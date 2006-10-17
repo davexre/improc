@@ -53,7 +53,6 @@ public class DImageMap {
 	}
 
 	public DImageMap(int aSizeX, int aSizeY) {
-		super();
 		sizeX = 0;
 		sizeY = 0;
 		resize(aSizeX, aSizeY);
@@ -194,6 +193,17 @@ public class DImageMap {
 				pixel[i][j] = 0;
 	}
 
+	public String calcStatistics() {
+		StatisticsLT stat = new StatisticsLT();
+		stat.start();
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--) {
+				stat.addValue(getPixel(i, j));
+			}
+		stat.stop();
+		return stat.toString2();
+	}
+	
 	public BufferedImage toImage() {
 		double aMin, aDelta;
 		int c;
@@ -202,7 +212,7 @@ public class DImageMap {
 		if (aDelta == 0) 
 			aDelta = 1;
 		BufferedImage bi = new BufferedImage(sizeX, sizeY,
-				BufferedImage.TYPE_INT_RGB);
+				BufferedImage.TYPE_BYTE_GRAY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
 				c = (int) Math.floor(((getPixel(i, j) - aMin) * 255) / aDelta);
@@ -211,6 +221,10 @@ public class DImageMap {
 		return bi;
 	}
 	
+	public void toImageFile(String fouName) throws IOException {
+		ImageIO.write(toImage(), "jpg", new File(fouName));
+	}
+
 	public void applyStatisticsFilter() {
 		applyStatisticsFilter(0.5);
 	}

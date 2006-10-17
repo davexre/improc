@@ -213,6 +213,64 @@ public abstract class StatisticsBase {
 		return b.toString();
     }
     
+    public static String toString2Header(int style) {
+    	StringBuffer b = new StringBuffer();
+    	b.append("Average\tCount\tB");
+    	if ((style & CStatJ) != 0)
+			b.append("\tJ start\tJ end");
+    	if ((style & CStatAE) != 0)
+    		b.append("\tA\tE");
+    	if ((style & CStatMinMax) != 0)
+    		b.append("\tmin\tmax");
+    	if ((style & CStatAbs) != 0)
+    		b.append("\tmin(abs(X))\tmax(abs(X))");
+    	if ((style & CStatDelta) != 0)
+    		b.append("\tmax-min");
+    	if ((style & CStatMD) != 0) {
+	    	for (int i = 2; i <= 4; i++)
+	    		b.append("\tM[" + i + "]");
+	    	for (int i = 2; i <= 4; i++)
+	    		b.append("\tD[" + i + "]");
+    	}
+    	if ((style & CStatErrors) != 0) 
+    		b.append("\tResult");
+		return b.toString();
+    }
+    
+    public static String toString2Header() {
+    	return toString2Header(CStatDefault);
+    }
+    
+    public String toString2(int style) {
+    	StringBuffer b = new StringBuffer();
+    	b.append(Double.toString(this.getAvgValue()) + "\t" + Double.toString(this.getItemsCount()) + "\t" + Double.toString(this.B));
+    	if ((style & CStatJ) != 0)
+			b.append("\t" + Double.toString(this.J_Start) + "\t" + Double.toString(this.J_End));
+    	if ((style & CStatAE) != 0)
+    		b.append("\t" + Double.toString(this.A) + "\t" + Double.toString(this.E));
+    	if ((style & CStatMinMax) != 0)
+    		b.append("\t" + Double.toString(this.MinX) + "\t" + Double.toString(this.MaxX));
+    	if ((style & CStatAbs) != 0)
+    		b.append("\t" + Double.toString(this.AbsMinX) + "\t" + Double.toString(this.AbsMaxX));
+    	if ((style & CStatDelta) != 0)
+    		b.append("\t" + Double.toString(this.MaxX - this.MinX));
+    	if ((style & CStatMD) != 0) {
+	    	for (int i = 2; i <= 4; i++)
+	    		b.append("\t" + Double.toString(M[i]));
+	    	for (int i = 2; i <= 4; i++)
+	    		b.append("\t" + Double.toString(D[i]));
+    	}
+    	if (((style & CStatErrors) != 0) && hasBadValues()) 
+    		b.append("\tFAILED");
+    	else
+    		b.append("\tok");
+		return b.toString();
+    }
+    
+    public String toString2() {
+    	return toString2(CStatDefault);
+    }
+    
     public String toString() {
     	return toString(CStatDefault);
     }

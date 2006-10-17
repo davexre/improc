@@ -2,6 +2,7 @@ package com.slavi.img;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import org.jdom.Element;
@@ -9,6 +10,7 @@ import org.jdom.JDOMException;
 
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
+import com.slavi.statistics.StatisticsLT;
 import com.slavi.utils.Marker;
 import com.slavi.utils.XMLHelper;
 
@@ -17,6 +19,7 @@ import com.slavi.utils.XMLHelper;
  */
 public class DLoweDetector {
 
+	public static final String workDir = "../images/";
 	/**
 	 * Minimum absolute DoG value of a pixel to be allowed as minimum/maximum
 	 * peak. This control how much general non-differing areas, such as the sky
@@ -131,8 +134,7 @@ public class DLoweDetector {
 	}
 
 	protected boolean localizeIsWeak(DImageMap[] DOGs, int x, int y,
-			ScalePoint sp, @SuppressWarnings("unused")
-			int level) {
+			ScalePoint sp) {
 		DImageMap below = DOGs[0];
 		DImageMap current = DOGs[1];
 		DImageMap above = DOGs[2];
@@ -183,12 +185,8 @@ public class DLoweDetector {
 			double adjX = adj.getItem(0, 2);
 			if ((Math.abs(adjX) <= 0.5) && (Math.abs(adjY) <= 0.5)) {
 				// Now we approximated the exact sub-pixel peak position.
-				if (Math.abs(adjS) > scaleAdjustThresh) {
-//					if ((sp.imgX==35) && (sp.imgY==91)) {
-//						System.out.println(sp.toString());
-//					}
+				if (Math.abs(adjS) > scaleAdjustThresh) 
 					return true;
-				}
 				// Additional local pixel information is now available,
 				// threshhold the D(^x)
 				if (Math.abs(current.getPixel(x, y)) > dValueLowThresh) {
@@ -197,10 +195,6 @@ public class DLoweDetector {
 					sp.doubleX = x + adjX;
 					sp.doubleY = y + adjY;
 					sp.adjS = adjS; // ??? Who uses this (adjust scale) ???!!!???
-//					if ((sp.imgX==35) && (sp.imgY==91)) {
-//						System.out.println(sp.toString());
-//					}
-//					fou.println(x + "\t" + y + "\t" + level + "\t" + adjS);
 					return false;
 				}
 			}
@@ -217,7 +211,7 @@ public class DLoweDetector {
 		return true;
 	}
 
-	public void createDescriptor3(ScalePoint sp, DImageMap magnitude,
+	public void createDescriptor2(ScalePoint sp, DImageMap magnitude,
 			DImageMap direction) {
 
 		sp.initFeatureVector();
@@ -274,182 +268,6 @@ public class DLoweDetector {
 		sp.doubleX *= sp.imgScale;
 		sp.doubleY *= sp.imgScale;
 		sp.kpScale *= sp.imgScale;
-	}
-
-	public void createDescriptor2(ScalePoint sp, DImageMap magnitude,
-			DImageMap direction) {
-
-		sp.initFeatureVector();
-		
-		double considerScaleFactor = 2 * sp.kpScale;
-		double dDim05 = ScalePoint.descriptorSize / 2.0;
-		int radius = (int) (((ScalePoint.descriptorSize + 1.0) / 2) * considerScaleFactor + 0.5);
-		double sigma2Sq = 2.0 * dDim05 * dDim05;
-		double angle = -sp.degree;
-		
-		for (int y = -radius ; y < radius ; ++y) {
-			for (int x = -radius ; x < radius ; ++x) {
-				// Rotate and scale
-				double yR = Math.sin (angle) * x +
-					Math.cos (angle) * y;
-				double xR = Math.cos (angle) * x -
-					Math.sin (angle) * y;
-
-				yR /= considerScaleFactor;
-				xR /= considerScaleFactor;
-		
-				// Now consider all (xR, yR) that are anchored within
-				// (- descDim/2 - 0.5 ; -descDim/2 - 0.5) to
-				//    (descDim/2 + 0.5 ; descDim/2 + 0.5),
-				// as only those can influence the FV.
-				if (yR >= (dDim05 + 0.5) || xR >= (dDim05 + 0.5) ||
-					xR <= -(dDim05 + 0.5) || yR <= -(dDim05 + 0.5))
-					continue;
-
-				int currentX = (int) (x + sp.doubleX + 0.5);
-				int currentY = (int) (y + sp.doubleY + 0.5);
-				if (currentX < 1 || currentX >= (magnitude.getSizeX() - 1) ||
-					currentY < 1 || currentY >= (magnitude.getSizeY() - 1))
-					continue;
-				
-				// Weight the magnitude relative to the center of the
-				// whole FV. We do not need a normalizing factor now, as
-				// we normalize the whole FV later anyway (see below).
-				// xR, yR are each in -(dDim05 + 0.5) to (dDim05 + 0.5)
-				// range
-				double magW = Math.exp (-(xR * xR + yR * yR) / sigma2Sq) *
-					magnitude.getPixel(currentX, currentY);
-
-				// Anchor to (-1.0, -1.0)-(dDim + 1.0, dDim + 1.0), where
-				// the FV points are located at (x, y)
-				yR += dDim05 - 0.5;
-				xR += dDim05 - 0.5;
-
-				// Build linear interpolation weights:
-				// A B
-				// C D
-				//
-				// The keypoint is located between A, B, C and D.
-				int[] xIdx = new int[2];
-				int[] yIdx = new int[2];
-				int[] dirIdx = new int[2];
-				double[] xWeight = new double[2];
-				double[] yWeight = new double[2];
-				double[] dirWeight = new double[2];
-				
-				for (int i = 0; i<2; i++) 
-					dirWeight[i] = yWeight[i] = xWeight[i] = dirIdx[i] = yIdx[i] = xIdx[i] = 0;
-				
-				if (xR >= 0) {
-					xIdx[0] = (int) xR;
-					xWeight[0] = (1.0 - (xR - xIdx[0]));
-				}
-				if (yR >= 0) {
-					yIdx[0] = (int) yR;
-					yWeight[0] = (1.0 - (yR - yIdx[0]));
-				}
-
-				if (xR < (ScalePoint.descriptorSize - 1)) {
-					xIdx[1] = (int) (xR + 1.0);
-					xWeight[1] = xR - xIdx[1] + 1.0;
-				}
-				if (yR < (ScalePoint.descriptorSize - 1)) {
-					yIdx[1] = (int) (yR + 1.0);
-					yWeight[1] = yR - yIdx[1] + 1.0;
-				}
-				
-				// Rotate the gradient direction by the keypoint
-				// orientation, then normalize to [-pi ; pi] range.
-				double dir = direction.getPixel(currentX, currentY) - sp.degree;
-				if (dir <= -Math.PI)
-					dir += Math.PI;
-				if (dir > Math.PI)
-					dir -= Math.PI;
-
-				double idxDir = (dir * ScalePoint.numDirections) /
-					(2.0 * Math.PI);
-				if (idxDir < 0.0)
-					idxDir += ScalePoint.numDirections;
-
-				dirIdx[0] = (int) idxDir;
-				dirIdx[1] = (dirIdx[0] + 1) % ScalePoint.numDirections;
-				dirWeight[0] = 1.0 - (idxDir - dirIdx[0]);
-				dirWeight[1] = idxDir - dirIdx[0];
-
-				for (int iy = 0 ; iy < 2 ; iy++) {
-					for (int ix = 0 ; ix < 2 ; ix++) {
-						for (int id = 0 ; id < 2 ; id++) {
-							double value = sp.getItem(xIdx[ix], yIdx[iy], dirIdx[id]) +
-								xWeight[ix] * yWeight[iy] * dirWeight[id] * magW; 
-							sp.setItem(xIdx[ix], yIdx[iy], dirIdx[id], value);
-						}
-					}
-				}
-			}
-		}
-		
-		// Normalize and hicap the feature vector, as recommended on page
-		// 16 in Lowe03.
-		// Straight normalization
-		double norm = 0.0;
-		
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					norm += Math.pow(sp.getItem(i, j, k), 2.0);
-
-		norm = Math.sqrt(norm);
-		if (norm == 0.0)
-			throw (new Error("CapAndNormalizeFV cannot normalize with norm = 0.0"));
-		
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					sp.setItem(i, j, k, sp.getItem(i, j, k) / norm);
-
-		double fvGradHicap = 0.2;
-		// Hicap after normalization
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					if (sp.getItem(i, j, k) > fvGradHicap)
-						sp.setItem(i, j, k, fvGradHicap);
-
-		// Renormalize again
-		norm = 0.0;
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					norm += Math.pow(sp.getItem(i, j, k), 2.0);
-
-		norm = Math.sqrt (norm);
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					sp.setItem(i, j, k, (int)(255.0 * sp.getItem(i, j, k) / norm));
-
-		sp.doubleX *= sp.imgScale;
-		sp.doubleY *= sp.imgScale;
-		sp.kpScale *= sp.imgScale;
-
-//		String str =  "";
-//		for (int i = 0; i < ScalePoint.descriptorSize; i++)
-//			for (int j = 0; j < ScalePoint.descriptorSize; j++)
-//				for (int k = 0; k < ScalePoint.numDirections; k++)
-//					str = str + "\t" + sp.getItem(i, j, k);
-//		fou.println(sp.doubleX + "\t" + sp.doubleY + "\t" + (int)sp.level + "\t" + sp.imgScale + "\t" + sp.degree + str);
-		
-//		if ((sp.imgX==276) && (sp.imgY==75)) {
-//			System.out.println("Degree=" + sp.degree);
-//			for (int ix = 0 ; ix < 2 ; ix++) {
-//				for (int iy = 0 ; iy < 2 ; iy++) {
-//					for (int id = 0 ; id < 2 ; id++) {
-//						System.out.println("FV[" + ix + "," + iy + "," + id + "]=" + 
-//							sp.getItem(ix, iy, id));
-//					}
-//				}
-//			}
-//		}
 	}
 
 	public void createDescriptor(ScalePoint sp, DImageMap magnitude,
@@ -641,14 +459,6 @@ public class DLoweDetector {
 		double kpScale = initialSigma
 				* Math.pow(2.0, (sp.level + sp.adjS) / scaleSpaceLevels);
 
-//		if (sp.level > 1)
-//			System.out.println("SP.X=" + sp.imgX + " y=" + sp.imgY);
-//		if ((sp.imgX==35) && (sp.imgY==91)) {
-//			System.out.println("scaleSpaceLevels" + scaleSpaceLevels);
-//			System.out.println("kpScale=" + kpScale);
-//			System.out.println(sp.toString());
-//		}
-
 		// Lowe03, "A gaussian-weighted circular window with a \sigma three
 		// times that of the scale of the keypoint".
 		//
@@ -719,11 +529,6 @@ public class DLoweDetector {
 				last = cur;
 			}
 		}
-//		String str = "";
-//		for (int i = 0; i < bins.length; i++) {
-//			str = str + "\t" + bins[i];
-//		}
-//		fou.println(sp.imgX + "\t" + sp.imgY + "\t" + (int)sp.level + "\t" + kpScale + str);
 
 		// find the maximum peak in gradient orientation
 		double binMaxValue = bins[0];
@@ -740,11 +545,10 @@ public class DLoweDetector {
 		double middleval = bins[maxBinIndx];
 		double rightval = bins[(maxBinIndx + 1) % binCount];
 		double aval = ((leftval + rightval) - 2.0 * middleval) / 2.0;
-		if (aval == 0)
+		if (aval == 0.0)
 			return; // Not a parabol
 		double cval = (((leftval - middleval) / aval) - 1.0) / 2.0;
-		double binThreshold = (middleval - cval * cval * aval);
-		binThreshold = binThreshold * 0.8;
+		double binThreshold = (middleval - cval * cval * aval) * 0.8;
 
 		final double oneBinRad = (2.0 * Math.PI) / binCount;
 
@@ -767,11 +571,8 @@ public class DLoweDetector {
 				// double peakValue = middle - degreeCorrection *
 				// degreeCorrection * a;
 
-				// [-1.0 ; 1.0] -> [0 ; binrange], and add the fixed absolute
-				// bin
-				// position.
-				// We subtract PI because bin 0 refers to 0, binCount-1 bin
-				// refers
+				// [-1.0 ; 1.0] -> [0 ; binrange], and add the fixed absolute bin position.
+				// We subtract PI because bin 0 refers to 0, binCount-1 bin refers
 				// to a bin just below 2PI, so -> [-PI ; PI]. Note that at this
 				// point we determine the canonical descriptor anchor angle. It
 				// does not matter where we set it relative to the peak degree,
@@ -784,16 +585,6 @@ public class DLoweDetector {
 				else if (degree > Math.PI)
 					degree -= 2.0 * Math.PI;
 
-//				if ((sp.imgX==35) && (sp.imgY==91)) {
-//					System.out.println("degree=" + degree + " corr=" + degreeCorrection + 
-//							" oneBinRad=" + oneBinRad + " b=" + i);
-//					for (int tt = 0; tt < binCount; tt++)
-//						System.out.println("bin[" + tt + "]=" + bins[tt]);
-//					System.out.println("Level=" + sp.level + 
-//						" X=" + sp.imgX + " Y=" + sp.imgY + 
-//						" FineX=" + sp.doubleX + " FineY=" + sp.doubleY + 
-//						" kpScale=" + kpScale + " degree=" + degree);
-//				}
 				sp.kpScale = kpScale;
 				sp.degree = degree;
 				
@@ -808,11 +599,7 @@ public class DLoweDetector {
 				sp2.level = sp.level;
 				sp2.imgScale = sp.imgScale;
 				
-//				fou.println(sp.imgX + "\t" + sp.imgY + "\t" + (int)sp.level + "\t" + degree);
-				if (flag)
-					createDescriptor(sp2, magnitude, direction);
-				else
-					createDescriptor2(sp2, magnitude, direction);
+				createDescriptor(sp2, magnitude, direction);
 				scalePointCreated(sp2);
 			}
 		}
@@ -824,8 +611,13 @@ public class DLoweDetector {
 	
 	private DImageMap lastBlured1Img = null;
 	
+	private void debugPrintImage(DImageMap img, double scale, String type, int level) throws Exception {
+//		img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
+//		fou.println(Integer.toString((int)scale) + "\t" + type + "\t" + level + "\t" + img.calcStatistics());
+	}
+
 	private void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
-			int scaleSpaceLevels) {
+			int scaleSpaceLevels) throws Exception {
 
 		double sigma = initialSigma;
 		DImageMap blured0 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
@@ -843,6 +635,8 @@ public class DLoweDetector {
 		int isLocalExtremaCount = 0;
 		int isTooEdgeLikeCount = 0;
 		int localizeIsWeakCount = 0;
+		
+		debugPrintImage(theImage, scale, "A", 0);
 
 		for (int aLevel = -2; aLevel < scaleSpaceLevels; aLevel++) {
 			DImageMap tmpImageMap;
@@ -852,9 +646,11 @@ public class DLoweDetector {
 			lastBlured1Img = blured1 = blured2;
 			
 			blured2 = tmpImageMap;
-			// gf.applyGaussianFilter(curImage, blurredImage);
+			// gf.applyGaussianFilter(blured1, blured2);
 			gf.applyGaussianFilterOriginal(blured1, blured2);
 
+			debugPrintImage(tmpImageMap, scale, "B", aLevel);
+			
 			sigma *= Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula !!!
 
 			tmpImageMap = DOGs[0];
@@ -868,37 +664,26 @@ public class DLoweDetector {
 			if (aLevel < 0)
 				continue;
 			
+			debugPrintImage(tmpImageMap, scale, "G", aLevel);
+			
 			// Compute gradient magnitude and direction plane
 			blured0.computeMagnitude(magnitude);
 			blured0.computeDirection(direction);
+
+			debugPrintImage(magnitude, scale, "M", aLevel);
+			debugPrintImage(direction, scale, "D", aLevel);
 
 			// Now we have three valid Difference Of Gaus images
 			// Border pixels are skipped
 
 			for (int i = blured0.getSizeX() - 2; i >= 1; i--) {
 				for (int j = blured0.getSizeY() - 2; j >= 1; j--) {
-					
-//					if ((i == 449) && (j == 41) && (aLevel+1 == 2)) {
-//						fou.println("below");
-//						for (int iii = i - 1; iii <= i + 1; iii++)
-//								for (int iij = j - 1; iij <= j + 1; iij++)
-//									fou.println("" + iii + "\t" + iij + "\t" + DOGs[0].getPixel(iii, iij));
-//						fou.println("current");
-//						for (int iii = i - 1; iii <= i + 1; iii++)
-//								for (int iij = j - 1; iij <= j + 1; iij++)
-//									fou.println("" + iii + "\t" + iij + "\t" + DOGs[1].getPixel(iii, iij));
-//						fou.println("above");
-//						for (int iii = i - 1; iii <= i + 1; iii++)
-//								for (int iij = j - 1; iij <= j + 1; iij++)
-//									fou.println("" + iii + "\t" + iij + "\t" + DOGs[2].getPixel(iii, iij));
-//					}
-					
-					
 					// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
 					// this pixel to all its neighbour pixels.
 					if (!isLocalExtrema(DOGs, i, j))
 						continue; // current pixel in DOGs[1] is not a local
 									// extrema
+					fou.println(aLevel + "\t" + i + "\t" + j + "\t" + scale);
 					isLocalExtremaCount++;
 					
 					// We have a peak.
@@ -910,7 +695,7 @@ public class DLoweDetector {
 					// moving the
 					// point a border is reached, then skip this point.
 					ScalePoint sp = new ScalePoint();
-					if (localizeIsWeak(DOGs, i, j, sp, aLevel+1))
+					if (localizeIsWeak(DOGs, i, j, sp))
 						continue;
 					localizeIsWeakCount++;
 
@@ -925,7 +710,7 @@ public class DLoweDetector {
 	}
 	
 	public void DetectFeatures(DImageMap theImage, int scaleSpaceLevels,
-			int minimumRequiredPixelsize) {
+			int minimumRequiredPixelsize) throws Exception {
 		// ??? more initializers
 		double scale = 1;
 		DImageMap doubledImage = new DImageMap(theImage.getSizeX() * 2, theImage.getSizeY() * 2);
@@ -956,7 +741,7 @@ public class DLoweDetector {
 		scalePointList = new ScalePointList();
 	}
 	
-	public void processImage(String imageFileName) throws IOException {
+	public void processImage(String imageFileName) throws Exception {
 		File imgFile = new File(imageFileName);
 		DImageMap img = new DImageMap(imgFile);
 		scalePointList.points.clear();
@@ -972,8 +757,6 @@ public class DLoweDetector {
 //		XMLHelper.writeXML(new File(fouName), e, "");
 	}
 
-//	public static PrintWriter fou;
-	
 	public ScalePointList autoPanoPoints;
 	public void loadAutoPanoFile(String finName) throws JDOMException, IOException {
 		Element root = XMLHelper.readXML(new File(finName));
@@ -1051,35 +834,43 @@ public class DLoweDetector {
 	}	
 	
 	public static boolean flag = true;
+	public static PrintWriter fou;
 	
 	public static void main(String[] args) throws Exception {
 		Marker.mark("Total program run time");
-//		fou = new PrintWriter("./../../images/debug.my");
-		String imgDir = "./../../images/";
-//		String fn = imgDir + "HPIM0336.JPG";
-		String fn = imgDir + "testimg.bmp";
+		DLoweDetector ld;
+		ld = new DLoweDetector();
+		
+		fou = new PrintWriter(workDir + "debug.my");
+		fou.println("Scale\tType\tLevel\t" + StatisticsLT.toString2Header());
+//		String fn = workDir + "HPIM0337.JPG";
+		String fn = workDir + "testimg.bmp";
 
 //		String fn = args[0];
-//		ld.processImage(fn);
+		ld.processImage(fn);
 //		ld.loadAutoPanoFile(XMLHelper.chageFileExtension(fn, "KEY"));
 //		System.out.println("Processing file " + fn);
 //		ld.compareKeyLists(ld.scalePointList, ld.autoPanoPoints);
 
-		DLoweDetector ld;
-		flag = true;
-		ld = new DLoweDetector();
-		ld.processImage(fn);
-		ScalePointList spl1 = ld.scalePointList;
 
-		flag = false;
-		ld = new DLoweDetector();
-		ld.processImage(fn);
-		ScalePointList spl2 = ld.scalePointList;
-		//ScalePointList spl2 = ScalePointList.fromXML(XMLHelper.readXML(new File(XMLHelper.chageFileExtension(fn, "ok.xml"))));
-		ld.compareKeyLists(spl1, spl2);
+//		fn = workDir + "HPIM0336.JPG";
+//		ld = new DLoweDetector();
+//		ld.processImage(fn);
+//
+//		fn = workDir + "HPIM0337.JPG";
+//		ld = new DLoweDetector();
+//		ld.processImage(fn);
+//
+//		fn = workDir + "testimg.bmp";
+//		ld = new DLoweDetector();
+//		ld.processImage(fn);
 
-//		ld.processImage(imgDir + "HPIM0337.JPG");
-//		fou.close();
+//		ScalePointList spl1 = ld.scalePointList;
+//		ScalePointList spl2 = ScalePointList.fromXML(XMLHelper.readXML(new File(XMLHelper.chageFileExtension(fn, "ok.xml"))));
+//		ld.compareKeyLists(spl1, spl2);
+
+//		ld.processImage(workDir + "HPIM0337.JPG");
+		fou.close();
 		Marker.release();
 	}
 }

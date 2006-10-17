@@ -30,7 +30,7 @@ public class DGaussianFilter {
 	}
 
 	public DGaussianFilter(double sigma) {
-		this(sigma, 1 + (int) Math.floor(3 * sigma));
+		this(sigma, 1 + (int) Math.floor(3.0 * sigma));
 	}
 
 	public DGaussianFilter(double sigma, int MaskRadius) {
@@ -54,8 +54,8 @@ public class DGaussianFilter {
 	public static double fillArray(double[] dest, double sigma) {
 		int maxR = ((dest.length + 1) >> 1) - 1;
 
-		double sigma2sq = -1 / (2 * Math.pow(sigma, 2));
-		double normalizeFactor = 1 / (Math.sqrt(2 * Math.PI) * sigma);
+		double sigma2sq = -1.0 / (2.0 * Math.pow(sigma, 2.0));
+		double normalizeFactor = 1.0 / (Math.sqrt(2.0 * Math.PI) * sigma);
 		for (int i = maxR; i >= 0; i--) {
 			double G = Math.exp((i * i) * sigma2sq) * normalizeFactor;
 			dest[maxR + i] = dest[maxR - i] = G;

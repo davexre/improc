@@ -160,9 +160,12 @@ public class Test {
 		
 		BufferedReader fin1 = new BufferedReader(new FileReader(fname1));
 		BufferedReader fin2 = new BufferedReader(new FileReader(fname2));
+
+		fin1.readLine();
 		while (fin1.ready()) {
 			list1.add(Data.fromString(fin1.readLine()));
 		}
+		fin2.readLine();
 		while (fin2.ready()) {
 			list2.add(Data.fromString(fin2.readLine()));
 		}
@@ -204,12 +207,14 @@ public class Test {
 		System.out.println("Finished!");
 	}	
 	
-	
 	public static void main(String[] args) {
 		//Test t = new Test();
 		try {
-//			Test.compareFiles(workDir + "debug.autopano", workDir + "debug.my");
-			Test.compareKeyFiles(workDir + "testimg.APxml", workDir + "testimg.xml");
+//			String fn1 = workDir + "1-A.jpg";
+//			String fn2 = workDir + "1-A.b.jpg";
+//			Test.compareBImages(fn1, fn2);
+			Test.compareFiles(workDir + "debug.my", workDir + "debug.s.my");
+//			Test.compareKeyFiles(workDir + "testimg.APxml", workDir + "testimg.xml");
 //			Test.compareKeyFiles(workDir + "my_keys.xml", workDir + "my_keys_working.xml");
 		} catch (Exception e) {
 			e.printStackTrace();

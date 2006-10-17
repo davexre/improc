@@ -298,12 +298,13 @@ public class AutoPano {
 	public static PrintWriter fou;
 	
 	public static void main(String[] args) throws Exception {
-		fou = new PrintWriter("./../../images/debug.my");
+		fou = new PrintWriter("../images/debug.my");
 		AutoPano autoPano = new AutoPano();
 		try {
 			if (false) {
-				String file1 = "./../../images/HPIM0336.xml";
-				String file2 = "./../../images/HPIM0337.xml";
+				String file1 = "../images/HPIM0336.xml";
+				String file2 = "../images/HPIM0337.xml";
+				//String file2 = "../images/testimg.xml";
 	
 				ScalePointList spl1 = ScalePointList.fromXML(XMLHelper.readXML(new File(file1)));
 				ScalePointList spl2 = ScalePointList.fromXML(XMLHelper.readXML(new File(file2)));
@@ -317,9 +318,9 @@ public class AutoPano {
 				
 				Element e = new Element("ScalePointPairs");
 				autoPano.pointPairs.toXML(e);
-				XMLHelper.writeXML(new File("./../../images/ppairs.xml"), e, "matrix.xsl");
+				XMLHelper.writeXML(new File("../images/ppairs.xml"), e, "matrix.xsl");
 			} else {
-				Element e = XMLHelper.readXML(new File("./../../images/ppairs.xml"));
+				Element e = XMLHelper.readXML(new File("../images/ppairs.xml"));
 				autoPano.pointPairs = ScalePointPairList.fromXML(e);
 				autoPano.atl = null;
 				System.out.println("Total number of items = " + autoPano.pointPairs.items.size());
@@ -337,8 +338,8 @@ public class AutoPano {
 				System.out.println("==== max discrepancy 2 ====");
 				System.out.println(delta.toString());
 
-				//autoPano.writeToPtoFile(new PrintStream("./../../images/ppairs.pto"));
-				autoPano.computePtoFile(new PrintStream("./../../images/ppairs2.pto"));
+				autoPano.writeToPtoFile(new PrintStream("../images/ppairs.pto"));
+				//autoPano.computePtoFile(new PrintStream("../images/ppairs2.pto"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
