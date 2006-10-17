@@ -8,6 +8,7 @@ public class TestClass {
 		System.out.println("I already made some changes in the repository");	
 		// Added from notepad
 		// Edited in eclipse
+		// More added
 	}
 
 }
