@@ -18,7 +18,7 @@ public class Matrix {
 	/**
 	 * The elements of the matrix.
 	 */
-	private double m[][];
+	public double m[][];
 
 	/**
 	 * Number of columns
@@ -384,17 +384,10 @@ public class Matrix {
 	 * incorrect size it will be resized.
 	 */
 	public void transpose(Matrix dest) {
-		if (sizeX != sizeY) {
-			throw new Error("Invalid argument");
-		}
-		dest.resize(sizeX, sizeY);
-		double D;
+		dest.resize(sizeY, sizeX);
 		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--) {
-				D = m[i][j];
-				m[i][j] = dest.m[j][i];
-				dest.m[j][i] = D;
-			}
+			for (int j = sizeY - 1; j >= 0; j--)
+				dest.m[j][i] = m[i][j];
 	}
 
 	/**
@@ -753,5 +746,901 @@ public class Matrix {
 			}
 		}
 		return r;
+	}
+	
+	
+	/**
+	 * sqrt(a^2 + b^2) without under/overflow.
+	 */
+	public static double hypot(double a, double b) {
+		double r;
+		if (Math.abs(a) > Math.abs(b)) {
+			r = b / a;
+			r = Math.abs(a) * Math.sqrt(1 + r * r);
+		} else if (b != 0) {
+			r = a / b;
+			r = Math.abs(b) * Math.sqrt(1 + r * r);
+		} else {
+			r = 0.0;
+		}
+		return r;
+	}
+
+	public void svd2(Matrix U, Matrix V, Matrix s) {
+		int maxit = 30;
+		
+		int sizeS = Math.min(sizeX, sizeY);
+		s.resize(sizeS, 1);
+		U.resize(sizeY, sizeY);
+		V.resize(sizeX, sizeX);
+		double e[] = new double[sizeX];
+		double work[] = new double[sizeY];
+
+		for (int l = 0; l < sizeS; l++) {
+			//if (l < nct) {
+			{
+				// compute the transformation for the l-th column and
+				// place the l-th diagonal in s(l).
+				
+				// start snrm2
+				double scale = 0.0;
+				double ssq = 1.0;
+				for (int jj = l; jj < sizeY; jj++) {
+					double absX = Math.abs(m[l][jj]);
+					if (scale < absX) {
+						ssq = 1.0 + ssq * Math.pow(scale / absX, 2);
+						scale = absX;
+					} else {
+						ssq += Math.pow(absX / scale, 2);
+					}
+				}
+				s.m[l][0] = scale * Math.sqrt(ssq);
+				// end of snrm2
+				if (s.m[l][0] != 0.0) {
+					if (m[l][l] != 0.0) {
+						s.m[l][0] = m[l][l] >= 0 ? Math.abs(s.m[l][0]) : -Math.abs(s.m[l][0]);
+					}
+					double tmp = 1.0 / s.m[l][0];
+					// start sscal
+					for (int jj = l; jj < sizeY; jj++) {
+						m[l][jj] *= tmp;
+					}
+					// end sscal
+					m[l][l] += 1.0;
+				}
+				s.m[l][0] = -s.m[l][0];
+			}
+			
+			for (int j = l+1; j < sizeX; j++) {
+				if (s.m[l][0] != 0.0) {
+					// apply the transformation.
+					// start sdot
+					double t = 0;
+					for (int jj = l; jj < sizeY; jj++) {
+						t += m[l][jj] * m[j][jj];
+					}
+					// end sdot
+					t = -t / m[l][l];
+					// start saxpy
+					for (int jj = l; jj < sizeY; jj++) {
+						m[j][jj] += t * m[l][jj]; 
+					}
+					// end saxpy
+				}
+				// place the l-th row of x into  e for the
+				// subsequent calculation of the row transformation.
+				e[j] = m[j][l];
+			}
+
+			// place the transformation in u for subsequent back
+			// multiplication.
+			for (int i = l; i < sizeY; i++)
+				U.m[l][i] = m[l][i];
+
+			// compute the l-th row transformation and place the
+			// l-th super-diagonal in e(l).
+				
+			// start snrm2
+			double scale = 0.0;
+			double ssq = 1.0;
+			for (int jj = l+1; jj < sizeX; jj++) {
+				double absX = Math.abs(e[jj]);
+				if (scale < absX) {
+					ssq = 1.0 + ssq * Math.pow(scale / absX, 2);
+					scale = absX;
+				} else {
+					ssq += Math.pow(absX / scale, 2);
+				}
+			}
+			e[l] = scale * Math.sqrt(ssq);
+			// end of snrm2
+			if ((l+1 < sizeX) && (e[l] != 0.0)) {
+				if (e[l+1] != 0.0) {
+					e[l] = e[l+1] >= 0 ? Math.abs(e[l]) : -Math.abs(e[l]);
+				}
+				double tmp = 1.0 / e[l];
+				// start sscal
+				for (int jj = l+1; jj < sizeX; jj++) {
+					e[jj] *= tmp;
+				}
+				// end sscal
+				e[l+1] += 1.0;
+			}
+			e[l] = -e[l];
+			if ((l+1 < sizeY) && (e[l] != 0.0)) {
+				// apply the transformation.
+				for (int i = l+1; i < sizeY; i++) {
+					work[i] = 0.0;
+				}
+				for (int j = l+1; j < sizeX; j++) {
+					// start saxpy
+					for (int jj = l+1; jj < sizeY; jj++) {
+						work[jj] += e[j] * m[j][jj]; 
+					}
+					// end saxpy
+				}
+				for (int j = l+1; j < sizeX; j++) {
+					// start saxpy
+					double t = -e[j] / e[l+1];
+					for (int jj = l+1; jj < sizeY; jj++) {
+						m[j][jj] += t * work[jj]; 
+					}
+					// end saxpy
+				}
+			}
+			
+			// place the transformation in v for subsequent
+			// back multiplication.
+			for (int i = l+1; i < sizeX; i++) {
+				V.m[l][i] = e[i];
+			}
+		}
+		
+		// set up the final bidiagonal matrix or order m.
+		if (sizeS < sizeX) // ????
+			s.m[sizeS-1][0] = m[sizeS-1][sizeS-1];
+		if (sizeS > sizeY) 
+			s.m[sizeS-1][0] = 0.0; // ????
+		if (sizeS < sizeY)
+			e[sizeS-1] = m[sizeS-1][sizeX-1]; // ????
+		e[sizeS-1] = 0.0; // ???
+		
+		int m1 = sizeS - 1; // Math.min(sizeX, sizeY + 1); // ????!!!!????
+		
+		// generate u.
+		for (int j = sizeS; j < sizeY; j++) {
+			for (int i = 0; i < sizeY; i++) {
+				U.m[j][i] = 0.0;
+			}
+			U.m[j][j] = 1.0;
+		}
+			
+		for (int l = sizeS - 1; l >= 0; l--) {
+			if (s.m[l][0] != 0.0) {
+				for (int j = l+1; j < sizeY; j++) {
+					// start sdot
+					double t = 0;
+					for (int jj = l; jj < sizeY; jj++) {
+						t += U.m[l][jj] * U.m[j][jj];
+					}
+					// end sdot
+					t = -t / U.m[l][l];
+					// start saxpy
+					for (int jj = l; jj < sizeY; jj++) {
+						U.m[j][jj] += t * U.m[l][jj]; 
+					}
+					// end saxpy
+				}
+				// start sscal
+				for (int jj = l; jj < sizeY; jj++) {
+					U.m[l][jj] = -U.m[l][jj]; 
+				}
+				// end sscal
+				U.m[l][l] += 1.0;
+				for (int i = 0; i < l; i++) {
+					U.m[l][i] = 0.0;
+				}
+			} else {
+				for (int i = 0; i < sizeY; i++) {
+					U.m[l][i] = 0.0;
+				}
+				U.m[l][l] = 1.0;					
+			}
+		}
+
+		// generate v.
+		for (int l = sizeX - 1; l >= 0; l--) {
+			if (e[l] != 0.0) {
+				for (int j = l+1; j < sizeX; j++) {
+					// start sdot
+					double t = 0;
+					for (int jj = l+1; jj < sizeX; jj++) {
+						t += V.m[l][jj] * V.m[j][jj];
+					}
+					// end sdot
+					t = -t / V.m[l][l+1];
+					// start saxpy
+					for (int jj = l+1; jj < sizeX; jj++) {
+						V.m[j][jj] += t * V.m[l][jj]; 
+					}
+					// end saxpy
+				}
+			}
+			for (int i = 0; i < sizeX; i++) {
+				V.m[l][i] = 0.0;
+			}
+			V.m[l][l] = 1.0;
+		}
+		
+		// main iteration loop for the singular values.
+		int mm = m1;
+		int iter = 0;
+		while (true) {
+			// quit if all the singular values have been found.
+			if (m1 == 0)
+				break;
+			// if too many iterations have been performed, set
+			// flag and return.
+			if (iter >= maxit)
+				break; // TODO: set flag!
+			/*
+			 * this section of the program inspects for
+			 * negligible elements in the s and e arrays.  on
+			 * completion the variables kase and l are set as follows.
+			 *
+			 * kase = 1		if s(m) and e(l-1) are negligible and l.lt.m
+			 * kase = 2		if s(l) is negligible and l.lt.m
+			 * kase = 3		if e(l-1) is negligible, l.lt.m, and
+			 * 				s(l), ..., s(m) are not negligible (qr step).
+			 * kase = 4		if e(m-1) is negligible (convergence).
+			 */
+			int l = 0;
+			for (int ll = 1; ll < m1; ll++) {
+				l = m1 - ll - 1;
+				double test = Math.abs(s.m[l][0]) + Math.abs(s.m[l+1][0]);
+				double ztest = test + Math.abs(e[l]);
+				if (ztest == test) {
+					e[l] = 0.0;
+					break;
+				}				
+			}
+			int kase = 0;
+			if (l == m1 - 1 - 1) {
+				kase = 4;
+			} else {
+				int ls = 0;
+				int lp1 = l + 1;
+				int mp1 = m1 + 1;
+				for (int lls = lp1; lls < mp1; lls++) {
+					ls = m1 - lls + lp1 - 1;  // ???? ls -> m..l
+					if (ls == 0)
+						break;
+					double test = 0.0;
+					if (ls != m1) // ???
+						test += Math.abs(e[ls]);
+					if (ls != l + 1)
+						test += Math.abs(e[ls-1]);
+					double ztest = test + Math.abs(s.m[ls][0]);
+					if (ztest == test) {
+						s.m[ls][0] = 0.0;
+						break;
+					}
+				}
+				if (ls == l) {
+					kase = 3;
+				} else if (ls == m1) {
+					kase = 1;					
+				} else {
+					kase = 2;
+					l = ls;
+				}
+			}
+			l++;
+			// perform the task indicated by kase.
+			switch (kase) {
+			case 1: {
+				// deflate negligible s(m).
+				int mm1 = m1 - 1;
+				double f = e[m1 - 1];
+				e[m1 - 1] = 0.0;
+				for (int kk = l; kk < mm1; kk++) {
+					int k = mm1 - kk + l; // ???
+					double t1 = s.m[k][0];
+					// start srotg
+					double sn = 0.0;
+					double cs = 0.0;
+					// t1,f,cs,sn
+					// sa,sb,c,s
+					double roe = Math.abs(t1) > Math.abs(f) ? t1 : f;
+					double scale = Math.abs(t1) + Math.abs(f);
+					if (scale == 0.0) {
+						cs = 1.0;
+						sn = 0.0;
+						t1 = 0.0;
+						f = 0.0;
+					} else {
+						double r = scale * Math.sqrt(Math.pow(t1 / scale, 2) + Math.pow(f / scale, 2));
+						r = roe >= 0.0 ? r : -r;
+						cs = t1 / r;
+						sn = f / r;
+						double z = Math.abs(t1) > Math.abs(f) ? sn : 1.0;
+						if ((Math.abs(f) >= Math.abs(t1)) && (cs != 0.0))
+							z = 1.0 / cs;
+						t1 = r;
+						f = z;
+					}
+					// end srotg
+					s.m[k][0] = t1;
+					if (k != l) {
+						f = -sn * e[k - 1];
+						e[k - 1] = cs * e[k - 1];
+					}
+					// start srot
+					for (int jj = 0; jj < sizeX; jj++) {
+						double tmp = cs * V.m[k][jj] + sn * V.m[m1][jj];
+						V.m[m1][jj] = cs * V.m[m1][jj] - sn * V.m[k][jj];
+						V.m[k][jj] = tmp;						
+					}
+					// end srot
+				}
+				break;
+			}
+			case 2: {
+				// split at negligible s(l).
+				double f = e[l - 1];
+				e[l - 1] = 0.0;
+				for (int k = l; k < m1; k++) {
+					double t1 = s.m[k][0];
+					// start srotg
+					double sn = 0.0;
+					double cs = 0.0;
+					// t1,f,cs,sn
+					// sa,sb,c,s
+					double roe = Math.abs(t1) > Math.abs(f) ? t1 : f;
+					double scale = Math.abs(t1) + Math.abs(f);
+					if (scale == 0.0) {
+						cs = 1.0;
+						sn = 0.0;
+						t1 = 0.0;
+						f = 0.0;
+					} else {
+						double r = scale * Math.sqrt(Math.pow(t1 / scale, 2) + Math.pow(f / scale, 2));
+						r = roe >= 0.0 ? r : -r;
+						cs = t1 / r;
+						sn = f / r;
+						double z = Math.abs(t1) > Math.abs(f) ? sn : 1.0;
+						if ((Math.abs(f) >= Math.abs(t1)) && (cs != 0.0))
+							z = 1.0 / cs;
+						t1 = r;
+						f = z;
+					}
+					// end srotg
+					s.m[k][0] = t1;
+					f = -sn * e[k];
+					e[k] = cs * e[k];
+					// start srot
+					for (int jj = 0; jj < sizeY; jj++) {
+						double tmp = cs * U.m[k][jj] + sn * U.m[l-1][jj];
+						U.m[l-1][jj] = cs * U.m[l-1][jj] - sn * U.m[k][jj];
+						U.m[k][jj] = tmp;						
+					}
+					// end srot
+				}
+				break;
+			}
+			case 3: {
+				// perform one qr step.
+				// calculate the shift.
+				double sscale = Math.max(Math.abs(s.m[m1][0]), Math.abs(s.m[m1-1][0]));
+				sscale = Math.max(Math.abs(e[m1 - 1]), sscale);
+				sscale = Math.max(Math.abs(s.m[l][0]), sscale);
+				sscale = Math.max(Math.abs(e[l]), sscale);
+				double sm = s.m[m1][0] / sscale;
+				double smm1 = s.m[m1-1][0] /sscale;
+				double emm1 = e[m1-1] /sscale;
+				double sl = s.m[l][0] / sscale;
+				double el = e[l] / sscale;
+				double b = ((smm1 + sm)*(smm1 - sm) + Math.pow(emm1, 2)) / 2.0;
+				double c = Math.pow(sm*emm1, 2);
+				double shift = 0.0;
+				if ((b != 0.0) || (c != 0.0)) {
+					shift = Math.sqrt(b * b + c);
+					if (b < 0.0)
+						shift = -shift;
+					shift = c/(b + shift);
+				}
+				double f = (sl + sm)*(sl - sm) + shift;
+				double g = sl*el;
+				// chase zeros.
+				double mm1 = m1 - 1;
+				for (int k = l; k < mm1; k++) {
+					// start srotg
+					double sn = 0.0;
+					double cs = 0.0;
+					// f,g,cs,sn
+					// sa,sb,c,s
+					double roe = Math.abs(f) > Math.abs(g) ? f : g;
+					double scale = Math.abs(f) + Math.abs(g);
+					if (scale == 0.0) {
+						cs = 1.0;
+						sn = 0.0;
+						f = 0.0;
+						g = 0.0;
+					} else {
+						double r = scale * Math.sqrt(Math.pow(f / scale, 2) + Math.pow(g / scale, 2));
+						r = roe >= 0.0 ? r : -r;
+						cs = f / r;
+						sn = g / r;
+						double z = Math.abs(f) > Math.abs(g) ? sn : 1.0;
+						if ((Math.abs(g) >= Math.abs(f)) && (cs != 0.0))
+							z = 1.0 / cs;
+						f = r;
+						g = z;
+					}
+					// end srotg
+					if (k != l)
+						e[k-1] = f;
+					f = cs*s.m[k][0] + sn*e[k];
+					e[k] = cs*e[k] - sn*s.m[k][0];
+					g = sn*s.m[k+1][0];
+					s.m[k+1][0] *= cs;
+					// start srot
+					for (int jj = 0; jj < sizeX; jj++) {
+						double tmp = cs * V.m[k][jj] + sn * V.m[k+1][jj];
+						V.m[k+1][jj] = cs * V.m[k+1][jj] - sn * V.m[k][jj];
+						V.m[k][jj] = tmp;						
+					}
+					// end srot
+					// start srotg
+					sn = 0.0;
+					cs = 0.0;
+					// f,g,cs,sn
+					// sa,sb,c,s
+					roe = Math.abs(f) > Math.abs(g) ? f : g;
+					scale = Math.abs(f) + Math.abs(g);
+					if (scale == 0.0) {
+						cs = 1.0;
+						sn = 0.0;
+						f = 0.0;
+						g = 0.0;
+					} else {
+						double r = scale * Math.sqrt(Math.pow(f / scale, 2) + Math.pow(g / scale, 2));
+						r = roe >= 0.0 ? r : -r;
+						cs = f / r;
+						sn = g / r;
+						double z = Math.abs(f) > Math.abs(g) ? sn : 1.0;
+						if ((Math.abs(g) >= Math.abs(f)) && (cs != 0.0))
+							z = 1.0 / cs;
+						f = r;
+						g = z;
+					}
+					// end srotg
+					s.m[k][0] = f;
+					f = cs*e[k] + sn*s.m[k+1][0];
+					s.m[k+1][0] = -sn*e[k] + cs*s.m[k+1][0];
+					g = sn*e[k+1];
+					e[k+1] *= cs;
+					if (k < sizeY - 1) {
+						// start srot
+						for (int jj = 0; jj < sizeY; jj++) {
+							double tmp = cs * U.m[k][jj] + sn * U.m[k+1][jj];
+							U.m[k+1][jj] = cs * U.m[k+1][jj] - sn * U.m[k][jj];
+							U.m[k][jj] = tmp;						
+						}
+						// end srot
+					}					
+				}
+				e[m1-1] = f;
+				iter++;
+				break;
+			}
+			case 4:
+				// convergence.
+				// make the singular value  positive.
+				if (s.m[l][0] < 0.0) {
+					s.m[l][0] = -s.m[l][0];
+					// start sscal
+					for (int jj = 0; jj < sizeX; jj++) 
+						V.m[l][jj] = -V.m[l][jj];
+					// end sscal
+				}
+				// order the singular value.
+				while (true) {
+					if (l == mm) 
+						break;
+					if (s.m[l][0] >= s.m[l+1][0])
+						break;
+					double t = s.m[l][0];
+					s.m[l][0] = s.m[l+1][0];
+					s.m[l+1][0] = t;
+					if (l < sizeX) {
+						// start sswap
+						for (int jj = 0; jj < sizeX; jj++) {
+							double tmp = V.m[l][jj];
+							V.m[l][jj] = V.m[l+1][jj];
+							V.m[l+1][jj] = tmp;
+						}
+						// end sswap
+					}
+					if (l < sizeY) {
+						// start sswap
+						for (int jj = 0; jj < sizeY; jj++) {
+							double tmp = U.m[l][jj];
+							U.m[l][jj] = U.m[l+1][jj];
+							U.m[l+1][jj] = tmp;
+						}
+						// end sswap
+					}
+					l++;
+				}
+				iter = 0;
+				m1--;
+				break;
+			}
+		}
+	}
+	
+	// Derived from LINPACK code.
+	// http://www.netlib.org/lapack/lug/lapack_lug.html
+	// http://www.netlib.org/lapack/lug/node53.html
+	public void svd(Matrix U, Matrix V, Matrix s) {
+		/* Apparently the failing cases are only a proper subset of (m<n), 
+		 so let's not throw error.  Correct fix to come later?
+		 if (m<n) {
+		 throw new IllegalArgumentException("Jama SVD only works for m >= n"); }
+		 */
+		s.resize(Math.min(sizeX, sizeY + 1), 1);
+		U.resize(Math.min(sizeX, sizeY), sizeY);
+		V.resize(sizeX, sizeX);
+		double[] e = new double[sizeX];
+		double[] work = new double[sizeY];
+		boolean wantu = true;
+		boolean wantv = true;
+
+		// Reduce A to bidiagonal form, storing the diagonal elements
+		// in s and the super-diagonal elements in e.
+
+		int nct = Math.min(sizeY - 1, sizeX);
+		int nrt = Math.max(0, Math.min(sizeX - 2, sizeY));
+		for (int k = 0; k < Math.max(nct, nrt); k++) {
+			if (k < nct) {
+
+				// Compute the transformation for the k-th column and
+				// place the k-th diagonal in s[k].
+				// Compute 2-norm of k-th column without under/overflow.
+				s.m[k][0] = 0.0;
+				for (int i = k; i < sizeY; i++) 
+					s.m[k][0] = hypot(s.m[k][0], this.m[k][i]);
+				
+				if (s.m[k][0] != 0.0) {
+					if (this.m[k][k] < 0.0)
+						s.m[k][0] = -s.m[k][0];
+					for (int i = k; i < sizeY; i++) 
+						this.m[k][i] /= s.m[k][0];
+					this.m[k][k] += 1.0;
+				}
+				s.m[k][0] = -s.m[k][0];
+			}
+			for (int j = k + 1; j < sizeX; j++) {
+				if ((k < nct) & (s.m[k][0] != 0.0)) {
+					// Apply the transformation.
+					double t = 0;
+					for (int i = k; i < sizeY; i++) 
+						t += this.m[k][i] * this.m[j][i];
+					t = -t / this.m[k][k];
+					for (int i = k; i < sizeY; i++) {
+						this.m[j][i] += t * this.m[k][i];
+					}
+				}
+				// Place the k-th row of A into e for the
+				// subsequent calculation of the row transformation.
+				e[j] = this.m[j][k];
+			}
+			if (wantu & (k < nct)) {
+				// Place the transformation in U for subsequent back
+				// multiplication.
+				for (int i = k; i < sizeY; i++) 
+					U.m[k][i] = this.m[k][i];
+			}
+			if (k < nrt) {
+				// Compute the k-th row transformation and place the
+				// k-th super-diagonal in e[k].
+				// Compute 2-norm without under/overflow.
+				e[k] = 0;
+				for (int i = k + 1; i < sizeX; i++) 
+					e[k] = hypot(e[k], e[i]);
+				if (e[k] != 0.0) {
+					if (e[k + 1] < 0.0) 
+						e[k] = -e[k];
+					for (int i = k + 1; i < sizeX; i++) 
+						e[i] /= e[k];
+					e[k + 1] += 1.0;
+				}
+				e[k] = -e[k];
+				if ((k + 1 < sizeY) & (e[k] != 0.0)) {
+					// Apply the transformation.
+					for (int i = k + 1; i < sizeY; i++) 
+						work[i] = 0.0;
+					for (int j = k + 1; j < sizeX; j++) 
+						for (int i = k + 1; i < sizeY; i++) 
+							work[i] += e[j] * this.m[j][i];
+					for (int j = k + 1; j < sizeX; j++) {
+						double t = -e[j] / e[k + 1];
+						for (int i = k + 1; i < sizeY; i++) 
+							this.m[j][i] += t * work[i];
+					}
+				}
+				if (wantv) {
+					// Place the transformation in V for subsequent
+					// back multiplication.
+					for (int i = k + 1; i < sizeX; i++)
+						V.m[k][i] = e[i];
+				}
+			}
+		}
+
+		// Set up the final bidiagonal matrix or order p.
+		int p = Math.min(sizeX, sizeY + 1);
+		if (nct < sizeX) 
+			s.m[nct][0] = this.m[nct][nct];
+		if (sizeY < p) 
+			s.m[p - 1][0] = 0.0;
+		if (nrt + 1 < p) 
+			e[nrt] = this.m[p - 1][nrt];
+		e[p - 1] = 0.0;
+
+		// If required, generate U.
+
+		if (wantu) {
+			for (int j = nct; j < U.sizeX; j++) {
+				for (int i = 0; i < sizeY; i++) 
+					U.m[j][i] = 0.0;
+				U.m[j][j] = 1.0;
+			}
+			for (int k = nct - 1; k >= 0; k--) 
+				if (s.m[k][0] != 0.0) {
+					for (int j = k + 1; j < U.sizeX; j++) {
+						double t = 0;
+						for (int i = k; i < sizeY; i++) 
+							t += U.m[k][i] * U.m[j][i];
+						t = -t / U.m[k][k];
+						for (int i = k; i < sizeY; i++) 
+							U.m[j][i] += t * U.m[k][i];
+					}
+					for (int i = k; i < sizeY; i++) 
+						U.m[k][i] = -U.m[k][i];
+					U.m[k][k] = 1.0 + U.m[k][k];
+					for (int i = 0; i < k - 1; i++) 
+						U.m[k][i] = 0.0;
+				} else {
+					for (int i = 0; i < sizeY; i++) 
+						U.m[k][i] = 0.0;
+					U.m[k][k] = 1.0;
+				}
+		}
+
+		// If required, generate V.
+		if (wantv) {
+			for (int k = sizeX - 1; k >= 0; k--) {
+				if ((k < nrt) & (e[k] != 0.0)) {
+					for (int j = k + 1; j < U.sizeX; j++) {
+						double t = 0.0;
+						for (int i = k + 1; i < sizeX; i++) 
+							t += V.m[k][i] * V.m[j][i];
+						t = -t / V.m[k][k + 1];
+						for (int i = k + 1; i < sizeX; i++) 
+							V.m[j][i] += t * V.m[k][i];
+					}
+				}
+				for (int i = 0; i < sizeX; i++) 
+					V.m[k][i] = 0.0;
+				V.m[k][k] = 1.0;
+			}
+		}
+
+		// Main iteration loop for the singular values.
+		int pp = p - 1;
+		int iter = 0;
+		double eps = Math.pow(2.0, -52.0);
+		double tiny = Math.pow(2.0, -966.0);
+		while (p > 0) {
+			int k, kase;
+			// Here is where a test for too many iterations would go.
+
+			// This section of the program inspects for
+			// negligible elements in the s and e arrays.  On
+			// completion the variables kase and k are set as follows.
+
+			// kase = 1     if s(p) and e[k-1] are negligible and k<p
+			// kase = 2     if s(k) is negligible and k<p
+			// kase = 3     if e[k-1] is negligible, k<p, and
+			//              s(k), ..., s(p) are not negligible (qr step).
+			// kase = 4     if e(p-1) is negligible (convergence).
+
+			for (k = p - 2; k >= -1; k--) {
+				if (k == -1) 
+					break;
+				if (Math.abs(e[k]) <= tiny + eps * (Math.abs(s.m[k][0]) + Math.abs(s.m[k + 1][0]))) {
+					e[k] = 0.0;
+					break;
+				}
+			}
+			if (k == p - 2) {
+				kase = 4;
+			} else {
+				int ks;
+				for (ks = p - 1; ks >= k; ks--) {
+					if (ks == k) 
+						break;
+					double t = (ks != p ? Math.abs(e[ks]) : 0.) + (ks != k + 1 ? Math.abs(e[ks - 1]) : 0.);
+					if (Math.abs(s.m[ks][0]) <= tiny + eps * t) {
+						s.m[ks][0] = 0.0;
+						break;
+					}
+				}
+				if (ks == k) {
+					kase = 3;
+				} else if (ks == p - 1) {
+					kase = 1;
+				} else {
+					kase = 2;
+					k = ks;
+				}
+			}
+			k++;
+
+			// Perform the task indicated by kase.
+			switch (kase) {
+
+			// Deflate negligible s(p).
+			case 1: {
+				double f = e[p - 2];
+				e[p - 2] = 0.0;
+				for (int j = p - 2; j >= k; j--) {
+					double t = hypot(s.m[j][0], f);
+					double cs = s.m[j][0] / t;
+					double sn = f / t;
+					s.m[j][0] = t;
+					if (j != k) {
+						f = -sn * e[j - 1];
+						e[j - 1] = cs * e[j - 1];
+					}
+					if (wantv) {
+						for (int i = 0; i < sizeX; i++) {
+							t = cs * V.m[j][i] + sn * V.m[p - 1][i];
+							V.m[p - 1][i] = -sn * V.m[j][i] + cs * V.m[p - 1][i];
+							V.m[j][i] = t;
+						}
+					}
+				}
+				break;
+			}
+
+			// Split at negligible s(k).
+			case 2: { 
+				double f = e[k - 1];
+				e[k - 1] = 0.0;
+				for (int j = k; j < p; j++) {
+					double t = hypot(s.m[j][0], f);
+					double cs = s.m[j][0] / t;
+					double sn = f / t;
+					s.m[j][0] = t;
+					f = -sn * e[j];
+					e[j] = cs * e[j];
+					if (wantu) {
+						for (int i = 0; i < sizeY; i++) {
+							t = cs * U.m[j][i] + sn * U.m[k - 1][i];
+							U.m[k - 1][i] = -sn * U.m[j][i] + cs * U.m[k - 1][i];
+							U.m[j][i] = t;
+						}
+					}
+				}
+				break;
+			}
+
+			// Perform one qr step.
+			case 3: {
+				// Calculate the shift.
+				double scale = Math.max(Math.max(Math.max(Math.max(Math.abs(s.m[p - 1][0]), Math.abs(s.m[p - 2][0])), 
+					Math.abs(e[p - 2])), Math.abs(s.m[k][0])), Math.abs(e[k]));
+				double sp = s.m[p - 1][0] / scale;
+				double spm1 = s.m[p - 2][0] / scale;
+				double epm1 = e[p - 2] / scale;
+				double sk = s.m[k][0] / scale;
+				double ek = e[k] / scale;
+				double b = ((spm1 + sp) * (spm1 - sp) + epm1 * epm1) / 2.0;
+				double c = (sp * epm1) * (sp * epm1);
+				double shift = 0.0;
+				if ((b != 0.0) | (c != 0.0)) {
+					shift = Math.sqrt(b * b + c);
+					if (b < 0.0) {
+						shift = -shift;
+					}
+					shift = c / (b + shift);
+				}
+				double f = (sk + sp) * (sk - sp) + shift;
+				double g = sk * ek;
+
+				// Chase zeros.
+				for (int j = k; j < p - 1; j++) {
+					double t = hypot(f, g);
+					double cs = f / t;
+					double sn = g / t;
+					if (j != k) {
+						e[j - 1] = t;
+					}
+					f = cs * s.m[j][0] + sn * e[j];
+					e[j] = cs * e[j] - sn * s.m[j][0];
+					g = sn * s.m[j + 1][0];
+					s.m[j + 1][0] = cs * s.m[j + 1][0];
+					if (wantv) {
+						for (int i = 0; i < sizeX; i++) {
+							t = cs * V.m[j][i] + sn * V.m[j + 1][i];
+							V.m[j + 1][i] = -sn * V.m[j][i] + cs * V.m[j + 1][i];
+							V.m[j][i] = t;
+						}
+					}
+					t = hypot(f, g);
+					cs = f / t;
+					sn = g / t;
+					s.m[j][0] = t;
+					f = cs * e[j] + sn * s.m[j + 1][0];
+					s.m[j + 1][0] = -sn * e[j] + cs * s.m[j + 1][0];
+					g = sn * e[j + 1];
+					e[j + 1] = cs * e[j + 1];
+					if (wantu && (j < sizeY - 1)) {
+						for (int i = 0; i < sizeY; i++) {
+							t = cs * U.m[j][i] + sn * U.m[j + 1][i];
+							U.m[j + 1][i] = -sn * U.m[j][i] + cs * U.m[j + 1][i];
+							U.m[j][i] = t;
+						}
+					}
+				}
+				e[p - 2] = f;
+				iter = iter + 1;
+				break;
+			}
+
+			// Convergence.
+			case 4: {
+				// Make the singular values positive.
+				if (s.m[k][0] <= 0.0) {
+					s.m[k][0] = (s.m[k][0] < 0.0 ? -s.m[k][0] : 0.0);
+					if (wantv) {
+						for (int i = 0; i <= pp; i++) {
+							V.m[k][i] = -V.m[k][i];
+						}
+					}
+				}
+				// Order the singular values.
+				while (k < pp) {
+					if (s.m[k][0] >= s.m[k + 1][0]) {
+						break;
+					}
+					double t = s.m[k][0];
+					s.m[k][0] = s.m[k + 1][0];
+					s.m[k + 1][0] = t;
+					if (wantv && (k < sizeX - 1)) {
+						for (int i = 0; i < sizeX; i++) {
+							t = V.m[k + 1][i];
+							V.m[k + 1][i] = V.m[k][i];
+							V.m[k][i] = t;
+						}
+					}
+					if (wantu && (k < sizeY - 1)) {
+						for (int i = 0; i < sizeY; i++) {
+							t = U.m[k + 1][i];
+							U.m[k + 1][i] = U.m[k][i];
+							U.m[k][i] = t;
+						}
+					}
+					k++;
+				}
+				iter = 0;
+				p--;
+				break;
+			}
+			}
+		}
 	}
 }
