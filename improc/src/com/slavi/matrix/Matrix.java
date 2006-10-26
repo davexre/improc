@@ -981,8 +981,10 @@ public class Matrix {
 				break;
 			// if too many iterations have been performed, set
 			// flag and return.
-			if (iter >= maxit)
-				break; // TODO: set flag!
+			if (iter >= maxit) {
+				throw new Error("Maximum iterations reached!");
+				// break; // TODO: set flag!
+			}
 			/*
 			 * this section of the program inspects for
 			 * negligible elements in the s and e arrays.  on
@@ -995,56 +997,50 @@ public class Matrix {
 			 * kase = 4		if e(m-1) is negligible (convergence).
 			 */
 			int l = 0;
-			for (int ll = 1; ll < m1; ll++) {
-				l = m1 - ll - 1;
+			for (l = m1 - 2; l >= 0; l--) {
 				double test = Math.abs(s.m[l][0]) + Math.abs(s.m[l+1][0]);
 				double ztest = test + Math.abs(e[l]);
 				if (ztest == test) {
 					e[l] = 0.0;
+					l--;
 					break;
 				}				
 			}
+			l++;
 			int kase = 0;
 			if (l == m1 - 1 - 1) {
 				kase = 4;
 			} else {
-				int ls = 0;
-				int lp1 = l + 1;
-				int mp1 = m1 + 1;
-				for (int lls = lp1; lls < mp1; lls++) {
-					ls = m1 - lls + lp1 - 1;  // ???? ls -> m..l
-					if (ls == 0)
+				kase = 1;
+				int freezeL = l;
+				for (int ls = m1; ls >= freezeL; ls--) {
+					if (ls == freezeL) {
+						kase = 3;
 						break;
+					}
 					double test = 0.0;
 					if (ls != m1) // ???
 						test += Math.abs(e[ls]);
-					if (ls != l + 1)
+					if (ls != freezeL + 1)
 						test += Math.abs(e[ls-1]);
 					double ztest = test + Math.abs(s.m[ls][0]);
 					if (ztest == test) {
 						s.m[ls][0] = 0.0;
 						break;
 					}
-				}
-				if (ls == l) {
-					kase = 3;
-				} else if (ls == m1) {
-					kase = 1;					
-				} else {
 					kase = 2;
 					l = ls;
 				}
 			}
 			l++;
 			// perform the task indicated by kase.
+			kase = 4;
 			switch (kase) {
 			case 1: {
 				// deflate negligible s(m).
-				int mm1 = m1 - 1;
 				double f = e[m1 - 1];
 				e[m1 - 1] = 0.0;
-				for (int kk = l; kk < mm1; kk++) {
-					int k = mm1 - kk + l; // ???
+				for (int k = m1 - 1; k > l; k--) {
 					double t1 = s.m[k][0];
 					// start srotg
 					double sn = 0.0;
@@ -1152,8 +1148,7 @@ public class Matrix {
 				double f = (sl + sm)*(sl - sm) + shift;
 				double g = sl*el;
 				// chase zeros.
-				double mm1 = m1 - 1;
-				for (int k = l; k < mm1; k++) {
+				for (int k = l; k < m1-1; k++) {
 					// start srotg
 					double sn = 0.0;
 					double cs = 0.0;
