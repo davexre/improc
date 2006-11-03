@@ -1,7 +1,11 @@
 package com.slavi.img;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -64,7 +68,27 @@ public class ScalePointList {
 		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + dest.points.size());
 		System.out.println("Finished!");
 	}
+	
+	public static ScalePointList fromTextStream(BufferedReader fin) throws IOException {
+		ScalePointList r = new ScalePointList();
+		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
+		r.imageFileName = st.nextToken();
+		r.imageSizeX = Integer.parseInt(st.nextToken());
+		r.imageSizeY = Integer.parseInt(st.nextToken());
+		while (fin.ready()) {
+			String str = fin.readLine().trim();
+			if ((str.length() > 0) && (str.charAt(0) != '#'))
+				r.points.add(ScalePoint.fromString(str));
+		}
+		return r;
+	}
 
+	public void toTextStream(PrintWriter fou) {
+		fou.println(imageFileName + "\t" + imageSizeX + "\t" + imageSizeY);
+		for (int i = 0; i < points.size(); i++)
+			fou.println(((ScalePoint)points.get(i)).toString());
+	}
+	
 	public void toXML(Element dest) {
 		dest.addContent(XMLHelper.makeAttrEl("imageFileName", imageFileName));
 		dest.addContent(XMLHelper.makeAttrEl("imageSizeX", Integer.toString(imageSizeX)));

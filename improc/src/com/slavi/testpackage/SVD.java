@@ -352,9 +352,36 @@ public class SVD {
 		}
 		Matrix w = new Matrix(nc, 1);
 		Matrix v = new Matrix(nc,nc);
+		Matrix copyA = a.makeCopy();
+		
 		svd(a, w, v);
-		printM(a, "A");
+		printM(a, "U");
 		printM(w, "W");
 		printM(v, "V");
+		
+		Matrix s = new Matrix(w.getSizeX(), w.getSizeX());
+		s.make0();
+		for (int i = w.getSizeX() - 1; i >= 0; i--)
+			s.setItem(i, i, w.getItem(i, 0));
+		printM(s, "S");
+		Matrix vt = new Matrix();
+		v.transpose(vt);
+		Matrix t = new Matrix();
+		s.mMul(vt, t);
+		printM(t, "S * V.'");
+		
+		Matrix u = new Matrix(w.getSizeX(), w.getSizeX());
+		for (int i = u.getSizeX() - 1; i >= 0; i--)
+			for (int j = u.getSizeY() - 1; j >= 0; j--)
+				u.setItem(i, j, a.getItem(i, j));
+			
+		u.mMul(t, s);
+
+		for (int i = s.getSizeX() - 1; i >= 0; i--)
+			for (int j = s.getSizeY() - 1; j >= 0; j--)
+				s.setItem(i, j, s.getItem(i, j) - copyA.getItem(i, j));
+
+		printM(s, "U * S * V.'");
+		
 	}
 }

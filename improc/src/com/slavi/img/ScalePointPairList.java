@@ -1,9 +1,13 @@
 package com.slavi.img;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -49,6 +53,46 @@ public class ScalePointPairList {
 		}
 		items.add(sp);
 	}
+
+	public void toTextStream(PrintWriter fou) {
+		fou.println(sourceImageFileName + "\t" + sourceImageSizeX + "\t" + sourceImageSizeY);
+		fou.println(targetImageFileName + "\t" + targetImageSizeX + "\t" + targetImageSizeY);
+		for (int i = 0; i < items.size(); i++) {
+			ScalePointPair pair = (ScalePointPair)items.get(i);
+			fou.println(
+				Double.toString(pair.distanceToNearest) + " \t" +
+				Double.toString(pair.distanceToNearest2) + "\t" +
+				Double.toString(pair.getWeight()));
+			fou.println(pair.sourceSP.toString());
+			fou.println(pair.targetSP.toString());
+		}
+	}
+	
+	public static ScalePointPairList fromTextStream(BufferedReader fin) throws IOException {
+		ScalePointPairList r = new ScalePointPairList();
+		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
+		r.sourceImageFileName = st.nextToken();
+		r.sourceImageSizeX = Integer.parseInt(st.nextToken());
+		r.sourceImageSizeY = Integer.parseInt(st.nextToken());
+
+		st = new StringTokenizer(fin.readLine(), "\t");
+		r.targetImageFileName = st.nextToken();
+		r.targetImageSizeX = Integer.parseInt(st.nextToken());
+		r.targetImageSizeY = Integer.parseInt(st.nextToken());
+		while (fin.ready()) {
+			st = new StringTokenizer(fin.readLine(), "\t");
+			double distanceToNearest = Double.parseDouble(st.nextToken());
+			double distanceToNearest2 = Double.parseDouble(st.nextToken());
+			double weight = Double.parseDouble(st.nextToken());
+			ScalePoint sourceSP = ScalePoint.fromString(fin.readLine());
+			ScalePoint targetSP = ScalePoint.fromString(fin.readLine());
+			ScalePointPair pair = new ScalePointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
+			pair.setWeight(weight);
+			r.items.add(pair);
+		}
+		return r;
+	}
+	
 	
 	public void toXML(Element dest) {
 		dest.addContent(XMLHelper.makeAttrEl("sourceImageFileName", sourceImageFileName));

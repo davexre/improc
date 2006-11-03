@@ -1,6 +1,7 @@
 package com.slavi.img;
 
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -98,41 +99,56 @@ public class ScalePoint extends KDNodeBase {
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-		result.append("imgX     ");
 		result.append(imgX);
-		result.append("\nimgY     ");
+		result.append("\t");
 		result.append(imgY);
-		result.append("\ndoubleX  ");
+		result.append("\t");
 		result.append(Double.toString(doubleX));
-		result.append("\ndoubleY  ");
+		result.append("\t");
 		result.append(Double.toString(doubleY));
-		result.append("\nlevel    ");
+		result.append("\t");
 		result.append(Double.toString(level));
-		result.append("\nadjS     ");
+		result.append("\t");
 		result.append(Double.toString(adjS));
-		result.append("\nkpScale  ");
+		result.append("\t");
 		result.append(Double.toString(kpScale));
-		result.append("\ndegree   ");
+		result.append("\t");
 		result.append(Double.toString(degree));
-		result.append("\nfeatureVector\n");
+		result.append("\t");
 
+		boolean first = true;
 		for (int k = 0; k < numDirections; k++) {
-			result.append("featureVector.direction.");
-			result.append(k);
-			result.append("\n");
 			for (int j = 0; j < descriptorSize; j++) {
 				for (int i = 0; i < descriptorSize; i++) {
-					if (i != 0)
-						result.append(" ");
-						result.append(Double.toString(featureVector[i][j][k]));
+					if (first)
+						first = false;
+					else
+						result.append("\t");
+					result.append(Double.toString(featureVector[i][j][k]));
 				}
-				if (j != descriptorSize - 1)
-					result.append("\n");
 			}
-			if (k != numDirections - 1)
-				result.append("\n");
 		}
 		return result.toString();
+	}
+
+	public static ScalePoint fromString(String str) {
+		StringTokenizer st = new StringTokenizer(str, "\t");
+		if (st.countTokens() != 8 + (numDirections * descriptorSize * descriptorSize))
+			throw new Error("ScalePoint.fromString: Malformed source string.");
+		ScalePoint r = new ScalePoint();
+		r.imgX = Integer.parseInt(st.nextToken());
+		r.imgY = Integer.parseInt(st.nextToken());
+		r.doubleX = Double.parseDouble(st.nextToken());
+		r.doubleY = Double.parseDouble(st.nextToken());
+		r.level = Double.parseDouble(st.nextToken());
+		r.adjS = Double.parseDouble(st.nextToken());
+		r.kpScale = Double.parseDouble(st.nextToken());
+		r.degree = Double.parseDouble(st.nextToken());
+		for (int k = 0; k < numDirections; k++) 
+			for (int j = 0; j < descriptorSize; j++) 
+				for (int i = 0; i < descriptorSize; i++) 
+					r.featureVector[i][j][k] = Double.parseDouble(st.nextToken());
+		return r;
 	}
 
 	public boolean equals(Object o) {
