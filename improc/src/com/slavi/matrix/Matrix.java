@@ -780,6 +780,20 @@ public class Matrix {
 		return r;
 	}
 
+	// MY SVD translation from LAPACK's DGESVD
+	// MY SVD translation from LAPACK's DGESVD
+	public void mysvd(Matrix U, Matrix V, Matrix s) {
+		U.resize(getSizeY(), getSizeY());
+		s.resize(getSizeX(), getSizeY());
+		V.resize(getSizeX(), getSizeX());
+
+		double anrm = maxAbs();
+		// if (anrm < some_small_number) || (anrm > some_big_num) this.scale();
+		
+		
+		
+	}
+	
 	public void svd2(Matrix U, Matrix V, Matrix s) {
 		int maxit = 30;
 		

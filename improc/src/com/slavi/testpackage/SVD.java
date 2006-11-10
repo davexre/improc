@@ -261,7 +261,7 @@ public class SVD {
 		System.out.println(m.toString());
 	}
 	
-	public static void main2(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		BufferedReader fin = new BufferedReader(new FileReader(
 				SVD.class.getResource(
 					"SVD-A.txt").getFile()));
@@ -270,11 +270,12 @@ public class SVD {
 		a.load(fin);
 		fin.close();
 		Matrix aa = a.makeCopy();
-//		a.transpose(aa);
-//		aa.copyTo(a);
+		printM(a, "A");
+		a.transpose(aa);
+		aa.copyTo(a);
 		
-		jama.Matrix ja = slaviMat2jamaMat(a);
-		jama.SingularValueDecomposition svd = ja.svd();
+//		jama.Matrix ja = slaviMat2jamaMat(a);
+//		jama.SingularValueDecomposition svd = ja.svd();
 		
 		Matrix u = new Matrix(10, 10);
 		Matrix v = new Matrix(10, 10);
@@ -283,10 +284,10 @@ public class SVD {
 		Matrix tmp1 = new Matrix();
 		Matrix tmp2 = new Matrix();
 		Matrix tmp3 = new Matrix();
-		Matrix tmp4 = new Matrix();
+//		Matrix tmp4 = new Matrix();
 
-		//a.svd2(u, v, s);
-		a.svd(s,v);
+		a.svd2(u, v, s);
+		//a.svd(s,v);
 		tmp1.resize(aa.getSizeX(), aa.getSizeY());
 		for (int i = Math.min(aa.getSizeX(), aa.getSizeY()) - 1; i >= 0; i--)
 			tmp1.setItem(i, i, s.getItem(i, 0));
@@ -339,7 +340,7 @@ public class SVD {
 		printM(tmp1, "AA - U * S * V.'");
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main2(String[] args) throws Exception {
 		int nr = 6;
 		int nc = 5;
 		Matrix a = new Matrix(nr, nc);
@@ -350,6 +351,8 @@ public class SVD {
 				a.setItem(r, c, Math.pow(frac, p));
 			}
 		}
+		printM(a, "A");
+
 		Matrix w = new Matrix(nc, 1);
 		Matrix v = new Matrix(nc,nc);
 		Matrix copyA = a.makeCopy();
@@ -368,7 +371,7 @@ public class SVD {
 		v.transpose(vt);
 		Matrix t = new Matrix();
 		s.mMul(vt, t);
-		printM(t, "S * V.'");
+		//printM(t, "S * V.'");
 		
 		Matrix u = new Matrix(w.getSizeX(), w.getSizeX());
 		for (int i = u.getSizeX() - 1; i >= 0; i--)

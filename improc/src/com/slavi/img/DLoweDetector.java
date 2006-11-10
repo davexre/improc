@@ -10,7 +10,7 @@ import org.jdom.JDOMException;
 
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
-import com.slavi.statistics.StatisticsLT;
+import com.slavi.statistics.StatisticsBase;
 import com.slavi.utils.Marker;
 import com.slavi.utils.XMLHelper;
 
@@ -611,6 +611,7 @@ public class DLoweDetector {
 	
 	private DImageMap lastBlured1Img = null;
 	
+	@SuppressWarnings("unused")
 	private void debugPrintImage(DImageMap img, double scale, String type, int level) throws Exception {
 //		img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
 //		fou.println(Integer.toString((int)scale) + "\t" + type + "\t" + level + "\t" + img.calcStatistics());
@@ -842,7 +843,7 @@ public class DLoweDetector {
 		ld = new DLoweDetector();
 		
 		fou = new PrintWriter(workDir + "debug.my");
-		fou.println("Scale\tType\tLevel\t" + StatisticsLT.toString2Header());
+		fou.println("Scale\tType\tLevel\t" + StatisticsBase.toString2Header());
 //		String fn = workDir + "HPIM0337.JPG";
 		String fn = workDir + "testimg.bmp";
 

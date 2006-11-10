@@ -19,7 +19,12 @@ public class LUDecomposition implements java.io.Serializable {
    Class variables
  * ------------------------ */
 
-   /** Array for internal storage of decomposition.
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+/** Array for internal storage of decomposition.
    @serial internal array storage.
    */
    private double[][] LU;
@@ -41,9 +46,9 @@ public class LUDecomposition implements java.io.Serializable {
  * ------------------------ */
 
    /** LU Decomposition
-   @param  A   Rectangular matrix
-   @return     Structure to access L, U and piv.
-   */
+    * @param  A   Rectangular matrix
+    * return     Structure to access L, U and piv.
+    */
 
    public LUDecomposition (Matrix A) {
 
@@ -246,7 +251,7 @@ public class LUDecomposition implements java.io.Serializable {
    public double[] getDoublePivot () {
       double[] vals = new double[m];
       for (int i = 0; i < m; i++) {
-         vals[i] = (double) piv[i];
+         vals[i] = piv[i];
       }
       return vals;
    }
@@ -260,7 +265,7 @@ public class LUDecomposition implements java.io.Serializable {
       if (m != n) {
          throw new IllegalArgumentException("Matrix must be square.");
       }
-      double d = (double) pivsign;
+      double d = pivsign;
       for (int j = 0; j < n; j++) {
          d *= LU[j][j];
       }

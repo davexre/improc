@@ -1,5 +1,4 @@
 package jama;
-import jama.*;
 
 /** Eigenvalues and eigenvectors of a real matrix. 
 <P>
@@ -23,7 +22,12 @@ public class EigenvalueDecomposition implements java.io.Serializable {
    Class variables
  * ------------------------ */
 
-   /** Row and column dimension (square matrix).
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+/** Row and column dimension (square matrix).
    @serial matrix dimension.
    */
    private int n;
@@ -855,9 +859,9 @@ public class EigenvalueDecomposition implements java.io.Serializable {
  * ------------------------ */
 
    /** Check for symmetry, then construct the eigenvalue decomposition
-   @param A    Square matrix
-   @return     Structure to access D and V.
-   */
+    * @param A    Square matrix
+    * return     Structure to access D and V.
+    */
 
    public EigenvalueDecomposition (Matrix Arg) {
       double[][] A = Arg.getArray();
