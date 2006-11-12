@@ -766,20 +766,110 @@ public class Matrix {
 	/**
 	 * sqrt(a^2 + b^2) without under/overflow.
 	 */
-	public static double hypot(double a, double b) {
-		double r;
-		if (Math.abs(a) > Math.abs(b)) {
-			r = b / a;
-			r = Math.abs(a) * Math.sqrt(1 + r * r);
-		} else if (b != 0) {
-			r = a / b;
-			r = Math.abs(b) * Math.sqrt(1 + r * r);
-		} else {
-			r = 0.0;
-		}
-		return r;
-	}
+//	public static double hypot(double a, double b) {
+//		double r;
+//		if (Math.abs(a) > Math.abs(b)) {
+//			r = b / a;
+//			r = Math.abs(a) * Math.sqrt(1 + r * r);
+//		} else if (b != 0) {
+//			r = a / b;
+//			r = Math.abs(b) * Math.sqrt(1 + r * r);
+//		} else {
+//			r = 0.0;
+//		}
+//		return r;
+//	}
 
+	/**
+	 * Returns TAU 
+	 * DLARFG: Generates a real elementary reflector H of order n, such that
+	 *      H * ( alpha ) = ( beta ),   H' * H = I.
+	 *          (   x   )   (   0  )
+	 * where alpha and beta are scalars, and x is an (n-1)-element real
+	 * vector. H is represented in the form
+	 *       H = I - tau * ( 1 ) * ( 1 v' ) ,
+	 *                     ( v )
+	 * where tau is a real scalar and v is a real (n-1)-element vector.
+	 * If the elements of x are all zero, then tau = 0 and H is taken to be the unit matrix.
+	 * Otherwise  1 <= tau <= 2.
+	 */
+	private double DLARFG(int atIndex, boolean useRows) {
+		return 0;
+//		if (useRows) {
+//			// DNRM2: Returns the euclidean norm of a vector DNRM2 := sqrt( x'*x )
+//			double ssq = 1.0;
+//			double scale = 0.0;
+//			for (int i = atIndex + 1; i < getSizeX(); i++) {
+//				double absM = Math.abs(getItem(i, atIndex));
+//				if (absM == 0.0) 
+//					continue;
+//				if (scale < absM) {
+//					ssq = 1.0 + ssq * Math.pow(scale / absM, 2);
+//					scale = absM;
+//				} else
+//					ssq += Math.pow(absM / scale, 2);
+//			}
+//			double xnorm = scale / Math.sqrt(ssq);
+//			// End DNRM2
+//			// TODO: DLARFG:102 XNORM, BETA may be inaccurate; scale X and recompute them
+//			double beta = -SIGN(alpha, Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)));
+//			double tau = (beta - alpha) / beta;
+//			scale = 1.0 / (alpha - beta);
+//			for (int i = atIndex + 1; i < getSizeX(); i++) 
+//				setItem(i, atIndex, scale * getItem(i, atIndex));
+//			// setItem(atIndex, atIndex, beta);  // How to return BETA ??
+//			return tau;
+//		}
+//		// DNRM2: Returns the euclidean norm of a vector DNRM2 := sqrt( x'*x )
+//		double ssq = 1.0;
+//		double scale = 0.0;
+//		for (int j = atIndex + 1; j < getSizeY(); j++) {
+//			double absM = Math.abs(getItem(atIndex, j));
+//			if (absM == 0.0) 
+//				continue;
+//			if (scale < absM) {
+//				ssq = 1.0 + ssq * Math.pow(scale / absM, 2);
+//				scale = absM;
+//			} else
+//				ssq += Math.pow(absM / scale, 2);
+//		}
+//		double xnorm = scale / Math.sqrt(ssq);
+//		// End DNRM2
+//		// TODO: DLARFG:102 XNORM, BETA may be inaccurate; scale X and recompute them
+//		double beta = -SIGN(getItem(atIndex, atIndex),
+//				Math.sqrt(Math.pow(getItem(atIndex, atIndex), 2) + Math.pow(xnorm, 2)));
+//		double tau = (beta - getItem(atIndex, atIndex)) / beta;
+//		scale = 1.0 / (getItem(atIndex, atIndex)- beta);
+//		for (int j = atIndex + 1; j < getSizeY(); j++) 
+//			setItem(atIndex, j, scale * getItem(atIndex, j));
+//		setItem(atIndex, atIndex, beta);
+//		return tau;
+	}
+	
+	private void DLARF(int atX, double tau, boolean useRows) {
+		if (useRows) {
+			for (int j = atX; j < getSizeY(); j++) {
+				double sum = 0.0;
+				for (int i = atX + 1; i < getSizeX(); i++) {
+					sum += getItem(i, j) * getItem(i - 1, atX);
+				}
+				for (int i = atX + 1; i < getSizeX(); i++) {
+					setItem(i, j, getItem(i, j) - tau * sum * getItem(i - 1, atX));
+				}				
+			}
+		} else {
+			for (int i = atX; i < getSizeX(); i++) {
+				double sum = 0.0;
+				for (int j = atX + 1; j < getSizeY(); j++) {
+					sum += getItem(i, j) * getItem(atX, j - 1);
+				}
+				for (int j = atX + 1; j < getSizeY(); j++) {
+					setItem(i, j, getItem(i, j) - tau * sum * getItem(atX, j - 1));
+				}				
+			}
+		}
+	}
+	
 	// MY SVD translation from LAPACK's DGESVD
 	// MY SVD translation from LAPACK's DGESVD
 	public void mysvd(Matrix U, Matrix V, Matrix s) {
@@ -787,11 +877,143 @@ public class Matrix {
 		s.resize(getSizeX(), getSizeY());
 		V.resize(getSizeX(), getSizeX());
 
+		int minXY = Math.min(getSizeX(), getSizeY());
+		double work[] = new double[minXY];
+		double tau[] = new double[minXY];
+		double tauP[] = new double[minXY];
+
 		double anrm = maxAbs();
 		// if (anrm < some_small_number) || (anrm > some_big_num) this.scale();
 		
+		// DGEQR2 QR factorization
+		for (int i = 0; i < minXY; i++) {
+			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
+			tau[i] = DLARFG(i, true);
+			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
+			double AII = getItem(i, i); 
+			setItem(i, i, 1.0);
+			DLARF(i, tau[i], true);
+			setItem(i, i, AII);			
+		}
+		// End DGEQR2
+		
+		// DGESVD:1750 DLACPY
+		for (int i = 0; i < getSizeX(); i++)
+			for (int j = i; j < getSizeY(); j++)
+				U.setItem(i, j, getItem(i, j));
+
+		// DGESVD:1752 Generate Q in U
+
+		// DORGQR
+		// DORG2R:98 Initialise columns k+1:n to columns of the unit matrix
+		for (int j = getSizeX(); j < getSizeY(); j++) {
+			for (int i = 0; i < getSizeY(); i++)
+				U.setItem(i, j, 0.0);
+			U.setItem(j, j, 1.0);
+		}
+		// DORG2R:109 Apply H(i) to A(i:m,i:n) from the left
+		for (int i = getSizeX() - 1; i >= 0; i--) {
+			if (i + 1 < getSizeY()) {
+				U.setItem(i, i, 1.0);
+				U.DLARF(i, tau[i], true);
+				// DORG2R:117 DSCAL
+				for (int ii = i + 1; ii < U.getSizeX(); ii++)
+					U.setItem(ii, i, -tau[i] * U.getItem(ii, i));
+			}
+			U.setItem(i, i, 1.0 - tau[i]);
+			// DORG2R:120 Set U(1:i-1,i) to zero
+			for (int ii = 0; ii < i; ii++)
+				U.setItem(i, ii, 0.0);
+		}
+		// End DORGQR
+
+		// DGESVD:1758 Copy R to WORK(IU), zeroing out below it
+		for (int i = 0; i < getSizeX(); i++)
+			for (int j = 0; j < getSizeX(); j++)
+				if ((i > j) && (j < getSizeY()))  // set(i, i, 0)
+					V.setItem(i, j, getItem(i, j)); // Actually WORK[i] is used in the original code
+				else
+					V.setItem(i, j, 0.0);
+
+		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
+		// DGEBRD
+		double E[] = new double[V.getSizeX()];
+		
+		for (int i = 0; i < V.getSizeX(); i++) {
+			// DGEBD2:163 Generate elementary reflector H(i) to annihilate A(i+1:m,i)
+			tau[i] = V.DLARFG(i, true);
+			// DGEBD2:167
+			s.setItem(i, i, V.getItem(i, i));
+			V.setItem(i, i, 1.0);
+			// DGEBD2:170 Apply H(i) to A(i:m,i+1:n) from the left
+			V.DLARF(i, tau[i], true);
+			V.setItem(i, i, s.getItem(i, i));
+			if (i + 1 < V.getSizeX()) {
+				// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
+				tauP[i] = V.DLARFG(i, false); 
+				E[i] = V.getItem(i, i + 1);
+				V.setItem(i, i + 1, 1.0);
+				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
+				//V.DLARF(
+			}
+		}
+		// End DGEBRD
+		
+		// DGESVD:1776 DLACPY
+		Matrix VT = V.makeCopy();
+		
+		// DGESVD:1779 Generate left bidiagonalizing vectors in WORK(IU)
+		
+		// DGESVD:1782 DORGBR
+		// DORG2R:98 Initialise columns k+1:n to columns of the unit matrix
+		// DORG2R:109 Apply H(i) to A(i:m,i:n) from the left
+		for (int i = V.getSizeX() - 1; i >= 0; i--) {
+			if (i + 1 < V.getSizeY()) {
+				V.setItem(i, i, 1.0);
+				V.DLARF(i, tau[i], true);
+				// DORG2R:117 DSCAL
+				for (int ii = i + 1; ii < V.getSizeX(); ii++)
+					V.setItem(ii, i, -tau[i] * V.getItem(ii, i));
+			}
+			V.setItem(i, i, 1.0 - tau[i]);
+			// DORG2R:120 Set V(1:i-1,i) to zero
+			for (int ii = 0; ii < i; ii++)
+				V.setItem(i, ii, 0.0);
+		}
+		// End DORGQR
+
+		// DGESVD:1786 Generate right bidiagonalizing vectors in VT
+		for (int i = V.getSizeX() - 1; i >= 0; i--) {
+			if (i + 1 < V.getSizeY()) {
+				V.setItem(i, i, 1.0);
+				V.DLARF(i, tau[i], true);
+				// DORG2R:117 DSCAL
+				for (int ii = i + 1; ii < V.getSizeX(); ii++)
+					V.setItem(ii, i, -tau[i] * V.getItem(ii, i));
+			}
+			V.setItem(i, i, 1.0 - tau[i]);
+			// DORG2R:120 Set V(1:i-1,i) to zero
+			for (int ii = 0; ii < i; ii++)
+				V.setItem(i, ii, 0.0);
+		}
+		// End DORGQR
+		// End DORGBR
+		
+		// DGESVD:1794 Perform bidiagonal QR iteration, computing left 
+		// singular vectors of R in WORK(IU) and computing right singular vectors of R in VT
+
+		// DBDSQR
+		// DBDSQR:258 Compute approximate maximum, minimum singular values
+		double smax = 0.0;
+		for (int i = 0; i < s.getSizeX(); i++) {
+			double absS = Math.abs(s.getItem(i, i));
+			if (smax < absS)
+				smax = absS;
+		}
+		//for (int i = 0; i < 
 		
 		
+		// End DBDSQR
 	}
 	
 	public void svd2(Matrix U, Matrix V, Matrix s) {
@@ -1888,5 +2110,94 @@ public class Matrix {
 
 	static final double SIGN(double a, double b) {
 		return ((b) >= 0. ? Math.abs(a) : -Math.abs(a));
+	}
+	
+	/** 
+	 * sqrt(a^2 + b^2) without under/overflow. 
+	 */
+	public static double hypot(double a, double b) {
+		double r;
+		if (Math.abs(a) > Math.abs(b)) {
+			r = b / a;
+			r = Math.abs(a) * Math.sqrt(1 + r * r);
+		} else if (b != 0) {
+			r = a / b;
+			r = Math.abs(b) * Math.sqrt(1 + r * r);
+		} else {
+			r = 0.0;
+		}
+		return r;
+	}
+	
+	public void QRDecomposition(Matrix RDiag) {
+		RDiag.resize(sizeX, 1);
+
+		// Main loop.
+		for (int k = 0; k < sizeX; k++) {
+			// Compute 2-norm of k-th column without under/overflow.
+			double nrm = 0;
+			for (int i = k; i < sizeY; i++) {
+				nrm = hypot(nrm, m[k][i]);
+			}
+
+			if (nrm != 0.0) {
+				// Form k-th Householder vector.
+				if (m[k][k] < 0) {
+					nrm = -nrm;
+				}
+				for (int i = k; i < sizeY; i++) {
+					m[k][i] /= nrm;
+				}
+				m[k][k] += 1.0;
+
+				// Apply transformation to remaining columns.
+				for (int j = k + 1; j < sizeX; j++) {
+					double s = 0.0;
+					for (int i = k; i < sizeY; i++) {
+						s += m[k][i] * m[i][j];
+					}
+					s = -s / m[k][k];
+					for (int i = k; i < sizeY; i++) {
+						m[j][i] += s * m[k][i];
+					}
+				}
+			}
+			RDiag.m[k][0] = -nrm;
+		}
+	}
+	
+	public void getH(Matrix destH) {
+		destH.resize(sizeX, sizeY);
+		for (int i = 0; i < sizeX; i++) {
+			for (int j = 0; j < sizeY; j++) {
+				if (i >= j) {
+					destH.m[i][j] = m[i][j];
+				} else {
+					destH.m[i][j] = 0.0;
+				}
+			}
+		}
+	}
+
+	public void getQ(Matrix destQ) {
+		destQ.resize(sizeX, sizeY);
+		for (int k = sizeX - 1; k >= 0; k--) {
+			for (int i = 0; i < sizeY; i++) {
+				destQ.m[k][i] = 0.0;
+			}
+			destQ.m[k][k] = 1.0;
+			for (int j = k; j < sizeX; j++) {
+				if (m[k][k] != 0) {
+					double s = 0.0;
+					for (int i = k; i < sizeY; i++) {
+						s += m[k][i] * destQ.m[j][i];
+					}
+					s = -s / m[k][k];
+					for (int i = k; i < sizeY; i++) {
+						destQ.m[j][i] += s * m[k][i];
+					}
+				}
+			}
+		}
 	}
 }
