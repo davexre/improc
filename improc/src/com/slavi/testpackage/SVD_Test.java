@@ -2,7 +2,6 @@ package com.slavi.testpackage;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.PrintStream;
 
 import com.slavi.matrix.Matrix;
 
@@ -54,7 +53,7 @@ public class SVD_Test {
 		Matrix tmp4 = new Matrix();
 
 		printM(a, "A");
-		a.QRDecomposition(s);
+		a.qrDecomposition(s);
 		printM(a, "QR");
 		a.getQ(u);
 		printM(u, "Q");
