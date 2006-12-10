@@ -2467,7 +2467,6 @@ public class Matrix {
 		
 		// DORGL2
 		for (int atIndex = V.getSizeX() - 1; atIndex > 0; atIndex--) {
-			System.out.println("I=" + atIndex + " a(3,3)=" + V.getItem(2, 2));
 			double tmp_tau = tauP.getItem(atIndex - 1, 0);
 			if (atIndex < V.getSizeX() - 1) {
 				// Apply H(i) to A(i:m,i:n) from the right
@@ -2481,22 +2480,204 @@ public class Matrix {
 						V.setItem(i, j, V.getItem(i, j) - tmp_tau * sum * V.getItem(i, atIndex));
 				// End DLARF Right
 				}
-				for (int j = V.getSizeY() - 1; j >= atIndex; j--)
+				for (int j = V.getSizeY() - 2; j >= atIndex; j--) 
 					V.setItem(atIndex+1, j, -tmp_tau * V.getItem(atIndex+1, j));
 				// End of DORGL2
 			}
 			V.setItem(atIndex, atIndex, 1.0 - tmp_tau);
-			System.out.println("tauP=" + tmp_tau + " V(i,i)=" + V.getItem(atIndex, atIndex));
 			// DORGL2:124 Set A(i,1:i-1) to zero 
 			for (int i = atIndex - 1; i > 0; i--)
 				V.setItem(i, atIndex, 0.0);
 		}
-		System.out.println("I=" + 0 + " a(3,3)=" + V.getItem(2, 2));
+		// End DORGL2
 		V.printM("V");
 		
-		// End DORGL2
+		// DBDSQR
+		// Perform bidiagonal QR iteration, computing left singular vectors 
+		// of R in WORK(IU) and computing right singular vectors of R in VT
 		
+		// WORK(IU) = Q 
+		// WORK(IE) = E 
+		// WORK(IWORK) = temporary
+		// S, V
 		
+		// DBDSQR:258 Compute approximate maximum, minimum singular values
+//		double smax = 0.0;
+//		for (int i = s.getSizeY() - 1; i >= 0; i--)
+//			smax = Math.max(smax, Math.abs(s.getItem(i, i)));
+//		for (int i = s.getSizeX() - 2; i >= 0; i--)
+//			smax = Math.max(smax, Math.abs(E.getItem(i, 0)));
+		
+		int atIndex = getSizeY();
+		int maxit = 6 * atIndex * atIndex;
+		
+		double threshold = 2.59371421E-015;
+		
+		int old_atIndex = -1;
+		int old_ll = -1;
+		
+		while ((atIndex >= 0) && (maxit >= 0)) {
+			// DBDSQR:316 Find diagonal block of matrix to work on
+			double smax = Math.abs(s.getItem(atIndex, atIndex));
+			double smin = smax;
+			int ll = atIndex - 1;
+			while (ll >= 0) {
+				double abss = Math.abs(s.getItem(ll, ll));
+				double abse = Math.abs(E.getItem(ll, 0));
+				if (abss <= threshold) // ??? DBDSQR:326 
+					E.setItem(ll, 0, 0.0);
+				if (abse <= threshold) {
+					// Matrix splits since E(LL) = 0
+					if (ll == atIndex - 1) {
+						// Convergence of bottom singular value, return to top of loop
+						atIndex--;
+					} else {
+						break;
+					}					
+				}
+				smin = Math.min(smin, abss);
+				smax = Math.max(smax, Math.max(abss, abse));
+				ll--;
+			}
+			// E(LL) through E(M-1) are nonzero, E(LL-1) is zero
+			if (ll == atIndex - 1) {
+				// DBDSQR:354 2 by 2 block, handle separately
+				double SINR, COSR, SINL, COSL;
+				
+				// DLASV2
+				double F = s.getItem(atIndex - 1, atIndex - 1);
+				double G = E.getItem(atIndex - 1, 0);
+				double H = s.getItem(atIndex, atIndex);
+				
+				double FA = Math.abs(F);
+				double HA = Math.abs(H);
+				double GA = Math.abs(G);
+				
+				int pmax = 1;
+				boolean swap = HA > FA;
+				
+				if (swap) {
+					pmax = 3;
+					double tmp = F;
+					F = H;
+					H = tmp;
+					tmp = FA;
+					FA = HA;
+					HA = tmp;
+				}
+				double CLT = 0, CRT = 0, SLT = 0, SRT = 0;
+				if (GA == 0.0) {
+					// DLASV:132 Diagonal matrix
+					s.setItem(atIndex, atIndex, HA);			// SSMIN
+					s.setItem(atIndex - 1, atIndex - 1, FA);	// SSMAX
+					CRT = CLT = 1.0;
+					SRT = SLT = 0.0;
+				} else {
+					boolean gasmal = true;
+					if (GA > FA) {
+						pmax = 2;
+						if ((FA / GA) < 0.000000001) {  // TODO EPS=??? = 0.00000...1
+							gasmal = false;
+							s.setItem(atIndex, atIndex, 
+									HA > 1.0 ? FA / (GA / HA) : (FA / GA) * HA);	// SSMIN
+							s.setItem(atIndex - 1, atIndex - 1, GA);				// SSMAX
+							SRT = CLT = 1.0;
+							SLT = H / G;
+							CRT = F / G;								
+						}
+					}
+					if (gasmal) {
+							// DLASV:146 Case of very large GA -> scipped
+							// Normal case
+							double L = (FA - HA) / FA;  // TODO what if FA=0.0
+							double M = G / F;
+							double T = 2.0 - L;
+							double MM = M * M;
+							double TT = T * T;
+							double _S = Math.sqrt(TT + MM);
+							double _R = L == 0.0 ? Math.abs(M) : Math.sqrt(L * L + MM);
+							double A = (_S + _R) * 0.5;
+							s.setItem(atIndex, atIndex, HA / A);			// SSMIN
+							s.setItem(atIndex - 1, atIndex - 1, FA * A);	// SSMAX
+							if (MM == 0.0) {
+								// DLASV:207 Note that M is very tiny
+								if (L == 0.0)
+									T = SIGN(2.0, F) * SIGN(1.0, G);
+								else
+									T = G / SIGN(FA - HA, F) + M / T;
+							} else
+								T = (M / (_S + T) + M / (_R + L)) * (1.0 + A);
+							L = Math.sqrt(T * T + 4.0);
+							CRT = 2.0 / L;
+							SRT = T / L;
+							CLT = (CRT + SRT * M) / A;
+							SLT = (H / F ) * SRT / A;
+					}
+				}
+				if (swap) {
+					COSL = SRT;
+					SINL = CRT;
+					COSR = SLT;
+					SINR = CLT;
+				} else {
+					COSL = CLT;
+					SINL = SLT;
+					COSR = CRT;
+					SINR = SRT;
+				};
+				// DLASV2:236 Correct signs of SSMAX and SSMIN
+				double tsign = 0;
+				if (pmax == 1)
+					tsign = SIGN(1.0, COSR) * SIGN(1.0, COSL) * SIGN(1.0, F);
+				if (pmax == 2)
+					tsign = SIGN(1.0, SINR) * SIGN(1.0, COSL) * SIGN(1.0, G);
+				if (pmax == 3)
+					tsign = SIGN(1.0, SINR) * SIGN(1.0, SINL) * SIGN(1.0, H);
+				s.setItem(atIndex, atIndex, SIGN(s.getItem(atIndex, atIndex), tsign));	// SSMIN
+				s.setItem(atIndex - 1, atIndex - 1, SIGN(s.getItem(atIndex - 1, atIndex - 1), 
+						tsign * SIGN(1.0, F) * SIGN(1.0, H)));	// SSMAX
+				// End DLASV2
+				
+				// DBDSQR:362 Compute singular vectors
+				for (int i = getSizeX() - 1; i >= 0; i--) {
+					double tmp =  COSR * V.getItem(i, atIndex - 1) + SINR * V.getItem(i, atIndex);
+					V.setItem(i, atIndex, COSR * V.getItem(i, atIndex) - SINR * V.getItem(i, atIndex - 1));
+					V.setItem(i, atIndex - 1, tmp);
+				}
+				for (int j = getSizeY() - 1; j >= 0; j--) {
+					double tmp =  COSL * U.getItem(atIndex - 1, j) + SINL * U.getItem(atIndex, j);
+					U.setItem(atIndex, j, COSL * U.getItem(atIndex, j) - SINL * U.getItem(atIndex - 1, j));
+					U.setItem(atIndex - 1, j, tmp);
+				}
+				atIndex -= 2;
+				continue;
+			}
+			
+			// DBDSQR:376 If working on new submatrix, choose shift direction (from larger end diagonal element towards smaller)
+			int idir = 0;
+			if ((ll > old_atIndex) || (atIndex < old_ll)) {
+				if (Math.abs(s.getItem(ll, ll)) >= Math.abs(s.getItem(atIndex, atIndex)))
+					idir = 1;
+				else
+					idir = 2;					
+			}
+			// DBDSQR:393 Apply convergence tests
+			if (idir == 1) {
+				// Run convergence test in forward direction. First apply standard test to bottom of matrix
+				if ((Math.abs(E.getItem(atIndex - 1, atIndex - 1)) <= Math.abs(TOL * s.getItem(atIndex, atIndex))) ||
+					((TOL < 0.0) && (Math.abs(E.getItem(atIndex - 1, atIndex - 1))))) {
+					E.setItem(atIndex - 1, atIndex - 1, 0.0);
+					continue;
+				}
+				if (TOL > 0.0) {
+					// DBDSQR:408 If relative accuracy desired, apply convergence criterion forward
+					
+				}
+			}
+			
+		}		
+		
+		// End DBDSQR
 	}	
 	
 	public static void main(String[] args) throws Exception {
