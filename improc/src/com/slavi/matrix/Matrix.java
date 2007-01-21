@@ -778,1116 +778,8 @@ public class Matrix {
 //		return r;
 //	}
 
-	/**
-	 * Returns TAU 
-	 * DLARFG: Generates a real elementary reflector H of order n, such that
-	 *      H * ( alpha ) = ( beta ),   H' * H = I.
-	 *          (   x   )   (   0  )
-	 * where alpha and beta are scalars, and x is an (n-1)-element real
-	 * vector. H is represented in the form
-	 *       H = I - tau * ( 1 ) * ( 1 v' ) ,
-	 *                     ( v )
-	 * where tau is a real scalar and v is a real (n-1)-element vector.
-	 * If the elements of x are all zero, then tau = 0 and H is taken to be the unit matrix.
-	 * Otherwise  1 <= tau <= 2.
-	 */
-	private double DLARFG(int atIndex, boolean useRows) {
-		return 0;
-//		if (useRows) {
-//			// DNRM2: Returns the euclidean norm of a vector DNRM2 := sqrt( x'*x )
-//			double ssq = 1.0;
-//			double scale = 0.0;
-//			for (int i = atIndex + 1; i < getSizeX(); i++) {
-//				double absM = Math.abs(getItem(i, atIndex));
-//				if (absM == 0.0) 
-//					continue;
-//				if (scale < absM) {
-//					ssq = 1.0 + ssq * Math.pow(scale / absM, 2);
-//					scale = absM;
-//				} else
-//					ssq += Math.pow(absM / scale, 2);
-//			}
-//			double xnorm = scale / Math.sqrt(ssq);
-//			// End DNRM2
-//			// TODO: DLARFG:102 XNORM, BETA may be inaccurate; scale X and recompute them
-//			double beta = -SIGN(alpha, Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)));
-//			double tau = (beta - alpha) / beta;
-//			scale = 1.0 / (alpha - beta);
-//			for (int i = atIndex + 1; i < getSizeX(); i++) 
-//				setItem(i, atIndex, scale * getItem(i, atIndex));
-//			// setItem(atIndex, atIndex, beta);  // How to return BETA ??
-//			return tau;
-//		}
-//		// DNRM2: Returns the euclidean norm of a vector DNRM2 := sqrt( x'*x )
-//		double ssq = 1.0;
-//		double scale = 0.0;
-//		for (int j = atIndex + 1; j < getSizeY(); j++) {
-//			double absM = Math.abs(getItem(atIndex, j));
-//			if (absM == 0.0) 
-//				continue;
-//			if (scale < absM) {
-//				ssq = 1.0 + ssq * Math.pow(scale / absM, 2);
-//				scale = absM;
-//			} else
-//				ssq += Math.pow(absM / scale, 2);
-//		}
-//		double xnorm = scale / Math.sqrt(ssq);
-//		// End DNRM2
-//		// TODO: DLARFG:102 XNORM, BETA may be inaccurate; scale X and recompute them
-//		double beta = -SIGN(getItem(atIndex, atIndex),
-//				Math.sqrt(Math.pow(getItem(atIndex, atIndex), 2) + Math.pow(xnorm, 2)));
-//		double tau = (beta - getItem(atIndex, atIndex)) / beta;
-//		scale = 1.0 / (getItem(atIndex, atIndex)- beta);
-//		for (int j = atIndex + 1; j < getSizeY(); j++) 
-//			setItem(atIndex, j, scale * getItem(atIndex, j));
-//		setItem(atIndex, atIndex, beta);
-//		return tau;
-	}
-	
-	private void DLARF(int atX, double tau, boolean useRows) {
-		if (useRows) {
-			for (int j = atX; j < getSizeY(); j++) {
-				double sum = 0.0;
-				for (int i = atX + 1; i < getSizeX(); i++) {
-					sum += getItem(i, j) * getItem(i - 1, atX);
-				}
-				for (int i = atX + 1; i < getSizeX(); i++) {
-					setItem(i, j, getItem(i, j) - tau * sum * getItem(i - 1, atX));
-				}				
-			}
-		} else {
-			for (int i = atX; i < getSizeX(); i++) {
-				double sum = 0.0;
-				for (int j = atX + 1; j < getSizeY(); j++) {
-					sum += getItem(i, j) * getItem(atX, j - 1);
-				}
-				for (int j = atX + 1; j < getSizeY(); j++) {
-					setItem(i, j, getItem(i, j) - tau * sum * getItem(atX, j - 1));
-				}				
-			}
-		}
-	}
-	
 	// MY SVD translation from LAPACK's DGESVD
-	// MY SVD translation from LAPACK's DGESVD
-	public void mysvd_old(Matrix U, Matrix V, Matrix s, Matrix debug) {
-		U.resize(getSizeY(), getSizeY());
-		s.resize(getSizeX(), getSizeY());
-		V.resize(getSizeX(), getSizeX());
-
-		int minXY = Math.min(getSizeX(), getSizeY());
-		double work[] = new double[minXY];
-		double tau[] = new double[minXY];
-		double tauP[] = new double[minXY];
-
-		double anrm = maxAbs();
-		// if (anrm < some_small_number) || (anrm > some_big_num) this.scale();
-		
-		// DGEQR2 QR factorization
-		for (int i = 0; i < minXY; i++) {
-			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
-			tau[i] = DLARFG(i, true);
-			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
-			double AII = getItem(i, i); 
-			setItem(i, i, 1.0);
-			DLARF(i, tau[i], true);
-			setItem(i, i, AII);			
-		}
-		// End DGEQR2
-		
-		// DGESVD:1750 DLACPY
-		for (int i = 0; i < getSizeX(); i++)
-			for (int j = i; j < getSizeY(); j++)
-				U.setItem(i, j, getItem(i, j));
-		copyTo(debug);
-
-		// DGESVD:1752 Generate Q in U
-
-		// DORGQR
-		// DORG2R:98 Initialise columns k+1:n to columns of the unit matrix
-		for (int j = getSizeX(); j < getSizeY(); j++) {
-			for (int i = 0; i < getSizeY(); i++)
-				U.setItem(i, j, 0.0);
-			U.setItem(j, j, 1.0);
-		}
-		// DORG2R:109 Apply H(i) to A(i:m,i:n) from the left
-		for (int i = getSizeX() - 1; i >= 0; i--) {
-			if (i + 1 < getSizeY()) {
-				U.setItem(i, i, 1.0);
-				U.DLARF(i, tau[i], true);
-				// DORG2R:117 DSCAL
-				for (int ii = i + 1; ii < U.getSizeX(); ii++)
-					U.setItem(ii, i, -tau[i] * U.getItem(ii, i));
-			}
-			U.setItem(i, i, 1.0 - tau[i]);
-			// DORG2R:120 Set U(1:i-1,i) to zero
-			for (int ii = 0; ii < i; ii++)
-				U.setItem(i, ii, 0.0);
-		}
-		// End DORGQR
-
-		// DGESVD:1758 Copy R to WORK(IU), zeroing out below it
-		for (int i = 0; i < getSizeX(); i++)
-			for (int j = 0; j < getSizeX(); j++)
-				if ((i > j) && (j < getSizeY()))  // set(i, i, 0)
-					V.setItem(i, j, getItem(i, j)); // Actually WORK[i] is used in the original code
-				else
-					V.setItem(i, j, 0.0);
-
-		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
-		// DGEBRD
-		double E[] = new double[V.getSizeX()];
-		
-		for (int i = 0; i < V.getSizeX(); i++) {
-			// DGEBD2:163 Generate elementary reflector H(i) to annihilate A(i+1:m,i)
-			tau[i] = V.DLARFG(i, true);
-			// DGEBD2:167
-			s.setItem(i, i, V.getItem(i, i));
-			V.setItem(i, i, 1.0);
-			// DGEBD2:170 Apply H(i) to A(i:m,i+1:n) from the left
-			V.DLARF(i, tau[i], true);
-			V.setItem(i, i, s.getItem(i, i));
-			if (i + 1 < V.getSizeX()) {
-				// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
-				tauP[i] = V.DLARFG(i, false); 
-				E[i] = V.getItem(i, i + 1);
-				V.setItem(i, i + 1, 1.0);
-				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
-				//V.DLARF(
-			}
-		}
-		// End DGEBRD
-		
-		// DGESVD:1776 DLACPY
-		Matrix VT = V.makeCopy();
-		
-		// DGESVD:1779 Generate left bidiagonalizing vectors in WORK(IU)
-		
-		// DGESVD:1782 DORGBR
-		// DORG2R:98 Initialise columns k+1:n to columns of the unit matrix
-		// DORG2R:109 Apply H(i) to A(i:m,i:n) from the left
-		for (int i = V.getSizeX() - 1; i >= 0; i--) {
-			if (i + 1 < V.getSizeY()) {
-				V.setItem(i, i, 1.0);
-				V.DLARF(i, tau[i], true);
-				// DORG2R:117 DSCAL
-				for (int ii = i + 1; ii < V.getSizeX(); ii++)
-					V.setItem(ii, i, -tau[i] * V.getItem(ii, i));
-			}
-			V.setItem(i, i, 1.0 - tau[i]);
-			// DORG2R:120 Set V(1:i-1,i) to zero
-			for (int ii = 0; ii < i; ii++)
-				V.setItem(i, ii, 0.0);
-		}
-		// End DORGQR
-
-		// DGESVD:1786 Generate right bidiagonalizing vectors in VT
-		for (int i = V.getSizeX() - 1; i >= 0; i--) {
-			if (i + 1 < V.getSizeY()) {
-				V.setItem(i, i, 1.0);
-				V.DLARF(i, tau[i], true);
-				// DORG2R:117 DSCAL
-				for (int ii = i + 1; ii < V.getSizeX(); ii++)
-					V.setItem(ii, i, -tau[i] * V.getItem(ii, i));
-			}
-			V.setItem(i, i, 1.0 - tau[i]);
-			// DORG2R:120 Set V(1:i-1,i) to zero
-			for (int ii = 0; ii < i; ii++)
-				V.setItem(i, ii, 0.0);
-		}
-		// End DORGQR
-		// End DORGBR
-		
-		// DGESVD:1794 Perform bidiagonal QR iteration, computing left 
-		// singular vectors of R in WORK(IU) and computing right singular vectors of R in VT
-
-		// DBDSQR
-		// DBDSQR:258 Compute approximate maximum, minimum singular values
-		double smax = 0.0;
-		for (int i = 0; i < s.getSizeX(); i++) {
-			double absS = Math.abs(s.getItem(i, i));
-			if (smax < absS)
-				smax = absS;
-		}
-		//for (int i = 0; i < 
-		
-		
-		// End DBDSQR
-	}
 	
-	public void svd2(Matrix U, Matrix V, Matrix s) {
-		int maxit = 30;
-		
-		int sizeS = Math.min(sizeX, sizeY);
-		s.resize(sizeS, 1);
-		U.resize(sizeY, sizeY);
-		V.resize(sizeX, sizeX);
-		double e[] = new double[sizeX];
-		double work[] = new double[sizeY];
-
-		for (int l = 0; l < sizeS; l++) {
-			//if (l < nct) {
-			{
-				// compute the transformation for the l-th column and
-				// place the l-th diagonal in s(l).
-				
-				// start snrm2
-				double scale = 0.0;
-				double ssq = 1.0;
-				for (int jj = l; jj < sizeY; jj++) {
-					double absX = Math.abs(m[l][jj]);
-					if (scale < absX) {
-						ssq = 1.0 + ssq * Math.pow(scale / absX, 2);
-						scale = absX;
-					} else {
-						ssq += Math.pow(absX / scale, 2);
-					}
-				}
-				s.m[l][0] = scale * Math.sqrt(ssq);
-				// end of snrm2
-				if (s.m[l][0] != 0.0) {
-					if (m[l][l] != 0.0) {
-						s.m[l][0] = m[l][l] >= 0 ? Math.abs(s.m[l][0]) : -Math.abs(s.m[l][0]);
-					}
-					double tmp = 1.0 / s.m[l][0];
-					// start sscal
-					for (int jj = l; jj < sizeY; jj++) {
-						m[l][jj] *= tmp;
-					}
-					// end sscal
-					m[l][l] += 1.0;
-				}
-				s.m[l][0] = -s.m[l][0];
-			}
-			
-			for (int j = l+1; j < sizeX; j++) {
-				if (s.m[l][0] != 0.0) {
-					// apply the transformation.
-					// start sdot
-					double t = 0;
-					for (int jj = l; jj < sizeY; jj++) {
-						t += m[l][jj] * m[j][jj];
-					}
-					// end sdot
-					t = -t / m[l][l];
-					// start saxpy
-					for (int jj = l; jj < sizeY; jj++) {
-						m[j][jj] += t * m[l][jj]; 
-					}
-					// end saxpy
-				}
-				// place the l-th row of x into  e for the
-				// subsequent calculation of the row transformation.
-				e[j] = m[j][l];
-			}
-
-			// place the transformation in u for subsequent back
-			// multiplication.
-			for (int i = l; i < sizeY; i++)
-				U.m[l][i] = m[l][i];
-
-			// compute the l-th row transformation and place the
-			// l-th super-diagonal in e(l).
-				
-			// start snrm2
-			double scale = 0.0;
-			double ssq = 1.0;
-			for (int jj = l+1; jj < sizeX; jj++) {
-				double absX = Math.abs(e[jj]);
-				if (scale < absX) {
-					ssq = 1.0 + ssq * Math.pow(scale / absX, 2);
-					scale = absX;
-				} else {
-					ssq += Math.pow(absX / scale, 2);
-				}
-			}
-			e[l] = scale * Math.sqrt(ssq);
-			// end of snrm2
-			if ((l+1 < sizeX) && (e[l] != 0.0)) {
-				if (e[l+1] != 0.0) {
-					e[l] = e[l+1] >= 0 ? Math.abs(e[l]) : -Math.abs(e[l]);
-				}
-				double tmp = 1.0 / e[l];
-				// start sscal
-				for (int jj = l+1; jj < sizeX; jj++) {
-					e[jj] *= tmp;
-				}
-				// end sscal
-				e[l+1] += 1.0;
-			}
-			e[l] = -e[l];
-			if ((l+1 < sizeY) && (e[l] != 0.0)) {
-				// apply the transformation.
-				for (int i = l+1; i < sizeY; i++) {
-					work[i] = 0.0;
-				}
-				for (int j = l+1; j < sizeX; j++) {
-					// start saxpy
-					for (int jj = l+1; jj < sizeY; jj++) {
-						work[jj] += e[j] * m[j][jj]; 
-					}
-					// end saxpy
-				}
-				for (int j = l+1; j < sizeX; j++) {
-					// start saxpy
-					double t = -e[j] / e[l+1];
-					for (int jj = l+1; jj < sizeY; jj++) {
-						m[j][jj] += t * work[jj]; 
-					}
-					// end saxpy
-				}
-			}
-			
-			// place the transformation in v for subsequent
-			// back multiplication.
-			for (int i = l+1; i < sizeX; i++) {
-				V.m[l][i] = e[i];
-			}
-		}
-		
-		// set up the final bidiagonal matrix or order m.
-		if (sizeS < sizeX) // ????
-			s.m[sizeS-1][0] = m[sizeS-1][sizeS-1];
-		if (sizeS > sizeY) 
-			s.m[sizeS-1][0] = 0.0; // ????
-		if (sizeS < sizeY)
-			e[sizeS-1] = m[sizeS-1][sizeX-1]; // ????
-		e[sizeS-1] = 0.0; // ???
-		
-		int m1 = sizeS - 1; // Math.min(sizeX, sizeY + 1); // ????!!!!????
-		
-		// generate u.
-		for (int j = sizeS; j < sizeY; j++) {
-			for (int i = 0; i < sizeY; i++) {
-				U.m[j][i] = 0.0;
-			}
-			U.m[j][j] = 1.0;
-		}
-			
-		for (int l = sizeS - 1; l >= 0; l--) {
-			if (s.m[l][0] != 0.0) {
-				for (int j = l+1; j < sizeY; j++) {
-					// start sdot
-					double t = 0;
-					for (int jj = l; jj < sizeY; jj++) {
-						t += U.m[l][jj] * U.m[j][jj];
-					}
-					// end sdot
-					t = -t / U.m[l][l];
-					// start saxpy
-					for (int jj = l; jj < sizeY; jj++) {
-						U.m[j][jj] += t * U.m[l][jj]; 
-					}
-					// end saxpy
-				}
-				// start sscal
-				for (int jj = l; jj < sizeY; jj++) {
-					U.m[l][jj] = -U.m[l][jj]; 
-				}
-				// end sscal
-				U.m[l][l] += 1.0;
-				for (int i = 0; i < l; i++) {
-					U.m[l][i] = 0.0;
-				}
-			} else {
-				for (int i = 0; i < sizeY; i++) {
-					U.m[l][i] = 0.0;
-				}
-				U.m[l][l] = 1.0;					
-			}
-		}
-
-		// generate v.
-		for (int l = sizeX - 1; l >= 0; l--) {
-			if (e[l] != 0.0) {
-				for (int j = l+1; j < sizeX; j++) {
-					// start sdot
-					double t = 0;
-					for (int jj = l+1; jj < sizeX; jj++) {
-						t += V.m[l][jj] * V.m[j][jj];
-					}
-					// end sdot
-					t = -t / V.m[l][l+1];
-					// start saxpy
-					for (int jj = l+1; jj < sizeX; jj++) {
-						V.m[j][jj] += t * V.m[l][jj]; 
-					}
-					// end saxpy
-				}
-			}
-			for (int i = 0; i < sizeX; i++) {
-				V.m[l][i] = 0.0;
-			}
-			V.m[l][l] = 1.0;
-		}
-		
-		// main iteration loop for the singular values.
-		int mm = m1;
-		int iter = 0;
-		while (true) {
-			// quit if all the singular values have been found.
-			if (m1 == 0)
-				break;
-			// if too many iterations have been performed, set
-			// flag and return.
-			if (iter >= maxit) {
-				throw new Error("Maximum iterations reached!");
-				// break; // TODO: set flag!
-			}
-			/*
-			 * this section of the program inspects for
-			 * negligible elements in the s and e arrays.  on
-			 * completion the variables kase and l are set as follows.
-			 *
-			 * kase = 1		if s(m) and e(l-1) are negligible and l.lt.m
-			 * kase = 2		if s(l) is negligible and l.lt.m
-			 * kase = 3		if e(l-1) is negligible, l.lt.m, and
-			 * 				s(l), ..., s(m) are not negligible (qr step).
-			 * kase = 4		if e(m-1) is negligible (convergence).
-			 */
-			int l = 0;
-			for (l = m1 - 2; l >= 0; l--) {
-				double test = Math.abs(s.m[l][0]) + Math.abs(s.m[l+1][0]);
-				double ztest = test + Math.abs(e[l]);
-				if (ztest == test) {
-					e[l] = 0.0;
-					l--;
-					break;
-				}				
-			}
-			l++;
-			int kase = 0;
-			if (l == m1 - 1 - 1) {
-				kase = 4;
-			} else {
-				kase = 1;
-				int freezeL = l;
-				for (int ls = m1; ls >= freezeL; ls--) {
-					if (ls == freezeL) {
-						kase = 3;
-						break;
-					}
-					double test = 0.0;
-					if (ls != m1) // ???
-						test += Math.abs(e[ls]);
-					if (ls != freezeL + 1)
-						test += Math.abs(e[ls-1]);
-					double ztest = test + Math.abs(s.m[ls][0]);
-					if (ztest == test) {
-						s.m[ls][0] = 0.0;
-						break;
-					}
-					kase = 2;
-					l = ls;
-				}
-			}
-			l++;
-			// perform the task indicated by kase.
-			kase = 4;
-			switch (kase) {
-			case 1: {
-				// deflate negligible s(m).
-				double f = e[m1 - 1];
-				e[m1 - 1] = 0.0;
-				for (int k = m1 - 1; k > l; k--) {
-					double t1 = s.m[k][0];
-					// start srotg
-					double sn = 0.0;
-					double cs = 0.0;
-					// t1,f,cs,sn
-					// sa,sb,c,s
-					double roe = Math.abs(t1) > Math.abs(f) ? t1 : f;
-					double scale = Math.abs(t1) + Math.abs(f);
-					if (scale == 0.0) {
-						cs = 1.0;
-						sn = 0.0;
-						t1 = 0.0;
-						f = 0.0;
-					} else {
-						double r = scale * Math.sqrt(Math.pow(t1 / scale, 2) + Math.pow(f / scale, 2));
-						r = roe >= 0.0 ? r : -r;
-						cs = t1 / r;
-						sn = f / r;
-						double z = Math.abs(t1) > Math.abs(f) ? sn : 1.0;
-						if ((Math.abs(f) >= Math.abs(t1)) && (cs != 0.0))
-							z = 1.0 / cs;
-						t1 = r;
-						f = z;
-					}
-					// end srotg
-					s.m[k][0] = t1;
-					if (k != l) {
-						f = -sn * e[k - 1];
-						e[k - 1] = cs * e[k - 1];
-					}
-					// start srot
-					for (int jj = 0; jj < sizeX; jj++) {
-						double tmp = cs * V.m[k][jj] + sn * V.m[m1][jj];
-						V.m[m1][jj] = cs * V.m[m1][jj] - sn * V.m[k][jj];
-						V.m[k][jj] = tmp;						
-					}
-					// end srot
-				}
-				break;
-			}
-			case 2: {
-				// split at negligible s(l).
-				double f = e[l - 1];
-				e[l - 1] = 0.0;
-				for (int k = l; k < m1; k++) {
-					double t1 = s.m[k][0];
-					// start srotg
-					double sn = 0.0;
-					double cs = 0.0;
-					// t1,f,cs,sn
-					// sa,sb,c,s
-					double roe = Math.abs(t1) > Math.abs(f) ? t1 : f;
-					double scale = Math.abs(t1) + Math.abs(f);
-					if (scale == 0.0) {
-						cs = 1.0;
-						sn = 0.0;
-						t1 = 0.0;
-						f = 0.0;
-					} else {
-						double r = scale * Math.sqrt(Math.pow(t1 / scale, 2) + Math.pow(f / scale, 2));
-						r = roe >= 0.0 ? r : -r;
-						cs = t1 / r;
-						sn = f / r;
-						double z = Math.abs(t1) > Math.abs(f) ? sn : 1.0;
-						if ((Math.abs(f) >= Math.abs(t1)) && (cs != 0.0))
-							z = 1.0 / cs;
-						t1 = r;
-						f = z;
-					}
-					// end srotg
-					s.m[k][0] = t1;
-					f = -sn * e[k];
-					e[k] = cs * e[k];
-					// start srot
-					for (int jj = 0; jj < sizeY; jj++) {
-						double tmp = cs * U.m[k][jj] + sn * U.m[l-1][jj];
-						U.m[l-1][jj] = cs * U.m[l-1][jj] - sn * U.m[k][jj];
-						U.m[k][jj] = tmp;						
-					}
-					// end srot
-				}
-				break;
-			}
-			case 3: {
-				// perform one qr step.
-				// calculate the shift.
-				double sscale = Math.max(Math.abs(s.m[m1][0]), Math.abs(s.m[m1-1][0]));
-				sscale = Math.max(Math.abs(e[m1 - 1]), sscale);
-				sscale = Math.max(Math.abs(s.m[l][0]), sscale);
-				sscale = Math.max(Math.abs(e[l]), sscale);
-				double sm = s.m[m1][0] / sscale;
-				double smm1 = s.m[m1-1][0] /sscale;
-				double emm1 = e[m1-1] /sscale;
-				double sl = s.m[l][0] / sscale;
-				double el = e[l] / sscale;
-				double b = ((smm1 + sm)*(smm1 - sm) + Math.pow(emm1, 2)) / 2.0;
-				double c = Math.pow(sm*emm1, 2);
-				double shift = 0.0;
-				if ((b != 0.0) || (c != 0.0)) {
-					shift = Math.sqrt(b * b + c);
-					if (b < 0.0)
-						shift = -shift;
-					shift = c/(b + shift);
-				}
-				double f = (sl + sm)*(sl - sm) + shift;
-				double g = sl*el;
-				// chase zeros.
-				for (int k = l; k < m1-1; k++) {
-					// start srotg
-					double sn = 0.0;
-					double cs = 0.0;
-					// f,g,cs,sn
-					// sa,sb,c,s
-					double roe = Math.abs(f) > Math.abs(g) ? f : g;
-					double scale = Math.abs(f) + Math.abs(g);
-					if (scale == 0.0) {
-						cs = 1.0;
-						sn = 0.0;
-						f = 0.0;
-						g = 0.0;
-					} else {
-						double r = scale * Math.sqrt(Math.pow(f / scale, 2) + Math.pow(g / scale, 2));
-						r = roe >= 0.0 ? r : -r;
-						cs = f / r;
-						sn = g / r;
-						double z = Math.abs(f) > Math.abs(g) ? sn : 1.0;
-						if ((Math.abs(g) >= Math.abs(f)) && (cs != 0.0))
-							z = 1.0 / cs;
-						f = r;
-						g = z;
-					}
-					// end srotg
-					if (k != l)
-						e[k-1] = f;
-					f = cs*s.m[k][0] + sn*e[k];
-					e[k] = cs*e[k] - sn*s.m[k][0];
-					g = sn*s.m[k+1][0];
-					s.m[k+1][0] *= cs;
-					// start srot
-					for (int jj = 0; jj < sizeX; jj++) {
-						double tmp = cs * V.m[k][jj] + sn * V.m[k+1][jj];
-						V.m[k+1][jj] = cs * V.m[k+1][jj] - sn * V.m[k][jj];
-						V.m[k][jj] = tmp;						
-					}
-					// end srot
-					// start srotg
-					sn = 0.0;
-					cs = 0.0;
-					// f,g,cs,sn
-					// sa,sb,c,s
-					roe = Math.abs(f) > Math.abs(g) ? f : g;
-					scale = Math.abs(f) + Math.abs(g);
-					if (scale == 0.0) {
-						cs = 1.0;
-						sn = 0.0;
-						f = 0.0;
-						g = 0.0;
-					} else {
-						double r = scale * Math.sqrt(Math.pow(f / scale, 2) + Math.pow(g / scale, 2));
-						r = roe >= 0.0 ? r : -r;
-						cs = f / r;
-						sn = g / r;
-						double z = Math.abs(f) > Math.abs(g) ? sn : 1.0;
-						if ((Math.abs(g) >= Math.abs(f)) && (cs != 0.0))
-							z = 1.0 / cs;
-						f = r;
-						g = z;
-					}
-					// end srotg
-					s.m[k][0] = f;
-					f = cs*e[k] + sn*s.m[k+1][0];
-					s.m[k+1][0] = -sn*e[k] + cs*s.m[k+1][0];
-					g = sn*e[k+1];
-					e[k+1] *= cs;
-					if (k < sizeY - 1) {
-						// start srot
-						for (int jj = 0; jj < sizeY; jj++) {
-							double tmp = cs * U.m[k][jj] + sn * U.m[k+1][jj];
-							U.m[k+1][jj] = cs * U.m[k+1][jj] - sn * U.m[k][jj];
-							U.m[k][jj] = tmp;						
-						}
-						// end srot
-					}					
-				}
-				e[m1-1] = f;
-				iter++;
-				break;
-			}
-			case 4:
-				// convergence.
-				// make the singular value  positive.
-				if (s.m[l][0] < 0.0) {
-					s.m[l][0] = -s.m[l][0];
-					// start sscal
-					for (int jj = 0; jj < sizeX; jj++) 
-						V.m[l][jj] = -V.m[l][jj];
-					// end sscal
-				}
-				// order the singular value.
-				while (true) {
-					if (l == mm) 
-						break;
-					if (s.m[l][0] >= s.m[l+1][0])
-						break;
-					double t = s.m[l][0];
-					s.m[l][0] = s.m[l+1][0];
-					s.m[l+1][0] = t;
-					if (l < sizeX) {
-						// start sswap
-						for (int jj = 0; jj < sizeX; jj++) {
-							double tmp = V.m[l][jj];
-							V.m[l][jj] = V.m[l+1][jj];
-							V.m[l+1][jj] = tmp;
-						}
-						// end sswap
-					}
-					if (l < sizeY) {
-						// start sswap
-						for (int jj = 0; jj < sizeY; jj++) {
-							double tmp = U.m[l][jj];
-							U.m[l][jj] = U.m[l+1][jj];
-							U.m[l+1][jj] = tmp;
-						}
-						// end sswap
-					}
-					l++;
-				}
-				iter = 0;
-				m1--;
-				break;
-			}
-		}
-	}
-	
-	// Derived from LINPACK code.
-	// http://www.netlib.org/lapack/lug/lapack_lug.html
-	// http://www.netlib.org/lapack/lug/node53.html
-	public void svd3(Matrix U, Matrix V, Matrix s) {
-		/* Apparently the failing cases are only a proper subset of (m<n), 
-		 so let's not throw error.  Correct fix to come later?
-		 if (m<n) {
-		 throw new IllegalArgumentException("Jama SVD only works for m >= n"); }
-		 */
-		s.resize(Math.min(sizeX, sizeY + 1), 1);
-		U.resize(Math.min(sizeX, sizeY), sizeY);
-		V.resize(sizeX, sizeX);
-		double[] e = new double[sizeX];
-		double[] work = new double[sizeY];
-		boolean wantu = true;
-		boolean wantv = true;
-
-		// Reduce A to bidiagonal form, storing the diagonal elements
-		// in s and the super-diagonal elements in e.
-
-		int nct = Math.min(sizeY - 1, sizeX);
-		int nrt = Math.max(0, Math.min(sizeX - 2, sizeY));
-		for (int k = 0; k < Math.max(nct, nrt); k++) {
-			if (k < nct) {
-
-				// Compute the transformation for the k-th column and
-				// place the k-th diagonal in s[k].
-				// Compute 2-norm of k-th column without under/overflow.
-				s.m[k][0] = 0.0;
-				for (int i = k; i < sizeY; i++) 
-					s.m[k][0] = hypot(s.m[k][0], this.m[k][i]);
-				
-				if (s.m[k][0] != 0.0) {
-					if (this.m[k][k] < 0.0)
-						s.m[k][0] = -s.m[k][0];
-					for (int i = k; i < sizeY; i++) 
-						this.m[k][i] /= s.m[k][0];
-					this.m[k][k] += 1.0;
-				}
-				s.m[k][0] = -s.m[k][0];
-			}
-			for (int j = k + 1; j < sizeX; j++) {
-				if ((k < nct) & (s.m[k][0] != 0.0)) {
-					// Apply the transformation.
-					double t = 0;
-					for (int i = k; i < sizeY; i++) 
-						t += this.m[k][i] * this.m[j][i];
-					t = -t / this.m[k][k];
-					for (int i = k; i < sizeY; i++) {
-						this.m[j][i] += t * this.m[k][i];
-					}
-				}
-				// Place the k-th row of A into e for the
-				// subsequent calculation of the row transformation.
-				e[j] = this.m[j][k];
-			}
-			if (wantu & (k < nct)) {
-				// Place the transformation in U for subsequent back
-				// multiplication.
-				for (int i = k; i < sizeY; i++) 
-					U.m[k][i] = this.m[k][i];
-			}
-			if (k < nrt) {
-				// Compute the k-th row transformation and place the
-				// k-th super-diagonal in e[k].
-				// Compute 2-norm without under/overflow.
-				e[k] = 0;
-				for (int i = k + 1; i < sizeX; i++) 
-					e[k] = hypot(e[k], e[i]);
-				if (e[k] != 0.0) {
-					if (e[k + 1] < 0.0) 
-						e[k] = -e[k];
-					for (int i = k + 1; i < sizeX; i++) 
-						e[i] /= e[k];
-					e[k + 1] += 1.0;
-				}
-				e[k] = -e[k];
-				if ((k + 1 < sizeY) & (e[k] != 0.0)) {
-					// Apply the transformation.
-					for (int i = k + 1; i < sizeY; i++) 
-						work[i] = 0.0;
-					for (int j = k + 1; j < sizeX; j++) 
-						for (int i = k + 1; i < sizeY; i++) 
-							work[i] += e[j] * this.m[j][i];
-					for (int j = k + 1; j < sizeX; j++) {
-						double t = -e[j] / e[k + 1];
-						for (int i = k + 1; i < sizeY; i++) 
-							this.m[j][i] += t * work[i];
-					}
-				}
-				if (wantv) {
-					// Place the transformation in V for subsequent
-					// back multiplication.
-					for (int i = k + 1; i < sizeX; i++)
-						V.m[k][i] = e[i];
-				}
-			}
-		}
-
-		// Set up the final bidiagonal matrix or order p.
-		int p = Math.min(sizeX, sizeY + 1);
-		if (nct < sizeX) 
-			s.m[nct][0] = this.m[nct][nct];
-		if (sizeY < p) 
-			s.m[p - 1][0] = 0.0;
-		if (nrt + 1 < p) 
-			e[nrt] = this.m[p - 1][nrt];
-		e[p - 1] = 0.0;
-
-		// If required, generate U.
-
-		if (wantu) {
-			for (int j = nct; j < U.sizeX; j++) {
-				for (int i = 0; i < sizeY; i++) 
-					U.m[j][i] = 0.0;
-				U.m[j][j] = 1.0;
-			}
-			for (int k = nct - 1; k >= 0; k--) 
-				if (s.m[k][0] != 0.0) {
-					for (int j = k + 1; j < U.sizeX; j++) {
-						double t = 0;
-						for (int i = k; i < sizeY; i++) 
-							t += U.m[k][i] * U.m[j][i];
-						t = -t / U.m[k][k];
-						for (int i = k; i < sizeY; i++) 
-							U.m[j][i] += t * U.m[k][i];
-					}
-					for (int i = k; i < sizeY; i++) 
-						U.m[k][i] = -U.m[k][i];
-					U.m[k][k] = 1.0 + U.m[k][k];
-					for (int i = 0; i < k - 1; i++) 
-						U.m[k][i] = 0.0;
-				} else {
-					for (int i = 0; i < sizeY; i++) 
-						U.m[k][i] = 0.0;
-					U.m[k][k] = 1.0;
-				}
-		}
-
-		// If required, generate V.
-		if (wantv) {
-			for (int k = sizeX - 1; k >= 0; k--) {
-				if ((k < nrt) & (e[k] != 0.0)) {
-					for (int j = k + 1; j < U.sizeX; j++) {
-						double t = 0.0;
-						for (int i = k + 1; i < sizeX; i++) 
-							t += V.m[k][i] * V.m[j][i];
-						t = -t / V.m[k][k + 1];
-						for (int i = k + 1; i < sizeX; i++) 
-							V.m[j][i] += t * V.m[k][i];
-					}
-				}
-				for (int i = 0; i < sizeX; i++) 
-					V.m[k][i] = 0.0;
-				V.m[k][k] = 1.0;
-			}
-		}
-
-		// Main iteration loop for the singular values.
-		int pp = p - 1;
-		int iter = 0;
-		double eps = Math.pow(2.0, -52.0);
-		double tiny = Math.pow(2.0, -966.0);
-		while (p > 0) {
-			int k, kase;
-			// Here is where a test for too many iterations would go.
-
-			// This section of the program inspects for
-			// negligible elements in the s and e arrays.  On
-			// completion the variables kase and k are set as follows.
-
-			// kase = 1     if s(p) and e[k-1] are negligible and k<p
-			// kase = 2     if s(k) is negligible and k<p
-			// kase = 3     if e[k-1] is negligible, k<p, and
-			//              s(k), ..., s(p) are not negligible (qr step).
-			// kase = 4     if e(p-1) is negligible (convergence).
-
-			for (k = p - 2; k >= -1; k--) {
-				if (k == -1) 
-					break;
-				if (Math.abs(e[k]) <= tiny + eps * (Math.abs(s.m[k][0]) + Math.abs(s.m[k + 1][0]))) {
-					e[k] = 0.0;
-					break;
-				}
-			}
-			if (k == p - 2) {
-				kase = 4;
-			} else {
-				int ks;
-				for (ks = p - 1; ks >= k; ks--) {
-					if (ks == k) 
-						break;
-					double t = (ks != p ? Math.abs(e[ks]) : 0.) + (ks != k + 1 ? Math.abs(e[ks - 1]) : 0.);
-					if (Math.abs(s.m[ks][0]) <= tiny + eps * t) {
-						s.m[ks][0] = 0.0;
-						break;
-					}
-				}
-				if (ks == k) {
-					kase = 3;
-				} else if (ks == p - 1) {
-					kase = 1;
-				} else {
-					kase = 2;
-					k = ks;
-				}
-			}
-			k++;
-
-			// Perform the task indicated by kase.
-			switch (kase) {
-
-			// Deflate negligible s(p).
-			case 1: {
-				double f = e[p - 2];
-				e[p - 2] = 0.0;
-				for (int j = p - 2; j >= k; j--) {
-					double t = hypot(s.m[j][0], f);
-					double cs = s.m[j][0] / t;
-					double sn = f / t;
-					s.m[j][0] = t;
-					if (j != k) {
-						f = -sn * e[j - 1];
-						e[j - 1] = cs * e[j - 1];
-					}
-					if (wantv) {
-						for (int i = 0; i < sizeX; i++) {
-							t = cs * V.m[j][i] + sn * V.m[p - 1][i];
-							V.m[p - 1][i] = -sn * V.m[j][i] + cs * V.m[p - 1][i];
-							V.m[j][i] = t;
-						}
-					}
-				}
-				break;
-			}
-
-			// Split at negligible s(k).
-			case 2: { 
-				double f = e[k - 1];
-				e[k - 1] = 0.0;
-				for (int j = k; j < p; j++) {
-					double t = hypot(s.m[j][0], f);
-					double cs = s.m[j][0] / t;
-					double sn = f / t;
-					s.m[j][0] = t;
-					f = -sn * e[j];
-					e[j] = cs * e[j];
-					if (wantu) {
-						for (int i = 0; i < sizeY; i++) {
-							t = cs * U.m[j][i] + sn * U.m[k - 1][i];
-							U.m[k - 1][i] = -sn * U.m[j][i] + cs * U.m[k - 1][i];
-							U.m[j][i] = t;
-						}
-					}
-				}
-				break;
-			}
-
-			// Perform one qr step.
-			case 3: {
-				// Calculate the shift.
-				double scale = Math.max(Math.max(Math.max(Math.max(Math.abs(s.m[p - 1][0]), Math.abs(s.m[p - 2][0])), 
-					Math.abs(e[p - 2])), Math.abs(s.m[k][0])), Math.abs(e[k]));
-				double sp = s.m[p - 1][0] / scale;
-				double spm1 = s.m[p - 2][0] / scale;
-				double epm1 = e[p - 2] / scale;
-				double sk = s.m[k][0] / scale;
-				double ek = e[k] / scale;
-				double b = ((spm1 + sp) * (spm1 - sp) + epm1 * epm1) / 2.0;
-				double c = (sp * epm1) * (sp * epm1);
-				double shift = 0.0;
-				if ((b != 0.0) | (c != 0.0)) {
-					shift = Math.sqrt(b * b + c);
-					if (b < 0.0) {
-						shift = -shift;
-					}
-					shift = c / (b + shift);
-				}
-				double f = (sk + sp) * (sk - sp) + shift;
-				double g = sk * ek;
-
-				// Chase zeros.
-				for (int j = k; j < p - 1; j++) {
-					double t = hypot(f, g);
-					double cs = f / t;
-					double sn = g / t;
-					if (j != k) {
-						e[j - 1] = t;
-					}
-					f = cs * s.m[j][0] + sn * e[j];
-					e[j] = cs * e[j] - sn * s.m[j][0];
-					g = sn * s.m[j + 1][0];
-					s.m[j + 1][0] = cs * s.m[j + 1][0];
-					if (wantv) {
-						for (int i = 0; i < sizeX; i++) {
-							t = cs * V.m[j][i] + sn * V.m[j + 1][i];
-							V.m[j + 1][i] = -sn * V.m[j][i] + cs * V.m[j + 1][i];
-							V.m[j][i] = t;
-						}
-					}
-					t = hypot(f, g);
-					cs = f / t;
-					sn = g / t;
-					s.m[j][0] = t;
-					f = cs * e[j] + sn * s.m[j + 1][0];
-					s.m[j + 1][0] = -sn * e[j] + cs * s.m[j + 1][0];
-					g = sn * e[j + 1];
-					e[j + 1] = cs * e[j + 1];
-					if (wantu && (j < sizeY - 1)) {
-						for (int i = 0; i < sizeY; i++) {
-							t = cs * U.m[j][i] + sn * U.m[j + 1][i];
-							U.m[j + 1][i] = -sn * U.m[j][i] + cs * U.m[j + 1][i];
-							U.m[j][i] = t;
-						}
-					}
-				}
-				e[p - 2] = f;
-				iter = iter + 1;
-				break;
-			}
-
-			// Convergence.
-			case 4: {
-				// Make the singular values positive.
-				if (s.m[k][0] <= 0.0) {
-					s.m[k][0] = (s.m[k][0] < 0.0 ? -s.m[k][0] : 0.0);
-					if (wantv) {
-						for (int i = 0; i <= pp; i++) {
-							V.m[k][i] = -V.m[k][i];
-						}
-					}
-				}
-				// Order the singular values.
-				while (k < pp) {
-					if (s.m[k][0] >= s.m[k + 1][0]) {
-						break;
-					}
-					double t = s.m[k][0];
-					s.m[k][0] = s.m[k + 1][0];
-					s.m[k + 1][0] = t;
-					if (wantv && (k < sizeX - 1)) {
-						for (int i = 0; i < sizeX; i++) {
-							t = V.m[k + 1][i];
-							V.m[k + 1][i] = V.m[k][i];
-							V.m[k][i] = t;
-						}
-					}
-					if (wantu && (k < sizeY - 1)) {
-						for (int i = 0; i < sizeY; i++) {
-							t = U.m[k + 1][i];
-							U.m[k + 1][i] = U.m[k][i];
-							U.m[k][i] = t;
-						}
-					}
-					k++;
-				}
-				iter = 0;
-				p--;
-				break;
-			}
-			}
-		}
-	}
-
 	public void svd(Matrix w, Matrix v) {
 		int i, its, j, jj, k, l = 0, nm = 0;
 		boolean flag;
@@ -2130,90 +1022,105 @@ public class Matrix {
 		return r;
 	}
 	
-	public void QRDecompositionOBSOLETE(Matrix RDiag) {
-		RDiag.resize(sizeX, 1);
-
-		// Main loop.
-		for (int k = 0; k < sizeX; k++) {
-			// Compute 2-norm of k-th column without under/overflow.
-			double nrm = 0;
-			for (int i = k; i < sizeY; i++) {
-				nrm = hypot(nrm, m[k][i]);
-			}
-
-			if (nrm != 0.0) {
-				// Form k-th Householder vector.
-				if (m[k][k] < 0) {
-					nrm = -nrm;
-				}
-				for (int i = k; i < sizeY; i++) {
-					m[k][i] /= nrm;
-				}
-				m[k][k] += 1.0;
-
-/*
-				for (int i = getSizeX() - 1; i > atIndex; i--) {
-					double sum = 0.0;
-					for (int j = getSizeY() - 1; j >= atIndex; j--) 
-						sum += getItem(i, j) * getItem(atIndex, j);
-					for (int j = getSizeY() - 1; j >= atIndex; j--) 
-						setItem(i, j, getItem(i, j) - tmp_tau * sum * getItem(atIndex, j));
-				}
- */				
-				// Apply transformation to remaining columns.
-				for (int j = k + 1; j < sizeX; j++) {
-					double s = 0.0;
-					for (int i = k; i < sizeY; i++) {
-						s += m[k][j] * m[i][j];
-					}
-					s = -s / m[k][k];
-					for (int i = k; i < sizeY; i++) {
-						m[j][i] += s * m[k][i];
-					}
-				}
-			}
-			RDiag.m[k][0] = -nrm;
-		}
-	}
-	
-	public void getH(Matrix destH) {
-		destH.resize(sizeX, sizeY);
-		for (int i = 0; i < sizeX; i++) {
-			for (int j = 0; j < sizeY; j++) {
-				if (i >= j) {
-					destH.m[i][j] = m[i][j];
-				} else {
-					destH.m[i][j] = 0.0;
-				}
-			}
-		}
-	}
-
-	public void getQ(Matrix destQ) {
-		destQ.resize(sizeX, sizeY);
-		for (int k = sizeX - 1; k >= 0; k--) {
-			for (int i = 0; i < sizeY; i++) {
-				destQ.m[k][i] = 0.0;
-			}
-			destQ.m[k][k] = 1.0;
-			for (int j = k; j < sizeX; j++) {
-				if (m[k][k] != 0) {
-					double s = 0.0;
-					for (int i = k; i < sizeY; i++) {
-						s += m[k][i] * destQ.m[j][i];
-					}
-					s = -s / m[k][k];
-					for (int i = k; i < sizeY; i++) {
-						destQ.m[j][i] += s * m[k][i];
-					}
-				}
-			}
-		}
-	}
-	
 	public void printM(String title) {
 		System.out.println(title);
 		System.out.println(toString());
+	}
+
+	public void lq(Matrix q, Matrix tau) {
+		q.resize(getSizeY(), getSizeY());
+		lqDecomposition(tau);
+		lqDecomositionGetQ(tau, q);
+		lqDecomositionGetL(this);
+	}
+
+	public void lqDecomposition(Matrix tau) {
+		int minXY = Math.min(sizeX, sizeY);
+		if ((tau.getSizeX() < minXY) || (tau.getSizeY() < 1))
+			tau.resize(minXY, 1);
+		for (int atIndex = 0; atIndex < minXY; atIndex++) {
+			if (atIndex >= getSizeX() - 1) {
+				tau.setItem(atIndex, 0, 0.0);
+				continue;
+			}
+			// Generate elementary reflector H(i) to annihilate A(i,i+1:n)
+			// DLARFG
+			double xnorm = 0.0;
+			for (int i = getSizeX() - 1; i > atIndex; i--)
+				xnorm = hypot(xnorm, getItem(i, atIndex));
+			if (xnorm == 0.0) { 
+				tau.setItem(atIndex, 0, 0.0);
+				continue;
+			}
+				
+			double alpha = getItem(atIndex, atIndex);
+			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
+			double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+			if (beta == 0.0) {
+				tau.setItem(atIndex, 0, 0.0);
+				continue;
+			}
+			if (alpha >= 0.0)
+				beta = -beta;
+			double tmp_tau = (beta - alpha) / beta;
+			tau.setItem(atIndex, 0, tmp_tau);
+			double scale = 1.0 / (alpha - beta);
+			for (int i = getSizeX() - 1; i > atIndex; i--) 
+				setItem(i, atIndex, scale * getItem(i, atIndex));
+			// End DLARFG
+			
+			// DGELQ2:109 Apply H(i) to A(i+1:m,i:n) from the right
+			setItem(atIndex, atIndex, 1.0);
+			// DLARF Right
+			for (int j = getSizeY() - 1; j > atIndex; j--) {
+				double sum = 0.0;
+				for (int i = getSizeX() - 1; i >= atIndex; i--) 
+					sum += getItem(i, j) * getItem(i, atIndex);
+				for (int i = getSizeX() - 1; i >= atIndex; i--) 
+					setItem(i, j, getItem(i, j) - tmp_tau * sum * getItem(i, atIndex));
+			}
+			// End DLARF Right
+			setItem(atIndex, atIndex, beta);
+		}
+	}
+	
+	public void lqDecomositionGetL(Matrix l) {
+		l.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				l.setItem(i, j, i > j ? 0.0 : getItem(i, j));
+	}
+
+	public void lqDecomositionGetQ(Matrix tau, Matrix q) {
+		if ((tau.getSizeX() < getSizeY()) || (tau.getSizeY() != 1))
+			throw new Error("Invalid parameter");
+		
+		q.resize(getSizeX(), getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeX() - 1; j >= 0; j--)
+				q.setItem(i, j, (i >= j) && (j < getSizeY()) ? getItem(i, j) : i == j ? 1.0 : 0.0);
+
+		for (int atIndex = getSizeY() - 1; atIndex >= 0; atIndex--) {
+			if (atIndex < q.getSizeX()) {
+				double tmp_tau = tau.getItem(atIndex, 0);
+				q.setItem(atIndex, atIndex, 1.0);
+				// DLARF Right
+				for (int j = q.getSizeY() - 1; j > atIndex; j--) {
+					double sum = 0.0;
+					for (int i = q.getSizeX() - 1; i >= atIndex; i--) 
+						sum += q.getItem(i, j) * q.getItem(i, atIndex);
+					for (int i = q.getSizeX() - 1; i >= atIndex; i--) 
+						q.setItem(i, j, q.getItem(i, j) - tmp_tau * sum * q.getItem(i, atIndex));
+				}
+				// End DLARF Right
+
+				for (int i = q.getSizeX() - 1; i > atIndex; i--)
+					q.setItem(i, atIndex, q.getItem(i, atIndex) * (-tmp_tau));
+				q.setItem(atIndex, atIndex, 1.0 - tmp_tau);
+				for (int i = atIndex - 1; i >= 0; i--)
+					q.setItem(i, atIndex, 0.0);				
+			}
+		}
 	}
 
 	public void qr(Matrix q, Matrix tau) {
@@ -2273,7 +1180,7 @@ public class Matrix {
 			setItem(atIndex, atIndex, beta);
 		}
 	}
-
+	
 	public void qrDecomositionGetR(Matrix r) {
 		r.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
@@ -2313,189 +1220,7 @@ public class Matrix {
 		}
 	}
 	
-	public void mysvd(Matrix U, Matrix V, Matrix s, Matrix debug) throws Exception {
-		U.resize(getSizeY(), getSizeY());
-		s.resize(getSizeX(), getSizeY());
-		V.resize(getSizeX(), getSizeX());
-		s.make0();
-		int minXY = Math.min(getSizeX(), getSizeY());
-
-		Matrix tau = new Matrix();
-		
-		qrDecomposition(tau);
-		// Generate Q in U
-		qrDecomositionGetQ(tau, U);
-		U.printM("U=");
-		Matrix UBackup = U.makeCopy();
-		Matrix R = new Matrix(getSizeX(), getSizeX());
-		//qrDecomositionGetR(R);
-		for (int i = R.getSizeX() - 1; i >= 0; i--)
-			for (int j = R.getSizeY() - 1; j >= 0; j--)
-				R.setItem(i, j, (i >= j) && (j < getSizeY()) ? getItem(i, j) : 0.0);
-				
-		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
-		// DGEBRD
-		Matrix tauP = new Matrix(R.getSizeX(), 1);
-		Matrix tauQ = new Matrix(R.getSizeX(), 1);
-		Matrix E = new Matrix(R.getSizeX() - 1, 1);
-		
-		if ((tau.getSizeX() < minXY) || (tau.getSizeY() < 1))
-			tauQ.resize(minXY, 1);
-		for (int atIndex = 0; atIndex < R.getSizeX(); atIndex++) {
-			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
-			// DLARFG
-			double xnorm = 0.0;
-			for (int j = R.getSizeY() - 1; j > atIndex; j--)					
-				xnorm = hypot(xnorm, R.getItem(atIndex, j));
-			
-			double beta;
-			double tmp_tau;
-			if (xnorm == 0.0) { 
-				tmp_tau = 0.0;
-				beta = R.getItem(atIndex, atIndex);
-			} else {
-				double alpha = R.getItem(atIndex, atIndex);
-				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-				if (beta == 0.0) {
-					tauQ.setItem(atIndex, 0, 0.0);
-					continue;
-				}
-				if (alpha >= 0.0)
-					beta = -beta;
-				tmp_tau = (beta - alpha) / beta;
-				double scale = 1.0 / (alpha - beta);
-				for (int j = R.getSizeY() - 1; j > atIndex; j--) 
-					R.setItem(atIndex, j, scale * R.getItem(atIndex, j));
-			}
-			tauQ.setItem(atIndex, 0, tmp_tau);
-			// End DLARFG
-
-			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
-			R.setItem(atIndex, atIndex, 1.0);
-			// DLARF Left
-			for (int i = R.getSizeX() - 1; i > atIndex; i--) {
-				double sum = 0.0;
-				for (int j = R.getSizeY() - 1; j >= atIndex; j--) 
-					sum += R.getItem(i, j) * R.getItem(atIndex, j);
-				for (int j = R.getSizeY() - 1; j >= atIndex; j--) 
-					R.setItem(i, j, R.getItem(i, j) - tmp_tau * sum * R.getItem(atIndex, j));
-			}
-			// End DLARF Left
-			R.setItem(atIndex, atIndex, beta);
-			s.setItem(atIndex, atIndex, beta);
-
-			// =============================================
-			// DGEBD2:176
-			if (atIndex >= R.getSizeY() - 1) {
-				tauP.setItem(atIndex, 0, 0.0); // DGEBD2:192
-				continue;
-			}
-			// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
-			// DLARFG - now working with rows!
-			
-			int atIndex1 = atIndex + 1;
-			//int atIndex2 = Math.min(atIndex + 2, R.getSizeX() - 1);
-			xnorm = 0.0;
-			for (int i = R.getSizeX() - 1; i > atIndex1; i--)					
-				xnorm = hypot(xnorm, R.getItem(i, atIndex));
-
-			if (xnorm == 0.0) {
-				tmp_tau = 0.0;
-				beta = R.getItem(atIndex1, atIndex);
-			} else {
-				double alpha = R.getItem(atIndex1, atIndex);
-				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-				if (beta == 0.0) {
-					tauP.setItem(atIndex1, 0, 0.0);
-					continue;
-				}
-				if (alpha >= 0.0)
-					beta = -beta;
-				
-				tmp_tau = (beta - alpha) / beta;
-				double scale = 1.0 / (alpha - beta);
-				for (int i = R.getSizeX() - 1; i > atIndex1; i--) 
-					R.setItem(i, atIndex, scale * R.getItem(i, atIndex));
-			}
-			tauP.setItem(atIndex, 0, tmp_tau);
-			// End DLARFG
-			
-			// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
-			R.setItem(atIndex1, atIndex, 1.0);
-			// DLARF Right
-			for (int j = R.getSizeY() - 1; j >= atIndex1; j--) {
-				double sum = 0.0;
-				for (int i = R.getSizeX() - 1; i >= atIndex1; i--) 
-					sum += R.getItem(i, j) * R.getItem(i, atIndex);
-				for (int i = R.getSizeX() - 1; i >= atIndex1; i--) 
-					R.setItem(i, j, R.getItem(i, j) - tmp_tau * sum * R.getItem(i, atIndex));
-			}
-			// End DLARF Right
-			R.setItem(atIndex1, atIndex, beta);
-			E.setItem(atIndex, 0, beta);
-		}
-		
-		R.printM("R");
-		s.printM("S");
-		tauP.printM("tauP");
-		tauQ.printM("tauQ");
-		E.printM("e");
-		
-		// DGESVD:1807
-		for (int i = V.getSizeX() - 1; i >= 0; i--)
-			for (int j = i; j >= 0; j--)
-				V.setItem(i, j, R.getItem(i, j));
-		
-		V.printM("V");
-		
-		// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
-		Matrix Q = new Matrix();
-		R.qrDecomositionGetQ(tauQ, Q);
-		Q.printM("Q");
-		
-		// DGESVD:1829 Generate right bidiagonalizing vectors in VT
-		
-		// DORGBR:217 Shift the vectors which define the elementary reflectors one
-		// row downward, and set the first row and column of P' to those of the unit matrix
-		for (int j = V.getSizeY() - 1; j > 0; j--) {
-			for (int i = j - 1; i > 0; i--)
-				V.setItem(j, i, V.getItem(j, i - 1));
-			V.setItem(0, j, 0.0);
-			V.setItem(j, 0, 0.0);
-		}
-		V.setItem(0, 0, 1.0);
-		
-		// DORGL2
-		for (int atIndex = V.getSizeX() - 1; atIndex > 0; atIndex--) {
-			double tmp_tau = tauP.getItem(atIndex - 1, 0);
-			if (atIndex < V.getSizeX() - 1) {
-				// Apply H(i) to A(i:m,i:n) from the right
-				V.setItem(atIndex, atIndex, 1.0);
-				// DLARF Right
-				for (int j = V.getSizeY() - 1; j > atIndex; j--) {
-					double sum = 0.0;
-					for (int i = V.getSizeX() - 1; i >= atIndex; i--) 
-						sum += V.getItem(i, j) * V.getItem(i, atIndex);
-					for (int i = V.getSizeX() - 1; i >= atIndex; i--) 
-						V.setItem(i, j, V.getItem(i, j) - tmp_tau * sum * V.getItem(i, atIndex));
-				// End DLARF Right
-				}
-				for (int j = V.getSizeY() - 2; j >= atIndex; j--) 
-					V.setItem(atIndex+1, j, -tmp_tau * V.getItem(atIndex+1, j));
-				// End of DORGL2
-			}
-			V.setItem(atIndex, atIndex, 1.0 - tmp_tau);
-			// DORGL2:124 Set A(i,1:i-1) to zero 
-			for (int i = atIndex - 1; i > 0; i--)
-				V.setItem(i, atIndex, 0.0);
-		}
-		// End DORGL2
-		V.printM("V");
-
-		System.out.println("-----------------------------");
-		
+	public static void svdDBDSQR(Matrix U, Matrix s, Matrix V, Matrix E, Matrix work) {
 		// DBDSQR
 		// Perform bidiagonal QR iteration, computing left singular vectors 
 		// of R in WORK(IU) and computing right singular vectors of R in VT
@@ -2512,7 +1237,7 @@ public class Matrix {
 //		for (int i = s.getSizeX() - 2; i >= 0; i--)
 //			smax = Math.max(smax, Math.abs(E.getItem(i, 0)));
 		
-		int atIndex = Math.min(getSizeX(), getSizeY()) - 1;
+		int atIndex = Math.min(U.getSizeX(), V.getSizeY()) - 1;
 		int maxit = 6 * atIndex * atIndex;
 		int iter = maxit;
 		double TOL = 1.0958067E-014; // ?????
@@ -2523,8 +1248,7 @@ public class Matrix {
 		int old_ll = -1;
 		double SMINL = 0.0;
 		
-		Matrix work = new Matrix(getSizeX(), 4);
-		Q.copyTo(U);
+		work.resize(V.getSizeX(), 4);
 		int idir = 0;
 		
 		while ((atIndex >= 0) && (iter >= 0)) {
@@ -2752,13 +1476,13 @@ public class Matrix {
 			double shift = 0.0;
 			s.printM("mid S=");
 			System.out.println("SMINL=" + SMINL);
-			System.out.println("N    =" + getSizeX());
+			System.out.println("N    =" + V.getSizeX());
 			System.out.println("SAMX =" + smax);
-			System.out.println("Form1=" + (getSizeX() * TOL * (SMINL / smax)));
+			System.out.println("Form1=" + (V.getSizeX() * TOL * (SMINL / smax)));
 			System.out.println("Form2=" + (Math.max(EPS, TOL * 0.01)));
 			
 			// DBDQR:456 Compute shift.  First, test if shifting would ruin relative accuracy, and if so set the shift to zero.
-			if ((TOL >= 0.0) && (getSizeX() * TOL * (SMINL / smax) <= Math.max(EPS, TOL * 0.01))) { 
+			if ((TOL >= 0.0) && (V.getSizeX() * TOL * (SMINL / smax) <= Math.max(EPS, TOL * 0.01))) { 
 				// DBDSQR:462 Use a zero shift to avoid loss of relative accuracy
 				shift = 0.0;
 			} else {
@@ -2822,66 +1546,80 @@ public class Matrix {
 			
 			if (shift == 0.0) {
 				if (idir == 1) {
-					System.out.println("use path 01");
-					// DBDSQR:494 Chase bulge from top to bottom
-					// Save cosines and sines for later singular vector updates
-					double CS = 1.0;
-					double oldCS = 1.0;
-					double oldSN = 0.0;
-					double SN;
-					for (int lll = ll; lll < atIndex; lll++) {
-						// DLARTG
-						double F = s.getItem(lll, lll) * CS;
-						double G = E.getItem(lll, 0);
-						double r = hypot(F, G);
-						CS = F / r;
-						SN = G / r;
-						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							CS = -CS;
-							SN = -SN;
-							r = -r;
+					// DBDSQR:570 Use nonzero shift
+					if (idir == 1) {
+						System.out.println("use path 01");
+						// DBDSQR:494 Chase bulge from top to bottom
+						// Save cosines and sines for later singular vector updates
+						double CS = 1.0;
+						double oldCS = 1.0;
+						double oldSN = 0.0;
+						double SN;
+
+						for (int lll = ll; lll < atIndex; lll++) {
+							// DLARTG
+							double F = s.getItem(lll, lll) * CS;
+							double G = E.getItem(lll, 0);
+							double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // hypot(F, G);
+							CS = F / r;
+							SN = G / r;
+							if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
+								CS = -CS;
+								SN = -SN;
+								r = -r;
+							}
+							//End DLARTG
+							if (lll > ll)
+								E.setItem(lll - 1, 0, oldSN * r);
+							
+							F = oldCS * r;
+							G = s.getItem(lll + 1, lll + 1) * SN;
+							// DLARTG
+							r = hypot(F, G);
+							oldCS = F / r;
+							oldSN = G / r;
+							if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
+								oldCS = -oldCS;
+								oldSN = -oldSN;
+								r = -r;
+							}
+							s.setItem(lll, lll, r);
+							// End DLARTG
+
+							work.setItem(lll, 0, CS);
+							work.setItem(lll, 1, SN);
+							work.setItem(lll, 2, oldCS);
+							work.setItem(lll, 3, oldSN);
 						}
-						// End DLARTG
-						if (lll > ll)
-							E.setItem(lll - 1, 0, oldSN * r);
-						
-						// DLARTG
-						F = oldCS * r;
-						G = s.getItem(lll + 1, lll + 1) * SN;
-						r = hypot(F, G);
-						oldCS = F / r;
-						oldSN = G / r;
-						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							oldCS = -oldCS;
-							oldSN = -oldSN;
-							r = -r;
-						}
-						s.setItem(lll, lll, r);
-						// End DLARTG
-						
+						double H = s.getItem(atIndex, atIndex) * CS;
+						s.setItem(atIndex, atIndex, H * oldCS);
+						E.setItem(atIndex - 1, 0, H * oldSN);
 						// DBDSQR:513 Update singular vectors
-						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indx = 0; indx < V.getSizeX(); indx++) {
-								double tmp1 = V.getItem(indx, lll + 1);
-								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
-								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
-							}
-						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = 0; indy < U.getSizeY(); indy++) {
-								double tmp1 = U.getItem(lll + 1, indy);
-								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
-								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
-							}
+						for (int lll = ll; lll < atIndex; lll++) {
+							CS = work.getItem(lll, 0);
+							SN = work.getItem(lll, 1);
+							oldCS = work.getItem(lll, 2);
+							oldSN = work.getItem(lll, 3);
+							
+							if ((CS != 1.0) || (SN != 0.0)) 
+								for (int indx = 0; indx < V.getSizeX(); indx++) {
+									double tmp1 = V.getItem(indx, lll + 1);
+									double tmp2 = V.getItem(indx, lll);
+									V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
+									V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
+								}
+							if ((oldCS != 1.0) || (oldSN != 0.0)) 
+								for (int indy = 0; indy < U.getSizeY(); indy++) {
+									double tmp1 = U.getItem(lll + 1, indy);
+									double tmp2 = U.getItem(lll, indy);
+									U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
+									U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
+								}
+						}
+						// DBDSQR:525 Test convergence
+						if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
+							E.setItem(atIndex - 1, 0, 0.0);
 					}
-					double H = s.getItem(atIndex, atIndex) * CS;
-					s.setItem(atIndex, atIndex, H * oldCS);
-					E.setItem(atIndex - 1, 0, H * oldSN);
-					
-					// DBDSQR:525 Test convergence
-					if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
-						E.setItem(atIndex - 1, 0, 0.0);
 				} else {
 					System.out.println("use path 02");
 					// DBDSQR:532 Chase bulge from bottom to top
@@ -2890,11 +1628,12 @@ public class Matrix {
 					double oldCS = 1.0;
 					double oldSN = 0.0;
 					double SN;
-					for (int lll = atIndex; lll <= ll + 1; lll--) {
-						// DLARTG
+
+					for (int lll = atIndex; lll > ll; lll--) {
 						double F = s.getItem(lll, lll) * CS;
 						double G = E.getItem(lll - 1, 0);
-						double r = hypot(F, G);
+						// DLARTG
+						double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
 						CS = F / r;
 						SN = G / r;
 						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -2902,14 +1641,14 @@ public class Matrix {
 							SN = -SN;
 							r = -r;
 						}
-						// End DLARTG
+						//End DLARTG
 						if (lll < atIndex)
 							E.setItem(lll, 0, oldSN * r);
 						
-						// DLARTG
 						F = oldCS * r;
 						G = s.getItem(lll - 1, lll - 1) * SN;
-						r = hypot(F, G);
+						// DLARTG
+						r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
 						oldCS = F / r;
 						oldSN = G / r;
 						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -2917,29 +1656,39 @@ public class Matrix {
 							oldSN = -oldSN;
 							r = -r;
 						}
-						s.setItem(lll, lll, r);
 						// End DLARTG
-						
-						// DBDSQR:551 Update singular vectors
-						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indx = 0; indx < V.getSizeX(); indx++) {
-								double tmp1 = V.getItem(indx, lll + 1);
-								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, oldCS * tmp1 + oldSN * tmp2);
-								V.setItem(indx, lll,    -oldSN * tmp1 + oldCS * tmp2);
-							}
-						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = 0; indy < U.getSizeY(); indy++) {
-								double tmp1 = U.getItem(lll + 1, indy);
-								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, CS * tmp1 + SN * tmp2);
-								U.setItem(lll, indy,    -SN * tmp1 + CS * tmp2);
-							}
+						s.setItem(lll, lll, r);
+
+						work.setItem(lll, 0, CS);
+						work.setItem(lll, 1, -SN);
+						work.setItem(lll, 2, oldCS);
+						work.setItem(lll, 3, -oldSN);
 					}
 					double H = s.getItem(ll, ll) * CS;
 					s.setItem(ll, ll, H * oldCS);
-					E.setItem(ll, 0, -H * oldSN);
-					
+					E.setItem(ll, 0, H * oldSN);
+					// DBDSQR:551 Update singular vectors
+					for (int lll = ll; lll < atIndex; lll++) {
+						CS = work.getItem(lll, 0);
+						SN = work.getItem(lll, 1);
+						oldCS = work.getItem(lll, 2);
+						oldSN = work.getItem(lll, 3);
+						
+						if ((CS != 1.0) || (SN != 0.0)) 
+							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
+								double tmp1 = V.getItem(indx, lll + 1);
+								double tmp2 = V.getItem(indx, lll);
+								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
+								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
+							}
+						if ((oldCS != 1.0) || (oldSN != 0.0)) 
+							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
+								double tmp1 = U.getItem(lll + 1, indy);
+								double tmp2 = U.getItem(lll, indy);
+								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
+								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
+							}
+					}
 					// DBDSQR:563 Test convergence
 					if (Math.abs(E.getItem(ll, 0)) < threshold)
 						E.setItem(ll, 0, 0.0);
@@ -2995,16 +1744,12 @@ public class Matrix {
 							G = oldSN * E.getItem(lll + 1, 0); 
 							E.setItem(lll + 1, 0, oldCS * E.getItem(lll + 1, 0));
 						}
-						
 						work.setItem(lll, 0, CS);
 						work.setItem(lll, 1, SN);
 						work.setItem(lll, 2, oldCS);
 						work.setItem(lll, 3, oldSN);
 					}
 					E.setItem(atIndex - 1, 0, F);
-
-					V.printM("BEFORE DLASR VT=");
-					U.printM("BEFORE DLASR U =");
 					// DBDSQR:603 Update singular vectors
 					for (int lll = ll; lll < atIndex; lll++) {
 						CS = work.getItem(lll, 0);
@@ -3012,12 +1757,10 @@ public class Matrix {
 						oldCS = work.getItem(lll, 2);
 						oldSN = work.getItem(lll, 3);
 						
-						//System.out.println("CS=" + CS);
 						if ((CS != 1.0) || (SN != 0.0)) 
 							for (int indx = 0; indx < V.getSizeX(); indx++) {
 								double tmp1 = V.getItem(indx, lll + 1);
 								double tmp2 = V.getItem(indx, lll);
-								System.out.println("TEMP+1=" + tmp1 + "  TEMP=" + tmp2);
 								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
 								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
 							}
@@ -3029,10 +1772,6 @@ public class Matrix {
 								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
 							}
 					}
-					V.printM("AFTER  DLASR VT=");
-					U.printM("AFTER  DLASR U =");
-					
-					
 					// DBDSQR:615 Test convergence
 					if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
 						E.setItem(atIndex - 1, 0, 0.0);
@@ -3043,7 +1782,7 @@ public class Matrix {
 					double F = (Math.abs(s.getItem(atIndex, atIndex)) - shift) *
 						(SIGN(1.0, s.getItem(atIndex, atIndex)) + shift / s.getItem(atIndex, atIndex));
 					double G = E.getItem(atIndex - 1, 0);
-
+					
 					double CS = 1.0;
 					double oldCS = 1.0;
 					double oldSN = 0.0;
@@ -3051,7 +1790,7 @@ public class Matrix {
 
 					for (int lll = atIndex; lll > ll; lll--) {
 						// DLARTG
-						double r = hypot(F, G);
+						double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
 						CS = F / r;
 						SN = G / r;
 						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -3060,7 +1799,7 @@ public class Matrix {
 							r = -r;
 						}
 						//End DLARTG
-						if (lll < atIndex)
+						if (lll > ll)
 							E.setItem(lll, 0, r);
 						
 						F = CS * s.getItem(lll, lll) + SN * E.getItem(lll - 1, 0);
@@ -3068,7 +1807,7 @@ public class Matrix {
 						G = s.getItem(lll - 1, lll - 1) * SN;
 						s.setItem(lll - 1, lll - 1, CS * s.getItem(lll - 1, lll - 1));
 						// DLARTG
-						r = hypot(F, G);
+						r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
 						oldCS = F / r;
 						oldSN = G / r;
 						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -3076,95 +1815,298 @@ public class Matrix {
 							oldSN = -oldSN;
 							r = -r;
 						}
-						s.setItem(lll, lll, r);
 						// End DLARTG
-						
-						F = oldCS * E.getItem(lll - 1, 0) + SN * s.getItem(lll - 1, lll - 1);
-						s.setItem(lll - 1, lll - 1, oldCS * s.getItem(lll - 1, lll - 1) - SN * E.getItem(lll - 1, 0));
-						if (lll >  ll + 1) {
-							// G = oldSN * E.getItem(lll - 2, 0);		// DBDSQR:641 ?????? obsolete ???? 
+						s.setItem(lll, lll, r);
+
+						F = oldCS * E.getItem(lll - 1, 0) + oldSN * s.getItem(lll - 1, lll - 1);
+						s.setItem(lll - 1, lll - 1, oldCS * s.getItem(lll - 1, lll - 1) - oldSN * E.getItem(lll - 1, 0));
+						if (lll > ll + 1) {
+							G = oldSN * E.getItem(lll - 2, 0); 
 							E.setItem(lll - 2, 0, oldCS * E.getItem(lll - 2, 0));
 						}
+						work.setItem(lll, 0, CS);
+						work.setItem(lll, 1, -SN);
+						work.setItem(lll, 2, oldCS);
+						work.setItem(lll, 3, -oldSN);
+					}
+					E.setItem(atIndex - 1, 0, F);
+					// DBDSQR:656 Update singular vectors
+					for (int lll = ll; lll < atIndex; lll++) {
+						CS = work.getItem(lll, 0);
+						SN = work.getItem(lll, 1);
+						oldCS = work.getItem(lll, 2);
+						oldSN = work.getItem(lll, 3);
 						
-						// DBDSQR:656 Update singular vectors
 						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indx = 0; indx < V.getSizeX(); indx++) {
+							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
 								double tmp1 = V.getItem(indx, lll + 1);
 								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, oldCS * tmp1 + oldSN * tmp2);
-								V.setItem(indx, lll,    -oldSN * tmp1 + oldCS * tmp2);
+								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
+								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
 							}
 						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = 0; indy < U.getSizeY(); indy++) {
+							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
 								double tmp1 = U.getItem(lll + 1, indy);
 								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, CS * tmp1 + SN * tmp2);
-								U.setItem(lll, indy,    -SN * tmp1 + CS * tmp2);
+								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
+								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
 							}
 					}
-					E.setItem(ll, 0, F);
-					
 					// DBDSQR:615 Test convergence
-					if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
-						E.setItem(atIndex - 1, 0, 0.0);
+					if (Math.abs(E.getItem(ll - 1, 0)) < threshold)
+						E.setItem(ll - 1, 0, 0.0);
 				}
 			}
 			// DBDSQR:670 QR iteration finished, go back and check convergence
 		}
-					
+
+		if ((atIndex < 0) && (iter >= 0)) 
+			svdSortResult(U, s, V);
+		else 
+			// DBDSQR:720 Maximum number of iterations exceeded, failure to converge
+			throw new Error("Maximum number of iterations exceeded, failure to converge");
+	}
+	
+	public static void svdSortResult(Matrix U, Matrix s, Matrix V) {
+		// Check data
+//		if ((U.getSizeX() != U.getSizeY()) ||		// TODO: Enable this check
+//			(V.getSizeX() != V.getSizeY()) ||
+//			(V.getSizeX() != s.getSizeX()) ||
+//			(U.getSizeY() != s.getSizeY()) )
+//			throw new Error("Invalid arguments");
+		int minXY = Math.min(s.getSizeX(), s.getSizeY());
+		// Make all singular values positive
+		for (int j = 0; j < minXY; j++) {
+			if (s.getItem(j, j) < 0.0) {
+				s.setItem(j, j, -s.getItem(j, j));
+				for (int i = V.getSizeX() - 1; i >= 0; i--)
+					V.setItem(i, j, -V.getItem(i, j));
+			}
+		}
+		// Sort the singular values into decreasing order (insertion sort on
+		// singular values, but only one transposition per singular vector)
+		for (int j = 0; j < minXY; j++) {
+			// Scan for smallest D(I)
+			int minJindex = j;
+			double minJvalue = s.getItem(j, j);
+			for (int i = j + 1; i < minXY; i++) {
+				if (s.getItem(i, i) > minJvalue) {
+					minJindex = i;
+					minJvalue = s.getItem(i, i);						
+				}				
+			}
+			if (minJindex != j) {
+				// Swap singular values and vectors
+				double tmp = s.getItem(j, j);
+				s.setItem(j, j, s.getItem(minJindex, minJindex));
+				s.setItem(minJindex, minJindex, tmp);
+				for (int i = V.getSizeX() - 1; i >= 0; i--) {
+					tmp = V.getItem(i, j);
+					V.setItem(i, j, V.getItem(i, minJindex));
+					V.setItem(i, minJindex, tmp);
+				}
+				for (int i = U.getSizeX() - 1; i >= 0; i--) {   
+					tmp = U.getItem(j, i);
+					U.setItem(j, i, U.getItem(minJindex, i));
+					U.setItem(minJindex, i, tmp);
+				}
+			}
+		}
+	}
+	
+	public void mysvd(Matrix U, Matrix V, Matrix s, Matrix debug) throws Exception {
+		U.resize(getSizeY(), getSizeY());
+		s.resize(getSizeX(), getSizeY());
+		V.resize(getSizeX(), getSizeX());
+		s.make0();
+		int minXY = Math.min(getSizeX(), getSizeY());
+
+		Matrix tau = new Matrix();
+		
+		qrDecomposition(tau);
+		// Generate Q in U
+		qrDecomositionGetQ(tau, U);
+		U.printM("U=");
+		Matrix UBackup = U.makeCopy();
+		Matrix R = new Matrix(getSizeX(), getSizeX());
+		//qrDecomositionGetR(R);
+		for (int i = R.getSizeX() - 1; i >= 0; i--)
+			for (int j = R.getSizeY() - 1; j >= 0; j--)
+				R.setItem(i, j, (i >= j) && (j < getSizeY()) ? getItem(i, j) : 0.0);
+				
+		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
+		// DGEBRD
+		Matrix tauP = new Matrix(R.getSizeX(), 1);
+		Matrix tauQ = new Matrix(R.getSizeX(), 1);
+		Matrix E = new Matrix(R.getSizeX() - 1, 1);
+		
+		if ((tau.getSizeX() < minXY) || (tau.getSizeY() < 1))
+			tauQ.resize(minXY, 1);
+		for (int atIndex = 0; atIndex < R.getSizeX(); atIndex++) {
+			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
+			// DLARFG
+			double xnorm = 0.0;
+			for (int j = R.getSizeY() - 1; j > atIndex; j--)					
+				xnorm = hypot(xnorm, R.getItem(atIndex, j));
+			
+			double beta;
+			double tmp_tau;
+			if (xnorm == 0.0) { 
+				tmp_tau = 0.0;
+				beta = R.getItem(atIndex, atIndex);
+			} else {
+				double alpha = R.getItem(atIndex, atIndex);
+				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
+				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+				if (beta == 0.0) {
+					tauQ.setItem(atIndex, 0, 0.0);
+					continue;
+				}
+				if (alpha >= 0.0)
+					beta = -beta;
+				tmp_tau = (beta - alpha) / beta;
+				double scale = 1.0 / (alpha - beta);
+				for (int j = R.getSizeY() - 1; j > atIndex; j--) 
+					R.setItem(atIndex, j, scale * R.getItem(atIndex, j));
+			}
+			tauQ.setItem(atIndex, 0, tmp_tau);
+			// End DLARFG
+
+			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
+			R.setItem(atIndex, atIndex, 1.0);
+			// DLARF Left
+			for (int i = R.getSizeX() - 1; i > atIndex; i--) {
+				double sum = 0.0;
+				for (int j = R.getSizeY() - 1; j >= atIndex; j--) 
+					sum += R.getItem(i, j) * R.getItem(atIndex, j);
+				for (int j = R.getSizeY() - 1; j >= atIndex; j--) 
+					R.setItem(i, j, R.getItem(i, j) - tmp_tau * sum * R.getItem(atIndex, j));
+			}
+			// End DLARF Left
+			R.setItem(atIndex, atIndex, beta);
+			s.setItem(atIndex, atIndex, beta);
+
+			// =============================================
+			// DGEBD2:176
+			if (atIndex >= R.getSizeY() - 1) {
+				tauP.setItem(atIndex, 0, 0.0); // DGEBD2:192
+				continue;
+			}
+			// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
+			// DLARFG - now working with rows!
+			
+			int atIndex1 = atIndex + 1;
+			//int atIndex2 = Math.min(atIndex + 2, R.getSizeX() - 1);
+			xnorm = 0.0;
+			for (int i = R.getSizeX() - 1; i > atIndex1; i--)					
+				xnorm = hypot(xnorm, R.getItem(i, atIndex));
+
+			if (xnorm == 0.0) {
+				tmp_tau = 0.0;
+				beta = R.getItem(atIndex1, atIndex);
+			} else {
+				double alpha = R.getItem(atIndex1, atIndex);
+				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
+				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+				if (beta == 0.0) {
+					tauP.setItem(atIndex1, 0, 0.0);
+					continue;
+				}
+				if (alpha >= 0.0)
+					beta = -beta;
+				
+				tmp_tau = (beta - alpha) / beta;
+				double scale = 1.0 / (alpha - beta);
+				for (int i = R.getSizeX() - 1; i > atIndex1; i--) 
+					R.setItem(i, atIndex, scale * R.getItem(i, atIndex));
+			}
+			tauP.setItem(atIndex, 0, tmp_tau);
+			// End DLARFG
+			
+			// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
+			R.setItem(atIndex1, atIndex, 1.0);
+			// DLARF Right
+			for (int j = R.getSizeY() - 1; j >= atIndex1; j--) {
+				double sum = 0.0;
+				for (int i = R.getSizeX() - 1; i >= atIndex1; i--) 
+					sum += R.getItem(i, j) * R.getItem(i, atIndex);
+				for (int i = R.getSizeX() - 1; i >= atIndex1; i--) 
+					R.setItem(i, j, R.getItem(i, j) - tmp_tau * sum * R.getItem(i, atIndex));
+			}
+			// End DLARF Right
+			R.setItem(atIndex1, atIndex, beta);
+			E.setItem(atIndex, 0, beta);
+		}
+		
+		R.printM("R");
+		s.printM("S");
+		tauP.printM("tauP");
+		tauQ.printM("tauQ");
+		E.printM("e");
+		
+		// DGESVD:1807
+		for (int i = V.getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				V.setItem(i, j, R.getItem(i, j));
+		
+		V.printM("V");
+		
+		// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
+		Matrix Q = new Matrix();
+		R.qrDecomositionGetQ(tauQ, Q);
+		Q.printM("Q");
+		
+		// DGESVD:1829 Generate right bidiagonalizing vectors in VT
+		
+		// DORGBR:217 Shift the vectors which define the elementary reflectors one
+		// row downward, and set the first row and column of P' to those of the unit matrix
+		for (int j = V.getSizeY() - 1; j > 0; j--) {
+			for (int i = j - 1; i > 0; i--)
+				V.setItem(j, i, V.getItem(j, i - 1));
+			V.setItem(0, j, 0.0);
+			V.setItem(j, 0, 0.0);
+		}
+		V.setItem(0, 0, 1.0);
+		
+		// DORGL2
+		for (int atIndex = V.getSizeX() - 1; atIndex > 0; atIndex--) {
+			double tmp_tau = tauP.getItem(atIndex - 1, 0);
+			if (atIndex < V.getSizeX() - 1) {
+				// Apply H(i) to A(i:m,i:n) from the right
+				V.setItem(atIndex, atIndex, 1.0);
+				// DLARF Right
+				for (int j = V.getSizeY() - 1; j > atIndex; j--) {
+					double sum = 0.0;
+					for (int i = V.getSizeX() - 1; i >= atIndex; i--) 
+						sum += V.getItem(i, j) * V.getItem(i, atIndex);
+					for (int i = V.getSizeX() - 1; i >= atIndex; i--) 
+						V.setItem(i, j, V.getItem(i, j) - tmp_tau * sum * V.getItem(i, atIndex));
+				// End DLARF Right
+				}
+				for (int j = V.getSizeY() - 2; j >= atIndex; j--) 
+					V.setItem(atIndex+1, j, -tmp_tau * V.getItem(atIndex+1, j));
+				// End of DORGL2
+			}
+			V.setItem(atIndex, atIndex, 1.0 - tmp_tau);
+			// DORGL2:124 Set A(i,1:i-1) to zero 
+			for (int i = atIndex - 1; i > 0; i--)
+				V.setItem(i, atIndex, 0.0);
+		}
+		// End DORGL2
+		V.printM("V");
+
+		System.out.println("-----------------------------");
+
+		Q.copyTo(U);
+		Matrix work = new Matrix();
+		svdDBDSQR(U, s, V, E, work);
+		
 		System.out.println("FINISHED!!!!!");
 		s.printM("S=");
 		E.printM("E=");
 		V.printM("VT=");
 		U.printM("U=");
 	
-		if ((atIndex < 0) && (iter >= 0)) {
-			// DBDSQR:674 All singular values converged, so make them positive
-			for (int j = 0; j < minXY; j++) {
-				if (s.getItem(j, j) < 0.0) {
-					s.setItem(j, j, -s.getItem(j, j));
-					// DBDSQR:681 Change sign of singular vectors, if desired
-					for (int i = 0; i < getSizeX(); i++)
-						V.setItem(i, j, -V.getItem(i, j));
-				}
-			}
-			s.printM("S after=");
-			V.printM("V after=");
-			
-			// DBDSQR:688 Sort the singular values into decreasing order (insertion sort on
-			// singular values, but only one transposition per singular vector)
-			for (int j = 0; j < minXY; j++) {
-				// DBDSQR:693 Scan for smallest D(I)
-				int minJindex = j;
-				double minJvalue = s.getItem(j, j);
-				for (int i = j + 1; i < minXY; i++) {
-					if (s.getItem(i, i) > minJvalue) {
-						minJindex = i;
-						minJvalue = s.getItem(i, i);						
-					}				
-				}
-				if (minJindex != j) {
-					// DBDSQR:705 Swap singular values and vectors
-					double tmp = s.getItem(j, j);
-					s.setItem(j, j, s.getItem(minJindex, minJindex));
-					s.setItem(minJindex, minJindex, tmp);
-					for (int i = 0; i < getSizeX(); i++) {
-						tmp = V.getItem(i, j);
-						V.setItem(i, j, V.getItem(i, minJindex));
-						V.setItem(i, minJindex, tmp);
-					}
-					for (int i = 0; i < getSizeX(); i++) {   ///?????
-						tmp = U.getItem(j, i);
-						U.setItem(j, i, U.getItem(minJindex, i));
-						U.setItem(minJindex, i, tmp);
-					}
-				}
-			}
-		} else {
-			// DBDSQR:720 Maximum number of iterations exceeded, failure to converge
-			throw new Exception("Maximum number of iterations exceeded, failure to converge");
-		}
-		
 		// DGESVD:1850 Multiply Q in U by left singular vectors of R in WORK(IU), storing result in A
 		UBackup.printM("Q =");
 		U.printM("IU=");
@@ -3177,9 +2119,11 @@ public class Matrix {
 					sum += a * b;
 				}
 				setItem(i, j, sum);
+				UBackup.setItem(i, j, sum);
 			}
 		}
 		printM("AAAAAAA");
+		UBackup.copyTo(U);
 		
 		// End DBDSQR
 	}	
@@ -3200,13 +2144,28 @@ public class Matrix {
 		Matrix r = new Matrix();
 		Matrix debug = new Matrix();
 		Matrix tau = new Matrix();
+		
+		Matrix b = a.makeCopy();
+		
+		b.printM("QR");
+		b.qrDecomposition(tau);
+		b.qrDecomositionGetR(r);
+		r.printM("r");
+		
+		at.printM("LQ");
+		at.lqDecomposition(tau);
+		at.lqDecomositionGetL(r);
+		r.printM("L");
+		
 
-		a.printM("A");
-		a.mysvd(u, v, s, debug);
-		a.printM("A=");
-		u.printM("U=");
-		v.printM("VT=");
-		s.printM("S=");
+		
+		
+//		a.printM("A");
+//		a.mysvd(u, v, s, debug);
+//		a.printM("A=");
+//		u.printM("U=");
+//		v.printM("VT=");
+//		s.printM("S=");
 		
 		
 //		a.qrDecomposition(tau);
