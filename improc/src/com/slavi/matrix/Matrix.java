@@ -1920,8 +1920,9 @@ public class Matrix {
 	}
 	
 	public void svdDGEBRD(Matrix tauP, Matrix tauQ) {
-		boolean upper = getSizeX() <= getSizeY();
-		int minXY = upper ? getSizeX() : getSizeY();
+		boolean upper = true; //getSizeX() <= getSizeY();
+		//int minXY = upper ? getSizeX() : getSizeY();
+		int minXY = Math.min(getSizeX(), getSizeY());
 		if ((tauQ.getSizeX() < minXY) || (tauQ.getSizeY() < 1))
 			tauQ.resize(minXY, 1);
 		if ((tauP.getSizeX() < minXY) || (tauP.getSizeY() < 1))
@@ -1932,6 +1933,8 @@ public class Matrix {
 //			tauQ = tmp;
 //		}
 		for (int atIndex = 0; atIndex < minXY; atIndex++) {
+			printM("cccccc");
+			
 			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
 			// DLARFG
 			double xnorm = 0.0;
@@ -1969,21 +1972,28 @@ public class Matrix {
 			}
 			tauQ.setItem(atIndex, 0, tmp_tau);
 			// End DLARFG
-
+			
 			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
 			setItem(atIndex, atIndex, 1.0);
+			
+			printM("dd");
+			
 			if (upper) 
 				svdDLARF_X(atIndex, tmp_tau);
 			else 
 				svdDLARF_Y(atIndex, tmp_tau);
 			setItem(atIndex, atIndex, beta);
 
+			
 			// =============================================
 			// DGEBD2:176
 			if (atIndex >= minXY - 1) {
 				tauP.setItem(atIndex, 0, 0.0); // DGEBD2:192
 				continue;
 			}
+
+			printM("ee");
+			
 			// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
 			// DLARFG - now working with rows!
 			
@@ -1995,8 +2005,9 @@ public class Matrix {
 			else
 				for (int j = getSizeY() - 1; j > atIndex + 1; j--)					
 					xnorm = hypot(xnorm, getItem(atIndex, j));
-
+			System.out.println("XNORM=" + xnorm);
 			if (xnorm == 0.0) {
+				System.out.println("XNORM IS ZERO");
 				tmp_tau = 0.0;
 				beta = upper ? getItem(atIndex + 1, atIndex) : getItem(atIndex, atIndex + 1);
 			} else {
@@ -2004,6 +2015,7 @@ public class Matrix {
 				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
 				if (beta == 0.0) {
+					System.out.println("BETA IS ZERO!!!!");
 					tauP.setItem(atIndex + 1, 0, 0.0);
 					continue;
 				}
@@ -2012,6 +2024,8 @@ public class Matrix {
 				
 				tmp_tau = (beta - alpha) / beta;
 				double scale = 1.0 / (alpha - beta);
+				System.out.println("SCALE=" + scale);
+				printM("before scale");
 				if (upper)
 					for (int i = getSizeX() - 1; i > atIndex + 1; i--) 
 						setItem(i, atIndex, scale * getItem(i, atIndex));
@@ -2022,6 +2036,8 @@ public class Matrix {
 			tauP.setItem(atIndex, 0, tmp_tau);
 			// End DLARFG
 			
+			printM("ff");
+
 			if (upper) {
 				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
 				setItem(atIndex + 1, atIndex, 1.0);
@@ -2033,6 +2049,7 @@ public class Matrix {
 				svdDLARF_X(atIndex, tmp_tau);
 				setItem(atIndex, atIndex + 1, beta);
 			}
+			printM("gg");
 		}
 	}
 	
@@ -2058,7 +2075,9 @@ public class Matrix {
 			Matrix tauQ = new Matrix(minXY, 1);
 			Matrix E = new Matrix(minXY - 1, 1);
 	
+			R.printM("before DGEBRD R");
 			R.svdDGEBRD(tauP, tauQ);
+			R.printM("after DGEBRD R");
 			
 			for (int i = minXY - 1; i >= 0; i--)
 				s.setItem(i, i, R.getItem(i, i));
@@ -2112,6 +2131,7 @@ public class Matrix {
 			Q.copyTo(U);
 			Matrix work = new Matrix();
 
+			s.printM("s");
 			E.printM("E");
 			U.printM("First param");
 			V.printM("Second param");
@@ -2140,6 +2160,9 @@ public class Matrix {
 				}
 			}
 			UBackup.copyTo(U);
+			for (int j = getSizeY() - 1; j >= 0; j--) 
+				for (int i = getSizeX() - 1; i >= 0; i--) 
+					U.setItem(i, j, getItem(i, j));
 		} else {
 			lqDecomposition(tau);
 			printM("LQ");
@@ -2156,7 +2179,9 @@ public class Matrix {
 			Matrix tauQ = new Matrix(minXY, 1);
 			Matrix E = new Matrix(minXY - 1, 1);
 	
+			L.printM("before DGEBRD L");
 			L.svdDGEBRD(tauP, tauQ);
+			L.printM("after DGEBRD L");
 			for (int i = minXY - 1; i >= 0; i--)
 				s.setItem(i, i, L.getItem(i, i));
 			for (int i = minXY - 2; i >= 0; i--)
@@ -2208,6 +2233,7 @@ public class Matrix {
 			Q.copyTo(V);
 			Matrix work = new Matrix();
 			
+			s.printM("s");
 			E.printM("E");
 			U.printM("First param");
 			V.printM("Second param");
@@ -2249,10 +2275,12 @@ public class Matrix {
 						sum += a * b;
 					}
 					setItem(i, j, sum);
-					//VBackup.setItem(i, j, sum);
 				}
 			}
-			//VBackup.copyTo(U);
+			VBackup.copyTo(U);
+			for (int j = getSizeY() - 1; j >= 0; j--) 
+				for (int i = getSizeX() - 1; i >= 0; i--) 
+					U.setItem(i, j, getItem(i, j));
 		}
 	}	
 	
@@ -2272,40 +2300,12 @@ public class Matrix {
 		Matrix r = new Matrix();
 		Matrix tau = new Matrix();
 
-		//a = at;
+		a = at;
 		a.printM("A");
 		a.mysvd(u, v, s);
 		a.printM("A=");
 		u.printM("U=");
 		v.printM("VT=");
 		s.printM("S=");
-		
-		
-//		a.qrDecomposition(tau);
-//		a.printM("A-QR");
-//		tau.printM("TAU");
-//		a.qrDecomositionGetQ(tau, u);
-//		u.printM("Q");
-//		a.qrDecomositionGetR(r);
-//		r.printM("R");
-//
-//		at.lqDecomposition(tau);
-//		at.printM("AT-LQ");
-//		tau.printM("TAU");
-//		at.lqDecomositionGetQ(tau, u);
-//		u.printM("Q");
-//		at.lqDecomositionGetL(r);
-//		r.printM("L");
-		
-		
-//		at.QRDecomposition(debug);
-//		at.printM("AT");
-//		debug.printM("TAU");
-		
-//		
-//		a.QRDecomposition(s);
-//		//a.mysvd(u, v, s, debug);
-//		a.printM("A");
-//		s.printM("R");
 	}
 }
