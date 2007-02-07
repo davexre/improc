@@ -1224,7 +1224,7 @@ public class Matrix {
 		work.resize(V.getSizeX(), 4);
 		int idir = 0;
 		
-		while ((atIndex >= 0) && (iter >= 0)) {
+		while ((atIndex > 0) && (iter >= 0)) {
  			System.out.println("Iteration = " + (maxit - iter) + " atIndex = " + atIndex);
 			s.printM("S=");
 			E.printM("E=");
@@ -1246,8 +1246,8 @@ public class Matrix {
 						// Convergence of bottom singular value, return to top of loop
 						atIndex--;
 						found_it = true;
-						break;
 					}
+					break;
 				}
 				smin = Math.min(smin, abss);
 				smax = Math.max(smax, Math.max(abss, abse));
@@ -1268,8 +1268,6 @@ public class Matrix {
 				double FT = F;
 				double GT = G;
 				double HT = H;
-				
-				System.out.println("F=" + FT + " G=" + GT + " H=" + HT);
 				
 				double FA = Math.abs(FT);
 				double HA = Math.abs(HT);
@@ -1366,7 +1364,6 @@ public class Matrix {
 						tsign * SIGN(1.0, F) * SIGN(1.0, H)));	// SSMIN
 				// End DLASV2
 				E.setItem(atIndex - 1, 0, 0.0);
-				s.printM("S after DLASV2=");
 				
 				// DBDSQR:362 Compute singular vectors
 				for (int i = V.getSizeX() - 1; i >= 0; i--) {
@@ -1390,7 +1387,7 @@ public class Matrix {
 					idir = 1;
 				else
 					// DBDSQR:387 Chase bulge from bottom (big end) to top (small end)
-					idir = 2;					
+					idir = 2;
 			}
 			System.out.println("IDIR=" + idir);
 			// DBDSQR:393 Apply convergence tests
@@ -1422,7 +1419,7 @@ public class Matrix {
 				// DBDSQR:426 Run convergence test in backward direction First apply standard test to top of matrix
 				if ((Math.abs(E.getItem(ll, 0)) <= Math.abs(TOL * s.getItem(ll, ll))) || 
 					((TOL < 0.0) && (Math.abs(E.getItem(ll, 0)) <= threshold))) {   
-					E.setItem(ll, ll, 0.0);
+					E.setItem(ll, 0, 0.0);
 					continue;
 				}
 				if (TOL > 0.0) {
@@ -1447,12 +1444,12 @@ public class Matrix {
 			old_atIndex = atIndex;
 			
 			double shift = 0.0;
-			s.printM("mid S=");
-			System.out.println("SMINL=" + SMINL);
-			System.out.println("N    =" + V.getSizeX());
-			System.out.println("SAMX =" + smax);
-			System.out.println("Form1=" + (V.getSizeX() * TOL * (SMINL / smax)));
-			System.out.println("Form2=" + (Math.max(EPS, TOL * 0.01)));
+//			s.printM("mid S=");
+//			System.out.println("SMINL=" + SMINL);
+//			System.out.println("N    =" + V.getSizeX());
+//			System.out.println("SAMX =" + smax);
+//			System.out.println("Form1=" + (V.getSizeX() * TOL * (SMINL / smax)));
+//			System.out.println("Form2=" + (Math.max(EPS, TOL * 0.01)));
 			
 			// DBDQR:456 Compute shift.  First, test if shifting would ruin relative accuracy, and if so set the shift to zero.
 			if ((TOL >= 0.0) && (V.getSizeX() * TOL * (SMINL / smax) <= Math.max(EPS, TOL * 0.01))) { 
@@ -1515,7 +1512,7 @@ public class Matrix {
 			// DBDSQR:485 Increment iteration count
 			iter -= atIndex - ll;
 			// DBDSQR:489 If SHIFT = 0, do simplified QR iteration
-			System.out.println("SHIFT=" + shift);
+//			System.out.println("SHIFT=" + shift);
 			
 			if (shift == 0.0) {
 				if (idir == 1) {
@@ -1772,7 +1769,7 @@ public class Matrix {
 							r = -r;
 						}
 						//End DLARTG
-						if (lll > ll)
+						if (lll < atIndex)
 							E.setItem(lll, 0, r);
 						
 						F = CS * s.getItem(lll, lll) + SN * E.getItem(lll - 1, 0);
@@ -1797,43 +1794,87 @@ public class Matrix {
 							G = oldSN * E.getItem(lll - 2, 0); 
 							E.setItem(lll - 2, 0, oldCS * E.getItem(lll - 2, 0));
 						}
+						System.out.println("I=" + lll + " CS=" + CS + " SN=" + SN);
+						System.out.println(" oldCS=" + oldCS + " oldSN=" + oldSN);
 						work.setItem(lll, 0, CS);
 						work.setItem(lll, 1, -SN);
 						work.setItem(lll, 2, oldCS);
 						work.setItem(lll, 3, -oldSN);
 					}
-					E.setItem(atIndex - 1, 0, F);
+					E.setItem(ll, 0, F);
 					// DBDSQR:656 Update singular vectors
-					for (int lll = ll; lll < atIndex; lll++) {
+					V.printM("VT before DLASR, path 12=");
+					U.printM("**************************** U before DLASR, path 12=");
+					
+					//for (int lll = ll; lll < atIndex; lll++) {
+					//for (int lll = atIndex - 1; lll >= ll; lll--) {
+					for (int lll = atIndex; lll > ll; lll--) {
 						CS = work.getItem(lll, 0);
 						SN = work.getItem(lll, 1);
 						oldCS = work.getItem(lll, 2);
 						oldSN = work.getItem(lll, 3);
+	
+						System.out.println("CTEMP=" + CS + " STEMP=" + SN + " oldCS=" + oldCS + " oldSN=" + oldSN);
 						
-						if ((CS != 1.0) || (SN != 0.0)) 
+						if ((oldCS != 1.0) || (oldSN != 0.0))
 							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
-								double tmp1 = V.getItem(indx, lll + 1);
-								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
-								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
+								double tmp1 = V.getItem(indx, lll);
+								double tmp2 = V.getItem(indx, lll - 1);
+								V.setItem(indx, lll,     oldCS * tmp1 - oldSN * tmp2);
+								V.setItem(indx, lll - 1, oldSN * tmp1 + oldCS * tmp2);
 							}
-						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
-								double tmp1 = U.getItem(lll + 1, indy);
-								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
-								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
+						if ((CS != 1.0) || (SN != 0.0)) 
+							for (int indy = 0; indy < U.getSizeY(); indy++) {
+								double tmp1 = U.getItem(lll, indy);
+								double tmp2 = U.getItem(lll - 1, indy);
+								U.setItem(lll, indy,     CS * tmp1 - SN * tmp2);
+								U.setItem(lll - 1, indy, SN * tmp1 + CS * tmp2);
 							}
 					}
+					
+					
+					
+//					for (int lll = ll; lll < atIndex; lll++) {
+//						CS = work.getItem(lll, 0);
+//						SN = work.getItem(lll, 1);
+//						oldCS = work.getItem(lll, 2);
+//						oldSN = work.getItem(lll, 3);
+//						
+//						if ((oldCS != 1.0) || (oldSN != 0.0)) 
+//							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
+//								double tmp1 = V.getItem(indx, lll + 1);
+//								double tmp2 = V.getItem(indx, lll);
+//								V.setItem(indx, lll + 1, oldCS * tmp1 - oldSN * tmp2);
+//								V.setItem(indx, lll,     oldSN * tmp1 + oldCS * tmp2);
+//							}
+//					}
+//					for (int lll = atIndex; lll > ll; lll--) { 
+//						CS = work.getItem(lll, 0);
+//						SN = work.getItem(lll, 1);
+//						oldCS = work.getItem(lll, 2);
+//						oldSN = work.getItem(lll, 3);
+//						
+//						System.out.println("CTEMP=" + CS + " STEMP=" + SN + " oldCS=" + oldCS + " oldSN=" + oldSN);
+//						if ((CS != 1.0) || (SN != 0.0)) 
+//							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
+//								U.printM("dummy debug for U=");
+//								double tmp1 = U.getItem(lll + 1, indy);
+//								double tmp2 = U.getItem(lll, indy);
+//								U.setItem(lll + 1, indy, CS * tmp1 - SN * tmp2);
+//								U.setItem(lll, indy,     SN * tmp1 + CS * tmp2);
+//							}
+//					}
+					U.printM("U after DLASR, path 12=");
+					V.printM("VT after DLASR, path 12=");
 					// DBDSQR:615 Test convergence
-					if (Math.abs(E.getItem(ll - 1, 0)) < threshold)
-						E.setItem(ll - 1, 0, 0.0);
+					if (Math.abs(E.getItem(ll, 0)) < threshold)
+						E.setItem(ll, 0, 0.0);
 				}
 			}
 			// DBDSQR:670 QR iteration finished, go back and check convergence
 		}
 
-		if ((atIndex < 0) && (iter >= 0)) 
+		if ((atIndex <= 0) && (iter >= 0)) 
 			svdSortResult(U, s, V);
 		else 
 			// DBDSQR:720 Maximum number of iterations exceeded, failure to converge
@@ -2078,6 +2119,7 @@ public class Matrix {
 	}
 	
 	public void mysvd(Matrix U, Matrix V, Matrix s) throws Exception {
+		printM("A");
 		double work2[] = new double[getSizeX()];
 		U.resize(getSizeY(), getSizeY());
 		s.resize(getSizeX(), getSizeY());
@@ -2100,9 +2142,7 @@ public class Matrix {
 			Matrix tauQ = new Matrix(minXY, 1);
 			Matrix E = new Matrix(minXY - 1, 1);
 	
-			R.printM("before DGEBRD R");
 			R.svdDGEBRD(tauP, tauQ);
-			R.printM("after DGEBRD R");
 			
 			for (int i = minXY - 1; i >= 0; i--)
 				s.setItem(i, i, R.getItem(i, i));
@@ -2114,17 +2154,9 @@ public class Matrix {
 				for (int j = i; j >= 0; j--)
 					V.setItem(i, j, R.getItem(i, j));
 	
-			System.out.println("---------");
-			R.printM("R=");
-			tauP.printM("taup");
-			tauQ.printM("tauQ");
-			s.printM("S");
-			E.printM("E=");
-			V.printM("V");
 			// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
 			Matrix Q = new Matrix();
 			R.qrDecomositionGetQ(tauQ, Q);
-			Q.printM("Q");
 			
 			// DGESVD:1829 Generate right bidiagonalizing vectors in VT
 			
@@ -2137,6 +2169,7 @@ public class Matrix {
 				V.setItem(j, 0, 0.0);
 			}
 			V.setItem(0, 0, 1.0);
+			
 			// DORGL2
 			for (int atIndex = V.getSizeX() - 1; atIndex > 0; atIndex--) {
 				double tmp_tau = tauP.getItem(atIndex - 1, 0);
@@ -2144,8 +2177,8 @@ public class Matrix {
 					// Apply H(i) to A(i:m,i:n) from the right
 					V.setItem(atIndex, atIndex, 1.0);
 					V.svdDLARF_Y(atIndex, tmp_tau);
-					for (int j = V.getSizeY() - 2; j >= atIndex; j--) 
-						V.setItem(atIndex+1, j, -tmp_tau * V.getItem(atIndex+1, j));
+					for (int i = V.getSizeX() - 1; i > atIndex; i--) 
+						V.setItem(i, atIndex, -tmp_tau * V.getItem(i, atIndex));
 				}
 				V.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				// DORGL2:124 Set A(i,1:i-1) to zero 
@@ -2153,25 +2186,26 @@ public class Matrix {
 					V.setItem(i, atIndex, 0.0);
 			}
 			// End DORGL2
+			
 			Q.copyTo(U);
 			Matrix work = new Matrix();
 
-			s.printM("s");
-			E.printM("E");
-			U.printM("First param");
-			V.printM("Second param");
+//			s.printM("s");
+//			E.printM("E");
+//			U.printM("First param");
+//			V.printM("Second param");
 			
 			svdDBDSQR(U, s, V, E, work);
 			
-			System.out.println("FINISHED!!!!!");
-			s.printM("S=");
-			E.printM("E=");
-			V.printM("VT=");
-			U.printM("U=");
+//			System.out.println("FINISHED!!!!!");
+//			s.printM("S=");
+//			E.printM("E=");
+//			V.printM("VT=");
+//			U.printM("U=");
 		
 			// DGESVD:1850 Multiply Q in U by left singular vectors of R in WORK(IU), storing result in A
-			UBackup.printM("Q =");
-			U.printM("IU=");
+//			UBackup.printM("Q =");
+//			U.printM("IU=");
 			for (int i = getSizeX() - 1; i >= 0; i--) {
 				for (int j = getSizeY() - 1; j >= 0; j--) {
 					double sum = 0.0;	
@@ -2238,8 +2272,8 @@ public class Matrix {
 					// Apply H(i) to A(i:m,i:n) from the right
 					U.setItem(atIndex, atIndex, 1.0);
 					U.svdDLARF_Y(atIndex, tmp_tau);
-					for (int j = U.getSizeY() - 2; j >= atIndex; j--) 
-						U.setItem(atIndex+1, j, -tmp_tau * U.getItem(atIndex+1, j));
+					for (int i = U.getSizeX() - 1; i > atIndex; i--) 
+						U.setItem(i, atIndex, -tmp_tau * U.getItem(i, atIndex));
 				}
 				U.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				// DORGL2:124 Set A(i,1:i-1) to zero 
@@ -2283,6 +2317,10 @@ public class Matrix {
 			for (int j = getSizeY() - 1; j >= 0; j--) 
 				for (int i = getSizeX() - 1; i >= 0; i--) 
 					U.setItem(i, j, getItem(i, j));
+			
+			U.copyTo(E);
+			V.copyTo(U);
+			E.copyTo(V);
 		}
 	}	
 	
@@ -2290,30 +2328,64 @@ public class Matrix {
 		BufferedReader fin = new BufferedReader(new FileReader(
 				MatrixTest.class.getResource(
 					"SVD-A.txt").getFile()));
-		Matrix a = new Matrix(3, 4);
+		StringTokenizer stt = new StringTokenizer(fin.readLine());
+		Matrix a = new Matrix(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
 		a.load(fin);
 		fin.close();
-		Matrix at = a.makeCopy();
+		Matrix at = new Matrix();
 		a.transpose(at);
+		Matrix b = a.makeCopy();
+		Matrix bt = at.makeCopy();
 		
+		Matrix tmp = new Matrix();
+
 		Matrix u = new Matrix();
 		Matrix v = new Matrix();
 		Matrix s = new Matrix();
-		Matrix r = new Matrix();
-		Matrix tau = new Matrix();
 
-		a = at;
-		a.printM("A");
+//		Matrix ut = new Matrix();
+//		Matrix vt = new Matrix();
+//		Matrix st = new Matrix();
+
 		a.mysvd(u, v, s);
-		a.printM("A=");
-		u.printM("U=");
-		v.printM("VT=");
-		s.printM("S=");
+//		at.mysvd(ut, vt, st);
+
+		u.printM("U !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		v.printM("V");
+		s.printM("S");
 		
-//		Matrix q = new Matrix();
-//		a.qr(q, tau);
-//		a.printM("A");
-//		q.printM("Q");
-//		tau.printM("tau");
+		Matrix checkA = new Matrix();
+		Matrix checkAt = new Matrix();
+
+//		ut.printM("UT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//		vt.printM("VT");
+//		st.printM("ST");
+		
+		u.mMul(s, tmp);
+		tmp.mMul(v, checkA);
+		checkA.mSub(b, a);
+		a.printM("Diff A");
+
+//		ut.mMul(st, tmp);
+//		tmp.mMul(vt, checkAt);
+//		checkAt.mSub(bt, at);
+//		at.printM("Diff AT");
+		
+//		ut.termMul(ut, ut);
+//		vt.termMul(vt, vt);
+//		u.termMul(u, u);
+//		v.termMul(v, v);
+//				
+//		vt.transpose(tmp);
+//		tmp.mSub(u, tmp);
+//		tmp.printM("Diff U");
+//
+//		ut.transpose(tmp);
+//		tmp.mSub(v, tmp);
+//		tmp.printM("Diff V");
+//
+//		st.transpose(tmp);
+//		tmp.mSub(s, tmp);
+//		tmp.printM("Diff S");
 	}
 }
