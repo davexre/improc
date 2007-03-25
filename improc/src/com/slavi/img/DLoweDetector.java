@@ -225,7 +225,7 @@ public class DLoweDetector {
 		
 		for (int i = 0; i < sizeInPixels; i++) {
 			double translatedX = i - sizeInPixels05;
-			double translatedXSq = Math.pow(translatedX, 2.0);
+//			double translatedXSq = Math.pow(translatedX, 2.0);
 			for (int j = 0; j < sizeInPixels; j++) {
 				double translatedY = j - sizeInPixels05;
 				double xR = (translatedX * cosD - translatedY * sinD) / considerScaleFactor;

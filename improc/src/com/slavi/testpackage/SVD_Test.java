@@ -36,7 +36,7 @@ public class SVD_Test {
 		Matrix a = new Matrix(3, 3);
 		a.load(fin);
 		fin.close();
-		Matrix aa = a.makeCopy();
+//		Matrix aa = a.makeCopy();
 //		a.transpose(aa);
 //		aa.copyTo(a);
 		
@@ -44,18 +44,18 @@ public class SVD_Test {
 //		jama.SingularValueDecomposition svd = ja.svd();
 		
 		Matrix u = new Matrix();
-		Matrix v = new Matrix();
+//		Matrix v = new Matrix();
 		Matrix s = new Matrix();
 
-		Matrix tmp1 = new Matrix();
-		Matrix tmp2 = new Matrix();
-		Matrix tmp3 = new Matrix();
-		Matrix tmp4 = new Matrix();
+//		Matrix tmp1 = new Matrix();
+//		Matrix tmp2 = new Matrix();
+//		Matrix tmp3 = new Matrix();
+//		Matrix tmp4 = new Matrix();
 
 		printM(a, "A");
 		a.qrDecomposition(s);
 		printM(a, "QR");
-		a.getQ(u);
+//		a.getQ(u);
 		printM(u, "Q");
 		printM(s, "R");
 		

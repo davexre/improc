@@ -286,7 +286,7 @@ public class SVD {
 		Matrix tmp3 = new Matrix();
 //		Matrix tmp4 = new Matrix();
 
-		a.svd2(u, v, s);
+//		a.svd2(u, v, s);
 		//a.svd(s,v);
 		tmp1.resize(aa.getSizeX(), aa.getSizeY());
 		for (int i = Math.min(aa.getSizeX(), aa.getSizeY()) - 1; i >= 0; i--)

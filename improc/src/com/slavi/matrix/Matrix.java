@@ -789,6 +789,83 @@ public class Matrix {
 //			throw new Error("m < n");
 		// zliberror._assert(m>=n) ;
 		double[] rv1 = new double[sizeY];
+		w.resize(Math.min(getSizeX(), getSizeY()), 1);
+		v.resize(getSizeY(), getSizeY());
+		
+		System.out.println("SVD beware results may not be sorted!");
+
+		for (i = 0; i < sizeY; i++) {
+			l = i + 1;
+			rv1[i] = scale * g;
+			g = s = scale = 0.;
+			if (i < sizeX) {
+				for (k = i; k < sizeX; k++)
+					scale += Math.abs(this.m[k][i]);
+				if (scale != 0.0) {
+					for (k = i; k < sizeX; k++) {
+						this.m[k][i] /= scale;
+						s += this.m[k][i] * this.m[k][i];
+					}
+					f = this.m[i][i];
+					g = -SIGN(Math.sqrt(s), f);
+					h = f * g - s;
+					this.m[i][i] = f - g;
+					// if (i!=(n-1)) { // CHECK
+					for (j = l; j < sizeY; j++) {
+						for (s = 0, k = i; k < sizeX; k++)
+							s += this.m[k][i] * this.m[k][j];
+						f = s / h;
+						for (k = i; k < sizeX; k++)
+							this.m[k][j] += f * this.m[k][i];
+					}
+					// }
+					for (k = i; k < sizeX; k++)
+						this.m[k][i] *= scale;
+				}
+			}
+			w.m[i][0] = scale * g;
+			g = s = scale = 0.0;
+			if (i < sizeX && i != sizeY - 1) { //
+				for (k = l; k < sizeY; k++)
+					scale += Math.abs(this.m[i][k]);
+				if (scale != 0.) {
+					for (k = l; k < sizeY; k++) { //
+						this.m[i][k] /= scale;
+						s += this.m[i][k] * this.m[i][k];
+					}
+					f = this.m[i][l];
+					g = -SIGN(Math.sqrt(s), f);
+					h = f * g - s;
+					this.m[i][l] = f - g;
+					for (k = l; k < sizeY; k++)
+						rv1[k] = this.m[i][k] / h;
+					if (i != sizeX - 1) { //
+						for (j = l; j < sizeX; j++) { //
+							for (s = 0, k = l; k < sizeY; k++)
+								s += this.m[j][k] * this.m[i][k];
+							for (k = l; k < sizeY; k++)
+								this.m[j][k] += s * rv1[k];
+						}
+					}
+					for (k = l; k < sizeY; k++)
+						this.m[i][k] *= scale;
+				}
+			} // i<m && i!=n-1
+			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
+		} // i
+	}	
+	
+	public void svd1(Matrix w, Matrix v) {
+		int i, its, j, jj, k, l = 0, nm = 0;
+		boolean flag;
+		double c, f, h, s, x, y, z;
+		double anorm = 0., g = 0., scale = 0.;
+		if (sizeX < sizeY)
+			throw new Error("m < n");
+		// zliberror._assert(m>=n) ;
+		double[] rv1 = new double[sizeY];
+		w.resize(Math.min(getSizeX(), getSizeY()), 1);
+		v.resize(getSizeY(), getSizeY());
 
 		System.out.println("SVD beware results may not be sorted!");
 
@@ -851,6 +928,8 @@ public class Matrix {
 			} // i<m && i!=n-1
 			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
 		} // i
+		
+		
 		for (i = sizeY - 1; i >= 0; --i) {
 			if (i < sizeY - 1) { //
 				if (g != 0.) {
@@ -999,14 +1078,14 @@ public class Matrix {
 		// free rv1
 	} // svd
 
-	static final double SIGN(double a, double b) {
+	public static final double SIGN(double a, double b) {
 		return ((b) >= 0.0 ? Math.abs(a) : -Math.abs(a));
 	}
 	
 	/** 
 	 * sqrt(a^2 + b^2) without under/overflow. 
 	 */
-	private static double hypot(double a, double b) {
+	public static double hypot(double a, double b) {
 		double r;
 		double absA = Math.abs(a);
 		double absB = Math.abs(b);
@@ -1120,7 +1199,6 @@ public class Matrix {
 	// private static final double SAFMIN = 1.0E-30; // 2.00416836E-292;
 	public void qrDecomposition(Matrix tau) {
 		int minXY = Math.min(sizeX, sizeY);
-		double work[] = new double[getSizeX()];
 		
 		if ((tau.getSizeX() < minXY) || (tau.getSizeY() < 1))
 			tau.resize(minXY, 1);
@@ -1173,7 +1251,6 @@ public class Matrix {
 		if ((tau.getSizeX() < getSizeX()) || (tau.getSizeY() < 1))
 			throw new Error("Invalid parameter");
 		q.resize(getSizeY(), getSizeY());
-		double work[] = new double[q.getSizeX()];
 		for (int i = getSizeY() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				q.setItem(i, j, (i <= j) && (i < getSizeX()) ? getItem(i, j) : i == j ? 1.0 : 0.0);
@@ -1193,23 +1270,12 @@ public class Matrix {
 		}
 	}
 	
-	public static void svdDBDSQR(Matrix U, Matrix s, Matrix V, Matrix E, Matrix work) {
+	private static void svdDBDSQR(Matrix U, Matrix s, Matrix V, Matrix E, Matrix work) {
 		// DBDSQR
 		// Perform bidiagonal QR iteration, computing left singular vectors 
 		// of R in WORK(IU) and computing right singular vectors of R in VT
 		
-		// WORK(IU) = Q 
-		// WORK(IE) = E 
-		// WORK(IWORK) = temporary
-		// S, V
-		
 		// DBDSQR:258 Compute approximate maximum, minimum singular values
-//		double smax = 0.0;
-//		for (int i = s.getSizeY() - 1; i >= 0; i--)
-//			smax = Math.max(smax, Math.abs(s.getItem(i, i)));
-//		for (int i = s.getSizeX() - 2; i >= 0; i--)
-//			smax = Math.max(smax, Math.abs(E.getItem(i, 0)));
-		
 		int atIndex = Math.min(U.getSizeX(), V.getSizeY()) - 1;
 		int maxit = 6 * atIndex * atIndex;
 		int iter = maxit;
@@ -1225,11 +1291,11 @@ public class Matrix {
 		int idir = 0;
 		
 		while ((atIndex > 0) && (iter >= 0)) {
- 			System.out.println("Iteration = " + (maxit - iter) + " atIndex = " + atIndex);
-			s.printM("S=");
-			E.printM("E=");
-			V.printM("VT=");
-			U.printM("U=");
+// 			System.out.println("Iteration = " + (maxit - iter) + " atIndex = " + atIndex);
+//			s.printM("S=");
+//			E.printM("E=");
+//			V.printM("VT=");
+//			U.printM("U=");
 			
 			// DBDSQR:316 Find diagonal block of matrix to work on
 			double smax = Math.abs(s.getItem(atIndex, atIndex));
@@ -1444,12 +1510,6 @@ public class Matrix {
 			old_atIndex = atIndex;
 			
 			double shift = 0.0;
-//			s.printM("mid S=");
-//			System.out.println("SMINL=" + SMINL);
-//			System.out.println("N    =" + V.getSizeX());
-//			System.out.println("SAMX =" + smax);
-//			System.out.println("Form1=" + (V.getSizeX() * TOL * (SMINL / smax)));
-//			System.out.println("Form2=" + (Math.max(EPS, TOL * 0.01)));
 			
 			// DBDQR:456 Compute shift.  First, test if shifting would ruin relative accuracy, and if so set the shift to zero.
 			if ((TOL >= 0.0) && (V.getSizeX() * TOL * (SMINL / smax) <= Math.max(EPS, TOL * 0.01))) { 
@@ -1479,6 +1539,7 @@ public class Matrix {
 					FA = HA;
 					HA = tmp;
 				}
+				System.out.println("HA=" + HA);
 				if (HA == 0.0) {
 					shift = 0.0;
 				} else {
@@ -1603,7 +1664,7 @@ public class Matrix {
 						double F = s.getItem(lll, lll) * CS;
 						double G = E.getItem(lll - 1, 0);
 						// DLARTG
-						double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
+						double r = hypot(F, G);
 						CS = F / r;
 						SN = G / r;
 						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -1618,7 +1679,7 @@ public class Matrix {
 						F = oldCS * r;
 						G = s.getItem(lll - 1, lll - 1) * SN;
 						// DLARTG
-						r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
+						r = hypot(F, G); 
 						oldCS = F / r;
 						oldSN = G / r;
 						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -1760,7 +1821,7 @@ public class Matrix {
 
 					for (int lll = atIndex; lll > ll; lll--) {
 						// DLARTG
-						double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
+						double r = hypot(F, G); 
 						CS = F / r;
 						SN = G / r;
 						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -1777,7 +1838,7 @@ public class Matrix {
 						G = s.getItem(lll - 1, lll - 1) * SN;
 						s.setItem(lll - 1, lll - 1, CS * s.getItem(lll - 1, lll - 1));
 						// DLARTG
-						r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // TODO: hypot(F, G);
+						r = hypot(F, G); 
 						oldCS = F / r;
 						oldSN = G / r;
 						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -1794,8 +1855,6 @@ public class Matrix {
 							G = oldSN * E.getItem(lll - 2, 0); 
 							E.setItem(lll - 2, 0, oldCS * E.getItem(lll - 2, 0));
 						}
-						System.out.println("I=" + lll + " CS=" + CS + " SN=" + SN);
-						System.out.println(" oldCS=" + oldCS + " oldSN=" + oldSN);
 						work.setItem(lll, 0, CS);
 						work.setItem(lll, 1, -SN);
 						work.setItem(lll, 2, oldCS);
@@ -1803,19 +1862,13 @@ public class Matrix {
 					}
 					E.setItem(ll, 0, F);
 					// DBDSQR:656 Update singular vectors
-					V.printM("VT before DLASR, path 12=");
-					U.printM("**************************** U before DLASR, path 12=");
 					
-					//for (int lll = ll; lll < atIndex; lll++) {
-					//for (int lll = atIndex - 1; lll >= ll; lll--) {
 					for (int lll = atIndex; lll > ll; lll--) {
 						CS = work.getItem(lll, 0);
 						SN = work.getItem(lll, 1);
 						oldCS = work.getItem(lll, 2);
 						oldSN = work.getItem(lll, 3);
 	
-						System.out.println("CTEMP=" + CS + " STEMP=" + SN + " oldCS=" + oldCS + " oldSN=" + oldSN);
-						
 						if ((oldCS != 1.0) || (oldSN != 0.0))
 							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
 								double tmp1 = V.getItem(indx, lll);
@@ -1831,41 +1884,6 @@ public class Matrix {
 								U.setItem(lll - 1, indy, SN * tmp1 + CS * tmp2);
 							}
 					}
-					
-					
-					
-//					for (int lll = ll; lll < atIndex; lll++) {
-//						CS = work.getItem(lll, 0);
-//						SN = work.getItem(lll, 1);
-//						oldCS = work.getItem(lll, 2);
-//						oldSN = work.getItem(lll, 3);
-//						
-//						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-//							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
-//								double tmp1 = V.getItem(indx, lll + 1);
-//								double tmp2 = V.getItem(indx, lll);
-//								V.setItem(indx, lll + 1, oldCS * tmp1 - oldSN * tmp2);
-//								V.setItem(indx, lll,     oldSN * tmp1 + oldCS * tmp2);
-//							}
-//					}
-//					for (int lll = atIndex; lll > ll; lll--) { 
-//						CS = work.getItem(lll, 0);
-//						SN = work.getItem(lll, 1);
-//						oldCS = work.getItem(lll, 2);
-//						oldSN = work.getItem(lll, 3);
-//						
-//						System.out.println("CTEMP=" + CS + " STEMP=" + SN + " oldCS=" + oldCS + " oldSN=" + oldSN);
-//						if ((CS != 1.0) || (SN != 0.0)) 
-//							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
-//								U.printM("dummy debug for U=");
-//								double tmp1 = U.getItem(lll + 1, indy);
-//								double tmp2 = U.getItem(lll, indy);
-//								U.setItem(lll + 1, indy, CS * tmp1 - SN * tmp2);
-//								U.setItem(lll, indy,     SN * tmp1 + CS * tmp2);
-//							}
-//					}
-					U.printM("U after DLASR, path 12=");
-					V.printM("VT after DLASR, path 12=");
 					// DBDSQR:615 Test convergence
 					if (Math.abs(E.getItem(ll, 0)) < threshold)
 						E.setItem(ll, 0, 0.0);
@@ -1936,7 +1954,7 @@ public class Matrix {
 	 * If tau = 0, then H is taken to be the unit matrix.
 	 * (DLARF Left)
 	 */
-	public void svdDLARF_X(int atX, double tau) {
+	private void svdDLARF_X(int atX, double tau) {
 
 		for (int i = getSizeX() - 1; i > atX; i--) {
 			double sum = 0.0;
@@ -1947,37 +1965,6 @@ public class Matrix {
 		}
 	}
 
-	public void svdDLARF_X2(int atX, double tau) {
-		for (int i = getSizeX() - 1; i > atX; i--) {
-			double sum = 0.0;
-			for (int j = getSizeY() - 1; j > atX; j--) 
-				sum += getItem(i, j) * getItem(atX, j);
-			for (int j = getSizeY() - 1; j > atX; j--) 
-				setItem(i, j, getItem(i, j) - tau * sum * getItem(atX, j));
-		}
-	}
-
-	public void svdDLARF_Y2(int atY, double tau) {
-		for (int j = getSizeY() - 1; j > atY; j--) {
-			double sum = 0.0;
-			for (int i = getSizeX() - 1; i > atY; i--) 
-				sum += getItem(i, j) * getItem(i, atY);
-			for (int i = getSizeX() - 1; i > atY; i--) 
-				setItem(i, j, getItem(i, j) - tau * sum * getItem(i, atY));
-		}
-//		for (int j = getSizeY() - 1; j > atY; j--) { 
-//			double sum = 0.0;
-//			for (int i = getSizeX() - 1; i >= atY; i--) 
-//				sum += getItem(i, j) * getItem(atY, j);
-//			work[j] = tau * sum;
-//		}
-//		for (int j = getSizeY() - 1; j > atY; j--) 
-//			for (int i = getSizeX() - 1; i >= atY; i--) {
-//				setItem(i, j, getItem(i, j) - work[i] * getItem(atY, j));
-//		}
-	}
-
-	
 	/**
 	 * DLARF applies a real elementary reflector H to a real m by n matrix
 	 * C, from either the left or the right. H is represented in the form
@@ -1986,7 +1973,7 @@ public class Matrix {
 	 * If tau = 0, then H is taken to be the unit matrix.
 	 * (DLARF Right)
 	 */
-	public void svdDLARF_Y(int atY, double tau) {
+	private void svdDLARF_Y(int atY, double tau) {
 		for (int j = getSizeY() - 1; j > atY; j--) {
 			double sum = 0.0;
 			for (int i = getSizeX() - 1; i >= atY; i--) 
@@ -1996,7 +1983,7 @@ public class Matrix {
 		}
 	}
 	
-	public void svdDGEBRD(Matrix tauP, Matrix tauQ) {
+	private void svdDGEBRD(Matrix tauP, Matrix tauQ) {
 		boolean upper = true; //getSizeX() <= getSizeY();
 		//int minXY = upper ? getSizeX() : getSizeY();
 		int minXY = Math.min(getSizeX(), getSizeY());
@@ -2009,7 +1996,6 @@ public class Matrix {
 //			tauP = tauQ;
 //			tauQ = tmp;
 //		}
-		double work[] = new double[getSizeX()];
 		
 		for (int atIndex = 0; atIndex < minXY; atIndex++) {
 			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
@@ -2107,7 +2093,13 @@ public class Matrix {
 			if (upper) {
 				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
 				setItem(atIndex + 1, atIndex, 1.0);
-				svdDLARF_Y2(atIndex, tmp_tau);
+				for (int j = getSizeY() - 1; j > atIndex; j--) {
+					double sum = 0.0;
+					for (int i = getSizeX() - 1; i > atIndex; i--) 
+						sum += getItem(i, j) * getItem(i, atIndex);
+					for (int i = getSizeX() - 1; i > atIndex; i--) 
+						setItem(i, j, getItem(i, j) - tmp_tau * sum * getItem(i, atIndex));
+				}
 				setItem(atIndex + 1, atIndex, beta);
 			} else {
 				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
@@ -2117,212 +2109,149 @@ public class Matrix {
 			}
 		}
 	}
-	
-	public void mysvd(Matrix U, Matrix V, Matrix s) throws Exception {
+
+	public void mysvd(Matrix U, Matrix V, Matrix s) {
 		printM("A");
-		double work2[] = new double[getSizeX()];
 		U.resize(getSizeY(), getSizeY());
 		s.resize(getSizeX(), getSizeY());
 		V.resize(getSizeX(), getSizeX());
 		s.make0();
 		int minXY = Math.min(getSizeX(), getSizeY());
 
-		Matrix tau = new Matrix();
+		Matrix RL = new Matrix(getSizeX(), getSizeY());
+		Matrix tauP = new Matrix(minXY, 1);
+		Matrix tauQ = new Matrix(getSizeX(), 1);
+		Matrix E = new Matrix(minXY - 1, 1);
+		Matrix Q = new Matrix(getSizeY(), getSizeY());
+		Matrix work = new Matrix();
 
-		if (getSizeX() <= getSizeY()) {
-			qrDecomposition(tau);
-			// Generate Q in U
-			qrDecomositionGetQ(tau, U);
-			Matrix UBackup = U.makeCopy();
-			Matrix R = new Matrix();
-			qrDecomositionGetR(R);
-					
-			// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
-			Matrix tauP = new Matrix(minXY, 1);
-			Matrix tauQ = new Matrix(minXY, 1);
-			Matrix E = new Matrix(minXY - 1, 1);
-	
-			R.svdDGEBRD(tauP, tauQ);
-			
-			for (int i = minXY - 1; i >= 0; i--)
-				s.setItem(i, i, R.getItem(i, i));
-			for (int i = minXY - 2; i >= 0; i--)
-				E.setItem(i, 0, R.getItem(i + 1, i));
-	
-			// DGESVD:1807
-			for (int i = V.getSizeX() - 1; i >= 0; i--)
-				for (int j = i; j >= 0; j--)
-					V.setItem(i, j, R.getItem(i, j));
-	
-			// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
-			Matrix Q = new Matrix();
-			R.qrDecomositionGetQ(tauQ, Q);
-			
-			// DGESVD:1829 Generate right bidiagonalizing vectors in VT
-			
-			// DORGBR:217 Shift the vectors which define the elementary reflectors one
-			// row downward, and set the first row and column of P' to those of the unit matrix
-			for (int j = V.getSizeY() - 1; j > 0; j--) {
-				for (int i = j - 1; i > 0; i--)
-					V.setItem(j, i, V.getItem(j, i - 1));
-				V.setItem(0, j, 0.0);
-				V.setItem(j, 0, 0.0);
-			}
-			V.setItem(0, 0, 1.0);
-			
-			// DORGL2
-			for (int atIndex = V.getSizeX() - 1; atIndex > 0; atIndex--) {
-				double tmp_tau = tauP.getItem(atIndex - 1, 0);
-				if (atIndex < V.getSizeX() - 1) {
-					// Apply H(i) to A(i:m,i:n) from the right
-					V.setItem(atIndex, atIndex, 1.0);
-					V.svdDLARF_Y(atIndex, tmp_tau);
-					for (int i = V.getSizeX() - 1; i > atIndex; i--) 
-						V.setItem(i, atIndex, -tmp_tau * V.getItem(i, atIndex));
-				}
-				V.setItem(atIndex, atIndex, 1.0 - tmp_tau);
-				// DORGL2:124 Set A(i,1:i-1) to zero 
-				for (int i = atIndex - 1; i > 0; i--)
-					V.setItem(i, atIndex, 0.0);
-			}
-			// End DORGL2
-			
-			Q.copyTo(U);
-			Matrix work = new Matrix();
-
-//			s.printM("s");
-//			E.printM("E");
-//			U.printM("First param");
-//			V.printM("Second param");
-			
-			svdDBDSQR(U, s, V, E, work);
-			
-//			System.out.println("FINISHED!!!!!");
-//			s.printM("S=");
-//			E.printM("E=");
-//			V.printM("VT=");
-//			U.printM("U=");
+		Matrix tmpV;
+		Matrix tmpU;
+		Matrix tmpQ;
 		
-			// DGESVD:1850 Multiply Q in U by left singular vectors of R in WORK(IU), storing result in A
-//			UBackup.printM("Q =");
-//			U.printM("IU=");
-			for (int i = getSizeX() - 1; i >= 0; i--) {
-				for (int j = getSizeY() - 1; j >= 0; j--) {
-					double sum = 0.0;	
-					for (int k = U.getSizeY() - 1; k >= 0; k--) {
-						double a = UBackup.getItem(k, j);
-						double b = U.getItem(i, k);
-						sum += a * b;
-					}
-					setItem(i, j, sum);
-					//UBackup.setItem(i, j, sum);
-				}
-			}
-			UBackup.copyTo(U);
-			for (int j = getSizeY() - 1; j >= 0; j--) 
-				for (int i = getSizeX() - 1; i >= 0; i--) 
-					U.setItem(i, j, getItem(i, j));
+		boolean upper = getSizeX() <= getSizeY();
+
+		if (upper) {
+			qrDecomposition(tauP);
+			qrDecomositionGetQ(tauP, U);
+			qrDecomositionGetR(RL);
+			tmpU = U;
+			tmpV = V;
+			tmpQ = Q;
 		} else {
-			lqDecomposition(tau);
-			// DGESVD:3192 Generate Q in VT
-			lqDecomositionGetQ(tau, V);
-			
-			Matrix VBackup = V.makeCopy();
-			Matrix L = new Matrix();
-			lqDecomositionGetL(L);
-			
-			// DGESVD:3213 Bidiagonalize L in WORK(IU), copying result to U
-			Matrix tauP = new Matrix(minXY, 1);
-			Matrix tauQ = new Matrix(getSizeX(), 1);
-			Matrix E = new Matrix(minXY - 1, 1);
-	
-			L.svdDGEBRD(tauP, tauQ);
-			for (int i = minXY - 1; i >= 0; i--)
-				s.setItem(i, i, L.getItem(i, i));
-			for (int i = minXY - 2; i >= 0; i--)
-				E.setItem(i, 0, L.getItem(i + 1, i));
-	
-			// DGESVD:3220
-			for (int i = U.getSizeX() - 1; i >= 0; i--)
-				for (int j = U.getSizeY() - 1; j >= 0; j--)
-					U.setItem(i, j, L.getItem(i, j));
-			
-			// DGESVD:3223 Generate right bidiagonalizing vectors in WORK(IU)
-			Matrix Q = new Matrix();
+			lqDecomposition(tauP);
+			lqDecomositionGetQ(tauP, V);
+			lqDecomositionGetL(RL);
+			tmpU = V;
+			tmpV = Q;
+			tmpQ = U;
+		}
 
-			L.qrDecomositionGetQ(tauQ, Q);
-			Q.printM("Q");
-			// DGESVD:3230 Generate left bidiagonalizing vectors in U
-			
-			U.printM("before DORGL2 A=");
-			// DORGBR:217 Shift the vectors which define the elementary reflectors one
-			// row downward, and set the first row and column of P' to those of the unit matrix
-			for (int i = U.getSizeY() - 1; i > 0; i--) {
-				for (int j = i - 1; j > 0; j--)
-					U.setItem(i, j, U.getItem(i, j - 1));
-				U.setItem(0, i, 0.0);
-				U.setItem(i, 0, 0.0);
-			}
-			U.setItem(0, 0, 1.0);
-			U.printM("DORGL2 A=");
-			// DORGL2
-			for (int atIndex = U.getSizeX() - 1; atIndex > 0; atIndex--) {
-				double tmp_tau = tauP.getItem(atIndex - 1, 0);
-				if (atIndex < U.getSizeX() - 1) {
-					// Apply H(i) to A(i:m,i:n) from the right
-					U.setItem(atIndex, atIndex, 1.0);
-					U.svdDLARF_Y(atIndex, tmp_tau);
-					for (int i = U.getSizeX() - 1; i > atIndex; i--) 
-						U.setItem(i, atIndex, -tmp_tau * U.getItem(i, atIndex));
-				}
-				U.setItem(atIndex, atIndex, 1.0 - tmp_tau);
-				// DORGL2:124 Set A(i,1:i-1) to zero 
-				for (int i = atIndex - 1; i > 0; i--)
-					U.setItem(i, atIndex, 0.0);
-			}
-			// End DORGL2
-			U.printM("DORGL2 A=");
-			Q.copyTo(V);
-			Matrix work = new Matrix();
-			
-			s.printM("s");
-			E.printM("E");
-			U.printM("First param");
-			V.printM("Second param");
-			
-			svdDBDSQR(V, s, U, E, work);
-			
-			System.out.println("FINISHED!!!!!");
-			s.printM("S=");
-			E.printM("E=");
-			V.printM("VT=");
-			U.printM("U=");
+		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
+		RL.svdDGEBRD(tauP, tauQ);
+		for (int i = minXY - 1; i >= 0; i--)
+			s.setItem(i, i, RL.getItem(i, i));
+		for (int i = minXY - 2; i >= 0; i--)
+			E.setItem(i, 0, RL.getItem(i + 1, i));
 		
-			// DGESVD:3246 Multiply right singular vectors of L in WORK(IU) by Q in VT, storing result in A 
-			U.printM("IU=");
-			VBackup.printM("VT=");
+		// DGESVD:1807
+		for (int i = tmpV.getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				tmpV.setItem(i, j, RL.getItem(i, j));
+		
+		// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
+		RL.qrDecomositionGetQ(tauQ, tmpQ);
+		
+		// DORGBR:217 Shift the vectors which define the elementary reflectors one
+		// row downward, and set the first row and column of P' to those of the unit matrix
+		for (int j = tmpV.getSizeY() - 1; j > 0; j--) {
+			for (int i = j - 1; i > 0; i--)
+				tmpV.setItem(j, i, tmpV.getItem(j, i - 1));
+			tmpV.setItem(0, j, 0.0);
+			tmpV.setItem(j, 0, 0.0);
+		}
+		tmpV.setItem(0, 0, 1.0);
+
+		// DORGL2
+		for (int atIndex = tmpV.getSizeX() - 1; atIndex > 0; atIndex--) {
+			double tmp_tau = tauP.getItem(atIndex - 1, 0);
+			if (atIndex < tmpV.getSizeX() - 1) {
+				// Apply H(i) to A(i:m,i:n) from the right
+				tmpV.setItem(atIndex, atIndex, 1.0);
+				tmpV.svdDLARF_Y(atIndex, tmp_tau);
+				for (int i = tmpV.getSizeX() - 1; i > atIndex; i--) 
+					tmpV.setItem(i, atIndex, -tmp_tau * tmpV.getItem(i, atIndex));
+			}
+			tmpV.setItem(atIndex, atIndex, 1.0 - tmp_tau);
+			// DORGL2:124 Set A(i,1:i-1) to zero 
+			for (int i = atIndex - 1; i > 0; i--)
+				tmpV.setItem(i, atIndex, 0.0);
+		}
+		// End DORGL2
+		svdDBDSQR(tmpQ, s, tmpV, E, work);
+
+		if (upper) {
+			// DGESVD:1850 Multiply Q in U by left singular vectors of R in WORK(IU), storing result in A
 			for (int i = getSizeX() - 1; i >= 0; i--) {
 				for (int j = getSizeY() - 1; j >= 0; j--) {
 					double sum = 0.0;	
 					for (int k = getSizeY() - 1; k >= 0; k--) {
-						double a = U.getItem(k, j);
-						double b = VBackup.getItem(i, k);
+						double a = tmpU.getItem(k, j);
+						double b = tmpQ.getItem(i, k);
 						sum += a * b;
 					}
 					setItem(i, j, sum);
 				}
 			}
-			printM("after DGEMM=");
-			VBackup.copyTo(U);
-			for (int j = getSizeY() - 1; j >= 0; j--) 
-				for (int i = getSizeX() - 1; i >= 0; i--) 
-					U.setItem(i, j, getItem(i, j));
-			
-			U.copyTo(E);
-			V.copyTo(U);
-			E.copyTo(V);
+		} else {
+			// DGESVD:3246 Multiply right singular vectors of L in WORK(IU) by Q in VT, storing result in A 
+			for (int i = getSizeX() - 1; i >= 0; i--) {
+				for (int j = getSizeY() - 1; j >= 0; j--) {
+					double sum = 0.0;	
+					for (int k = getSizeY() - 1; k >= 0; k--) {
+						double a = tmpV.getItem(k, j);
+						double b = tmpU.getItem(i, k);
+						sum += a * b;
+					}
+					setItem(i, j, sum);
+				}
+			}
 		}
-	}	
+
+		for (int i = getSizeX() - 1; i >= 0; i--) 
+			for (int j = getSizeY() - 1; j >= 0; j--) 
+				tmpU.setItem(i, j, getItem(i, j));
+	}
+	
+	public void luDecomposition() {
+		boolean found;
+		Matrix permMatr = new Matrix(getSizeX(), getSizeY());
+		permMatr.makeE();
+		
+		for (int k = 0; k < getSizeX(); k++)
+			for (int i = k + 1; k < getSizeX(); i++) {
+				if (getItem(k, k) == 0.0) {
+					found = false;
+					for (int p = k + 1; p < getSizeX(); p++) {
+						if (getItem(0, k) != 0) {
+							exchangeX(k, p);
+							permMatr.exchangeX(k, p);
+							found = true;
+							break;
+						}
+					}
+					if (!found)
+						throw new Error("LU decomposition failed. Matrix is singular");
+				}
+				// ????
+			}
+	}
+
+	
+	
+	
+	
+	
 	
 	public static void main(String[] args) throws Exception {
 		BufferedReader fin = new BufferedReader(new FileReader(
@@ -2337,22 +2266,36 @@ public class Matrix {
 		Matrix b = a.makeCopy();
 		Matrix bt = at.makeCopy();
 		
-		Matrix tmp = new Matrix();
+		Matrix tmp = new Matrix(50,1);
 
 		Matrix u = new Matrix();
-		Matrix v = new Matrix();
-		Matrix s = new Matrix();
+		Matrix v = new Matrix(a.getSizeX(), a.getSizeX());
+		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 
-//		Matrix ut = new Matrix();
-//		Matrix vt = new Matrix();
-//		Matrix st = new Matrix();
+		Matrix ut = new Matrix();
+		Matrix vt = new Matrix();
+		Matrix st = new Matrix();
 
-		a.mysvd(u, v, s);
+		
+		a.lqDecomposition(tmp);
+		a.lqDecomositionGetQ(tmp, u);
+		a.lqDecomositionGetL(v);
+		
+//		a.mysvd(u, v, s);
 //		at.mysvd(ut, vt, st);
 
-		u.printM("U !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		v.printM("V");
-		s.printM("S");
+		u.printM("U2");
+		v.printM("V2");
+		v.mMul(u, s);
+		s.printM("S2");
+		s.mSub(b, b);
+		b.printM("A");
+				
+		
+		
+//		u.printM("U !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//		v.printM("V");
+//		s.printM("S");
 		
 		Matrix checkA = new Matrix();
 		Matrix checkAt = new Matrix();
@@ -2361,10 +2304,10 @@ public class Matrix {
 //		vt.printM("VT");
 //		st.printM("ST");
 		
-		u.mMul(s, tmp);
-		tmp.mMul(v, checkA);
-		checkA.mSub(b, a);
-		a.printM("Diff A");
+//		u.mMul(s, tmp);
+//		tmp.mMul(v, checkA);
+//		checkA.mSub(b, a);
+//		a.printM("Diff A");
 
 //		ut.mMul(st, tmp);
 //		tmp.mMul(vt, checkAt);
