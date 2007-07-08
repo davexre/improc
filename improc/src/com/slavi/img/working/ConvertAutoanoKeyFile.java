@@ -5,13 +5,14 @@ import java.util.List;
 
 import org.jdom.Element;
 
+import com.slavi.utils.Utl;
 import com.slavi.utils.XMLHelper;
 
 public class ConvertAutoanoKeyFile {
 
 	public static void main(String[] args) throws Exception {
 		String finName = "./../../images/testimg.key";
-		String fouName = XMLHelper.chageFileExtension(finName, "APxml");
+		String fouName = Utl.chageFileExtension(finName, "APxml");
 		
 		Element root = XMLHelper.readXML(new File(finName));
 		ScalePointList spl = new ScalePointList();

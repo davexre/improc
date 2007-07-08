@@ -33,9 +33,9 @@ public class XMLHelper {
 		return doc.getRootElement();		
 	}
 	
-	public static Element makeEl(String name, String attributeValue) {
+	public static Element makeEl(String name, String elementName) {
 		Element e = new Element(name);
-		e.setText(attributeValue);
+		e.setText(elementName);
 		return e;
 	}
 	
@@ -80,11 +80,5 @@ public class XMLHelper {
 			r = defaultValue;				
 		return r;
 	}
-	
-	public static String chageFileExtension(String fileName, String newExtension) {
-		int lastIndex = fileName.lastIndexOf(".");
-		if (lastIndex < 0)
-			return fileName + "." + newExtension;
-		return fileName.substring(0, lastIndex) + "." + newExtension; 
-	}
+
 }

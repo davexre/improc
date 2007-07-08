@@ -76,7 +76,7 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format(Locale.US, "%1$5.10f",new Object[] { new Double(m[i][j]) } ));
+				result.append(String.format(Locale.US, "%1$9.4f",new Object[] { new Double(m[i][j]) } ));
 			}
 			result.append("\n");
 		}
@@ -781,8 +781,11 @@ public class Matrix {
 	// MY SVD translation from LAPACK's DGESVD
 	
 	public void svd(Matrix w, Matrix v) {
+		@SuppressWarnings("unused")
 		int i, its, j, jj, k, l = 0, nm = 0;
+		@SuppressWarnings("unused")
 		boolean flag;
+		@SuppressWarnings("unused")
 		double c, f, h, s, x, y, z;
 		double anorm = 0., g = 0., scale = 0.;
 //		if (sizeX < sizeY)
@@ -1210,7 +1213,7 @@ public class Matrix {
 			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
 			// DLARFG
 			double xnorm = 0.0;
-			for (int j = getSizeY() - 1; j > atIndex; j--)					
+			for (int j = getSizeY() - 1; j > atIndex; j--)
 				xnorm = hypot(xnorm, getItem(atIndex, j));
 			if (xnorm == 0.0) { 
 				tau.setItem(atIndex, 0, 0.0);
@@ -2045,6 +2048,8 @@ public class Matrix {
 				svdDLARF_Y(atIndex, tmp_tau);
 			setItem(atIndex, atIndex, beta);
 
+		
+			System.out.println("atIndex = " + atIndex + " beta = " + beta + " tau = " + tmp_tau);
 			
 			// =============================================
 			// DGEBD2:176
@@ -2264,7 +2269,7 @@ public class Matrix {
 		Matrix at = new Matrix();
 		a.transpose(at);
 		Matrix b = a.makeCopy();
-		Matrix bt = at.makeCopy();
+//		Matrix bt = at.makeCopy();
 		
 		Matrix tmp = new Matrix(50,1);
 
@@ -2272,9 +2277,9 @@ public class Matrix {
 		Matrix v = new Matrix(a.getSizeX(), a.getSizeX());
 		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 
-		Matrix ut = new Matrix();
-		Matrix vt = new Matrix();
-		Matrix st = new Matrix();
+//		Matrix ut = new Matrix();
+//		Matrix vt = new Matrix();
+//		Matrix st = new Matrix();
 
 		
 		a.lqDecomposition(tmp);
@@ -2297,8 +2302,8 @@ public class Matrix {
 //		v.printM("V");
 //		s.printM("S");
 		
-		Matrix checkA = new Matrix();
-		Matrix checkAt = new Matrix();
+//		Matrix checkA = new Matrix();
+//		Matrix checkAt = new Matrix();
 
 //		ut.printM("UT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 //		vt.printM("VT");

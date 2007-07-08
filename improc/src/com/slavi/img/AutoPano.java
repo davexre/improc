@@ -1,5 +1,8 @@
 package com.slavi.img;
-
+/*
+ * Run using the -Xmx (maximum heap) like (300 Mb)
+ * java -Xmx300000000
+ */
 import java.io.File;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -11,6 +14,7 @@ import com.slavi.matrix.Matrix;
 import com.slavi.statistics.AffineTransformLearner;
 import com.slavi.statistics.BaseTransformLearner;
 import com.slavi.statistics.StatisticsLT;
+import com.slavi.tree.NearestNeighbours;
 import com.slavi.utils.Marker;
 import com.slavi.utils.XMLHelper;
 
@@ -32,32 +36,37 @@ public class AutoPano {
 	
 	public void buildPointPairList(ScalePointList a, ScalePointList b)  {
 		int denied = 0;
-		if (a.points.size() > b.points.size()) {
+		ArrayList aPoints = a.kdtree.toList();
+		ArrayList bPoints = b.kdtree.toList();
+		if (aPoints.size() > bPoints.size()) {
 			ScalePointList tmp = a;
 			a = b;
 			b = tmp;
+			ArrayList tmpLst = aPoints;
+			aPoints = bPoints;
+			bPoints = tmpLst;
 		}		
-		int searchSteps = (int) (Math.max(130.0, (Math.log(a.points.size()) / Math.log (1000.0)) * 130.0));
+		int searchSteps = (int) (Math.max(130.0, (Math.log(aPoints.size()) / Math.log (1000.0)) * 130.0));
 		
-		for (int p = a.points.size() - 1; p >= 0; p--) {
-			ScalePoint ap = (ScalePoint) a.points.get(p);
+		for (int p = aPoints.size() - 1; p >= 0; p--) {
+			ScalePoint ap = (ScalePoint) aPoints.get(p);
 			NearestNeighbours nnlst = b.kdtree.getNearestNeighboursBBF(ap, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;
-			if (nnlst.getValue(0) > nnlst.getValue(1) * 0.6) {
+			if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
 				denied++;
 				continue;
 			}
 			ScalePoint bp = (ScalePoint)nnlst.getItem(0);
-			pointPairs.addPair(ap, (ScalePoint)nnlst.getItem(0), nnlst.getValue(0), nnlst.getValue(1));
+			pointPairs.addPair(ap, (ScalePoint)nnlst.getItem(0), nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
 			fou.println(
 				ap.doubleX + "\t" + ap.doubleY + "\t" + ap.kpScale + "\t" + 
 				bp.doubleX + "\t" + bp.doubleY + "\t" + bp.kpScale + "\t" +
-				nnlst.getValue(0) + "\t" + nnlst.getValue(1));
+				nnlst.getDistanceToTarget(0) + "\t" + nnlst.getDistanceToTarget(1));
 		}
 		System.out.println("DENIED=" + denied);
-		System.out.println("SPL1.SIZE=" + a.points.size());
-		System.out.println("SPL2.SIZE=" + b.points.size());
+		System.out.println("SPL1.SIZE=" + aPoints.size());
+		System.out.println("SPL2.SIZE=" + bPoints.size());
 	}
 
 	public void printWeightsGreaterThanOne() {

@@ -6,6 +6,8 @@ import java.util.StringTokenizer;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
+import com.slavi.tree.KDNode;
+import com.slavi.tree.KDNodeBase;
 import com.slavi.utils.XMLHelper;
 
 public class ScalePoint extends KDNodeBase {

@@ -1,10 +1,11 @@
-package com.slavi.img;
+package com.slavi.tree;
 
-public class NearestNeighbours {
+
+public class NearestNeighbours{
 
 	private KDNode target;
 	
-	private double[] values;
+	private double[] distancesToTarget;
 	
 	private KDNode[] items;
 	
@@ -15,15 +16,15 @@ public class NearestNeighbours {
 	}
 	
 	public KDNode getItem(int atIndex) {
-		return items[atIndex];
+		return (KDNode)items[atIndex];
 	}
 	
-	public double getValue(int atIndex) {
-		return values[atIndex];
+	public double getDistanceToTarget(int atIndex) {
+		return distancesToTarget[atIndex];
 	}
 	
 	public int getCapacity() {
-		return values.length;
+		return distancesToTarget.length;
 	}
 	
 	public KDNode getTarget() {
@@ -32,35 +33,35 @@ public class NearestNeighbours {
 	
 	public NearestNeighbours(KDNode target, int maxCapacity) {
 		this.target = target;
-		this.values = new double[maxCapacity];
+		this.distancesToTarget = new double[maxCapacity];
 		this.items = new KDNode[maxCapacity];
 		this.m_size = 0;
 	}
 	
 	public int countAdds = 0;
 	
-	public void add(KDNode item, double value) {
+	public void add(KDNode item, double distanceToTarget) {
 		countAdds++;
 		int insertAt = 0;
 		// Find insert position
 		for (; insertAt < m_size; insertAt++) {
-			if (value < values[insertAt])
+			if (distanceToTarget < distancesToTarget[insertAt])
 				break;
 		}
 		// If value is greater than all elements then ignore it.
-		if (insertAt >= values.length)
+		if (insertAt >= distancesToTarget.length)
 			return;
 		// Increase size if limit not reached
-		if (m_size < values.length)
+		if (m_size < distancesToTarget.length)
 			m_size++;
 		// Make room to insert
 		int itemsToMove = m_size - insertAt - 1;
 		if (itemsToMove > 0) {
-			System.arraycopy(values, insertAt, values, insertAt + 1, itemsToMove);
+			System.arraycopy(distancesToTarget, insertAt, distancesToTarget, insertAt + 1, itemsToMove);
 			System.arraycopy(items, insertAt, items, insertAt + 1, itemsToMove);
 		}
 		// Put item in insertAt position
-		values[insertAt] = value;
+		distancesToTarget[insertAt] = distanceToTarget;
 		items[insertAt] = item;
 	}
 }

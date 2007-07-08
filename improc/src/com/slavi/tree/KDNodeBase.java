@@ -1,4 +1,4 @@
-package com.slavi.img;
+package com.slavi.tree;
 
 public abstract class KDNodeBase implements KDNode {
 

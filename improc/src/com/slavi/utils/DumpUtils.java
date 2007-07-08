@@ -100,9 +100,4 @@ public class DumpUtils {
 //			}
 //		}
 //	}
-	
-	public static void main(String[] args) {
-		DumpUtils du = new DumpUtils();
-		DumpUtils.showObject(du);
-	}
 }

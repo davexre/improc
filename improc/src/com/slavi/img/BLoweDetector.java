@@ -400,7 +400,7 @@ public class BLoweDetector {
 	}
 
 	private void scalePointCreated(ScalePoint sp) {
-		scalePointList.points.add(sp);
+		scalePointList.kdtree.add(sp);
 	}
 	
 	private BImageMap lastBlured1Img = null;
@@ -530,7 +530,7 @@ public class BLoweDetector {
 	public void processImage(String imageFileName) throws IOException {
 		File imgFile = new File(imageFileName);
 		BImageMap img = new BImageMap(imgFile);
-		scalePointList.points.clear();
+		scalePointList.kdtree.clear();
 		scalePointList.imageFileName = imgFile.getName();
 		scalePointList.imageSizeX = img.sizeX;
 		scalePointList.imageSizeY = img.sizeY;

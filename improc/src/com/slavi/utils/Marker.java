@@ -71,7 +71,7 @@ public class Marker {
 			size /= 1000.0;
 		}
 		if (Math.floor(size) == size) 
-			return String.format("%i %s", new Object[] { new Integer((int)size), dim } );
+			return String.format("%d %s", new Object[] { new Integer((int)size), dim } );
 		return String.format(Locale.US, "%.1f %s", new Object[] { new Double(size), dim } );
 	}
 
@@ -86,15 +86,5 @@ public class Marker {
 				+ formatMillis(now - m.mark) + 
 				", memory used " + formatBytes(memoryUsage.getUsed()) + 
 				", memory delta " + formatBytes(memoryUsage.getUsed() - m.memoryUsed));
-	}
-
-	public static void main(String[] args) throws Exception {
-		Marker.mark();
-		@SuppressWarnings("unused")
-		double a[] = new double[10000];
-		Thread.sleep(1234);
-		//a = null;
-		//System.gc();
-		Marker.release();
 	}
 }

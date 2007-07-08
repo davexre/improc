@@ -1,12 +1,9 @@
 package com.slavi.testpackage;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.text.Format;
 import java.util.ArrayList;
-import java.util.Formatter;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import com.slavi.matrix.Matrix;
@@ -16,7 +13,7 @@ public class DNister5PointMatch {
 
 	ArrayList pairs = new ArrayList();
 	
-	private void checkSVD(Matrix source, Matrix u, Matrix v, Matrix s) {
+	public void checkSVD(Matrix source, Matrix u, Matrix v, Matrix s) {
 		final double precision = 1000000.0;
 //		source.printM("Source matrix");
 //		u.printM("U");
@@ -156,6 +153,41 @@ public class DNister5PointMatch {
 		dest.setItem(19, 0, a.getItem(9, 0) * W.getItem(atX, atY));
 	}
 	
+	private static void build10DegreePolynomial(int destY, Matrix src, Matrix dest) {
+		int Y = destY << 1;
+		int Y1 = Y + 1;
+		dest.setItem( 0, destY,                   - src.getItem(0, Y1));
+		dest.setItem( 1, destY, src.getItem(0, Y) - src.getItem(1, Y1));
+		dest.setItem( 2, destY, src.getItem(1, Y) - src.getItem(2, Y1));
+		dest.setItem( 3, destY, src.getItem(2, Y)                     );
+
+		dest.setItem( 4, destY,                   - src.getItem(3, Y1));
+		dest.setItem( 5, destY, src.getItem(3, Y) - src.getItem(4, Y1));
+		dest.setItem( 6, destY, src.getItem(4, Y) - src.getItem(5, Y1));
+		dest.setItem( 7, destY, src.getItem(5, Y)                     );
+
+		dest.setItem( 8, destY,                   - src.getItem(6, Y1));
+		dest.setItem( 9, destY, src.getItem(6, Y) - src.getItem(7, Y1));
+		dest.setItem(10, destY, src.getItem(7, Y) - src.getItem(8, Y1));
+		dest.setItem(11, destY, src.getItem(8, Y) - src.getItem(9, Y1));
+		dest.setItem(12, destY, src.getItem(9, Y)                     );
+	}
+
+	private static void polymult0b(
+			Matrix L, int LX, int LY, int LS,
+			Matrix R, int RX, int RY, int RS,
+			Matrix D, int DY) { 
+		int DS = LS + RS - 1;
+		for (int i = 0; i < DS; i++)
+			D.setItem(i, DY, 0.0);
+		for (int iR = 0; iR < RS; iR++) {
+			for (int iL = 0; iL < LS; iL++) {
+				D.setItem(iR + iL, DY, D.getItem(iR + iL, DY) +
+					R.getItem(RX + iR, RY) * L.getItem(LX + iL, LY));
+			}
+		}
+	}
+
 	public void computeIt() throws Exception {
 		if (pairs.size() < 5) 
 			throw new Error("At least 5 matching points required");
@@ -180,7 +212,7 @@ public class DNister5PointMatch {
 //		Q.printM("Q");
 		
 		Matrix u = new Matrix();
-		Matrix s = new Matrix();
+//		Matrix s = new Matrix();
 		Matrix v = new Matrix();
 		
 //		Q.svd1(s, v);
@@ -312,8 +344,7 @@ public class DNister5PointMatch {
 		System.out.println("LE");
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 20; j++) {
-				System.out.print(((int)(LE[i].getItem(j, 0) * 10000.0)) / 10000.0);
-				System.out.print("\t");
+				System.out.print(String.format(Locale.US, "%7.4f ", LE[i].getItem(j, 0)));
 			}
 			System.out.println("");
 		}
@@ -353,12 +384,11 @@ public class DNister5PointMatch {
 
 		System.out.println("A");
 		for (int j = 0; j < A.getSizeY(); j++) {
-		for (int i = 0; i < A.getSizeX(); i++) {
-			System.out.print(((int)(A.getItem(i, j) * 10000.0)) / 10000.0);
-			System.out.print("\t");
+			for (int i = 0; i < A.getSizeX(); i++) {
+				System.out.print(String.format(Locale.US, "%7.4f ", A.getItem(i, j)));
+			}
+			System.out.println("");
 		}
-		System.out.println("");
-	}
 		
 //		A.printM("A");
 		
@@ -368,40 +398,100 @@ public class DNister5PointMatch {
 			double theValue = Math.abs(A.getItem(aRow, aRow));
 			double tmp;
 			int theIndex = aRow;
-			for (int i = aRow + 1; i < 10; i++) 
-				if ((tmp = Math.abs(A.getItem(i, aRow))) > theValue) {
+			for (int j = aRow + 1; j < 10; j++) 
+				if ((tmp = Math.abs(A.getItem(aRow, j))) > theValue) {
 					theValue = tmp; 
-					theIndex = i;
+					theIndex = j;
 				}
+			// Swap rows
+			if (aRow != theIndex)
+				A.exchangeY(aRow, theIndex);
+
+			theValue = A.getItem(aRow, aRow);
 			// normalize current row
 			if (theValue != 0.0)
-				for (int i = 0; i < 10; i++)
-					A.setItem(i, theIndex, A.getItem(i, theIndex) / theValue);
+				for (int i = 0; i < 20; i++)
+					A.setItem(i, aRow, A.getItem(i, aRow) / theValue);
 			// nullify rest of column
-			for (int i = theIndex + 1; i < 10; i++) {
-				tmp = A.getItem(i, theIndex);
-				for (int j = 0; j < 10; j++)
-					A.setItem(j, i, A.getItem(j, i) - A.getItem(j, theIndex) * tmp);
+			for (int j = aRow + 1; j < 10; j++) {
+				tmp = A.getItem(aRow, j);
+				for (int i = 0; i < 20; i++)
+					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, aRow) * tmp);
 			}
 			// diagonalize row 5-9
-			for (int j = 5; j < aRow; j++) {
-				tmp = A.getItem(j, theIndex);
-				for (int i = 0; i < 10; i++)
-					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, theIndex) * tmp);
+			for (int j = 4; j < aRow; j++) {
+				tmp = A.getItem(aRow, j);
+				for (int i = 0; i < 20; i++)
+					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, aRow) * tmp);
 			}
 		}
 		// test for rank deficiency (e.g., pure translation)
 		if (Math.abs(A.getItem(9, 9)) < 1e-7) {
-			A.make0();
+			for (int i = 0; i < 20; i++) {
+				A.setItem(i, 8, A.getItem(i, 9));
+				A.setItem(i, 9, 0.0);
+			}
 		} else {
 			// complete elimination for last row
 			double tmp = A.getItem(9, 9);
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 20; i++)
 				A.setItem(i, 9, A.getItem(i, 9) / tmp);
-			for (int j = 5; j < 9; j++)
-				for (int i = 0; i < 10; i++)
-					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, 9) * A.getItem(9, j));
+			for (int j = 4; j < 9; j++) {
+				tmp = A.getItem(9, j);
+				for (int i = 0; i < 20; i++)
+					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, 9) * tmp);
+			}
 		}
+		
+		// display/return only required part
+		Matrix A2 = new Matrix(10, 6);
+		System.out.println("A2");
+		for (int i = 0, i2 = 10; i < 10; i++, i2++)
+			for (int j = 0, j2 = 4; j < 6; j++, j2++)
+				A2.setItem(i, j, A.getItem(i2, j2));
+		
+		for (int j = 0; j < A2.getSizeY(); j++) {
+			for (int i = 0; i < A2.getSizeX(); i++) {
+				System.out.print(String.format(Locale.US, "%7.4f ", A2.getItem(i, j)));
+				//System.out.print(A2.getItem(i, j) + " ");
+			}
+			System.out.println(";");
+		}
+		
+		// step 4: build 10th-degree polynomial
+		Matrix B = new Matrix(13, 3);
+		build10DegreePolynomial(0, A2, B);
+		build10DegreePolynomial(1, A2, B);
+		build10DegreePolynomial(2, A2, B);
+		
+		B.printM("B");
+		
+		Matrix p1 = new Matrix(8, 3);
+		Matrix p2 = new Matrix(8, 3);
+				
+		polymult0b(B, 4, 0, 4, B, 8, 1, 5, p1, 0);
+		polymult0b(B, 8, 0, 5, B, 4, 1, 4, p2, 0);
+		
+		polymult0b(B, 8, 0, 5, B, 0, 1, 4, p1, 1);
+		polymult0b(B, 0, 0, 4, B, 8, 1, 5, p2, 1);
+		
+		polymult0b(B, 0, 0, 4, B, 4, 1, 4, p1, 2);
+		polymult0b(B, 4, 0, 4, B, 0, 1, 4, p2, 2);
+		p1.mSub(p2, p1);
+				
+		p1.printM("PPPP");
+
+		Matrix pn = new Matrix(11, 1);
+		Matrix pn2 = new Matrix(11, 1);
+		
+		polymult0b(p1, 0, 0, 8, B, 0, 2, 4, pn, 0);
+		polymult0b(p1, 0, 1, 8, B, 4, 2, 4, pn2, 0);
+		pn.mSum(pn2, pn);
+		polymult0b(p1, 0, 2, 7, B, 8, 2, 5, pn2, 0);
+		pn.mSum(pn2, pn);
+		
+		pn.printM("PN");
+		
 		
 	}
 	

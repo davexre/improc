@@ -18,7 +18,7 @@ public class MatrixSvdTest {
 		Matrix at = new Matrix();
 		a.transpose(at);
 		Matrix b = a.makeCopy();
-		Matrix bt = at.makeCopy();
+//		Matrix bt = at.makeCopy();
 		
 		Matrix tmp = new Matrix();
 
@@ -55,7 +55,7 @@ public class MatrixSvdTest {
 //		s.printM("S");
 		
 		Matrix checkA = new Matrix();
-		Matrix checkAt = new Matrix();
+//		Matrix checkAt = new Matrix();
 
 //		ut.printM("UT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 //		vt.printM("VT");

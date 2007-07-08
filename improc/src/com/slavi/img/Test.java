@@ -84,13 +84,14 @@ public class Test {
 	public static void compareKeyFiles(String fname1, String fname2) throws Exception {
 		ScalePointList list1= ScalePointList.fromXML(XMLHelper.readXML(new File(fname1)));
 		ScalePointList list2= ScalePointList.fromXML(XMLHelper.readXML(new File(fname2)));
-
+		ArrayList list1Points =list1.kdtree.toList(); 
+		ArrayList list2Points =list2.kdtree.toList(); 
 		int matchedCount1 = 0;
-		for (int i = list1.points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+		for (int i = list1Points.size() - 1; i >= 0; i--) {
+			ScalePoint sp1 = (ScalePoint)list1Points.get(i);
 			boolean matchingFound = false;
-			for (int j = list2.points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+			for (int j = list2Points.size() - 1; j >= 0; j--) {
+				ScalePoint sp2 = (ScalePoint)list2Points.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -102,11 +103,11 @@ public class Test {
 		}
 
 		int matchedCount2 = 0;
-		for (int j = list2.points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+		for (int j = list2Points.size() - 1; j >= 0; j--) {
+			ScalePoint sp2 = (ScalePoint)list2Points.get(j);
 			boolean matchingFound = false;
-			for (int i = list1.points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+			for (int i = list1Points.size() - 1; i >= 0; i--) {
+				ScalePoint sp1 = (ScalePoint)list1Points.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
@@ -117,8 +118,8 @@ public class Test {
 				System.out.println("Point No " + j + " from 2-nd list has no match in 1-st list /X=" + sp2.doubleX + ",Y=" + sp2.doubleY);
 		}
 		
-		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + list1.points.size());
-		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + list2.points.size());
+		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + list1Points.size());
+		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + list2Points.size());
 		System.out.println("Finished!");
 	}	
 	

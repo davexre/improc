@@ -1,25 +1,29 @@
 package com.slavi.img;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-
-import org.jdom.Element;
-import org.jdom.JDOMException;
 
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
-import com.slavi.statistics.StatisticsBase;
-import com.slavi.utils.Marker;
-import com.slavi.utils.XMLHelper;
+import com.slavi.utils.AbsoluteToRelativePathMaker;
+import com.slavi.utils.FileStamp;
+import com.slavi.utils.FindFileIterator;
+import com.slavi.utils.Utl;
 
 /**
  * @author Slavian Petrov
  */
 public class DLoweDetector {
 
-	public static final String workDir = "../images/";
+	public static interface Listener {
+		public void scalePointCreated(ScalePoint scalePoint);
+	}
+	
+	public Listener listener = null;
+	
 	/**
 	 * Minimum absolute DoG value of a pixel to be allowed as minimum/maximum
 	 * peak. This control how much general non-differing areas, such as the sky
@@ -68,8 +72,6 @@ public class DLoweDetector {
 	 */
 	public static final int relocationMaximum = 4;
 
-	public ScalePointList scalePointList;	
-	
 	private boolean isLocalExtrema(DImageMap[] DOGs, int atX, int atY) {
 		double curPixel = DOGs[1].getPixel(atX, atY);
 		if (Math.abs(curPixel) < dogThreshold)
@@ -273,12 +275,9 @@ public class DLoweDetector {
 	public void createDescriptor(ScalePoint sp, DImageMap magnitude,
 			DImageMap direction) {
 
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					sp.setItem(i, j, k, 0);
+		sp.initFeatureVector();
 		
-		double considerScaleFactor = 2 * sp.kpScale;
+		double considerScaleFactor = 2.0 * sp.kpScale;
 		double dDim05 = ScalePoint.descriptorSize / 2.0;
 		int radius = (int) (((ScalePoint.descriptorSize + 1.0) / 2) *
 			Math.sqrt(2.0) * considerScaleFactor + 0.5);
@@ -429,25 +428,6 @@ public class DLoweDetector {
 		sp.doubleX *= sp.imgScale;
 		sp.doubleY *= sp.imgScale;
 		sp.kpScale *= sp.imgScale;
-
-//		String str =  "";
-//		for (int i = 0; i < ScalePoint.descriptorSize; i++)
-//			for (int j = 0; j < ScalePoint.descriptorSize; j++)
-//				for (int k = 0; k < ScalePoint.numDirections; k++)
-//					str = str + "\t" + sp.getItem(i, j, k);
-//		fou.println(sp.doubleX + "\t" + sp.doubleY + "\t" + (int)sp.level + "\t" + sp.imgScale + "\t" + sp.degree + str);
-		
-//		if ((sp.imgX==276) && (sp.imgY==75)) {
-//			System.out.println("Degree=" + sp.degree);
-//			for (int ix = 0 ; ix < 2 ; ix++) {
-//				for (int iy = 0 ; iy < 2 ; iy++) {
-//					for (int id = 0 ; id < 2 ; id++) {
-//						System.out.println("FV[" + ix + "," + iy + "," + id + "]=" + 
-//							sp.getItem(ix, iy, id));
-//					}
-//				}
-//			}
-//		}
 	}
 	
 	private void GenerateKeypointSingle(double sigma, DImageMap magnitude,
@@ -513,7 +493,7 @@ public class DLoweDetector {
 		// middle of this three entries, we can improve the distinctiveness of
 		// the bins by applying an averaging pass.
 		//
-		// TO DO: is this really the best method? (we also loose a bit of
+		// TODO: is this really the best method? (we also loose a bit of
 		// information. Maybe there is a one-step method that conserves more)
 		// ???AverageWeakBins (bins, binCount);
 
@@ -600,25 +580,21 @@ public class DLoweDetector {
 				sp2.imgScale = sp.imgScale;
 				
 				createDescriptor(sp2, magnitude, direction);
-				scalePointCreated(sp2);
+				if (listener != null)
+					listener.scalePointCreated(sp2);
 			}
 		}
 	}
 
-	private void scalePointCreated(ScalePoint sp) {
-		scalePointList.points.add(sp);
-	}
-	
 	private DImageMap lastBlured1Img = null;
 	
-	@SuppressWarnings("unused")
-	private void debugPrintImage(DImageMap img, double scale, String type, int level) throws Exception {
+	private void debugPrintImage(DImageMap img, double scale, String type, int level) {
 //		img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
 //		fou.println(Integer.toString((int)scale) + "\t" + type + "\t" + level + "\t" + img.calcStatistics());
 	}
 
 	private void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
-			int scaleSpaceLevels) throws Exception {
+			int scaleSpaceLevels) {
 
 		double sigma = initialSigma;
 		DImageMap blured0 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
@@ -684,7 +660,6 @@ public class DLoweDetector {
 					if (!isLocalExtrema(DOGs, i, j))
 						continue; // current pixel in DOGs[1] is not a local
 									// extrema
-					fou.println(aLevel + "\t" + i + "\t" + j + "\t" + scale);
 					isLocalExtremaCount++;
 					
 					// We have a peak.
@@ -711,7 +686,7 @@ public class DLoweDetector {
 	}
 	
 	public void DetectFeatures(DImageMap theImage, int scaleSpaceLevels,
-			int minimumRequiredPixelsize) throws Exception {
+			int minimumRequiredPixelsize) {
 		// ??? more initializers
 		double scale = 1;
 		DImageMap doubledImage = new DImageMap(theImage.getSizeX() * 2, theImage.getSizeY() * 2);
@@ -738,26 +713,110 @@ public class DLoweDetector {
 		}
 	}
 
-	public DLoweDetector() {
-		scalePointList = new ScalePointList();
+	//////////////////////////////////////////////	
+	
+	public static class ListenerImpl implements Listener {
+		public ScalePointList scalePointList;
+		
+		public ListenerImpl(ScalePointList spl) {
+			this.scalePointList = spl;
+		}
+		public void scalePointCreated(ScalePoint scalePoint) {
+			scalePointList.kdtree.add(scalePoint);
+		}		
 	}
 	
-	public void processImage(String imageFileName) throws Exception {
-		File imgFile = new File(imageFileName);
-		DImageMap img = new DImageMap(imgFile);
-		scalePointList.points.clear();
-		scalePointList.imageFileName = imgFile.getName();
-		scalePointList.imageSizeX = img.sizeX;
-		scalePointList.imageSizeY = img.sizeY;
-		Marker.mark();
+	public void updateScalePointFileIfNecessary(
+			AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootSPfileDir,
+			File image) throws IOException {
+		String relativeImageName = rootImagesDir.getRelativePath(image, false);
+		File spfile = new File(Utl.chageFileExtension(
+				rootSPfileDir.getFullPath(relativeImageName), "spf"));
+		
+		try {
+			if (spfile.isFile()) {
+				BufferedReader fin = new BufferedReader(new FileReader(spfile));
+				FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
+				if (!fs.isModified()) {
+					if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
+						// The image file is not modified, so don't build
+						return;
+					}
+				}
+			}
+		} catch (IOException e) {
+		}
+		
+		DImageMap img = new DImageMap(image);
+		ScalePointList scalePointList = new ScalePointList();
+		listener = new ListenerImpl(scalePointList);
 		DetectFeatures(img, 3, 32);
-		Marker.release();
-//		String fouName = imageFileName.substring(0, imageFileName.lastIndexOf(".")) + ".xml";
-//		Element e = new Element("ScalePointList");
-//		scalePointList.toXML(e);
-//		XMLHelper.writeXML(new File(fouName), e, "");
+		spfile.getParentFile().mkdirs();
+		PrintWriter fou = new PrintWriter(spfile);
+		fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
+		scalePointList.toTextStream(fou);		
+		listener = null;
 	}
-
+	
+	public ScalePointList readScalePointFile(
+			AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootSPfileDir,
+			File image) throws IOException {
+		String relativeImageName = rootImagesDir.getRelativePath(image);
+		File spfile = new File(Utl.chageFileExtension(
+				rootSPfileDir.getFullPath(relativeImageName), "spf"));
+		
+		ScalePointList scalePointList = null;
+		try {
+			if (spfile.isFile()) {
+				BufferedReader fin = new BufferedReader(new FileReader(spfile));
+				FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
+				if (!fs.isModified()) {
+					if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
+						// The image file is not modified, so read it
+						scalePointList = ScalePointList.fromTextStream(fin);
+					}
+				}
+			}
+		} catch (IOException e) {
+		}
+		
+		if (scalePointList == null) {
+			DImageMap img = new DImageMap(image);
+			scalePointList = new ScalePointList();
+			listener = new ListenerImpl(scalePointList);
+			DetectFeatures(img, 3, 32);
+			PrintWriter fou = new PrintWriter(spfile);
+			fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
+			scalePointList.toTextStream(fou);		
+			listener = null;
+		}
+		return scalePointList;
+	}
+	
+	public void updateScalePointFiles(String rootImagesDirStr, String rootSPfileDirStr) {
+		FindFileIterator ffi = FindFileIterator.makeWithWildcard(rootImagesDirStr + "/*.jpg", true, true);
+		AbsoluteToRelativePathMaker rootImagesDir = new AbsoluteToRelativePathMaker(rootImagesDirStr);
+		AbsoluteToRelativePathMaker rootSPfileDir = new AbsoluteToRelativePathMaker(rootSPfileDirStr);
+		File image;
+		while ((image = ffi.next()) != null) {
+			try {
+				System.out.println("Processing file " + image.getPath());
+				updateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.err.println("Failed processing file " + image.getPath());
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+		DLoweDetector dld = new DLoweDetector();
+		dld.updateScalePointFiles("../images/test", "../images/spfiles/");
+		System.out.println("Done!");
+	}
+/*
 	public ScalePointList autoPanoPoints;
 	public void loadAutoPanoFile(String finName) throws JDOMException, IOException {
 		Element root = XMLHelper.readXML(new File(finName));
@@ -792,58 +851,17 @@ public class DLoweDetector {
 					}
 				}
 			}
-			autoPanoPoints.points.add(sp);
+			autoPanoPoints.kdtree.add(sp);
 		}
 	}
 
-	public void compareKeyLists(ScalePointList list1, ScalePointList list2) throws Exception {
-		int matchedCount1 = 0;
-		for (int i = list1.points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)list1.points.get(i);
-//			boolean matchingFound = false;
-			for (int j = list2.points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)list2.points.get(j);
-				if (sp1.equals(sp2)) {
-//					matchingFound = true;
-					matchedCount1++;
-					break;
-				}
-			}
-//			if (!matchingFound)
-//				System.out.println("Point No " + i + " from 1-st list has no match in 2-nd list");
-		}
 
-		int matchedCount2 = 0;
-		for (int j = list2.points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)list2.points.get(j);
-//			boolean matchingFound = false;
-			for (int i = list1.points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)list1.points.get(i);
-				if (sp1.equals(sp2)) {
-//					matchingFound = true;
-					matchedCount2++;
-					break;
-				}
-			}
-//			if (!matchingFound)
-//				System.out.println("Point No " + j + " from 2-nd list has no match in 1-st list /X=" + sp2.doubleX + ",Y=" + sp2.doubleY);
-		}
-		
-		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + list1.points.size());
-		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + list2.points.size());
-//		System.out.println("Finished!");
-	}	
-	
-	public static boolean flag = true;
-	public static PrintWriter fou;
-	
+	public static final String workDir = "../images/";
 	public static void main(String[] args) throws Exception {
 		Marker.mark("Total program run time");
 		DLoweDetector ld;
 		ld = new DLoweDetector();
 		
-		fou = new PrintWriter(workDir + "debug.my");
-		fou.println("Scale\tType\tLevel\t" + StatisticsBase.toString2Header());
 //		String fn = workDir + "HPIM0337.JPG";
 		String fn = workDir + "testimg.bmp";
 
@@ -871,7 +889,7 @@ public class DLoweDetector {
 //		ld.compareKeyLists(spl1, spl2);
 
 //		ld.processImage(workDir + "HPIM0337.JPG");
-		fou.close();
 		Marker.release();
 	}
+*/
 }
