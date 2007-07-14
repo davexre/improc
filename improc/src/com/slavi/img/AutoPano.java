@@ -34,12 +34,12 @@ public class AutoPano {
 	
 	public ScalePointPairList pointPairs;
 	
-	public void buildPointPairList(ScalePointList a, ScalePointList b)  {
+	public void buildPointPairList(KeyPointList a, KeyPointList b)  {
 		int denied = 0;
 		ArrayList aPoints = a.kdtree.toList();
 		ArrayList bPoints = b.kdtree.toList();
 		if (aPoints.size() > bPoints.size()) {
-			ScalePointList tmp = a;
+			KeyPointList tmp = a;
 			a = b;
 			b = tmp;
 			ArrayList tmpLst = aPoints;
@@ -49,7 +49,7 @@ public class AutoPano {
 		int searchSteps = (int) (Math.max(130.0, (Math.log(aPoints.size()) / Math.log (1000.0)) * 130.0));
 		
 		for (int p = aPoints.size() - 1; p >= 0; p--) {
-			ScalePoint ap = (ScalePoint) aPoints.get(p);
+			KeyPoint ap = (KeyPoint) aPoints.get(p);
 			NearestNeighbours nnlst = b.kdtree.getNearestNeighboursBBF(ap, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;
@@ -57,8 +57,8 @@ public class AutoPano {
 				denied++;
 				continue;
 			}
-			ScalePoint bp = (ScalePoint)nnlst.getItem(0);
-			pointPairs.addPair(ap, (ScalePoint)nnlst.getItem(0), nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
+			KeyPoint bp = (KeyPoint)nnlst.getItem(0);
+			pointPairs.addPair(ap, (KeyPoint)nnlst.getItem(0), nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
 			fou.println(
 				ap.doubleX + "\t" + ap.doubleY + "\t" + ap.kpScale + "\t" + 
 				bp.doubleX + "\t" + bp.doubleY + "\t" + bp.kpScale + "\t" +
@@ -71,7 +71,7 @@ public class AutoPano {
 
 	public void printWeightsGreaterThanOne() {
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			if (pp.getWeight() > 1.0) {
 				System.out.println("Item at index " + i + " has id " + pp.id + " and weight " + pp.getWeight());
 			}
@@ -80,7 +80,7 @@ public class AutoPano {
 
 	public void resetWeights() {
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			pp.setWeight(1.0);
 		}
 	}
@@ -120,7 +120,7 @@ public class AutoPano {
 		System.out.println("Good count = " + pointPairs.countGoodItems());
 		pointPairs.sortByDelta();
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			pp.setBad(pp.discrepancy > 2);				
 		}
 		System.out.println("Good count = " + pointPairs.countGoodItems());
@@ -154,11 +154,11 @@ public class AutoPano {
 		for (int iteration = 1; iteration <= maxIterations; iteration++) {
 			int indexThreshold = (int)(pointPairs.items.size() - (double)(pointPairs.items.size() - minGoodPoints) * iteration / maxIterations);
 			for (int i = pointPairs.items.size() - 1; i >= 0; i--) {
-				ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+				KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 				pp.setBad(i >= indexThreshold);
 			}
 			for (int i = 0; i < minGoodPoints; i++) {
-				ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+				KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 				System.out.println(pp.discrepancy + "\t" + pp.id); 
 			}
 			System.out.println("ADJUST = " + atl.calculateOne());
@@ -168,13 +168,13 @@ public class AutoPano {
 		}
 
 		for (int i = 0; i < minGoodPoints; i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			System.out.println(pp.discrepancy + "\t" + pp.id); 
 		}
 		
 		ArrayList pointPairs2 = new ArrayList();
 		for (int i = pointPairs.items.size() - 1; i >= 0; i--) {
-			ScalePointPair pp = (ScalePointPair) (pointPairs.items.get(i));
+			KeyPointPair pp = (KeyPointPair) (pointPairs.items.get(i));
 			if (!pp.isBad())
 				pointPairs2.add(pp);
 		}
@@ -184,7 +184,7 @@ public class AutoPano {
 		pointPairs.sortByWeight();
 		
 		for (int i = 0; i < minGoodPoints; i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			System.out.println(pp.discrepancy + "\t" + pp.id); 
 		}
 	}
@@ -209,7 +209,7 @@ public class AutoPano {
 		int pointCounter = 0;		
 		System.out.println("=== Output data discrepancies ===");
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			if (!pp.isBad()) {
 				pointCounter++;
 				//fou.println("c n{0} N{1} x{2} y{3} X{4} Y{5} t0");
@@ -248,7 +248,7 @@ public class AutoPano {
 		boolean isFirst = true;
 		
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			if (!pp.isBad()) {
 				if (isFirst) {
 					minX = maxX = pp.sourceSP.doubleX;
@@ -283,7 +283,7 @@ public class AutoPano {
 		StatisticsLT stat = new StatisticsLT();
 		stat.start();
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			if (pp.getWeight() <= 1)
 				continue;
 			double value = pp.sourceSP.degree - pp.targetSP.degree;
@@ -294,7 +294,7 @@ public class AutoPano {
 		
 		stat.start();
 		for (int i = 0; i < pointPairs.items.size(); i++) {
-			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
+			KeyPointPair pp = (KeyPointPair) pointPairs.items.get(i);
 			if (pp.getWeight() > 1)
 				continue;
 			double value = pp.sourceSP.degree - pp.targetSP.degree;
@@ -307,6 +307,12 @@ public class AutoPano {
 	public static PrintWriter fou;
 	
 	public static void main(String[] args) throws Exception {
+		//ArrayList<KDNode>lst = new ArrayList<KDNode>();
+		//lst.iterator();
+		
+		//AbsoluteToRelativePathMaker rootImagesDir = new AbsoluteToRelativePathMaker(rootImagesDirStr);
+		//AbsoluteToRelativePathMaker rootSPfileDir = new AbsoluteToRelativePathMaker(rootSPfileDirStr);
+
 		fou = new PrintWriter("../images/debug.my");
 		AutoPano autoPano = new AutoPano();
 		try {
@@ -315,8 +321,8 @@ public class AutoPano {
 				String file2 = "../images/HPIM0337.xml";
 				//String file2 = "../images/testimg.xml";
 	
-				ScalePointList spl1 = ScalePointList.fromXML(XMLHelper.readXML(new File(file1)));
-				ScalePointList spl2 = ScalePointList.fromXML(XMLHelper.readXML(new File(file2)));
+				KeyPointList spl1 = KeyPointList.fromXML(XMLHelper.readXML(new File(file1)), null);
+				KeyPointList spl2 = KeyPointList.fromXML(XMLHelper.readXML(new File(file2)), null);
 				
 				autoPano.pointPairs = new ScalePointPairList(spl1, spl2);
 				

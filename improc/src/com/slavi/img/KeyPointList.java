@@ -1,0 +1,256 @@
+package com.slavi.img;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+
+import org.jdom.Element;
+import org.jdom.JDOMException;
+
+import com.slavi.img.DLoweDetector.Hook;
+import com.slavi.tree.KDNodeSaver;
+import com.slavi.tree.KDNodeSaverXML;
+import com.slavi.tree.KDTree;
+import com.slavi.utils.AbsoluteToRelativePathMaker;
+import com.slavi.utils.FileStamp;
+import com.slavi.utils.Utl;
+import com.slavi.utils.XMLHelper;
+
+public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPoint> {
+	public static final String fileHeader = "KeyPoint file version 1.1";
+	
+	public FileStamp imageFileStamp = null;
+	
+	public int imageSizeX = 0;
+
+	public int imageSizeY = 0;
+
+	public KDTree<KeyPoint> kdtree = new KDTree<KeyPoint>(KeyPoint.featureVectorLinearSize);
+
+	public KeyPoint nodeFromString(String source) {
+		return KeyPoint.fromString(source);
+	}
+
+	public String nodeToString(KeyPoint node) {
+		return node.toString();
+	}
+	
+	public KeyPoint nodeFromXML(Element source) throws JDOMException {
+		return KeyPoint.fromXML(source);
+	}
+
+	public void nodeToXML(KeyPoint node, Element dest) {
+		node.toXML(dest);
+	}
+
+	public static KeyPointList fromTextStream(BufferedReader fin) throws IOException {
+		KeyPointList r = new KeyPointList();
+		r.imageFileStamp = FileStamp.fromString(fin.readLine());
+		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
+		r.imageSizeX = Integer.parseInt(st.nextToken());
+		r.imageSizeY = Integer.parseInt(st.nextToken());
+		r.kdtree = KDTree.fromTextStream(KeyPoint.featureVectorLinearSize, fin, r);
+		return r;
+	}
+
+	public void toTextStream(PrintWriter fou) {
+		fou.println(imageFileStamp.toString());
+		fou.println(imageSizeX + "\t" + imageSizeY);
+		kdtree.toTextStream(fou, this);
+	}
+
+	public void toXML(Element dest) {
+		imageFileStamp.toXML(dest);
+		dest.addContent(XMLHelper.makeAttrEl("imageSizeX", Integer.toString(imageSizeX)));
+		dest.addContent(XMLHelper.makeAttrEl("imageSizeY", Integer.toString(imageSizeY)));
+		kdtree.toXML(dest, this);
+	}
+	
+	public static KeyPointList fromXML(Element source, AbsoluteToRelativePathMaker rootImageDir) throws JDOMException {
+		KeyPointList r = new KeyPointList();
+		r.imageFileStamp = FileStamp.fromXML(source, rootImageDir);
+		r.imageSizeX = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeX"));
+		r.imageSizeY = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeY"));
+		r.kdtree = KDTree.fromXML(source, r);
+		return r;			
+	}
+
+	private static class ListenerImpl implements Hook {
+		public KeyPointList scalePointList;
+		
+		public ListenerImpl(KeyPointList spl) {
+			this.scalePointList = spl;
+		}
+		public void keyPointCreated(KeyPoint scalePoint) {
+			scalePointList.kdtree.add(scalePoint);
+		}		
+	}
+	
+	public static void updateScalePointFileIfNecessary(
+			AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootSPfileDir,
+			File image) throws IOException {
+		doUpdateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
+	}
+	
+	private static KeyPointList doUpdateScalePointFileIfNecessary(
+			AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootSPfileDir,
+			File image) throws IOException {
+		String relativeImageName = rootImagesDir.getRelativePath(image, false);
+		File spfile = new File(Utl.chageFileExtension(
+				rootSPfileDir.getFullPath(relativeImageName), "spf"));
+		
+		try {
+			if (spfile.isFile()) {
+				BufferedReader fin = new BufferedReader(new FileReader(spfile));
+				if (fileHeader.equals(fin.readLine())) {
+					FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
+					if (!fs.isModified()) {
+						if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
+							// The image file is not modified, so don't build
+							return null;
+						}
+					}
+				}
+			}
+		} catch (IOException e) {
+		}
+		
+		DImageMap img = new DImageMap(image);
+		KeyPointList result = new KeyPointList();
+		DLoweDetector d = new DLoweDetector();
+		d.hook = new ListenerImpl(result);
+		d.DetectFeatures(img, 3, 32);
+		spfile.getParentFile().mkdirs();
+		PrintWriter fou = new PrintWriter(spfile);
+		fou.println(fileHeader);
+		fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
+		result.toTextStream(fou);
+		if (fou.checkError()) {
+			fou.close();
+			throw new IOException("Write to file failed.");
+		}
+		fou.close();
+		return result;
+	}
+	
+	public static KeyPointList readScalePointFile(
+			AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootSPfileDir,
+			File image) throws IOException {
+		KeyPointList result = doUpdateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
+		if (result != null)
+			return result;
+				
+		String relativeImageName = rootImagesDir.getRelativePath(image);
+		File spfile = new File(Utl.chageFileExtension(
+				rootSPfileDir.getFullPath(relativeImageName), "spf"));
+		
+		if (spfile.isFile()) {
+			BufferedReader fin = new BufferedReader(new FileReader(spfile));
+			fin.readLine(); // Skip header.
+			FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
+			if (!fs.isModified()) {
+				if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
+					// The image file is not modified, so read it
+					result = KeyPointList.fromTextStream(fin);
+				}
+			}
+		}
+		return result;
+	}
+	
+	public HashMap<Integer, KeyPoint> makeMap() {
+		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(kdtree.size());
+		for (KeyPoint i : kdtree) {
+			result.put(i.id, i);
+		}
+		return result;
+	}
+	
+	/*
+	public static KeyPointList loadAutoPanoFile(String finName) throws JDOMException, IOException {
+		KeyPointList result = new KeyPointList();
+		Element root = XMLHelper.readXML(new File(finName));
+		result.imageFileStamp = new FileStamp(root.getChildText("ImageFile"));
+		result.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
+		result.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
+		
+		java.util.List kpl = root.getChild("Arr").getChildren("KeypointN");
+		
+		for (int counter = 0; counter < kpl.size(); counter++) {
+			Element key = (Element)kpl.get(counter);
+			KeyPoint sp = new KeyPoint();
+			sp.doubleX = Double.parseDouble(key.getChildText("X"));
+			sp.doubleY = Double.parseDouble(key.getChildText("Y"));
+			sp.imgX = (int)sp.doubleX;
+			sp.imgY = (int)sp.doubleY;
+			sp.adjS = 0;
+			sp.degree = Double.parseDouble(key.getChildText("Orientation"));
+			sp.level = Integer.parseInt(key.getChildText("Level"));
+			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
+			
+			List descr = key.getChild("Descriptor").getChildren("int");
+			for (int i = 0; i < KeyPoint.descriptorSize; i++) {
+				for (int j = 0; j < KeyPoint.descriptorSize; j++) {
+					for (int k = 0; k < KeyPoint.numDirections; k++) {
+						int index = 
+							i * KeyPoint.descriptorSize * KeyPoint.numDirections +
+							j * KeyPoint.numDirections + k;
+						sp.setItem(i, j, k, Byte.parseByte(
+							((Element)descr.get(index)).getText()));
+					}
+				}
+			}
+			result.kdtree.add(sp);
+		}
+		return result;
+	}
+	*/
+	
+	public void compareToList(KeyPointList dest) {
+		ArrayList points = kdtree.toList();
+		ArrayList destPoints = kdtree.toList();
+		
+		int matchedCount1 = 0;
+		for (int i = points.size() - 1; i >= 0; i--) {
+			KeyPoint sp1 = (KeyPoint)points.get(i);
+			boolean matchingFound = false;
+			for (int j = destPoints.size() - 1; j >= 0; j--) {
+				KeyPoint sp2 = (KeyPoint)destPoints.get(j);
+				if (sp1.equals(sp2)) {
+					matchingFound = true;
+					matchedCount1++;
+					break;
+				}
+			}
+			if (!matchingFound)
+				System.out.println("Point No " + i + " from 1-st list has no match in 2-nd list");
+		}
+
+		int matchedCount2 = 0;
+		for (int j = destPoints.size() - 1; j >= 0; j--) {
+			KeyPoint sp2 = (KeyPoint)destPoints.get(j);
+			boolean matchingFound = false;
+			for (int i = points.size() - 1; i >= 0; i--) {
+				KeyPoint sp1 = (KeyPoint)points.get(i);
+				if (sp1.equals(sp2)) {
+					matchingFound = true;
+					matchedCount2++;
+					break;
+				}
+			}
+			if (!matchingFound)
+				System.out.println("Point No " + j + " from 2-nd list has no match in 1-st list");
+		}
+		
+		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + points.size());
+		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + destPoints.size());
+	}
+}

@@ -6,11 +6,12 @@ import java.util.StringTokenizer;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.tree.KDNode;
 import com.slavi.tree.KDNodeBase;
 import com.slavi.utils.XMLHelper;
 
-public class ScalePoint extends KDNodeBase {
+public class KeyPoint extends KDNodeBase<KeyPoint> {
+	public int id = hashCode();
+	
 	public static final int numDirections = 8;
 
 	public static final int descriptorSize = 4;
@@ -37,70 +38,20 @@ public class ScalePoint extends KDNodeBase {
 
 	public double degree;
 	
-	public double dummy;
+	byte[][][] featureVector = new byte[descriptorSize][descriptorSize][numDirections];
 
-	double[][][] featureVector = new double[descriptorSize][descriptorSize][numDirections];
-
-	public double getItem(int atX, int atY, int atOrientation) {
+	public byte getItem(int atX, int atY, int atOrientation) {
 		return featureVector[atX][atY][atOrientation];
 	}
 
-	public void setItem(int atX, int atY, int atOrientation, double aValue) {
+	public void setItem(int atX, int atY, int atOrientation, byte aValue) {
 		featureVector[atX][atY][atOrientation] = aValue;
 	}
 
-	public void normalizeOriginal() {
-		double norm = 0.0;
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++)
-					norm += Math.pow(featureVector[i][j][k], 2.0);
-		if (norm == 0.0)
-			return;
-		norm = Math.sqrt(norm);
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++)
-					featureVector[i][j][k] /= norm;
-	}
-	
-	public void normalize() {
-		double norm = 0.0;
-		double min = featureVector[0][0][0];
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++) {
-					double value = featureVector[i][j][k];
-					if (min > value)
-						min = value;
-					norm += Math.abs(value);
-				}
-		if (norm == 0.0)
-			return;
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++) {
-					featureVector[i][j][k] = (featureVector[i][j][k] - min) / norm;
-				}
-	}
-	
-	public void hiCap(double hiCapValue) {
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++)
-					if (featureVector[i][j][k] > hiCapValue)
-						featureVector[i][j][k] = hiCapValue;
-	}
-	
-	public void initFeatureVector() {
-		for (int i = 0 ; i < descriptorSize; i++)
-			for (int j = 0 ; j < descriptorSize; j++)
-				for (int k = 0 ; k < numDirections; k++)
-					featureVector[i][j][k] = 0;
-	}
-	
 	public String toString() {
 		StringBuilder result = new StringBuilder();
+		result.append(id);
+		result.append("\t");
 		result.append(imgX);
 		result.append("\t");
 		result.append(imgY);
@@ -126,18 +77,19 @@ public class ScalePoint extends KDNodeBase {
 						first = false;
 					else
 						result.append("\t");
-					result.append(Double.toString(featureVector[i][j][k]));
+					result.append(Integer.toString(featureVector[i][j][k]));
 				}
 			}
 		}
 		return result.toString();
 	}
 
-	public static ScalePoint fromString(String str) {
+	public static KeyPoint fromString(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		if (st.countTokens() != 8 + (numDirections * descriptorSize * descriptorSize))
-			throw new Error("ScalePoint.fromString: Malformed source string.");
-		ScalePoint r = new ScalePoint();
+			throw new Error("KeyPoint.fromString: Malformed source string.");
+		KeyPoint r = new KeyPoint();
+		r.id = Integer.parseInt(st.nextToken());
 		r.imgX = Integer.parseInt(st.nextToken());
 		r.imgY = Integer.parseInt(st.nextToken());
 		r.doubleX = Double.parseDouble(st.nextToken());
@@ -148,23 +100,26 @@ public class ScalePoint extends KDNodeBase {
 		r.degree = Double.parseDouble(st.nextToken());
 		for (int k = 0; k < numDirections; k++) 
 			for (int j = 0; j < descriptorSize; j++) 
-				for (int i = 0; i < descriptorSize; i++) 
-					r.featureVector[i][j][k] = Double.parseDouble(st.nextToken());
+				for (int i = 0; i < descriptorSize; i++) {
+					int tmp = Integer.parseInt(st.nextToken());
+					if (tmp > Byte.MAX_VALUE)
+						tmp = Byte.MAX_VALUE;
+					if (tmp < Byte.MIN_VALUE)
+						tmp = Byte.MIN_VALUE;
+					r.featureVector[i][j][k] = (byte)tmp;
+				}
 		return r;
 	}
 
 	public boolean equals(Object o) {
 		int multiply = 10;
-		if (!(o instanceof ScalePoint))
+		if (!(o instanceof KeyPoint))
 			return false;
-		ScalePoint sp = (ScalePoint)o;
+		KeyPoint sp = (KeyPoint)o;
 		if (
 			(sp.imgX != imgX) || 
 			(sp.imgY != imgY) || 
 			((int)(sp.level * multiply) != (int)(level * multiply)) || 
-
-			((int)(sp.dummy * multiply) != (int)(dummy * multiply)) || 
-			
 			((int)(sp.degree * multiply) != (int)(degree * multiply)) ||
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
@@ -184,8 +139,6 @@ public class ScalePoint extends KDNodeBase {
 
 	// Methods implementing KDNode
 	
-	public ScalePointList scalePointList = null;
-
 	public static final int linearFeatureVectorDimension = descriptorSize * descriptorSize * numDirections;
 	
 	public int getDimensions() {
@@ -200,11 +153,12 @@ public class ScalePoint extends KDNodeBase {
 		return featureVector[x][y][o];
 	}
 
-	public boolean canFindDistanceToPoint(KDNode node) {
-		return scalePointList != ((ScalePoint)node).scalePointList;
+	public boolean canFindDistanceToPoint(KeyPoint node) {
+		return this != node;
 	}
 	
 	public void toXML(Element dest) {
+		dest.addContent(XMLHelper.makeAttrEl("id", Integer.toString(id)));
 		dest.addContent(XMLHelper.makeAttrEl("imgX", Integer.toString(imgX)));
 		dest.addContent(XMLHelper.makeAttrEl("imgY", Integer.toString(imgY)));
 		dest.addContent(XMLHelper.makeAttrEl("doubleX", Double.toString(doubleX)));
@@ -216,11 +170,12 @@ public class ScalePoint extends KDNodeBase {
 		for (int k = 0; k < numDirections; k++)
 			for (int j = 0; j < descriptorSize; j++)
 				for (int i = 0; i < descriptorSize; i++)
-					dest.addContent(XMLHelper.makeEl("f", Double.toString(featureVector[i][j][k])));
+					dest.addContent(XMLHelper.makeEl("f", Integer.toString(featureVector[i][j][k])));
 	}
 
-	public static ScalePoint fromXML(Element source) throws JDOMException {
-		ScalePoint r = new ScalePoint();
+	public static KeyPoint fromXML(Element source) throws JDOMException {
+		KeyPoint r = new KeyPoint();
+		r.id = Integer.parseInt(XMLHelper.getAttrEl(source, "id"));
 		r.imgX = Integer.parseInt(XMLHelper.getAttrEl(source, "imgX"));
 		r.imgY = Integer.parseInt(XMLHelper.getAttrEl(source, "imgY"));
 		r.doubleX = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleX"));
@@ -230,13 +185,19 @@ public class ScalePoint extends KDNodeBase {
 		r.kpScale = Double.parseDouble(XMLHelper.getAttrEl(source, "kpScale"));
 		r.degree = Double.parseDouble(XMLHelper.getAttrEl(source, "degree"));
 		List fList = source.getChildren("f");
-		if (fList.size() != ScalePoint.descriptorSize * ScalePoint.descriptorSize * ScalePoint.numDirections)
+		if (fList.size() != KeyPoint.descriptorSize * KeyPoint.descriptorSize * KeyPoint.numDirections)
 			throw new JDOMException("Number of feature elements goes not match.");
 		int count = 0;
 		for (int k = 0; k < numDirections; k++)
 			for (int j = 0; j < descriptorSize; j++)				
-				for (int i = 0; i < descriptorSize; i++)
-					r.featureVector[i][j][k] = Double.parseDouble(((Element)fList.get(count++)).getTextTrim());
+				for (int i = 0; i < descriptorSize; i++) {
+					int tmp = Integer.parseInt(((Element)fList.get(count++)).getTextTrim());
+					if (tmp > Byte.MAX_VALUE)
+						tmp = Byte.MAX_VALUE;
+					if (tmp < Byte.MIN_VALUE)
+						tmp = Byte.MIN_VALUE;
+					r.featureVector[i][j][k] = (byte)tmp;
+				}
 		return r;
 	}
 }

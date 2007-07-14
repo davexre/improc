@@ -1,28 +1,28 @@
 package com.slavi.tree;
 
-public abstract class KDNodeBase implements KDNode {
+public abstract class KDNodeBase<E extends KDNodeBase<E>> implements KDNode<E> {
 
-	protected KDNode left = null;
+	protected E left = null;
 	
-	protected KDNode right = null;
+	protected E right = null;
 	
-	public boolean canFindDistanceToPoint(KDNode node) {
+	public boolean canFindDistanceToPoint(E node) {
 		return true;
 	}
 
-	public KDNode getLeft() {
+	public E getLeft() {
 		return left;
 	}
 
-	public KDNode getRight() {
+	public E getRight() {
 		return right;
 	}
 
-	public void setLeft(KDNode node) {
+	public void setLeft(E node) {
 		left = node;
 	}
 
-	public void setRight(KDNode node) {
+	public void setRight(E node) {
 		right = node;
 	}
 }

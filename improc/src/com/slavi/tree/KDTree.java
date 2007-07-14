@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 import org.jdom.Content;
 import org.jdom.Element;
@@ -12,10 +14,10 @@ import org.jdom.JDOMException;
 
 import com.slavi.utils.XMLHelper;
 
-public class KDTree {
+public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	protected int dimensions;
 
-	protected KDNode root;
+	protected E root;
 	
 	private double[][] hyperRectangle; // used by getNearestNeighbourhood()
 
@@ -45,7 +47,7 @@ public class KDTree {
 		root = null;
 	}
 
-	private void addToList_recursive(ArrayList<KDNode>list, KDNode node) {
+	private void addToList_recursive(ArrayList<E>list, E node) {
 		if (node == null)
 			return;
 		list.add(node);
@@ -57,8 +59,8 @@ public class KDTree {
 	 * Returns a list of all items in the tree. The order of the elements 
 	 * in the list is undefined. 
 	 */
-	public ArrayList<KDNode>toList() {
-		ArrayList<KDNode>list = new ArrayList<KDNode>();
+	public ArrayList<E>toList() {
+		ArrayList<E>list = new ArrayList<E>();
 		addToList_recursive(list, root); 
 		return list;
 	}
@@ -68,7 +70,7 @@ public class KDTree {
 	 * to use {@link #balanceIfNeeded()}
 	 */
 	public void balance() {
-		ArrayList<KDNode>list = toList();
+		ArrayList<E>list = toList();
 		this.treeDepth = 0;
 		this.root = balanceSegment(list, dimensions, 0, list.size() - 1, 0, 0);
 	}
@@ -158,23 +160,23 @@ public class KDTree {
 		return deepSort(items, dimensions, segmentStartIndex, segmentEndIndex, nextDimension, numberOfUnsuccessfullSorts);
 	}
 	
-	private KDNode balanceSegment(ArrayList items, int dimensions, int left, int right, int curDimension, int depthLevel) {
+	private E balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
 		if (left > right)
 			return null;
 		int midIndex = deepSort(items, dimensions, left, right, curDimension, 0);
-		double midValue = ((KDNode)items.get(midIndex)).getValue(curDimension);
+		double midValue = items.get(midIndex).getValue(curDimension);
 		int startIndex = midIndex - 1;
 		for (; startIndex >= left; startIndex--) 
-			if (((KDNode)items.get(startIndex)).getValue(curDimension) != midValue) 
+			if (items.get(startIndex).getValue(curDimension) != midValue) 
 				break;
 		startIndex++;
 		if (startIndex != midIndex) {
-			Object tmp = items.get(midIndex);
+			E tmp = items.get(midIndex);
 			items.set(midIndex, items.get(startIndex));
 			items.set(startIndex, tmp);
 		}
 		int nextDimension = (curDimension + 1) % dimensions;
-		KDNode result = (KDNode)items.get(startIndex);
+		E result = items.get(startIndex);
 		depthLevel++;
 		if (depthLevel > treeDepth)
 			treeDepth = depthLevel;
@@ -183,7 +185,7 @@ public class KDTree {
 		return result;
 	}
 	
-	private double getDistanceSquared(KDNode n1, KDNode n2) {
+	private double getDistanceSquared(E n1, E n2) {
 		double result = 0;
 		for (int i = dimensions - 1; i >= 0; i--) {
 			double d = n1.getValue(i) - n2.getValue(i);
@@ -192,7 +194,7 @@ public class KDTree {
 		return result;
 	}
 
-	private double getDistanceSquaredToHR(double[][] hr, KDNode target) {
+	private double getDistanceSquaredToHR(double[][] hr, E target) {
 		double result = 0;
 		for (int i = dimensions - 1; i >= 0; i--) {
 			double d = target.getValue(i);
@@ -209,7 +211,7 @@ public class KDTree {
 	}
 
 	private void nearestSegment(NearestNeighbours nearest,
-			double[][] hr, KDNode target, KDNode curNode, int dimension) {
+			double[][] hr, E target, E curNode, int dimension) {
 		if (curNode == null) 
 			return;
 		usedSearchSteps++;
@@ -264,7 +266,7 @@ public class KDTree {
 	 * 
 	 * @see #nearestSegmentBBF(NearestNeighbours, double[][], KDNode, KDNode, int)
 	 */
-	public NearestNeighbours getNearestNeighbours(KDNode target, int maxNeighbours) {
+	public NearestNeighbours getNearestNeighbours(E target, int maxNeighbours) {
 		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
 		for (int i = dimensions - 1; i >= 0; i--) {
 			hyperRectangle[i][0] = Double.MIN_VALUE;
@@ -282,7 +284,7 @@ public class KDTree {
 	public int maxUsedSearchSteps = 0;
 
 	private void nearestSegmentBBF(NearestNeighbours nearest,
-			double[][] hr, KDNode target, KDNode curNode, int dimension) {
+			double[][] hr, E target, E curNode, int dimension) {
 		if (curNode == null) 
 			return;
 		usedSearchSteps++;
@@ -349,7 +351,7 @@ public class KDTree {
 	 *
 	 * @see #nearestSegment(NearestNeighbours, double[][], KDNode, KDNode, int)
 	 */
-	public NearestNeighbours getNearestNeighboursBBF(KDNode target, int maxNeighbours, int maxSearchSteps) {
+	public NearestNeighbours getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
 		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
 		for (int i = dimensions - 1; i >= 0; i--) {
 			hyperRectangle[i][0] = Double.MIN_VALUE;
@@ -364,7 +366,7 @@ public class KDTree {
 	}
 
 	private void nearestSegmentBBFOriginal(NearestNeighbours nearest,
-			double[][] hr, KDNode target, KDNode curNode, int dimension) {
+			double[][] hr, E target, E curNode, int dimension) {
 		if (curNode == null) 
 			return;
 		usedSearchSteps++;
@@ -421,7 +423,7 @@ public class KDTree {
 		}
 	}
 	
-	public NearestNeighbours getNearestNeighboursBBFOriginal(KDNode target, int maxNeighbours, int maxSearchSteps) {
+	public NearestNeighbours getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
 		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
 		for (int i = dimensions - 1; i >= 0; i--) {
 			hyperRectangle[i][0] = Double.MIN_VALUE;
@@ -435,7 +437,7 @@ public class KDTree {
 		return result;
 	}
 	
-	private void toXML_recursive(KDNode node, Element dest, KDNodeSaverXML saver) {
+	private void toXML_recursive(E node, Element dest, KDNodeSaverXML<E> saver) {
 		if (node == null)
 			return;
 		saver.nodeToXML(node, dest);
@@ -463,7 +465,7 @@ public class KDTree {
 	 * 
 	 * @see #fromXML(Element, KDNodeSaverXML)
 	 */
-	public void toXML(Element dest, KDNodeSaverXML saver) {
+	public void toXML(Element dest, KDNodeSaverXML<E> saver) {
 		balanceIfNeeded();
 		dest.addContent(XMLHelper.makeAttrEl("Dimensions", Integer.toString(dimensions)));
 		Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
@@ -471,7 +473,7 @@ public class KDTree {
 		dest.addContent(rootNode);
 	}
 	
-	private void fromXML_ReadChildren(Element source, KDNodeSaverXML reader) throws JDOMException {
+	private void fromXML_ReadChildren(Element source, KDNodeSaverXML<E> reader) throws JDOMException {
 		if (source == null)
 			return;
 		List children = source.getChildren();
@@ -480,7 +482,7 @@ public class KDTree {
 			if (child_content instanceof Element) {
 				Element child = (Element)child_content;
 				if (child.getName().equals("Item")) {
-					KDNode node = reader.nodeFromXML(child);
+					E node = reader.nodeFromXML(child);
 					if (node != null)
 						add(node);
 					fromXML_ReadChildren(child, reader);
@@ -511,7 +513,7 @@ public class KDTree {
 		return result;
 	}
 
-	private void toTextStream_recursive(PrintWriter fou, KDNode node, KDNodeSaver saver) {
+	private void toTextStream_recursive(PrintWriter fou, E node, KDNodeSaver saver) {
 		if (node == null)
 			return;
 		fou.println(saver.nodeToString(node));
@@ -539,13 +541,13 @@ public class KDTree {
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#'))
-				result.add(reader.nodeFromString(str));
+				result.add((KDNode) reader.nodeFromString(str));
 		}
 		result.balanceIfNeeded();
 		return result;
 	}
 
-	private void add_recursive(KDNode node, KDNode curNode, int dimension, int depthLevel) {
+	private void add_recursive(E node, E curNode, int dimension, int depthLevel) {
 		depthLevel++;
 		double value = node.getValue(dimension);
 		int nextDimension = (dimension + 1) % dimensions;
@@ -570,7 +572,7 @@ public class KDTree {
 	 * Add a node to the tree. The tree might get disbalanced using this method.
 	 * To balance the tree use {@link #balance()} or better {@link #balanceIfNeeded()}. 
 	 */
-	public void add(KDNode node) {
+	public void add(E node) {
 		if (node == null)
 			return;
 		node.setLeft(null);
@@ -599,5 +601,57 @@ public class KDTree {
 	 */
 	public int getTreeDepth() {
 		return treeDepth;
+	}
+	
+	private class Itr implements Iterator<E> {
+		private Stack<E>stack = new Stack<E>();
+		
+		private E nextItem = null;
+		
+		private E getNext() {
+			if (stack.empty()) {
+				if (root != null) {
+					stack.push(root);
+				}
+				return root;
+			}
+			while (!stack.empty()) {
+				E node = stack.peek();
+				E tmp = node.getLeft();
+				if (tmp != null) {
+					stack.push(tmp);
+					return tmp;
+				}
+				tmp = node.getRight();
+				if (tmp != null) {
+					stack.push(tmp);
+					return tmp;
+				}
+				stack.pop();
+			}
+			return null;
+		}
+		
+		public boolean hasNext() {
+			if (nextItem == null) 
+				nextItem = getNext();
+			return nextItem != null;
+		}
+
+		public E next() {
+			E result = nextItem;
+			nextItem = null;
+			if (result == null) 
+				result = getNext();
+			return result;
+		}
+
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public Iterator<E> iterator() {
+		return new Itr();
 	}
 }

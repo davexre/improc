@@ -1,8 +1,8 @@
 package com.slavi.tree;
 
-public interface KDNodeSaver {
+public interface KDNodeSaver<E extends KDNode<E>> {
 
-	public String nodeToString(KDNode node);
+	public String nodeToString(E node);
 		
-	public KDNode nodeFromString(String source);
+	public E nodeFromString(String source);
 }

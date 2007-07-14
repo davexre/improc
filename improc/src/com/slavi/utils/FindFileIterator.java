@@ -1,10 +1,11 @@
 package com.slavi.utils;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-public class FindFileIterator {
+public class FindFileIterator implements Iterator<File> {
 	private String patternStr;
 	
 	private String startDir;
@@ -28,6 +29,8 @@ public class FindFileIterator {
 	private Stack<FileBookmark>dirstack = new Stack<FileBookmark>();
 	
 	private Pattern pattern;
+	
+	private File nextFile;
 	
 	private FindFileIterator() { }
 	
@@ -64,9 +67,10 @@ public class FindFileIterator {
 		cur = new FileBookmark();
 		cur.files = f.listFiles();
 		cur.itemsCount = cur.files == null ? 0 : cur.files.length;
+		nextFile = null;
 	}
 	
-	public File next() {
+	private File getNext() {
 		while (cur != null) {
 			File candidate = null;
 			if (cur.atIndex < cur.itemsCount) {
@@ -97,5 +101,25 @@ public class FindFileIterator {
 			}
 		}
 		return null;
+	}
+	
+	public boolean hasNext() {
+		if (nextFile == null) {
+			nextFile = getNext();
+		}
+		return nextFile != null;
+	}
+	
+	public File next() {
+		File result = nextFile;
+		nextFile = null;
+		if (result == null) {
+			result = getNext();
+		}
+		return result;
+	}
+
+	public void remove() {
+		throw new UnsupportedOperationException();
 	}
 }

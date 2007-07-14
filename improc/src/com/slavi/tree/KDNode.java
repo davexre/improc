@@ -1,18 +1,18 @@
 package com.slavi.tree;
 
-public interface KDNode {
+public interface KDNode<E extends KDNode<E>> {
 
 	public int getDimensions();
 	
 	public double getValue(int dimensionIndex);
 	
-	public boolean canFindDistanceToPoint(KDNode node);
+	public boolean canFindDistanceToPoint(E node);
 	
-	public KDNode getLeft();
+	public E getLeft();
 	
-	public void setLeft(KDNode node);
+	public void setLeft(E node);
 	
-	public KDNode getRight();
+	public E getRight();
 	
-	public void setRight(KDNode node);
+	public void setRight(E node);
 }

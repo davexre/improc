@@ -1,5 +1,7 @@
 package com.slavi.img;
 
+import java.util.StringTokenizer;
+
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
@@ -7,16 +9,16 @@ import com.slavi.matrix.Matrix;
 import com.slavi.statistics.PointsPair;
 import com.slavi.utils.XMLHelper;
 
-public class ScalePointPair extends PointsPair {
-	public int id;
+public class KeyPointPair extends PointsPair {
+	public int id = hashCode();
 	
-	public ScalePoint sourceSP;
+	public KeyPoint sourceSP;
 	
-	public ScalePoint targetSP;
+	public KeyPoint targetSP;
 	
-	// Distance to nearest ScalePoint as reported by nearestNeighbourhood
+	// Distance to nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest;
-	// Distance to second-nearest ScalePoint as reported by nearestNeighbourhood
+	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest2;
 
 	public double overallFitness;
@@ -24,7 +26,7 @@ public class ScalePointPair extends PointsPair {
 	// targetReused = true means this pair is suspicious, posibly bad
 	public boolean targetReused;
 	
-	public ScalePointPair() {
+	public KeyPointPair() {
 		super();
 		sourceSP = null;
 		targetSP = null;
@@ -34,14 +36,14 @@ public class ScalePointPair extends PointsPair {
 		targetReused = false;
 	}
 	
-	private static Matrix getMatrixFromScalePoint(ScalePoint sp) {
+	private static Matrix getMatrixFromScalePoint(KeyPoint sp) {
 		Matrix r = new Matrix(2, 1);
 		r.setItem(0, 0, sp.doubleX);
 		r.setItem(1, 0, sp.doubleY);
 		return r;
 	}
 	
-	public ScalePointPair(ScalePoint sourceSP, ScalePoint targetSP, double distanceToNearest, double distanceToNearest2) {
+	public KeyPointPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
 		this.source = getMatrixFromScalePoint(sourceSP);
 		this.target = getMatrixFromScalePoint(targetSP);
 		this.sourceTransformed = new Matrix(this.target.getSizeX(), this.target.getSizeY());
@@ -63,13 +65,27 @@ public class ScalePointPair extends PointsPair {
 		this.targetReused = false;
 	}
 
+	public String toString() {
+		return
+			Double.toString(distanceToNearest) + ":" + 
+			Double.toString(distanceToNearest2) + ":" +
+			source.toString() + ":" + target.toString();
+	}
+	
+	public static KeyPointPair fromString(String str) {
+		StringTokenizer st = new StringTokenizer(str, ":");
+		double d1 = Double.parseDouble(st.nextToken());
+		double d2 = Double.parseDouble(st.nextToken());
+		return new KeyPointPair(
+				KeyPoint.fromString(st.nextToken()),
+				KeyPoint.fromString(st.nextToken()), d1, d2);
+	}	
+	
 	public void toXML(Element dest) {
 		Element e;
 		
 		dest.addContent(XMLHelper.makeAttrEl("dist1", Double.toString(distanceToNearest)));
 		dest.addContent(XMLHelper.makeAttrEl("dist2", Double.toString(distanceToNearest2)));
-		dest.addContent(XMLHelper.makeAttrEl("targetReused", Boolean.toString(targetReused)));
-		dest.addContent(XMLHelper.makeAttrEl("weight", Double.toString(weight)));
 		
 		e = new Element("source");
 		source.toXML(e);
@@ -88,14 +104,12 @@ public class ScalePointPair extends PointsPair {
 		dest.addContent(e);
 	}
 	
-	public static ScalePointPair fromXML(Element source) throws JDOMException {
-		ScalePointPair r = new ScalePointPair();
+	public static KeyPointPair fromXML(Element source) throws JDOMException {
+		KeyPointPair r = new KeyPointPair();
 		Element e;
 
 		r.distanceToNearest = Double.parseDouble(XMLHelper.getAttrEl(source, "dist1"));
 		r.distanceToNearest2 = Double.parseDouble(XMLHelper.getAttrEl(source, "dist2"));
-		r.targetReused = Boolean.parseBoolean(XMLHelper.getAttrEl(source, "targetReused"));
-		r.weight = Double.parseDouble(XMLHelper.getAttrEl(source, "weight", "1"));
 		
 		e = source.getChild("source");
 		r.source = Matrix.fromXML(e);
@@ -104,10 +118,10 @@ public class ScalePointPair extends PointsPair {
 		r.target = Matrix.fromXML(e);
 
 		e = source.getChild("sourceSP");
-		r.sourceSP = ScalePoint.fromXML(e);
+		r.sourceSP = KeyPoint.fromXML(e);
 
 		e = source.getChild("targetSP");
-		r.targetSP = ScalePoint.fromXML(e);
+		r.targetSP = KeyPoint.fromXML(e);
 
 		r.sourceTransformed = new Matrix(r.source.getSizeX(), r.source.getSizeY());
 		return r;

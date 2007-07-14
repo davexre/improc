@@ -1,13 +1,12 @@
 package com.slavi.tree;
 
+public class NearestNeighbours<E extends KDNode<E>>{
 
-public class NearestNeighbours{
-
-	private KDNode target;
+	private E target;
 	
 	private double[] distancesToTarget;
 	
-	private KDNode[] items;
+	private E[] items;
 	
 	private int m_size;
 	
@@ -15,8 +14,8 @@ public class NearestNeighbours{
 		return m_size;
 	}
 	
-	public KDNode getItem(int atIndex) {
-		return (KDNode)items[atIndex];
+	public E getItem(int atIndex) {
+		return items[atIndex];
 	}
 	
 	public double getDistanceToTarget(int atIndex) {
@@ -27,20 +26,20 @@ public class NearestNeighbours{
 		return distancesToTarget.length;
 	}
 	
-	public KDNode getTarget() {
+	public E getTarget() {
 		return target;
 	}
 	
-	public NearestNeighbours(KDNode target, int maxCapacity) {
+	public NearestNeighbours(E target, int maxCapacity) {
 		this.target = target;
 		this.distancesToTarget = new double[maxCapacity];
-		this.items = new KDNode[maxCapacity];
+		this.items = (E[])new Object[maxCapacity];
 		this.m_size = 0;
 	}
 	
 	public int countAdds = 0;
 	
-	public void add(KDNode item, double distanceToTarget) {
+	public void add(E item, double distanceToTarget) {
 		countAdds++;
 		int insertAt = 0;
 		// Find insert position

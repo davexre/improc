@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 
 import com.slavi.utils.Marker;
-import com.slavi.utils.XMLHelper;
 
 public class Test {
 	private static String workDir = "./../../images/";
@@ -81,17 +80,18 @@ public class Test {
 		System.out.println(maxD);
 	}
 
+	/*
 	public static void compareKeyFiles(String fname1, String fname2) throws Exception {
-		ScalePointList list1= ScalePointList.fromXML(XMLHelper.readXML(new File(fname1)));
-		ScalePointList list2= ScalePointList.fromXML(XMLHelper.readXML(new File(fname2)));
+		KeyPointList list1= KeyPointList.fromXML(XMLHelper.readXML(new File(fname1)));
+		KeyPointList list2= KeyPointList.fromXML(XMLHelper.readXML(new File(fname2)));
 		ArrayList list1Points =list1.kdtree.toList(); 
 		ArrayList list2Points =list2.kdtree.toList(); 
 		int matchedCount1 = 0;
 		for (int i = list1Points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)list1Points.get(i);
+			KeyPoint sp1 = (KeyPoint)list1Points.get(i);
 			boolean matchingFound = false;
 			for (int j = list2Points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)list2Points.get(j);
+				KeyPoint sp2 = (KeyPoint)list2Points.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -104,10 +104,10 @@ public class Test {
 
 		int matchedCount2 = 0;
 		for (int j = list2Points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)list2Points.get(j);
+			KeyPoint sp2 = (KeyPoint)list2Points.get(j);
 			boolean matchingFound = false;
 			for (int i = list1Points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)list1Points.get(i);
+				KeyPoint sp1 = (KeyPoint)list1Points.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
@@ -122,7 +122,7 @@ public class Test {
 		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + list2Points.size());
 		System.out.println("Finished!");
 	}	
-	
+	*/
 	
 	public static class Data {
 		public int x;

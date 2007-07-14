@@ -1,28 +1,18 @@
 package com.slavi.img;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
-import com.slavi.utils.AbsoluteToRelativePathMaker;
-import com.slavi.utils.FileStamp;
-import com.slavi.utils.FindFileIterator;
-import com.slavi.utils.Utl;
 
 /**
  * @author Slavian Petrov
  */
 public class DLoweDetector {
 
-	public static interface Listener {
-		public void scalePointCreated(ScalePoint scalePoint);
+	public static interface Hook {
+		public void keyPointCreated(KeyPoint scalePoint);
 	}
 	
-	public Listener listener = null;
+	public Hook hook = null;
 	
 	/**
 	 * Minimum absolute DoG value of a pixel to be allowed as minimum/maximum
@@ -136,7 +126,7 @@ public class DLoweDetector {
 	}
 
 	protected boolean localizeIsWeak(DImageMap[] DOGs, int x, int y,
-			ScalePoint sp) {
+			KeyPoint sp) {
 		DImageMap below = DOGs[0];
 		DImageMap current = DOGs[1];
 		DImageMap above = DOGs[2];
@@ -213,14 +203,18 @@ public class DLoweDetector {
 		return true;
 	}
 
-	public void createDescriptor2(ScalePoint sp, DImageMap magnitude,
+	/* wrong, wrong, wrong
+	public void createDescriptor2(KeyPoint sp, DImageMap magnitude,
 			DImageMap direction) {
 
-		sp.initFeatureVector();
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					featureVector[i][j][k] = 0;
 		
 		double considerScaleFactor = 2.0 * sp.kpScale;
-		double sigma2Sq = 2.0 * Math.pow(ScalePoint.descriptorSize / 2.0, 2.0);
-		double sizeInPixels05 = (ScalePoint.descriptorSize - 1) * considerScaleFactor / 2.0;
+		double sigma2Sq = 2.0 * Math.pow(KeyPoint.descriptorSize / 2.0, 2.0);
+		double sizeInPixels05 = (KeyPoint.descriptorSize - 1) * considerScaleFactor / 2.0;
 		int sizeInPixels = (int)(sizeInPixels05 * 2.0);
 		double cosD = Math.cos(sp.degree);
 		double sinD = Math.sin(sp.degree);		
@@ -241,7 +235,7 @@ public class DLoweDetector {
 				int indxX = (int)(i / considerScaleFactor);
 				int indxY = (int)(j / considerScaleFactor);
 				int indxOrientation = (int) ((direction.getPixel(imgX, imgY) - sp.degree + 
-						2.0 * Math.PI) * ScalePoint.numDirections / (2.0 * Math.PI)) % ScalePoint.numDirections;
+						2.0 * Math.PI) * KeyPoint.numDirections / (2.0 * Math.PI)) % KeyPoint.numDirections;
 				double weightX = indxX - i / considerScaleFactor;
 				double weightY = indxY - j / considerScaleFactor;
 				//double weightGauss = Math.exp (-(translatedXSq + Math.pow(translatedY, 2.0)) / sigma2Sq);
@@ -262,24 +256,30 @@ public class DLoweDetector {
 		sp.hiCap(0.2);
 		sp.normalize();
 
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
 					sp.setItem(i, j, k, (int)(255.0 * sp.getItem(i, j, k)));
 
 		sp.doubleX *= sp.imgScale;
 		sp.doubleY *= sp.imgScale;
 		sp.kpScale *= sp.imgScale;
 	}
-
-	public void createDescriptor(ScalePoint sp, DImageMap magnitude,
+	*/
+	
+	private double[][][] featureVector = new double[KeyPoint.descriptorSize][KeyPoint.descriptorSize][KeyPoint.numDirections];
+	
+	public void createDescriptor(KeyPoint sp, DImageMap magnitude,
 			DImageMap direction) {
 
-		sp.initFeatureVector();
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					featureVector[i][j][k] = 0;
 		
 		double considerScaleFactor = 2.0 * sp.kpScale;
-		double dDim05 = ScalePoint.descriptorSize / 2.0;
-		int radius = (int) (((ScalePoint.descriptorSize + 1.0) / 2) *
+		double dDim05 = KeyPoint.descriptorSize / 2.0;
+		int radius = (int) (((KeyPoint.descriptorSize + 1.0) / 2) *
 			Math.sqrt(2.0) * considerScaleFactor + 0.5);
 		double sigma2Sq = 2.0 * dDim05 * dDim05;
 		double angle = -sp.degree;
@@ -346,11 +346,11 @@ public class DLoweDetector {
 					yWeight[0] = (1.0 - (yR - yIdx[0]));
 				}
 
-				if (xR < (ScalePoint.descriptorSize - 1)) {
+				if (xR < (KeyPoint.descriptorSize - 1)) {
 					xIdx[1] = (int) (xR + 1.0);
 					xWeight[1] = xR - xIdx[1] + 1.0;
 				}
-				if (yR < (ScalePoint.descriptorSize - 1)) {
+				if (yR < (KeyPoint.descriptorSize - 1)) {
 					yIdx[1] = (int) (yR + 1.0);
 					yWeight[1] = yR - yIdx[1] + 1.0;
 				}
@@ -363,22 +363,22 @@ public class DLoweDetector {
 				if (dir > Math.PI)
 					dir -= Math.PI;
 
-				double idxDir = (dir * ScalePoint.numDirections) /
+				double idxDir = (dir * KeyPoint.numDirections) /
 					(2.0 * Math.PI);
 				if (idxDir < 0.0)
-					idxDir += ScalePoint.numDirections;
+					idxDir += KeyPoint.numDirections;
 
 				dirIdx[0] = (int) idxDir;
-				dirIdx[1] = (dirIdx[0] + 1) % ScalePoint.numDirections;
+				dirIdx[1] = (dirIdx[0] + 1) % KeyPoint.numDirections;
 				dirWeight[0] = 1.0 - (idxDir - dirIdx[0]);
 				dirWeight[1] = idxDir - dirIdx[0];
 
 				for (int iy = 0 ; iy < 2 ; iy++) {
 					for (int ix = 0 ; ix < 2 ; ix++) {
 						for (int id = 0 ; id < 2 ; id++) {
-							double value = sp.getItem(xIdx[ix], yIdx[iy], dirIdx[id]) +
+							double value = featureVector[xIdx[ix]][yIdx[iy]][dirIdx[id]] +
 								xWeight[ix] * yWeight[iy] * dirWeight[id] * magW; 
-							sp.setItem(xIdx[ix], yIdx[iy], dirIdx[id], value);
+							featureVector[xIdx[ix]][yIdx[iy]][dirIdx[id]] = value;
 						}
 					}
 				}
@@ -390,40 +390,40 @@ public class DLoweDetector {
 		// Straight normalization
 		double norm = 0.0;
 		
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					norm += Math.pow(sp.getItem(i, j, k), 2.0);
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					norm += Math.pow(featureVector[i][j][k], 2.0);
 
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
 			throw (new Error("CapAndNormalizeFV cannot normalize with norm = 0.0"));
 		
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					sp.setItem(i, j, k, sp.getItem(i, j, k) / norm);
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					featureVector[i][j][k] = featureVector[i][j][k] / norm;
 
 		double fvGradHicap = 0.2;
 		// Hicap after normalization
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					if (sp.getItem(i, j, k) > fvGradHicap)
-						sp.setItem(i, j, k, fvGradHicap);
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					if (featureVector[i][j][k] > fvGradHicap)
+						featureVector[i][j][k] = fvGradHicap;
 
 		// Renormalize again
 		norm = 0.0;
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					norm += Math.pow(sp.getItem(i, j, k), 2.0);
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					norm += Math.pow(featureVector[i][j][k], 2.0);
 
 		norm = Math.sqrt (norm);
-		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
-			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)
-				for (int k = 0 ; k < ScalePoint.numDirections; k++)
-					sp.setItem(i, j, k, (int)(255.0 * sp.getItem(i, j, k) / norm));
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					sp.setItem(i, j, k, (byte)(255.0 * featureVector[i][j][k] / norm));
 
 		sp.doubleX *= sp.imgScale;
 		sp.doubleY *= sp.imgScale;
@@ -431,7 +431,7 @@ public class DLoweDetector {
 	}
 	
 	private void GenerateKeypointSingle(double sigma, DImageMap magnitude,
-			DImageMap direction, ScalePoint sp, int scaleSpaceLevels) {
+			DImageMap direction, KeyPoint sp, int scaleSpaceLevels) {
 		// The relative estimated keypoint scale. The actual absolute keypoint
 		// scale to the original image is yielded by the product of imgScale.
 		// But as we operate in the current octave, the size relative to the
@@ -568,7 +568,7 @@ public class DLoweDetector {
 				sp.kpScale = kpScale;
 				sp.degree = degree;
 				
-				ScalePoint sp2 = new ScalePoint();
+				KeyPoint sp2 = new KeyPoint();
 				sp2.adjS = sp.adjS;
 				sp2.degree = sp.degree;
 				sp2.doubleX = sp.doubleX;
@@ -580,8 +580,8 @@ public class DLoweDetector {
 				sp2.imgScale = sp.imgScale;
 				
 				createDescriptor(sp2, magnitude, direction);
-				if (listener != null)
-					listener.scalePointCreated(sp2);
+				if (hook != null)
+					hook.keyPointCreated(sp2);
 			}
 		}
 	}
@@ -670,16 +670,16 @@ public class DLoweDetector {
 					// When the localization hits some problem, i.e. while
 					// moving the
 					// point a border is reached, then skip this point.
-					ScalePoint sp = new ScalePoint();
-					if (localizeIsWeak(DOGs, i, j, sp))
+					KeyPoint tempKeyPoint = new KeyPoint();
+					if (localizeIsWeak(DOGs, i, j, tempKeyPoint))
 						continue;
 					localizeIsWeakCount++;
 
 					// Ok. We have located a keypoint.
-					sp.level = aLevel+1;
-					sp.imgScale = scale;
+					tempKeyPoint.level = aLevel+1;
+					tempKeyPoint.imgScale = scale;
 
-					GenerateKeypointSingle(sigma, magnitude, direction, sp, scaleSpaceLevels);
+					GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
 				}
 			}
 		} // end of for aLevel
@@ -712,184 +712,4 @@ public class DLoweDetector {
 			}
 		}
 	}
-
-	//////////////////////////////////////////////	
-	
-	public static class ListenerImpl implements Listener {
-		public ScalePointList scalePointList;
-		
-		public ListenerImpl(ScalePointList spl) {
-			this.scalePointList = spl;
-		}
-		public void scalePointCreated(ScalePoint scalePoint) {
-			scalePointList.kdtree.add(scalePoint);
-		}		
-	}
-	
-	public void updateScalePointFileIfNecessary(
-			AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootSPfileDir,
-			File image) throws IOException {
-		String relativeImageName = rootImagesDir.getRelativePath(image, false);
-		File spfile = new File(Utl.chageFileExtension(
-				rootSPfileDir.getFullPath(relativeImageName), "spf"));
-		
-		try {
-			if (spfile.isFile()) {
-				BufferedReader fin = new BufferedReader(new FileReader(spfile));
-				FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
-				if (!fs.isModified()) {
-					if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
-						// The image file is not modified, so don't build
-						return;
-					}
-				}
-			}
-		} catch (IOException e) {
-		}
-		
-		DImageMap img = new DImageMap(image);
-		ScalePointList scalePointList = new ScalePointList();
-		listener = new ListenerImpl(scalePointList);
-		DetectFeatures(img, 3, 32);
-		spfile.getParentFile().mkdirs();
-		PrintWriter fou = new PrintWriter(spfile);
-		fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
-		scalePointList.toTextStream(fou);		
-		listener = null;
-	}
-	
-	public ScalePointList readScalePointFile(
-			AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootSPfileDir,
-			File image) throws IOException {
-		String relativeImageName = rootImagesDir.getRelativePath(image);
-		File spfile = new File(Utl.chageFileExtension(
-				rootSPfileDir.getFullPath(relativeImageName), "spf"));
-		
-		ScalePointList scalePointList = null;
-		try {
-			if (spfile.isFile()) {
-				BufferedReader fin = new BufferedReader(new FileReader(spfile));
-				FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
-				if (!fs.isModified()) {
-					if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
-						// The image file is not modified, so read it
-						scalePointList = ScalePointList.fromTextStream(fin);
-					}
-				}
-			}
-		} catch (IOException e) {
-		}
-		
-		if (scalePointList == null) {
-			DImageMap img = new DImageMap(image);
-			scalePointList = new ScalePointList();
-			listener = new ListenerImpl(scalePointList);
-			DetectFeatures(img, 3, 32);
-			PrintWriter fou = new PrintWriter(spfile);
-			fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
-			scalePointList.toTextStream(fou);		
-			listener = null;
-		}
-		return scalePointList;
-	}
-	
-	public void updateScalePointFiles(String rootImagesDirStr, String rootSPfileDirStr) {
-		FindFileIterator ffi = FindFileIterator.makeWithWildcard(rootImagesDirStr + "/*.jpg", true, true);
-		AbsoluteToRelativePathMaker rootImagesDir = new AbsoluteToRelativePathMaker(rootImagesDirStr);
-		AbsoluteToRelativePathMaker rootSPfileDir = new AbsoluteToRelativePathMaker(rootSPfileDirStr);
-		File image;
-		while ((image = ffi.next()) != null) {
-			try {
-				System.out.println("Processing file " + image.getPath());
-				updateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.err.println("Failed processing file " + image.getPath());
-			}
-		}
-	}
-	
-	public static void main(String[] args) {
-		DLoweDetector dld = new DLoweDetector();
-		dld.updateScalePointFiles("../images/test", "../images/spfiles/");
-		System.out.println("Done!");
-	}
-/*
-	public ScalePointList autoPanoPoints;
-	public void loadAutoPanoFile(String finName) throws JDOMException, IOException {
-		Element root = XMLHelper.readXML(new File(finName));
-		autoPanoPoints = new ScalePointList();
-		autoPanoPoints.imageFileName = root.getChildText("ImageFile");
-		autoPanoPoints.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
-		autoPanoPoints.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
-		
-		List kpl = root.getChild("Arr").getChildren("KeypointN");
-		
-		for (int counter = 0; counter < kpl.size(); counter++) {
-			Element key = (Element)kpl.get(counter);
-			ScalePoint sp = new ScalePoint();
-			sp.doubleX = Double.parseDouble(key.getChildText("X"));
-			sp.doubleY = Double.parseDouble(key.getChildText("Y"));
-			sp.imgX = (int)sp.doubleX;
-			sp.imgY = (int)sp.doubleY;
-			sp.adjS = 0;
-			sp.degree = Double.parseDouble(key.getChildText("Orientation"));
-			sp.level = Integer.parseInt(key.getChildText("Level"));
-			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
-			
-			List descr = key.getChild("Descriptor").getChildren("int");
-			for (int i = 0; i < ScalePoint.descriptorSize; i++) {
-				for (int j = 0; j < ScalePoint.descriptorSize; j++) {
-					for (int k = 0; k < ScalePoint.numDirections; k++) {
-						int index = 
-							i * ScalePoint.descriptorSize * ScalePoint.numDirections +
-							j * ScalePoint.numDirections + k;
-						sp.setItem(i, j, k, Double.parseDouble(
-							((Element)descr.get(index)).getText()));
-					}
-				}
-			}
-			autoPanoPoints.kdtree.add(sp);
-		}
-	}
-
-
-	public static final String workDir = "../images/";
-	public static void main(String[] args) throws Exception {
-		Marker.mark("Total program run time");
-		DLoweDetector ld;
-		ld = new DLoweDetector();
-		
-//		String fn = workDir + "HPIM0337.JPG";
-		String fn = workDir + "testimg.bmp";
-
-//		String fn = args[0];
-		ld.processImage(fn);
-//		ld.loadAutoPanoFile(XMLHelper.chageFileExtension(fn, "KEY"));
-//		System.out.println("Processing file " + fn);
-//		ld.compareKeyLists(ld.scalePointList, ld.autoPanoPoints);
-
-
-//		fn = workDir + "HPIM0336.JPG";
-//		ld = new DLoweDetector();
-//		ld.processImage(fn);
-//
-//		fn = workDir + "HPIM0337.JPG";
-//		ld = new DLoweDetector();
-//		ld.processImage(fn);
-//
-//		fn = workDir + "testimg.bmp";
-//		ld = new DLoweDetector();
-//		ld.processImage(fn);
-
-//		ScalePointList spl1 = ld.scalePointList;
-//		ScalePointList spl2 = ScalePointList.fromXML(XMLHelper.readXML(new File(XMLHelper.chageFileExtension(fn, "ok.xml"))));
-//		ld.compareKeyLists(spl1, spl2);
-
-//		ld.processImage(workDir + "HPIM0337.JPG");
-		Marker.release();
-	}
-*/
 }

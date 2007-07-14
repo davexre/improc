@@ -3,9 +3,9 @@ package com.slavi.tree;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-public interface KDNodeSaverXML {
+public interface KDNodeSaverXML<E extends KDNode<E>> {
 
-	public void nodeToXML(KDNode node, Element dest);
+	public void nodeToXML(E node, Element dest);
 	
-	public KDNode nodeFromXML(Element source) throws JDOMException;
+	public E nodeFromXML(Element source) throws JDOMException;
 }

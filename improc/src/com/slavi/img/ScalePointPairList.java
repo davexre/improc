@@ -16,7 +16,7 @@ import com.slavi.utils.XMLHelper;
 
 public class ScalePointPairList {
 
-	public ArrayList items;
+	public ArrayList<KeyPointPair> items;
 
 	String sourceImageFileName;
 	int sourceImageSizeX;
@@ -27,24 +27,24 @@ public class ScalePointPairList {
 	int targetImageSizeY;
 	
 	private ScalePointPairList() {
-		items = new ArrayList();
+		items = new ArrayList<KeyPointPair>();
 	}
 
-	public ScalePointPairList(ScalePointList source, ScalePointList target) {
-		items = new ArrayList();
-		sourceImageFileName = source.imageFileName;
+	public ScalePointPairList(KeyPointList source, KeyPointList target) {
+		items = new ArrayList<KeyPointPair>();
+		//sourceImageFileName = source.imageFileName;
 		sourceImageSizeX = source.imageSizeX;
 		sourceImageSizeY = source.imageSizeY;
 		
-		targetImageFileName = target.imageFileName;
+		//targetImageFileName = target.imageFileName;
 		targetImageSizeX = target.imageSizeX;
 		targetImageSizeY = target.imageSizeY;
 	}
 	
-	public void addPair(ScalePoint sourceSP, ScalePoint targetSP, double distanceToNearest, double distanceToNearest2) {
-		ScalePointPair sp = new ScalePointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
+	public void addPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
+		KeyPointPair sp = new KeyPointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
 		for (int i = items.size() - 1; i >= 0; i--) {
-			ScalePointPair aSP = (ScalePointPair) items.get(i);
+			KeyPointPair aSP = (KeyPointPair) items.get(i);
 			if (aSP.targetSP == sp.targetSP) {
 				aSP.targetReused = true;
 				sp.targetReused = true;
@@ -58,7 +58,7 @@ public class ScalePointPairList {
 		fou.println(sourceImageFileName + "\t" + sourceImageSizeX + "\t" + sourceImageSizeY);
 		fou.println(targetImageFileName + "\t" + targetImageSizeX + "\t" + targetImageSizeY);
 		for (int i = 0; i < items.size(); i++) {
-			ScalePointPair pair = (ScalePointPair)items.get(i);
+			KeyPointPair pair = (KeyPointPair)items.get(i);
 			fou.println(
 				Double.toString(pair.distanceToNearest) + " \t" +
 				Double.toString(pair.distanceToNearest2) + "\t" +
@@ -84,9 +84,9 @@ public class ScalePointPairList {
 			double distanceToNearest = Double.parseDouble(st.nextToken());
 			double distanceToNearest2 = Double.parseDouble(st.nextToken());
 			double weight = Double.parseDouble(st.nextToken());
-			ScalePoint sourceSP = ScalePoint.fromString(fin.readLine());
-			ScalePoint targetSP = ScalePoint.fromString(fin.readLine());
-			ScalePointPair pair = new ScalePointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
+			KeyPoint sourceSP = KeyPoint.fromString(fin.readLine());
+			KeyPoint targetSP = KeyPoint.fromString(fin.readLine());
+			KeyPointPair pair = new KeyPointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
 			pair.setWeight(weight);
 			r.items.add(pair);
 		}
@@ -105,7 +105,7 @@ public class ScalePointPairList {
 		
 		for (int i = 0; i < items.size(); i++) {
 			Element e = new Element("sppair");
-			((ScalePointPair) items.get(i)).toXML(e);
+			((KeyPointPair) items.get(i)).toXML(e);
 			dest.addContent(e);
 		}
 	}
@@ -123,7 +123,7 @@ public class ScalePointPairList {
 		List pairs = source.getChildren("sppair");
 		for (int i = 0; i < pairs.size(); i++) {
 			Element e = (Element) pairs.get(i);
-			ScalePointPair pp = ScalePointPair.fromXML(e);
+			KeyPointPair pp = KeyPointPair.fromXML(e);
 			pp.id = i;
 			r.items.add(pp);
 		}
@@ -133,7 +133,7 @@ public class ScalePointPairList {
 	public int countGoodItems() {
 		int r = 0;
 		for (int i = items.size() - 1; i >= 0; i--)
-			if (!((ScalePointPair) items.get(i)).isBad())
+			if (!((KeyPointPair) items.get(i)).isBad())
 				r++;
 		return r;
 	}
@@ -141,7 +141,7 @@ public class ScalePointPairList {
 	public int leaveGoodTopElements(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			ScalePointPair sp = (ScalePointPair)items.get(i);
+			KeyPointPair sp = (KeyPointPair)items.get(i);
 			if (count >= numElements) { 
 				sp.setBad(true);
 			} else {
@@ -155,7 +155,7 @@ public class ScalePointPairList {
 	public int leaveGoodTopElements2(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			ScalePointPair sp = (ScalePointPair)items.get(i);
+			KeyPointPair sp = (KeyPointPair)items.get(i);
 			if (sp.targetReused || (count >= numElements)) { 
 				sp.setBad(true);
 			} else {
@@ -170,8 +170,8 @@ public class ScalePointPairList {
 		public static final CompareByDistance instance = new CompareByDistance();
 
 		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+			KeyPointPair spp1 = (KeyPointPair)o1;
+			KeyPointPair spp2 = (KeyPointPair)o2;
 			return Double.compare(spp1.distanceToNearest, spp2.distanceToNearest);
 		} 
 	}
@@ -183,8 +183,8 @@ public class ScalePointPairList {
 		public static final CompareByOverallFitness instance = new CompareByOverallFitness();
 
 		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+			KeyPointPair spp1 = (KeyPointPair)o1;
+			KeyPointPair spp2 = (KeyPointPair)o2;
 			return Double.compare(spp1.overallFitness, spp2.overallFitness);
 		} 
 	}
@@ -196,8 +196,8 @@ public class ScalePointPairList {
 		public static final CompareByDelta instance = new CompareByDelta();
 
 		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+			KeyPointPair spp1 = (KeyPointPair)o1;
+			KeyPointPair spp2 = (KeyPointPair)o2;
 			return Double.compare(spp1.discrepancy, spp2.discrepancy);
 		} 
 	}
@@ -209,8 +209,8 @@ public class ScalePointPairList {
 		public static final CompareByWeight instance = new CompareByWeight();
 
 		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+			KeyPointPair spp1 = (KeyPointPair)o1;
+			KeyPointPair spp2 = (KeyPointPair)o2;
 			return Double.compare(spp2.getWeight(), spp1.getWeight());  // Weight comparison is DESCENDING
 		} 
 	}
@@ -226,8 +226,8 @@ public class ScalePointPairList {
 		public static final CompareByOrientationDelta instance = new CompareByOrientationDelta();
 
 		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+			KeyPointPair spp1 = (KeyPointPair)o1;
+			KeyPointPair spp2 = (KeyPointPair)o2;
 			return Double.compare(
 				fixAnglePI(spp1.sourceSP.degree - spp1.targetSP.degree), 
 				fixAnglePI(spp2.sourceSP.degree - spp2.targetSP.degree));

@@ -15,8 +15,8 @@ public class ConvertAutoanoKeyFile {
 		String fouName = Utl.chageFileExtension(finName, "APxml");
 		
 		Element root = XMLHelper.readXML(new File(finName));
-		ScalePointList spl = new ScalePointList();
-		spl.imageFileName = root.getChildText("ImageFile");
+		KeyPointList spl = new KeyPointList();
+		//spl.imageFileName = root.getChildText("ImageFile");
 		spl.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
 		spl.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
 		
@@ -24,7 +24,7 @@ public class ConvertAutoanoKeyFile {
 		
 		for (int counter = 0; counter < kpl.size(); counter++) {
 			Element key = (Element)kpl.get(counter);
-			ScalePoint sp = new ScalePoint();
+			KeyPoint sp = new KeyPoint();
 			sp.doubleX = Double.parseDouble(key.getChildText("X"));
 			sp.doubleY = Double.parseDouble(key.getChildText("Y"));
 			sp.imgX = (int)sp.doubleX;
@@ -34,18 +34,18 @@ public class ConvertAutoanoKeyFile {
 			sp.level = Integer.parseInt(key.getChildText("Level"));
 			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
 			
-			List descr = key.getChild("Descriptor").getChildren("int");
-			for (int i = 0; i < ScalePoint.descriptorSize; i++) {
-				for (int j = 0; j < ScalePoint.descriptorSize; j++) {
-					for (int k = 0; k < ScalePoint.numDirections; k++) {
-						int index = 
-							i * ScalePoint.descriptorSize * ScalePoint.numDirections +
-							j * ScalePoint.numDirections + k;
-						sp.setItem(i, j, k, Double.parseDouble(
-							((Element)descr.get(index)).getText()));
-					}
-				}
-			}
+//			List descr = key.getChild("Descriptor").getChildren("int");
+//			for (int i = 0; i < KeyPoint.descriptorSize; i++) {
+//				for (int j = 0; j < KeyPoint.descriptorSize; j++) {
+//					for (int k = 0; k < KeyPoint.numDirections; k++) {
+//						int index = 
+//							i * KeyPoint.descriptorSize * KeyPoint.numDirections +
+//							j * KeyPoint.numDirections + k;
+//						//sp.setItem(i, j, k, Double.parseDouble(
+//						//	((Element)descr.get(index)).getText()));
+//					}
+//				}
+//			}
 			spl.kdtree.add(sp);
 		}
 		root = new Element("ScalePoints");

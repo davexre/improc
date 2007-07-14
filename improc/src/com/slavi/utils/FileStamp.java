@@ -29,6 +29,10 @@ public class FileStamp {
 			file = new File(relativeFileName);
 		else
 			file = rootDir.getFullPathFile(relativeFileName);
+		resetStamp();
+	}
+	
+	public void resetStamp() {
 		try {
 			this.length = file.length();
 			this.lastModified = file.lastModified();
