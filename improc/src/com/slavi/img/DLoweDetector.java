@@ -689,9 +689,7 @@ public class DLoweDetector {
 			int minimumRequiredPixelsize) {
 		// ??? more initializers
 		double scale = 1;
-		DImageMap doubledImage = new DImageMap(theImage.getSizeX() * 2, theImage.getSizeY() * 2);
-		DImageMap curImage = new DImageMap(theImage.getSizeX() * 2, theImage.getSizeY() * 2);
-		theImage.scaleDouble(doubledImage);
+		DImageMap curImage = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 		DGaussianFilter gf = new DGaussianFilter(1.5);
 		gf.applyGaussianFilter(theImage, curImage);
 		theImage.copyTo(curImage);

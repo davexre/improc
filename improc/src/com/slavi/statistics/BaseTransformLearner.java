@@ -81,7 +81,9 @@ public abstract class BaseTransformLearner {
 		}
 
 		if (sumWeight == 0) {
-			double computedWeight = 1 / goodCount;
+			double computedWeight = 1.0;
+			if (goodCount > 0)
+				computedWeight = 1.0 / goodCount;
 			for (int p = items.size() - 1; p >= 0; p--) {
 				PointsPair item = (PointsPair) items.get(p);
 				item.computedWeight = item.bad ? 0 : computedWeight;

@@ -86,7 +86,7 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 
 	public static KeyPoint fromString(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
-		if (st.countTokens() != 8 + (numDirections * descriptorSize * descriptorSize))
+		if (st.countTokens() != 9 + featureVectorLinearSize)
 			throw new Error("KeyPoint.fromString: Malformed source string.");
 		KeyPoint r = new KeyPoint();
 		r.id = Integer.parseInt(st.nextToken());

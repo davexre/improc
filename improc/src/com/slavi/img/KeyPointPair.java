@@ -21,10 +21,10 @@ public class KeyPointPair extends PointsPair {
 	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest2;
 
-	public double overallFitness;
+	public double overallFitness;	// TODO: obsolete !?!
 	
 	// targetReused = true means this pair is suspicious, posibly bad
-	public boolean targetReused;
+	public boolean targetReused;	// TODO: obsolete !?!
 	
 	public KeyPointPair() {
 		super();

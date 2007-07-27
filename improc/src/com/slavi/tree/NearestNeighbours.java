@@ -1,6 +1,6 @@
 package com.slavi.tree;
 
-public class NearestNeighbours<E extends KDNode<E>>{
+public class NearestNeighbours<E extends KDNode>{
 
 	private E target;
 	
@@ -33,7 +33,7 @@ public class NearestNeighbours<E extends KDNode<E>>{
 	public NearestNeighbours(E target, int maxCapacity) {
 		this.target = target;
 		this.distancesToTarget = new double[maxCapacity];
-		this.items = (E[])new Object[maxCapacity];
+		this.items = (E[])new KDNode[maxCapacity];
 		this.m_size = 0;
 	}
 	

@@ -37,7 +37,7 @@ public class AffineTransformLearner extends BaseTransformLearner {
 		int goodCount = computeWeights();
 
 		if (goodCount < lsa.getRequiredPoints())
-			throw new Error("Not enough good points");
+			return false;
 
 		computeScaleAndOrigin();
 

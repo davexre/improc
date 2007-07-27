@@ -9,29 +9,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
-
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.tree.KDNodeSaver;
-import com.slavi.tree.KDNodeSaverXML;
 import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
 import com.slavi.utils.Utl;
-import com.slavi.utils.XMLHelper;
 
-public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPoint> {
-	public static final String fileHeader = "KeyPoint file version 1.1";
+public class KeyPointList implements KDNodeSaver<KeyPoint> {
+	public static final String fileHeader = "KeyPoint file version 1.2";
 	
 	public FileStamp imageFileStamp = null;
 	
-	public int imageSizeX = 0;
-
-	public int imageSizeY = 0;
-
 	public KDTree<KeyPoint> kdtree = new KDTree<KeyPoint>(KeyPoint.featureVectorLinearSize);
 
+	public int imageSizeX;
+
+	public int imageSizeY;
+	
 	public KeyPoint nodeFromString(String source) {
 		return KeyPoint.fromString(source);
 	}
@@ -40,17 +35,9 @@ public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPo
 		return node.toString();
 	}
 	
-	public KeyPoint nodeFromXML(Element source) throws JDOMException {
-		return KeyPoint.fromXML(source);
-	}
-
-	public void nodeToXML(KeyPoint node, Element dest) {
-		node.toXML(dest);
-	}
-
-	public static KeyPointList fromTextStream(BufferedReader fin) throws IOException {
+	private static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
-		r.imageFileStamp = FileStamp.fromString(fin.readLine());
+		r.imageFileStamp = FileStamp.fromString(fin.readLine(), rootImagesDir);
 		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
 		r.imageSizeX = Integer.parseInt(st.nextToken());
 		r.imageSizeY = Integer.parseInt(st.nextToken());
@@ -58,26 +45,10 @@ public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPo
 		return r;
 	}
 
-	public void toTextStream(PrintWriter fou) {
+	private void toTextStream(PrintWriter fou) {
 		fou.println(imageFileStamp.toString());
 		fou.println(imageSizeX + "\t" + imageSizeY);
 		kdtree.toTextStream(fou, this);
-	}
-
-	public void toXML(Element dest) {
-		imageFileStamp.toXML(dest);
-		dest.addContent(XMLHelper.makeAttrEl("imageSizeX", Integer.toString(imageSizeX)));
-		dest.addContent(XMLHelper.makeAttrEl("imageSizeY", Integer.toString(imageSizeY)));
-		kdtree.toXML(dest, this);
-	}
-	
-	public static KeyPointList fromXML(Element source, AbsoluteToRelativePathMaker rootImageDir) throws JDOMException {
-		KeyPointList r = new KeyPointList();
-		r.imageFileStamp = FileStamp.fromXML(source, rootImageDir);
-		r.imageSizeX = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeX"));
-		r.imageSizeY = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeY"));
-		r.kdtree = KDTree.fromXML(source, r);
-		return r;			
 	}
 
 	private static class ListenerImpl implements Hook {
@@ -91,24 +62,30 @@ public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPo
 		}		
 	}
 	
-	public static void updateScalePointFileIfNecessary(
+	public static void updateKeyPointFileIfNecessary(
 			AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootSPfileDir,
+			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws IOException {
-		doUpdateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
+		doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
 	}
 	
-	private static KeyPointList doUpdateScalePointFileIfNecessary(
+	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
+			AbsoluteToRelativePathMaker rootKeyPointFileDir,
+			File image) {
+		return new File(Utl.chageFileExtension(
+			rootKeyPointFileDir.getFullPath(
+				rootImagesDir.getRelativePath(image, false)), "spf"));
+	}
+	
+	private static KeyPointList doUpdateKeyPointFileIfNecessary(
 			AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootSPfileDir,
+			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws IOException {
-		String relativeImageName = rootImagesDir.getRelativePath(image, false);
-		File spfile = new File(Utl.chageFileExtension(
-				rootSPfileDir.getFullPath(relativeImageName), "spf"));
+		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
 		
 		try {
-			if (spfile.isFile()) {
-				BufferedReader fin = new BufferedReader(new FileReader(spfile));
+			if (kplFile.isFile()) {
+				BufferedReader fin = new BufferedReader(new FileReader(kplFile));
 				if (fileHeader.equals(fin.readLine())) {
 					FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
 					if (!fs.isModified()) {
@@ -124,13 +101,16 @@ public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPo
 		
 		DImageMap img = new DImageMap(image);
 		KeyPointList result = new KeyPointList();
+		result.imageSizeX = img.getSizeX();
+		result.imageSizeY = img.getSizeY();
+		String relativeImageName = rootImagesDir.getRelativePath(image, false);
+		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
 		DLoweDetector d = new DLoweDetector();
 		d.hook = new ListenerImpl(result);
 		d.DetectFeatures(img, 3, 32);
-		spfile.getParentFile().mkdirs();
-		PrintWriter fou = new PrintWriter(spfile);
+		kplFile.getParentFile().mkdirs();
+		PrintWriter fou = new PrintWriter(kplFile);
 		fou.println(fileHeader);
-		fou.println((new FileStamp(relativeImageName, rootImagesDir)).toString());
 		result.toTextStream(fou);
 		if (fou.checkError()) {
 			fou.close();
@@ -140,29 +120,19 @@ public class KeyPointList implements KDNodeSaver<KeyPoint>, KDNodeSaverXML<KeyPo
 		return result;
 	}
 	
-	public static KeyPointList readScalePointFile(
+	public static KeyPointList readKeyPointFile(
 			AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootSPfileDir,
+			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws IOException {
-		KeyPointList result = doUpdateScalePointFileIfNecessary(rootImagesDir, rootSPfileDir, image);
+		KeyPointList result = doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
 		if (result != null)
 			return result;
-				
-		String relativeImageName = rootImagesDir.getRelativePath(image);
-		File spfile = new File(Utl.chageFileExtension(
-				rootSPfileDir.getFullPath(relativeImageName), "spf"));
-		
-		if (spfile.isFile()) {
-			BufferedReader fin = new BufferedReader(new FileReader(spfile));
-			fin.readLine(); // Skip header.
-			FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
-			if (!fs.isModified()) {
-				if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
-					// The image file is not modified, so read it
-					result = KeyPointList.fromTextStream(fin);
-				}
-			}
-		}
+
+		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
+		BufferedReader fin = new BufferedReader(new FileReader(kplFile));
+		fin.readLine(); // Skip header.
+		result = new KeyPointList();
+		result = KeyPointList.fromTextStream(fin, rootImagesDir);
 		return result;
 	}
 	

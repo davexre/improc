@@ -1,6 +1,6 @@
 package com.slavi.tree;
 
-public abstract class KDNodeBase<E extends KDNodeBase<E>> implements KDNode<E> {
+public abstract class KDNodeBase<E extends KDNodeBase> implements KDNode<E> {
 
 	protected E left = null;
 	

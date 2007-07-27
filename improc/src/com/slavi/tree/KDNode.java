@@ -1,6 +1,6 @@
 package com.slavi.tree;
 
-public interface KDNode<E extends KDNode<E>> {
+public interface KDNode<E extends KDNode> {
 
 	public int getDimensions();
 	

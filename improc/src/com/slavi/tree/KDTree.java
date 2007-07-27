@@ -603,29 +603,52 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 		return treeDepth;
 	}
 	
+	private static class IteratorVisit<E> {
+		E item;
+		byte status;
+	}
+
 	private class Itr implements Iterator<E> {
-		private Stack<E>stack = new Stack<E>();
 		
-		private E nextItem = null;
+		private Stack<IteratorVisit<E>>stack;
+
+		private E nextItem;
+
+		Itr() {
+			stack = new Stack<IteratorVisit<E>>();
+			nextItem = root;
+			if (root != null) {
+				IteratorVisit<E>v = new IteratorVisit<E>();
+				v.item = root;
+				v.status = 0;
+				stack.push(v);
+			}
+		}
 		
 		private E getNext() {
-			if (stack.empty()) {
-				if (root != null) {
-					stack.push(root);
-				}
-				return root;
-			}
 			while (!stack.empty()) {
-				E node = stack.peek();
-				E tmp = node.getLeft();
-				if (tmp != null) {
-					stack.push(tmp);
-					return tmp;
+				IteratorVisit<E>v = stack.peek();
+				if (v.status == 0) {
+					v.status++;
+					E tmp = v.item.getLeft();
+					if (tmp != null) {
+						v = new IteratorVisit<E>();
+						v.item = tmp;
+						v.status = 0;
+						stack.push(v);
+						return tmp;
+					}
 				}
-				tmp = node.getRight();
-				if (tmp != null) {
-					stack.push(tmp);
-					return tmp;
+				if (v.status == 1) {
+					v.status++;
+					E tmp = v.item.getRight();
+					if (tmp != null) {
+						v = new IteratorVisit<E>();
+						v.item = tmp;
+						v.status = 0;
+						stack.push(v);
+						return tmp;
+					}
 				}
 				stack.pop();
 			}

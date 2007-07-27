@@ -49,7 +49,7 @@ public class ConvertAutoanoKeyFile {
 			spl.kdtree.add(sp);
 		}
 		root = new Element("ScalePoints");
-		spl.toXML(root);
+//		spl.toXML(root);
 		XMLHelper.writeXML(new File(fouName), root, "matrix.xsl");
 	}
 }

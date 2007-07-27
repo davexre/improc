@@ -63,7 +63,7 @@ public class FindFileIterator implements Iterator<File> {
 	public void reset() {
 		dirstack.empty();
 		File f = new File(startDir);
-		pattern = Pattern.compile(patternStr);
+		pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
 		cur = new FileBookmark();
 		cur.files = f.listFiles();
 		cur.itemsCount = cur.files == null ? 0 : cur.files.length;

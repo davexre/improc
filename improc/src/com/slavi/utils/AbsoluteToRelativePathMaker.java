@@ -105,10 +105,10 @@ public class AbsoluteToRelativePathMaker {
 	}
 	
 	public File getFullPathFile(String aRelativePath) {
-		return new File(rootDir + "/" + aRelativePath);
+		return new File(rootDir + File.separator + aRelativePath);
 	}
 	
 	public String getFullPath(String aRelativePath) {
-		return rootDir + "/" + aRelativePath;
+		return rootDir + File.separator + aRelativePath;
 	}
 }
