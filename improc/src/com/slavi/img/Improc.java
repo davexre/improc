@@ -9,7 +9,6 @@ import java.util.Properties;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FindFileIterator;
 import com.slavi.utils.UiUtils;
-import com.slavi.utils.Utl;
 
 public class Improc {
 
@@ -82,8 +81,11 @@ public class Improc {
 		}
 	}
 
+	PanoList panoList;
+	
 	class GeneratePanoPairFiles implements Runnable {
 		public void run() {
+			panoList = new PanoList();
 			try {
 				for (int i = 0, pairsCount = 0; i < images.size(); i++) {
 					for (int j = i + 1; j < images.size(); j++, pairsCount++) {
@@ -98,9 +100,7 @@ public class Improc {
 						String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();;
 						System.out.println(statusMessage);
 						UiUtils.activeWaitDialogSetStatus(statusMessage, pairsCount);
-						PanoPairList ppl = PanoPairList.readKeyPointPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
-						File ptoFile = new File(Utl.chageFileExtension(kpplFile.getPath(), "pto"));
-						ppl.writeToPtoFile(ptoFile);
+						panoList.addItem(PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2));
 					}
 				}
 			} catch (Exception e) {
@@ -110,6 +110,31 @@ public class Improc {
 		}
 	}
 
+	class GeneratePanoramaFiles implements Runnable {
+		public void run() {
+			try {
+				int panoCount = 1;
+				int maxItems = panoList.items.size();
+				while (!Thread.interrupted()) {
+					ArrayList<PanoPairList>chain = panoList.getImageChain();
+					if (chain == null)
+						break;
+					File fou = keyPointPairFileRoot.getFullPathFile("Pano" + panoCount + ".pto");
+
+					String statusMessage = fou.getAbsolutePath();
+					System.out.println(statusMessage);
+					UiUtils.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
+
+					PanoList.writeToPtoFile(fou, chain);
+					panoCount++;
+				}
+			} catch (Exception e) {
+				System.err.println("GeneratePanoramaFiles FAILED!");
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	AbsoluteToRelativePathMaker userHomeRoot;
 	AbsoluteToRelativePathMaker imagesRoot;
 	AbsoluteToRelativePathMaker keyPointFileRoot;
@@ -174,6 +199,13 @@ public class Improc {
 			return;
 		}
 		
+		System.out.println("----------");
+
+		if (!UiUtils.openWaitDialog("Generating panorama (PTO) files", 
+				new GeneratePanoramaFiles(), panoList.items.size())) {
+			System.err.println("GeneratePanoramaFiles aborted");
+			return;
+		}
 		System.out.println("Done.");
 	}
 	

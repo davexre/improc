@@ -177,7 +177,7 @@ public class KeyPointPairList {
 	public int countGoodItems() {
 		int r = 0;
 		for (int i = items.size() - 1; i >= 0; i--)
-			if (!((KeyPointPair) items.get(i)).isBad())
+			if (!items.get(i).isBad())
 				r++;
 		return r;
 	}
@@ -185,7 +185,7 @@ public class KeyPointPairList {
 	public int leaveGoodTopElements(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			KeyPointPair sp = (KeyPointPair)items.get(i);
+			KeyPointPair sp = items.get(i);
 			if (count >= numElements) { 
 				sp.setBad(true);
 			} else {
@@ -199,7 +199,7 @@ public class KeyPointPairList {
 	public int leaveGoodTopElements2(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			KeyPointPair sp = (KeyPointPair)items.get(i);
+			KeyPointPair sp = items.get(i);
 			if (sp.targetReused || (count >= numElements)) { 
 				sp.setBad(true);
 			} else {
@@ -212,7 +212,7 @@ public class KeyPointPairList {
 	
 	public void leaveGoodElements(double maxDiscrepancy) {
 		for (int i = 0; i < items.size(); i++) {
-			KeyPointPair sp = (KeyPointPair)items.get(i);
+			KeyPointPair sp = items.get(i);
 			sp.setBad(sp.discrepancy > maxDiscrepancy);
 		}
 	}
@@ -292,7 +292,7 @@ public class KeyPointPairList {
 	public void displayTop(int maxTop) {
 		maxTop = (maxTop <= 0 ? items.size() : Math.min(maxTop, items.size()));
 		for (int i = 0; i < maxTop; i++) {
-			KeyPointPair pp = (KeyPointPair) items.get(i);
+			KeyPointPair pp = items.get(i);
 			System.out.println((i+1) + " -> " + pp.discrepancy);
 		}
 	}
