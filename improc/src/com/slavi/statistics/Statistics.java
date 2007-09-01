@@ -86,11 +86,11 @@ public class Statistics extends StatisticsBase {
 				double value = stat.getValue(item);
 				double weight = stat.getComputedWeight(item);
 		        double r = value * weight;
-		        double r1 = Math.pow(value, 2.0);
+		        double r1 = value * value;
 		        M[1] = M[1] + r;
 		        M[2] = M[2] + r1 * weight;
 		        M[3] = M[3] + r1 * r;
-		        M[4] = M[4] + Math.pow(r1, 2.0) * weight;
+		        M[4] = M[4] + r1 * r1 * weight;
 			}				
 		}
     	
@@ -101,10 +101,10 @@ public class Statistics extends StatisticsBase {
 		        // Пресмятане на Централен момент от 2,3 и 4 ред. (2-ри ред = дисперсия)
 				double weight = stat.getComputedWeight(item);
 		        double r = stat.getValue(item) - M[1];
-		        double r1 = Math.pow(r, 2.0);
+		        double r1 = r * r;
 		        D[2] = D[2] + r1 * weight;
 		        D[3] = D[3] + r1 * r * weight;
-		        D[4] = D[4] + Math.pow(r1, 2.0) * weight;
+		        D[4] = D[4] + r1 * r1 * weight;
 			}
 		}
 

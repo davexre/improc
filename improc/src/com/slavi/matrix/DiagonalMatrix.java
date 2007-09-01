@@ -674,8 +674,8 @@ public class DiagonalMatrix {
 		for (int i = m.length - 1; i >= 0; i--) {
 			dA = m[i] - res.AvgA;
 			dB = second.m[i] - res.AvgB;
-			res.SAA += Math.pow(dA, 2);
-			res.SBB += Math.pow(dB, 2);
+			res.SAA += dA * dA;
+			res.SBB += dB * dB;
 			res.SAB += dA * dB;
 		}
 

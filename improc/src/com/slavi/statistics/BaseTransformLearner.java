@@ -148,8 +148,10 @@ public abstract class BaseTransformLearner {
 			item.previousBadStatus = item.bad;
 			// Compute distance between target and sourceTransformed
 			double sum2 = 0;
-			for (int i = transformer.outputSize - 1; i >= 0; i--)
-				sum2 += Math.pow(item.target.getItem(i, 0) - item.sourceTransformed.getItem(i, 0), 2.0);
+			for (int i = transformer.outputSize - 1; i >= 0; i--) {
+				double d = item.target.getItem(i, 0) - item.sourceTransformed.getItem(i, 0);
+				sum2 += d * d;
+			}
 			item.discrepancy = Math.sqrt(sum2);
 		}
 		

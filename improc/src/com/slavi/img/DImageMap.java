@@ -125,9 +125,9 @@ public class DImageMap {
 				// ... so ...
 				// Scale the magnitude to fit 0..255 interval
 				// The maximum value for magnitude is 360.6244...
-				dest.setPixel(i, j, Math.sqrt(
-					Math.pow(getPixel(i + 1, j) - getPixel(i - 1, j), 2) +
-					Math.pow(getPixel(i, j + 1) - getPixel(i, j - 1), 2)));
+				double d1 = getPixel(i + 1, j) - getPixel(i - 1, j);
+				double d2 = getPixel(i, j + 1) - getPixel(i, j - 1);
+				dest.setPixel(i, j, Math.sqrt(d1 * d1 + d2 * d2));
 			}
 	}
 

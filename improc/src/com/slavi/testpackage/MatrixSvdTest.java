@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.StringTokenizer;
 
+import com.slavi.matrix.JLapack;
 import com.slavi.matrix.Matrix;
 
 public class MatrixSvdTest {
@@ -37,7 +38,8 @@ public class MatrixSvdTest {
 		v.copyTo(vt);
 		b.copyTo(a);
 		
-		a.mysvd(u, v, s);
+		JLapack jl = new JLapack();
+		jl.mysvd(a, u, v, s);
 //		at.mysvd(ut, vt, st);
 
 		

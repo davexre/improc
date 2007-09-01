@@ -329,6 +329,14 @@ public class Matrix {
 
 	/**
 	 * Returns the max(abs()) of all elements of the matrix.
+	 * <p>
+	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
+	 * <p>
+	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
+	 * the infinity norm, or the element of largest absolute value of a
+	 * real matrix A.
+	 * <p>
+	 * NORM = 'M' or 'm'
 	 */
 	public double maxAbs() {
 		double D = 0;
@@ -353,6 +361,85 @@ public class Matrix {
 				if (D > m[i][j])
 					D = m[i][j];
 		return D;
+	}
+
+	/**
+	 * Return the matrix one norm value that is equal to the maximum of the 
+	 * column sums of the absolute values of the array elements.
+	 * <p>
+	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
+	 * <p>
+	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
+	 * the infinity norm, or the element of largest absolute value of a
+	 * real matrix A.
+	 * <p>
+	 * NORM = '1', 'O' or 'o'
+	 */
+	public double getOneNorm() {
+		double result = 0.0;
+		for (int i = sizeX - 1; i >= 0; i--) {  
+			double d = 0.0;
+			for (int j = sizeY - 1; j >= 0; j--)  
+				d += Math.abs(getItem(i, j));
+			if (d > result)
+				result = d;
+		}
+		return result;
+	}
+	
+	/**
+	 * Return the infinity norm of the matrix that is equal to the 
+	 * maximum of the row sums of the absolute values of the array elements.
+	 * <p>
+	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
+	 * <p>
+	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
+	 * the infinity norm, or the element of largest absolute value of a
+	 * real matrix A.
+	 * <p>
+	 * NORM = 'I' or 'i'
+	 */
+	public double getNormInfinity() {
+		double result = 0.0;
+		for (int j = sizeY - 1; j >= 0; j--) { 
+			double d = 0.0;
+			for (int i = sizeX - 1; i >= 0; i--)  
+				d += Math.abs(getItem(i, j));
+			if (d > result)
+				result = d;
+		}
+		return result;
+	}
+	
+	/**
+	 * Return the Frobenius norm of the matrix.
+	 * <p>
+	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
+	 * <p>
+	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
+	 * the infinity norm, or the element of largest absolute value of a
+	 * real matrix A.
+	 * <p>
+	 * NORM = 'F', 'f', 'E' or 'e'
+	 */
+	public double getForbeniusNorm() {
+		double scale = 0.0;
+		double sum = 1.0;
+		for (int i = sizeX - 1; i >= 0; i--) 
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double d = Math.abs(getItem(i, j));
+				if (d != 0.0) {
+					if (scale < d) {
+						double d1 = scale / d;
+						sum = 1.0 + sum * d1 * d1;
+						scale = d;
+					} else {
+						double d1 = d / scale;
+						sum += d1 * d1;
+					}
+				}
+			}
+		return scale * Math.sqrt(sum);
 	}
 
 	/**
@@ -714,8 +801,8 @@ public class Matrix {
 			for (int j = sizeY - 1; j >= 0; j--) {
 				dA = m[i][j] - res.AvgA;
 				dB = second.m[i][j] - res.AvgB;
-				res.SAA += Math.pow(dA, 2);
-				res.SBB += Math.pow(dB, 2);
+				res.SAA += dA * dA;
+				res.SBB += dB * dB;
 				res.SAB += dA * dB;
 			}
 
@@ -1094,7 +1181,7 @@ public class Matrix {
 		double absB = Math.abs(b);
 		if (absA > absB) {
 			r = b / a;
-			r = absA * Math.sqrt(1 + Math.pow(r, 2.0));
+			r = absA * Math.sqrt(1 + r * r);
 		} else if (b != 0) {
 			r = a / b;
 			r = absB * Math.sqrt(1 + r * r);
@@ -1139,7 +1226,8 @@ public class Matrix {
 				
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-			double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+			double beta = hypot(alpha, xnorm);
 			if (beta == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
@@ -1222,7 +1310,8 @@ public class Matrix {
 				
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-			double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
+			double beta = hypot(alpha, xnorm);
 			if (beta == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
@@ -1273,682 +1362,6 @@ public class Matrix {
 		}
 	}
 	
-	private static void svdDBDSQR(Matrix U, Matrix s, Matrix V, Matrix E, Matrix work) {
-		// DBDSQR
-		// Perform bidiagonal QR iteration, computing left singular vectors 
-		// of R in WORK(IU) and computing right singular vectors of R in VT
-		
-		// DBDSQR:258 Compute approximate maximum, minimum singular values
-		int atIndex = Math.min(U.getSizeX(), V.getSizeY()) - 1;
-		int maxit = 6 * atIndex * atIndex;
-		int iter = maxit;
-		double TOL = 1.0958067E-014; // ?????
-		double threshold = 2.59371421E-015;
-		double EPS = 1.11022302E-016;
-		
-		int old_atIndex = -1;
-		int old_ll = -1;
-		double SMINL = 0.0;
-		
-		work.resize(V.getSizeX(), 4);
-		int idir = 0;
-		
-		while ((atIndex > 0) && (iter >= 0)) {
-// 			System.out.println("Iteration = " + (maxit - iter) + " atIndex = " + atIndex);
-//			s.printM("S=");
-//			E.printM("E=");
-//			V.printM("VT=");
-//			U.printM("U=");
-			
-			// DBDSQR:316 Find diagonal block of matrix to work on
-			double smax = Math.abs(s.getItem(atIndex, atIndex));
-			double smin = smax;
-			int ll = atIndex - 1;
-			boolean found_it = false; 
-			while (ll >= 0) {
-				double abss = Math.abs(s.getItem(ll, ll));
-				double abse = Math.abs(E.getItem(ll, 0));
-				if (abse <= threshold) {
-					E.setItem(ll, 0, 0.0);
-					// Matrix splits since E(LL) = 0
-					if (ll == atIndex - 1) {
-						// Convergence of bottom singular value, return to top of loop
-						atIndex--;
-						found_it = true;
-					}
-					break;
-				}
-				smin = Math.min(smin, abss);
-				smax = Math.max(smax, Math.max(abss, abse));
-				ll--;
-			}
-			if (found_it)
-				continue;
-			ll++;
-			// E(LL) through E(M-1) are nonzero, E(LL-1) is zero
-			if (ll == atIndex - 1) {
-				// DBDSQR:354 2 by 2 block, handle separately
-				double SINR, COSR, SINL, COSL;
-				
-				// DLASV2
-				double F = s.getItem(atIndex - 1, atIndex - 1);
-				double G = E.getItem(atIndex - 1, 0);
-				double H = s.getItem(atIndex, atIndex);
-				double FT = F;
-				double GT = G;
-				double HT = H;
-				
-				double FA = Math.abs(FT);
-				double HA = Math.abs(HT);
-				double GA = Math.abs(GT);
-				
-				int pmax = 1;
-				boolean swap = HA > FA;
-				
-				if (swap) {
-					pmax = 3;
-					double tmp = FT;
-					FT = HT;
-					HT = tmp;
-					tmp = FA;
-					FA = HA;
-					HA = tmp;
-				}
-				double CLT = 0, CRT = 0, SLT = 0, SRT = 0;
-				if (GA == 0.0) {
-					// DLASV:132 Diagonal matrix
-					s.setItem(atIndex, atIndex, HA);			// SSMIN
-					s.setItem(atIndex - 1, atIndex - 1, FA);	// SSMAX
-					CRT = CLT = 1.0;
-					SRT = SLT = 0.0;
-				} else {
-					boolean gasmal = true;
-					if (GA > FA) {
-						pmax = 2;
-						if ((FA / GA) < EPS) {  
-							// DLASV2:146 Case of very large GA
-							gasmal = false;
-							s.setItem(atIndex, atIndex, 
-									HA > 1.0 ? FA / (GA / HA) : (FA / GA) * HA);	// SSMIN
-							s.setItem(atIndex - 1, atIndex - 1, GA);				// SSMAX
-							SRT = CLT = 1.0;
-							SLT = HT / GT;
-							CRT = FT / GT;								
-						}
-					}
-					if (gasmal) {
-						// DLASV2:163 Normal case
-						double tmpD = FA - HA;
-						double L;
-						if (tmpD == FA)
-							// DLASV2:168 Copes with infinite F or H
-							L = 1.0;
-						else
-							L = tmpD / FA;  
-						double M = GT / FT;
-						double T = 2.0 - L;
-						double MM = M * M;
-						double TT = T * T;
-						double _S = Math.sqrt(TT + MM);
-						double _R = L == 0.0 ? Math.abs(M) : Math.sqrt(L * L + MM);
-						double A = (_S + _R) * 0.5;
-						s.setItem(atIndex, atIndex, HA / A);			// SSMIN
-						s.setItem(atIndex - 1, atIndex - 1, FA * A);	// SSMAX
-						if (MM == 0.0) {
-							// DLASV:207 Note that M is very tiny
-							if (L == 0.0)
-								T = SIGN(2.0, FT) * SIGN(1.0, GT);
-							else
-								T = GT / SIGN(tmpD, FT) + M / T;
-						} else
-							T = (M / (_S + T) + M / (_R + L)) * (1.0 + A);
-						L = Math.sqrt(T * T + 4.0);
-						CRT = 2.0 / L;
-						SRT = T / L;
-						CLT = (CRT + SRT * M) / A;
-						SLT = (HT / FT ) * SRT / A;
-					}
-				}
-				if (swap) {
-					COSL = SRT;
-					SINL = CRT;
-					COSR = SLT;
-					SINR = CLT;
-				} else {
-					COSL = CLT;
-					SINL = SLT;
-					COSR = CRT;
-					SINR = SRT;
-				};
-				// DLASV2:236 Correct signs of SSMAX and SSMIN
-				double tsign = 0;
-				if (pmax == 1)
-					tsign = SIGN(1.0, COSR) * SIGN(1.0, COSL) * SIGN(1.0, F);
-				if (pmax == 2)
-					tsign = SIGN(1.0, SINR) * SIGN(1.0, COSL) * SIGN(1.0, G);
-				if (pmax == 3)
-					tsign = SIGN(1.0, SINR) * SIGN(1.0, SINL) * SIGN(1.0, H);
-				s.setItem(atIndex - 1, atIndex - 1, SIGN(s.getItem(atIndex - 1, atIndex - 1), tsign));	// SSMAX
-				s.setItem(atIndex, atIndex, SIGN(s.getItem(atIndex, atIndex), 
-						tsign * SIGN(1.0, F) * SIGN(1.0, H)));	// SSMIN
-				// End DLASV2
-				E.setItem(atIndex - 1, 0, 0.0);
-				
-				// DBDSQR:362 Compute singular vectors
-				for (int i = V.getSizeX() - 1; i >= 0; i--) {
-					double tmp =  COSR * V.getItem(i, atIndex - 1) + SINR * V.getItem(i, atIndex);
-					V.setItem(i, atIndex, COSR * V.getItem(i, atIndex) - SINR * V.getItem(i, atIndex - 1));
-					V.setItem(i, atIndex - 1, tmp);
-				}
-				for (int j = U.getSizeY() - 1; j >= 0; j--) {
-					double tmp =  COSL * U.getItem(atIndex - 1, j) + SINL * U.getItem(atIndex, j);
-					U.setItem(atIndex, j, COSL * U.getItem(atIndex, j) - SINL * U.getItem(atIndex - 1, j));
-					U.setItem(atIndex - 1, j, tmp);
-				}
-				atIndex -= 2;
-				continue;
-			}
-			
-			// DBDSQR:376 If working on new submatrix, choose shift direction (from larger end diagonal element towards smaller)
-			if ((ll > old_atIndex) || (atIndex < old_ll)) {
-				if (Math.abs(s.getItem(ll, ll)) >= Math.abs(s.getItem(atIndex, atIndex)))
-					// DBDSQR:382 Chase bulge from top (big end) to bottom (small end)
-					idir = 1;
-				else
-					// DBDSQR:387 Chase bulge from bottom (big end) to top (small end)
-					idir = 2;
-			}
-			System.out.println("IDIR=" + idir);
-			// DBDSQR:393 Apply convergence tests
-			if (idir == 1) {
-				// DBDSQR:397 Run convergence test in forward direction. First apply standard test to bottom of matrix
-				if ((Math.abs(E.getItem(atIndex - 1, 0)) <= Math.abs(TOL * s.getItem(atIndex, atIndex))) ||
-					((TOL < 0.0) && (Math.abs(E.getItem(atIndex - 1, 0)) < threshold ))) {
-					E.setItem(atIndex - 1, 0, 0.0);
-					continue;
-				}
-				if (TOL >= 0.0) {
-					// DBDSQR:408 If relative accuracy desired, apply convergence criterion forward
-					double MU = Math.abs(s.getItem(ll, ll));
-					SMINL = MU;
-					boolean found = false;
-					for (int lll = ll; lll < atIndex; lll++) {
-						if (Math.abs(E.getItem(lll, 0)) <= (TOL * MU)) {
-							E.setItem(lll, 0, 0.0);
-							found = true;
-							break;
-						}
-						MU = Math.abs(s.getItem(lll + 1, lll + 1)) * (MU / (MU + Math.abs(E.getItem(lll, 0))));
-						SMINL = Math.min(SMINL, MU);
-					}
-					if (found)
-						continue;					
-				}
-			} else {
-				// DBDSQR:426 Run convergence test in backward direction First apply standard test to top of matrix
-				if ((Math.abs(E.getItem(ll, 0)) <= Math.abs(TOL * s.getItem(ll, ll))) || 
-					((TOL < 0.0) && (Math.abs(E.getItem(ll, 0)) <= threshold))) {   
-					E.setItem(ll, 0, 0.0);
-					continue;
-				}
-				if (TOL > 0.0) {
-					// DBDSQR:437 If relative accuracy desired, apply convergence criterion backward
-					double MU = Math.abs(s.getItem(atIndex, atIndex));
-					SMINL = MU;
-					boolean found = false;
-					for (int lll = atIndex - 1; lll >= ll; lll--) {
-						if (Math.abs(E.getItem(lll, 0)) <= (TOL * MU)) {
-							E.setItem(lll, 0, 0.0);
-							found = true;
-							break;
-						}
-						MU = Math.abs(s.getItem(lll, lll)) * (MU / (MU + Math.abs(E.getItem(lll, 0))));
-						SMINL = Math.min(SMINL, MU);
-					}
-					if (found)
-						continue;					
-				}
-			}
-			old_ll = ll;
-			old_atIndex = atIndex;
-			
-			double shift = 0.0;
-			
-			// DBDQR:456 Compute shift.  First, test if shifting would ruin relative accuracy, and if so set the shift to zero.
-			if ((TOL >= 0.0) && (V.getSizeX() * TOL * (SMINL / smax) <= Math.max(EPS, TOL * 0.01))) { 
-				// DBDSQR:462 Use a zero shift to avoid loss of relative accuracy
-				shift = 0.0;
-			} else {
-				// DBDSQR:467 Compute the shift from 2-by-2 block at end of matrix
-				double sll, FA, GA, HA;				
-				if (idir == 1) {
-					sll = Math.abs(s.getItem(ll, ll));
-					FA = Math.abs(s.getItem(atIndex - 1, atIndex - 1));
-					GA = Math.abs(E.getItem(atIndex - 1, 0));
-					HA = Math.abs(s.getItem(atIndex, atIndex));
-				} else {
-					sll = Math.abs(s.getItem(atIndex, atIndex));
-					FA = Math.abs(s.getItem(ll, ll));
-					GA = Math.abs(E.getItem(ll, 0));
-					HA = Math.abs(s.getItem(ll + 1, ll + 1));
-				}
-				
-				// DLAS2:15 computes the singular values of the 2-by-2 matrix
-				// [  F   G  ]
-				// [  0   H  ]
-				if (FA < HA) {
-					// FA => FHMX; HA => FHMN
-					double tmp = FA;
-					FA = HA;
-					HA = tmp;
-				}
-				System.out.println("HA=" + HA);
-				if (HA == 0.0) {
-					shift = 0.0;
-				} else {
-					if (GA < FA) {
-						double AS = 1.0 + HA / FA;
-						double AT = (FA - HA) / FA;
-						double AU = Math.pow((GA / FA), 2.0);
-						double C = 2.0 / (Math.sqrt(AS * AS + AU) + Math.sqrt(AT * AT + AU));
-						shift = HA * C;
-					} else {
-						double AU = FA / GA;
-						if (AU == 0.0) {
-							// DLAS2:101 Avoid possible harmful underflow if exponent range
-							// asymmetric (true SSMIN may not underflow even if AU underflows)
-							shift = (FA + HA) / GA;
-						} else {
-							double AS = 1.0 + HA / FA;
-							double AT = (FA - HA) / FA;
-							double C = 1.0 / (Math.sqrt(1.0 + Math.pow(AS * AU, 2.0)) + Math.sqrt(1.0 + Math.pow(AT * AU, 2.0)));
-							shift = 2.0 * (HA * C * AU);
-						}
-					}
-				}
-				// End of DLAS2
-				
-				// DBDSQR:477 Test if shift negligible, and if so set to zero
-				if ((sll > 0.0) && (Math.pow(shift / sll, 2.0) < EPS))
-					shift = 0.0;
-			}
-			
-			// DBDSQR:485 Increment iteration count
-			iter -= atIndex - ll;
-			// DBDSQR:489 If SHIFT = 0, do simplified QR iteration
-//			System.out.println("SHIFT=" + shift);
-			
-			if (shift == 0.0) {
-				if (idir == 1) {
-					// DBDSQR:570 Use nonzero shift
-					if (idir == 1) {
-						System.out.println("use path 01");
-						// DBDSQR:494 Chase bulge from top to bottom
-						// Save cosines and sines for later singular vector updates
-						double CS = 1.0;
-						double oldCS = 1.0;
-						double oldSN = 0.0;
-						double SN;
-
-						for (int lll = ll; lll < atIndex; lll++) {
-							// DLARTG
-							double F = s.getItem(lll, lll) * CS;
-							double G = E.getItem(lll, 0);
-							double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // hypot(F, G);
-							CS = F / r;
-							SN = G / r;
-							if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-								CS = -CS;
-								SN = -SN;
-								r = -r;
-							}
-							//End DLARTG
-							if (lll > ll)
-								E.setItem(lll - 1, 0, oldSN * r);
-							
-							F = oldCS * r;
-							G = s.getItem(lll + 1, lll + 1) * SN;
-							// DLARTG
-							r = hypot(F, G);
-							oldCS = F / r;
-							oldSN = G / r;
-							if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-								oldCS = -oldCS;
-								oldSN = -oldSN;
-								r = -r;
-							}
-							s.setItem(lll, lll, r);
-							// End DLARTG
-
-							work.setItem(lll, 0, CS);
-							work.setItem(lll, 1, SN);
-							work.setItem(lll, 2, oldCS);
-							work.setItem(lll, 3, oldSN);
-						}
-						double H = s.getItem(atIndex, atIndex) * CS;
-						s.setItem(atIndex, atIndex, H * oldCS);
-						E.setItem(atIndex - 1, 0, H * oldSN);
-						// DBDSQR:513 Update singular vectors
-						for (int lll = ll; lll < atIndex; lll++) {
-							CS = work.getItem(lll, 0);
-							SN = work.getItem(lll, 1);
-							oldCS = work.getItem(lll, 2);
-							oldSN = work.getItem(lll, 3);
-							
-							if ((CS != 1.0) || (SN != 0.0)) 
-								for (int indx = 0; indx < V.getSizeX(); indx++) {
-									double tmp1 = V.getItem(indx, lll + 1);
-									double tmp2 = V.getItem(indx, lll);
-									V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
-									V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
-								}
-							if ((oldCS != 1.0) || (oldSN != 0.0)) 
-								for (int indy = 0; indy < U.getSizeY(); indy++) {
-									double tmp1 = U.getItem(lll + 1, indy);
-									double tmp2 = U.getItem(lll, indy);
-									U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
-									U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
-								}
-						}
-						// DBDSQR:525 Test convergence
-						if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
-							E.setItem(atIndex - 1, 0, 0.0);
-					}
-				} else {
-					System.out.println("use path 02");
-					// DBDSQR:532 Chase bulge from bottom to top
-					// Save cosines and sines for later singular vector updates
-					double CS = 1.0;
-					double oldCS = 1.0;
-					double oldSN = 0.0;
-					double SN;
-
-					for (int lll = atIndex; lll > ll; lll--) {
-						double F = s.getItem(lll, lll) * CS;
-						double G = E.getItem(lll - 1, 0);
-						// DLARTG
-						double r = hypot(F, G);
-						CS = F / r;
-						SN = G / r;
-						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							CS = -CS;
-							SN = -SN;
-							r = -r;
-						}
-						//End DLARTG
-						if (lll < atIndex)
-							E.setItem(lll, 0, oldSN * r);
-						
-						F = oldCS * r;
-						G = s.getItem(lll - 1, lll - 1) * SN;
-						// DLARTG
-						r = hypot(F, G); 
-						oldCS = F / r;
-						oldSN = G / r;
-						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							oldCS = -oldCS;
-							oldSN = -oldSN;
-							r = -r;
-						}
-						// End DLARTG
-						s.setItem(lll, lll, r);
-
-						work.setItem(lll, 0, CS);
-						work.setItem(lll, 1, -SN);
-						work.setItem(lll, 2, oldCS);
-						work.setItem(lll, 3, -oldSN);
-					}
-					double H = s.getItem(ll, ll) * CS;
-					s.setItem(ll, ll, H * oldCS);
-					E.setItem(ll, 0, H * oldSN);
-					// DBDSQR:551 Update singular vectors
-					for (int lll = ll; lll < atIndex; lll++) {
-						CS = work.getItem(lll, 0);
-						SN = work.getItem(lll, 1);
-						oldCS = work.getItem(lll, 2);
-						oldSN = work.getItem(lll, 3);
-						
-						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
-								double tmp1 = V.getItem(indx, lll + 1);
-								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
-								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
-							}
-						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = U.getSizeY() - 1; indy >= 0; indy--) {
-								double tmp1 = U.getItem(lll + 1, indy);
-								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
-								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
-							}
-					}
-					// DBDSQR:563 Test convergence
-					if (Math.abs(E.getItem(ll, 0)) < threshold)
-						E.setItem(ll, 0, 0.0);
-				}
-			} else {
-				// DBDSQR:570 Use nonzero shift
-				if (idir == 1) {
-					System.out.println("use path 11");
-					// DBDSQR:574 Chase bulge from top to bottom
-					// Save cosines and sines for later singular vector updates
-					double F = (Math.abs(s.getItem(ll, ll)) - shift) *
-						(SIGN(1.0, s.getItem(ll, ll)) + shift / s.getItem(ll, ll));
-					double G = E.getItem(ll, 0);
-					
-					double CS = 1.0;
-					double oldCS = 1.0;
-					double oldSN = 0.0;
-					double SN;
-
-					for (int lll = ll; lll < atIndex; lll++) {
-						// DLARTG
-						double r = Math.sqrt(Math.pow(F, 2.0) + Math.pow(G, 2.0)); // hypot(F, G);
-						CS = F / r;
-						SN = G / r;
-						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							CS = -CS;
-							SN = -SN;
-							r = -r;
-						}
-						//End DLARTG
-						if (lll > ll)
-							E.setItem(lll - 1, 0, r);
-						
-						F = CS * s.getItem(lll, lll) + SN * E.getItem(lll, 0);
-						E.setItem(lll, 0, CS * E.getItem(lll, 0) - SN * s.getItem(lll, lll));
-						G = s.getItem(lll + 1, lll + 1) * SN;
-						s.setItem(lll + 1, lll + 1, CS * s.getItem(lll + 1, lll + 1));
-						// DLARTG
-						r = hypot(F, G);
-						oldCS = F / r;
-						oldSN = G / r;
-						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							oldCS = -oldCS;
-							oldSN = -oldSN;
-							r = -r;
-						}
-						s.setItem(lll, lll, r);
-						// End DLARTG
-
-						F = oldCS * E.getItem(lll, 0) + oldSN * s.getItem(lll + 1, lll + 1);
-						s.setItem(lll + 1, lll + 1, oldCS * s.getItem(lll + 1, lll + 1) - oldSN * E.getItem(lll, 0));
-						if (lll < atIndex - 1) {
-							G = oldSN * E.getItem(lll + 1, 0); 
-							E.setItem(lll + 1, 0, oldCS * E.getItem(lll + 1, 0));
-						}
-						work.setItem(lll, 0, CS);
-						work.setItem(lll, 1, SN);
-						work.setItem(lll, 2, oldCS);
-						work.setItem(lll, 3, oldSN);
-					}
-					E.setItem(atIndex - 1, 0, F);
-					// DBDSQR:603 Update singular vectors
-					for (int lll = ll; lll < atIndex; lll++) {
-						CS = work.getItem(lll, 0);
-						SN = work.getItem(lll, 1);
-						oldCS = work.getItem(lll, 2);
-						oldSN = work.getItem(lll, 3);
-						
-						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indx = 0; indx < V.getSizeX(); indx++) {
-								double tmp1 = V.getItem(indx, lll + 1);
-								double tmp2 = V.getItem(indx, lll);
-								V.setItem(indx, lll + 1, CS * tmp1 - SN * tmp2);
-								V.setItem(indx, lll,     SN * tmp1 + CS * tmp2);
-							}
-						if ((oldCS != 1.0) || (oldSN != 0.0)) 
-							for (int indy = 0; indy < U.getSizeY(); indy++) {
-								double tmp1 = U.getItem(lll + 1, indy);
-								double tmp2 = U.getItem(lll, indy);
-								U.setItem(lll + 1, indy, oldCS * tmp1 - oldSN * tmp2);
-								U.setItem(lll, indy,     oldSN * tmp1 + oldCS * tmp2);
-							}
-					}
-					// DBDSQR:615 Test convergence
-					if (Math.abs(E.getItem(atIndex - 1, 0)) < threshold)
-						E.setItem(atIndex - 1, 0, 0.0);
-				} else {
-					System.out.println("use path 12");
-					// DBDSQR:622 Chase bulge from bottom to top
-					// Save cosines and sines for later singular vector updates
-					double F = (Math.abs(s.getItem(atIndex, atIndex)) - shift) *
-						(SIGN(1.0, s.getItem(atIndex, atIndex)) + shift / s.getItem(atIndex, atIndex));
-					double G = E.getItem(atIndex - 1, 0);
-					
-					double CS = 1.0;
-					double oldCS = 1.0;
-					double oldSN = 0.0;
-					double SN;
-
-					for (int lll = atIndex; lll > ll; lll--) {
-						// DLARTG
-						double r = hypot(F, G); 
-						CS = F / r;
-						SN = G / r;
-						if ((CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							CS = -CS;
-							SN = -SN;
-							r = -r;
-						}
-						//End DLARTG
-						if (lll < atIndex)
-							E.setItem(lll, 0, r);
-						
-						F = CS * s.getItem(lll, lll) + SN * E.getItem(lll - 1, 0);
-						E.setItem(lll - 1, 0, CS * E.getItem(lll - 1, 0) - SN * s.getItem(lll, lll));
-						G = s.getItem(lll - 1, lll - 1) * SN;
-						s.setItem(lll - 1, lll - 1, CS * s.getItem(lll - 1, lll - 1));
-						// DLARTG
-						r = hypot(F, G); 
-						oldCS = F / r;
-						oldSN = G / r;
-						if ((oldCS < 0.0) && (Math.abs(F) > Math.abs(G))) {
-							oldCS = -oldCS;
-							oldSN = -oldSN;
-							r = -r;
-						}
-						// End DLARTG
-						s.setItem(lll, lll, r);
-
-						F = oldCS * E.getItem(lll - 1, 0) + oldSN * s.getItem(lll - 1, lll - 1);
-						s.setItem(lll - 1, lll - 1, oldCS * s.getItem(lll - 1, lll - 1) - oldSN * E.getItem(lll - 1, 0));
-						if (lll > ll + 1) {
-							G = oldSN * E.getItem(lll - 2, 0); 
-							E.setItem(lll - 2, 0, oldCS * E.getItem(lll - 2, 0));
-						}
-						work.setItem(lll, 0, CS);
-						work.setItem(lll, 1, -SN);
-						work.setItem(lll, 2, oldCS);
-						work.setItem(lll, 3, -oldSN);
-					}
-					E.setItem(ll, 0, F);
-					// DBDSQR:656 Update singular vectors
-					
-					for (int lll = atIndex; lll > ll; lll--) {
-						CS = work.getItem(lll, 0);
-						SN = work.getItem(lll, 1);
-						oldCS = work.getItem(lll, 2);
-						oldSN = work.getItem(lll, 3);
-	
-						if ((oldCS != 1.0) || (oldSN != 0.0))
-							for (int indx = V.getSizeX() - 1; indx >= 0; indx--) {
-								double tmp1 = V.getItem(indx, lll);
-								double tmp2 = V.getItem(indx, lll - 1);
-								V.setItem(indx, lll,     oldCS * tmp1 - oldSN * tmp2);
-								V.setItem(indx, lll - 1, oldSN * tmp1 + oldCS * tmp2);
-							}
-						if ((CS != 1.0) || (SN != 0.0)) 
-							for (int indy = 0; indy < U.getSizeY(); indy++) {
-								double tmp1 = U.getItem(lll, indy);
-								double tmp2 = U.getItem(lll - 1, indy);
-								U.setItem(lll, indy,     CS * tmp1 - SN * tmp2);
-								U.setItem(lll - 1, indy, SN * tmp1 + CS * tmp2);
-							}
-					}
-					// DBDSQR:615 Test convergence
-					if (Math.abs(E.getItem(ll, 0)) < threshold)
-						E.setItem(ll, 0, 0.0);
-				}
-			}
-			// DBDSQR:670 QR iteration finished, go back and check convergence
-		}
-
-		if ((atIndex <= 0) && (iter >= 0)) 
-			svdSortResult(U, s, V);
-		else 
-			// DBDSQR:720 Maximum number of iterations exceeded, failure to converge
-			throw new Error("Maximum number of iterations exceeded, failure to converge");
-	}
-	
-	public static void svdSortResult(Matrix U, Matrix s, Matrix V) {
-		// Check data
-//		if ((U.getSizeX() != U.getSizeY()) ||		// TODO: Enable this check
-//			(V.getSizeX() != V.getSizeY()) ||
-//			(V.getSizeX() != s.getSizeX()) ||
-//			(U.getSizeY() != s.getSizeY()) )
-//			throw new Error("Invalid arguments");
-		int minXY = Math.min(U.getSizeX(), V.getSizeX());
-		// Make all singular values positive
-		for (int j = 0; j < minXY; j++) {
-			if (s.getItem(j, j) < 0.0) {
-				s.setItem(j, j, -s.getItem(j, j));
-				for (int i = V.getSizeX() - 1; i >= 0; i--)
-					V.setItem(i, j, -V.getItem(i, j));
-			}
-		}
-		// Sort the singular values into decreasing order (insertion sort on
-		// singular values, but only one transposition per singular vector)
-		for (int j = 0; j < minXY; j++) {
-			// Scan for smallest D(I)
-			int minJindex = j;
-			double minJvalue = s.getItem(j, j);
-			for (int i = j + 1; i < minXY; i++) {
-				if (s.getItem(i, i) > minJvalue) {
-					minJindex = i;
-					minJvalue = s.getItem(i, i);						
-				}				
-			}
-			if (minJindex != j) {
-				// Swap singular values and vectors
-				double tmp = s.getItem(j, j);
-				s.setItem(j, j, s.getItem(minJindex, minJindex));
-				s.setItem(minJindex, minJindex, tmp);
-				for (int i = V.getSizeX() - 1; i >= 0; i--) {
-					tmp = V.getItem(i, j);
-					V.setItem(i, j, V.getItem(i, minJindex));
-					V.setItem(i, minJindex, tmp);
-				}
-				for (int i = U.getSizeX() - 1; i >= 0; i--) {   
-					tmp = U.getItem(j, i);
-					U.setItem(j, i, U.getItem(minJindex, i));
-					U.setItem(minJindex, i, tmp);
-				}
-			}
-		}
-	}
-
 	/**
 	 * DLARF applies a real elementary reflector H to a real m by n matrix
 	 * C, from either the left or the right. H is represented in the form
@@ -1986,248 +1399,6 @@ public class Matrix {
 		}
 	}
 	
-	private void svdDGEBRD(Matrix tauP, Matrix tauQ) {
-		boolean upper = true; //getSizeX() <= getSizeY();
-		//int minXY = upper ? getSizeX() : getSizeY();
-		int minXY = Math.min(getSizeX(), getSizeY());
-		if ((tauQ.getSizeX() < minXY) || (tauQ.getSizeY() < 1))
-			tauQ.resize(minXY, 1);
-		if ((tauP.getSizeX() < minXY) || (tauP.getSizeY() < 1))
-			tauP.resize(minXY, 1);
-//		if (!upper) {
-//			Matrix tmp = tauP;
-//			tauP = tauQ;
-//			tauQ = tmp;
-//		}
-		
-		for (int atIndex = 0; atIndex < minXY; atIndex++) {
-			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
-			// DLARFG
-			double xnorm = 0.0;
-			if (upper)
-				for (int j = getSizeY() - 1; j > atIndex; j--)					
-					xnorm = hypot(xnorm, getItem(atIndex, j));
-			else
-				for (int i = getSizeX() - 1; i > atIndex; i--)					
-					xnorm = hypot(xnorm, getItem(i, atIndex));
-			
-			double beta;
-			double tmp_tau;
-			if (xnorm == 0.0) { 
-				tmp_tau = 0.0;
-				beta = getItem(atIndex, atIndex);
-			} else {
-				double alpha = getItem(atIndex, atIndex);
-				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-				if (beta == 0.0) {
-					tauQ.setItem(atIndex, 0, 0.0);
-					continue;
-				}
-				if (alpha >= 0.0)
-					beta = -beta;
-				tmp_tau = (beta - alpha) / beta;
-				double scale = 1.0 / (alpha - beta);
-				
-				if (upper)
-					for (int j = getSizeY() - 1; j > atIndex; j--) 
-						setItem(atIndex, j, scale * getItem(atIndex, j));
-				else
-					for (int i = getSizeX() - 1; i > atIndex; i--) 
-						setItem(i, atIndex, scale * getItem(i, atIndex));
-			}
-			tauQ.setItem(atIndex, 0, tmp_tau);
-			// End DLARFG
-			
-			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
-			setItem(atIndex, atIndex, 1.0);
-			
-			if (upper) 
-				svdDLARF_X(atIndex, tmp_tau);
-			else 
-				svdDLARF_Y(atIndex, tmp_tau);
-			setItem(atIndex, atIndex, beta);
-
-		
-			System.out.println("atIndex = " + atIndex + " beta = " + beta + " tau = " + tmp_tau);
-			
-			// =============================================
-			// DGEBD2:176
-			if (atIndex >= minXY - 1) {
-				tauP.setItem(atIndex, 0, 0.0); // DGEBD2:192
-				continue;
-			}
-
-			// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
-			// DLARFG - now working with rows!
-			
-			//int atIndex2 = Math.min(atIndex + 2, R.getSizeX() - 1);
-			xnorm = 0.0;
-			if (upper)
-				for (int i = getSizeX() - 1; i > atIndex + 1; i--)					
-					xnorm = hypot(xnorm, getItem(i, atIndex));
-			else
-				for (int j = getSizeY() - 1; j > atIndex + 1; j--)					
-					xnorm = hypot(xnorm, getItem(atIndex, j));
-			if (xnorm == 0.0) {
-				tmp_tau = 0.0;
-				beta = upper ? getItem(atIndex + 1, atIndex) : getItem(atIndex, atIndex + 1);
-			} else {
-				double alpha = upper ? getItem(atIndex + 1, atIndex) : getItem(atIndex, atIndex + 1);
-				//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
-				beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-				if (beta == 0.0) {
-					tauP.setItem(atIndex + 1, 0, 0.0);
-					continue;
-				}
-				if (alpha >= 0.0)
-					beta = -beta;
-				
-				tmp_tau = (beta - alpha) / beta;
-				double scale = 1.0 / (alpha - beta);
-				if (upper)
-					for (int i = getSizeX() - 1; i > atIndex + 1; i--) 
-						setItem(i, atIndex, scale * getItem(i, atIndex));
-				else
-					for (int j = getSizeY() - 1; j > atIndex + 1; j--) 
-						setItem(atIndex, j, scale * getItem(atIndex, j));
-			}
-			tauP.setItem(atIndex, 0, tmp_tau);
-			// End DLARFG
-			
-			if (upper) {
-				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
-				setItem(atIndex + 1, atIndex, 1.0);
-				for (int j = getSizeY() - 1; j > atIndex; j--) {
-					double sum = 0.0;
-					for (int i = getSizeX() - 1; i > atIndex; i--) 
-						sum += getItem(i, j) * getItem(i, atIndex);
-					for (int i = getSizeX() - 1; i > atIndex; i--) 
-						setItem(i, j, getItem(i, j) - tmp_tau * sum * getItem(i, atIndex));
-				}
-				setItem(atIndex + 1, atIndex, beta);
-			} else {
-				// DGEBD2:186 Apply G(i) to A(i+1:m,i+1:n) from the right
-				setItem(atIndex, atIndex + 1, 1.0);
-				svdDLARF_X(atIndex, tmp_tau);
-				setItem(atIndex, atIndex + 1, beta);
-			}
-		}
-	}
-
-	public void mysvd(Matrix U, Matrix V, Matrix s) {
-		printM("A");
-		U.resize(getSizeY(), getSizeY());
-		s.resize(getSizeX(), getSizeY());
-		V.resize(getSizeX(), getSizeX());
-		s.make0();
-		int minXY = Math.min(getSizeX(), getSizeY());
-
-		Matrix RL = new Matrix(getSizeX(), getSizeY());
-		Matrix tauP = new Matrix(minXY, 1);
-		Matrix tauQ = new Matrix(getSizeX(), 1);
-		Matrix E = new Matrix(minXY - 1, 1);
-		Matrix Q = new Matrix(getSizeY(), getSizeY());
-		Matrix work = new Matrix();
-
-		Matrix tmpV;
-		Matrix tmpU;
-		Matrix tmpQ;
-		
-		boolean upper = getSizeX() <= getSizeY();
-
-		if (upper) {
-			qrDecomposition(tauP);
-			qrDecomositionGetQ(tauP, U);
-			qrDecomositionGetR(RL);
-			tmpU = U;
-			tmpV = V;
-			tmpQ = Q;
-		} else {
-			lqDecomposition(tauP);
-			lqDecomositionGetQ(tauP, V);
-			lqDecomositionGetL(RL);
-			tmpU = V;
-			tmpV = Q;
-			tmpQ = U;
-		}
-
-		// DGESVD:1769 Bidiagonalize R in WORK(IU), copying result to VT
-		RL.svdDGEBRD(tauP, tauQ);
-		for (int i = minXY - 1; i >= 0; i--)
-			s.setItem(i, i, RL.getItem(i, i));
-		for (int i = minXY - 2; i >= 0; i--)
-			E.setItem(i, 0, RL.getItem(i + 1, i));
-		
-		// DGESVD:1807
-		for (int i = tmpV.getSizeX() - 1; i >= 0; i--)
-			for (int j = i; j >= 0; j--)
-				tmpV.setItem(i, j, RL.getItem(i, j));
-		
-		// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
-		RL.qrDecomositionGetQ(tauQ, tmpQ);
-		
-		// DORGBR:217 Shift the vectors which define the elementary reflectors one
-		// row downward, and set the first row and column of P' to those of the unit matrix
-		for (int j = tmpV.getSizeY() - 1; j > 0; j--) {
-			for (int i = j - 1; i > 0; i--)
-				tmpV.setItem(j, i, tmpV.getItem(j, i - 1));
-			tmpV.setItem(0, j, 0.0);
-			tmpV.setItem(j, 0, 0.0);
-		}
-		tmpV.setItem(0, 0, 1.0);
-
-		// DORGL2
-		for (int atIndex = tmpV.getSizeX() - 1; atIndex > 0; atIndex--) {
-			double tmp_tau = tauP.getItem(atIndex - 1, 0);
-			if (atIndex < tmpV.getSizeX() - 1) {
-				// Apply H(i) to A(i:m,i:n) from the right
-				tmpV.setItem(atIndex, atIndex, 1.0);
-				tmpV.svdDLARF_Y(atIndex, tmp_tau);
-				for (int i = tmpV.getSizeX() - 1; i > atIndex; i--) 
-					tmpV.setItem(i, atIndex, -tmp_tau * tmpV.getItem(i, atIndex));
-			}
-			tmpV.setItem(atIndex, atIndex, 1.0 - tmp_tau);
-			// DORGL2:124 Set A(i,1:i-1) to zero 
-			for (int i = atIndex - 1; i > 0; i--)
-				tmpV.setItem(i, atIndex, 0.0);
-		}
-		// End DORGL2
-		svdDBDSQR(tmpQ, s, tmpV, E, work);
-
-		if (upper) {
-			// DGESVD:1850 Multiply Q in U by left singular vectors of R in WORK(IU), storing result in A
-			for (int i = getSizeX() - 1; i >= 0; i--) {
-				for (int j = getSizeY() - 1; j >= 0; j--) {
-					double sum = 0.0;	
-					for (int k = getSizeY() - 1; k >= 0; k--) {
-						double a = tmpU.getItem(k, j);
-						double b = tmpQ.getItem(i, k);
-						sum += a * b;
-					}
-					setItem(i, j, sum);
-				}
-			}
-		} else {
-			// DGESVD:3246 Multiply right singular vectors of L in WORK(IU) by Q in VT, storing result in A 
-			for (int i = getSizeX() - 1; i >= 0; i--) {
-				for (int j = getSizeY() - 1; j >= 0; j--) {
-					double sum = 0.0;	
-					for (int k = getSizeY() - 1; k >= 0; k--) {
-						double a = tmpV.getItem(k, j);
-						double b = tmpU.getItem(i, k);
-						sum += a * b;
-					}
-					setItem(i, j, sum);
-				}
-			}
-		}
-
-		for (int i = getSizeX() - 1; i >= 0; i--) 
-			for (int j = getSizeY() - 1; j >= 0; j--) 
-				tmpU.setItem(i, j, getItem(i, j));
-	}
-	
 	public void luDecomposition() {
 		boolean found;
 		Matrix permMatr = new Matrix(getSizeX(), getSizeY());
@@ -2252,12 +1423,6 @@ public class Matrix {
 			}
 	}
 
-	
-	
-	
-	
-	
-	
 	public static void main(String[] args) throws Exception {
 		BufferedReader fin = new BufferedReader(new FileReader(
 				MatrixTest.class.getResource(
@@ -2267,6 +1432,7 @@ public class Matrix {
 		a.load(fin);
 		fin.close();
 		Matrix at = new Matrix();
+		
 		a.transpose(at);
 		Matrix b = a.makeCopy();
 //		Matrix bt = at.makeCopy();

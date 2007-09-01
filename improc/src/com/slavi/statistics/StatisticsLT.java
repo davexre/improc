@@ -26,10 +26,11 @@ public class StatisticsLT extends StatisticsBase {
 				AbsMaxX = absValue;
 		}
 		itemsCount++;
+		double value2 = value * value;
 		sumValues[1] += value;
-		sumValues[2] += Math.pow(value, 2.0);
-		sumValues[3] += Math.pow(value, 3.0);
-		sumValues[4] += Math.pow(value, 4.0);
+		sumValues[2] += value2;
+		sumValues[3] += value2 * value;
+		sumValues[4] += value2 * value2;
 	}
 
 	public void start() {
@@ -48,9 +49,11 @@ public class StatisticsLT extends StatisticsBase {
 
 		// стр.26,48
 		// Пресмятане на Централен момент от 2,3 и 4 ред. (2-ри ред = дисперсия)
-		D[2] = M[2] - Math.pow(M[1], 2.0);
-		D[3] = M[3] - 3.0*M[1]*M[2] + 2.0*Math.pow(M[1], 3.0);
-		D[4] = M[4] - 4.0*M[1]*M[3] + 6.0*Math.pow(M[1], 2.0)*M[2] - 3.0*Math.pow(M[1], 4.0);
+		double m1 = M[1];
+		double m1_2 = m1 * m1;
+		D[2] = M[2] - m1_2;
+		D[3] = M[3] - 3.0 * m1 * M[2] + 2.0 * (m1_2 * m1);
+		D[4] = M[4] - 4.0 * m1 * M[3] + 6.0 * m1_2 * M[2] - 3.0 * (m1_2 * m1_2);
 
 		// стр.27,48
 		// Пресмятане на Асиметрия и Ексцес.

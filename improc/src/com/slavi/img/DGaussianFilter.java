@@ -54,7 +54,7 @@ public class DGaussianFilter {
 	public static double fillArray(double[] dest, double sigma) {
 		int maxR = ((dest.length + 1) >> 1) - 1;
 
-		double sigma2sq = -1.0 / (2.0 * Math.pow(sigma, 2.0));
+		double sigma2sq = -0.5 / (sigma * sigma);
 		double normalizeFactor = 1.0 / (Math.sqrt(2.0 * Math.PI) * sigma);
 		for (int i = maxR; i >= 0; i--) {
 			double G = Math.exp((i * i) * sigma2sq) * normalizeFactor;

@@ -392,8 +392,10 @@ public class DLoweDetector {
 		
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
-				for (int k = 0 ; k < KeyPoint.numDirections; k++)
-					norm += Math.pow(featureVector[i][j][k], 2.0);
+				for (int k = 0 ; k < KeyPoint.numDirections; k++) {
+					double d = featureVector[i][j][k];
+					norm += d * d;
+				}
 
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
@@ -416,8 +418,10 @@ public class DLoweDetector {
 		norm = 0.0;
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
-				for (int k = 0 ; k < KeyPoint.numDirections; k++)
-					norm += Math.pow(featureVector[i][j][k], 2.0);
+				for (int k = 0 ; k < KeyPoint.numDirections; k++) {
+					double d = featureVector[i][j][k];
+					norm += d * d;
+				}
 
 		norm = Math.sqrt (norm);
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
