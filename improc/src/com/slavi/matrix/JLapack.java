@@ -1730,6 +1730,9 @@ public class JLapack {
 			int I = DGEBAL_result.IHI;
 			I2 = I;
 			
+			/////???????
+			maxIterations = 15;
+			
 			while (I >= DGEBAL_result.ILO) {
 				int L = DGEBAL_result.ILO;
 				// DLAHQR:178 Perform QR iterations on rows and columns ILO to I until a
@@ -1739,6 +1742,7 @@ public class JLapack {
 				boolean converged = false;
 				while (iteration <= maxIterations) {
 					L = DLAHQR_FindSmallSubDiagonalElement(A, L, I);
+					System.out.println("!!!L=" + L + " at iteration " + iteration);
 					if (L > DGEBAL_result.ILO) {
 						// DLAHQR:197 H(L,L-1) is negligible
 						A.setItem(L - 1, L, 0.0);
@@ -1789,7 +1793,12 @@ public class JLapack {
 						}
 					}
 					
-					double V1, V2, V3 = 0.0;
+					System.out.println("S=" + S);
+					System.out.println("A33=" + A33);
+					System.out.println("A44=" + A44);
+					System.out.println("A43A34=" + A43A34);
+					
+					double V1 = 0.0, V2 = 0.0, V3 = 0.0;
 					
 					// DLAHQR:252 Look for two consecutive small subdiagonal elements.
 					int M = I - 2;
@@ -1802,9 +1811,18 @@ public class JLapack {
 						double A12 = A.getItem(M + 1, M);
 						double A44S = A44 - A11;
 						double A33S = A33 - A11;
+						
+//						System.out.println("M=" + M);
+//						System.out.println("A11=" + A11);
+//						System.out.println("A22=" + A22);
+//						System.out.println("A21=" + A21);
+//						System.out.println("A12=" + A12);
+//						System.out.println("A33S=" + A33S);
+//						System.out.println("A44S=" + A44S);
+						
 						V1 = (A33S * A44S - A43A34) / A21 + A12;
 						V2 = A22 - A11 - A33S - A44S;
-						V3 = A.getItem(M + 2, M + 1);
+						V3 = A.getItem(M + 1, M + 2);
 						S = Math.abs(V1) + Math.abs(V2) + Math.abs(V3);
 						V1 /= S;
 						V2 /= S;
@@ -1822,6 +1840,10 @@ public class JLapack {
 						M--;
 					}
 					
+					System.out.println("V1=" + V1);
+					System.out.println("V2=" + V2);
+					System.out.println("V3=" + V3);
+					
 					// DLAHQR:285 Double-shift QR step
 					for (int K = M; K < I; K++) { 
 						// DLAHQR:289 The first iteration of this loop determines a reflection G
@@ -1837,7 +1859,14 @@ public class JLapack {
 							for (int i = NR; i >= 0; i--)
 								V.setItem(i, 0, A.getItem(K + i - 1, K + i));
 						}
-						DLARFG_X(V, 1, 0, NR, V.getItem(0, 0));
+						
+						System.out.println("NR = " + NR + " K=" + K);
+						V.printM("V before DLARFG=");
+						
+						DLARFG_X(V, 0, 0, NR + 1, V.getItem(0, 0));
+						System.out.println("BETA = " + DLARFG_Beta + " TAU  = " + DLARFG_Tau);
+						V.printM("V after DLARFG=");
+						
 						if (K > M) {
 							A.setItem(K - 1, K, V.getItem(0, 0));
 							A.setItem(K - 1, K + 1, 0.0);
