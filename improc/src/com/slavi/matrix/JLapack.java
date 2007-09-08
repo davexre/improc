@@ -63,7 +63,7 @@ public class JLapack {
 	 */
 	public void DLARFG_X(Matrix Src, int atX, int atY, int width, double alpha) {
 		double xnorm = 0.0;
-		for (int i = atX + width - 1; i > atX; i--)
+		for (int i = atX + width - 1; i >= atX; i--)
 			xnorm = hypot(xnorm, Src.getItem(i, atY));
 		if (xnorm == 0.0) {
 			DLARFG_Beta = alpha;
@@ -82,7 +82,7 @@ public class JLapack {
 			DLARFG_Beta = -DLARFG_Beta;
 		DLARFG_Tau = (DLARFG_Beta - alpha) / DLARFG_Beta;
 		double scale = 1.0 / (alpha - DLARFG_Beta);
-		for (int i = atX + width - 1; i > atX; i--) 
+		for (int i = atX + width - 1; i >= atX; i--) 
 			Src.setItem(i, atY, scale * Src.getItem(i, atY));
 	}
 	
@@ -92,7 +92,7 @@ public class JLapack {
 	 */
 	public void DLARFG_Y(Matrix Src, int atX, int atY, int height, double alpha) {
 		double xnorm = 0.0;
-		for (int j = atY + height - 1; j > atY; j--)
+		for (int j = atY + height - 1; j >= atY; j--)
 			xnorm = hypot(xnorm, Src.getItem(atX, j));
 		if (xnorm == 0.0) {
 			DLARFG_Beta = alpha;
@@ -111,7 +111,7 @@ public class JLapack {
 			DLARFG_Beta = -DLARFG_Beta;
 		DLARFG_Tau = (DLARFG_Beta - alpha) / DLARFG_Beta;
 		double scale = 1.0 / (alpha - DLARFG_Beta);
-		for (int j = atY + height - 1; j > atY; j--) 
+		for (int j = atY + height - 1; j >= atY; j--) 
 			Src.setItem(atX, j, scale * Src.getItem(atX, j));
 	}
 	
@@ -190,7 +190,7 @@ public class JLapack {
 				continue;
 			}
 			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
-			DLARFG_Y(Src, atIndex, atIndex, Src.getSizeY() - atIndex, Src.getItem(atIndex, atIndex));
+			DLARFG_Y(Src, atIndex, atIndex + 1, Src.getSizeY() - atIndex - 1, Src.getItem(atIndex, atIndex));
 			tau.setItem(atIndex, 0, DLARFG_Tau);
 
 			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
@@ -273,7 +273,7 @@ public class JLapack {
 				continue;
 			}
 			// Generate elementary reflector H(i) to annihilate A(i,i+1:n)
-			DLARFG_X(Src, atIndex, atIndex, Src.getSizeX() - atIndex, Src.getItem(atIndex, atIndex));
+			DLARFG_X(Src, atIndex + 1, atIndex, Src.getSizeX() - atIndex - 1, Src.getItem(atIndex, atIndex));
 			tau.setItem(atIndex, 0, DLARFG_Tau);
 			
 			// DGELQ2:109 Apply H(i) to A(i+1:m,i:n) from the right
@@ -394,9 +394,9 @@ public class JLapack {
 		for (int atIndex = 0; atIndex < minXY; atIndex++) {
 			// Generate elementary reflector H(i) to annihilate A(i+1:m,i)
 			if (upper)
-				DLARFG_Y(Src, atIndex, atIndex, Src.getSizeY() - atIndex, Src.getItem(atIndex, atIndex));
+				DLARFG_Y(Src, atIndex, atIndex + 1, Src.getSizeY() - atIndex - 1, Src.getItem(atIndex, atIndex));
 			else
-				DLARFG_X(Src, atIndex, atIndex, Src.getSizeX() - atIndex, Src.getItem(atIndex, atIndex));
+				DLARFG_X(Src, atIndex + 1, atIndex, Src.getSizeX() - atIndex - 1, Src.getItem(atIndex, atIndex));
 			tauQ.setItem(atIndex, 0, DLARFG_Tau);
 			Src.setItem(atIndex, atIndex, DLARFG_Beta);
 
@@ -416,9 +416,9 @@ public class JLapack {
 			
 			// DGEBD2:178 Generate elementary reflector G(i) to annihilate A(i,i+2:n)
 			if (upper)
-				DLARFG_X(Src, atIndex + 1, atIndex, Src.getSizeX() - atIndex - 1, Src.getItem(atIndex + 1, atIndex));
+				DLARFG_X(Src, atIndex + 2, atIndex, Src.getSizeX() - atIndex - 2, Src.getItem(atIndex + 1, atIndex));
 			else
-				DLARFG_Y(Src, atIndex, atIndex + 1, Src.getSizeY() - atIndex - 1, Src.getItem(atIndex, atIndex + 1));
+				DLARFG_Y(Src, atIndex, atIndex + 2, Src.getSizeY() - atIndex - 2, Src.getItem(atIndex, atIndex + 1));
 			tauP.setItem(atIndex, 0, DLARFG_Tau);
 			
 			if (upper) {
@@ -1351,7 +1351,7 @@ public class JLapack {
 			result.RT2I = 0.0;
 		} else {
 			result.RT1I = Math.sqrt(Math.abs(B)) * Math.sqrt(Math.abs(C));
-			result.RT2I = -result.RT2I;
+			result.RT2I = -result.RT1I;
 		}
 	}	
 
@@ -1622,7 +1622,7 @@ public class JLapack {
 		DGEBAL(A, scale, DGEBAL_result);
 		for (int atIndex = DGEBAL_result.ILO; atIndex < DGEBAL_result.IHI; atIndex++) {
 			// DGEHD2: 124 Compute elementary reflector H(i) to annihilate A(i+2:ihi,i)
-			DLARFG_Y(A, atIndex, atIndex + 1, DGEBAL_result.IHI - atIndex, A.getItem(atIndex, atIndex + 1));
+			DLARFG_Y(A, atIndex, atIndex + 2, DGEBAL_result.IHI - atIndex - 1, A.getItem(atIndex, atIndex + 1));
 			tau.setItem(atIndex, 0, DLARFG_Tau);
 			A.setItem(atIndex, atIndex + 1, 1.0);
 
@@ -1646,7 +1646,7 @@ public class JLapack {
 			A.setItem(atIndex, atIndex + 1, DLARFG_Beta);
 		}
 
-		A.printM("*******A after DGEHD2");
+		//A.printM("*******A after DGEHD2");
 
 		if (Left != null) {
 			// Want left eigenvectors
@@ -1681,7 +1681,7 @@ public class JLapack {
 				Left.setItem(i, i, 1.0);
 			}
 			
-			Left.printM("DORG2R: before A=");
+			//Left.printM("DORG2R: before A=");
 			// DORGHR:159 Generate Q(ilo+1:ihi,ilo+1:ihi)
 			for (int i = DGEBAL_result.IHI; i > DGEBAL_result.ILO; i--) {
 				// DORG2R:109 Apply H(i) to A(i:m,i:n) from the left
@@ -1695,22 +1695,26 @@ public class JLapack {
 				for (int j = i - 1; j >= 0; j--)
 					Left.setItem(i, j, 0.0);
 			}
-			Left.printM("DORG2R: after A=");
+			//Left.printM("DORG2R: after A=");
 			
 			// DGEEV:276 Perform QR iteration, accumulating Schur vectors in VL
 
-			A.printM("A before DHSEQR");
+			//A.printM("A before DHSEQR");
 			
 			// DHSEQR:187 Store the eigenvalues isolated by DGEBAL.
 			for (int i = DGEBAL_result.ILO - 1; i >= 0; i--)
 				WRI.setItem(i, 0, A.getItem(i, i));
 			for (int i = A.getSizeX() - 1; i > DGEBAL_result.IHI; i--)
 				WRI.setItem(i, 0, A.getItem(i, i));
+			WRI.printM("WRI1=");
 			
 			// DHSEQR:208 Set rows and columns ILO to IHI to zero below the first subdiagonal.
 			for (int i = DGEBAL_result.IHI - 2; i >= DGEBAL_result.ILO; i--)
 				for (int j = A.getSizeY() - 1; j >= i + 2; j--)
 					A.setItem(i, j, 0.0);
+			
+			A.printM("A before DHLAQR");
+			
 			
 			// DLAHQR:162 the total number of QR iterations allowed.
 			int I1 = 0;
@@ -1730,9 +1734,6 @@ public class JLapack {
 			int I = DGEBAL_result.IHI;
 			I2 = I;
 			
-			/////???????
-			maxIterations = 15;
-			
 			while (I >= DGEBAL_result.ILO) {
 				int L = DGEBAL_result.ILO;
 				// DLAHQR:178 Perform QR iterations on rows and columns ILO to I until a
@@ -1742,7 +1743,7 @@ public class JLapack {
 				boolean converged = false;
 				while (iteration <= maxIterations) {
 					L = DLAHQR_FindSmallSubDiagonalElement(A, L, I);
-					System.out.println("!!!L=" + L + " at iteration " + iteration);
+					
 					if (L > DGEBAL_result.ILO) {
 						// DLAHQR:197 H(L,L-1) is negligible
 						A.setItem(L - 1, L, 0.0);
@@ -1793,11 +1794,6 @@ public class JLapack {
 						}
 					}
 					
-					System.out.println("S=" + S);
-					System.out.println("A33=" + A33);
-					System.out.println("A44=" + A44);
-					System.out.println("A43A34=" + A43A34);
-					
 					double V1 = 0.0, V2 = 0.0, V3 = 0.0;
 					
 					// DLAHQR:252 Look for two consecutive small subdiagonal elements.
@@ -1811,14 +1807,6 @@ public class JLapack {
 						double A12 = A.getItem(M + 1, M);
 						double A44S = A44 - A11;
 						double A33S = A33 - A11;
-						
-//						System.out.println("M=" + M);
-//						System.out.println("A11=" + A11);
-//						System.out.println("A22=" + A22);
-//						System.out.println("A21=" + A21);
-//						System.out.println("A12=" + A12);
-//						System.out.println("A33S=" + A33S);
-//						System.out.println("A44S=" + A44S);
 						
 						V1 = (A33S * A44S - A43A34) / A21 + A12;
 						V2 = A22 - A11 - A33S - A44S;
@@ -1840,10 +1828,6 @@ public class JLapack {
 						M--;
 					}
 					
-					System.out.println("V1=" + V1);
-					System.out.println("V2=" + V2);
-					System.out.println("V3=" + V3);
-					
 					// DLAHQR:285 Double-shift QR step
 					for (int K = M; K < I; K++) { 
 						// DLAHQR:289 The first iteration of this loop determines a reflection G
@@ -1855,18 +1839,15 @@ public class JLapack {
 						// chases the bulge one step toward the bottom of the active
 						// submatrix. NR is the order of G.
 						int NR = Math.min(2, I - K);
+						
 						if (K > M) {
 							for (int i = NR; i >= 0; i--)
-								V.setItem(i, 0, A.getItem(K + i - 1, K + i));
+								V.setItem(i, 0, A.getItem(K - 1, K + i));
 						}
 						
-						System.out.println("NR = " + NR + " K=" + K);
-						V.printM("V before DLARFG=");
-						
-						DLARFG_X(V, 0, 0, NR + 1, V.getItem(0, 0));
-						System.out.println("BETA = " + DLARFG_Beta + " TAU  = " + DLARFG_Tau);
-						V.printM("V after DLARFG=");
-						
+						DLARFG_X(V, 1, 0, NR, V.getItem(0, 0));
+						V.setItem(0, 0, DLARFG_Beta);
+
 						if (K > M) {
 							A.setItem(K - 1, K, V.getItem(0, 0));
 							A.setItem(K - 1, K + 1, 0.0);
@@ -1888,6 +1869,7 @@ public class JLapack {
 								A.setItem(j, K + 1, A.getItem(j, K + 1) - sum * T2);
 								A.setItem(j, K + 2, A.getItem(j, K + 2) - sum * T3);
 							}
+
 							// DLAHQR:326 Apply G from the right to transform the columns of the matrix in rows I1 to min(K+3,I).
 							for (int j = Math.min(K + 3, I); j >= I1; j--) {
 								double sum = A.getItem(K, j) + V2 * A.getItem(K + 1, j) + V3 * A.getItem(K + 2, j);
@@ -1895,6 +1877,7 @@ public class JLapack {
 								A.setItem(K + 1, j, A.getItem(K + 1, j) - sum * T2);
 								A.setItem(K + 2, j, A.getItem(K + 2, j) - sum * T3);
 							}
+
 							// DLAHQR:336 ???? IF (WANTZ)
 							// DLAHQR:338 Accumulate transformations in the matrix Z
 							for (int j = DGEBAL_result.ILO; j <= DGEBAL_result.IHI; j++) {
@@ -1910,6 +1893,7 @@ public class JLapack {
 								A.setItem(j, K, A.getItem(j, K) - sum * DLARFG_Tau);
 								A.setItem(j, K + 1, A.getItem(j, K + 1) - sum * T2);
 							}
+
 							// DLAHQR:358 Apply G from the right to transform the columns of the matrix in rows I1 to min(K+3,I).
 							for (int j = I1; j <= I; j++) {
 								double sum = A.getItem(K, j) + V2 * A.getItem(K + 1, j);
@@ -1924,9 +1908,11 @@ public class JLapack {
 								Z.setItem(K + 1, j, Z.getItem(K + 1, j) - sum * T2);
 							}
 						}
+						
 					}
 					iteration++;
 				}
+				
 				// DLAHQR:382 Failure to converge in remaining number of iterations
 				if (!converged) {
 					throw new Error("Failure to converge");
@@ -1950,7 +1936,7 @@ public class JLapack {
 					WRI.setItem(I - 1, 1, DLANV2_result.RT1I);
 					WRI.setItem(I, 0, DLANV2_result.RT2R);
 					WRI.setItem(I, 1, DLANV2_result.RT2I);
-					
+
 					// DLAHQR:406 ??? IF( WANTT ) THEN
 					// DLAHQR:408 Apply the transformation to the rest of H.
 					for (int i = I + 1; i <= I2; i++) {
@@ -1982,6 +1968,8 @@ public class JLapack {
 				maxIterations -= iteration;
 			}
 		}
+		
+		WRI.printM("WRI");
 	}
 	
 	/**
@@ -2071,28 +2059,28 @@ public class JLapack {
 		Matrix WRI = new Matrix();
 		jl.DGEEV(a, Left, WRI);
 		a.printM("A");
+/*
+		Matrix tmp = new Matrix();
+		a.transpose(tmp);
+		a = tmp.makeCopy();
+
+		Matrix b = a.makeCopy();
 		
-//		Matrix tmp = new Matrix();
-//		a.transpose(tmp);
-//		a = tmp.makeCopy();
-//
-//		Matrix b = a.makeCopy();
-//		
-//		Matrix aU = new Matrix(); 
-//		Matrix aS = new Matrix();
-//		Matrix aV = new Matrix();
-//
-//		Matrix bU = new Matrix();
-//		Matrix bS = new Matrix();
-//		Matrix bV = new Matrix();
-//		
-//		Matrix dU = new Matrix();
-//		Matrix dS = new Matrix();
-//		Matrix dV = new Matrix();
-//		
-//		//a.mysvd(aU, aV, aS);
-//		jl.mysvd(a, aU, aV, aS);
-//		
+		Matrix aU = new Matrix(); 
+		Matrix aS = new Matrix();
+		Matrix aV = new Matrix();
+
+		Matrix bU = new Matrix();
+		Matrix bS = new Matrix();
+		Matrix bV = new Matrix();
+		
+		Matrix dU = new Matrix();
+		Matrix dS = new Matrix();
+		Matrix dV = new Matrix();
+		
+		//a.mysvd(aU, aV, aS);
+		jl.mysvd(a, aU, aV, aS);
+		
 //		aU.mSub(bU, dU);
 //		dU.printM("Diff U");
 //		
@@ -2101,13 +2089,14 @@ public class JLapack {
 //		
 //		aS.mSub(bS, dS);
 //		dS.printM("Diff S");
-//		
-//		// Check SVD result
-//		Matrix tmpa = new Matrix();
-//		Matrix tmpb = new Matrix();
-//		aU.mMul(aS, tmpa);
-//		tmpa.mMul(aV, tmpb);
-//		tmpb.mSub(theMatrix, tmpa);
-//		tmpa.printM("U * S * V - theMatrix");
+		
+		// Check SVD result
+		Matrix tmpa = new Matrix();
+		Matrix tmpb = new Matrix();
+		aU.mMul(aS, tmpa);
+		tmpa.mMul(aV, tmpb);
+		tmpb.mSub(tmp, tmpa);
+		tmpa.printM("U * S * V - theMatrix");
+*/
 	}
 }
