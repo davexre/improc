@@ -182,8 +182,6 @@ public class Improc {
 			System.err.println("GenerateKeyPointFiles aborted");
 			return;
 		}
-		if (true)
-			return;
 			
 		System.out.println("----------");
 
