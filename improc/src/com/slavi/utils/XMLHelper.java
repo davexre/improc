@@ -16,6 +16,11 @@ import org.jdom.output.XMLOutputter;
 
 public class XMLHelper {
 
+	/**
+	 * Stores the XML document into a file. 
+	 * <p>
+	 * Adds an "xml-stylesheet" tag is a stylesheet is specified.
+	 */
 	public static void writeXML(File fou, Element documentRoot, String styleSheet) throws FileNotFoundException, IOException {
 		Document doc = new Document();
 		if ((styleSheet != null) || (!styleSheet.equals(""))) {
@@ -27,15 +32,29 @@ public class XMLHelper {
 		xout.output(doc, new FileOutputStream(fou));
 	}
 
+	/**
+	 * Reads the specified XML file and returs the root element 
+	 */
 	public static Element readXML(File fin) throws JDOMException, IOException {
 		SAXBuilder builder = new SAXBuilder(false);
 		Document doc = builder.build(fin);
 		return doc.getRootElement();		
 	}
 	
-	public static Element makeEl(String name, String elementName) {
+	/**
+	 * Creates an {@link #org.jdom.Element}.
+	 * <p>
+	 * Example:
+	 * <p>
+	 * XMLHelper.makeEl("elementName", "Element value");
+	 * <p>
+	 * will create the following XML
+	 * <p>
+	 * &lt;elementName&gt;Element value&lt;/elementName&gt;
+	 */
+	public static Element makeEl(String name, String text) {
 		Element e = new Element(name);
-		e.setText(elementName);
+		e.setText(text);
 		return e;
 	}
 	

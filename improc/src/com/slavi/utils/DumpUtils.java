@@ -5,10 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 public class DumpUtils {
-	
-	public String asd;
 	
 	public static void showWhoIsCallingMe() {
 		StackTraceElement ste[] = Thread.currentThread().getStackTrace();

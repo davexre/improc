@@ -8,6 +8,20 @@ import javax.swing.JOptionPane;
 
 public class Utl {
 
+	/**
+	 * Replaces the extension of fileName with the newExtension.
+	 * <p>
+	 * ex:
+	 * <p>
+	 * <table border=1>
+	 * <tr><th>fileName</th><th>newExtension</th><th>result</th></tr>
+	 * <tr><td>c:\temp\somefile.log</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
+	 * <tr><td>c:\temp\somefile.log</td><td>&nbsp;</td><td>c:\temp\somefile.</td></tr>
+	 * <tr><td>c:\temp\somefile</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
+	 * <tr><td>c:\temp.tmp\somefile.log</td><td>txt</td><td>c:\temp.tmp\somefile.txt</td></tr>
+	 * <tr><td>c:\temp.tmp\somefile</td><td>txt</td><td><b>c:\temp.txt</b></td></tr>
+	 * </table>
+	 */
 	public static String chageFileExtension(String fileName, String newExtension) {
 		int lastIndex = fileName.lastIndexOf(".");
 		if (lastIndex < 0)
@@ -15,10 +29,20 @@ public class Utl {
 		return fileName.substring(0, lastIndex) + "." + newExtension; 
 	}
 
+	/**
+	 * Opens the standart SWING directory chooser dialog.
+	 * @see #getDirectory(Component)
+	 */
 	public static String getDirectory() {
 		return getDirectory(null);
 	}
 	
+	/**
+	 * Opens the standart SWING directory chooser dialog.
+	 * <p>
+	 * Returns the selected directory or if
+	 * canceled returns an EMPTY string "" not a null.
+	 */
 	public static String getDirectory(Component parent) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -31,10 +55,21 @@ public class Utl {
 		return "";
 	}
 	
+	/**
+	 * Opens the standart SWING file chooser dialog.
+	 * @see #getFileName(Component)
+	 */
 	public static String getFileName() {
 		return getFileName(null);
 	}
 	
+	/**
+	 * Opens the standart SWING file chooser dialog.
+	 * <p>
+	 * Returns the selected file or if
+	 * canceled returns an EMPTY string "" not a null. The
+	 * file MAY be a new one and MIGHT NOT exist.
+	 */
 	public static String getFileName(Component parent) {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -47,7 +82,13 @@ public class Utl {
 		return "";
 	}
 
-	public static Object getUIInput(Object[] values) {
+	/**
+	 * Opens the standart SWING JOptionPane dialog.
+	 * <p>
+	 * The default selected options is the first object in the list.
+	 * Returns the selected object or null is the dialog is canceled.
+	 */
+	public static Object getUIInput(Object ... values) {
 		Object selected = JOptionPane.showInputDialog(null, "Choose one", "Input", JOptionPane.INFORMATION_MESSAGE,
 				null, values, values[0]);
 		return selected;
