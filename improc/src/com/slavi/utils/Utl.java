@@ -1,13 +1,75 @@
 package com.slavi.utils;
 
-import java.awt.Component;
 import java.io.File;
+import java.util.Locale;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
+/**
+ * This class contains utility static methods for general purpose.  
+ */
 public class Utl {
+	/**
+	 * Returns the "human" representation of a time delta specified in milliseconds
+	 * like "1 hour 23 minutes 45.6 seconds".
+	 * @param millis	the time delta in milliseconds
+	 */
+	public static String getFormatedMilliseconds(long millis) {
+		final long[] divisors = { (1000 * 60 * 60 * 24), (1000 * 60 * 60),
+				(1000 * 60), (1000) };
+		final String[][] texts = { { " day ", " days " },
+				{ " hour ", " hours " }, { " minute ", " minutes " },
+				{ " second", " seconds" } };
+		String s = new String("");
+		for (int i = 0; i < 3; i++) {
+			long tmp = millis / divisors[i];
+			millis %= divisors[i];
+			if (tmp > 0)
+				s += Long.toString(tmp) + texts[i][tmp == 1 ? 0 : 1];
+		}
+		return s + String.format(Locale.US, "%1$.3f", new Object[] { new Double((double) (millis) / divisors[3]) } )
+				+ texts[3][1];
+	}
 
+	/**
+	 * Returns the "human" representation of a size in bytes
+	 * like "123 bytes", "1.2 K", "2.3 M" or "3.4 G".
+	 * @param sizeInBytes	the size in bytes.
+	 */
+	public static String getFormatBytes(long sizeInBytes) {
+		String dim = "bytes";
+		double size = sizeInBytes;
+		if (Math.abs(size) >= 1000.0) {
+			dim = "K";
+			size /= 1000.0;
+		}
+		if (Math.abs(size) >= 800.0) {
+			dim = "M";
+			size /= 1000.0;
+		}
+		if (Math.abs(size) >= 800.0) {
+			dim = "G";
+			size /= 1000.0;
+		}
+		if (Math.abs(size) >= 800.0) {
+			dim = "T";
+			size /= 1000.0;
+		}
+		if (Math.floor(size) == size) 
+			return String.format(Locale.US, "%d %s", new Object[] { new Integer((int)size), dim } );
+		return String.format(Locale.US, "%.1f %s", new Object[] { new Double(size), dim } );
+	}
+
+	/**
+	 * Returns the absolute path of the current directory.
+	 */
+	public static String getCurrentDir() {
+		String result = ".";
+		try {
+			result = (new File(".")).getCanonicalPath();
+		} catch (Exception e) {
+		}
+		return result;
+	}
+	
 	/**
 	 * Replaces the extension of fileName with the newExtension.
 	 * <p>
@@ -30,71 +92,6 @@ public class Utl {
 	}
 
 	/**
-	 * Opens the standart SWING directory chooser dialog.
-	 * @see #getDirectory(Component)
-	 */
-	public static String getDirectory() {
-		return getDirectory(null);
-	}
-	
-	/**
-	 * Opens the standart SWING directory chooser dialog.
-	 * <p>
-	 * Returns the selected directory or if
-	 * canceled returns an EMPTY string "" not a null.
-	 */
-	public static String getDirectory(Component parent) {
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		chooser.setDialogTitle("Select a folder");
-		int retval = chooser.showOpenDialog(parent);
-		if (retval == JFileChooser.APPROVE_OPTION) {
-			File f = chooser.getSelectedFile();
-			return f == null ? "" : f.getAbsolutePath();
-		}
-		return "";
-	}
-	
-	/**
-	 * Opens the standart SWING file chooser dialog.
-	 * @see #getFileName(Component)
-	 */
-	public static String getFileName() {
-		return getFileName(null);
-	}
-	
-	/**
-	 * Opens the standart SWING file chooser dialog.
-	 * <p>
-	 * Returns the selected file or if
-	 * canceled returns an EMPTY string "" not a null. The
-	 * file MAY be a new one and MIGHT NOT exist.
-	 */
-	public static String getFileName(Component parent) {
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		chooser.setDialogTitle("Select a file");
-		int retval = chooser.showOpenDialog(parent);
-		if (retval == JFileChooser.APPROVE_OPTION) {
-			File f = chooser.getSelectedFile();
-			return f == null ? "" : f.getAbsolutePath();
-		}
-		return "";
-	}
-
-	/**
-	 * Opens the standart SWING JOptionPane dialog.
-	 * <p>
-	 * The default selected options is the first object in the list.
-	 * Returns the selected object or null is the dialog is canceled.
-	 */
-	public static Object getUIInput(Object ... values) {
-		Object selected = JOptionPane.showInputDialog(null, "Choose one", "Input", JOptionPane.INFORMATION_MESSAGE,
-				null, values, values[0]);
-		return selected;
-	} 
-	
-	/**
 	 * The code bellow is borrowed from WedSphinx
 	 * http://www.cs.cmu.edu/~rcm/websphinx
 	 * and slightly modified 
@@ -104,14 +101,14 @@ public class Utl {
 	 * Wildcards are similar to sh-style file globbing.
 	 * A wildcard pattern is implicitly anchored, meaning that it must match the entire string.
 	 * The wildcard operators are:
-	 * <PRE>
+	 * <pre>
 	 *    ? matches one arbitrary character
 	 *    * matches zero or more arbitrary characters
 	 *    [xyz] matches characters x or y or z
 	 *    {foo,bar,baz}   matches expressions foo or bar or baz
 	 *    ()  grouping to extract fields
 	 *    \ escape one of these special characters
-	 * </PRE>
+	 * </pre>
 	 * Escape codes (like \n and \t) and Perl5 character classes (like \w and \s) may also be used.
 	 */
 	public static String toRegexpStr(String wildcard) {

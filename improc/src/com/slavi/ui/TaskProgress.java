@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.TypedListener;
 
-import com.slavi.utils.UiUtils;
+import com.slavi.utils.SwtUtl;
 
 public class TaskProgress extends Composite {
 
@@ -184,7 +184,7 @@ public class TaskProgress extends Composite {
 		layoutData.horizontalAlignment = GridData.FILL;
 		layoutData.horizontalSpan = 2;
 		title.setLayoutData(layoutData);
-		title.setFont(UiUtils.getBoldFont(title.getFont()));
+		title.setFont(SwtUtl.getBoldFont(title.getFont()));
 		
 		progressBar = new ProgressBar(this, 
 				SWT.HORIZONTAL | (getStyle() & SWT.INDETERMINATE));

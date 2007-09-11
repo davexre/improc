@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.slavi.utils.UiUtils;
+import com.slavi.utils.SwtUtl;
 
 public class Settings {
 	
@@ -37,7 +37,7 @@ public class Settings {
 	public Settings(Shell parent) {
 		shell = new Shell(parent, SWT.SHELL_TRIM);
 		createWidgets();
-		UiUtils.centerShell(shell);
+		SwtUtl.centerShell(shell);
 	}
 
 	private void createWidgets() {
@@ -75,7 +75,7 @@ public class Settings {
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = UiUtils.browseForFolder(shell, "Message 1", txtImagesRoot.getText());
+				String result = SwtUtl.browseForFolder(shell, "Message 1", txtImagesRoot.getText());
 				if (result != null)
 					txtImagesRoot.setText(result); 
 			}
@@ -92,7 +92,7 @@ public class Settings {
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = UiUtils.browseForFolder(shell, "Message 2", txtKeyPointFileRoot.getText());
+				String result = SwtUtl.browseForFolder(shell, "Message 2", txtKeyPointFileRoot.getText());
 				if (result != null)
 					txtKeyPointFileRoot.setText(result); 
 			}
@@ -109,7 +109,7 @@ public class Settings {
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = UiUtils.browseForFolder(shell, "Message 3", txtKeyPointPairFileRoot.getText());
+				String result = SwtUtl.browseForFolder(shell, "Message 3", txtKeyPointPairFileRoot.getText());
 				if (result != null)
 					txtKeyPointPairFileRoot.setText(result); 
 			}

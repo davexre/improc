@@ -14,6 +14,10 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+/**
+ * This class contains utility methods for reading/writing XML files using the org.jdom library.
+ * The org.jdom library is available at {@link www.jdom.org}.  
+ */
 public class XMLHelper {
 
 	/**
@@ -42,7 +46,7 @@ public class XMLHelper {
 	}
 	
 	/**
-	 * Creates an {@link #org.jdom.Element}.
+	 * Creates an {@link #org.jdom.Element} with "name" and assigned text value "text".
 	 * <p>
 	 * Example:
 	 * <p>
@@ -57,28 +61,84 @@ public class XMLHelper {
 		e.setText(text);
 		return e;
 	}
-	
-	public static String getEl(Element source) {
+
+	/**
+	 * Retrieves the text of the specified element name, located as child 
+	 * element of the source XML element.
+	 * <p>Example:
+	 * <pre>
+	 * &lt;sourceElement&gt;
+	 *     &lt;elementName&gt;Element value&lt;/elementName&gt;
+	 * &lt;/sourceElement&gt;
+	 * @param source	the source element where the element with "name" should be located.
+	 * @return			returns the "Element value" or null if the element can not be located.
+	 * @see #makeEl(String, String)
+	 */
+	public static String getEl(Element source, String name) {
 		if (source == null)
 			return null;
-		return source.getTextTrim();
+		Element e = source.getChild(name);
+		if (e == null)
+			return null;
+		return e.getTextTrim();
 	}
 	
-	public static String getEl(Element source, String defaultValue) {
+	/**
+	 * Retrieves the text of the specified element name, located as child 
+	 * element of the source XML element.
+	 * <p>Example:
+	 * <pre>
+	 * &lt;sourceElement&gt;
+	 *     &lt;elementName&gt;Element value&lt;/elementName&gt;
+	 * &lt;/sourceElement&gt;
+	 * @param source	the source element where the element with "name" should be located.
+	 * @return			returns the "Element value" or defaultValue if the element 
+	 * 					can not be located.
+	 * @see #makeEl(String, String)
+	 */
+	public static String getEl(Element source, String name, String defaultValue) {
 		if (source == null)
 			return defaultValue;
-		String r = source.getTextTrim();
-		if ((r == null) || (r.equals("")))
-			r = defaultValue;				
-		return r;
+		Element e = source.getChild(name);
+		if (e == null)
+			return null;
+		String result = e.getTextTrim();
+		if ((result == null) || (result.equals("")))
+			result = defaultValue;				
+		return result;
 	}
 	
+	/**
+	 * Creates an empty {@link #org.jdom.Element} with "name" and 
+	 * attribute named "v" with value "text".
+	 * <p>
+	 * Example:
+	 * <p>
+	 * XMLHelper.makeAttrEl("elementName", "Attribute value");
+	 * <p>
+	 * will create the following XML
+	 * <p>
+	 * &lt;elementName v="Attribute value" /&gt;
+	 */
 	public static Element makeAttrEl(String name, String attributeValue) {
 		Element e = new Element(name);
 		e.setAttribute("v", attributeValue);
 		return e;
 	}
 	
+	/**
+	 * Retrieves the value of an attibute named "v" belonging to an XML 
+	 * element named "name", that is a child element to the source element. 
+	 * <p>Example:
+	 * <pre>
+	 * &lt;sourceElement&gt;
+	 *     &lt;elementName v="Attribute value" /&gt;
+	 * &lt;/sourceElement&gt;
+	 * @param source	the source element where the element with "name" should be located.
+	 * @return			returns the "Attribute value" or null if the element or 
+	 * 					the attribute "v" can not be located.
+	 * @see #makeAttrEl(String, String)
+	 */
 	public static String getAttrEl(Element source, String name) {
 		if (source == null)
 			return null;
@@ -88,6 +148,19 @@ public class XMLHelper {
 		return e.getAttributeValue("v");
 	}
 	
+	/**
+	 * Retrieves the value of an attibute named "v" belonging to an XML 
+	 * element named "name", that is a child element to the source element. 
+	 * <p>Example:
+	 * <pre>
+	 * &lt;sourceElement&gt;
+	 *     &lt;elementName v="Attribute value" /&gt;
+	 * &lt;/sourceElement&gt;
+	 * @param source	the source element where the element with "name" should be located.
+	 * @return			returns the "Attribute value" or defaultValue if the element or 
+	 * 					the attribute "v" can not be located.
+	 * @see #makeAttrEl(String, String)
+	 */
 	public static String getAttrEl(Element source, String name, String defaultValue) {
 		if (source == null)
 			return defaultValue;
@@ -99,5 +172,4 @@ public class XMLHelper {
 			r = defaultValue;				
 		return r;
 	}
-
 }

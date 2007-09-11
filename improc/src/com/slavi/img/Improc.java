@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FindFileIterator;
-import com.slavi.utils.UiUtils;
+import com.slavi.utils.SwtUtl;
 
 public class Improc {
 
@@ -26,7 +26,7 @@ public class Improc {
 					}
 					numberOfImages++;
 					images.add(imagesIterator.next().getPath());
-					UiUtils.activeWaitDialogSetStatus("Found " + numberOfImages + " images", 0);
+					SwtUtl.activeWaitDialogSetStatus("Found " + numberOfImages + " images", 0);
 				}
 			} catch (Exception e) {
 				System.err.println("CountImageFiles FAILED!");
@@ -45,7 +45,7 @@ public class Improc {
 					String fileName = images.get(i); 
 					String statusMessage = (i + 1) + "/" + images.size() + " " + fileName;
 					System.out.println(statusMessage);
-					UiUtils.activeWaitDialogSetStatus(statusMessage, i);
+					SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
 					KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
 				}
 			} catch (Throwable e) {
@@ -70,7 +70,7 @@ public class Improc {
 						File kpplFile = KeyPointPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
 						String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();
 						System.out.println(statusMessage);
-						UiUtils.activeWaitDialogSetStatus(statusMessage, pairsCount);
+						SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
 						KeyPointPairList.updateKeyPointPairFileIfNecessary(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
 					}
 				}
@@ -99,7 +99,7 @@ public class Improc {
 						File kpplFile = PanoPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
 						String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();;
 						System.out.println(statusMessage);
-						UiUtils.activeWaitDialogSetStatus(statusMessage, pairsCount);
+						SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
 						panoList.addItem(PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2));
 					}
 				}
@@ -123,7 +123,7 @@ public class Improc {
 
 					String statusMessage = fou.getAbsolutePath();
 					System.out.println(statusMessage);
-					UiUtils.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
+					SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
 					PanoList.writeToPtoFile(fou, chain);
 					panoCount++;
@@ -171,13 +171,13 @@ public class Improc {
 		keyPointPairFileRoot = new AbsoluteToRelativePathMaker(keyPointPairFileRootStr);
 		
 		images = new ArrayList<String>();
-		if (!UiUtils.openWaitDialog("Searching for images", 
+		if (!SwtUtl.openWaitDialog("Searching for images", 
 				new CountImageFiles(), -1)) {
 			System.err.println("CountImageFiles aborted");
 			return;
 		}
 		
-		if (!UiUtils.openWaitDialog("Generating key point files", 
+		if (!SwtUtl.openWaitDialog("Generating key point files", 
 				new GenerateKeyPointFiles(), images.size() - 1)) {
 			System.err.println("GenerateKeyPointFiles aborted");
 			return;
@@ -185,7 +185,7 @@ public class Improc {
 			
 		System.out.println("----------");
 
-		if (!UiUtils.openWaitDialog("Generating key point pair files", 
+		if (!SwtUtl.openWaitDialog("Generating key point pair files", 
 				new GenerateKeyPointPairFiles(), (images.size() - 1) * images.size() - 1)) {
 			System.err.println("GenerateKeyPointPairFiles aborted");
 			return;
@@ -193,7 +193,7 @@ public class Improc {
 		
 		System.out.println("----------");
 
-		if (!UiUtils.openWaitDialog("Generating pano pair files", 
+		if (!SwtUtl.openWaitDialog("Generating pano pair files", 
 				new GeneratePanoPairFiles(), (images.size() - 1) * images.size() - 1)) {
 			System.err.println("GeneratePanoPairFiles aborted");
 			return;
@@ -201,7 +201,7 @@ public class Improc {
 		
 		System.out.println("----------");
 
-		if (!UiUtils.openWaitDialog("Generating panorama (PTO) files", 
+		if (!SwtUtl.openWaitDialog("Generating panorama (PTO) files", 
 				new GeneratePanoramaFiles(), panoList.items.size())) {
 			System.err.println("GeneratePanoramaFiles aborted");
 			return;

@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
-import com.slavi.utils.UiUtils;
+import com.slavi.utils.SwtUtl;
 
 public class TestTaskProgress {
 
@@ -70,7 +70,7 @@ public class TestTaskProgress {
 		public void run() {
 			try {
 				for (int i = 0; i < 8; i++) {
-					UiUtils.activeWaitDialogSetStatus("thread step " + i, i);
+					SwtUtl.activeWaitDialogSetStatus("thread step " + i, i);
 					Thread.sleep(1000);
 				}
 			} catch (InterruptedException e) {
@@ -81,7 +81,7 @@ public class TestTaskProgress {
 
 	public static void main(String[] args) {
 		dummyJob2 job = new dummyJob2();
-		boolean result = UiUtils.openWaitDialog("Title", job, -1);
+		boolean result = SwtUtl.openWaitDialog("Title", job, -1);
 		System.out.println(result);
 	}
 	

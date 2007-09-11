@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
@@ -292,8 +293,8 @@ public class Asd {
     }
 	
     public static void main(String[] args) {
-		double[] a = new double[0];
-		System.out.println(a);
+    	File f = new File("c:/temp/test.txt");
+    	System.out.println(f.getParentFile().getParentFile().getParent());
 	}
     
 //	public static void main2(String[] args) throws Exception {

@@ -13,7 +13,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
 
-public class UiUtils {
+/**
+ * This class contains utility methods for creating user interface using
+ * the SWT (Standart Widget Toolkit) library.   
+ */
+public class SwtUtl {
 	static DirectoryDialog browseForFolderDialog = null;
 	
 	/**

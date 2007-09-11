@@ -5,26 +5,62 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * This class contains utility methods for debuging purposes. 
+ */
 public class DumpUtils {
 	
+	/**
+	 * This method displays the name of the method that invoked
+	 * the method, that is calling showWhoIsCallingMe.
+	 * <p>Example:
+	 * <pre>
+	 * package edu.test;
+	 * public class DumpTest {
+	 *   void method1() {
+	 *     method2();
+	 *   }
+	 * 
+	 *   void method2() {
+	 *     showWhoIsCallingMe();
+	 *   }
+	 * }
+	 * </pre>
+	 * <p>The output of the code above will be:
+	 * <pre>===== Called from edu.test.DumpTest.method1() =====</pre>
+	 */
 	public static void showWhoIsCallingMe() {
 		StackTraceElement ste[] = Thread.currentThread().getStackTrace();
 		StackTraceElement s = ste[3];
 		System.out.println("===== Called from " + s.toString() + " =====");
 	}
-
-	public static void showObject(Object o) {
-		showObject(o, false, false);
+	
+	/**
+	 * Reads all public fields of the object displaying thier 
+	 * names and values on the system console.
+	 * @param object		the object to be displayed
+	 * @see #showObject(Object, boolean, boolean)
+	 */
+	public static void showObject(Object object) {
+		showObject(object, false, false);
 	}
 	
-	public static void showObject(Object o, boolean showHidden, boolean showMethods) {
-		if (o == null) {
+	/**
+	 * Reads all fields and methods of the object displaying thier 
+	 * names and values on the system console.
+	 * @param object		the object to be displayed.
+	 * @param showHidden	if false the hidden (private) fields and 
+	 * 						methods will not be displayed.
+	 * @param showMethods	if false the method names will not be displayed.
+	 */
+	public static void showObject(Object object, boolean showHidden, boolean showMethods) {
+		if (object == null) {
 			System.out.println("Show object: Object is null.");
 			return;
 		}
-		Class c = o.getClass();
+		Class c = object.getClass();
 		System.out.println("Show object:" + c.getName());
-		System.out.println("  toString()=" + o.toString());
+		System.out.println("  toString()=" + object.toString());
 		ArrayList lst = new ArrayList();
 		Class loopC = c;
 		while (loopC != null) {
@@ -36,7 +72,7 @@ public class DumpUtils {
 					continue;
 				try {
 					f.setAccessible(true);
-					fldVal = f.get(o);
+					fldVal = f.get(object);
 				} catch (Exception e) {
 					//e.printStackTrace();
 				}
@@ -68,7 +104,7 @@ public class DumpUtils {
 				Object methodVal = null;
 				try {
 					m.setAccessible(true);
-					methodVal = m.invoke(o, (Object[]) null);
+					methodVal = m.invoke(object, (Object[]) null);
 				} catch (Exception e) {
 					//e.printStackTrace();
 				}

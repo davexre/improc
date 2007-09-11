@@ -2,9 +2,38 @@ package com.slavi.utils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
-import java.util.Locale;
 import java.util.Stack;
 
+/**
+ * This class is used for tracking the memory and CPU used for specific blocks
+ * of code.
+ * <p>
+ * It's main purpose is to help debugging and locating bottleneck points in
+ * the code. Calls to Marker.mark may be nested.  
+ * <p>
+ * Usage:
+ * <p>
+ * <pre>
+ *   Marker.mark("Lengthy job");
+ *   ... // some lengthy job
+ *   Marker.mark("Inner lengthy job");
+ *   ...
+ *   Marker.release();
+ *   ...
+ *   Marker.release();
+ *   ...
+ * </pre>
+ * <p>The output of this code is:
+ * <code>
+ *   Set block marker "Lengthy job", memory used 23.4 M
+ *   ...
+ *   Set block marker "Inner lengthy job", memory used 24.0 M
+ *   ...
+ *   Block "Inner lengthy job" elapsed 1 minute 2.3 seconds, memory used 25.2 M, memory delta 1.2 M
+ *   ...
+ *   Block "Lengthy job" elapsed 1 hour 23 minutes 45.6 seconds, memory used 34.5 M, memory delta 11.1 M
+ * </code>
+ */
 public class Marker {
 
 	protected static class InternalMarker {
@@ -19,10 +48,19 @@ public class Marker {
 
 	private static int markerId = 1;
 	
+	/**
+	 * Puts a marker in the marker stack with the default name "Marker 1", "Marker 2", ..., etc.
+	 */
 	public synchronized static void mark() {
 		mark("Marker " + Integer.toString(markerId++));
 	}
 
+	/**
+	 * Puts a marker in the marker stack. Every call to this method should have 
+	 * a correspondin call to {@link #release()}. Calls to this method 
+	 * may be nested.
+	 * @param markName	the name of the marker 
+	 */
 	public synchronized static void mark(String markName) {
 		InternalMarker marker = new InternalMarker();
 		marker.id = markName;
@@ -31,48 +69,7 @@ public class Marker {
 		marker.memoryUsed = memoryUsage.getUsed();
 
 		marks.push(marker);
-		System.out.println("Set block marker \"" + markName + "\", memory used " + formatBytes(marker.memoryUsed));
-	}
-
-	public static String formatMillis(long millis) {
-		final long[] divisors = { (1000 * 60 * 60 * 24), (1000 * 60 * 60),
-				(1000 * 60), (1000) };
-		final String[][] texts = { { " day ", " days " },
-				{ " hour ", " hours " }, { " minute ", " minutes " },
-				{ " second", " seconds" } };
-		String s = new String("");
-		for (int i = 0; i < 3; i++) {
-			long tmp = millis / divisors[i];
-			millis %= divisors[i];
-			if (tmp > 0)
-				s += Long.toString(tmp) + texts[i][tmp == 1 ? 0 : 1];
-		}
-		return s + String.format(Locale.US, "%1$.3f", new Object[] { new Double((double) (millis) / divisors[3]) } )
-				+ texts[3][1];
-	}
-	
-	public static String formatBytes(long sizeInBytes) {
-		String dim = "bytes";
-		double size = sizeInBytes;
-		if (Math.abs(size) >= 1000.0) {
-			dim = "K";
-			size /= 1000.0;
-		}
-		if (Math.abs(size) >= 800.0) {
-			dim = "M";
-			size /= 1000.0;
-		}
-		if (Math.abs(size) >= 800.0) {
-			dim = "G";
-			size /= 1000.0;
-		}
-		if (Math.abs(size) >= 800.0) {
-			dim = "T";
-			size /= 1000.0;
-		}
-		if (Math.floor(size) == size) 
-			return String.format("%d %s", new Object[] { new Integer((int)size), dim } );
-		return String.format(Locale.US, "%.1f %s", new Object[] { new Double(size), dim } );
+		System.out.println("Set block marker \"" + markName + "\", memory used " + Utl.getFormatBytes(marker.memoryUsed));
 	}
 
 	public synchronized static void release() {
@@ -83,8 +80,8 @@ public class Marker {
 		InternalMarker m = (InternalMarker)marks.pop();
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 		System.out.println("Block \"" + m.id + "\" elapsed "
-				+ formatMillis(now - m.mark) + 
-				", memory used " + formatBytes(memoryUsage.getUsed()) + 
-				", memory delta " + formatBytes(memoryUsage.getUsed() - m.memoryUsed));
+				+ Utl.getFormatedMilliseconds(now - m.mark) + 
+				", memory used " + Utl.getFormatBytes(memoryUsage.getUsed()) + 
+				", memory delta " + Utl.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed));
 	}
 }
