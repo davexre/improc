@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import com.slavi.matrix.JLapack;
 import com.slavi.matrix.Matrix;
 import com.slavi.statistics.PointsPair;
 
@@ -211,8 +212,9 @@ public class DNister5PointMatch {
 		
 //		Q.printM("Q");
 		
+		JLapack jl = new JLapack();
 		Matrix u = new Matrix();
-//		Matrix s = new Matrix();
+		Matrix s = new Matrix();
 		Matrix v = new Matrix();
 		
 //		Q.svd1(s, v);
@@ -221,14 +223,16 @@ public class DNister5PointMatch {
 //		s.printM("s");
 //		v.printM("U");
 
-/*		Matrix backupQ = Q.makeCopy();
-		Q.mysvd(u, v, s);
-		u.printM("U");
-		v.printM("V");
-		s.printM("S");
+		Matrix backupQ = Q.makeCopy();
+//		Q.mysvd(u, v, s);
+		jl.mysvd(Q, u, v, s);
+//		u.printM("U");
+//		v.printM("V");
+//		s.printM("S");
 		
 		checkSVD(backupQ, u, v, s);
-*/
+
+
 		u.resize(9, 9);
 		u.load(new BufferedReader(new FileReader(
 				DNister5PointMatch.class.getResource(
@@ -492,7 +496,86 @@ public class DNister5PointMatch {
 		
 		pn.printM("PN");
 		
+		Matrix z = new Matrix();
+		jl.roots(pn, z);
 		
+		z.printM("Z");
+		
+		// Count the real roots
+		int realRoots = 0;
+		for (int i = z.getSizeX() - 1; i >= 0; i--)
+			if (z.getItem(i, 1) == 0.0)
+				realRoots++;
+		if (realRoots == 0) {
+			throw new Error("No real roots!");
+		}
+		
+		Matrix z7 = new Matrix(realRoots, 8);
+		for (int i7 = realRoots - 1, i = z.getSizeX() - 1; i >= 0; i--) {
+			if (z.getItem(i, 1) == 0.0) {
+				double t1 = z.getItem(i, 0);
+				double t2 = t1 * t1;
+				double t3 = t1 * t2;
+				double t4 = t2 * t2;
+				z7.setItem(i7, 0, t4 * t3);
+				z7.setItem(i7, 1, t4 * t2);
+				z7.setItem(i7, 2, t4 * t1);
+				z7.setItem(i7, 3, t4);
+				z7.setItem(i7, 4, t3);
+				z7.setItem(i7, 5, t2);
+				z7.setItem(i7, 6, t1);
+				z7.setItem(i7, 7, 1.0);
+				i7--;
+			}
+		}
+		
+		z7.printM("z7");
+		
+		Matrix pnum = new Matrix(realRoots, 3);
+		for (int i = realRoots - 1; i >= 0; i--) {
+			double sum1 = 0.0;
+			double sum2 = 0.0;
+			for (int j = 0; j < 8; j++) {
+				sum1 += p1.getItem(j, 0) * z7.getItem(i, j);
+				sum2 += p1.getItem(j, 1) * z7.getItem(i, j);
+			}
+			pnum.setItem(i, 0, sum1);
+			pnum.setItem(i, 1, sum2);
+			sum1 = 0.0;
+			for (int j = 1; j < 8; j++)
+				sum1 += p1.getItem(j - 1, 2) * z7.getItem(i, j);
+			pnum.setItem(i, 2, sum1);
+		}
+		pnum.printM("pnum");
+
+		Matrix xy = new Matrix(realRoots,2);
+		for (int i = xy.getSizeX() - 1; i >= 0; i--) {
+			xy.setItem(i, 0, pnum.getItem(i, 0) / pnum.getItem(i, 2));
+			xy.setItem(i, 1, pnum.getItem(i, 1) / pnum.getItem(i, 2));
+		}
+
+		xy.printM("xy");
+		
+		// compute essential matrix
+		Matrix E[] = new Matrix[realRoots];
+		for (int ei = realRoots - 1; ei >= 0; ei--) {
+			double xi = xy.getItem(ei, 0);
+			double yi = xy.getItem(ei, 1);
+			double zi = z.getItem(ei, 0);
+			Matrix Ei = new Matrix(3, 3);
+			for (int i = 0; i < 3; i++)
+				for (int j = 0; j < 3; j++) {
+					Ei.setItem(i, j, 
+							xi * X.getItem(i, j) +
+							yi * Y.getItem(i, j) +
+							zi * Z.getItem(i, j) +
+							W.getItem(i, j));
+				}
+			E[ei] = Ei;
+		}
+		
+		for (int i = 0; i < E.length; i++)
+			E[i].printM("E[" + i + "]");
 	}
 	
 	public void doTheJob() throws Exception {
