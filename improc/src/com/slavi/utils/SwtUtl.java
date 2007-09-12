@@ -101,7 +101,7 @@ public class SwtUtl {
 	 * 		{@link #activeWaitDialogSetStatus(String, int)}. The minimum 
 	 * 		progress bar value is always 0. If the maxProgressValue is 
 	 * 		negative (maxProgressValue < 0) the progress bar is set as
-	 * 		{@link org.eclipse.swt.SWT.INDETERMINATE}
+	 * 		org.eclipse.swt.SWT.INDETERMINATE
 	 * @return True on success, False is the operation is aborted or the 
 	 * 		runnable thread throws an unhandled exception.
 	 * 

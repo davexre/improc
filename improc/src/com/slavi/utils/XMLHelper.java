@@ -16,7 +16,7 @@ import org.jdom.output.XMLOutputter;
 
 /**
  * This class contains utility methods for reading/writing XML files using the org.jdom library.
- * The org.jdom library is available at {@link www.jdom.org}.  
+ * The org.jdom library is available at <a href="www.jdom.org" />.  
  */
 public class XMLHelper {
 
@@ -46,7 +46,7 @@ public class XMLHelper {
 	}
 	
 	/**
-	 * Creates an {@link #org.jdom.Element} with "name" and assigned text value "text".
+	 * Creates an org.jdom.Element with "name" and assigned text value "text".
 	 * <p>
 	 * Example:
 	 * <p>
@@ -109,7 +109,7 @@ public class XMLHelper {
 	}
 	
 	/**
-	 * Creates an empty {@link #org.jdom.Element} with "name" and 
+	 * Creates an empty org.jdom.Element with "name" and 
 	 * attribute named "v" with value "text".
 	 * <p>
 	 * Example:
