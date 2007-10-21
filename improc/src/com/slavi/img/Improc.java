@@ -115,6 +115,7 @@ public class Improc {
 			try {
 				int panoCount = 1;
 				int maxItems = panoList.items.size();
+				AdjAffine adjustAffine = new AdjAffine();
 				while (!Thread.interrupted()) {
 					ArrayList<PanoPairList>chain = panoList.getImageChain();
 					if (chain == null)
@@ -126,6 +127,10 @@ public class Improc {
 					SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
 					PanoList.writeToPtoFile(fou, chain);
+					
+					adjustAffine.initWithPanoList(chain);
+					adjustAffine.doTheJob();
+					
 					panoCount++;
 				}
 			} catch (Exception e) {

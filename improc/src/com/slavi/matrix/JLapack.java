@@ -1869,7 +1869,7 @@ public class JLapack {
 		int I = IHI;
 		I2 = I;
 		
-		boolean fulldump = false;
+//		boolean fulldump = false;
 		
 		while (I >= ILO) {
 			int L = ILO;
@@ -2228,10 +2228,10 @@ public class JLapack {
 		Matrix a = theMatrix.makeCopy();
 		theMatrix.transpose(a);
 
-		Matrix scale = new Matrix();
+//		Matrix scale = new Matrix();
 		a.printM("A");
 		//jl.DGEBAL(a, scale, jl.DGEBAL_result);
-		Matrix Left = new Matrix();
+//		Matrix Left = new Matrix();
 		Matrix WRI = new Matrix();
 		jl.DGEEV(a, WRI);
 		a.printM("A");

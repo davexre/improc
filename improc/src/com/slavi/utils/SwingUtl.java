@@ -74,5 +74,5 @@ public class SwingUtl {
 		Object selected = JOptionPane.showInputDialog(null, "Choose one", "Input", JOptionPane.INFORMATION_MESSAGE,
 				null, values, values[0]);
 		return selected;
-	} 
+	}
 }

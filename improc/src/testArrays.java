@@ -29,7 +29,7 @@ public class testArrays {
       if (c == null) {
         System.out.println("No constructor with one string param");
       } else {
-        o = c.newInstance(new Object[] {"qqq"});
+        o = c.newInstance(new Object[] {"Calling the constructor with one String parameter"});
       }
     } catch (Exception e) {
       System.out.println("error " + e.getMessage());

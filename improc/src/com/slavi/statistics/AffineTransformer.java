@@ -1,5 +1,7 @@
 package com.slavi.statistics;
 
+import java.util.StringTokenizer;
+
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
@@ -102,6 +104,40 @@ public class AffineTransformer extends BaseTransformer {
 		origin.setItem(1, 0, d[5]);
 	}
 	
+	public Matrix getMatrix() {
+		Matrix result = new Matrix(inputSize + 1, outputSize + 1);
+		for (int i = inputSize - 1; i >= 0; i--) {
+			for (int j = outputSize - 1; j >= 0; j--)
+				result.setItem(i, j, affineCoefs.getItem(i, j));
+			result.setItem(i, outputSize, 0.0);
+		}
+		for (int j = outputSize - 1; j >= 0; j--)
+			result.setItem(inputSize, j, origin.getItem(j, 0));
+		result.setItem(inputSize, outputSize, 1.0);
+		return result;
+	}
+	
+	public void setMatrix(Matrix src) {
+		if ((src.getSizeX() != inputSize) || (src.getSizeY() != outputSize)) 
+			throw new Error("Invalid matrix size");
+		for (int i = inputSize - 1; i >= 0; i--) 
+			for (int j = outputSize - 1; j >= 0; j--)
+				affineCoefs.setItem(i, j, src.getItem(i, j));
+		for (int j = outputSize - 1; j >= 0; j--)
+			origin.setItem(inputSize, j, src.getItem(j, 0));
+	}
+	
+	public AffineTransformer getReverseTransformer() {
+		if (inputSize != outputSize) 
+			throw new Error("Affine transformation irreversible");
+		AffineTransformer result = new AffineTransformer(outputSize, inputSize);
+		Matrix m = getMatrix();
+		if (!m.inverse()) 
+			throw new Error("Reverse affine transformation calculation failed");
+		result.setMatrix(m);
+		return result;
+	}
+	
 	public String toString() {
 		StringBuffer b = new StringBuffer();
 		b.append("Origin\n");
@@ -109,6 +145,31 @@ public class AffineTransformer extends BaseTransformer {
 		b.append("Coefs\n");
 		b.append(affineCoefs.toString());
 		return b.toString();
+	}
+	
+	public String toString2() {
+		StringBuffer b = new StringBuffer();
+		for (int j = 0; j < outputSize; j++) {
+			for (int i = 0; i < inputSize; i++) {
+				if ( (i != 0) && (j != 0) )
+					b.append("\t");
+				b.append(affineCoefs.getItem(i, j));
+			}
+			b.append("\t");
+			b.append(origin.getItem(j, 0));
+		}
+		return b.toString();
+	}
+	
+	public static AffineTransformer fromString2(int inputSize, int outputSize, String str) {
+		StringTokenizer st = new StringTokenizer(str, "\t");
+		AffineTransformer r = new AffineTransformer(inputSize, outputSize);
+		for (int j = 0; j < outputSize; j++) {
+			for (int i = 0; i < inputSize; i++) 
+				r.affineCoefs.setItem(i, j, Double.parseDouble(st.nextToken()));
+			r.origin.setItem(j, 0, Double.parseDouble(st.nextToken()));
+		}
+		return r;
 	}
 	
 	public void toXML(Element dest) {

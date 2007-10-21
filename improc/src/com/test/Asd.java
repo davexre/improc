@@ -16,7 +16,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;

@@ -293,7 +293,7 @@ public class KeyPointPairList {
 		maxTop = (maxTop <= 0 ? items.size() : Math.min(maxTop, items.size()));
 		for (int i = 0; i < maxTop; i++) {
 			KeyPointPair pp = items.get(i);
-			System.out.println((i+1) + " -> " + pp.discrepancy);
+			System.out.println((i+1) + " -> " + (pp.isBad() ? "BAD " : "ok  ") + pp.discrepancy);
 		}
 	}
 }

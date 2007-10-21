@@ -210,7 +210,7 @@ public class DNister5PointMatch {
 			Q.setItem(8, i, 1                                                );
 		}
 		
-//		Q.printM("Q");
+		Q.printM("Q");
 		
 		JLapack jl = new JLapack();
 		Matrix u = new Matrix();
@@ -226,9 +226,9 @@ public class DNister5PointMatch {
 		Matrix backupQ = Q.makeCopy();
 //		Q.mysvd(u, v, s);
 		jl.mysvd(Q, u, v, s);
-//		u.printM("U");
-//		v.printM("V");
-//		s.printM("S");
+		u.printM("U");
+		v.printM("V");
+		s.printM("S");
 		
 		checkSVD(backupQ, u, v, s);
 

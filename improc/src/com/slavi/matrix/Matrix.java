@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.jdom.Element;
@@ -67,6 +66,23 @@ public class Matrix {
 		return true;
 	}
 
+	public String toMatlabString(String variableName) {
+		StringBuilder result = new StringBuilder();
+		result.append(variableName);
+		result.append("=[");
+		for (int j = 0; j < sizeY; j++) {
+			for (int i = 0; i < sizeX; i++) {
+				if (i != 0)
+					result.append(" ");
+				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(m[i][j]) } ));
+				result.append(m[i][j]);
+			}
+			result.append(";");
+		}
+		result.append("];");
+		return result.toString();
+	}
+	
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
@@ -76,7 +92,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format(Locale.US, "%1$9.4f",new Object[] { new Double(m[i][j]) } ));
+				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(m[i][j]) } ));
+				result.append(m[i][j]);
 			}
 			result.append("\n");
 		}

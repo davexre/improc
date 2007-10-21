@@ -9,6 +9,8 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
@@ -18,26 +20,142 @@ import com.slavi.ui.TaskProgress;
  * the SWT (Standart Widget Toolkit) library.   
  */
 public class SwtUtl {
-	static DirectoryDialog browseForFolderDialog = null;
-	
 	/**
 	 * Opens the standart SWT dialog for the current OS for selecting a folder.
 	 * <p>
-	 * Returns the selected folder or null if the dialog is cancelled
+	 * Returns the selected folder or null if the dialog is cancelled.
+	 * @param parent		The owner shell. Can be null.
 	 */
 	public static String browseForFolder(Shell parent, String message, String defaultDir) {
-		if (browseForFolderDialog == null) {
-			if (parent == null)
-				parent = new Shell();
-			browseForFolderDialog = new DirectoryDialog(parent);
-		}
-		browseForFolderDialog.setMessage(message);
-		browseForFolderDialog.setFilterPath(defaultDir);
-		browseForFolderDialog.setText("Some text");
-		
-		return browseForFolderDialog.open();
+		Shell shell = parent == null ? new Shell() : parent;
+		DirectoryDialog dialog = new DirectoryDialog(shell);
+		dialog.setText("");
+		dialog.setMessage(message);
+		dialog.setFilterPath(defaultDir);
+		String result = dialog.open();
+		if (parent == null)
+			shell.dispose();
+		return result;
 	}
 
+	/**
+	 * The default file extension filter for the openFile dialog.
+	 */
+	public static final String[][] defaultFilter = new String[][] {
+		{"All files"}, 
+		{"*.*"}
+	};
+	
+	/**
+	 * A file extension filter for the openFile dialog, enumerating all
+	 * image file formats, supported by ImageIO.
+	 */
+	public static final String[][] imageFileFilter = new String[][] {
+		{"Images (png,jpg,bmp,gif)", "All files"}, 
+		{"*.png; *.jpg; *.bmp; *.gif", "*.*"}
+	};
+	
+	/**
+	 * Opens the standart SWT dialog for the current OS for selecting a file to open.
+	 * <p>
+	 * Returns the selected file or null if the dialog is cancelled.
+	 * @param parent		The owner shell. Can be null.
+	 * @param title			The caption of the dialog. If this parameter 
+	 * 						is null then the caption is set to "Open file".
+	 * @param defaultDir	The default directory for the open file 
+	 * 						dialog. This parameter can be null. 
+	 * @param filter		The file extension filters for the dialog.
+	 * 						This parameter can be null. See {@link #defaultFilter} 
+	 */
+	public static String openFile(Shell parent, String title, String defaultDir, String[][] filter) {
+		Shell shell = parent == null ? new Shell() : parent;
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
+		if (filter == null) {
+			dialog.setFilterNames(defaultFilter[0]);
+			dialog.setFilterExtensions(defaultFilter[1]);
+		} else {
+			dialog.setFilterNames(filter[0]);
+			dialog.setFilterExtensions(filter[1]);
+		}
+		if (defaultDir != null)
+			dialog.setFilterPath(defaultDir);
+		if (title == null) 
+			dialog.setText("Open file");
+		else
+			dialog.setText(title);
+		
+		String result = dialog.open();
+		if (parent == null)
+			shell.dispose();
+		return result;
+	}
+
+	/**
+	 * Opens the standart SWT dialog for the current OS for selecting a file to save.
+	 * <p>
+	 * Returns the selected file or null if the dialog is cancelled.
+	 * @param parent		The owner shell. Can be null.
+	 * @param title			The caption of the dialog. If this parameter 
+	 * 						is null then the caption is set to "Save as".
+	 * @param defaultDir	The default directory for the open file 
+	 * 						dialog. This parameter can be null. 
+	 * @param filter		The file extension filters for the dialog.
+	 * 						This parameter can be null. See {@link #defaultFilter} 
+	 */
+	public static String saveFile(Shell parent, String title, String defaultDir, String defaultFileName, String[][] filter) {
+		Shell shell = parent == null ? new Shell() : parent;
+		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+		if (filter == null) {
+			dialog.setFilterNames(defaultFilter[0]);
+			dialog.setFilterExtensions(defaultFilter[1]);
+		} else {
+			dialog.setFilterNames(filter[0]);
+			dialog.setFilterExtensions(filter[1]);
+		}
+		if (defaultDir != null)
+			dialog.setFilterPath(defaultDir);
+		if (defaultFileName != null)
+			dialog.setFileName(defaultFileName);
+		else
+			dialog.setFileName(null);
+		if (title == null) 
+			dialog.setText("Save as");
+		else
+			dialog.setText(title);
+		
+		String result = dialog.open();
+		if (parent == null)
+			shell.dispose();
+		return result;
+	}
+
+	/**
+	 * Displays the standard error dialog box with the specified message.
+	 * @param parent		The owner shell. Can be null.
+	 */
+	public static void msgboxError(Shell parent, String errorMsg) {
+		Shell shell = parent == null ? new Shell() : parent;
+		MessageBox dialog = new MessageBox(shell, SWT.ICON_ERROR);
+		dialog.setText("Error");
+		dialog.setMessage(errorMsg);
+		dialog.open();
+		if (parent == null)
+			shell.dispose();
+	}
+	
+	/**
+	 * Displays the standard information dialog box with the specified message.
+	 * @param parent		The owner shell. Can be null.
+	 */
+	public static void msgbox(Shell parent, String message) {
+		Shell shell = parent == null ? new Shell() : parent;
+		MessageBox dialog = new MessageBox(shell, SWT.ICON_INFORMATION);
+		dialog.setMessage(message);
+		dialog.open();
+		if (parent == null)
+			shell.dispose();
+	}
+	
 	/**
 	 * Returns the BOLD version of the specified font
 	 */

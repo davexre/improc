@@ -9,14 +9,17 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import com.slavi.statistics.AffineTransformLearner;
+import com.slavi.statistics.AffineTransformer;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
 
 public class PanoPairList {
-	public static final String fileHeader = "PanoPair file version 1.2";
+	public static final String fileHeader = "PanoPair file version 1.2.1";
 
 	public ArrayList<PanoPair> items;
-
+	
+	public AffineTransformer transform = new AffineTransformer(2, 2);
+	
 	public FileStamp sourceKPL = null;
 
 	public FileStamp targetKPL = null;
@@ -105,16 +108,22 @@ public class PanoPairList {
 		atl.calculateOne();
 		atl.calculateOne();
 		atl.calculateOne();
-		kppl.leaveGoodElements(9.0); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
+		kppl.leaveGoodElements(50.0); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
 		atl.calculateOne();
 		atl.calculateOne();
+		
+//		System.out.println("*** after calc 6");
+//		kppl.sortByDiscrepancy();
+//		kppl.displayTop(30);
+		
 		for (int i = 0; i < kppl.items.size(); i++) {
 			KeyPointPair pp = (KeyPointPair) kppl.items.get(i);
 			if (pp.discrepancy < 2.0) {
 				result.items.add(new PanoPair(pp));
 			}				
 		}
-		
+		result.transform = (AffineTransformer) atl.transformer;
+
 		// The PanoPairList is built. Now save it.
 		panoFile.getParentFile().mkdirs();
 		PrintWriter fou = new PrintWriter(panoFile);
@@ -126,6 +135,15 @@ public class PanoPairList {
 			Integer.toString(result.sourceImageSizeY) + "\t" +
 			Integer.toString(result.targetImageSizeX) + "\t" +
 			Integer.toString(result.targetImageSizeY));
+		double d[] = new double[6];
+		result.transform.getMatrix(d);
+		String prefix = "";
+		for (int i = 0; i < d.length; i++) {
+			fou.print(prefix);
+			fou.print(Double.toString(d[i]));
+			prefix = "\t";
+		}
+		fou.println();
 		
 		for (PanoPair i : result.items) {
 			fou.println(i.toString());
@@ -161,7 +179,12 @@ public class PanoPairList {
 		result.sourceImageSizeY = Integer.parseInt(st.nextToken());
 		result.targetImageSizeX = Integer.parseInt(st.nextToken());
 		result.targetImageSizeY = Integer.parseInt(st.nextToken());
-
+		st = new StringTokenizer(fin.readLine(), "\t");
+		double d[] = new double[6];
+		for (int i = 0; i < d.length; i++)
+			d[i] = Double.parseDouble(st.nextToken());
+		result.transform.setMatrix(d);
+		
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {

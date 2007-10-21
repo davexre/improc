@@ -47,24 +47,24 @@ public class LeastSquaresAdjust {
 	 * "Смисълът" на параметрите numCoefsPerCoordinate и numCoordinates е "намаляване" на
 	 * размера на нормалната матрица при повтарящи се коефициенти например: Ако
 	 * матрицата на уравненията на поправките е:<br>
-	 * <tt><table>
+	 * <tt><table border=1>
 	 * <tr><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td><td> 0</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td> 0</td><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td></tr>
 	 * <tr><td>b1</td><td> 0</td><td> 0</td><td>b2</td><td> 0</td><td> 0</td><td>b3</td><td> 0</td><td> 0</td><td>b4</td><td> 0</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td>b1</td><td> 0</td><td> 0</td><td>b2</td><td> 0</td><td> 0</td><td>b3</td><td> 0</td><td> 0</td><td>b4</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td> 0</td><td>b1</td><td> 0</td><td> 0</td><td>b2</td><td> 0</td><td> 0</td><td>b3</td><td> 0</td><td> 0</td><td>b4</td></tr>
-	 * <tr><td colspan=4><center>... ... ...</center></td></tr>
+	 * <tr><td colspan=16><center>... ... ...</center></td></tr>
 	 * <tr><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td><td> 0</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td> 0</td><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td></tr>
 	 * </table></tt><br>
 	 * то тя се "редуцира" до матрица от вида:<br>
-	 * <tt><table>
-	 * <tr><td>a1</td><td>a2</td><td>a3</td><td>a4</td><td></tr>
-	 * <tr><td>b1</td><td>b2</td><td>b3</td><td>b4</td><td></tr>
+	 * <tt><table border=1>
+	 * <tr><td>a1</td><td>a2</td><td>a3</td><td>a4</td></tr>
+	 * <tr><td>b1</td><td>b2</td><td>b3</td><td>b4</td></tr>
 	 * <tr><td colspan=4><center>... ... ...</center></td></tr>
-	 * <tr><td>k1</td><td>k2</td><td>k3</td><td>k4</td><td></tr>
+	 * <tr><td>k1</td><td>k2</td><td>k3</td><td>k4</td></tr>
 	 * </table></tt><br>
 	 * което е доста по-икономично ;)<br>
 	 * <br>
@@ -106,23 +106,22 @@ public class LeastSquaresAdjust {
 		return measurementCount >= getRequiredMeasurements();
 	}
 
-	public void calculate() {
-		// if (measurementCount < numCoefsPerCoordinate)
+	public boolean calculate() {
 		if (!canCalculate())
-			throw new Error(
-					"Can't calculate using Least Squares Adjustment. Not enough measurements to calculate the unknowns.");
+			return false;
 		if (measurementCount == getRequiredMeasurements())
 			medianSquareError = 0;
 		else
 			medianSquareError = Math.sqrt(sumPLL / (measurementCount - numCoefsPerCoordinate));
 
 		if (!nm.inverse())
-			throw new Error("Can't solve the NM matrix.");
+			return false;
 		unknown.make0();
 		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
 			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)
 				for (int k = numCoordinates - 1; k >= 0; k--)
 					unknown.setItem(k, i, unknown.getItem(k, i) + nm.getItem(i, j) * apl.getItem(k, j));
+		return true;
 	}
 
 	public void addMeasurement(Matrix m, double weight, double L, int coordinate) {

@@ -59,7 +59,8 @@ public class AffineTransformLearner extends BaseTransformLearner {
 				lsa.addMeasurement(coefs, item.computedWeight, L, i);
 			}
 		}
-		lsa.calculate();
+		if (!lsa.calculate()) 
+			return false;
 
 		// Build transformer
 		AffineTransformer tr = (AffineTransformer)transformer;

@@ -19,7 +19,7 @@ public class PanoList {
 		if (item == null)
 			return;
 		
-		// Test is the pano pair list has enough good points
+		// Test if the pano pair list has enough good points
 		int goodCount = 0;
 		for (int i = 0; i < item.items.size(); i++) {
 			PanoPair pp = item.items.get(i);
@@ -61,6 +61,10 @@ public class PanoList {
 			return result;
 		}
 		return null;
+	}
+	
+	public void processPanoPairList(ArrayList<PanoPairList> ppl) {
+		
 	}
 	
 	private static class ImageFileData {
