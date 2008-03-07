@@ -5,6 +5,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
@@ -57,7 +58,7 @@ public class TestTaskProgress {
 		}		
 	}
 	
-	public static void main1(String[] args) {
+	public static void test1() {
 		TestTaskProgress test = new TestTaskProgress();
 		test.shell.open();
 		while( !test.shell.isDisposed()  ){
@@ -67,9 +68,15 @@ public class TestTaskProgress {
 	}
 	
 	static class dummyJob2 implements Runnable {
+		private int iterations;
+		
+		public dummyJob2(int iterations) {
+			this.iterations = iterations;
+		}
+		
 		public void run() {
 			try {
-				for (int i = 0; i < 8; i++) {
+				for (int i = 0; i < iterations; i++) {
 					SwtUtl.activeWaitDialogSetStatus("thread step " + i, i);
 					Thread.sleep(1000);
 				}
@@ -79,10 +86,46 @@ public class TestTaskProgress {
 		}		
 	}
 
-	public static void main(String[] args) {
-		dummyJob2 job = new dummyJob2();
-		boolean result = SwtUtl.openWaitDialog("Title", job, -1);
+	public static void test2() {
+		dummyJob2 job = new dummyJob2(8);
+		boolean result = SwtUtl.openWaitDialog("Title", job, 8);
 		System.out.println(result);
+	}
+	
+	static class dummyJob3 implements Runnable {
+		private int iterations;
+		
+		public dummyJob3(int iterations) {
+			this.iterations = iterations;
+		}
+		
+		public void run() {
+			try {
+				for (int i = 0; i < iterations; i++) {
+					SwtUtl.activeWaitDialogSetStatus("thread step " + i, i);
+					Thread.sleep(1000);
+					if (i == iterations / 2) {
+						SwtUtl.getActiveWaitDialogShell().getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								SwtUtl.msgbox(null, "asdasdasd");	
+							}
+						});
+					}
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void test3() {
+		dummyJob3 job = new dummyJob3(8);
+		boolean result = SwtUtl.openWaitDialog("Base dialog", job, 8);
+		System.out.println(result);
+	}
+	
+	public static void main(String[] args) {
+		test3();
 	}
 	
 }

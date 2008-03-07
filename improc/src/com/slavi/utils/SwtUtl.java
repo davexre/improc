@@ -17,11 +17,11 @@ import com.slavi.ui.TaskProgress;
 
 /**
  * This class contains utility methods for creating user interface using
- * the SWT (Standart Widget Toolkit) library.   
+ * the SWT (Standard Widget Toolkit) library.   
  */
 public class SwtUtl {
 	/**
-	 * Opens the standart SWT dialog for the current OS for selecting a folder.
+	 * Opens the standard SWT dialog for the current OS for selecting a folder.
 	 * <p>
 	 * Returns the selected folder or null if the dialog is cancelled.
 	 * @param parent		The owner shell. Can be null.
@@ -56,9 +56,9 @@ public class SwtUtl {
 	};
 	
 	/**
-	 * Opens the standart SWT dialog for the current OS for selecting a file to open.
+	 * Opens the standard SWT dialog for the current OS for selecting a file to open.
 	 * <p>
-	 * Returns the selected file or null if the dialog is cancelled.
+	 * Returns the selected file or null if the dialog is canceled.
 	 * @param parent		The owner shell. Can be null.
 	 * @param title			The caption of the dialog. If this parameter 
 	 * 						is null then the caption is set to "Open file".
@@ -91,9 +91,9 @@ public class SwtUtl {
 	}
 
 	/**
-	 * Opens the standart SWT dialog for the current OS for selecting a file to save.
+	 * Opens the standard SWT dialog for the current OS for selecting a file to save.
 	 * <p>
-	 * Returns the selected file or null if the dialog is cancelled.
+	 * Returns the selected file or null if the dialog is canceled.
 	 * @param parent		The owner shell. Can be null.
 	 * @param title			The caption of the dialog. If this parameter 
 	 * 						is null then the caption is set to "Save as".
@@ -203,12 +203,16 @@ public class SwtUtl {
 			waitDialogTaskProgress.setStatusAndProgressThreadsafe(status, taskCompleted);
 	}
 	
+	public static Shell getActiveWaitDialogShell() {
+		return waitDialogShell;
+	}
+	
 	/**
 	 * Opens a "Please wait..." dialog and starts the runnable thread.
 	 * <p>
 	 * The dialog is suspends the calling thread until the runnable is 
 	 * finished or until the user presses the "Cancel" button or the runnable
-	 * thread throws an expection.
+	 * thread throws an exception.
 	 * 
 	 * @param title The title of the task
 	 * @param runnable The runnable instance that will be started when the 
@@ -249,9 +253,9 @@ public class SwtUtl {
 		waitDialogShell.open();
 		while (!waitDialogShell.isDisposed()) {
 			if (display.readAndDispatch()) {
-				// Chesk once more if dialog is disposed as the dialog is disposed 
+				// Check once more if dialog is disposed as the dialog is disposed 
 				// in a call to readAndDispatch() and for some reason the
-				// readAndDispatch() returns a worng "true" value;
+				// readAndDispatch() returns a wrong "true" value;
 				if (!waitDialogShell.isDisposed()) 
 					display.sleep();
 			}

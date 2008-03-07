@@ -168,7 +168,7 @@ public class CardTemplate {
 		}
 
 		float height = 0;
-		ArrayList layouts = new ArrayList();
+		ArrayList<TextLayout> layouts = new ArrayList<TextLayout>();
 
 		for (int i = 0; i < (params.length >> 1); i++) {
 			int index = i << 1;

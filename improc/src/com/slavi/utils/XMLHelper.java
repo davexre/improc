@@ -16,7 +16,7 @@ import org.jdom.output.XMLOutputter;
 
 /**
  * This class contains utility methods for reading/writing XML files using the org.jdom library.
- * The org.jdom library is available at <a href="www.jdom.org" />.  
+ * The org.jdom library is available at <a href="www.jdom.org">www.jdom.org</a>.  
  */
 public class XMLHelper {
 
@@ -27,7 +27,7 @@ public class XMLHelper {
 	 */
 	public static void writeXML(File fou, Element documentRoot, String styleSheet) throws FileNotFoundException, IOException {
 		Document doc = new Document();
-		if ((styleSheet != null) || (!styleSheet.equals(""))) {
+		if ((styleSheet != null) && (!styleSheet.equals(""))) {
 			Content c = new ProcessingInstruction("xml-stylesheet", "href=\"" + styleSheet + "\" type=\"text/xsl\"");
 			doc.addContent(c);
 		}

@@ -29,9 +29,7 @@ public class TaskProgress extends Composite {
 	
 	Button btnAbort;
 
-	AsyncRefresh asyncRefresh;
-	
-	Display display;
+	Runnable asyncRefresh;
 	
 	public enum TaskStatus {
 		 NOTSTARTED,
@@ -46,8 +44,20 @@ public class TaskProgress extends Composite {
 	public TaskProgress(Composite parent, int style, Runnable task) {
 		super(parent, style);
 		createWidgets();
-		display = getDisplay();
-		asyncRefresh = new AsyncRefresh();
+		asyncRefresh = new Runnable() {
+			public void run() {
+				if (isDisposed())
+					return;
+				if (threadsafeStatus != null) {
+					status.setText(threadsafeStatus);
+					threadsafeStatus = null;
+				}
+				if (threadsafeTaskCompleted >= 0) {
+					progressBar.setSelection(threadsafeTaskCompleted);
+					threadsafeTaskCompleted = -1;
+				}
+			}
+		};
 		thread = new NotifyingThread(task);
 		thread.setPriority(Thread.MIN_PRIORITY);
 		taskStatus = TaskStatus.NOTSTARTED;
@@ -124,7 +134,9 @@ public class TaskProgress extends Composite {
 			} finally {
 				if (taskStatus == TaskStatus.RUNNING)
 					taskStatus = TaskStatus.FINISHED;
-				display.asyncExec(new TaskFinishedNotification());
+				Display display = getDisplay();
+				if ((display != null) && (!display.isDisposed()))
+					display.asyncExec(new TaskFinishedNotification());
 			}
 		}
 	}
@@ -133,21 +145,6 @@ public class TaskProgress extends Composite {
 	
 	private int threadsafeTaskCompleted;
 		
-	private class AsyncRefresh implements Runnable {
-		public void run() {
-			if (isDisposed())
-				return;
-			if (threadsafeStatus != null) {
-				status.setText(threadsafeStatus);
-				threadsafeStatus = null;
-			}
-			if (threadsafeTaskCompleted >= 0) {
-				progressBar.setSelection(threadsafeTaskCompleted);
-				threadsafeTaskCompleted = -1;
-			}
-		}
-	}
-	
 	public void setStatusThreadsafe(String status) {
 		setStatusAndProgressThreadsafe(threadsafeStatus = status, -1);
 	}
@@ -156,7 +153,7 @@ public class TaskProgress extends Composite {
 		setStatusAndProgressThreadsafe(null, taskCompleted);
 	}
 	
-	public void setStatusAndProgressThreadsafe(String status, int taskCompleted) {
+	public synchronized void setStatusAndProgressThreadsafe(String status, int taskCompleted) {
 		threadsafeStatus = status;
 		threadsafeTaskCompleted = taskCompleted;
 		if (!isDisposed())

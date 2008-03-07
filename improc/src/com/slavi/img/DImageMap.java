@@ -1,5 +1,6 @@
 package com.slavi.img;
 
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +56,10 @@ public class DImageMap {
 						new Double(sum) } );
 	}
 
+	public Rectangle getExtent() {
+		return new Rectangle(0, 0, sizeX, sizeY);
+	}
+	
 	/**
 	 * Width of the image in pixels.
 	 */
