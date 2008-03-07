@@ -18,11 +18,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
-import com.slavi.img.DImageMap;
-import com.slavi.statistics.StatisticsLT;
+import com.slavi.utils.Marker;
 
-public class SketchFilter implements BufferedImageFilter {
-	DImageMap theImage;
+public class SketchFilterOLD implements BufferedImageFilter {
+	BufferedImage theImage;
 	
 	int threshold1 = 50;
 	
@@ -53,81 +52,29 @@ public class SketchFilter implements BufferedImageFilter {
 	}
 
 	public void setImage(BufferedImage image) {
-		if (image == null)
-			theImage = null;
-		else
-			theImage = new DImageMap(image);
-		StatisticsLT stat = theImage.calcStatistics();
-		System.out.println(stat);
+		theImage = image;
 	}
-	
-	private static final double borderColorValue = 0;
 	
 	public BufferedImage getFilteredImage() {
 		if (theImage == null)
 			return null;
-	
-		DImageMap dest = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 		
-		for (int i = theImage.getSizeX() - 1; i >= 0; i--) {
-			dest.setPixel(i, 0, borderColorValue);
-			dest.setPixel(i, theImage.getSizeY() - 1, borderColorValue);
-		}
-		for (int j = theImage.getSizeY() - 1; j >= 0; j--) {
-			dest.setPixel(0, j, borderColorValue);
-			dest.setPixel(theImage.getSizeX() - 1, j, borderColorValue);
-		}
-		
-		for (int i = theImage.getSizeX() - 2; i > 0; i--)
-			for (int j = theImage.getSizeY() - 2; j > 0; j--) {
-				double curColor = theImage.getPixel(i, j);
-				double d = 0;
-
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i - 1, j - 1)));
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i - 1, j    )));
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i - 1, j + 1)));
-				
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i    , j - 1)));
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i    , j + 1)));
-				
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i + 1, j - 1)));
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i + 1, j    )));
-				d = Math.max(d, Math.abs(curColor - theImage.getPixel(i + 1, j + 1)));
-				
-				dest.setPixel(i, j, 1-d);
-			}
-				
-/*		for (int i = theImage.getSizeX() - 2; i > 0; i--)
-			for (int j = theImage.getSizeY() - 2; j > 0; j--) {
-				
-				d *= 255;
-				
-				int newColor = 0xffffff;
-				if (d > t1) newColor = 0x500000;
-				if (d > t2) newColor = 0xa00000;
-				r.setRGB(i, j, newColor);
-				
-			}
-*/
-		
-		BufferedImage r = dest.toImage();
-		return r;
-/*		int w = theImage.getSizeX();
-		int h = theImage.getSizeY();
+		int w = theImage.getWidth();
+		int h = theImage.getHeight();
 		BufferedImage r = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 		w--;
 		h--;
 		int t1 = Math.min(threshold1, threshold2);
 		int t2 = Math.max(threshold1, threshold2);
-		double rows[][] = new double[3][w + 2];
+		int rows[][] = new int[3][w + 2];
 		for (int i = w - 1; i >= 0; i--) 
-			rows[1][i+1] = rows[2][i+1] = theImage.getPixel(i, 0);
+			rows[1][i+1] = rows[2][i+1] = getGrayColor(theImage, i, 0);
 		rows[1][0] = rows[2][0] = rows[1][1];
 		rows[1][w+1] = rows[2][w+1] = rows[1][w];
 		Marker.mark();
 		
 		for (int j = 1; j <= h; j++) {
-			double tmp[] = rows[0];
+			int tmp[] = rows[0];
 			rows[0] = rows[1];
 			rows[1] = rows[2];
 			rows[2] = tmp;
@@ -135,14 +82,14 @@ public class SketchFilter implements BufferedImageFilter {
 				rows[2] = rows[1];
 			else {
 				for (int i = w - 1; i >= 0; i--) 
-					tmp[i+1] = theImage.getPixel(i, j);
+					tmp[i+1] = getGrayColor(theImage, i, j);
 				tmp[0] = tmp[1];
 				tmp[w+1] = tmp[w];
 			}
 			
 			for (int i = w; i > 0; i--) {
-				double curColor = rows[1][i];
-				double d = 0;
+				int curColor = rows[1][i];
+				int d = 0;
 
 				d = Math.max(d, Math.abs(curColor - rows[0][i-1]));
 				d = Math.max(d, Math.abs(curColor - rows[0][i  ]));
@@ -155,8 +102,6 @@ public class SketchFilter implements BufferedImageFilter {
 				d = Math.max(d, Math.abs(curColor - rows[2][i  ]));
 				d = Math.max(d, Math.abs(curColor - rows[2][i+1]));
 				
-				d *= 255;
-				
 				int newColor = 0xffffff;
 				if (d > t1) newColor = 0x500000;
 				if (d > t2) newColor = 0xa00000;
@@ -165,7 +110,7 @@ public class SketchFilter implements BufferedImageFilter {
 		}
 		Marker.release();
 		return r;
-*/	}
+	}
 	
 	Label lblT1;
 	
@@ -237,7 +182,7 @@ public class SketchFilter implements BufferedImageFilter {
 		BufferedImage src = ImageIO.read(new File(fin)); 
 
 		Display display = new Display();
-		ImageFilter imageSketch = new ImageFilter(new SketchFilter());
+		ImageFilter imageSketch = new ImageFilter(new SketchFilterOLD());
 		Shell shell = imageSketch.open(display);
 		imageSketch.setSourceImage(src);
 		

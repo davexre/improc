@@ -9,5 +9,7 @@ public interface BufferedImageFilter {
 	
 	public void createFilterWidgets(Composite parent, ImageFilter imageSketch);
 	
-	public BufferedImage getFilteredImage(BufferedImage image);
+	public void setImage(BufferedImage image);
+	
+	public BufferedImage getFilteredImage();
 }

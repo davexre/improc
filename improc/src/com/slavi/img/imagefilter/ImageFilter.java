@@ -49,7 +49,7 @@ public class ImageFilter {
 		if (sourceImage == null)
 			outputImage = null;
 		else
-			outputImage = imageFilter.getFilteredImage(sourceImage);
+			outputImage = imageFilter.getFilteredImage();
 		if (outputImage == null) {
 			outputImageSizeX = outputImageSizeY = 0;
 		} else {
@@ -62,6 +62,7 @@ public class ImageFilter {
 
 	public void setSourceImage(BufferedImage image) {
 		sourceImage = image;
+		imageFilter.setImage(sourceImage);
 		updateFilter();
 	}
 	
