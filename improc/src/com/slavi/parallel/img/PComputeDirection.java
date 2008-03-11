@@ -57,11 +57,12 @@ public class PComputeDirection implements Runnable {
 		}
 
 		for (int i = minX + 1; i < maxX; i++)
-			for (int j = minY + 1; j < maxY; j++)
+			for (int j = minY + 1; j < maxY; j++) {
 				// Direction is computed as d = atan2( dX, dY )
 				// The returned value of atan2 is from -pi to +pi.
 				dest.setPixel(i, j, Math.atan2(
 					src.getPixel(i, j + 1) - src.getPixel(i, j - 1), 
 					src.getPixel(i + 1, j) - src.getPixel(i - 1, j)));
+			}
 	}
 }

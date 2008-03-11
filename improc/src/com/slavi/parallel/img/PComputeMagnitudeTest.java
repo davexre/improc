@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.slavi.img.DImageMap;
 import com.slavi.utils.Marker;
 
-public class PComputeDirectionTest {
+public class PComputeMagnitudeTest {
 	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
 //	static final String finName = "D:/Users/s/Images/20071219 SAP Party in Exit club/DSC00325.JPG";
 //	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
@@ -27,7 +27,7 @@ public class PComputeDirectionTest {
 		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());
 
 		Marker.mark("original");
-		src.computeDirection(dest);
+		src.computeMagnitude(dest);
 		Marker.release();
 
 		ExecutorService exec = Executors.newFixedThreadPool(6);
@@ -53,7 +53,7 @@ public class PComputeDirectionTest {
 				destR = destR.intersection(srcExt);
 				DImageWrapper srcW = new DImageWrapper(src, srcR);
 				DImageWrapper destW = new DImageWrapper(dest, destR);
-				Runnable task = new PComputeDirection(srcW, destW, false);
+				Runnable task = new PComputeMagnitude(srcW, destW, false);
 				tasks.add(task);
 			}
 		}
@@ -67,8 +67,37 @@ public class PComputeDirectionTest {
 		
 		dest.toImageFile(fouName);
 	}
+
+	void asdf() throws IOException {
+		DImageMap src = new DImageMap(new File(finName));
+		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());
+
+		Marker.mark("magnitude");
+		src.computeMagnitude(dest);
+		Marker.release();
+		
+		Marker.mark("direction");
+		src.computeDirection(dest);
+		Marker.release();
+
+		Marker.mark("magnitude");
+		src.computeMagnitude(dest);
+		Marker.release();
+		
+		Marker.mark("direction");
+		src.computeDirection(dest);
+		Marker.release();
+
+		Marker.mark("magnitude");
+		src.computeMagnitude(dest);
+		Marker.release();
+		
+		Marker.mark("direction");
+		src.computeDirection(dest);
+		Marker.release();
+	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		new PComputeDirectionTest().doIt();
+		new PComputeMagnitudeTest().asdf();
 	}
 }
