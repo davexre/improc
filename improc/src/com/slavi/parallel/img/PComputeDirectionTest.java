@@ -12,10 +12,11 @@ import com.slavi.img.DImageMap;
 import com.slavi.utils.Marker;
 
 public class PComputeDirectionTest {
-	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
+//	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
+	static final String finName = "C:/Users/S/ImageProcess/images/output.png";
+	static final String fouName = "C:/temp/test.jpg";
 //	static final String finName = "D:/Users/s/Images/20071219 SAP Party in Exit club/DSC00325.JPG";
 //	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
-	static final String fouName = "C:/temp/test.jpg";
 
 	public static void main1(String[] args) {
 		Rectangle r = new Rectangle(0, 0, 400, 500);
@@ -58,8 +59,9 @@ public class PComputeDirectionTest {
 			}
 		}
 		Marker.mark("started");
-		for (Runnable task : tasks) 
-			exec.execute(task);
+		for (Runnable task : tasks) { 
+			exec.submit(task);
+		}
 		exec.shutdown();
 		while (!exec.isTerminated())
 			exec.awaitTermination(1000, TimeUnit.SECONDS);

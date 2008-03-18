@@ -46,7 +46,7 @@ public class ParallelExecution {
 	
 	public static void main(String[] args) throws InterruptedException {
 		ParallelExecution test = new ParallelExecution();
-//		test.test();
+		test.test();
 		System.out.println(Runtime.getRuntime().maxMemory()/1024/1024);
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Vector;
 public class EnumerationVsIterator {
 	public static void main(String[] args) {
 		Vector v = new Vector();
-		Object element;
+//		Object element;
 		Enumeration enum1;
 		Iterator iter;
 		long start;
@@ -21,7 +21,8 @@ public class EnumerationVsIterator {
 		for (int i = 0; i < 100; i++) {
 			iter = v.iterator();
 			while (iter.hasNext()) {
-				element = iter.next();
+//				element = iter.next();
+				iter.next();
 			}
 		}
 		System.out.println("Iterator took " + (System.currentTimeMillis() - start));
@@ -34,7 +35,8 @@ public class EnumerationVsIterator {
 		for (int i = 0; i < 100; i++) {
 			enum1 = v.elements();
 			while (enum1.hasMoreElements()) {
-				element = enum1.nextElement();
+//				element = enum1.nextElement();
+				enum1.nextElement();
 			}
 		}
 		System.out.println("Enumeration took " + (System.currentTimeMillis() - start));

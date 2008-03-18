@@ -1633,7 +1633,7 @@ public class JLapack {
 		Matrix tau = new Matrix(A.getSizeX(), 1);
 		tau.make0();
 		
-		double ANRM = A.maxAbs();
+//		double ANRM = A.maxAbs();
 //		????		
 //		if (ANRM != 0.0)
 //			A.rMul(1.0 / ANRM);
@@ -1785,8 +1785,8 @@ public class JLapack {
 		//      1, first of conjugate complex pair: (wr,wi)
 		//     -1, second of conjugate complex pair: (wr,wi)
 		
-		double ULP = 0.0; // ???
-		double SMLNUM = 0.0; // ???
+//		double ULP = 0.0; // ???
+//		double SMLNUM = 0.0; // ???
 		int IP = 0;
 		
 		// DTREVC:299 Compute right eigenvectors.
@@ -1796,13 +1796,13 @@ public class JLapack {
 			if ( (KI != 0) && (T.getItem(KI - 1, KI) != 0.0) )
 				IP = -1;
 			// DTREVC:655 Compute the KI-th eigenvalue (WR,WI).
-			double WR = T.getItem(KI, KI);
-			double WI = 0.0;
-			if (IP != 0)
-				WI = 
-					Math.sqrt(Math.abs(T.getItem(KI + 1, KI))) *
-					Math.sqrt(Math.abs(T.getItem(KI, KI + 1)));
-			double SMIN = Math.max(ULP * (Math.abs(WR) + Math.abs(WI)), SMLNUM);
+//			double WR = T.getItem(KI, KI);
+//			double WI = 0.0;
+//			if (IP != 0)
+//				WI = 
+//					Math.sqrt(Math.abs(T.getItem(KI + 1, KI))) *
+//					Math.sqrt(Math.abs(T.getItem(KI, KI + 1)));
+//			double SMIN = Math.max(ULP * (Math.abs(WR) + Math.abs(WI)), SMLNUM);
 			
 			if (IP == 0) {
 				// DTREVC:666 Real left eigenvector.
@@ -1862,7 +1862,7 @@ public class JLapack {
 		// with the active submatrix in rows and columns L to I.
 		// Eigenvalues I+1 to IHI have already converged. Either L = ILO or
 		// H(L,L-1) is negligible so that the matrix splits.
-		final double SMLNUM = 9.01875762E-292;
+//		final double SMLNUM = 9.01875762E-292;
 		final double ULP = 2.22044605E-016;
 		
 		Matrix V = new Matrix(3, 1);

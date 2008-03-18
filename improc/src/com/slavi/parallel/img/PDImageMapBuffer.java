@@ -2,21 +2,20 @@ package com.slavi.parallel.img;
 
 import java.awt.Rectangle;
 
-import com.slavi.img.DImageMap;
+/**
+ * This class represents a gray scale image with the pixels stored 
+ * in an array of doubles used by routines for parallel image processing.
+ * The origin of the buffer MAY be translated to a specified origin. 
+ * By default all pixel values are in the range [0..1].
+ */
+public class PDImageMapBuffer implements DWindowedImage {
 
-public class DImageWrapper implements DWindowedImage {
-
-	DImageMap image;
-	Rectangle imageExtent;
+	double pixels[][];
 	Rectangle extent;
 	
-	public DImageWrapper(DImageMap image, Rectangle extent) {
-		if ((image.getSizeX() < extent.x + extent.width) ||
-			(image.getSizeY() < extent.y + extent.height))
-			throw new Error("Invalid size");
-		this.image = image;
-		this.imageExtent = image.getExtent();
-		this.extent = extent;
+	public PDImageMapBuffer(Rectangle extent) {
+		this.extent = new Rectangle(extent);
+		pixels = new double[extent.width][extent.height];
 	}
 	
 	public Rectangle getExtent() {
@@ -25,14 +24,14 @@ public class DImageWrapper implements DWindowedImage {
 
 	public double getPixel(int atX, int atY) {
 		if (extent.contains(atX, atY))
-			return image.getPixel(atX, atY);
+			return pixels[atX - extent.x][atY - extent.y];
 		else
 			throw new Error("Invalid coordinates");
 	}
 
 	public void setPixel(int atX, int atY, double value) {
 		if (extent.contains(atX, atY))
-			image.setPixel(atX, atY, value);
+			pixels[atX - extent.x][atY - extent.y] = value;
 		else
 			throw new Error("Invalid coordinates");
 	}

@@ -9,8 +9,6 @@ import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.jdom.Attribute;
-
 public class ListClassesInPackage {
 
 	
@@ -127,7 +125,7 @@ public class ListClassesInPackage {
 	public static void main(String[] args) throws IOException {
 //		String packageName = "org.jdom";
 //		String packageName = "com.slavi";
-		String packageName = "com.slavi.ui";
+//		String packageName = "com.slavi.ui";
 		
 //		List<String> r = getClassNamesInPackage(packageName, false);
 //		for (String item : r) {

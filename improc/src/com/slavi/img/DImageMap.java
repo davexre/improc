@@ -307,17 +307,15 @@ public class DImageMap {
 	 * the pixel values as to fall in the interval [0..255].
 	 */
 	public BufferedImage toImage() {
-		double aMin, aDelta;
-		int c;
-		aMin = min();
-		aDelta = max() - aMin;
-		if (aDelta == 0) 
-			aDelta = 1;
+		double aMin = min();
+		double aDelta = max() - aMin;
+		if (aDelta == 0.0) 
+			aDelta = 1.0;
 		BufferedImage bi = new BufferedImage(sizeX, sizeY,
 				BufferedImage.TYPE_BYTE_GRAY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				c = (int) Math.floor(((getPixel(i, j) - aMin) * 255) / aDelta);
+				int c = (int) Math.floor(((getPixel(i, j) - aMin) * 255.0) / aDelta);
 				bi.setRGB(i, j, (c << 16) | (c << 8) | c);
 			}
 		return bi;
@@ -328,7 +326,7 @@ public class DImageMap {
 	 * saves it to the specified file.
 	 */
 	public void toImageFile(String fouName) throws IOException {
-		ImageIO.write(toImage(), "jpg", new File(fouName));
+		ImageIO.write(toImage(), "png", new File(fouName));
 	}
 
 	/**
