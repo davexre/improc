@@ -13,15 +13,17 @@ import com.slavi.img.DImageMap;
 import com.slavi.utils.Marker;
 
 public class PGaussianFilterTest {
-	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
+//	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
 //	static final String finName = "C:/Users/S/ImageProcess/images/output.png";
-	static final String fouName = "C:/temp/test.png";
-	static final String fouName1 = "C:/temp/test1.png";
-	static final String fouName2 = "C:/temp/test2.png";
+//	static final String fouName = "C:/temp/test.png";
+//	static final String fouName1 = "C:/temp/test1.png";
+//	static final String fouName2 = "C:/temp/test2.png";
+
 //	static final String finName = "D:/Users/s/Images/20071219 SAP Party in Exit club/DSC00325.JPG";
-//	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
-//	static final String fouName = "D:/temp/test.jpg";
-//	static final String fouName1 = "D:/temp/test1.jpg";
+	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+	static final String fouName = "D:/temp/test.jpg";
+	static final String fouName1 = "D:/temp/test1.jpg";
+	static final String fouName2 = "D:/temp/test2.jpg";
 
 	public void doIt() throws IOException, InterruptedException {
 		DImageMap src = new DImageMap(new File(finName));
@@ -58,9 +60,13 @@ public class PGaussianFilterTest {
 				Rectangle srcR = PGaussianFilter.getNeededSourceExtent(destR);
 				srcR = srcR.intersection(srcExt);
 				destR = destR.intersection(srcExt);
-				DImageWrapper srcW = new DImageWrapper(src, srcR);
-				DImageWrapper destW = new DImageWrapper(dest, destR);
-				Runnable task = new PGaussianFilter(srcW, destW);
+				final DImageWrapper srcW = new DImageWrapper(src, srcR);
+				final DImageWrapper destW = new DImageWrapper(dest, destR);
+				Runnable task = new Runnable() {
+					public void run() {
+						PFastGaussianFilter.applyFilter(srcW, destW);
+					}
+				};
 				tasks.add(task);
 			}
 		}

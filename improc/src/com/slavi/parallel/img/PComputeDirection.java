@@ -8,27 +8,15 @@ import com.slavi.img.DImageMap;
  * Parallel Compute direction of an ImageMap (using DWindowedImage)
  *
  */
-public class PComputeDirection implements Runnable {
+public class PComputeDirection {
 
 	/**
 	 * Specifies the value for the one-pixel border of the computed magnitude or
 	 * direction map. Used by {@link #computeMagnitude(DImageMap)} and 
 	 * {@link #computeDirection(DImageMap)}.
 	 */
-	static final double borderColorValue = 0;
+	static final double borderColorValue = 0.0;
 	
-	DWindowedImage src; 
-	
-	DWindowedImage dest;
-	
-	boolean initializeDest;
-	
-	public PComputeDirection(DWindowedImage src, DWindowedImage dest, boolean initializeDest) {
-		this.src = src;
-		this.dest = dest;
-		this.initializeDest = initializeDest;
-	}
-
 	public static Rectangle getNeededSourceExtent(Rectangle dest) {
 		return new Rectangle(
 				dest.x - 1,
@@ -36,33 +24,59 @@ public class PComputeDirection implements Runnable {
 				dest.width + 2,
 				dest.height + 2);
 	}
-	
-	public void run() {
-		int minX = src.minX();
-		int maxX = src.maxX();
-		int minY = src.minY();
-		int maxY = src.maxY();
-		
-		if (initializeDest) {
-			// Draw a one-pixel border. At this border direction CAN NOT be computed
-			// adequately.
-			for (int i = minX; i <= maxX; i++) {
-				dest.setPixel(i, 0, borderColorValue);
-				dest.setPixel(i, maxY, borderColorValue);
-			}
-			for (int j = minY; j <= maxY; j++) {
-				dest.setPixel(0, j, borderColorValue);
-				dest.setPixel(maxX, j, borderColorValue);
-			}
-		}
 
-		for (int i = minX + 1; i < maxX; i++)
-			for (int j = minY + 1; j < maxY; j++) {
+	public static Rectangle getEffectiveTargetExtent(Rectangle source) {
+		return new Rectangle(
+				source.x + 1,
+				source.y + 1,
+				source.width - 2,
+				source.height - 2);
+	}
+		
+	public static void computeDirection(DWindowedImage source, DWindowedImage dest) {
+		int dMinX = dest.minX();
+		int dMaxX = dest.maxX();
+		int dMinY = dest.minY();
+		int dMaxY = dest.maxY();
+		
+		int sMinX = source.minX();
+		int sMaxX = source.maxX();
+		int sMinY = source.minY();
+		int sMaxY = source.maxY();
+
+		int minX = Math.max(dMinX, sMinX + 1);
+		int maxX = Math.min(dMaxX, sMaxX - 1);
+		int minY = Math.max(dMinY, sMinY + 1);
+		int maxY = Math.min(dMaxY, sMaxY - 1);
+
+		// Draw a border where values can not be adequately computed.
+		// Draw top 
+		for (int j = dMinY; j < minY; j++)
+			for (int i = dMinX; i <= dMaxX; i++)
+				dest.setPixel(i, j, borderColorValue);
+		// Draw bottom
+		for (int j = maxY + 1; j <= dMaxY; j++)
+			for (int i = dMinX; i <= dMaxX; i++)
+				dest.setPixel(i, j, borderColorValue);
+		// Draw left
+		for (int i = dMinX; i < minX; i++)
+			for (int j = minY; j <= maxY; j++)
+				dest.setPixel(i, j, borderColorValue);
+		// Draw right
+		for (int i = maxX + 1; i <= dMaxX; i++)
+			for (int j = minY; j <= maxY; j++)
+				dest.setPixel(i, j, borderColorValue);
+
+		// Compute direction
+		for (int i = minX; i <= maxX; i++) {
+			for (int j = minY; j <= maxY; j++) {
 				// Direction is computed as d = atan2( dX, dY )
 				// The returned value of atan2 is from -pi to +pi.
-				dest.setPixel(i, j, Math.atan2(
-					src.getPixel(i, j + 1) - src.getPixel(i, j - 1), 
-					src.getPixel(i + 1, j) - src.getPixel(i - 1, j)));
+				double value = Math.atan2(
+					source.getPixel(i, j + 1) - source.getPixel(i, j - 1), 
+					source.getPixel(i + 1, j) - source.getPixel(i - 1, j));
+				dest.setPixel(i, j, value);
 			}
+		}
 	}
 }

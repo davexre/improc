@@ -13,10 +13,12 @@ import com.slavi.utils.Marker;
 
 public class PComputeDirectionTest {
 //	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
-	static final String finName = "C:/Users/S/ImageProcess/images/output.png";
-	static final String fouName = "C:/temp/test.jpg";
+//	static final String finName = "C:/Users/S/ImageProcess/images/output.png";
+//	static final String fouName = "C:/temp/test.jpg";
+
 //	static final String finName = "D:/Users/s/Images/20071219 SAP Party in Exit club/DSC00325.JPG";
-//	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+	static final String fouName = "D:/temp/test.jpg";
 
 	public static void main1(String[] args) {
 		Rectangle r = new Rectangle(0, 0, 400, 500);
@@ -27,11 +29,11 @@ public class PComputeDirectionTest {
 		DImageMap src = new DImageMap(new File(finName));
 		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());
 
-		Marker.mark("original");
-		src.computeDirection(dest);
-		Marker.release();
+//		Marker.mark("original");
+//		src.computeDirection(dest);
+//		Marker.release();
 
-		ExecutorService exec = Executors.newFixedThreadPool(6);
+		ExecutorService exec = Executors.newFixedThreadPool(1);
 		
 		Rectangle srcExt = src.getExtent();
 		int gridX = 3;
@@ -52,9 +54,13 @@ public class PComputeDirectionTest {
 				Rectangle srcR = PComputeDirection.getNeededSourceExtent(destR);
 				srcR = srcR.intersection(srcExt);
 				destR = destR.intersection(srcExt);
-				DImageWrapper srcW = new DImageWrapper(src, srcR);
-				DImageWrapper destW = new DImageWrapper(dest, destR);
-				Runnable task = new PComputeDirection(srcW, destW, false);
+				final DImageWrapper srcW = new DImageWrapper(src, srcR);
+				final DImageWrapper destW = new DImageWrapper(dest, destR);
+				Runnable task = new Runnable() {
+					public void run() {
+						PComputeDirection.computeDirection(srcW, destW);
+					}
+				};
 				tasks.add(task);
 			}
 		}
@@ -66,7 +72,7 @@ public class PComputeDirectionTest {
 		while (!exec.isTerminated())
 			exec.awaitTermination(1000, TimeUnit.SECONDS);
 		Marker.release();
-		
+
 		dest.toImageFile(fouName);
 	}
 	

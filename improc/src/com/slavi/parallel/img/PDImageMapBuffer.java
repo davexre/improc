@@ -10,11 +10,15 @@ import java.awt.Rectangle;
  */
 public class PDImageMapBuffer implements DWindowedImage {
 
+	int sizeX; 
+	int sizeY;
 	double pixels[][];
 	Rectangle extent;
 	
 	public PDImageMapBuffer(Rectangle extent) {
 		this.extent = new Rectangle(extent);
+		this.sizeX = extent.width;
+		this.sizeY = extent.height;
 		pixels = new double[extent.width][extent.height];
 	}
 	
@@ -22,6 +26,13 @@ public class PDImageMapBuffer implements DWindowedImage {
 		return new Rectangle(extent);
 	}
 
+	public void setExtent(Rectangle extent) {
+		if ((extent.width <= sizeX) && (extent.height <= sizeY)) 
+			this.extent = extent;
+		else
+			throw new Error("Invalid extent");
+	}
+	
 	public double getPixel(int atX, int atY) {
 		if (extent.contains(atX, atY))
 			return pixels[atX - extent.x][atY - extent.y];

@@ -1,5 +1,8 @@
 package com.slavi.img;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
 
@@ -72,7 +75,8 @@ public class DLoweDetector {
 		for (int k = 2; k >= 0; k--) {
 			DImageMap im = DOGs[k];
 			if (isMinimum) {
-				if ((im.getPixel(atX + 1, atY + 1) <= curPixel) ||
+				if (
+					(im.getPixel(atX + 1, atY + 1) <= curPixel) ||
 					(im.getPixel(atX - 1, atY + 1) <= curPixel) ||
 					(im.getPixel(atX    , atY + 1) <= curPixel) ||
 					(im.getPixel(atX + 1, atY - 1) <= curPixel) ||
@@ -81,11 +85,12 @@ public class DLoweDetector {
 					(im.getPixel(atX + 1, atY    ) <= curPixel) ||
 					(im.getPixel(atX - 1, atY    ) <= curPixel) ||
 					// note here its just < instead of <=
-					(k == 1 ? false : (im.getPixel(atX, atY) < curPixel)))
+					(k == 1 ? false : (im.getPixel(atX, atY) < curPixel)) )
 					isMinimum = false;
 			}
 			if (isMaximum) {
-				if ((im.getPixel(atX + 1, atY + 1) >= curPixel) ||
+				if (
+					(im.getPixel(atX + 1, atY + 1) >= curPixel) ||
 					(im.getPixel(atX - 1, atY + 1) >= curPixel) ||
 					(im.getPixel(atX    , atY + 1) >= curPixel) ||
 					(im.getPixel(atX + 1, atY - 1) >= curPixel) ||
@@ -94,7 +99,7 @@ public class DLoweDetector {
 					(im.getPixel(atX + 1, atY    ) >= curPixel) ||
 					(im.getPixel(atX - 1, atY    ) >= curPixel) ||
 					// note here its just > instead of >=
-					(k == 1 ? false : (im.getPixel(atX, atY) > curPixel)))
+					(k == 1 ? false : (im.getPixel(atX, atY) > curPixel)) )
 					isMaximum = false;
 			}
 		}
@@ -592,14 +597,66 @@ public class DLoweDetector {
 
 	private DImageMap lastBlured1Img = null;
 	
+	String workDir = "D:/Temp/t1/";
 	private void debugPrintImage(DImageMap img, double scale, String type, int level) {
-//		img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
-//		fou.println(Integer.toString((int)scale) + "\t" + type + "\t" + level + "\t" + img.calcStatistics());
+//		try {
+//			img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println("**** " + Integer.toString((int) scale) + "\t" + type + "\t" + level + "\t");
+//		System.out.println(img.calcStatistics());
 	}
+
+	private void DetectFeaturesInSingleDOG(DImageMap[] DOGs, DImageMap magnitude, DImageMap direction, int aLevel, double scale, int scaleSpaceLevels, double sigma) {
+		// Now we have three valid Difference Of Gaus images
+		// Border pixels are skipped
+
+		int sizeX = DOGs[0].getSizeX();
+		int sizeY = DOGs[0].getSizeY();
+		
+		for (int i = sizeX - 2; i >= 1; i--) {
+			for (int j = sizeY - 2; j >= 1; j--) {
+				// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
+				// this pixel to all its neighbour pixels.
+				if (!isLocalExtrema(DOGs, i, j))
+					continue; // current pixel in DOGs[1] is not a local
+								// extrema
+				isLocalExtremaCount++;
+				
+				// We have a peak.
+				if (isTooEdgeLike(DOGs[1], i, j))
+					continue;
+				isTooEdgeLikeCount++;
+
+				// When the localization hits some problem, i.e. while
+				// moving the
+				// point a border is reached, then skip this point.
+				KeyPoint tempKeyPoint = new KeyPoint();
+				if (localizeIsWeak(DOGs, i, j, tempKeyPoint))
+					continue;
+				localizeIsWeakCount++;
+
+				// Ok. We have located a keypoint.
+				tempKeyPoint.level = aLevel+1;
+				tempKeyPoint.imgScale = scale;
+
+				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
+			}
+		}
+	}
+
+	int isLocalExtremaCount;
+	int isTooEdgeLikeCount;
+	int localizeIsWeakCount;
 
 	private void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
 			int scaleSpaceLevels) {
 
+		isLocalExtremaCount = 0;
+		isTooEdgeLikeCount = 0;
+		localizeIsWeakCount = 0;
+		
 		double sigma = initialSigma;
 		DImageMap blured0 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 		DImageMap blured1 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
@@ -613,10 +670,6 @@ public class DLoweDetector {
 
 		theImage.copyTo(blured2);
 
-		int isLocalExtremaCount = 0;
-		int isTooEdgeLikeCount = 0;
-		int localizeIsWeakCount = 0;
-		
 		debugPrintImage(theImage, scale, "A", 0);
 
 		for (int aLevel = -2; aLevel < scaleSpaceLevels; aLevel++) {
@@ -653,39 +706,8 @@ public class DLoweDetector {
 
 			debugPrintImage(magnitude, scale, "M", aLevel);
 			debugPrintImage(direction, scale, "D", aLevel);
-
-			// Now we have three valid Difference Of Gaus images
-			// Border pixels are skipped
-
-			for (int i = blured0.getSizeX() - 2; i >= 1; i--) {
-				for (int j = blured0.getSizeY() - 2; j >= 1; j--) {
-					// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
-					// this pixel to all its neighbour pixels.
-					if (!isLocalExtrema(DOGs, i, j))
-						continue; // current pixel in DOGs[1] is not a local
-									// extrema
-					isLocalExtremaCount++;
-					
-					// We have a peak.
-					if (isTooEdgeLike(DOGs[1], i, j))
-						continue;
-					isTooEdgeLikeCount++;
-
-					// When the localization hits some problem, i.e. while
-					// moving the
-					// point a border is reached, then skip this point.
-					KeyPoint tempKeyPoint = new KeyPoint();
-					if (localizeIsWeak(DOGs, i, j, tempKeyPoint))
-						continue;
-					localizeIsWeakCount++;
-
-					// Ok. We have located a keypoint.
-					tempKeyPoint.level = aLevel+1;
-					tempKeyPoint.imgScale = scale;
-
-					GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
-				}
-			}
+			
+			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		} // end of for aLevel
 	}
 	
@@ -712,6 +734,16 @@ public class DLoweDetector {
 			} else { 
 				curImage = null; 
 			}
+			break;
 		}
+	}
+	
+	public static void main(String[] args) throws IOException {
+		File image = new File("D:\\Users\\s\\kayak\\me in the kayak.jpg");
+		System.out.println("Processing image " + image);
+		DImageMap img = new DImageMap(image);
+		DLoweDetector d = new DLoweDetector();
+		d.DetectFeatures(img, 3, 32);
+		System.out.println("DONE.");
 	}
 }

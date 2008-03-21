@@ -31,7 +31,7 @@ public class Asd {
 	private static BufferedImage resizeImage(BufferedImage source, int destWidth, int destHeight) {
 		int srcWidth = source.getWidth();
 		int srcHeight = source.getHeight();
-		
+
 		double scale = Math.max(
 				(double) destWidth / srcWidth, 
 				(double) destHeight / srcHeight);

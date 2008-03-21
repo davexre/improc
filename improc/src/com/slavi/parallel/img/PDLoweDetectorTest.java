@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import com.slavi.img.DImageMap;
 import com.slavi.utils.Marker;
 
-public class PComputeMagnitudeTest {
+public class PDLoweDetectorTest {
 //	static final String finName = "C:/Users/S/ImageProcess/images/HPIM7379.JPG";
 //	static final String fouName = "C:/temp/test.jpg";
 
@@ -19,24 +19,15 @@ public class PComputeMagnitudeTest {
 	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
 	static final String fouName = "D:/temp/test.jpg";
 
-	public static void main1(String[] args) {
-		Rectangle r = new Rectangle(0, 0, 400, 500);
-		System.out.println(r.contains(1, 1));
-	}
-
 	public void doIt() throws IOException, InterruptedException {
 		DImageMap src = new DImageMap(new File(finName));
 		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());
 
-		Marker.mark("original");
-		src.computeMagnitude(dest);
-		Marker.release();
-
 		ExecutorService exec = Executors.newFixedThreadPool(6);
 		
 		Rectangle srcExt = src.getExtent();
-		int gridX = 3;
-		int gridY = 3;
+		int gridX = 1;
+		int gridY = 1;
 
 		int dx = 1 + src.getSizeX() / gridX; 
 		int dy = 1 + src.getSizeY() / gridY;
@@ -50,16 +41,12 @@ public class PComputeMagnitudeTest {
 				int maxy = (j + 1) * dy;
 				
 				Rectangle destR = new Rectangle(minx, miny, maxx - minx, maxy - miny);
-				Rectangle srcR = PComputeDirection.getNeededSourceExtent(destR);
+				Rectangle srcR = PDLoweDetector.getNeededSourceExtent(destR);
 				srcR = srcR.intersection(srcExt);
 				destR = destR.intersection(srcExt);
-				final DImageWrapper srcW = new DImageWrapper(src, srcR);
-				final DImageWrapper destW = new DImageWrapper(dest, destR);
-				Runnable task = new Runnable() {
-					public void run() {
-						PComputeMagnitude.computeMagnitude(srcW, destW);
-					}
-				};
+				DImageWrapper srcW = new DImageWrapper(src, srcR);
+				DImageWrapper destW = new DImageWrapper(dest, destR);
+				Runnable task = new PDLoweDetector(srcW, destR, 2, 3, exec);
 				tasks.add(task);
 			}
 		}
@@ -74,36 +61,7 @@ public class PComputeMagnitudeTest {
 		dest.toImageFile(fouName);
 	}
 
-	void asdf() throws IOException {
-		DImageMap src = new DImageMap(new File(finName));
-		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());
-
-		Marker.mark("magnitude");
-		src.computeMagnitude(dest);
-		Marker.release();
-		
-		Marker.mark("direction");
-		src.computeDirection(dest);
-		Marker.release();
-
-		Marker.mark("magnitude");
-		src.computeMagnitude(dest);
-		Marker.release();
-		
-		Marker.mark("direction");
-		src.computeDirection(dest);
-		Marker.release();
-
-		Marker.mark("magnitude");
-		src.computeMagnitude(dest);
-		Marker.release();
-		
-		Marker.mark("direction");
-		src.computeDirection(dest);
-		Marker.release();
-	}
-	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		new PComputeMagnitudeTest().doIt();
+		new PDLoweDetectorTest().doIt();
 	}
 }
