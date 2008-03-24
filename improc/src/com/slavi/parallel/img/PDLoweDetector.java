@@ -6,10 +6,13 @@ import java.util.concurrent.ExecutorService;
 
 import com.slavi.img.DImageMap;
 import com.slavi.img.KeyPoint;
+import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
 
 public class PDLoweDetector implements Runnable {
+
+	public Hook hook = null;
 
 	public static final int defaultScaleSpaceLevels = 3;
 
@@ -439,6 +442,199 @@ public class PDLoweDetector implements Runnable {
 		sp.kpScale *= sp.imgScale;
 	}
 	
+	private void GenerateKeypointSingle(double sigma, DWindowedImage magnitude,
+			DWindowedImage direction, KeyPoint sp, int scaleSpaceLevels) {
+		// The relative estimated keypoint scale. The actual absolute keypoint
+		// scale to the original image is yielded by the product of imgScale.
+		// But as we operate in the current octave, the size relative to the
+		// anchoring images is missing the imgScale factor.
+		double kpScale = initialSigma
+				* Math.pow(2.0, (sp.level + sp.adjS) / scaleSpaceLevels);
+
+		// Lowe03, "A gaussian-weighted circular window with a \sigma three
+		// times that of the scale of the keypoint".
+		//
+		// With \sigma = 3.0 * kpScale, the square dimension we have to
+		// consider is (3 * \sigma) (until the weight becomes very small).
+		sigma = 3.0 * kpScale;
+		int radius = (int) (3.0 * sigma / 2.0 + 0.5);
+		int radiusSq = radius * radius;
+
+		// As the point may lie near the border, build the rectangle
+		// coordinates we can still reach, minus the border pixels, for which
+		// we do not have gradient information available.
+		int xMin = Math.max(sp.imgX - radius, direction.minX());
+		int xMax = Math.min(sp.imgX + radius, direction.maxX());
+		int yMin = Math.max(sp.imgY - radius, direction.minY());
+		int yMax = Math.min(sp.imgY + radius, direction.maxY());
+
+		// Precompute 1D gaussian divisor (2 \sigma^2) in:
+		// G(r) = e^{-\frac{r^2}{2 \sigma^2}}
+		double gaussianSigmaFactor = 2.0 * sigma * sigma;
+		final int binCount = 36;
+		double[] bins = new double[binCount];
+		for (int i = binCount - 1; i >= 0; i--)
+			bins[i] = 0;
+
+		// Build the direction histogram
+		for (int y = yMin; y < yMax; y++) {
+			for (int x = xMin; x < xMax; x++) {
+				// Only consider pixels in the circle, else we might skew the
+				// orientation histogram by considering more pixels into the
+				// corner directions
+				int relX = x - sp.imgX;
+				int relY = y - sp.imgY;
+				int rSq = relX * relX + relY * relY;
+				if (rSq <= radiusSq) {
+					// The gaussian weight factor.
+					double gaussianWeight = Math.exp(-rSq / gaussianSigmaFactor);
+					// Find the closest bin and add the direction
+					double angle = Math.PI + direction.getPixel(x, y);
+					angle /= 2 * Math.PI;
+					angle *= binCount;
+
+					int indx = (int) angle;
+					indx = (indx >= binCount ? 0 : indx);
+					bins[indx] += magnitude.getPixel(x, y) * gaussianWeight;
+				}
+			}
+		}
+
+		// As there may be succeeding histogram entries like this:
+		// ( ..., 0.4, 0.3, 0.4, ... ) where the real peak is located at the
+		// middle of this three entries, we can improve the distinctiveness of
+		// the bins by applying an averaging pass.
+		//
+		// TODO: is this really the best method? (we also loose a bit of
+		// information. Maybe there is a one-step method that conserves more)
+		// ???AverageWeakBins (bins, binCount);
+
+		for (int pass = 0; pass < 4; pass++) {
+			double firstE = bins[0];
+			double last = bins[binCount - 1];
+			for (int i = 0; i < binCount; i++) {
+				double cur = bins[i];
+				// double next = bins[(i + 1) % binCount];
+				double next = (i == (binCount - 1)) ? firstE : bins[(i + 1)
+						% binCount];
+				bins[i] = (last + cur + next) / 3.0;
+				last = cur;
+			}
+		}
+
+		// find the maximum peak in gradient orientation
+		double binMaxValue = bins[0];
+		int maxBinIndx = 0;
+		for (int i = binCount - 1; i > 0; i--)
+			if (bins[i] > binMaxValue) {
+				binMaxValue = bins[i];
+				maxBinIndx = i;
+			}
+
+		// Any other local peak that is within 80% of the highest peak is
+		// used to also create keypoints with the corresponding orientation.
+		double leftval = bins[(maxBinIndx + binCount - 1) % binCount];
+		double middleval = bins[maxBinIndx];
+		double rightval = bins[(maxBinIndx + 1) % binCount];
+		double aval = ((leftval + rightval) - 2.0 * middleval) / 2.0;
+		if (aval == 0.0)
+			return; // Not a parabol
+		double cval = (((leftval - middleval) / aval) - 1.0) / 2.0;
+		double binThreshold = (middleval - cval * cval * aval) * 0.8;
+
+		final double oneBinRad = (2.0 * Math.PI) / binCount;
+
+		for (int i = binCount - 1; i >= 0; i--) {
+			double left = bins[(i + binCount - 1) % binCount];
+			double middle = bins[i];
+			double right = bins[(i + 1) % binCount];
+			// Check if current bin is local peak
+			// if ((middle >= binThreshold) &&
+			// ((middle == binMaxValue) || (
+			// (middle > left) && (middle > right)) )) {
+			if ((i == maxBinIndx) ||
+				((middle >= binThreshold) && (middle > left) && (middle > right))) {
+				// Get an interpolated peak direction and value guess.
+				double a = ((left + right) - 2.0 * middle) / 2.0;
+				if (a == 0.0)
+					continue; // Not a parabol
+				double degreeCorrection = (((left - middle) / a) - 1.0) / 2.0;
+
+				// double peakValue = middle - degreeCorrection *
+				// degreeCorrection * a;
+
+				// [-1.0 ; 1.0] -> [0 ; binrange], and add the fixed absolute bin position.
+				// We subtract PI because bin 0 refers to 0, binCount-1 bin refers
+				// to a bin just below 2PI, so -> [-PI ; PI]. Note that at this
+				// point we determine the canonical descriptor anchor angle. It
+				// does not matter where we set it relative to the peak degree,
+				// but it has to be constant. Also, if the output of this
+				// implementation is to be matched with other implementations it
+				// must be the same constant angle (here: -PI).
+				double degree = (i + degreeCorrection) * oneBinRad - Math.PI;
+				if (degree < -Math.PI)
+					degree += 2.0 * Math.PI;
+				else if (degree > Math.PI)
+					degree -= 2.0 * Math.PI;
+
+				sp.kpScale = kpScale;
+				sp.degree = degree;
+				
+				KeyPoint sp2 = new KeyPoint();
+				sp2.adjS = sp.adjS;
+				sp2.degree = sp.degree;
+				sp2.doubleX = sp.doubleX;
+				sp2.doubleY = sp.doubleY;
+				sp2.imgX = sp.imgX;
+				sp2.imgY = sp.imgY;
+				sp2.kpScale = sp.kpScale;
+				sp2.level = sp.level;
+				sp2.imgScale = sp.imgScale;
+				
+				createDescriptor(sp2, magnitude, direction);
+				if (hook != null)
+					hook.keyPointCreated(sp2);
+			}
+		}
+	}
+	
+	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, double scale, int scaleSpaceLevels, double sigma) {
+		// Now we have three valid Difference Of Gaus images
+		// Border pixels are skipped
+/*
+		int sizeX = DOGs[0].getSizeX();
+		int sizeY = DOGs[0].getSizeY();
+		
+		for (int i = sizeX - 2; i >= 1; i--) {
+			for (int j = sizeY - 2; j >= 1; j--) {
+				// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
+				// this pixel to all its neighbour pixels.
+				if (!isLocalExtrema(DOGs, i, j))
+					continue; // current pixel in DOGs[1] is not a local
+								// extrema
+				isLocalExtremaCount++;
+				
+				// We have a peak.
+				if (isTooEdgeLike(DOGs[1], i, j))
+					continue;
+				isTooEdgeLikeCount++;
+
+				// When the localization hits some problem, i.e. while
+				// moving the
+				// point a border is reached, then skip this point.
+				KeyPoint tempKeyPoint = new KeyPoint();
+				if (localizeIsWeak(DOGs, i, j, tempKeyPoint))
+					continue;
+				localizeIsWeakCount++;
+
+				// Ok. We have located a keypoint.
+				tempKeyPoint.level = aLevel+1;
+				tempKeyPoint.imgScale = scale;
+
+				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
+			}
+		}*/
+	}
 	
 	void doit() throws InterruptedException, ExecutionException {
 		double sigma = initialSigma;
