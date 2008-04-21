@@ -6,7 +6,7 @@ import org.jdom.JDOMException;
 import com.slavi.matrix.Matrix;
 import com.slavi.utils.XMLHelper;
 
-public class PointsPair extends StatisticsItem {
+public class PointsPair extends StatisticsItemBasic {
 	
 	public Matrix source;
 
@@ -18,61 +18,33 @@ public class PointsPair extends StatisticsItem {
 	 * The distance between target and sourceTransformed.
 	 * The formula is:
 	 * discrepancy = sqrt(sum(pow(target.getItem(i,0) - soruceTransformed.getItem(i,0), 2)))
+	 * 
+	 * public double discrepancy; 
 	 */
-	public double discrepancy; 
 
 	public boolean previousBadStatus;
 
 	public PointsPair() {
+		super(0.0, 1.0);
 		source = null;
 		target = null;
 		sourceTransformed = null;
-		weight = 1;
-		computedWeight = 0;
-		bad = false;
 		previousBadStatus = false;
 	}
 
 	public PointsPair(Matrix source, Matrix target, double weight) {
+		super(0.0, weight);
 		this.source = source;
 		this.target = target;
 		this.sourceTransformed = new Matrix(target.getSizeX(), target.getSizeY());
-		this.discrepancy = 0;
-		this.weight = weight;
-		this.computedWeight = 0;
-		this.bad = false;
 		this.previousBadStatus = false;
 	}
 
-	public double getValue() {
-		return discrepancy;
-	}
-
-	public double getWeight() {
-		return weight;
-	}
-
-	public double getComputedWeight() {
-		return computedWeight;
-	}
-
-	public void setComputedWeight(double computedWeight) {
-		this.computedWeight = computedWeight;
-	}
-
-	public boolean isBad() {
-		return bad;
-	}
-
-	public void setBad(boolean bad) {
-		this.bad = bad;
-	}
-	
 	public void toXML(Element dest) {
 		Element e;
 		
-		dest.addContent(XMLHelper.makeAttrEl("weight", Double.toString(weight)));
-		dest.addContent(XMLHelper.makeAttrEl("bad", Boolean.toString(bad)));
+		dest.addContent(XMLHelper.makeAttrEl("weight", Double.toString(getWeight())));
+		dest.addContent(XMLHelper.makeAttrEl("bad", Boolean.toString(isBad())));
 		
 		e = new Element("source");
 		source.toXML(e);
@@ -87,8 +59,8 @@ public class PointsPair extends StatisticsItem {
 		PointsPair r = new PointsPair();
 		Element e;
 		
-		r.weight = Double.parseDouble(XMLHelper.getAttrEl(source, "weight"));
-		r.bad = Boolean.parseBoolean(XMLHelper.getAttrEl(source, "bad", "false"));
+		r.setWeight(Double.parseDouble(XMLHelper.getAttrEl(source, "weight")));
+		r.setBad(Boolean.parseBoolean(XMLHelper.getAttrEl(source, "bad", "false")));
 
 		e = source.getChild("source");
 		r.source = Matrix.fromXML(e);

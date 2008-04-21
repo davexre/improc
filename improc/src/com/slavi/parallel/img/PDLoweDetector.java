@@ -14,6 +14,13 @@ public class PDLoweDetector implements Runnable {
 
 	public Hook hook = null;
 
+	public static DImageMap mask;
+	
+	public static synchronized void setProcessed(int atX, int atY) {
+		if (mask != null)
+			mask.setPixel(atX, atY, mask.getPixel(atX, atY) + 1.0);
+	}
+	
 	public static final int defaultScaleSpaceLevels = 3;
 
 	DWindowedImage src;
@@ -55,6 +62,7 @@ public class PDLoweDetector implements Runnable {
 			tmp = PFastGaussianFilter.getNeededSourceExtent(tmp, sigmas[i]);
 		}
 		return tmp;
+//		return new Rectangle(tmp.x - 1, tmp.y - 1, tmp.width + 2, tmp.height + 2);
 	}
 
 	public static Rectangle getEffectiveTargetExtent(Rectangle source, int scaleSpaceLevels) {
@@ -65,6 +73,7 @@ public class PDLoweDetector implements Runnable {
 			tmp = PFastGaussianFilter.getEffectiveTargetExtent(tmp, sigma);
 		}
 		return tmp;
+//		return new Rectangle(tmp.x + 1, tmp.y + 1, tmp.width - 2, tmp.height - 2);
 	}
 	
 	void computeDOG(DWindowedImage blured1, DWindowedImage blured2, DWindowedImage destDOG) {
@@ -127,6 +136,8 @@ public class PDLoweDetector implements Runnable {
 	public static final int relocationMaximum = 4;
 
 	private boolean isLocalExtrema(DWindowedImage[] DOGs, int atX, int atY) {
+		setProcessed(atX, atY);
+		
 		double curPixel = DOGs[1].getPixel(atX, atY);
 		if (Math.abs(curPixel) < dogThreshold)
 			return false;
@@ -601,12 +612,15 @@ public class PDLoweDetector implements Runnable {
 	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, double scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
 		// Border pixels are skipped
-/*
-		int sizeX = DOGs[0].getSizeX();
-		int sizeY = DOGs[0].getSizeY();
-		
-		for (int i = sizeX - 2; i >= 1; i--) {
-			for (int j = sizeY - 2; j >= 1; j--) {
+
+		DWindowedImage tmpDOG = DOGs[0];
+		int minX = tmpDOG.minX();
+		int maxX = tmpDOG.maxX();
+		int minY = tmpDOG.minY();
+		int maxY = tmpDOG.maxY();
+
+		for (int i = minX + 1; i < maxX; i++) {
+			for (int j = minY + 1; j < maxY; j++) {
 				// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
 				// this pixel to all its neighbour pixels.
 				if (!isLocalExtrema(DOGs, i, j))
@@ -633,9 +647,13 @@ public class PDLoweDetector implements Runnable {
 
 				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
 			}
-		}*/
+		}
 	}
-	
+
+	int isLocalExtremaCount;
+	int isTooEdgeLikeCount;
+	int localizeIsWeakCount;
+
 	void doit() throws InterruptedException, ExecutionException {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
@@ -646,23 +664,25 @@ public class PDLoweDetector implements Runnable {
 		PDImageMapBuffer magnitude = new PDImageMapBuffer(srcExtent);
 		PDImageMapBuffer direction = new PDImageMapBuffer(srcExtent);
 
+		Rectangle dogExtent = new Rectangle(destExtent.x - 1, destExtent.y - 1, destExtent.width + 2, destExtent.height + 2);
+		dogExtent = dogExtent.intersection(srcExtent);
 		PDImageMapBuffer[] DOGs = new PDImageMapBuffer[3];
 		for (int i = DOGs.length - 1; i >= 0; i--)
-			DOGs[i] = new PDImageMapBuffer(destExtent);
+			DOGs[i] = new PDImageMapBuffer(dogExtent);
 
-		int isLocalExtremaCount = 0;
-		int isTooEdgeLikeCount = 0;
-		int localizeIsWeakCount = 0;
+		isLocalExtremaCount = 0;
+		isTooEdgeLikeCount = 0;
+		localizeIsWeakCount = 0;
 
 		Rectangle curExtent;
 		
-		curExtent = destExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(srcExtent));
+		curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(srcExtent));
 		blurred1.setExtent(curExtent);
 		PFastGaussianFilter.applyFilter(src, blurred1, sigma);
 		computeDOG(src, blurred1, DOGs[1]);
 		sigma = getNextSigma(sigma, scaleSpaceLevels);
 
-		curExtent = destExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
+		curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
 		blurred2.setExtent(curExtent);
 		PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 		computeDOG(blurred1, blurred2, DOGs[2]);
@@ -680,18 +700,19 @@ public class PDLoweDetector implements Runnable {
 			DOGs[1] = DOGs[2];
 			DOGs[2] = tmpimap;
 
-			magnitude.setExtent(destExtent.union(PComputeMagnitude.getEffectiveTargetExtent(curExtent)));
+			magnitude.setExtent(dogExtent.union(PComputeMagnitude.getEffectiveTargetExtent(curExtent)));
 			PComputeMagnitude.computeMagnitude(blurred1, magnitude);
-			direction.setExtent(destExtent.union(PComputeDirection.getEffectiveTargetExtent(curExtent)));
+			direction.setExtent(dogExtent.union(PComputeDirection.getEffectiveTargetExtent(curExtent)));
 			PComputeDirection.computeDirection(blurred1, direction);
 			// Compute next DOG
-			curExtent = destExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
+			curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
 			blurred2.setExtent(curExtent);
 			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 			computeDOG(blurred1, blurred2, DOGs[2]);
 			sigma = getNextSigma(sigma, scaleSpaceLevels);
 
 			// detect
+			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
 	}
 	

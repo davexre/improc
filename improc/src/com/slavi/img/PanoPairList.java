@@ -118,7 +118,7 @@ public class PanoPairList {
 		
 		for (int i = 0; i < kppl.items.size(); i++) {
 			KeyPointPair pp = (KeyPointPair) kppl.items.get(i);
-			if (pp.discrepancy < 2.0) {
+			if (pp.getValue() < 2.0) {
 				result.items.add(new PanoPair(pp));
 			}				
 		}

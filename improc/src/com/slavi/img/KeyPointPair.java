@@ -44,14 +44,8 @@ public class KeyPointPair extends PointsPair {
 	}
 	
 	public KeyPointPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
-		this.source = getMatrixFromScalePoint(sourceSP);
-		this.target = getMatrixFromScalePoint(targetSP);
+		super(getMatrixFromScalePoint(sourceSP), getMatrixFromScalePoint(targetSP), 1.0);
 		this.sourceTransformed = new Matrix(this.target.getSizeX(), this.target.getSizeY());
-		this.discrepancy = 0;
-		this.weight = 1;
-		this.computedWeight = 0;
-		this.bad = false;
-		this.previousBadStatus = false;
 		
 		this.sourceSP = sourceSP;
 		this.targetSP = targetSP;

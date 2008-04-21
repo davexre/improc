@@ -8,7 +8,7 @@ public abstract class BaseTransformLearner {
 
 	public BaseTransformer transformer;
 	
-	public ArrayList items;
+	public Iterable<? extends PointsPair> items;
 	
 	protected Matrix sourceOrigin;	
 	protected Matrix sourceScale; 	
@@ -22,7 +22,7 @@ public abstract class BaseTransformLearner {
 	
 	protected Statistics stat;
 	
-	protected BaseTransformLearner(BaseTransformer transformer, ArrayList pointsPairList) {
+	protected BaseTransformLearner(BaseTransformer transformer, ArrayList<? extends PointsPair> pointsPairList) {
 		this.transformer = transformer;
 		this.items = pointsPairList;
 		
@@ -41,23 +41,13 @@ public abstract class BaseTransformLearner {
 	
 	public abstract boolean calculateOne();
 	
-	public void addPair(Matrix source, Matrix target, double weight) {
-		if (
-			(source.getSizeX() != transformer.inputSize) || 
-			(source.getSizeY() != 1) ||
-			(target.getSizeX() != transformer.outputSize) ||
-			(target.getSizeY() != 1))
-			throw new Error("Received invalid point pair");
-		items.add(new PointsPair(source, target, weight));
-	}
-
 	public abstract int getRequiredTrainingPoints();
 
 	public boolean canCompute() {
 		int required = getRequiredTrainingPoints();
 		int goodCount = 0;
-		for (int p = items.size() - 1; p >= 0; p--)
-			if (!((PointsPair)items.get(p)).bad)
+		for (PointsPair item : items)
+			if (!item.isBad())
 				if (++goodCount >= required)
 					return true;
 		return false;
@@ -70,30 +60,27 @@ public abstract class BaseTransformLearner {
 	protected int computeWeights() {
 		int goodCount = 0;
 		double sumWeight = 0;
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			if (item.bad)
+		for (PointsPair item : items) {
+			if (item.isBad())
 				continue;
-			if (item.weight < 0)
+			if (item.getWeight() < 0)
 				throw new Error("Negative weight received.");
 			goodCount++;
-			sumWeight += item.weight;
+			sumWeight += item.getWeight();
 		}
 
 		if (sumWeight == 0) {
 			double computedWeight = 1.0;
 			if (goodCount > 0)
 				computedWeight = 1.0 / goodCount;
-			for (int p = items.size() - 1; p >= 0; p--) {
-				PointsPair item = (PointsPair) items.get(p);
-				item.computedWeight = item.bad ? 0 : computedWeight;
+			for (PointsPair item : items) {
+				item.setComputedWeight(item.isBad() ? 0 : computedWeight);
 			}
 		} else {
 			// sum(NewWeight) = sum( Weight/sum(Weight) ) = 1
 			if (sumWeight != 1)
-				for (int p = items.size() - 1; p >= 0; p--) {
-					PointsPair item = (PointsPair) items.get(p);
-					item.computedWeight = item.bad ? 0 : item.weight / sumWeight;
+				for (PointsPair item : items) {
+					item.setComputedWeight(item.isBad() ? 0 : item.getWeight() / sumWeight);
 				}
 		}
 		return goodCount;
@@ -105,9 +92,8 @@ public abstract class BaseTransformLearner {
 		boolean isFirst = true;
 		sourceOrigin.make0();
 		targetOrigin.make0();
-		for (int p = items.size() - 1; p > 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			if (item.bad)
+		for (PointsPair item : items) {
+			if (item.isBad())
 				continue;
 			if (isFirst) {
 				item.source.copyTo(sourceMin);
@@ -121,9 +107,9 @@ public abstract class BaseTransformLearner {
 				item.target.mMax(targetMax, targetMax);
 			}
 			for (int i = transformer.inputSize - 1; i >= 0; i--)
-				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + item.source.getItem(i, 0) * item.computedWeight);
+				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + item.source.getItem(i, 0) * item.getComputedWeight());
 			for (int i = transformer.outputSize - 1; i >= 0; i--)
-				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + item.target.getItem(i, 0) * item.computedWeight);
+				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + item.target.getItem(i, 0) * item.getComputedWeight());
 			isFirst = false;
 		}
 		
@@ -140,26 +126,25 @@ public abstract class BaseTransformLearner {
 	
 	protected boolean isAdjusted() {
 		// Determine correctness of source data (items array)
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
+		for (PointsPair item : items) {
 			// Compute for all points, so no item.isBad check
 			transformer.transform(item.source, item.sourceTransformed);
 			// Backup bad status
-			item.previousBadStatus = item.bad;
+			item.previousBadStatus = item.isBad();
 			// Compute distance between target and sourceTransformed
 			double sum2 = 0;
 			for (int i = transformer.outputSize - 1; i >= 0; i--) {
 				double d = item.target.getItem(i, 0) - item.sourceTransformed.getItem(i, 0);
 				sum2 += d * d;
 			}
-			item.discrepancy = Math.sqrt(sum2);
+			item.setValue(Math.sqrt(sum2));
 		}
 		
 		stat.resetCalculations();
 		boolean iterationHasBad = false;
 		for (int k = 0; k < 3; k++) {
 			iterationHasBad = false;
-			if (stat.calculateOne(items, StatisticianImpl.getInstance()) != 0) {
+			if (stat.calculateOne(items) != 0) {
 				iterationHasBad = true;
 			}
 			if (!iterationHasBad)
@@ -168,10 +153,9 @@ public abstract class BaseTransformLearner {
 		boolean adjusted = true;
 		if (iterationHasBad)
 			adjusted = false;
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			item.bad |= stat.isBad(item.discrepancy);
-			if (item.bad != item.previousBadStatus) {
+		for (PointsPair item : items) {
+			item.setBad(item.isBad() || stat.isBad(item.getValue()));
+			if (item.isBad() != item.previousBadStatus) {
 				adjusted = false;
 				break;
 			}
@@ -190,9 +174,8 @@ public abstract class BaseTransformLearner {
 	 * weight = discrepancy >= (1/MAX_WEIGHT) ? MAX_WEIGHT : 1/discrepancy 
 	 */
 	public void recomputeWeights() {
-		for (int p = 0; p < items.size(); p++) {
-			PointsPair item = (PointsPair)items.get(p);
-			item.weight = item.discrepancy >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.discrepancy;
+		for (PointsPair item : items) {
+			item.setWeight(item.getValue() >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.getValue());
 		}
 	}
 	
@@ -205,9 +188,8 @@ public abstract class BaseTransformLearner {
 	public Matrix computeTransformedTargetDelta(boolean ignoreBad) {
 		Matrix result = new Matrix(transformer.outputSize, 1);
 		result.make0();
-		for (int p = 0; p < items.size(); p++) {
-			PointsPair item = (PointsPair)items.get(p);
-			if (item.bad && ignoreBad)
+		for (PointsPair item : items) {
+			if (item.isBad() && ignoreBad)
 				continue;
 			for (int i = transformer.outputSize - 1; i >= 0; i--) {
 				double d = Math.abs(item.target.getItem(i, 0) - item.sourceTransformed.getItem(i, 0));

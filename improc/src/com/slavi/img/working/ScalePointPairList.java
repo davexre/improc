@@ -154,7 +154,7 @@ public class ScalePointPairList {
 		public int compare(Object o1, Object o2) {
 			ScalePointPair spp1 = (ScalePointPair)o1;
 			ScalePointPair spp2 = (ScalePointPair)o2;
-			return Double.compare(spp1.discrepancy, spp2.discrepancy);
+			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
 	public void sortByDelta() {

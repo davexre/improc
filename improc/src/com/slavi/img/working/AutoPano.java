@@ -112,7 +112,7 @@ public class AutoPano {
 		pointPairs.sortByDelta();
 		for (int i = 0; i < pointPairs.items.size(); i++) {
 			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
-			pp.setBad(pp.discrepancy > 2);				
+			pp.setBad(pp.getValue() > 2);				
 		}
 		System.out.println("Good count = " + pointPairs.countGoodItems());
 		
@@ -150,7 +150,7 @@ public class AutoPano {
 			}
 			for (int i = 0; i < minGoodPoints; i++) {
 				ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
-				System.out.println(pp.discrepancy + "\t" + pp.id); 
+				System.out.println(pp.getValue() + "\t" + pp.id); 
 			}
 			System.out.println("ADJUST = " + atl.calculateOne());
 			System.out.println("Good count = " + pointPairs.countGoodItems());
@@ -160,7 +160,7 @@ public class AutoPano {
 
 		for (int i = 0; i < minGoodPoints; i++) {
 			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
-			System.out.println(pp.discrepancy + "\t" + pp.id); 
+			System.out.println(pp.getValue() + "\t" + pp.id); 
 		}
 		
 		ArrayList pointPairs2 = new ArrayList();
@@ -176,7 +176,7 @@ public class AutoPano {
 		
 		for (int i = 0; i < minGoodPoints; i++) {
 			ScalePointPair pp = (ScalePointPair) pointPairs.items.get(i);
-			System.out.println(pp.discrepancy + "\t" + pp.id); 
+			System.out.println(pp.getValue() + "\t" + pp.id); 
 		}
 	}
 	
@@ -210,7 +210,7 @@ public class AutoPano {
 					" y" + (int) (pp.source.getItem(1, 0)) +
 					" X" + (int) (pp.target.getItem(0, 0)) +
 					" Y" + (int) (pp.target.getItem(1, 0)) + " t0");
-				System.out.println(Integer.toString(pp.id) + "\t" + Double.toString(pp.discrepancy));
+				System.out.println(Integer.toString(pp.id) + "\t" + Double.toString(pp.getValue()));
 //				if (pointCounter > minGoodPoints)
 //					break;
 			}

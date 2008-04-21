@@ -45,10 +45,6 @@ public class ScalePointPair extends PointsPair {
 		this.source = getMatrixFromScalePoint(sourceSP);
 		this.target = getMatrixFromScalePoint(targetSP);
 		this.sourceTransformed = new Matrix(this.target.getSizeX(), this.target.getSizeY());
-		this.discrepancy = 0;
-		this.weight = 1;
-		this.computedWeight = 0;
-		this.bad = false;
 		this.previousBadStatus = false;
 		
 		this.sourceSP = sourceSP;
@@ -69,7 +65,7 @@ public class ScalePointPair extends PointsPair {
 		dest.addContent(XMLHelper.makeAttrEl("dist1", Double.toString(distanceToNearest)));
 		dest.addContent(XMLHelper.makeAttrEl("dist2", Double.toString(distanceToNearest2)));
 		dest.addContent(XMLHelper.makeAttrEl("targetReused", Boolean.toString(targetReused)));
-		dest.addContent(XMLHelper.makeAttrEl("weight", Double.toString(weight)));
+		dest.addContent(XMLHelper.makeAttrEl("weight", Double.toString(getWeight())));
 		
 		e = new Element("source");
 		source.toXML(e);
@@ -95,7 +91,7 @@ public class ScalePointPair extends PointsPair {
 		r.distanceToNearest = Double.parseDouble(XMLHelper.getAttrEl(source, "dist1"));
 		r.distanceToNearest2 = Double.parseDouble(XMLHelper.getAttrEl(source, "dist2"));
 		r.targetReused = Boolean.parseBoolean(XMLHelper.getAttrEl(source, "targetReused"));
-		r.weight = Double.parseDouble(XMLHelper.getAttrEl(source, "weight", "1"));
+		r.setWeight(Double.parseDouble(XMLHelper.getAttrEl(source, "weight", "1")));
 		
 		e = source.getChild("source");
 		r.source = Matrix.fromXML(e);

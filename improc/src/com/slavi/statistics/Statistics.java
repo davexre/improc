@@ -1,7 +1,5 @@
 package com.slavi.statistics;
 
-import java.util.ArrayList;
-
 /**
  * Формулите са взети от "Теория на математическата обработка на геодезическите
  * измервания", Техника, 1988, проф.к.т.н.инж.Стефан Н. Атанасов.
@@ -13,16 +11,24 @@ public class Statistics extends StatisticsBase {
 	public Statistics() {
 		itemsCount = 0;
 	}
+
+	public int getItemsCount() {
+		return itemsCount;
+	}
+
+    public void resetCalculations() {
+    	super.resetCalculations();
+    	itemsCount = 0;
+    }
 	
-    public int calculateOne(ArrayList items, Statistician stat) {
+    public int calculateOne(Iterable<? extends StatisticsItem> data) {
     	resetCalculations();
 
 		// Да намериме най-малката тежест, както и броя на
 		// "Добрите" елементи.
-    	for (int i = items.size() - 1; i >= 0; i--) {
-    		Object item = items.get(i);
-    		if (!stat.isBad(item)) {
-    			double X = stat.getValue(item);
+    	for (StatisticsItem item : data) {
+    		if (!item.isBad()) {
+    			double X = item.getValue();
     			double absX = Math.abs(X);
     			if (itemsCount == 0) {
     				MaxX = MinX = X;
@@ -45,10 +51,9 @@ public class Statistics extends StatisticsBase {
     		return 0;       // Няма елементи - няма изчисления.
 
     	double sumWeight = 0.0;
-    	for (int i = items.size() - 1; i >= 0; i--) {
-    		Object item = items.get(i);
-    		if (!stat.isBad(item)) {
-    			double weight = stat.getWeight(item);
+    	for (StatisticsItem item : data) {
+    		if (!item.isBad()) {
+    			double weight = item.getWeight();
     			// Тежестите трябва ВИНАГИ да са положителни
     			if (weight < 0.0)
     				throw new Error("Negative weight received by TStatistics."); 
@@ -58,33 +63,30 @@ public class Statistics extends StatisticsBase {
 
     	if (sumWeight == 0) {
     		double computedWeight = (double)1 / itemsCount;
-    		for (int i = items.size() - 1; i >= 0; i--) {
-    			Object item = items.get(i);
-    			if (stat.isBad(item))
-    				stat.setComputedWeight(item, 0.0);
+        	for (StatisticsItem item : data) {
+    			if (item.isBad())
+    				item.setComputedWeight(0.0);
     			else
-    				stat.setComputedWeight(item, computedWeight);
+    				item.setComputedWeight(computedWeight);
     		}
     	} else {
 		    // стр.22,48
 		    // Сумата от тежестите = sum(NewP) = sum( abs(P)/sum(abs(P)) ) = 1
     		if (sumWeight != 1)
-	    		for (int i = items.size() - 1; i >= 0; i--) {
-	    			Object item = items.get(i);
-	    			if (stat.isBad(item))
-	    				stat.setComputedWeight(item, 0.0);
+    	    	for (StatisticsItem item : data) {
+	    			if (item.isBad())
+	    				item.setComputedWeight(0.0);
 	    			else
-	    				stat.setComputedWeight(item, stat.getWeight(item) / sumWeight);
+	    				item.setComputedWeight(item.getWeight() / sumWeight);
 	    		}
     	}
 
-		for (int i = items.size() - 1; i >= 0; i--) {
-			Object item = items.get(i);
-			if (!stat.isBad(item)) {
+    	for (StatisticsItem item : data) {
+			if (!item.isBad()) {
 		        // стр.26,48
 		        // Пресмятане на Начален момент от 1,2,3 и 4 ред. (1-ви ред = средно тежестно).
-				double value = stat.getValue(item);
-				double weight = stat.getComputedWeight(item);
+				double value = item.getValue();
+				double weight = item.getComputedWeight();
 		        double r = value * weight;
 		        double r1 = value * value;
 		        M[1] = M[1] + r;
@@ -94,13 +96,12 @@ public class Statistics extends StatisticsBase {
 			}				
 		}
     	
-		for (int i = items.size() - 1; i >= 0; i--) {
-			Object item = items.get(i);
-			if (!stat.isBad(item)) {
+    	for (StatisticsItem item : data) {
+			if (!item.isBad()) {
 		        // стр.26,48
 		        // Пресмятане на Централен момент от 2,3 и 4 ред. (2-ри ред = дисперсия)
-				double weight = stat.getComputedWeight(item);
-		        double r = stat.getValue(item) - M[1];
+				double weight = item.getComputedWeight();
+		        double r = item.getValue() - M[1];
 		        double r1 = r * r;
 		        D[2] = D[2] + r1 * weight;
 		        D[3] = D[3] + r1 * r * weight;
@@ -123,31 +124,15 @@ public class Statistics extends StatisticsBase {
 
 		// И сега да маркираме тези, които попадат ИЗВЪН доверителния интервал.
 		int badCount = 0;
-		for (int i = items.size() - 1; i >= 0; i--) {
-			Object item = items.get(i);
-			if (!stat.isBad(item)) {
-				double value = stat.getValue(item);
+    	for (StatisticsItem item : data) {
+			if (!item.isBad()) {
+				double value = item.getValue();
 				if ((value < J_Start) || (value > J_End)) {
 					badCount++;
-					stat.setBad(item, true);
+					item.setBad(true);
 				}
 			}
 		}
     	return badCount;
-    }
-    
-    public void killBad(ArrayList items, Statistician stat) {
-		for (int i = items.size() - 1; i >= 0; i--) 
-			if (stat.isBad(items.get(i)))
-				items.remove(i);
-    }
-
-	public int getItemsCount() {
-		return itemsCount;
-	}
-
-    public void resetCalculations() {
-    	super.resetCalculations();
-    	itemsCount = 0;
     }
 }

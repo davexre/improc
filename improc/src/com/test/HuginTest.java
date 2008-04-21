@@ -19,7 +19,7 @@ public class HuginTest {
 		public int compare(Object o1, Object o2) {
 			PointsPair spp1 = (PointsPair)o1;
 			PointsPair spp2 = (PointsPair)o2;
-			return Double.compare(spp1.discrepancy, spp2.discrepancy);
+			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
 	
@@ -57,7 +57,7 @@ public class HuginTest {
 		System.out.println(delta.toString());
 		for (int i = 0; i < items.size(); i++) {
 			PointsPair pp = (PointsPair) items.get(i);
-			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.discrepancy));
+			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.getValue()));
 		}
 	}
 

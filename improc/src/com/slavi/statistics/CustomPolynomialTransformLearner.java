@@ -50,9 +50,8 @@ public class CustomPolynomialTransformLearner extends BaseTransformLearner {
 		Matrix tmpT = new Matrix(tr.outputSize, 1);
 		
 		lsa.clear();
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			if (item.bad)
+		for (PointsPair item : items) {
+			if (item.isBad())
 				continue;
 
 			item.source.mSub(sourceOrigin, tmpS);
@@ -68,7 +67,7 @@ public class CustomPolynomialTransformLearner extends BaseTransformLearner {
 			}
 			for (int i = tr.outputSize - 1; i >= 0; i--) {
 				double L = tmpT.getItem(i, 0);						
-				lsa.addMeasurement(coefs, item.computedWeight, L, i);
+				lsa.addMeasurement(coefs, item.getComputedWeight(), L, i);
 			}
 		}
 		lsa.calculate();

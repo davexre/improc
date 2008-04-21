@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 public class PDLoweDetector_OLD implements Runnable {
 

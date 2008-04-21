@@ -26,12 +26,16 @@ public class PDLoweDetectorTest {
 		ExecutorService exec = Executors.newFixedThreadPool(6);
 		
 		Rectangle srcExt = src.getExtent();
-		int gridX = 1;
-		int gridY = 1;
+		int gridX = 3;
+		int gridY = 3;
 
 		int dx = 1 + src.getSizeX() / gridX; 
 		int dy = 1 + src.getSizeY() / gridY;
 
+		DImageMap processMask = new DImageMap(src.getSizeX(), src.getSizeY());
+		processMask.make0();
+		PDLoweDetector.mask = processMask;
+		
 		ArrayList<Runnable>tasks = new ArrayList<Runnable>();
 		for (int i = 0; i < gridX; i++) {
 			for (int j = 0; j < gridY; j++) {
@@ -46,7 +50,12 @@ public class PDLoweDetectorTest {
 				destR = destR.intersection(srcExt);
 				DImageWrapper srcW = new DImageWrapper(src, srcR);
 				DImageWrapper destW = new DImageWrapper(dest, destR);
-				Runnable task = new PDLoweDetector(srcW, destR, 2, 3, exec);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, 2, 3, exec);
+//				task.hook = new Hook() {
+//					public void keyPointCreated(KeyPoint scalePoint) {
+//						
+//					}
+//				};
 				tasks.add(task);
 			}
 		}
@@ -58,7 +67,9 @@ public class PDLoweDetectorTest {
 			exec.awaitTermination(1000, TimeUnit.SECONDS);
 		Marker.release();
 		
-		dest.toImageFile(fouName);
+		PDLoweDetector.mask.setPixel(0, 0, 0.0);
+		PDLoweDetector.mask.toImageFile(fouName);
+//		dest.toImageFile(fouName);
 	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {

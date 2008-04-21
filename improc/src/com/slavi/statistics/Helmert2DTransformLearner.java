@@ -45,9 +45,8 @@ public class Helmert2DTransformLearner extends BaseTransformLearner {
 		
 		// Calculate the affine transform parameters 
 		lsa.clear();
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			if (item.bad)
+		for (PointsPair item : items) {
+			if (item.isBad())
 				continue;
 
 			double a = (item.source.getItem(0, 0) - sourceOrigin.getItem(0, 0)) / aSourceScale;
@@ -59,14 +58,14 @@ public class Helmert2DTransformLearner extends BaseTransformLearner {
 			coefs.setItem(1, 0, -b);
 			coefs.setItem(2, 0, 1.0);
 			coefs.setItem(3, 0, 0.0);
-			lsa.addMeasurement(coefs, item.computedWeight, L, 0);
+			lsa.addMeasurement(coefs, item.getComputedWeight(), L, 0);
 			
 			L = (item.target.getItem(1, 0) - targetOrigin.getItem(1, 0)) / aTargetScale;
 			coefs.setItem(0, 0, b);
 			coefs.setItem(1, 0, a);
 			coefs.setItem(2, 0, 0.0);
 			coefs.setItem(3, 0, 1.0);
-			lsa.addMeasurement(coefs, item.computedWeight, L, 0);
+			lsa.addMeasurement(coefs, item.getComputedWeight(), L, 0);
 		}
 		lsa.calculate();
 

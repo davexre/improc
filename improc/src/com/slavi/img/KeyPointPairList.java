@@ -213,7 +213,7 @@ public class KeyPointPairList {
 	public void leaveGoodElements(double maxDiscrepancy) {
 		for (int i = 0; i < items.size(); i++) {
 			KeyPointPair sp = items.get(i);
-			sp.setBad(sp.discrepancy > maxDiscrepancy);
+			sp.setBad(sp.getValue() > maxDiscrepancy);
 		}
 	}
 	
@@ -249,7 +249,7 @@ public class KeyPointPairList {
 		public int compare(Object o1, Object o2) {
 			KeyPointPair spp1 = (KeyPointPair)o1;
 			KeyPointPair spp2 = (KeyPointPair)o2;
-			return Double.compare(spp1.discrepancy, spp2.discrepancy);
+			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
 	public void sortByDiscrepancy() {
@@ -293,7 +293,7 @@ public class KeyPointPairList {
 		maxTop = (maxTop <= 0 ? items.size() : Math.min(maxTop, items.size()));
 		for (int i = 0; i < maxTop; i++) {
 			KeyPointPair pp = items.get(i);
-			System.out.println((i+1) + " -> " + (pp.isBad() ? "BAD " : "ok  ") + pp.discrepancy);
+			System.out.println((i+1) + " -> " + (pp.isBad() ? "BAD " : "ok  ") + pp.getValue());
 		}
 	}
 }

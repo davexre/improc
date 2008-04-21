@@ -43,9 +43,8 @@ public class AffineTransformLearner extends BaseTransformLearner {
 
 		// Calculate the affine transform parameters 
 		lsa.clear();
-		for (int p = items.size() - 1; p >= 0; p--) {
-			PointsPair item = (PointsPair) items.get(p);
-			if (item.bad)
+		for (PointsPair item : items) {
+			if (item.isBad())
 				continue;
 
 			for (int i = transformer.inputSize - 1; i >= 0; i--) {
@@ -56,7 +55,7 @@ public class AffineTransformLearner extends BaseTransformLearner {
 			for (int i = transformer.outputSize - 1; i >= 0; i--) {
 				double L = (item.target.getItem(i, 0) - targetOrigin.getItem(i, 0)) / 
 					targetScale.getItem(i, 0);
-				lsa.addMeasurement(coefs, item.computedWeight, L, i);
+				lsa.addMeasurement(coefs, item.getComputedWeight(), L, i);
 			}
 		}
 		if (!lsa.calculate()) 
