@@ -54,19 +54,19 @@ public class NNLayerBase implements NNLayer {
 
 	public void feedForward(double[] inputPattern) {
 		if (inputPattern.length != input.length) {
-			throw new Error("FeedForward invalid input data size");
+			throw new IllegalArgumentException("FeedForward invalid input data size");
 		}
 	}
 
 	public void errorBackProp(double[] errorOutput) {
 		if (errorOutput.length != output.length) {
-			throw new Error("ErrorBackProp invalid ErrorOut size");
+			throw new IllegalArgumentException("ErrorBackProp invalid ErrorOut size");
 		}
 	}
 
 	public void backPropagate(double[] errorOutput) {
 		if (errorOutput.length != output.length) {
-			throw new Error("BackPropagate invalid ErrorOut size");
+			throw new IllegalArgumentException("BackPropagate invalid ErrorOut size");
 		}
 	}
 }

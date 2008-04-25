@@ -54,7 +54,7 @@ public class SVD_Working {
 		double c, f, h, s, x, y, z;
 		double anorm = 0., g = 0., scale = 0.;
 		if (m < n)
-			throw new Error("m < n");
+			throw new IllegalArgumentException("m < n");
 		// zliberror._assert(m>=n) ;
 		double[] rv1 = new double[n];
 
@@ -211,7 +211,7 @@ public class SVD_Working {
 					break;
 				} // l==k
 				if (its >= 50)
-					throw new Error("no svd convergence in 50 iterations");
+					throw new ArithmeticException("no svd convergence in 50 iterations");
 				// zliberror._assert(its<50, "no svd convergence in 50
 				// iterations");
 				x = w[l];

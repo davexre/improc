@@ -48,7 +48,7 @@ public class AdjAffine {
 			this.toTarget = toTarget;
 			this.fromTarget = toTarget.makeCopy();
 			if (!this.fromTarget.inverse())
-				throw new Error("Invalid transformation matrix specified"); 
+				throw new IllegalArgumentException("Invalid transformation matrix specified"); 
 		}
 		
 		public String toString() {
@@ -140,10 +140,10 @@ public class AdjAffine {
 		// Calculate all the "fromWorld" matrices
 		for (AdjImage i : il) { 
 			if (i.toWorld == null)
-				throw new Error("There are not connected images");
+				throw new IllegalArgumentException("There are not connected images");
 			i.fromWorld = i.toWorld.makeCopy();
 			if (!i.fromWorld.inverse())
-				throw new Error("Could not compute the fromWorld matrix");
+				throw new IllegalArgumentException("Could not compute the fromWorld matrix");
 			i.fromWorld2 = new Matrix(3, 3);
 			i.fromWorld.mMul(i.fromWorld, i.fromWorld2);
 		}

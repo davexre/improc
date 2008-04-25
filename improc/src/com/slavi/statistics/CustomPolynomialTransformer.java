@@ -76,7 +76,7 @@ public class CustomPolynomialTransformer extends BaseTransformer {
 	public void transform(Matrix source, Matrix dest) {
 		if ((source.getSizeX() != inputSize) ||
 				(source.getSizeY() != 1))
-				throw new Error("Transform received invalid point");
+				throw new IllegalArgumentException("Transform received invalid point");
 		dest.resize(outputSize, 1);
 		
 		source.mSub(sourceOrigin, point);
@@ -148,7 +148,7 @@ public class CustomPolynomialTransformer extends BaseTransformer {
 			(r.sourceOrigin.getSizeY() != 1) ||
 			(r.polynomCoefs.getSizeX() != r.outputSize) ||
 			(r.polynomCoefs.getSizeY() != r.numPoints) )
-			throw new Error("XML file contains malformed PolynomialTransformer data");
+			throw new IllegalArgumentException("XML file contains malformed PolynomialTransformer data");
 		return r;
 	}
 	

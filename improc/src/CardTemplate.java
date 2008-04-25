@@ -164,7 +164,7 @@ public class CardTemplate {
 		if (params == null)
 			return;
 		if (params.length % 2 != 0) {
-			throw new Error("Incorrect number of parameters");
+			throw new IllegalArgumentException("Incorrect number of parameters");
 		}
 
 		float height = 0;

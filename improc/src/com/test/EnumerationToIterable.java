@@ -25,7 +25,7 @@ public class EnumerationToIterable<E> implements Iterable<E> {
 		}
 	
 		public void remove() {
-			throw new Error("Not applicable");
+			throw new IllegalArgumentException("Not applicable");
 		}
 	}	
 

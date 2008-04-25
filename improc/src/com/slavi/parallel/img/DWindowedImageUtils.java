@@ -27,10 +27,10 @@ public class DWindowedImageUtils {
 		return String.format(
 				"Min: %.5f\n" +
 				"Max: %.5f\n" +
-				"Sum: %.5f\n", new Object[] { 
-						new Double(min(image)), 
-						new Double(max(image)), 
-						new Double(sum) } );
+				"Sum: %.5f\n", 
+					min(image), 
+					max(image), 
+					sum);
 	}
 
 	/**

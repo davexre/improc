@@ -392,7 +392,7 @@ public class DLoweDetector {
 
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
-			throw (new Error("CapAndNormalizeFV cannot normalize with norm = 0.0"));
+			throw (new IllegalArgumentException("CapAndNormalizeFV cannot normalize with norm = 0.0"));
 		
 		for (int i = 0 ; i < ScalePoint.descriptorSize; i++)
 			for (int j = 0 ; j < ScalePoint.descriptorSize; j++)

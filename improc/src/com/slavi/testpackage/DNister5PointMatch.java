@@ -61,7 +61,7 @@ public class DNister5PointMatch {
 //			(V.getSizeX() != V.getSizeY()) ||
 //			(V.getSizeX() != s.getSizeX()) ||
 //			(U.getSizeY() != s.getSizeY()) )
-//			throw new Error("Invalid arguments");
+//			throw new IllegalArgumentException("Invalid arguments");
 		int minXY = Math.min(U.getSizeX(), V.getSizeX());
 		// Make all singular values positive
 		for (int j = 0; j < minXY; j++) {
@@ -191,7 +191,7 @@ public class DNister5PointMatch {
 
 	public void computeIt() throws Exception {
 		if (pairs.size() < 5) 
-			throw new Error("At least 5 matching points required");
+			throw new ArithmeticException("At least 5 matching points required");
 		
 		// step 1: get 4 matrices X,Y,Z,W spanning the subspace of solutions
 
@@ -507,7 +507,7 @@ public class DNister5PointMatch {
 			if (z.getItem(i, 1) == 0.0)
 				realRoots++;
 		if (realRoots == 0) {
-			throw new Error("No real roots!");
+			throw new ArithmeticException("No real roots!");
 		}
 		
 		Matrix z7 = new Matrix(realRoots, 8);

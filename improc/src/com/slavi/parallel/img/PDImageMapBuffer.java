@@ -30,21 +30,21 @@ public class PDImageMapBuffer implements DWindowedImage {
 		if ((extent.width <= sizeX) && (extent.height <= sizeY)) 
 			this.extent = extent;
 		else
-			throw new Error("Invalid extent");
+			throw new IllegalArgumentException("Invalid extent");
 	}
 	
 	public double getPixel(int atX, int atY) {
 		if (extent.contains(atX, atY))
 			return pixels[atX - extent.x][atY - extent.y];
 		else
-			throw new Error("Invalid coordinates");
+			throw new IllegalArgumentException("Invalid coordinates");
 	}
 
 	public void setPixel(int atX, int atY, double value) {
 		if (extent.contains(atX, atY))
 			pixels[atX - extent.x][atY - extent.y] = value;
 		else
-			throw new Error("Invalid coordinates");
+			throw new IllegalArgumentException("Invalid coordinates");
 	}
 
 	public int maxX() {

@@ -27,7 +27,7 @@ public class Laplas {
 	 */
 	public static final double get_Laplas(double t) {
 		if ((t < 0.0) || (t > 4.0))
-			throw new Error("getLaplas: Got a bad parameter");
+			throw new IllegalArgumentException("getLaplas: Got a bad parameter");
 		int tt = (int) (t * 10.0);
 		double r = laplasF[tt];
 		if (tt + 1 < laplasF.length)
@@ -37,7 +37,7 @@ public class Laplas {
 
 	public static final double get_T_from_Laplas(double f_t) {
 		if ((f_t < 0.0) || (f_t >= 1.0))
-			throw new Error("get_T_from_Laplas: Got a bad parameter");
+			throw new IllegalArgumentException("get_T_from_Laplas: Got a bad parameter");
 		int i = laplasF.length - 1;
 		while ((i >= 0.0) && (f_t < laplasF[i]))
 			i--;

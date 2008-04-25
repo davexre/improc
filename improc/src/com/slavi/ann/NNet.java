@@ -41,7 +41,7 @@ public class NNet extends NNLayerBase {
       } catch (Exception e) {
       }
       if (c == null)
-        throw new Error("NNet: Not supported class passed as parameter");
+        throw new IllegalArgumentException("NNet: Not supported class passed as parameter");
     }
   }
 

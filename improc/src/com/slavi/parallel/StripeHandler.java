@@ -15,7 +15,7 @@ public class StripeHandler {
 		if (this.sizeY == sizeY)
 			return;
 		if (sizeY <= 0)
-			throw new Error("Invalid size parameter");
+			throw new IllegalArgumentException("Invalid size parameter");
 		this.sizeY = sizeY;
 		this.rows = new Stripe[sizeY];
 	}

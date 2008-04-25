@@ -56,7 +56,7 @@ public class Statistics extends StatisticsBase {
     			double weight = item.getWeight();
     			// Тежестите трябва ВИНАГИ да са положителни
     			if (weight < 0.0)
-    				throw new Error("Negative weight received by TStatistics."); 
+    				throw new IllegalArgumentException("Negative weight received by TStatistics."); 
     			sumWeight += weight;
     		}
     	}

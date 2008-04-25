@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
+import com.slavi.utils.Marker;
 
 /**
  * @author Slavian Petrov
@@ -404,7 +405,7 @@ public class DLoweDetector {
 
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
-			throw (new Error("CapAndNormalizeFV cannot normalize with norm = 0.0"));
+			throw (new IllegalArgumentException("CapAndNormalizeFV cannot normalize with norm = 0.0"));
 		
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
@@ -739,11 +740,15 @@ public class DLoweDetector {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		File image = new File("D:\\Users\\s\\kayak\\me in the kayak.jpg");
+		String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+		
+		File image = new File(finName);
 		System.out.println("Processing image " + image);
 		DImageMap img = new DImageMap(image);
 		DLoweDetector d = new DLoweDetector();
+		Marker.mark("started");
 		d.DetectFeatures(img, 3, 32);
+		Marker.release();
 		System.out.println("DONE.");
 	}
 }

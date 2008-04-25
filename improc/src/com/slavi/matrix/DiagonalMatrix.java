@@ -101,7 +101,7 @@ public class DiagonalMatrix {
 	 */
 	public void resize(int aSizeM) {
 		if (aSizeM < 0) {
-			throw new Error("Invalid matrix size");
+			throw new IllegalArgumentException("Invalid matrix size");
 		}
 		if (aSizeM == sizeM) {
 			return;
@@ -197,7 +197,7 @@ public class DiagonalMatrix {
 	 */
 	public void mMul(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		double D;
@@ -219,7 +219,7 @@ public class DiagonalMatrix {
 	 */
 	public void mMul(Matrix second, Matrix dest) {
 		if (sizeM != second.getSizeY()) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(second.getSizeX(), sizeM);
 		double D;
@@ -242,7 +242,7 @@ public class DiagonalMatrix {
 	 */
 	public void mSum(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -259,7 +259,7 @@ public class DiagonalMatrix {
 	 */
 	public void mSub(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -273,7 +273,7 @@ public class DiagonalMatrix {
 	 */
 	public double dotProduct(DiagonalMatrix second) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		double sum = 0;
 		for (int i = sizeM - 1; i >= 0; i--)
@@ -289,7 +289,7 @@ public class DiagonalMatrix {
 	 */
 	public double dotProduct(Matrix second) {
 		if ((sizeM != second.getSizeX()) || (sizeM != second.getSizeY())) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		double sum = 0;
 		for (int i = sizeM - 1; i >= 0; i--)
@@ -308,7 +308,7 @@ public class DiagonalMatrix {
 	 */
 	public void termMul(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -325,7 +325,7 @@ public class DiagonalMatrix {
 	 */
 	public void termDiv(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -389,7 +389,7 @@ public class DiagonalMatrix {
 	 */
 	public void mMax(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -405,7 +405,7 @@ public class DiagonalMatrix {
 	 */
 	public void mMin(DiagonalMatrix second, DiagonalMatrix dest) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Invalid argument");
+			throw new IllegalArgumentException("Invalid argument");
 		}
 		dest.resize(sizeM);
 		for (int i = m.length - 1; i >= 0; i--)
@@ -649,7 +649,7 @@ public class DiagonalMatrix {
 	 */
 	public MatrixCompareResult compareTo(DiagonalMatrix second) {
 		if (sizeM != second.sizeM) {
-			throw new Error("Comparing matrices of different size");
+			throw new IllegalArgumentException("Comparing matrices of different size");
 		}
 		MatrixCompareResult res = new MatrixCompareResult();
 		res.A = this;

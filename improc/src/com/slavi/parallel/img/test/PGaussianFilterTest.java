@@ -1,4 +1,4 @@
-package com.slavi.parallel.img;
+package com.slavi.parallel.img.test;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -10,6 +10,9 @@ import java.util.concurrent.TimeUnit;
 
 import com.slavi.img.DGaussianFilter;
 import com.slavi.img.DImageMap;
+import com.slavi.parallel.img.DImageWrapper;
+import com.slavi.parallel.img.PFastGaussianFilter;
+import com.slavi.parallel.img.PGaussianFilter;
 import com.slavi.utils.Marker;
 
 public class PGaussianFilterTest {

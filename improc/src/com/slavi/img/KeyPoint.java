@@ -87,7 +87,7 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 	public static KeyPoint fromString(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		if (st.countTokens() != 9 + featureVectorLinearSize)
-			throw new Error("KeyPoint.fromString: Malformed source string.");
+			throw new IllegalArgumentException("KeyPoint.fromString: Malformed source string.");
 		KeyPoint r = new KeyPoint();
 		r.id = Integer.parseInt(st.nextToken());
 		r.imgX = Integer.parseInt(st.nextToken());
@@ -112,7 +112,7 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 	}
 
 	public boolean equals(Object o) {
-		int multiply = 10;
+		int multiply = 10000;
 		if (!(o instanceof KeyPoint))
 			return false;
 		KeyPoint sp = (KeyPoint)o;

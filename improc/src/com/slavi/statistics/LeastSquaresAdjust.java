@@ -126,7 +126,7 @@ public class LeastSquaresAdjust {
 
 	public void addMeasurement(Matrix m, double weight, double L, int coordinate) {
 		if ((coordinate < 0) || (coordinate >= numCoordinates) || (m.getSizeX() != numCoefsPerCoordinate) || (m.getSizeY() != 1))
-			throw new Error("Invalid measurement added to Least Square Adjustment.");
+			throw new IllegalArgumentException("Invalid measurement added to Least Square Adjustment.");
 		measurementCount++;
 		double ll = L * L;
 		sumPLL += weight * ll;

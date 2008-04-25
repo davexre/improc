@@ -798,7 +798,7 @@ public class Matrix {
 	 */
 	public MatrixCompareResult compareTo(Matrix second) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Comparing matrices of different size");
+			throw new IllegalArgumentException("Comparing matrices of different size");
 		}
 		MatrixCompareResult res = new MatrixCompareResult();
 		res.A = this;
@@ -893,7 +893,7 @@ public class Matrix {
 		double c, f, h, s, x, y, z;
 		double anorm = 0., g = 0., scale = 0.;
 //		if (sizeX < sizeY)
-//			throw new Error("m < n");
+//			throw new IllegalArgumentException("m < n");
 		// zliberror._assert(m>=n) ;
 		double[] rv1 = new double[sizeY];
 		w.resize(Math.min(getSizeX(), getSizeY()), 1);
@@ -968,7 +968,7 @@ public class Matrix {
 		double c, f, h, s, x, y, z;
 		double anorm = 0., g = 0., scale = 0.;
 		if (sizeX < sizeY)
-			throw new Error("m < n");
+			throw new IllegalArgumentException("m < n");
 		// zliberror._assert(m>=n) ;
 		double[] rv1 = new double[sizeY];
 		w.resize(Math.min(getSizeX(), getSizeY()), 1);
@@ -1129,7 +1129,7 @@ public class Matrix {
 					break;
 				} // l==k
 				if (its >= 50)
-					throw new Error("no svd convergence in 50 iterations");
+					throw new ArithmeticException("no svd convergence in 50 iterations");
 				// zliberror._assert(its<50, "no svd convergence in 50
 				// iterations");
 				x = w.m[l][0];
@@ -1274,7 +1274,7 @@ public class Matrix {
 
 	public void lqDecomositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeY()) || (tau.getSizeY() != 1))
-			throw new Error("Invalid parameter");
+			throw new IllegalArgumentException("Invalid parameter");
 		
 		q.resize(getSizeX(), getSizeX());
 		for (int i = getSizeX() - 1; i >= 0; i--)
@@ -1358,7 +1358,7 @@ public class Matrix {
 	
 	public void qrDecomositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeX()) || (tau.getSizeY() < 1))
-			throw new Error("Invalid parameter");
+			throw new IllegalArgumentException("Invalid parameter");
 		q.resize(getSizeY(), getSizeY());
 		for (int i = getSizeY() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
@@ -1434,7 +1434,7 @@ public class Matrix {
 						}
 					}
 					if (!found)
-						throw new Error("LU decomposition failed. Matrix is singular");
+						throw new ArithmeticException("LU decomposition failed. Matrix is singular");
 				}
 				// ????
 			}

@@ -74,7 +74,7 @@ public class DImageMap {
 		if ((newSizeX == sizeX) && (newSizeY == sizeY))
 			return;
 		if ((newSizeX <= 0) || (newSizeY <= 0))
-			throw new Error("Invalid size parameter");
+			throw new IllegalArgumentException("Invalid size parameter");
 		sizeX = newSizeX;
 		sizeY = newSizeY;
 		pixel = new double[sizeX][sizeY];

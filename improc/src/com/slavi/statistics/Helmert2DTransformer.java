@@ -33,7 +33,7 @@ public class Helmert2DTransformer extends BaseTransformer {
 	public void transform(Matrix source, Matrix dest) {
 		if ((source.getSizeX() != inputSize) ||
 			(source.getSizeY() != 1))
-			throw new Error("Transform received invalid point");
+			throw new IllegalArgumentException("Transform received invalid point");
 		dest.resize(outputSize, 1);
 		dest.setItem(0, 0, c + a * source.getItem(0, 0) - b * source.getItem(1, 0));
 		dest.setItem(1, 0, d + b * source.getItem(0, 0) + a * source.getItem(1, 0));

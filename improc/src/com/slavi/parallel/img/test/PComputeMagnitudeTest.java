@@ -1,4 +1,4 @@
-package com.slavi.parallel.img;
+package com.slavi.parallel.img.test;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -9,6 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.img.DImageMap;
+import com.slavi.parallel.img.DImageWrapper;
+import com.slavi.parallel.img.PComputeDirection;
+import com.slavi.parallel.img.PComputeMagnitude;
 import com.slavi.utils.Marker;
 
 public class PComputeMagnitudeTest {

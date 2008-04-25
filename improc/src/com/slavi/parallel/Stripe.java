@@ -20,7 +20,7 @@ public class Stripe {
 		if (this.sizeX == sizeX)
 			return;
 		if (sizeX <= 0)
-			throw new Error("Invalid size parameter");
+			throw new IllegalArgumentException("Invalid size parameter");
 		this.sizeX = sizeX;
 		this.pixelRow = new double[sizeX];
 		atY = -1;

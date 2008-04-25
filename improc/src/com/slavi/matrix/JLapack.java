@@ -224,7 +224,7 @@ public class JLapack {
 	 */
 	public static void qrDecomositionGetQ(Matrix Src, Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < Src.getSizeX()) || (tau.getSizeY() < 1))
-			throw new Error("Invalid parameter");
+			throw new ArithmeticException("Invalid parameter");
 		q.resize(Src.getSizeY(), Src.getSizeY());
 		for (int i = Src.getSizeY() - 1; i >= 0; i--)
 			for (int j = Src.getSizeY() - 1; j >= 0; j--)
@@ -304,7 +304,7 @@ public class JLapack {
 	 */
 	public static void lqDecomositionGetQ(Matrix Src, Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < Src.getSizeY()) || (tau.getSizeY() != 1))
-			throw new Error("Invalid parameter");
+			throw new IllegalArgumentException("Invalid parameter");
 		
 		q.resize(Src.getSizeX(), Src.getSizeX());
 		for (int i = Src.getSizeX() - 1; i >= 0; i--)
@@ -1066,7 +1066,7 @@ public class JLapack {
 			svdSortResult(U, s, V);
 		else 
 			// DBDSQR:720 Maximum number of iterations exceeded, failure to converge
-			throw new Error("Maximum number of iterations exceeded, failure to converge");
+			throw new ArithmeticException("Maximum number of iterations exceeded, failure to converge");
 	}
 	
 	public static void svdSortResult(Matrix U, Matrix s, Matrix V) {
@@ -1075,7 +1075,7 @@ public class JLapack {
 //			(V.getSizeX() != V.getSizeY()) ||
 //			(V.getSizeX() != s.getSizeX()) ||
 //			(U.getSizeY() != s.getSizeY()) )
-//			throw new Error("Invalid arguments");
+//			throw new IllegalArgumentException("Invalid arguments");
 		int minXY = Math.min(U.getSizeX(), V.getSizeX());
 		// Make all singular values positive
 		for (int j = 0; j < minXY; j++) {
@@ -1401,7 +1401,7 @@ public class JLapack {
 		result.IHI = 0;
 		
 		if (A.getSizeX() != A.getSizeY())
-			throw new Error("Invalid matrix size");
+			throw new IllegalArgumentException("Invalid matrix size");
 		if (scale.getSizeX() < A.getSizeX())
 			scale.resize(A.getSizeX(), 1);
 		
@@ -1625,7 +1625,7 @@ public class JLapack {
 	 */
 	protected void DGEEV(Matrix A, Matrix WRI) {
 		if (A.getSizeX() != A.getSizeY())
-			throw new Error("Matrix must be square");
+			throw new IllegalArgumentException("Matrix must be square");
 		
 		WRI.resize(A.getSizeX(), 2);  
 		WRI.make0();
@@ -2177,7 +2177,7 @@ public class JLapack {
 	
 	public void roots(Matrix p, Matrix result) {
 		if (p.getSizeY() != 1)
-			throw new Error("Invalid matrix size");
+			throw new IllegalArgumentException("Invalid matrix size");
 		
 		int n = p.getSizeX();
 		int start = 0;
@@ -2189,7 +2189,7 @@ public class JLapack {
 			start++;
 		}
 		if ((start > n) || (div == 0.0))
-			throw new Error("Invalid polynomial");
+			throw new IllegalArgumentException("Invalid polynomial");
 		
 		int size = n - start - 1;
 		Matrix A = new Matrix(size, size);

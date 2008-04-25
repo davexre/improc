@@ -13,7 +13,7 @@ public class DImageWrapper implements DWindowedImage {
 	public DImageWrapper(DImageMap image, Rectangle extent) {
 		if ((image.getSizeX() < extent.x + extent.width) ||
 			(image.getSizeY() < extent.y + extent.height))
-			throw new Error("Invalid size");
+			throw new IllegalArgumentException("Invalid size");
 		this.image = image;
 		this.imageExtent = image.getExtent();
 		this.extent = extent;
@@ -27,14 +27,14 @@ public class DImageWrapper implements DWindowedImage {
 		if (extent.contains(atX, atY))
 			return image.getPixel(atX, atY);
 		else
-			throw new Error("Invalid coordinates");
+			throw new IllegalArgumentException("Invalid coordinates");
 	}
 
 	public void setPixel(int atX, int atY, double value) {
 		if (extent.contains(atX, atY))
 			image.setPixel(atX, atY, value);
 		else
-			throw new Error("Invalid coordinates");
+			throw new IllegalArgumentException("Invalid coordinates");
 	}
 
 	public int maxX() {

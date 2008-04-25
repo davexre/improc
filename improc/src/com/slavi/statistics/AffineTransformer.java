@@ -36,7 +36,7 @@ public class AffineTransformer extends BaseTransformer {
 	public void transform(Matrix source, Matrix dest) {
 		if ((source.getSizeX() != inputSize) ||
 			(source.getSizeY() != 1))
-			throw new Error("Transform received invalid point");
+			throw new IllegalArgumentException("Transform received invalid point");
 		dest.resize(outputSize, 1);
 		
 		for (int j = outputSize - 1; j >= 0; j--) {
@@ -66,7 +66,7 @@ public class AffineTransformer extends BaseTransformer {
 			(d.length != 6) || 
 			(inputSize != 2) ||
 			(outputSize != 2))
-			throw new Error("AffineTransformer.getMatrix requires a double[6] array and AffineTransformer must be 2D");
+			throw new IllegalArgumentException("AffineTransformer.getMatrix requires a double[6] array and AffineTransformer must be 2D");
 		d[0] = affineCoefs.getItem(0, 0);
 		d[1] = affineCoefs.getItem(1, 0);
 		d[2] = affineCoefs.getItem(0, 1);
@@ -95,7 +95,7 @@ public class AffineTransformer extends BaseTransformer {
 			(d.length != 6) || 
 			(inputSize != 2) ||
 			(outputSize != 2))
-			throw new Error("AffineTransformer.setMatrix requires a double[6] array and AffineTransformer must be 2D");
+			throw new IllegalArgumentException("AffineTransformer.setMatrix requires a double[6] array and AffineTransformer must be 2D");
 		affineCoefs.setItem(0, 0, d[0]);
 		affineCoefs.setItem(1, 0, d[1]);
 		affineCoefs.setItem(0, 1, d[2]);
@@ -119,7 +119,7 @@ public class AffineTransformer extends BaseTransformer {
 	
 	public void setMatrix(Matrix src) {
 		if ((src.getSizeX() != inputSize) || (src.getSizeY() != outputSize)) 
-			throw new Error("Invalid matrix size");
+			throw new IllegalArgumentException("Invalid matrix size");
 		for (int i = inputSize - 1; i >= 0; i--) 
 			for (int j = outputSize - 1; j >= 0; j--)
 				affineCoefs.setItem(i, j, src.getItem(i, j));
@@ -129,11 +129,11 @@ public class AffineTransformer extends BaseTransformer {
 	
 	public AffineTransformer getReverseTransformer() {
 		if (inputSize != outputSize) 
-			throw new Error("Affine transformation irreversible");
+			throw new IllegalArgumentException("Affine transformation irreversible");
 		AffineTransformer result = new AffineTransformer(outputSize, inputSize);
 		Matrix m = getMatrix();
 		if (!m.inverse()) 
-			throw new Error("Reverse affine transformation calculation failed");
+			throw new IllegalArgumentException("Reverse affine transformation calculation failed");
 		result.setMatrix(m);
 		return result;
 	}
@@ -204,7 +204,7 @@ public class AffineTransformer extends BaseTransformer {
 			(r.affineCoefs.getSizeY() != r.outputSize) ||
 			(r.origin.getSizeX() != r.outputSize) ||
 			(r.origin.getSizeY() != 1))
-			throw new Error("Invalid data for affine transformer");
+			throw new IllegalArgumentException("Invalid data for affine transformer");
 		return r;
 	}
 }

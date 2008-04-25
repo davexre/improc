@@ -64,7 +64,7 @@ public abstract class BaseTransformLearner {
 			if (item.isBad())
 				continue;
 			if (item.getWeight() < 0)
-				throw new Error("Negative weight received.");
+				throw new IllegalArgumentException("Negative weight received.");
 			goodCount++;
 			sumWeight += item.getWeight();
 		}

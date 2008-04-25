@@ -3,6 +3,7 @@ package com.slavi.parallel.img;
 import java.awt.Rectangle;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.slavi.img.DImageMap;
 import com.slavi.img.KeyPoint;
@@ -46,7 +47,6 @@ public class PDLoweDetector implements Runnable {
 	}
 
 	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
-//		return sigma * Math.pow(2.7, 1.0 / scaleSpaceLevels); // -> This is the original formula!!!
 		return sigma * Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula!!!
 	}
 	
@@ -62,7 +62,6 @@ public class PDLoweDetector implements Runnable {
 			tmp = PFastGaussianFilter.getNeededSourceExtent(tmp, sigmas[i]);
 		}
 		return tmp;
-//		return new Rectangle(tmp.x - 1, tmp.y - 1, tmp.width + 2, tmp.height + 2);
 	}
 
 	public static Rectangle getEffectiveTargetExtent(Rectangle source, int scaleSpaceLevels) {
@@ -73,7 +72,6 @@ public class PDLoweDetector implements Runnable {
 			tmp = PFastGaussianFilter.getEffectiveTargetExtent(tmp, sigma);
 		}
 		return tmp;
-//		return new Rectangle(tmp.x + 1, tmp.y + 1, tmp.width - 2, tmp.height - 2);
 	}
 	
 	void computeDOG(DWindowedImage blured1, DWindowedImage blured2, DWindowedImage destDOG) {
@@ -418,7 +416,7 @@ public class PDLoweDetector implements Runnable {
 
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
-			throw (new Error("CapAndNormalizeFV cannot normalize with norm = 0.0"));
+			throw (new IllegalArgumentException("CapAndNormalizeFV cannot normalize with norm = 0.0"));
 		
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
@@ -653,6 +651,21 @@ public class PDLoweDetector implements Runnable {
 	int isLocalExtremaCount;
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
+	
+	public void getRequiredMemory(Rectangle srcExtent) {
+		/*
+		 * Intermediate image buffers needed as in method #doIt()
+		 * blurred0, blurred1, blurred2, 
+		 * magnitude, direction,
+		 * DOGs[0], DOGs[1], DOGs[2]
+		 */
+		final int numberOfImageBuffers = 8;
+		/*
+		 * Pixel is defined as double. Size of double = 8 bytes.
+		 */
+		final int sizeOfSingleImageMapPixel = 8;
+		
+	}
 
 	void doit() throws InterruptedException, ExecutionException {
 		double sigma = initialSigma;
@@ -716,9 +729,14 @@ public class PDLoweDetector implements Runnable {
 		}
 	}
 	
+	public static AtomicLong timeElapsed = new AtomicLong(0);
+	
 	public void run()  {
 		try {
+			long start = System.currentTimeMillis();
 			doit();
+			long end = System.currentTimeMillis();
+			timeElapsed.getAndAdd(end - start);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
