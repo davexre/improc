@@ -72,7 +72,7 @@ public class Test {
 		double sumD = 0;
 		for (int i = 0; i < img.sizeX; i++)
 			for (int j = 0; j < img.sizeY; j++) {
-				double d = Math.abs(blur1.pixel[i][j] - blur2.pixel[i][j]);
+				double d = Math.abs(blur1.getPixel(i, j) - blur2.getPixel(i, j));
 				sumD += d;
 				maxD = Math.max(maxD, d);  
 			}

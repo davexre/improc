@@ -1,5 +1,6 @@
 package com.slavi.img;
 
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +10,23 @@ import javax.imageio.ImageIO;
 
 import com.slavi.matrix.Matrix;
 import com.slavi.parallel.img.BufferedBMPImage;
+import com.slavi.statistics.AffineTransformer;
 import com.slavi.statistics.LeastSquaresAdjust;
 
 public class AdjAffine {
+	
+	/**
+	 * Middle point of the {@link #worldExtent}.
+	 * This value is computed by {@link #calcImageExtents()}
+	 */
+	double midX, midY;
+	
+	/**
+	 * The union of the extents of the images in World coordinate system.
+	 * This value is computed by {@link #calcImageExtents()}
+	 */
+	Rectangle2D.Double worldExtent;
+
 	public static class AdjImage {
 		public String imageFile;
 		
@@ -24,16 +39,25 @@ public class AdjAffine {
 		 */
 		public Matrix fromWorld2 = null;
 		
-		public double width, height;
+		/**
+		 * Extent of the image in image coordinate system. The origin of the extent is always the 0,0 point
+		 */
+		public Rectangle2D.Double extent;
 		
-		public double x1 = 0.0, y1 = 0.0;	// The point (0, 0) in image space
+		/**
+		 * The extent of the image in World coordinate system. 
+		 * This value is computed by {@link #AdjAffine.calcImageExtents()}
+		 */
+		public Rectangle2D.Double worldExtent;
 		
-		public double x2 = 0.0, y2 = 0.0;	// The point (width, height) in image space
-		
-		public double midWX, midWY;		// The middle point of the immage in world coordinates
+		/**
+		 * Middle point of the extent {@link #worldExtent}
+		 * This value is computed by {@link #AdjAffine.calcImageExtents()}
+		 */
+		public double midWX, midWY;		
 		
 		public String toString() {
-			return "IMG=" + imageFile + "\tW=" + width + "\tH=" + height + "\t" + toWorld.toMatlabString("toWorld");
+			return "IMG=" + imageFile + "\tW=" + extent.width + "\tH=" + extent.height + "\t" + toWorld.toMatlabString("toWorld");
 		}
 	}
 	
@@ -73,8 +97,10 @@ public class AdjAffine {
 				return i;
 		AdjImage r = new AdjImage();
 		r.imageFile = imageFile;
-		r.width = width;
-		r.height = height;
+		r.extent = new Rectangle2D.Double(0, 0, width, height);
+		r.worldExtent = new Rectangle2D.Double(0, 0, width, height);
+		r.midWX = width / 2;
+		r.midWY = height / 2;
 		il.add(r);
 		return r;
 	}
@@ -129,10 +155,16 @@ public class AdjAffine {
 				if ((p.source.toWorld != null) && (p.target.toWorld == null)) {
 					p.target.toWorld = new Matrix(3, 3);
 					p.fromTarget.mMul(p.source.toWorld, p.target.toWorld);
+					p.target.toWorld.setItem(0, 2, 0.0);
+					p.target.toWorld.setItem(1, 2, 0.0);
+					p.target.toWorld.setItem(2, 2, 1.0);
 					loopMore = true;
 				} else if ((p.source.toWorld == null) && (p.target.toWorld != null)) {
 					p.source.toWorld = new Matrix(3, 3);
 					p.toTarget.mMul(p.target.toWorld, p.source.toWorld);
+					p.source.toWorld.setItem(0, 2, 0.0);
+					p.source.toWorld.setItem(1, 2, 0.0);
+					p.source.toWorld.setItem(2, 2, 1.0);
 					loopMore = true;
 				} 
 			}
@@ -146,6 +178,9 @@ public class AdjAffine {
 			i.fromWorld = i.toWorld.makeCopy();
 			if (!i.fromWorld.inverse())
 				throw new IllegalArgumentException("Could not compute the fromWorld matrix");
+			i.fromWorld.setItem(0, 2, 0.0);
+			i.fromWorld.setItem(1, 2, 0.0);
+			i.fromWorld.setItem(2, 2, 1.0);
 			i.fromWorld2 = new Matrix(3, 3);
 			i.fromWorld.mMul(i.fromWorld, i.fromWorld2);
 		}
@@ -155,7 +190,6 @@ public class AdjAffine {
 		// Least square adjust the rotation of the images 
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(il.size() * 4);
 		Matrix coefs = new Matrix(il.size() * 4, 1);
-//		Matrix m = new Matrix(3, 3);
 		Matrix L = new Matrix(3, 3);
 		Matrix Q = new Matrix(3, 3);
 		Matrix a = new Matrix(3, 3);
@@ -202,116 +236,148 @@ public class AdjAffine {
 			im.toWorld.setItem(1, 0, u.getItem(0, iA + 1));
 			im.toWorld.setItem(0, 1, u.getItem(0, iA + 2));
 			im.toWorld.setItem(1, 1, u.getItem(0, iA + 3));
-			im.toWorld.setItem(0, 2, 0.0);
-			im.toWorld.setItem(1, 2, 0.0);
-			im.toWorld.setItem(2, 2, 1.0);
+//			im.toWorld.setItem(0, 2, 0.0);
+//			im.toWorld.setItem(1, 2, 0.0);
+//			im.toWorld.setItem(2, 2, 1.0);
+//			
+//			im.toWorld.copyTo(im.fromWorld);
+//			if (!im.fromWorld.inverse())
+//				throw new Error("After adjustment can not calculate the reverse affine transofrmation");
+		}
+		dump4matlab();
+
+		// Least square adjust the translation of the images 
+		lsa = new LeastSquaresAdjust(il.size() * 2, 2);
+		coefs = new Matrix(il.size() * 2, 1);
+		a = new Matrix(1, 3);
+		a.setItem(2, 0, 0.0);
+		b = new Matrix(1, 3);
+		L = new Matrix(1, 3);
+		for (AdjImagePair p : ipl) {
+			int iA = il.indexOf(p.source);
+			int iB = il.indexOf(p.target);
+			// Discrepancy
+			a.setItem(0, 0, p.toTarget.getItem(2, 0));
+			a.setItem(0, 1, p.toTarget.getItem(2, 1));
+			p.source.toWorld.mMul(a, b);
 			
+			coefs.make0();
+			coefs.setItem(iA, 0, 1.0);
+			coefs.setItem(iB, 0, -1.0);
+			lsa.addMeasurement(coefs, 1.0, p.source.toWorld.getItem(2, 0) - p.target.toWorld.getItem(2, 0) + b.getItem(0, 0), 0);
+			lsa.addMeasurement(coefs, 1.0, p.source.toWorld.getItem(2, 1) - p.target.toWorld.getItem(2, 1) + b.getItem(1, 0), 1);
+		}
+		lsa.calculate();
+		
+		// Recreate the toWorld and fromWorld matrices
+		u = lsa.getUnknown();
+		for (int iA = il.size() - 1; iA >= 0; iA--) {
+			AdjImage im = il.get(iA);
+			im.toWorld.setItem(0, 0, u.getItem(0, iA));
+			im.toWorld.setItem(1, 0, u.getItem(1, iA));
 			im.toWorld.copyTo(im.fromWorld);
 			if (!im.fromWorld.inverse())
 				throw new Error("After adjustment can not calculate the reverse affine transofrmation");
+			im.fromWorld.setItem(0, 2, 0.0);
+			im.fromWorld.setItem(1, 2, 0.0);
+			im.fromWorld.setItem(2, 2, 1.0);
 		}
-		dump4matlab();		
 	}
 	
 	public void calcImageExtents() {
-		Matrix src = new Matrix(1, 3);
-		Matrix dest = new Matrix(1, 3);
-		src.setItem(0, 2, 1.0);
+		AffineTransformer tr = new AffineTransformer(2, 2);
+		worldExtent = null;
 		for (AdjImage i : il) {
-			// calc the origin (0, 0) point
-			i.x1 = i.toWorld.getItem(2, 0);
-			i.y1 = i.toWorld.getItem(2, 1);
-			// calc the (width, height) point
-			src.setItem(0, 0, i.width);
-			src.setItem(0, 1, i.height);
-			i.toWorld.mMul(src, dest);
-			i.x2 = dest.getItem(0, 0);
-			i.y2 = dest.getItem(0, 1);
+			tr.setMatrix(i.toWorld);
+			tr.transformExtent(i.extent, i.worldExtent);
 			// Calculate the mid point of the extent of all "transformed image" extents
-			i.midWX = (i.x1 + i.x2) / 2.0;
-			i.midWY = (i.y1 + i.y2) / 2.0;
+			i.midWX = i.worldExtent.getCenterX();
+			i.midWY = i.worldExtent.getCenterY();
+			// Calculate the worldExtent of all images
+			worldExtent = (worldExtent == null ? i.worldExtent : 
+				(Rectangle2D.Double) worldExtent.createUnion(i.worldExtent));
 		}
+		midX = worldExtent.getCenterX();
+		midY = worldExtent.getCenterY();
 	}
 	
 	private void dumpImageExtents() {
 		for (AdjImage i : il) {
-			System.out.println(i.imageFile + "\tW=" + i.width + "\tH=" + i.height + 
-					"\tExtW=" + Math.abs(i.x2-i.x1) + "\tExtH=" + Math.abs(i.y2-i.y1));
+			System.out.println(i.imageFile + "\tW=" + i.extent.width + "\tH=" + i.extent.height + 
+					"\tExtW=" + i.worldExtent.width + "\tExtH=" + i.worldExtent.height);
 		}
 		for (AdjImage i : il) {
 			System.out.println(i);
 		}
 	}
 	
-	public void doTheJob() throws IOException {
-		if ( (il.size() < 2) || (il.size() >= ipl.size()))
-			return;		
+	private void flattenImages1(String outputFileName) throws IOException {
+		BufferedBMPImage bo = new BufferedBMPImage(new File(outputFileName), (int)worldExtent.width, (int)worldExtent.height);
+		// Clear the output image
+		for (int j = bo.minY(); j <= bo.maxY(); j++)
+			for (int i = bo.minX(); i <= bo.maxX(); i++)
+				bo.setPixel(i, j, 0);
 		
-		// Assume the "first" image to be the "correct" one and orient 
-		// all the others to this one
-		calcUsingOriginPoint(il.get(0));
-		
-		// Calculate image rectangles in the world coordinate system
-		calcImageExtents();
-		dumpImageExtents();
-		// Calculate the mid point of the extent of all "transformed image" extents
-		double midx = 0.0;
-		double midy = 0.0;
-		for (AdjImage i : il) {
-			i.midWX = (i.x1 + i.x2) / 2.0;
-			i.midWY = (i.y1 + i.y2) / 2.0;
-			midx += i.midWX;
-			midy += i.midWY;
-		}
-		midx /= il.size();
-		midy /= il.size();
-
-		// Find the closest image to the mid point 
-		double midDist = Double.MAX_VALUE;
-		AdjImage midImage = null;
-		for (AdjImage i : il) {
-			double dx = i.midWX - midx;
-			double dy = i.midWY - midy;
-			double d = dx * dx + dy * dy;
-			if (midDist > d) {
-				midDist = d;
-				midImage = i;
+		AffineTransformer transform = new AffineTransformer(2, 2);
+		Matrix srcPoint1 = new Matrix(2, 1);
+		srcPoint1.setItem(0, 0, 0.0);
+		srcPoint1.setItem(1, 0, 0.0);
+		Matrix srcPoint2 = new Matrix(2, 1);
+		srcPoint2.setItem(0, 0, 1.0);
+		srcPoint2.setItem(1, 0, 1.0);
+		Matrix destPoint1 = new Matrix(2, 1);
+		Matrix destPoint2 = new Matrix(2, 1);
+		for (AdjImage adjImage : il) {
+			System.out.println("Now processing image " + adjImage.imageFile);
+			BufferedImage bi = ImageIO.read(new File(adjImage.imageFile));
+			transform.setMatrix(adjImage.fromWorld);
+			transform.transform(srcPoint1, destPoint1);
+			transform.transform(srcPoint2, destPoint2);
+			double radius = 0.5 * Math.sqrt(
+					Math.pow(destPoint2.getItem(0, 0) - destPoint1.getItem(0, 0), 2.0) + 
+					Math.pow(destPoint2.getItem(1, 0) - destPoint1.getItem(1, 0), 2.0));
+			int minX = (int)adjImage.worldExtent.getMinX();
+			int maxX = (int)adjImage.worldExtent.getMaxX();
+			int minY = (int)adjImage.worldExtent.getMinY();
+			int maxY = (int)adjImage.worldExtent.getMaxY();
+			for (int j = minY; j <= maxY; j++) {
+				for (int i = minX; i <= maxX; i++) {
+					srcPoint1.setItem(0, 0, i);
+					srcPoint1.setItem(1, 0, j);
+					transform.transform(srcPoint1, destPoint1);
+					int imgMinX = (int) (destPoint1.getItem(0, 0) - radius);
+					int imgMaxX = (int) (destPoint1.getItem(0, 0) + radius);
+					int imgMinY = (int) (destPoint1.getItem(1, 0) - radius);
+					int imgMaxY = (int) (destPoint1.getItem(1, 0) + radius);
+					
+					int r = 0;
+					int g = 0;
+					int b = 0;
+					int count = 0;
+					for (int imgJ = imgMinY; imgJ <= imgMaxY; imgJ++)
+						for (int imgI = imgMinX; imgI <= imgMaxX; imgI++) {
+							int c = bi.getRGB(imgI, imgJ);
+							r += (c & 0xff0000) >> 16;
+							g += (c & 0x00ff00) >> 8;
+							b += (c & 0x0000ff);
+							count++;
+						}
+					r = (r / count) & 0xff;  
+					g = (g / count) & 0xff;  
+					b = (b / count) & 0xff;  
+					int c = (r << 16) | (g << 8) | (b);
+					bo.setPixel(i, j, c);
+				}
 			}
 		}
+		bo.close();
+	}
+	
+	private void flattenImages2(String outputFileName) throws IOException {
+		int width = (int)worldExtent.width;
+		int height = (int)worldExtent.height;
 
-		// Recalculate using the new origin point
-		calcUsingOriginPoint(midImage);
-		// Calculate image rectangles in the world coordinate system
-		calcImageExtents();
-		dumpImageExtents();
-		
-		// Determine the extent of all transformed image extents
-		double x1 = Double.MAX_VALUE;
-		double y1 = Double.MAX_VALUE;
-		double x2 = Double.MIN_VALUE;
-		double y2 = Double.MIN_VALUE;
-		for (AdjImage i : il) {
-			if (x1 > i.x1) x1 = i.x1; 
-			if (x1 > i.x2) x1 = i.x2; 
-			if (y1 > i.y1) y1 = i.y1; 
-			if (y1 > i.y2) y1 = i.y2;
-			
-			if (x2 < i.x1) x2 = i.x1; 
-			if (x2 < i.x2) x2 = i.x2; 
-			if (y2 < i.y1) y2 = i.y1; 
-			if (y2 < i.y2) y2 = i.y2; 
-		}
-		System.out.println(x1);
-		System.out.println(x2);
-		System.out.println(y1);
-		System.out.println(y2);
-		int width = (int)(x2 - x1);
-		int height = (int)(y2 - y1);
-		System.out.println("WIDTH = " + width);
-		System.out.println("HEIGHT= " + height);
-/*		
-//		BufferedImage bo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		BufferedBMPImage bo = new BufferedBMPImage(new File("c:/temp/ttt.bmp"), width, height);
+		BufferedBMPImage bo = new BufferedBMPImage(new File(outputFileName), width, height);
 		short buf[][][] = new short[2][width][height];
 		
 		Matrix src = new Matrix(1, 3);
@@ -345,7 +411,7 @@ public class AdjAffine {
 			}
 			
 			// Flatten the current color space and copy it to the resulting image
-/ *			int mask = ~(0xff << shift);
+/*			int mask = ~(0xff << shift);
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < height; j++) {
 					int c = bo.getRGB(i, j);
@@ -354,7 +420,7 @@ public class AdjAffine {
 					if (d > 255) d = 255;
 					c = (c & mask) | (d << shift);
 					bo.setRGB(i, j, c);
-				} * /
+				} */
 			int mask = ~(0xff << shift);
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < height; j++) {
@@ -367,10 +433,49 @@ public class AdjAffine {
 				}			
 			
 		}
-		
-//		ImageIO.write(bo, "jpg", new File("c:/test.jpg"));
 		bo.close();
-*/				
+	}
+	
+	public void doTheJob() throws IOException {
+		if ( (il.size() < 2) || (il.size() >= ipl.size()))
+			return;		
+		
+		// Assume the "first" image to be the "correct" one and orient 
+		// all the others to this one
+		calcUsingOriginPoint(il.get(0));
+		
+		// Calculate image extents in the world coordinate system
+		calcImageExtents();
+		dumpImageExtents();
+
+		// Find the closest image to the mid point 
+		double midDist = Double.MAX_VALUE;
+		AdjImage midImage = null;
+		for (AdjImage i : il) {
+			double dx = i.midWX - midX;
+			double dy = i.midWY - midY;
+			double d = dx * dx + dy * dy;
+			if (midDist > d) {
+				midDist = d;
+				midImage = i;
+			}
+		}
+
+		// Recalculate using the new origin point
+		calcUsingOriginPoint(midImage);
+		// Calculate image rectangles in the world coordinate system
+		calcImageExtents();
+		dumpImageExtents();
+		
+		// Determine the extent of all transformed image extents
+		System.out.println(worldExtent);
+		int width = (int)(worldExtent.width);
+		int height = (int)(worldExtent.height);
+		System.out.println("WIDTH = " + width);
+		System.out.println("HEIGHT= " + height);
+
+		flattenImages1(Const.outputImage);
+
 		// Dump results
 		for (int i = 0; i < il.size(); i++) {
 		    AdjImage img = il.get(i);

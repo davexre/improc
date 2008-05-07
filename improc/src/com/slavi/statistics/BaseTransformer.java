@@ -1,6 +1,6 @@
 package com.slavi.statistics;
 
-import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 import com.slavi.matrix.Matrix;
 
@@ -25,7 +25,7 @@ public abstract class BaseTransformer {
 	 * Transforms the source rectangle vertices into the destination 
 	 * coordinate system and returns the extent of the transformed vertices.  
 	 */
-	public void transformExtent(Rectangle source, Rectangle dest) {
+	public void transformExtent(Rectangle2D.Double source, Rectangle2D.Double dest) {
 		if ((inputSize != 2) || (outputSize != 2))
 			throw new UnsupportedOperationException("Tranfsorm extent is 2D only operation");
 		

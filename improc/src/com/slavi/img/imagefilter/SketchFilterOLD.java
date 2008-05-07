@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
+import com.slavi.img.Const;
 import com.slavi.utils.Marker;
 
 public class SketchFilterOLD implements BufferedImageFilter {
@@ -178,8 +179,7 @@ public class SketchFilterOLD implements BufferedImageFilter {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String fin = "C:/Users/S/ImageProcess/images/HPIM0336.JPG";
-		BufferedImage src = ImageIO.read(new File(fin)); 
+		BufferedImage src = ImageIO.read(new File(Const.sourceImage)); 
 
 		Display display = new Display();
 		ImageFilter imageSketch = new ImageFilter(new SketchFilterOLD());

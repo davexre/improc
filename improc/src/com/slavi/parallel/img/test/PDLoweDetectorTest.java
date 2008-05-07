@@ -1,19 +1,15 @@
 package com.slavi.parallel.img.test;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.img.DImageMap;
-import com.slavi.img.DLoweDetector;
 import com.slavi.img.KeyPoint;
 import com.slavi.img.KeyPointList;
 import com.slavi.img.DLoweDetector.Hook;
-import com.slavi.parallel.img.DImageWrapper;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.utils.Marker;
