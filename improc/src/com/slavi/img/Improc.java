@@ -148,9 +148,9 @@ public class Improc {
 	public void doTheJob() {
 		Properties properties = new Properties();
 		String userHomeRootStr = System.getProperty("user.home");
-		AbsoluteToRelativePathMaker userHomdeRootBase = new AbsoluteToRelativePathMaker(userHomeRootStr);
+		AbsoluteToRelativePathMaker userHomeRootBase = new AbsoluteToRelativePathMaker(userHomeRootStr);
 
-		String propertiesFile = userHomdeRootBase.getFullPath("ImageProcess.xproperties");
+		String propertiesFile = userHomeRootBase.getFullPath("ImageProcess.xproperties");
 		try {
 			properties.loadFromXML(new FileInputStream(propertiesFile));
 		} catch (Exception e) {

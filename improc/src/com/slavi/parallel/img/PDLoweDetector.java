@@ -1,8 +1,10 @@
 package com.slavi.parallel.img;
 
 import java.awt.Rectangle;
+import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.slavi.img.DImageMap;
@@ -10,18 +12,12 @@ import com.slavi.img.KeyPoint;
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.matrix.DiagonalMatrix;
 import com.slavi.matrix.Matrix;
+import com.slavi.utils.Utl;
 
 public class PDLoweDetector implements Runnable {
 
 	public Hook hook = null;
 
-	public static DImageMap mask;
-	
-	public static synchronized void setProcessed(int atX, int atY) {
-		if (mask != null)
-			mask.setPixel(atX, atY, mask.getPixel(atX, atY) + 1.0);
-	}
-	
 	public static final int defaultScaleSpaceLevels = 3;
 
 	DWindowedImage src;
@@ -30,15 +26,12 @@ public class PDLoweDetector implements Runnable {
 
 	int scaleSpaceLevels;
 
-	ExecutorService exec;
-
 	Rectangle destExtent;
 	
-	public PDLoweDetector(DWindowedImage src, Rectangle dest, double scale, int scaleSpaceLevels, ExecutorService exec) {
+	public PDLoweDetector(DWindowedImage src, Rectangle dest, double scale, int scaleSpaceLevels) {
 		this.src = src;
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
-		this.exec = exec;
 		this.destExtent = dest;
 	}
 	
@@ -134,8 +127,6 @@ public class PDLoweDetector implements Runnable {
 	public static final int relocationMaximum = 4;
 
 	private boolean isLocalExtrema(DWindowedImage[] DOGs, int atX, int atY) {
-		setProcessed(atX, atY);
-		
 		double curPixel = DOGs[1].getPixel(atX, atY);
 		if (Math.abs(curPixel) < dogThreshold)
 			return false;
@@ -652,21 +643,6 @@ public class PDLoweDetector implements Runnable {
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
 	
-	public void getRequiredMemory(Rectangle srcExtent) {
-		/*
-		 * Intermediate image buffers needed as in method #doIt()
-		 * blurred0, blurred1, blurred2, 
-		 * magnitude, direction,
-		 * DOGs[0], DOGs[1], DOGs[2]
-		 */
-		final int numberOfImageBuffers = 8;
-		/*
-		 * Pixel is defined as double. Size of double = 8 bytes.
-		 */
-		final int sizeOfSingleImageMapPixel = 8;
-		
-	}
-
 	void doit() throws InterruptedException, ExecutionException {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
@@ -740,5 +716,115 @@ public class PDLoweDetector implements Runnable {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/*
+	 * Intermediate image buffers needed as in method #doIt()
+	 * blurred0, blurred1, blurred2, 
+	 * magnitude, direction,
+	 * DOGs[0], DOGs[1], DOGs[2]
+	 */
+	private static final int numberOfImageBuffers = 8;
+	/*
+	 * Pixel is defined as double. Size of double = 8 bytes.
+	 */
+	private static final int sizeOfSingleImageMapPixel = 8;
+
+	private static final long requiredMemoryPerPixel = numberOfImageBuffers * sizeOfSingleImageMapPixel; 
+	
+	public static class ExecutionProfile {
+		public int parallelTasks;
+		public int numberOfProcessors;
+		public long availableMemory;
+		public int sourceExtentX;
+		public int sourceExtentY;
+		public int divisionsX;
+		public int divisionsY;
+		public int windowSizeX;
+		public int windowSizeY;
+		public List<Runnable> tasks;
+		
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Parallel tasks          :");		sb.append(parallelTasks);
+			sb.append("\nTotal number of tasks   :");	sb.append(divisionsX * divisionsY);
+			sb.append("\nNumber of processors    :");	sb.append(numberOfProcessors);
+			sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
+			sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
+			sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
+			sb.append("\nWindow extent X         :");	sb.append(windowSizeX);
+			sb.append("\nWindow extent Y         :");	sb.append(windowSizeY);
+			sb.append("\nDivisions along X       :");	sb.append(divisionsX);
+			sb.append("\nDivisions along Y       :");	sb.append(divisionsY);
+			return sb.toString();
+		}
+	}
+	
+	public static ExecutionProfile suggestExecutionProfile(Rectangle srcExtent) {
+		return suggestExecutionProfile(srcExtent, 0.5, 100);
+	}
+		
+	/**
+	 * Creates an execution profile taking into account the number of CPUs and available memory. 
+	 * @param srcExtent					Minimum size (in pixels) for a task window (ex. 100)
+	 * @param maxMemoryUsageAllowed		Value is in % if the available memory (ex. 0.7)
+	 */
+	public static ExecutionProfile suggestExecutionProfile(Rectangle srcExtent, double maxMemoryUsageAllowed, int userSpecifiedMinSizeOfTaskWindow) {
+		ExecutionProfile result = new ExecutionProfile();
+		result.sourceExtentX = srcExtent.width;
+		result.sourceExtentY = srcExtent.height;
+		
+		maxMemoryUsageAllowed = Math.max(0.1, Math.min(0.9, maxMemoryUsageAllowed));
+		userSpecifiedMinSizeOfTaskWindow = Math.max(100, userSpecifiedMinSizeOfTaskWindow);
+		
+		Runtime runtime = Runtime.getRuntime();
+		result.numberOfProcessors = runtime.availableProcessors();
+		long usedMemory = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+		result.availableMemory = runtime.maxMemory() - usedMemory;
+		
+		result.parallelTasks = Math.max(result.numberOfProcessors, 2);
+		long memPerParallelTask = (long)(result.availableMemory * maxMemoryUsageAllowed) / result.parallelTasks;
+		int tasksForExtent = (int) Math.max(result.parallelTasks, Math.ceil( 
+			(double)(result.sourceExtentX * result.sourceExtentY * requiredMemoryPerPixel) / 
+			(double) memPerParallelTask));
+		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks * 6);
+		result.divisionsX = Math.max(1, (int)Math.round(
+				Math.sqrt(tasksForExtent * result.sourceExtentX / result.sourceExtentY)));
+		result.divisionsY = (int)Math.ceil((double)tasksForExtent / result.divisionsX);
+		
+		int minSizeOfTaskWindow = Math.min(userSpecifiedMinSizeOfTaskWindow,
+				(int)Math.sqrt((double)result.availableMemory / requiredMemoryPerPixel));
+		minSizeOfTaskWindow = Math.max(100, minSizeOfTaskWindow);
+		
+		result.divisionsX = Math.max(1, Math.min(result.divisionsX, result.sourceExtentX / minSizeOfTaskWindow));
+		result.divisionsY = Math.max(1, Math.min(result.divisionsY, result.sourceExtentY / minSizeOfTaskWindow));
+		
+		result.windowSizeX = (int)Math.ceil((double)result.sourceExtentX / result.divisionsX);
+		result.windowSizeY = (int)Math.ceil((double)result.sourceExtentY / result.divisionsY);
+		return result;
+	}
+
+	public static ExecutionProfile makeTasks(DImageMap source, Hook hook) {
+		return makeTasks(source, hook, suggestExecutionProfile(source.getExtent()));
+	}
+	
+	public static ExecutionProfile makeTasks(DImageMap source, Hook hook, ExecutionProfile suggestedProfile) {
+		Rectangle srcExtent = source.getExtent();
+		ExecutionProfile result = suggestedProfile;
+		result.tasks = new ArrayList<Runnable>();
+		
+		for (int minx = 0; minx < srcExtent.width; minx += result.windowSizeX) {
+			for (int miny = 0; miny < srcExtent.height; miny += result.windowSizeY) {
+				Rectangle destR = new Rectangle(minx, miny, result.windowSizeX, result.windowSizeY);
+				Rectangle srcR = PDLoweDetector.getNeededSourceExtent(destR);
+				srcR = srcR.intersection(srcExtent);
+				destR = destR.intersection(srcExtent);
+				DImageWrapper srcW = new DImageWrapper(source, srcR);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, 2, 3);
+				task.hook = hook;
+				result.tasks.add(task);
+			}
+		}
+		return result;
 	}
 }

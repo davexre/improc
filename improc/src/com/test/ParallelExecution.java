@@ -1,4 +1,4 @@
-package com.slavi.parallel;
+package com.test;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;

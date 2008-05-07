@@ -740,7 +740,8 @@ public class DLoweDetector {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+//		String finName = "D:/Users/s/kayak/me in the kayak.jpg";
+		String finName = "C:/Users/s/ImageProcess/images/HPIM7379.JPG";
 		
 		File image = new File(finName);
 		System.out.println("Processing image " + image);

@@ -118,7 +118,7 @@ public class Utl {
 		int inSet = 0;
 		boolean inEscape = false;
 
-		StringBuffer output = new StringBuffer();
+		StringBuilder output = new StringBuilder();
 
 		int len = s.length();
 		for (int i = 0; i < len; ++i) {

@@ -170,7 +170,7 @@ public abstract class StatisticsBase {
     }
     
     public String toString(int style) {
-    	StringBuffer b = new StringBuffer();
+    	StringBuilder b = new StringBuilder();
     	b.append(String.format(
 			"Average           = %.4f\n" +
 			"Count             = %d\n" +
@@ -214,7 +214,7 @@ public abstract class StatisticsBase {
     }
     
     public static String toString2Header(int style) {
-    	StringBuffer b = new StringBuffer();
+    	StringBuilder b = new StringBuilder();
     	b.append("Average\tCount\tB");
     	if ((style & CStatJ) != 0)
 			b.append("\tJ start\tJ end");
@@ -242,7 +242,7 @@ public abstract class StatisticsBase {
     }
     
     public String toString2(int style) {
-    	StringBuffer b = new StringBuffer();
+    	StringBuilder b = new StringBuilder();
     	b.append(Double.toString(this.getAvgValue()) + "\t" + Double.toString(this.getItemsCount()) + "\t" + Double.toString(this.B));
     	if ((style & CStatJ) != 0)
 			b.append("\t" + Double.toString(this.J_Start) + "\t" + Double.toString(this.J_End));

@@ -26,7 +26,7 @@ public class KDTreeTest {
 		}
 		
 		public String toString() {
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			String prefix = "";
 			for (int i = 0; i < value.length; i++) {
 				buf.append(prefix);

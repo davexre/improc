@@ -41,7 +41,7 @@ public class CustomPolynomialTransformer extends BaseTransformer {
 	private static final String coefNames[] = {"X", "Y", "Z"};
 	
 	public String getCoefIndexText(int polynomCoefIndex) {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		String prefix = "";
 		boolean useCoefNames = (inputSize <= coefNames.length);
 		for (int i = 0; i < inputSize; i++) {
@@ -94,7 +94,7 @@ public class CustomPolynomialTransformer extends BaseTransformer {
 	}
 
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append("Origin source\n");
 		b.append(sourceOrigin.toString());
 		b.append("Coefs\n");

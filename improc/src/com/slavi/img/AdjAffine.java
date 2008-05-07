@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import com.slavi.matrix.Matrix;
+import com.slavi.parallel.img.BufferedBMPImage;
 import com.slavi.statistics.LeastSquaresAdjust;
 
 public class AdjAffine {
@@ -18,6 +19,9 @@ public class AdjAffine {
 		
 		public Matrix fromWorld = null;
 		
+		/**
+		 * The squared value of fromWorld 
+		 */
 		public Matrix fromWorld2 = null;
 		
 		public double width, height;
@@ -88,8 +92,6 @@ public class AdjAffine {
 				addImage(p.targetImage, p.targetImageSizeX, p.targetImageSizeY),
 				p.transform.getMatrix());
 			ipl.add(ip);
-			//System.out.println(ip);
-			
 		}
 	}
 	
@@ -113,7 +115,7 @@ public class AdjAffine {
 	}
 	
 	private void calcUsingOriginPoint(AdjImage image) {
-		// Clear previous calculcations
+		// Clear previous calculations
 		for (AdjImage i : il)
 			i.toWorld = null;
 		image.toWorld = new Matrix(3, 3);
@@ -150,22 +152,22 @@ public class AdjAffine {
 
 		dump4matlab();
 		
-		// Least square adrjust the images 
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(il.size() * 6);
-		Matrix coefs = new Matrix(il.size() * 6, 1);
+		// Least square adjust the rotation of the images 
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(il.size() * 4);
+		Matrix coefs = new Matrix(il.size() * 4, 1);
 //		Matrix m = new Matrix(3, 3);
 		Matrix L = new Matrix(3, 3);
 		Matrix Q = new Matrix(3, 3);
 		Matrix a = new Matrix(3, 3);
 		Matrix b = new Matrix(3, 3);
 		for (AdjImagePair p : ipl) {
-			int iA = il.indexOf(p.source) * 6;
-			int iB = il.indexOf(p.target) * 6;
+			int iA = il.indexOf(p.source) * 4;
+			int iB = il.indexOf(p.target) * 4;
 			// Discrepancy
 			p.source.toWorld.mMul(p.target.fromWorld, L);
 			L.mSub(p.toTarget, L);
 
-			for (int i = 0; i < 3; i++) { 
+			for (int i = 0; i < 2; i++) { 
 				for (int j = 0; j < 2; j++) {
 					Q.make0();
 					Q.setItem(i, j, 1.0);
@@ -178,89 +180,16 @@ public class AdjAffine {
 		
 					coefs.setItem(iA + 0, 0, a.getItem(0, 0));
 					coefs.setItem(iA + 1, 0, a.getItem(1, 0));
-					coefs.setItem(iA + 2, 0, a.getItem(2, 0));
-					coefs.setItem(iA + 3, 0, a.getItem(0, 1));
-					coefs.setItem(iA + 4, 0, a.getItem(1, 1));
-					coefs.setItem(iA + 5, 0, a.getItem(2, 1));
+					coefs.setItem(iA + 2, 0, a.getItem(0, 1));
+					coefs.setItem(iA + 3, 0, a.getItem(1, 1));
 		
 					coefs.setItem(iB + 0, 0, -b.getItem(0, 0));
 					coefs.setItem(iB + 1, 0, -b.getItem(1, 0));
-					coefs.setItem(iB + 2, 0, -b.getItem(2, 0));
-					coefs.setItem(iB + 3, 0, -b.getItem(0, 1));
-					coefs.setItem(iB + 4, 0, -b.getItem(1, 1));
-					coefs.setItem(iB + 5, 0, -b.getItem(2, 1));
+					coefs.setItem(iB + 2, 0, -b.getItem(0, 1));
+					coefs.setItem(iB + 3, 0, -b.getItem(1, 1));
 					lsa.addMeasurement(coefs, 1.0, L.getItem(i, j), 0);
 				}
 			}
-			
-/*			
-			p.source.toWorld.mMul(p.target.fromWorld2, m);
-
-			coefs.make0();
-			coefs.setItem(iA + 0, 0, p.target.fromWorld.getItem(0, 0));
-			coefs.setItem(iA + 1, 0, p.target.fromWorld.getItem(1, 0));
-			coefs.setItem(iA + 2, 0, p.target.fromWorld.getItem(2, 0));
-			coefs.setItem(iA + 3, 0, p.target.fromWorld.getItem(0, 1));
-			coefs.setItem(iA + 4, 0, p.target.fromWorld.getItem(1, 1));
-			coefs.setItem(iA + 5, 0, p.target.fromWorld.getItem(2, 1));
-			coefs.setItem(iB + 0, 0, -m.getItem(0, 0));
-			coefs.setItem(iB + 1, 0, -m.getItem(1, 0));
-			coefs.setItem(iB + 2, 0, -m.getItem(2, 0));
-			coefs.setItem(iB + 3, 0, -m.getItem(0, 1));
-			coefs.setItem(iB + 4, 0, -m.getItem(1, 1));
-			coefs.setItem(iB + 5, 0, -m.getItem(2, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(0, 0), 0);
-			lsa.addMeasurement(coefs, 1.0, L.getItem(1, 0), 0);
-			lsa.addMeasurement(coefs, 1.0, L.getItem(2, 0), 0);
-			lsa.addMeasurement(coefs, 1.0, L.getItem(0, 1), 0);
-			lsa.addMeasurement(coefs, 1.0, L.getItem(1, 1), 0);
-			lsa.addMeasurement(coefs, 1.0, L.getItem(2, 1), 0);
-*/			
-/*			
-			coefs.make0();
-			coefs.setItem(iA + 0, 0, p.target.fromWorld.getItem(0, 0));
-			coefs.setItem(iA + 1, 0, p.target.fromWorld.getItem(1, 0));
-			coefs.setItem(iB + 0, 0, -m.getItem(0, 0));
-			coefs.setItem(iB + 3, 0, -m.getItem(0, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(0, 0), 0);
-			
-			coefs.make0();
-			coefs.setItem(iA + 0, 0, p.target.fromWorld.getItem(0, 0));
-			coefs.setItem(iA + 1, 0, p.target.fromWorld.getItem(1, 0));
-			coefs.setItem(iB + 1, 0, -m.getItem(1, 0));
-			coefs.setItem(iB + 4, 0, -m.getItem(1, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(1, 0), 0);
-
-			coefs.make0();
-			coefs.setItem(iA + 0, 0, p.target.fromWorld.getItem(0, 0));
-			coefs.setItem(iA + 1, 0, p.target.fromWorld.getItem(1, 0));
-			coefs.setItem(iA + 2, 0, p.target.fromWorld.getItem(2, 0));
-			coefs.setItem(iB + 2, 0, -m.getItem(2, 0));
-			coefs.setItem(iB + 5, 0, -m.getItem(2, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(2, 0), 0);
-			
-			coefs.make0();
-			coefs.setItem(iA + 3, 0, p.target.fromWorld.getItem(0, 1));
-			coefs.setItem(iA + 4, 0, p.target.fromWorld.getItem(1, 1));
-			coefs.setItem(iB + 0, 0, -m.getItem(0, 0));
-			coefs.setItem(iB + 3, 0, -m.getItem(0, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(0, 1), 0);
-			
-			coefs.make0();
-			coefs.setItem(iA + 3, 0, p.target.fromWorld.getItem(0, 1));
-			coefs.setItem(iA + 4, 0, p.target.fromWorld.getItem(1, 1));
-			coefs.setItem(iB + 1, 0, -m.getItem(1, 0));
-			coefs.setItem(iB + 4, 0, -m.getItem(1, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(1, 1), 0);
-
-			coefs.make0();
-			coefs.setItem(iA + 3, 0, p.target.fromWorld.getItem(0, 1));
-			coefs.setItem(iA + 4, 0, p.target.fromWorld.getItem(1, 1));
-			coefs.setItem(iA + 5, 0, p.target.fromWorld.getItem(2, 1));
-			coefs.setItem(iB + 2, 0, -m.getItem(2, 0));
-			coefs.setItem(iB + 5, 0, -m.getItem(2, 1));
-			lsa.addMeasurement(coefs, 1.0, L.getItem(2, 1), 0);
-*/
 		}
 		lsa.calculate();
 
@@ -268,13 +197,11 @@ public class AdjAffine {
 		Matrix u = lsa.getUnknown();
 		for (int i = il.size() - 1; i >= 0; i--) {
 			AdjImage im = il.get(i);
-			int iA = i * 6;
+			int iA = i * 4;
 			im.toWorld.setItem(0, 0, u.getItem(0, iA + 0));
 			im.toWorld.setItem(1, 0, u.getItem(0, iA + 1));
-			im.toWorld.setItem(2, 0, u.getItem(0, iA + 2));
-			im.toWorld.setItem(0, 1, u.getItem(0, iA + 3));
-			im.toWorld.setItem(1, 1, u.getItem(0, iA + 4));
-			im.toWorld.setItem(2, 1, u.getItem(0, iA + 5));
+			im.toWorld.setItem(0, 1, u.getItem(0, iA + 2));
+			im.toWorld.setItem(1, 1, u.getItem(0, iA + 3));
 			im.toWorld.setItem(0, 2, 0.0);
 			im.toWorld.setItem(1, 2, 0.0);
 			im.toWorld.setItem(2, 2, 1.0);
@@ -380,13 +307,11 @@ public class AdjAffine {
 		System.out.println(y2);
 		int width = (int)(x2 - x1);
 		int height = (int)(y2 - y1);
-		System.out.println(width);
-		System.out.println(height);
-		
-		
-		
-		
-		BufferedImage bo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		System.out.println("WIDTH = " + width);
+		System.out.println("HEIGHT= " + height);
+/*		
+//		BufferedImage bo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedBMPImage bo = new BufferedBMPImage(new File("c:/temp/ttt.bmp"), width, height);
 		short buf[][][] = new short[2][width][height];
 		
 		Matrix src = new Matrix(1, 3);
@@ -420,7 +345,7 @@ public class AdjAffine {
 			}
 			
 			// Flatten the current color space and copy it to the resulting image
-			int mask = ~(0xff << shift);
+/ *			int mask = ~(0xff << shift);
 			for (int i = 0; i < width; i++)
 				for (int j = 0; j < height; j++) {
 					int c = bo.getRGB(i, j);
@@ -429,17 +354,28 @@ public class AdjAffine {
 					if (d > 255) d = 255;
 					c = (c & mask) | (d << shift);
 					bo.setRGB(i, j, c);
+				} * /
+			int mask = ~(0xff << shift);
+			for (int i = 0; i < width; i++)
+				for (int j = 0; j < height; j++) {
+					int c = bo.getPixel(i, j);
+					int d = buf[0][i][j] == 0 ? 0 : buf[1][i][j] / buf[0][i][j];
+					if (d < 0) d = 0;
+					if (d > 255) d = 255;
+					c = (c & mask) | (d << shift);
+					bo.setPixel(i, j, c);
 				}			
+			
 		}
 		
-		ImageIO.write(bo, "jpg", new File("c:/test.jpg"));
-				
+//		ImageIO.write(bo, "jpg", new File("c:/test.jpg"));
+		bo.close();
+*/				
 		// Dump results
-		int count = 1;
-		for (AdjImage i : il) {
-			System.out.println(i.toWorld.toMatlabString("A" + count));
-			System.out.println(i.fromWorld.toMatlabString("R" + count));
-			count++;
+		for (int i = 0; i < il.size(); i++) {
+		    AdjImage img = il.get(i);
+			System.out.println(img.toWorld.toMatlabString("A" + i));
+			System.out.println(img.fromWorld.toMatlabString("R" + i));
 		}
 	}
 }

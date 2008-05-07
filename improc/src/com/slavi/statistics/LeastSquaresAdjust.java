@@ -183,7 +183,7 @@ public class LeastSquaresAdjust {
 	}
 
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append("numCoefsPerCoordinate = " + Integer.toString(numCoefsPerCoordinate) + "\n");
 		b.append("numCoordinates        = " + Integer.toString(numCoordinates) + "\n");
 		b.append("measurementCount      = " + Integer.toString(measurementCount) + "\n");

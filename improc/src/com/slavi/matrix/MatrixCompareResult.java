@@ -47,7 +47,7 @@ public class MatrixCompareResult {
 	double PearsonR;
 	
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append("AvgA     = " + Double.toString(AvgA) + "\n");
 		b.append("AvgB     = " + Double.toString(AvgB) + "\n");
 		b.append("SAA      = " + Double.toString(SAA) + "\n");

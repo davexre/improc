@@ -139,7 +139,7 @@ public class AffineTransformer extends BaseTransformer {
 	}
 	
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append("Origin\n");
 		b.append(origin.toString());
 		b.append("Coefs\n");
@@ -148,7 +148,7 @@ public class AffineTransformer extends BaseTransformer {
 	}
 	
 	public String toString2() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		for (int j = 0; j < outputSize; j++) {
 			for (int i = 0; i < inputSize; i++) {
 				if ( (i != 0) && (j != 0) )
