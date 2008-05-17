@@ -735,7 +735,6 @@ public class DLoweDetector {
 			} else { 
 				curImage = null; 
 			}
-			break;
 		}
 	}
 	

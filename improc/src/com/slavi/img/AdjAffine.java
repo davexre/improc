@@ -57,7 +57,8 @@ public class AdjAffine {
 		public double midWX, midWY;		
 		
 		public String toString() {
-			return "IMG=" + imageFile + "\tW=" + extent.width + "\tH=" + extent.height + "\t" + toWorld.toMatlabString("toWorld");
+			return "IMG=" + imageFile + "\tW=" + extent.width + "\tH=" + extent.height + "\t" + 
+				"\tExtW=" + worldExtent.width + "\tExtH=" + worldExtent.height + "\ttoWorld=" + toWorld.toMatlabString("toWorld");
 		}
 	}
 	
@@ -121,17 +122,23 @@ public class AdjAffine {
 		}
 	}
 	
-	private void dump4matlab() {
+	private void printImageNames() {
 		System.out.println("*** Images");
 		for (int i = 0; i < il.size(); i++) {
 			AdjImage ii = il.get(i);
 			System.out.println("a" + i + "\t" + ii.imageFile);
 		}
+	}
+	
+	private void printImageToWorld() {
 		System.out.println("*** Image toWorld");
 		for (int i = 0; i < il.size(); i++) {
 			AdjImage ii = il.get(i);
 			System.out.println(ii.toWorld.toMatlabString("a" + i));
 		}
+	}
+	
+	private void printSourceToTarget() {
 		System.out.println("*** source to target");
 		for (AdjImagePair p : ipl) {
 			System.out.println(p.toTarget.toMatlabString(
@@ -140,7 +147,13 @@ public class AdjAffine {
 		}
 	}
 	
-	private void calcUsingOriginPoint(AdjImage image) {
+	private void dump4matlab() {
+		printImageNames();
+		printImageToWorld();
+		printSourceToTarget();
+	}
+	
+	private void calcToWorldUsingOriginImage(AdjImage image) {
 		// Clear previous calculations
 		for (AdjImage i : il)
 			i.toWorld = null;
@@ -169,7 +182,9 @@ public class AdjAffine {
 				} 
 			}
 		} while(loopMore);
-		
+	}
+
+	private void calcFromWorld() {
 		// Check if there are any non-computed images
 		// Calculate all the "fromWorld" matrices
 		for (AdjImage i : il) { 
@@ -184,8 +199,27 @@ public class AdjAffine {
 			i.fromWorld2 = new Matrix(3, 3);
 			i.fromWorld.mMul(i.fromWorld, i.fromWorld2);
 		}
+	}
+	
+	private Matrix getRotationMatrix(Matrix m) {
+		Matrix r = m.makeCopy();
+		r.setItem(2, 0, 0.0);
+		r.setItem(2, 1, 0.0);
+		r.setItem(2, 2, 1.0);
+		r.setItem(0, 2, 0.0);
+		r.setItem(1, 2, 0.0);
+		return r;
+	}
+	
+	private void calcUsingOriginPoint(AdjImage image) {
+		printImageNames();
+		printSourceToTarget();
 
-		dump4matlab();
+		System.out.println("*** Calc using origin image " + il.indexOf(image));
+		calcToWorldUsingOriginImage(image);
+		calcFromWorld();
+
+		printImageToWorld();
 		
 		// Least square adjust the rotation of the images 
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(il.size() * 4);
@@ -195,21 +229,26 @@ public class AdjAffine {
 		Matrix a = new Matrix(3, 3);
 		Matrix b = new Matrix(3, 3);
 		for (AdjImagePair p : ipl) {
+			System.out.println();
+			System.out.println("------ Processing pair " + il.indexOf(p.source) + "-" + il.indexOf(p.target));
 			int iA = il.indexOf(p.source) * 4;
 			int iB = il.indexOf(p.target) * 4;
 			// Discrepancy
-			p.source.toWorld.mMul(p.target.fromWorld, L);
-			L.mSub(p.toTarget, L);
+			Matrix rotSrcToWorld = getRotationMatrix(p.source.toWorld);
+			Matrix rotTargetFromWorld = getRotationMatrix(p.target.fromWorld);
+			Matrix rotMul = new Matrix();
+			rotSrcToWorld.mMul(rotTargetFromWorld, rotMul);
+			rotMul.mSub(getRotationMatrix(p.toTarget), L);
+			L.printM("L");
 
 			for (int i = 0; i < 2; i++) { 
 				for (int j = 0; j < 2; j++) {
 					Q.make0();
 					Q.setItem(i, j, 1.0);
 		
-					p.source.toWorld.mMul(p.target.fromWorld, b);
-					b.mMul(Q, a);
-					a.mMul(p.target.fromWorld, b);
-					Q.mMul(p.target.fromWorld, a);
+					rotMul.mMul(Q, a);
+					a.mMul(rotTargetFromWorld, b);
+					Q.mMul(rotTargetFromWorld, a);
 					coefs.make0();
 		
 					coefs.setItem(iA + 0, 0, a.getItem(0, 0));
@@ -236,21 +275,16 @@ public class AdjAffine {
 			im.toWorld.setItem(1, 0, u.getItem(0, iA + 1));
 			im.toWorld.setItem(0, 1, u.getItem(0, iA + 2));
 			im.toWorld.setItem(1, 1, u.getItem(0, iA + 3));
-//			im.toWorld.setItem(0, 2, 0.0);
-//			im.toWorld.setItem(1, 2, 0.0);
-//			im.toWorld.setItem(2, 2, 1.0);
-//			
-//			im.toWorld.copyTo(im.fromWorld);
-//			if (!im.fromWorld.inverse())
-//				throw new Error("After adjustment can not calculate the reverse affine transofrmation");
 		}
-		dump4matlab();
+		printImageToWorld();
+		calcFromWorld();
+/*		dump4matlab();
 
 		// Least square adjust the translation of the images 
 		lsa = new LeastSquaresAdjust(il.size() * 2, 2);
 		coefs = new Matrix(il.size() * 2, 1);
 		a = new Matrix(1, 3);
-		a.setItem(2, 0, 0.0);
+		a.setItem(0, 2, 0.0);
 		b = new Matrix(1, 3);
 		L = new Matrix(1, 3);
 		for (AdjImagePair p : ipl) {
@@ -265,7 +299,7 @@ public class AdjAffine {
 			coefs.setItem(iA, 0, 1.0);
 			coefs.setItem(iB, 0, -1.0);
 			lsa.addMeasurement(coefs, 1.0, p.source.toWorld.getItem(2, 0) - p.target.toWorld.getItem(2, 0) + b.getItem(0, 0), 0);
-			lsa.addMeasurement(coefs, 1.0, p.source.toWorld.getItem(2, 1) - p.target.toWorld.getItem(2, 1) + b.getItem(1, 0), 1);
+			lsa.addMeasurement(coefs, 1.0, p.source.toWorld.getItem(2, 1) - p.target.toWorld.getItem(2, 1) + b.getItem(0, 1), 1);
 		}
 		lsa.calculate();
 		
@@ -275,13 +309,9 @@ public class AdjAffine {
 			AdjImage im = il.get(iA);
 			im.toWorld.setItem(0, 0, u.getItem(0, iA));
 			im.toWorld.setItem(1, 0, u.getItem(1, iA));
-			im.toWorld.copyTo(im.fromWorld);
-			if (!im.fromWorld.inverse())
-				throw new Error("After adjustment can not calculate the reverse affine transofrmation");
-			im.fromWorld.setItem(0, 2, 0.0);
-			im.fromWorld.setItem(1, 2, 0.0);
-			im.fromWorld.setItem(2, 2, 1.0);
 		}
+		calcFromWorld();
+*/
 	}
 	
 	public void calcImageExtents() {
@@ -302,10 +332,7 @@ public class AdjAffine {
 	}
 	
 	private void dumpImageExtents() {
-		for (AdjImage i : il) {
-			System.out.println(i.imageFile + "\tW=" + i.extent.width + "\tH=" + i.extent.height + 
-					"\tExtW=" + i.worldExtent.width + "\tExtH=" + i.worldExtent.height);
-		}
+		System.out.println("*** Image extents");
 		for (AdjImage i : il) {
 			System.out.println(i);
 		}
@@ -437,7 +464,7 @@ public class AdjAffine {
 	}
 	
 	public void doTheJob() throws IOException {
-		if ( (il.size() < 2) || (il.size() >= ipl.size()))
+		if ( (il.size() < 2) || (il.size() > ipl.size()))
 			return;		
 		
 		// Assume the "first" image to be the "correct" one and orient 
@@ -474,7 +501,7 @@ public class AdjAffine {
 		System.out.println("WIDTH = " + width);
 		System.out.println("HEIGHT= " + height);
 
-		flattenImages1(Const.outputImage);
+//		flattenImages1(Const.outputImage);
 
 		// Dump results
 		for (int i = 0; i < il.size(); i++) {

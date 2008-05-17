@@ -5,7 +5,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.jdom.Element;
@@ -92,8 +94,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(m[i][j]) } ));
-				result.append(m[i][j]);
+				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(m[i][j]) } ));
+//				result.append(m[i][j]);
 			}
 			result.append("\n");
 		}
@@ -1210,7 +1212,7 @@ public class Matrix {
 	
 	public void printM(String title) {
 		System.out.println(title);
-		System.out.println(toString());
+		System.out.print(toString());
 	}
 
 	

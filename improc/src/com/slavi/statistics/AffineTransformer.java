@@ -118,13 +118,13 @@ public class AffineTransformer extends BaseTransformer {
 	}
 	
 	public void setMatrix(Matrix src) {
-		if ((src.getSizeX() != inputSize) || (src.getSizeY() != outputSize)) 
+		if ((src.getSizeX() != inputSize + 1) || (src.getSizeY() != outputSize + 1)) 
 			throw new IllegalArgumentException("Invalid matrix size");
 		for (int i = inputSize - 1; i >= 0; i--) 
 			for (int j = outputSize - 1; j >= 0; j--)
 				affineCoefs.setItem(i, j, src.getItem(i, j));
 		for (int j = outputSize - 1; j >= 0; j--)
-			origin.setItem(inputSize, j, src.getItem(j, 0));
+			origin.setItem(j, 0, src.getItem(inputSize, j));
 	}
 	
 	public AffineTransformer getReverseTransformer() {

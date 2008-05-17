@@ -78,7 +78,7 @@ public class FileStamp {
 	}
 
 	public static FileStamp fromString(String str, AbsoluteToRelativePathMaker rootDir) {
-		StringTokenizer st = new StringTokenizer(str);
+		StringTokenizer st = new StringTokenizer(str, "\t");
 		FileStamp result = new FileStamp();
 		result.rootDir = rootDir;
 		String fileName = st.nextToken();

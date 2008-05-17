@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
@@ -108,7 +110,7 @@ public class PanoPairList {
 		atl.calculateOne();
 		atl.calculateOne();
 		atl.calculateOne();
-		kppl.leaveGoodElements(50.0); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
+		kppl.leaveGoodElements(9.0); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
 		atl.calculateOne();
 		atl.calculateOne();
 		
