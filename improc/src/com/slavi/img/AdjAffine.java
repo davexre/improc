@@ -147,7 +147,7 @@ public class AdjAffine {
 		}
 	}
 	
-	private void dump4matlab() {
+	public void dump4matlab() {
 		printImageNames();
 		printImageToWorld();
 		printSourceToTarget();
@@ -338,7 +338,7 @@ public class AdjAffine {
 		}
 	}
 	
-	private void flattenImages1(String outputFileName) throws IOException {
+	public void flattenImages1(String outputFileName) throws IOException {
 		BufferedBMPImage bo = new BufferedBMPImage(new File(outputFileName), (int)worldExtent.width, (int)worldExtent.height);
 		// Clear the output image
 		for (int j = bo.minY(); j <= bo.maxY(); j++)
@@ -400,7 +400,7 @@ public class AdjAffine {
 		bo.close();
 	}
 	
-	private void flattenImages2(String outputFileName) throws IOException {
+	public void flattenImages2(String outputFileName) throws IOException {
 		int width = (int)worldExtent.width;
 		int height = (int)worldExtent.height;
 

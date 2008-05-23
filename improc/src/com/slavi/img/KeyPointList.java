@@ -8,8 +8,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.slavi.img.DLoweDetector.Hook;
+import com.slavi.parallel.img.PDLoweDetector;
+import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.tree.KDNodeSaver;
 import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
@@ -57,7 +62,7 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		public ListenerImpl(KeyPointList spl) {
 			this.scalePointList = spl;
 		}
-		public void keyPointCreated(KeyPoint scalePoint) {
+		public synchronized void keyPointCreated(KeyPoint scalePoint) {
 			scalePointList.kdtree.add(scalePoint);
 		}		
 	}
@@ -75,6 +80,38 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		return new File(Utl.chageFileExtension(
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image, false)), "spf"));
+	}
+	
+	private static KeyPointList buildKeyPointFileSingleThreaded(File kplFile, File image) throws IOException {
+		DImageMap img = new DImageMap(image);
+		KeyPointList result = new KeyPointList();
+		result.imageSizeX = img.getSizeX();
+		result.imageSizeY = img.getSizeY();
+		DLoweDetector d = new DLoweDetector();
+		d.hook = new ListenerImpl(result);
+		d.DetectFeatures(img, 3, 32);
+		return result;
+	}
+	
+	private static KeyPointList buildKeyPointFileMultiThreaded(File kplFile, File image) throws IOException {
+		DImageMap img = new DImageMap(image);
+		KeyPointList result = new KeyPointList();
+		result.imageSizeX = img.getSizeX();
+		result.imageSizeY = img.getSizeY();
+
+		Hook hook = new ListenerImpl(result);
+		ExecutionProfile profile = PDLoweDetector.makeTasks(img, hook);
+		ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
+		System.out.println(profile);
+		for (Runnable task : profile.tasks)
+			exec.execute(task);
+		exec.shutdown();
+		while (!exec.isTerminated())
+			try {
+				exec.awaitTermination(1000, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+			}
+		return result;
 	}
 	
 	private static KeyPointList doUpdateKeyPointFileIfNecessary(
@@ -99,15 +136,11 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		} catch (IOException e) {
 		}
 		
-		DImageMap img = new DImageMap(image);
-		KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.getSizeX();
-		result.imageSizeY = img.getSizeY();
+		KeyPointList result = buildKeyPointFileSingleThreaded(kplFile, image);
+//		KeyPointList result = buildKeyPointFileMultiThreaded(kplFile, image);
+
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
-		DLoweDetector d = new DLoweDetector();
-		d.hook = new ListenerImpl(result);
-		d.DetectFeatures(img, 3, 32);
 		kplFile.getParentFile().mkdirs();
 		PrintWriter fou = new PrintWriter(kplFile);
 		fou.println(fileHeader);

@@ -2,7 +2,6 @@ package com.slavi.testpackage;
 
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.Locale;
 
 import com.slavi.matrix.Matrix;

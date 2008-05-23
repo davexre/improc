@@ -44,9 +44,11 @@ public class Improc {
 					}
 					String fileName = images.get(i); 
 					String statusMessage = (i + 1) + "/" + images.size() + " " + fileName;
-					System.out.println(statusMessage);
+					System.out.print(statusMessage);
 					SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
-					KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
+//					KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
+					KeyPointList kpl = KeyPointList.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(fileName));
+					System.out.println(" (" + kpl.kdtree.size() + " key points)");
 				}
 			} catch (Throwable e) {
 				System.err.println("GenerateKeyPointFiles FAILED!");
@@ -69,9 +71,11 @@ public class Improc {
 						File image2 = new File(fileName2);
 						File kpplFile = KeyPointPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
 						String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();
-						System.out.println(statusMessage);
+						System.out.print(statusMessage);
 						SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
-						KeyPointPairList.updateKeyPointPairFileIfNecessary(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
+//						KeyPointPairList.updateKeyPointPairFileIfNecessary(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
+						KeyPointPairList kppl = KeyPointPairList.readKeyPointPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
+						System.out.println(" (" + kppl.items.size() + " key point pairs)");
 					}
 				}
 			} catch (Exception e) {
@@ -98,9 +102,11 @@ public class Improc {
 						File image2 = new File(fileName2);
 						File kpplFile = PanoPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
 						String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();;
-						System.out.println(statusMessage);
+						System.out.print(statusMessage);
 						SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
-						panoList.addItem(PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2));
+						PanoPairList ppl = PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
+						panoList.addItem(ppl);
+						System.out.println(" (" + ppl.items.size() + " pano paris)");
 					}
 				}
 			} catch (Exception e) {
@@ -123,7 +129,7 @@ public class Improc {
 					File fou = keyPointPairFileRoot.getFullPathFile("Pano" + panoCount + ".pto");
 
 					String statusMessage = fou.getAbsolutePath();
-					System.out.println(statusMessage);
+					System.out.print(statusMessage);
 					SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
 					PanoList.writeToPtoFile(fou, chain);
@@ -132,6 +138,7 @@ public class Improc {
 					adjustAffine.doTheJob();
 					
 					panoCount++;
+					System.out.println(" (" + chain.size() + " images in chain)");
 				}
 			} catch (Exception e) {
 				System.err.println("GeneratePanoramaFiles FAILED!");
