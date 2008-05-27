@@ -49,4 +49,8 @@ public class Const {
 			throw new RuntimeException("User consts file not found or incomplete");
 		}
 	};
+	
+	public static void main(String[] args) {
+		System.out.println("Constants file seems to be correct.");
+	}
 }

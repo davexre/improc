@@ -646,7 +646,7 @@ public class PDLoweDetector implements Runnable {
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
 	
-	void doit() throws InterruptedException, ExecutionException {
+	void DetectFeaturesInSingleLevel() throws InterruptedException, ExecutionException {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
 
@@ -724,7 +724,7 @@ public class PDLoweDetector implements Runnable {
 	public void run()  {
 		try {
 			long start = System.currentTimeMillis();
-			doit();
+			DetectFeaturesInSingleLevel();
 			long end = System.currentTimeMillis();
 			timeElapsed.getAndAdd(end - start);
 		} catch (Exception e) {
@@ -782,7 +782,7 @@ public class PDLoweDetector implements Runnable {
 	/**
 	 * Creates an execution profile taking into account the number of CPUs and available memory. 
 	 * @param srcExtent					Minimum size (in pixels) for a task window (ex. 100)
-	 * @param maxMemoryUsageAllowed		Value is in % if the available memory (ex. 0.7)
+	 * @param maxMemoryUsageAllowed		Value is in % of the available memory whereas 0.9 means 90% (ex. 0.7)
 	 */
 	public static ExecutionProfile suggestExecutionProfile(Rectangle srcExtent, double maxMemoryUsageAllowed, int userSpecifiedMinSizeOfTaskWindow) {
 		ExecutionProfile result = new ExecutionProfile();

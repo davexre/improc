@@ -31,6 +31,7 @@ public class Improc {
 			} catch (Exception e) {
 				System.err.println("CountImageFiles FAILED!");
 				e.printStackTrace();
+				SwtUtl.activeWaitDialogAbortTask();
 			}
 		}
 	}
@@ -53,6 +54,7 @@ public class Improc {
 			} catch (Throwable e) {
 				System.err.println("GenerateKeyPointFiles FAILED!");
 				e.printStackTrace();
+				SwtUtl.activeWaitDialogAbortTask();
 			}
 		}
 	}
@@ -81,6 +83,7 @@ public class Improc {
 			} catch (Exception e) {
 				System.err.println("GenerateKeyPointPairFiles FAILED!");
 				e.printStackTrace();
+				SwtUtl.activeWaitDialogAbortTask();
 			}
 		}
 	}
@@ -112,6 +115,7 @@ public class Improc {
 			} catch (Exception e) {
 				System.err.println("GeneratePanoPairFiles FAILED!");
 				e.printStackTrace();
+				SwtUtl.activeWaitDialogAbortTask();
 			}
 		}
 	}
@@ -143,6 +147,7 @@ public class Improc {
 			} catch (Exception e) {
 				System.err.println("GeneratePanoramaFiles FAILED!");
 				e.printStackTrace();
+				SwtUtl.activeWaitDialogAbortTask();
 			}
 		}
 	}
@@ -195,7 +200,7 @@ public class Improc {
 			return;
 		}
 			
-		System.out.println("----------");
+		System.out.println("---------- Generating key point pair files");
 
 		if (!SwtUtl.openWaitDialog("Generating key point pair files", 
 				new GenerateKeyPointPairFiles(), (images.size() - 1) * images.size() - 1)) {
@@ -203,7 +208,7 @@ public class Improc {
 			return;
 		}
 		
-		System.out.println("----------");
+		System.out.println("---------- Generating pano pair files");
 
 		if (!SwtUtl.openWaitDialog("Generating pano pair files", 
 				new GeneratePanoPairFiles(), (images.size() - 1) * images.size() - 1)) {
@@ -211,7 +216,7 @@ public class Improc {
 			return;
 		}
 		
-		System.out.println("----------");
+		System.out.println("---------- Generating panorama (PTO) files");
 
 		if (!SwtUtl.openWaitDialog("Generating panorama (PTO) files", 
 				new GeneratePanoramaFiles(), panoList.items.size())) {

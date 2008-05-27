@@ -1,8 +1,15 @@
 package com.slavi.utils;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ParseArgs {
 	public Map<String, String> args;
@@ -167,5 +174,41 @@ public class ParseArgs {
 		}
 		result.remainingArgs = remaining.toArray(new String[0]);
 		return result;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		String str = "\"qqq=\"asd qw\\eqwe\\\"zxc rty.fgh\" zzz";
+//		String expr = "(\".*\")|(\\w\\w*)";
+//		String expr = "(\".*(a{0}?).*\")|(\\w++)";
+//		String expr = "(\"((\\\\\")|[^\"(\\\\\")])+\")|(\\w++)";
+
+		BufferedReader fin = new BufferedReader(new InputStreamReader(
+				ParseArgs.class.getResourceAsStream("ParseArgs.txt")));
+		String expr = fin.readLine();
+		fin.close();
+		
+		System.out.println(str);
+		System.out.println("-------");
+
+		Pattern p = Pattern.compile(expr);
+		Matcher m = p.matcher(str);
+		while (m.find()) {
+			System.out.println("|" + str.substring(m.start(), m.end()) + "|");
+		}
+
+		
+//		Pattern p = Pattern.compile(expr);
+//		Matcher m = p.matcher(str);
+//		int index = 0;
+//		while (m.find()) {
+//			System.out.println(str.substring(index, m.start()));
+//			index = m.end();
+//		}
+
+//		String res[] = str.split(expr);
+//		for (String i : res)
+//			System.out.println(i);
+		
+		System.out.println("-------");
 	}
 }

@@ -203,6 +203,11 @@ public class SwtUtl {
 			waitDialogTaskProgress.setStatusAndProgressThreadsafe(status, taskCompleted);
 	}
 	
+	public static void activeWaitDialogAbortTask() {
+		if (waitDialogTaskProgress != null)
+			waitDialogTaskProgress.abortTask();
+	}
+	
 	public static Shell getActiveWaitDialogShell() {
 		return waitDialogShell;
 	}
