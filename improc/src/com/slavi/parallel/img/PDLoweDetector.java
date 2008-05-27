@@ -21,6 +21,8 @@ public class PDLoweDetector implements Runnable {
 	public static final int defaultScaleSpaceLevels = 3;
 
 	DWindowedImage src;
+	
+	DWindowedImage nextLevelBlurredImage;
 
 	double scale;
 
@@ -28,11 +30,12 @@ public class PDLoweDetector implements Runnable {
 
 	Rectangle destExtent;
 	
-	public PDLoweDetector(DWindowedImage src, Rectangle dest, double scale, int scaleSpaceLevels) {
+	public PDLoweDetector(DWindowedImage src, Rectangle dest, DWindowedImage nextLevelBlurredImage, double scale, int scaleSpaceLevels) {
 		this.src = src;
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
 		this.destExtent = dest;
+		this.nextLevelBlurredImage = nextLevelBlurredImage;
 	}
 	
 	public static Rectangle getNeededSourceExtent(Rectangle dest) {
@@ -703,6 +706,17 @@ public class PDLoweDetector implements Runnable {
 			// detect
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
+		
+		int minX = nextLevelBlurredImage.minX();
+		int minY = nextLevelBlurredImage.minY();
+		int maxX = nextLevelBlurredImage.maxX();
+		int maxY = nextLevelBlurredImage.maxY();
+		
+		for (int j = minY; j <= maxY; j++) {
+			for (int i = minX; i <= maxX; i++) {
+				nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i, j));
+			}
+		}
 	}
 	
 	public static AtomicLong timeElapsed = new AtomicLong(0);
@@ -743,6 +757,7 @@ public class PDLoweDetector implements Runnable {
 		public int windowSizeX;
 		public int windowSizeY;
 		public List<Runnable> tasks;
+		public DImageMap nextLevelBlurredImage;
 		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
@@ -812,6 +827,7 @@ public class PDLoweDetector implements Runnable {
 		Rectangle srcExtent = source.getExtent();
 		ExecutionProfile result = suggestedProfile;
 		result.tasks = new ArrayList<Runnable>();
+		DImageMap nextLevelBlurredImage = new DImageMap(source.getSizeX(), source.getSizeY());
 		
 		for (int minx = 0; minx < srcExtent.width; minx += result.windowSizeX) {
 			for (int miny = 0; miny < srcExtent.height; miny += result.windowSizeY) {
@@ -820,11 +836,13 @@ public class PDLoweDetector implements Runnable {
 				srcR = srcR.intersection(srcExtent);
 				destR = destR.intersection(srcExtent);
 				DImageWrapper srcW = new DImageWrapper(source, srcR);
-				PDLoweDetector task = new PDLoweDetector(srcW, destR, 2, 3);
+				DImageWrapper nextLevel = new DImageWrapper(nextLevelBlurredImage, destR);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, nextLevel, 2, 3);
 				task.hook = hook;
 				result.tasks.add(task);
 			}
 		}
+		result.nextLevelBlurredImage = nextLevelBlurredImage;
 		return result;
 	}
 }

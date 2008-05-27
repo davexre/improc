@@ -100,17 +100,27 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		result.imageSizeY = img.getSizeY();
 
 		Hook hook = new ListenerImpl(result);
-		ExecutionProfile profile = PDLoweDetector.makeTasks(img, hook);
-		ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
-		System.out.println(profile);
-		for (Runnable task : profile.tasks)
-			exec.execute(task);
-		exec.shutdown();
-		while (!exec.isTerminated())
-			try {
-				exec.awaitTermination(1000, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
+		
+		while (true) {
+			ExecutionProfile profile = PDLoweDetector.makeTasks(img, hook);
+			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
+			System.out.println(profile);
+			for (Runnable task : profile.tasks)
+				exec.execute(task);
+			exec.shutdown();
+			while (!exec.isTerminated()) {
+				try {
+					exec.awaitTermination(1000, TimeUnit.SECONDS);
+				} catch (InterruptedException e) {
+				}
 			}
+//			profile.nextLevelBlurredImage.scaleHalf(img);
+			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
+			img.scaleHalf(tmp);
+			img = tmp;
+			if (img.getSizeX() / 2 <= 32) 
+				break;
+		};		
 		return result;
 	}
 	
@@ -136,8 +146,8 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		} catch (IOException e) {
 		}
 		
-		KeyPointList result = buildKeyPointFileSingleThreaded(kplFile, image);
-//		KeyPointList result = buildKeyPointFileMultiThreaded(kplFile, image);
+//		KeyPointList result = buildKeyPointFileSingleThreaded(kplFile, image);
+		KeyPointList result = buildKeyPointFileMultiThreaded(kplFile, image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
@@ -255,5 +265,18 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		
 		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + points.size());
 		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + destPoints.size());
+	}
+	
+	public static void main(String[] args) throws IOException {
+		File kplFile = new File(Const.tempDir + "/ttt.kpl");
+		File image = new File(Const.sourceImage);
+		
+		
+		KeyPointList l1 = buildKeyPointFileSingleThreaded(kplFile, image);
+		KeyPointList l2 = buildKeyPointFileMultiThreaded(kplFile, image);
+		
+		System.out.println("----------------------- Comparing -----------------");
+		l1.compareToList(l2);
+
 	}
 }
