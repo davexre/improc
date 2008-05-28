@@ -124,16 +124,16 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
 			((int)(sp.doubleY * multiply) != (int)(doubleY * multiply)) )
-			return false;
-//		for (int k = 0; k < numDirections; k++) {
-//			for (int j = 0; j < descriptorSize; j++) {
-//				for (int i = 0; i < descriptorSize; i++) {
-//					if ((int)(sp.featureVector[i][j][k]) != 
-//						(int)(featureVector[i][j][k]))
-//						return false;
-//				}
-//			}
-//		}
+//			return false;
+		for (int k = 0; k < numDirections; k++) {
+			for (int j = 0; j < descriptorSize; j++) {
+				for (int i = 0; i < descriptorSize; i++) {
+					if ((int)(sp.featureVector[i][j][k]) != 
+						(int)(featureVector[i][j][k]))
+						return false;
+				}
+			}
+		}
 		return true;
 	}
 

@@ -19,6 +19,7 @@ import com.slavi.tree.KDNodeSaver;
 import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
+import com.slavi.utils.Marker;
 import com.slavi.utils.Utl;
 
 public class KeyPointList implements KDNodeSaver<KeyPoint> {
@@ -105,8 +106,8 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 			ExecutionProfile profile = PDLoweDetector.makeTasks(img, hook);
 			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
 			System.out.println(profile);
-			for (Runnable task : profile.tasks)
-				exec.execute(task);
+//			for (Runnable task : profile.tasks)
+//				exec.execute(task);
 			exec.shutdown();
 			while (!exec.isTerminated()) {
 				try {
@@ -271,12 +272,15 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		File kplFile = new File(Const.tempDir + "/ttt.kpl");
 		File image = new File(Const.sourceImage);
 		
-		
-		KeyPointList l1 = buildKeyPointFileSingleThreaded(kplFile, image);
+		Marker.mark("Single threaded");
+//		KeyPointList l1 = buildKeyPointFileSingleThreaded(kplFile, image);
+		Marker.release();
+		Marker.mark("Multithreaded");
 		KeyPointList l2 = buildKeyPointFileMultiThreaded(kplFile, image);
+		Marker.release();
 		
 		System.out.println("----------------------- Comparing -----------------");
-		l1.compareToList(l2);
+//		l1.compareToList(l2);
 
 	}
 }

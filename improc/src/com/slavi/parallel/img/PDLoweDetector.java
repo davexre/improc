@@ -38,14 +38,14 @@ public class PDLoweDetector implements Runnable {
 		this.nextLevelBlurredImage = nextLevelBlurredImage;
 	}
 	
-	public static Rectangle getNeededSourceExtent(Rectangle dest) {
-		return getNeededSourceExtent(dest, defaultScaleSpaceLevels);
-	}
-
 	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
 		return sigma * Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula!!!
 	}
 	
+	public static Rectangle getNeededSourceExtent(Rectangle dest) {
+		return getNeededSourceExtent(dest, defaultScaleSpaceLevels);
+	}
+
 	public static Rectangle getNeededSourceExtent(Rectangle dest, int scaleSpaceLevels) {
 		double sigma = initialSigma;
 		double sigmas[] = new double[scaleSpaceLevels + 2];
@@ -60,12 +60,20 @@ public class PDLoweDetector implements Runnable {
 		return tmp;
 	}
 
+	public static Rectangle getEffectiveTargetExtent(Rectangle source) {
+		return getEffectiveTargetExtent(source, defaultScaleSpaceLevels);
+	}
+	
 	public static Rectangle getEffectiveTargetExtent(Rectangle source, int scaleSpaceLevels) {
 		double sigma = initialSigma;
+		double sigmas[] = new double[scaleSpaceLevels + 2];
+		for (int aLevel = -2, i = 0; aLevel < scaleSpaceLevels; aLevel++, i++) {
+			sigmas[i] = sigma = getNextSigma(sigma, scaleSpaceLevels);
+		}
+
 		Rectangle tmp = source;
-		for (int aLevel = -2; aLevel < scaleSpaceLevels; aLevel++) {
-			sigma = getNextSigma(sigma, scaleSpaceLevels);
-			tmp = PFastGaussianFilter.getEffectiveTargetExtent(tmp, sigma);
+		for (int i = 0; i < sigmas.length; i++) {
+			tmp = PFastGaussianFilter.getEffectiveTargetExtent(tmp, sigmas[i]);
 		}
 		return tmp;
 	}
@@ -727,8 +735,8 @@ public class PDLoweDetector implements Runnable {
 			DetectFeaturesInSingleLevel();
 			long end = System.currentTimeMillis();
 			timeElapsed.getAndAdd(end - start);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 	}
 
@@ -738,7 +746,7 @@ public class PDLoweDetector implements Runnable {
 	 * magnitude, direction,
 	 * DOGs[0], DOGs[1], DOGs[2]
 	 */
-	private static final int numberOfImageBuffers = 8;
+	private static final int numberOfImageBuffers = 9;
 	/*
 	 * Pixel is defined as double. Size of double = 8 bytes.
 	 */
@@ -754,8 +762,8 @@ public class PDLoweDetector implements Runnable {
 		public int sourceExtentY;
 		public int divisionsX;
 		public int divisionsY;
-		public int windowSizeX;
-		public int windowSizeY;
+		public int srcWindowSizeX;
+		public int srcWindowSizeY;
 		public List<Runnable> tasks;
 		public DImageMap nextLevelBlurredImage;
 		
@@ -767,8 +775,8 @@ public class PDLoweDetector implements Runnable {
 			sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
 			sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
 			sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
-			sb.append("\nWindow extent X         :");	sb.append(windowSizeX);
-			sb.append("\nWindow extent Y         :");	sb.append(windowSizeY);
+			sb.append("\nWindow extent X         :");	sb.append(srcWindowSizeX);
+			sb.append("\nWindow extent Y         :");	sb.append(srcWindowSizeY);
 			sb.append("\nDivisions along X       :");	sb.append(divisionsX);
 			sb.append("\nDivisions along Y       :");	sb.append(divisionsY);
 			return sb.toString();
@@ -776,7 +784,7 @@ public class PDLoweDetector implements Runnable {
 	}
 	
 	public static ExecutionProfile suggestExecutionProfile(Rectangle srcExtent) {
-		return suggestExecutionProfile(srcExtent, 0.5, 100);
+		return suggestExecutionProfile(srcExtent, 0.4, 100);
 	}
 		
 	/**
@@ -799,23 +807,31 @@ public class PDLoweDetector implements Runnable {
 		
 		result.parallelTasks = Math.max(result.numberOfProcessors, 2);
 		long memPerParallelTask = (long)(result.availableMemory * maxMemoryUsageAllowed) / result.parallelTasks;
-		int tasksForExtent = (int) Math.max(result.parallelTasks, Math.ceil( 
+		int tasksForExtent = (int) Math.ceil( 
 			(double)(result.sourceExtentX * result.sourceExtentY * requiredMemoryPerPixel) / 
-			(double) memPerParallelTask));
-		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks * 6);
+			(double) memPerParallelTask);
+		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks);
 		result.divisionsX = Math.max(1, (int)Math.round(
-				Math.sqrt(tasksForExtent * result.sourceExtentX / result.sourceExtentY)));
+				Math.sqrt(tasksForExtent) * result.sourceExtentX / result.sourceExtentY));
 		result.divisionsY = (int)Math.ceil((double)tasksForExtent / result.divisionsX);
 		
 		int minSizeOfTaskWindow = Math.min(userSpecifiedMinSizeOfTaskWindow,
-				(int)Math.sqrt((double)result.availableMemory / requiredMemoryPerPixel));
+				(int)Math.sqrt((double)memPerParallelTask / requiredMemoryPerPixel));
 		minSizeOfTaskWindow = Math.max(100, minSizeOfTaskWindow);
 		
 		result.divisionsX = Math.max(1, Math.min(result.divisionsX, result.sourceExtentX / minSizeOfTaskWindow));
 		result.divisionsY = Math.max(1, Math.min(result.divisionsY, result.sourceExtentY / minSizeOfTaskWindow));
 		
-		result.windowSizeX = (int)Math.ceil((double)result.sourceExtentX / result.divisionsX);
-		result.windowSizeY = (int)Math.ceil((double)result.sourceExtentY / result.divisionsY);
+		result.srcWindowSizeX = (int)Math.ceil((double)result.sourceExtentX / result.divisionsX);
+		result.srcWindowSizeY = (int)Math.ceil((double)result.sourceExtentY / result.divisionsY);
+		
+		Rectangle source = new Rectangle(result.srcWindowSizeX, result.srcWindowSizeY);
+		Rectangle r = getEffectiveTargetExtent(source);
+		
+		result.srcWindowSizeX = r.width;
+		result.srcWindowSizeY = r.height;
+		result.divisionsX = (int) Math.ceil(result.sourceExtentX / result.srcWindowSizeX);
+		result.divisionsY = (int) Math.ceil(result.sourceExtentY / result.srcWindowSizeY);
 		return result;
 	}
 
@@ -829,10 +845,14 @@ public class PDLoweDetector implements Runnable {
 		result.tasks = new ArrayList<Runnable>();
 		DImageMap nextLevelBlurredImage = new DImageMap(source.getSizeX(), source.getSizeY());
 		
-		for (int minx = 0; minx < srcExtent.width; minx += result.windowSizeX) {
-			for (int miny = 0; miny < srcExtent.height; miny += result.windowSizeY) {
-				Rectangle destR = new Rectangle(minx, miny, result.windowSizeX, result.windowSizeY);
-				Rectangle srcR = PDLoweDetector.getNeededSourceExtent(destR);
+		for (int minx = 0; minx < srcExtent.width; minx += result.srcWindowSizeX) {
+			for (int miny = 0; miny < srcExtent.height; miny += result.srcWindowSizeY) {
+				Rectangle srcR = new Rectangle(minx, miny, result.srcWindowSizeX, result.srcWindowSizeY);
+				Rectangle destR = PDLoweDetector.getEffectiveTargetExtent(srcR);
+				if (destR.width <= 0 || destR.height <= 0) {
+					destR = PDLoweDetector.getEffectiveTargetExtent(srcR);
+					
+				}
 				srcR = srcR.intersection(srcExtent);
 				destR = destR.intersection(srcExtent);
 				DImageWrapper srcW = new DImageWrapper(source, srcR);
@@ -844,5 +864,13 @@ public class PDLoweDetector implements Runnable {
 		}
 		result.nextLevelBlurredImage = nextLevelBlurredImage;
 		return result;
+	}
+	
+	public static void main(String[] args) {
+		Rectangle dest = new Rectangle(100, 200);
+		Rectangle src = PDLoweDetector.getNeededSourceExtent(dest);
+		Rectangle dest2 = PDLoweDetector.getEffectiveTargetExtent(src);
+		System.out.println(dest.equals(dest2));
+		
 	}
 }
