@@ -102,24 +102,33 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 
 		Hook hook = new ListenerImpl(result);
 		
+		double scale = 1.0;
 		while (true) {
-			ExecutionProfile profile = PDLoweDetector.makeTasks(img, hook);
-			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
+			ExecutionProfile profile = PDLoweDetector.makeTasks(img, scale, hook);
+			ExecutorService exec = Executors.newSingleThreadExecutor(); // newFixedThreadPool(profile.parallelTasks);
 			System.out.println(profile);
+			System.out.println("---------------------");
+			for (Runnable task : profile.tasks) {
+				System.out.println(task);
+				System.out.println();
+			}
+			for (Runnable task : profile.tasks)
+				task.run();
+				
 //			for (Runnable task : profile.tasks)
 //				exec.execute(task);
-			exec.shutdown();
-			while (!exec.isTerminated()) {
-				try {
-					exec.awaitTermination(1000, TimeUnit.SECONDS);
-				} catch (InterruptedException e) {
-				}
-			}
-//			profile.nextLevelBlurredImage.scaleHalf(img);
+//			exec.shutdown();
+//			while (!exec.isTerminated()) {
+//				try {
+//					exec.awaitTermination(1000, TimeUnit.SECONDS);
+//				} catch (InterruptedException e) {
+//				}
+//			}
 			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
 			img.scaleHalf(tmp);
+			scale *= 2.0;
 			img = tmp;
-			if (img.getSizeX() / 2 <= 32) 
+			if (img.getSizeX() / 2 <= 64) 
 				break;
 		};		
 		return result;

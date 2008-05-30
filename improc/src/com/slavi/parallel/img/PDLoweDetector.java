@@ -715,14 +715,19 @@ public class PDLoweDetector implements Runnable {
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
 		
-		int minX = nextLevelBlurredImage.minX();
-		int minY = nextLevelBlurredImage.minY();
-		int maxX = nextLevelBlurredImage.maxX();
-		int maxY = nextLevelBlurredImage.maxY();
+		int minX = blurred1.minX();
+		int minY = blurred1.minY();
+		int maxX = blurred1.maxX();
+		int maxY = blurred1.maxY();
 		
-		for (int j = minY; j <= maxY; j++) {
-			for (int i = minX; i <= maxX; i++) {
-				nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i, j));
+		if ((minX & 0x01) != 0)
+			minX++;
+		if ((minY & 0x01) != 0)
+			minY++;
+		
+		for (int j = minY; j <= maxY; j += 2) {
+			for (int i = minX; i <= maxX; i += 2) {
+				nextLevelBlurredImage.setPixel(i >> 1, j >> 1, blurred1.getPixel(i, j));
 			}
 		}
 	}
@@ -732,6 +737,8 @@ public class PDLoweDetector implements Runnable {
 	public void run()  {
 		try {
 			long start = System.currentTimeMillis();
+			System.out.println("+++++");
+			System.out.println(this);
 			DetectFeaturesInSingleLevel();
 			long end = System.currentTimeMillis();
 			timeElapsed.getAndAdd(end - start);
@@ -760,25 +767,21 @@ public class PDLoweDetector implements Runnable {
 		public long availableMemory;
 		public int sourceExtentX;
 		public int sourceExtentY;
-		public int divisionsX;
-		public int divisionsY;
 		public int srcWindowSizeX;
 		public int srcWindowSizeY;
 		public List<Runnable> tasks;
-		public DImageMap nextLevelBlurredImage;
+		public DWindowedImage nextLevelBlurredImage;
 		
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("Parallel tasks          :");		sb.append(parallelTasks);
-			sb.append("\nTotal number of tasks   :");	sb.append(divisionsX * divisionsY);
+			sb.append("\nTotal number of tasks   :");   sb.append(tasks == null ? 0 : tasks.size());
 			sb.append("\nNumber of processors    :");	sb.append(numberOfProcessors);
 			sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
 			sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
 			sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
 			sb.append("\nWindow extent X         :");	sb.append(srcWindowSizeX);
 			sb.append("\nWindow extent Y         :");	sb.append(srcWindowSizeY);
-			sb.append("\nDivisions along X       :");	sb.append(divisionsX);
-			sb.append("\nDivisions along Y       :");	sb.append(divisionsY);
 			return sb.toString();
 		}
 	}
@@ -805,65 +808,67 @@ public class PDLoweDetector implements Runnable {
 		long usedMemory = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 		result.availableMemory = runtime.maxMemory() - usedMemory;
 		
-		result.parallelTasks = Math.max(result.numberOfProcessors, 2);
+		result.parallelTasks = Math.max(result.numberOfProcessors, 1);
 		long memPerParallelTask = (long)(result.availableMemory * maxMemoryUsageAllowed) / result.parallelTasks;
+		
 		int tasksForExtent = (int) Math.ceil( 
 			(double)(result.sourceExtentX * result.sourceExtentY * requiredMemoryPerPixel) / 
 			(double) memPerParallelTask);
 		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks);
-		result.divisionsX = Math.max(1, (int)Math.round(
-				Math.sqrt(tasksForExtent) * result.sourceExtentX / result.sourceExtentY));
-		result.divisionsY = (int)Math.ceil((double)tasksForExtent / result.divisionsX);
+		int divisionsX = Math.max(1, (int)Math.round(
+				Math.sqrt(tasksForExtent * result.sourceExtentX / result.sourceExtentY)));
+		int divisionsY = (int)Math.ceil((double)tasksForExtent / divisionsX);
 		
-		int minSizeOfTaskWindow = Math.min(userSpecifiedMinSizeOfTaskWindow,
-				(int)Math.sqrt((double)memPerParallelTask / requiredMemoryPerPixel));
-		minSizeOfTaskWindow = Math.max(100, minSizeOfTaskWindow);
-		
-		result.divisionsX = Math.max(1, Math.min(result.divisionsX, result.sourceExtentX / minSizeOfTaskWindow));
-		result.divisionsY = Math.max(1, Math.min(result.divisionsY, result.sourceExtentY / minSizeOfTaskWindow));
-		
-		result.srcWindowSizeX = (int)Math.ceil((double)result.sourceExtentX / result.divisionsX);
-		result.srcWindowSizeY = (int)Math.ceil((double)result.sourceExtentY / result.divisionsY);
-		
-		Rectangle source = new Rectangle(result.srcWindowSizeX, result.srcWindowSizeY);
-		Rectangle r = getEffectiveTargetExtent(source);
-		
-		result.srcWindowSizeX = r.width;
-		result.srcWindowSizeY = r.height;
-		result.divisionsX = (int) Math.ceil(result.sourceExtentX / result.srcWindowSizeX);
-		result.divisionsY = (int) Math.ceil(result.sourceExtentY / result.srcWindowSizeY);
+		result.srcWindowSizeX = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
+				Math.ceil((double)result.sourceExtentX / divisionsX));
+		result.srcWindowSizeY = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
+				Math.ceil((double)result.sourceExtentY / divisionsY));
 		return result;
 	}
 
-	public static ExecutionProfile makeTasks(DImageMap source, Hook hook) {
-		return makeTasks(source, hook, suggestExecutionProfile(source.getExtent()));
+	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook) {
+		return makeTasks(source, scale, hook, suggestExecutionProfile(source.getExtent()));
 	}
 	
-	public static ExecutionProfile makeTasks(DImageMap source, Hook hook, ExecutionProfile suggestedProfile) {
+	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook, ExecutionProfile suggestedProfile) {
 		Rectangle srcExtent = source.getExtent();
-		ExecutionProfile result = suggestedProfile;
-		result.tasks = new ArrayList<Runnable>();
-		DImageMap nextLevelBlurredImage = new DImageMap(source.getSizeX(), source.getSizeY());
+		ExecutionProfile profile = suggestedProfile;
+		profile.tasks = new ArrayList<Runnable>();
+		profile.nextLevelBlurredImage = new PDImageMapBuffer(new Rectangle(source.getSizeX() >> 1, source.getSizeY() >> 1));
 		
-		for (int minx = 0; minx < srcExtent.width; minx += result.srcWindowSizeX) {
-			for (int miny = 0; miny < srcExtent.height; miny += result.srcWindowSizeY) {
-				Rectangle srcR = new Rectangle(minx, miny, result.srcWindowSizeX, result.srcWindowSizeY);
-				Rectangle destR = PDLoweDetector.getEffectiveTargetExtent(srcR);
-				if (destR.width <= 0 || destR.height <= 0) {
-					destR = PDLoweDetector.getEffectiveTargetExtent(srcR);
-					
-				}
+		Rectangle rect = new Rectangle(suggestedProfile.srcWindowSizeX, suggestedProfile.srcWindowSizeY);
+		rect = PDLoweDetector.getEffectiveTargetExtent(rect);
+		
+		for (int sminx = 0; sminx < srcExtent.width; sminx += rect.width) {
+			for (int sminy = 0; sminy < srcExtent.height; sminy += rect.height) {
+				Rectangle destR = new Rectangle(rect.x + sminx, rect.y + sminy, rect.width, rect.height);
+				Rectangle srcR = new Rectangle(sminx, sminy, profile.srcWindowSizeX, profile.srcWindowSizeY);
 				srcR = srcR.intersection(srcExtent);
 				destR = destR.intersection(srcExtent);
+				if (srcR.isEmpty() || destR.isEmpty()) {
+					break;
+//					throw new RuntimeException("empty");
+				}
 				DImageWrapper srcW = new DImageWrapper(source, srcR);
-				DImageWrapper nextLevel = new DImageWrapper(nextLevelBlurredImage, destR);
-				PDLoweDetector task = new PDLoweDetector(srcW, destR, nextLevel, 2, 3);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, profile.nextLevelBlurredImage, scale, 3);
 				task.hook = hook;
-				result.tasks.add(task);
+				profile.tasks.add(task);
 			}
 		}
-		result.nextLevelBlurredImage = nextLevelBlurredImage;
-		return result;
+		return profile;
+	}
+	
+	public String toString() {
+		Rectangle srcExtent = src.getExtent();
+		StringBuilder r = new StringBuilder();
+		r.append("Source X,Y                :"); r.append(srcExtent.x); r.append(","); r.append(srcExtent.y);
+		r.append("\nSource width, height      :"); r.append(srcExtent.width); r.append(","); r.append(srcExtent.height);
+		r.append("\nDestination X,Y           :"); r.append(destExtent.x); r.append(","); r.append(destExtent.y);
+		r.append("\nDestination width, height :"); r.append(destExtent.width); r.append(","); r.append(destExtent.height);
+		r.append("\nScale                     :"); r.append(scale);
+		if (srcExtent.isEmpty() || destExtent.isEmpty())
+			throw new RuntimeException("zxc");
+		return r.toString();
 	}
 	
 	public static void main(String[] args) {

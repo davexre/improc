@@ -86,7 +86,7 @@ public class PDLoweDetectorTest {
 		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
 */		
 		///////////////////////////////////
-		ExecutionProfile profile = PDLoweDetector.makeTasks(src, hook);
+		ExecutionProfile profile = PDLoweDetector.makeTasks(src, 1.0, hook);
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		System.out.println(profile);
 		
