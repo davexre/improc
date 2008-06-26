@@ -1,7 +1,9 @@
 package com.slavi.img.working;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.jdom.Element;
 
@@ -540,7 +542,9 @@ public class BLoweDetector {
 		String fouName = imageFileName.substring(0, imageFileName.lastIndexOf(".")) + ".b.xml";
 		Element e = new Element("ScalePointList");
 		scalePointList.toXML(e);
-		XMLHelper.writeXML(new File(fouName), e, "");
+		OutputStream fou = new FileOutputStream(fouName);
+		XMLHelper.writeXML(fou, e, "");
+		fou.close();
 	}
 	
 	public static void main(String[] args) throws Exception {

@@ -1,9 +1,12 @@
 package com.slavi.utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.jdom.Content;
 import org.jdom.Document;
@@ -25,7 +28,7 @@ public class XMLHelper {
 	 * <p>
 	 * Adds an "xml-stylesheet" tag is a stylesheet is specified.
 	 */
-	public static void writeXML(File fou, Element documentRoot, String styleSheet) throws FileNotFoundException, IOException {
+	public static void writeXML(OutputStream fou, Element documentRoot, String styleSheet) throws IOException {
 		Document doc = new Document();
 		if ((styleSheet != null) && (!styleSheet.equals(""))) {
 			Content c = new ProcessingInstruction("xml-stylesheet", "href=\"" + styleSheet + "\" type=\"text/xsl\"");
@@ -33,16 +36,40 @@ public class XMLHelper {
 		}
 		doc.setRootElement(documentRoot);
 		XMLOutputter xout = new XMLOutputter(Format.getPrettyFormat());
-		xout.output(doc, new FileOutputStream(fou));
+		xout.output(doc, fou);
+	}
+	
+	/**
+	 * @see #writeXML(OutputStream, Element, String) 
+	 */
+	public static void writeXML(File fou, Element documentRoot, String styleSheet) throws FileNotFoundException, IOException {
+		OutputStream out = new FileOutputStream(fou);
+		try {
+			writeXML(out, documentRoot, styleSheet);
+		} finally {
+			out.close();
+		}
 	}
 
 	/**
-	 * Reads the specified XML file and returs the root element 
+	 * Reads the specified XML file and returns the root element 
 	 */
-	public static Element readXML(File fin) throws JDOMException, IOException {
+	public static Element readXML(InputStream fin) throws JDOMException, IOException {
 		SAXBuilder builder = new SAXBuilder(false);
 		Document doc = builder.build(fin);
 		return doc.getRootElement();		
+	}
+
+	/**
+	 * @see #readXML(InputStream)
+	 */
+	public static Element readXML(File fin) throws JDOMException, IOException {
+		InputStream in = new FileInputStream(fin);
+		try {
+			return readXML(in);
+		} finally {
+			in.close();
+		}
 	}
 	
 	/**

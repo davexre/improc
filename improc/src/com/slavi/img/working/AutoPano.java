@@ -1,6 +1,8 @@
 package com.slavi.img.working;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -317,7 +319,9 @@ public class AutoPano {
 				
 				Element e = new Element("ScalePointPairs");
 				autoPano.pointPairs.toXML(e);
-				XMLHelper.writeXML(new File("./../../images/ppairs.xml"), e, "matrix.xsl");
+				OutputStream fou = new FileOutputStream("./../../images/ppairs.xml");
+				XMLHelper.writeXML(fou, e, "matrix.xsl");
+				fou.close();
 			} else {
 				Element e = XMLHelper.readXML(new File("./../../images/ppairs.xml"));
 				autoPano.pointPairs = ScalePointPairList.fromXML(e);

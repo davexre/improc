@@ -1,12 +1,26 @@
 package com.slavi.utils;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.ArmEvent;
 import org.eclipse.swt.events.ArmListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -20,6 +34,15 @@ import com.slavi.ui.TaskProgress;
  * the SWT (Standard Widget Toolkit) library.   
  */
 public class SwtUtl {
+	
+	public static Shell makeShell(Shell parent, int style) {
+		return parent == null ? new Shell(Display.getDefault(), style) : new Shell(parent, style);
+	}
+
+	public static Shell makeShell(Shell parent) {
+		return makeShell(parent, SWT.NONE);
+	}	
+	
 	/**
 	 * Opens the standard SWT dialog for the current OS for selecting a folder.
 	 * <p>
@@ -27,14 +50,13 @@ public class SwtUtl {
 	 * @param parent		The owner shell. Can be null.
 	 */
 	public static String browseForFolder(Shell parent, String message, String defaultDir) {
-		Shell shell = parent == null ? new Shell() : parent;
+		Shell shell = makeShell(parent);
 		DirectoryDialog dialog = new DirectoryDialog(shell);
 		dialog.setText("");
 		dialog.setMessage(message);
 		dialog.setFilterPath(defaultDir);
 		String result = dialog.open();
-		if (parent == null)
-			shell.dispose();
+		shell.dispose();
 		return result;
 	}
 
@@ -50,10 +72,14 @@ public class SwtUtl {
 	 * A file extension filter for the openFile dialog, enumerating all
 	 * image file formats, supported by ImageIO.
 	 */
-	public static final String[][] imageFileFilter = new String[][] {
-		{"Images (png,jpg,bmp,gif)", "All files"}, 
-		{"*.png; *.jpg; *.bmp; *.gif", "*.*"}
-	};
+	public static final String[][] imageFileFilter = makeFileFilter("Images (png,jpg,bmp,gif)", "*.png; *.jpg; *.bmp; *.gif");
+
+	public static String[][] makeFileFilter(String displayName, String fileMask) {
+		return new String[][] {
+				{ displayName, "All files" },
+				{ fileMask, "*.*" }
+		};
+	}
 	
 	/**
 	 * Opens the standard SWT dialog for the current OS for selecting a file to open.
@@ -68,7 +94,7 @@ public class SwtUtl {
 	 * 						This parameter can be null. See {@link #defaultFilter} 
 	 */
 	public static String openFile(Shell parent, String title, String defaultDir, String[][] filter) {
-		Shell shell = parent == null ? new Shell() : parent;
+		Shell shell = makeShell(parent);
 		FileDialog dialog = new FileDialog(shell, SWT.OPEN);
 		if (filter == null) {
 			dialog.setFilterNames(defaultFilter[0]);
@@ -85,8 +111,7 @@ public class SwtUtl {
 			dialog.setText(title);
 		
 		String result = dialog.open();
-		if (parent == null)
-			shell.dispose();
+		shell.dispose();
 		return result;
 	}
 
@@ -103,7 +128,7 @@ public class SwtUtl {
 	 * 						This parameter can be null. See {@link #defaultFilter} 
 	 */
 	public static String saveFile(Shell parent, String title, String defaultDir, String defaultFileName, String[][] filter) {
-		Shell shell = parent == null ? new Shell() : parent;
+		Shell shell = makeShell(parent);
 		FileDialog dialog = new FileDialog(shell, SWT.SAVE);
 		if (filter == null) {
 			dialog.setFilterNames(defaultFilter[0]);
@@ -124,36 +149,120 @@ public class SwtUtl {
 			dialog.setText(title);
 		
 		String result = dialog.open();
-		if (parent == null)
-			shell.dispose();
+		shell.dispose();
 		return result;
 	}
 
+	/**
+	 * Show an HTML document in a resizable modal dialog box. The dialog box has a "save" button.  
+	 */
+	public static void showHTML(Shell parent, final String message, final String html) {
+		final Shell shell = SwtUtl.makeShell(parent, SWT.DIALOG_TRIM);
+		shell.setText(message);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		shell.setLayout(layout);
+		shell.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_ESCAPE) {
+					shell.close();
+				}
+			}
+		});
+		
+		Composite composite = new Composite(shell, SWT.NONE);
+		composite.setLayout(new RowLayout(SWT.HORIZONTAL));
+		
+		Button closeBtn = new Button(composite, SWT.PUSH);
+		closeBtn.setText("C&lose");
+		closeBtn.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				shell.close();
+			}
+		});
+		shell.setDefaultButton(closeBtn);
+		
+		Button saveBtn = new Button(composite, SWT.PUSH);
+		saveBtn.setText("&Save");
+		saveBtn.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String fouName = SwtUtl.saveFile(shell, "Save as", "", "", SwtUtl.makeFileFilter("HTML files", "*.html"));
+				if (fouName == null)
+					return;
+				PrintWriter fou = null;
+				try {
+					fou = new PrintWriter(fouName);
+					fou.print(html);
+				} catch (FileNotFoundException ee) {
+				} finally {
+					try {
+						if (fou != null && fou.checkError()) {
+							SwtUtl.msgboxError(shell, "Save failed");
+						}
+						if (fou != null) {
+							fou.close();
+						}
+					} catch (Exception ex) {
+					}
+				}
+			}
+		});
+
+		try {
+			Browser browser = new Browser(shell, SWT.NONE);
+			browser.setText(html);
+			browser.setSize(600, 450);
+			GridData layoutData = new GridData();
+			layoutData.horizontalAlignment = GridData.FILL;
+			layoutData.verticalAlignment = GridData.FILL;
+			layoutData.grabExcessHorizontalSpace = true;
+			layoutData.grabExcessVerticalSpace = true;
+			browser.setLayoutData(layoutData);
+		} catch (SWTError e) {
+			System.out.println("Could not instantiate Browser: " + e.getMessage());
+			return;
+		}
+		shell.pack();
+		shell.open();
+		SwtUtl.centerShell(shell);
+		Display display = shell.getDisplay();
+		if (display == null)
+			display = Display.getDefault();
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+		shell.dispose();
+	}
+		
 	/**
 	 * Displays the standard error dialog box with the specified message.
 	 * @param parent		The owner shell. Can be null.
 	 */
 	public static void msgboxError(Shell parent, String errorMsg) {
-		Shell shell = parent == null ? new Shell() : parent;
+		Shell shell = makeShell(parent);
 		MessageBox dialog = new MessageBox(shell, SWT.ICON_ERROR);
 		dialog.setText("Error");
 		dialog.setMessage(errorMsg);
 		dialog.open();
-		if (parent == null)
-			shell.dispose();
+		shell.dispose();
+	}
+	
+	public static void msgbox(Shell parent, String message) {
+		msgbox(parent, "", message);
 	}
 	
 	/**
 	 * Displays the standard information dialog box with the specified message.
 	 * @param parent		The owner shell. Can be null.
 	 */
-	public static void msgbox(Shell parent, String message) {
-		Shell shell = parent == null ? new Shell() : parent;
+	public static void msgbox(Shell parent, String title, String message) {
+		Shell shell = makeShell(parent);
 		MessageBox dialog = new MessageBox(shell, SWT.ICON_INFORMATION);
+		dialog.setText(title);
 		dialog.setMessage(message);
 		dialog.open();
-		if (parent == null)
-			shell.dispose();
+		shell.dispose();
 	}
 	
 	/**

@@ -1,6 +1,8 @@
 package com.slavi.img.working;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import org.jdom.Element;
@@ -50,6 +52,8 @@ public class ConvertAutoanoKeyFile {
 		}
 		root = new Element("ScalePoints");
 		spl.toXML(root);
-		XMLHelper.writeXML(new File(fouName), root, "matrix.xsl");
+		OutputStream fou = new FileOutputStream(fouName);
+		XMLHelper.writeXML(fou, root, "matrix.xsl");
+		fou.close();
 	}
 }
