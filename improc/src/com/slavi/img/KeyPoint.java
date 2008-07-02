@@ -6,10 +6,9 @@ import java.util.StringTokenizer;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.tree.KDNodeBase;
 import com.slavi.utils.XMLHelper;
 
-public class KeyPoint extends KDNodeBase<KeyPoint> {
+public class KeyPoint {
 	public int id = hashCode();
 	
 	public static final int numDirections = 8;
@@ -137,8 +136,6 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 		return true;
 	}
 
-	// Methods implementing KDNode
-	
 	public static final int linearFeatureVectorDimension = descriptorSize * descriptorSize * numDirections;
 	
 	public int getDimensions() {
@@ -153,10 +150,6 @@ public class KeyPoint extends KDNodeBase<KeyPoint> {
 		return featureVector[x][y][o];
 	}
 
-	public boolean canFindDistanceToPoint(KeyPoint node) {
-		return this != node;
-	}
-	
 	public void toXML(Element dest) {
 		dest.addContent(XMLHelper.makeAttrEl("id", Integer.toString(id)));
 		dest.addContent(XMLHelper.makeAttrEl("imgX", Integer.toString(imgX)));

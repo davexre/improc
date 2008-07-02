@@ -1,28 +1,33 @@
 package com.slavi.testpackage;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import com.slavi.img.working.KDNode;
-import com.slavi.img.working.KDNodeBase;
-import com.slavi.img.working.KDTree;
-import com.slavi.img.working.NearestNeighbours;
+import com.slavi.tree.KDTree;
 
 public class KDTreeTest {
-	public static class KDNodeTest extends KDNodeBase {
+	
+	public static class MyKDTree extends KDTree<MyKDData> {
+		public MyKDTree(int dimensions, List<MyKDData> items) {
+			super(dimensions, items);
+		}
+
+		public boolean canFindDistanceBetween(MyKDData fromNode, MyKDData toNode) {
+			return true;
+		}
+
+		public double getValue(MyKDData node, int dimensionIndex) {
+			return node.value[dimensionIndex];
+		}
+	}
+	
+	public static class MyKDData {
 		public double value[];
 		
-		public KDNodeTest(double value[]) {
+		public MyKDData(double value[]) {
 			this.value = new double[value.length];
 			for (int i = value.length - 1; i >= 0; i--)
 				this.value[i] = value[i];
-		}
-		
-		public int getDimensions() {
-			return value.length;
-		}
-		
-		public double getValue(int dimensionIndex) {
-			return value[dimensionIndex]; 
 		}
 		
 		public String toString() {
@@ -35,15 +40,11 @@ public class KDTreeTest {
 			}
 			return buf.toString();
 		}
-
-		public boolean canFindDistanceToPoint(KDNode node) {
-			return true; //this != node;
-		}
 	}
 	
-	protected static void generateItems(ArrayList items, double[] value, int dimension, int itemsPerDimension) {
+	protected static void generateItems(ArrayList<MyKDData> items, double[] value, int dimension, int itemsPerDimension) {
 		if (dimension < 0) {
-			items.add(new KDNodeTest(value));
+			items.add(new MyKDData(value));
 		} else {
 			for (int i = itemsPerDimension - 1; i >= 0; i--) {
 				value[dimension] = i;
@@ -52,44 +53,58 @@ public class KDTreeTest {
 		}
 	}
 	
-	public static void printNode(KDNode node, int level) {
+	public static void printNode(KDTree.Node<MyKDData> node, int level) {
 		String s = "";
 		for (int i = 0; i < level; i++)
-			s += "  ";
+			s += "|  ";
 
 		if (node == null) {
 			System.out.println(s + "null");
 		} else {
-			System.out.println(s + node.toString());
+			System.out.println(s + node.getData().toString());
 			printNode(node.getLeft(), level + 1);
 			printNode(node.getRight(), level + 1);
 		}
 	}
 	
+	public static void printNodesList(ArrayList<MyKDData> items) {
+		for (int i = 0; i < items.size(); i++) {
+			MyKDData n = items.get(i);
+			System.out.printf("%5d  %s\n", i, n.toString());
+		}
+		System.out.println();
+	}
+	
 	public static void main(String[] args) {
 		int dimensions = 2;
-		int itemsPerDimension = 4;
-		ArrayList items = new ArrayList();
+		int itemsPerDimension = 5;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
 		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
-		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+//		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
 
-		KDNode thePoint = (KDNode)items.get(2);
+		printNodesList(items);
+		
+		MyKDData thePoint = items.get(2);
 
-		KDTree tree = new KDTree(items, dimensions);
-		printNode(tree.root, 0);
+		MyKDTree tree = new MyKDTree(dimensions, items);
+		printNode(tree.getRoot(), 0);
 
-		NearestNeighbours nnlst = tree.getNearestNeighbours(thePoint, 5);
+		KDTree.NearestNeighbours<MyKDData> nnlst = tree.getNearestNeighbours(thePoint, 5);
+		int maxUsedSearchSteps = nnlst.getUsedSearchSteps();
+		
 		System.out.println("--------");
 		System.out.println("Point is:" + nnlst.getTarget().toString());
 		for (int i = 0; i < nnlst.size(); i++) {
-			System.out.println("Distance=" + Math.sqrt(nnlst.getValue(i)) + " value=" + nnlst.getItem(i).toString());
+			System.out.println("Distance=" + Math.sqrt(nnlst.getDistanceToTarget(i)) + " value=" + nnlst.getItem(i).toString());
 		}
-		System.out.println("Used search steps=" + tree.usedSearchSteps);
+		System.out.println("Used search steps=" + nnlst.getUsedSearchSteps());
 		for (int i = 0; i < items.size(); i++) {
-		  nnlst = tree.getNearestNeighbours((KDNode)items.get(i), 5);
+		  nnlst = tree.getNearestNeighbours(items.get(i), 5);
+		  if (maxUsedSearchSteps < nnlst.getUsedSearchSteps())
+			  maxUsedSearchSteps = nnlst.getUsedSearchSteps();
 		}
 		
 		System.out.println("Numer of items=" + items.size());
-		System.out.println("Max used steps=" + tree.maxUsedSearchSteps);
+		System.out.println("Max used steps=" + maxUsedSearchSteps);
 	}
 }

@@ -49,7 +49,7 @@ public class Improc {
 					SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
 //					KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
 					KeyPointList kpl = KeyPointList.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(fileName));
-					System.out.println(" (" + kpl.kdtree.size() + " key points)");
+					System.out.println(" (" + kpl.kdtree.getSize() + " key points)");
 				}
 			} catch (Throwable e) {
 				System.err.println("GenerateKeyPointFiles FAILED!");

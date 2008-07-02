@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
-import com.slavi.tree.NearestNeighbours;
+import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
 
@@ -90,10 +90,10 @@ public class KeyPointPairList {
 		result.target = KeyPointList.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
 		result.sourceKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image1) ), rootKeyPointFileDir);
 		result.targetKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image2) ), rootKeyPointFileDir);
-		int searchSteps = (int) (Math.max(130.0, (Math.log(result.source.kdtree.size()) / Math.log (1000.0)) * 130.0));
+		int searchSteps = (int) (Math.max(130.0, (Math.log(result.source.kdtree.getSize()) / Math.log (1000.0)) * 130.0));
 
 		for (KeyPoint p1 : result.source.kdtree) {
-			NearestNeighbours<KeyPoint> nnlst = result.target.kdtree.getNearestNeighboursBBF(p1, 2, searchSteps);
+			KDTree.NearestNeighbours<KeyPoint> nnlst = result.target.kdtree.getNearestNeighboursBBF(p1, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;
 			if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {

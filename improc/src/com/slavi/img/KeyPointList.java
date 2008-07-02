@@ -10,36 +10,58 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
-import com.slavi.tree.KDNodeSaver;
 import com.slavi.tree.KDTree;
+import com.slavi.tree.KDNodeSaver;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
 import com.slavi.utils.Marker;
 import com.slavi.utils.Utl;
 
-public class KeyPointList implements KDNodeSaver<KeyPoint> {
+public class KeyPointList {
 	public static final String fileHeader = "KeyPoint file version 1.2";
 	
 	public FileStamp imageFileStamp = null;
 	
-	public KDTree<KeyPoint> kdtree = new KDTree<KeyPoint>(KeyPoint.featureVectorLinearSize);
+	public static class KeyPointTree extends KDTree<KeyPoint> {
+
+		public KeyPointTree() {
+			super(KeyPoint.featureVectorLinearSize);
+		}
+
+		public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {
+			return fromNode != toNode;
+		}
+
+		public double getValue(KeyPoint node, int dimensionIndex) {
+			return node.getValue(dimensionIndex);
+		}
+	}
+	
+	public static class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
+		public KDTree<KeyPoint> getTree(int dimensions) {
+			if (dimensions != KeyPoint.featureVectorLinearSize)
+				throw new IllegalArgumentException("Invalid dimension"); 
+			return new KeyPointTree();
+		}
+
+		public KeyPoint nodeFromString(String source) {
+			return KeyPoint.fromString(source);
+		}
+
+		public String nodeToString(KeyPoint node) {
+			return node.toString();
+		}
+	}
+	
+	public KeyPointTree kdtree = new KeyPointTree();
 
 	public int imageSizeX;
 
 	public int imageSizeY;
-	
-	public KeyPoint nodeFromString(String source) {
-		return KeyPoint.fromString(source);
-	}
-
-	public String nodeToString(KeyPoint node) {
-		return node.toString();
-	}
 	
 	private static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
@@ -47,14 +69,15 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
 		r.imageSizeX = Integer.parseInt(st.nextToken());
 		r.imageSizeY = Integer.parseInt(st.nextToken());
-		r.kdtree = KDTree.fromTextStream(KeyPoint.featureVectorLinearSize, fin, r);
+		r.kdtree = new KeyPointTree(); 
+		new KeyPointListSaver().fromTextStream(r.kdtree, fin);
 		return r;
 	}
 
 	private void toTextStream(PrintWriter fou) {
 		fou.println(imageFileStamp.toString());
 		fou.println(imageSizeX + "\t" + imageSizeY);
-		kdtree.toTextStream(fou, this);
+		new KeyPointListSaver().toTextStream(kdtree, fou);
 	}
 
 	private static class ListenerImpl implements Hook {
@@ -190,7 +213,7 @@ public class KeyPointList implements KDNodeSaver<KeyPoint> {
 	}
 	
 	public HashMap<Integer, KeyPoint> makeMap() {
-		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(kdtree.size());
+		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(kdtree.getSize());
 		for (KeyPoint i : kdtree) {
 			result.put(i.id, i);
 		}

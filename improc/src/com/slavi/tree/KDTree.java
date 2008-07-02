@@ -1,58 +1,161 @@
 package com.slavi.tree;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.jdom.Content;
-import org.jdom.Element;
-import org.jdom.JDOMException;
+public abstract class KDTree<E> implements Iterable<E>{
+	
+	public abstract boolean canFindDistanceBetween(E fromNode, E toNode);
+	
+	public abstract double getValue(E node, int dimensionIndex);
+	
+	public static class NearestNeighbours<E>{
+		NearestNeighbours(E target, int maxCapacity, int dimensions) {
+			this.target = target;
+			distancesToTarget = new double[maxCapacity];
+			items = (E[])new Object[maxCapacity];
+			m_size = 0;
+			searchSteps = 0;
+			usedSearchSteps = 0;
+			hr = new double[dimensions][2];
 
-import com.slavi.utils.XMLHelper;
+			for (int i = dimensions - 1; i >= 0; i--) {
+				hr[i][0] = Double.MIN_VALUE;
+				hr[i][1] = Double.MAX_VALUE;
+			}
+		}
+		
+		int searchSteps;
+		
+		int usedSearchSteps;
 
-public class KDTree<E extends KDNode<E>> implements Iterable<E>{
+		double[][] hr;
+
+		E target;
+		
+		double[] distancesToTarget;
+		
+		E[] items;
+		
+		int m_size;
+		
+		public int size() {
+			return m_size;
+		}
+		
+		public E getItem(int atIndex) {
+			return items[atIndex];
+		}
+		
+		public double getDistanceToTarget(int atIndex) {
+			return distancesToTarget[atIndex];
+		}
+		
+		public int getCapacity() {
+			return distancesToTarget.length;
+		}
+		
+		public E getTarget() {
+			return target;
+		}
+		
+		public int countAdds = 0;
+
+		public int getSearchSteps() {
+			return searchSteps;
+		}
+		
+		public int getUsedSearchSteps() {
+			return usedSearchSteps;
+		}
+		
+		void add(E item, double distanceToTarget) {
+			countAdds++;
+			int insertAt = 0;
+			// Find insert position
+			for (; insertAt < m_size; insertAt++) {
+				if (distanceToTarget < distancesToTarget[insertAt])
+					break;
+			}
+			// If value is greater than all elements then ignore it.
+			if (insertAt >= distancesToTarget.length)
+				return;
+			// Increase size if limit not reached
+			if (m_size < distancesToTarget.length)
+				m_size++;
+			// Make room to insert
+			int itemsToMove = m_size - insertAt - 1;
+			if (itemsToMove > 0) {
+				System.arraycopy(distancesToTarget, insertAt, distancesToTarget, insertAt + 1, itemsToMove);
+				System.arraycopy(items, insertAt, items, insertAt + 1, itemsToMove);
+			}
+			// Put item in insertAt position
+			distancesToTarget[insertAt] = distanceToTarget;
+			items[insertAt] = item;
+		}
+	}
+	
+	public static class Node<E> {
+		protected E data;
+		protected Node<E> left, right;
+		
+		public E getData() {
+			return data;
+		}
+		
+		public Node<E> getLeft() {
+			return left;
+		}
+		
+		public Node<E> getRight() {
+			return right;
+		}
+	}	
+	
 	protected int dimensions;
 
-	protected E root;
+	protected Node<E> root;
 	
-	private double[][] hyperRectangle; // used by getNearestNeighbourhood()
-
-	private int m_size;
+	private volatile int size;
 	
-	private int treeDepth;
+	private volatile int treeDepth;
 	
-	private KDTree() {
-		m_size = 0;
-		treeDepth = 0;
-	};
+	private volatile int mutations;
 	
 	public KDTree(int dimensions) {
 		this.dimensions = dimensions;
-		this.m_size = 0;
+		this.size = 0;
 		this.treeDepth = 0;
-		this.hyperRectangle = new double[dimensions][2];
 		this.root = null;
+		this.mutations = 0;
 	}
 
+	public KDTree(int dimensions, List<E> items) {
+		this(dimensions);
+		for (E item : items)
+			add(item);
+		balanceIfNeeded();
+	}
+	
 	/**
 	 * Removes all elements in the tree.
 	 */
 	public void clear() {
-		m_size = 0;
+		size = 0;
 		treeDepth = 0;
 		root = null;
+		mutations++;
 	}
 
-	private void addToList_recursive(ArrayList<E>list, E node) {
+	private void addToList_recursive(ArrayList<E>list, Node<E> node) {
 		if (node == null)
 			return;
-		list.add(node);
-		addToList_recursive(list, node.getLeft()); 
-		addToList_recursive(list, node.getRight()); 
+		list.add(node.data);
+		addToList_recursive(list, node.left); 
+		addToList_recursive(list, node.right); 
 	}
 
 	/**
@@ -66,13 +169,14 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	}
 
 	/**
-	 * Balances the tree. The prefered way to do this is 
+	 * Balances the tree. The preferred way to do this is 
 	 * to use {@link #balanceIfNeeded()}
 	 */
 	public void balance() {
 		ArrayList<E>list = toList();
-		this.treeDepth = 0;
-		this.root = balanceSegment(list, dimensions, 0, list.size() - 1, 0, 0);
+		treeDepth = 0;
+		mutations++;
+		root = balanceSegment(list, dimensions, 0, list.size() - 1, 0, 0);
 	}
 
 	/**
@@ -91,12 +195,12 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	 * 
 	 * where
 	 * 
-	 * maxDepthDeviation = {@link #size()} * 0.05 (5%)
+	 * maxDepthDeviation = {@link #getSize()} * 0.05 (5%)
 	 * and also 3 <= maxDepthDeviation <= 7 
 	 */
 	public boolean isBalanceNeeded() {
 		final double log2 = Math.log(2.0);
-		int curSize = size();
+		int curSize = getSize();
 		int perfectDepth = (int)(Math.ceil(Math.log(curSize) / log2));
 		int maxDepthDeviation = (int)(curSize * 0.05);
 		if (maxDepthDeviation < 3)
@@ -113,28 +217,28 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	 * If the items list contains more than one element with equal value in a speciffic dimension, the
 	 * list is recursively sorted using the next dimension.  
 	 */
-	private static int deepSort(ArrayList items, int dimensions, int left, int right, int curDimension, int numberOfUnsuccessfullSorts) {
+	private int deepSort(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int numberOfUnsuccessfullSorts) {
 		if (left > right)
 			return -1;
 		int midIndex = (left + right) >> 1;
 
 		int segmentEndIndex = right;
-		double segmentEndValue = ((KDNode)items.get(segmentEndIndex)).getValue(curDimension);
+		double segmentEndValue = getValue(items.get(segmentEndIndex), curDimension);
 		
 		int segmentStartIndex = right;
 		for (; segmentStartIndex >= left; segmentStartIndex--) {
 			int minIndex = segmentStartIndex;
-			double segmentStartValue = ((KDNode)items.get(segmentStartIndex)).getValue(curDimension);
+			double segmentStartValue = getValue(items.get(segmentStartIndex), curDimension);
 			
 			for (int j = segmentStartIndex - 1; j >= left; j--) {
-				double tmp = ((KDNode)items.get(j)).getValue(curDimension);
+				double tmp = getValue(items.get(j), curDimension);
 				if (tmp >= segmentStartValue) {
 					segmentStartValue = tmp;
 					minIndex = j;
 				}
 			}
 			if (minIndex != segmentStartIndex) {
-				Object tmp = items.get(minIndex);
+				E tmp = items.get(minIndex);
 				items.set(minIndex, items.get(segmentStartIndex));
 				items.set(segmentStartIndex, tmp);
 			}
@@ -160,14 +264,14 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 		return deepSort(items, dimensions, segmentStartIndex, segmentEndIndex, nextDimension, numberOfUnsuccessfullSorts);
 	}
 	
-	private E balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
+	private Node<E> balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
 		if (left > right)
 			return null;
 		int midIndex = deepSort(items, dimensions, left, right, curDimension, 0);
-		double midValue = items.get(midIndex).getValue(curDimension);
+		double midValue = getValue(items.get(midIndex), curDimension);
 		int startIndex = midIndex - 1;
 		for (; startIndex >= left; startIndex--) 
-			if (items.get(startIndex).getValue(curDimension) != midValue) 
+			if (getValue(items.get(startIndex), curDimension) != midValue) 
 				break;
 		startIndex++;
 		if (startIndex != midIndex) {
@@ -176,19 +280,20 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 			items.set(startIndex, tmp);
 		}
 		int nextDimension = (curDimension + 1) % dimensions;
-		E result = items.get(startIndex);
+		Node<E> result = new Node<E>();
+		result.data = items.get(startIndex);
 		depthLevel++;
 		if (depthLevel > treeDepth)
 			treeDepth = depthLevel;
-		result.setLeft(balanceSegment(items, dimensions, left, startIndex - 1, nextDimension, depthLevel));
-		result.setRight(balanceSegment(items, dimensions, startIndex + 1, right, nextDimension, depthLevel));
+		result.left = balanceSegment(items, dimensions, left, startIndex - 1, nextDimension, depthLevel);
+		result.right = balanceSegment(items, dimensions, startIndex + 1, right, nextDimension, depthLevel);
 		return result;
 	}
 	
 	private double getDistanceSquared(E n1, E n2) {
 		double result = 0;
 		for (int i = dimensions - 1; i >= 0; i--) {
-			double d = n1.getValue(i) - n2.getValue(i);
+			double d = getValue(n1, i) - getValue(n2, i);
 			result += d * d;
 		}
 		return result;
@@ -197,7 +302,7 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	private double getDistanceSquaredToHR(double[][] hr, E target) {
 		double result = 0;
 		for (int i = dimensions - 1; i >= 0; i--) {
-			double d = target.getValue(i);
+			double d = getValue(target, i);
 			if (d < hr[i][0]) {
 				d -= hr[i][0];
 			} else if (d > hr[i][1]) {
@@ -209,54 +314,53 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 		}
 		return result;
 	}
-
-	private void nearestSegment(NearestNeighbours nearest,
-			double[][] hr, E target, E curNode, int dimension) {
+	
+	private void nearestSegment(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension) {
 		if (curNode == null) 
 			return;
-		usedSearchSteps++;
+		nearest.usedSearchSteps++;
 
-		if (target.canFindDistanceToPoint(curNode))
-			nearest.add(curNode, getDistanceSquared(target, curNode));
-		double curNodeValue = curNode.getValue(dimension);
+		if (canFindDistanceBetween(target, curNode.data))
+			nearest.add(curNode.data, getDistanceSquared(target, curNode.data));
+		double curNodeValue = getValue(curNode.data, dimension);
 		int nextDimension = (dimension + 1) % dimensions;
 
-		if (target.getValue(dimension) < curNodeValue) {
+		if (getValue(target, dimension) < curNodeValue) {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][1];
-			hr[dimension][1] = curNodeValue;
-			nearestSegment(nearest, hr, target, curNode.getLeft(), nextDimension);
-			hr[dimension][1] = tmp;
+			double tmp = nearest.hr[dimension][1];
+			nearest.hr[dimension][1] = curNodeValue;
+			nearestSegment(nearest, target, curNode.left, nextDimension);
+			nearest.hr[dimension][1] = tmp;
 			// Prepare the "further" hyper rectangle
-			tmp = hr[dimension][0];
-			hr[dimension][0] = curNodeValue;
+			tmp = nearest.hr[dimension][0];
+			nearest.hr[dimension][0] = curNodeValue;
 			// Check the "further" hyper rectangle:
 			//   if capacity is not reached OR
 			//   if distance from target to "further" hyper rectangle is smaller 
 			//      than the maximum of the currently found neighbours
 			if ((nearest.size() < nearest.getCapacity()) ||
-					(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-				nearestSegment(nearest, hr, target, curNode.getRight(), nextDimension);
+					(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+				nearestSegment(nearest, target, curNode.right, nextDimension);
 			// Restore the hyper rectangle
-			hr[dimension][0] = tmp;
+			nearest.hr[dimension][0] = tmp;
 		} else {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][0];
-			hr[dimension][0] = curNodeValue;			
-			nearestSegment(nearest, hr, target, curNode.getRight(), nextDimension);
-			hr[dimension][0] = tmp;
+			double tmp = nearest.hr[dimension][0];
+			nearest.hr[dimension][0] = curNodeValue;			
+			nearestSegment(nearest, target, curNode.right, nextDimension);
+			nearest.hr[dimension][0] = tmp;
 			// Prepare the "further" hyper rectangle
-			tmp = hr[dimension][1];
-			hr[dimension][1] = curNodeValue;
+			tmp = nearest.hr[dimension][1];
+			nearest.hr[dimension][1] = curNodeValue;
 			// Check the "further" hyper rectangle:
 			//   if capacity is not reached OR
 			//   if distance from target to "further" hyper rectangle is smaller 
 			//      than the maximum of the currently found neighbours
 			if ((nearest.size() < nearest.getCapacity()) ||
-					(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-				nearestSegment(nearest, hr, target, curNode.getLeft(), nextDimension);
+					(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+				nearestSegment(nearest, target, curNode.left, nextDimension);
 			// Restore the hyper rectangle
-			hr[dimension][1] = tmp;
+			nearest.hr[dimension][1] = tmp;
 		}
 	}
 	
@@ -264,79 +368,67 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	 * Returns [maxNeighbours] of elements closest to the [target] element.
 	 * The list is sorted using the distance from the element to the target element.
 	 * 
-	 * @see #nearestSegmentBBF(NearestNeighbours, double[][], KDNode, KDNode, int)
+	 * @see #getNearestNeighboursBBF(Object, int, int)
 	 */
 	public NearestNeighbours getNearestNeighbours(E target, int maxNeighbours) {
-		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
-		for (int i = dimensions - 1; i >= 0; i--) {
-			hyperRectangle[i][0] = Double.MIN_VALUE;
-			hyperRectangle[i][1] = Double.MAX_VALUE;
-		}
-		usedSearchSteps = 0;
-		nearestSegment(result, hyperRectangle, target, root, 0);
-		if (usedSearchSteps > maxUsedSearchSteps)
-			maxUsedSearchSteps = usedSearchSteps;
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+		nearestSegment(result, target, root, 0);
 		return result;
 	}
 
-	public int searchSteps;
-	public int usedSearchSteps;
-	public int maxUsedSearchSteps = 0;
-
-	private void nearestSegmentBBF(NearestNeighbours nearest,
-			double[][] hr, E target, E curNode, int dimension) {
+	private void nearestSegmentBBF(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension) {
 		if (curNode == null) 
 			return;
-		usedSearchSteps++;
+		nearest.usedSearchSteps++;
 
-		if (target.canFindDistanceToPoint(curNode))
-			nearest.add(curNode, getDistanceSquared(target, curNode));
-		double curNodeValue = curNode.getValue(dimension);
+		if (canFindDistanceBetween(target, curNode.data))
+			nearest.add(curNode.data, getDistanceSquared(target, curNode.data));
+		double curNodeValue = getValue(curNode.data, dimension);
 		int nextDimension = (dimension + 1) % dimensions;
 
-		if (target.getValue(dimension) < curNodeValue) {
+		if (getValue(target, dimension) < curNodeValue) {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][1];
-			hr[dimension][1] = curNodeValue;
-			nearestSegmentBBF(nearest, hr, target, curNode.getLeft(), nextDimension);
-			hr[dimension][1] = tmp;
+			double tmp = nearest.hr[dimension][1];
+			nearest.hr[dimension][1] = curNodeValue;
+			nearestSegmentBBF(nearest, target, curNode.left, nextDimension);
+			nearest.hr[dimension][1] = tmp;
 
-			if (searchSteps > 0) {
-				searchSteps--;
+			if (nearest.searchSteps > 0) {
+				nearest.searchSteps--;
 				// Prepare the "further" hyper rectangle
-				tmp = hr[dimension][0];
-				hr[dimension][0] = curNodeValue;
+				tmp = nearest.hr[dimension][0];
+				nearest.hr[dimension][0] = curNodeValue;
 				// Check the "further" hyper rectangle:
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
 				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-					nearestSegmentBBF(nearest, hr, target, curNode.getRight(), nextDimension);
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegmentBBF(nearest, target, curNode.right, nextDimension);
 				// Restore the hyper rectangle
-				hr[dimension][0] = tmp;
+				nearest.hr[dimension][0] = tmp;
 			}
 		} else {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][0];
-			hr[dimension][0] = curNodeValue;			
-			nearestSegmentBBF(nearest, hr, target, curNode.getRight(), nextDimension);
-			hr[dimension][0] = tmp;
+			double tmp = nearest.hr[dimension][0];
+			nearest.hr[dimension][0] = curNodeValue;			
+			nearestSegmentBBF(nearest, target, curNode.right, nextDimension);
+			nearest.hr[dimension][0] = tmp;
 
-			if (searchSteps > 0) {
-				searchSteps--;
+			if (nearest.searchSteps > 0) {
+				nearest.searchSteps--;
 				// Prepare the "further" hyper rectangle
-				tmp = hr[dimension][1];
-				hr[dimension][1] = curNodeValue;
+				tmp = nearest.hr[dimension][1];
+				nearest.hr[dimension][1] = curNodeValue;
 				// Check the "further" hyper rectangle:
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
 				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-					nearestSegmentBBF(nearest, hr, target, curNode.getLeft(), nextDimension);
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegmentBBF(nearest, target, curNode.left, nextDimension);
 				// Restore the hyper rectangle
-				hr[dimension][1] = tmp;
+				nearest.hr[dimension][1] = tmp;
 			}
 		}
 	}
@@ -349,222 +441,99 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	 * Returns [maxNeighbours] of elements closest to the [target] element using maxSearchSteps.
 	 * The list is sorted using the distance from the element to the target element.
 	 *
-	 * @see #nearestSegment(NearestNeighbours, double[][], KDNode, KDNode, int)
+	 * @see #getNearestNeighbours(Object, int)
 	 */
-	public NearestNeighbours getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
-		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
-		for (int i = dimensions - 1; i >= 0; i--) {
-			hyperRectangle[i][0] = Double.MIN_VALUE;
-			hyperRectangle[i][1] = Double.MAX_VALUE;
-		}
-		usedSearchSteps = 0;
-		this.searchSteps = maxSearchSteps; 
-		nearestSegmentBBF(result, hyperRectangle, target, root, 0);
-		if (usedSearchSteps > maxUsedSearchSteps)
-			maxUsedSearchSteps = usedSearchSteps;
+	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+
+		result.searchSteps = maxSearchSteps;
+		nearestSegmentBBF(result, target, root, 0);
 		return result;
 	}
 
-	private void nearestSegmentBBFOriginal(NearestNeighbours nearest,
-			double[][] hr, E target, E curNode, int dimension) {
+	private void nearestSegmentBBFOriginal(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension) {
 		if (curNode == null) 
 			return;
-		usedSearchSteps++;
+		nearest.usedSearchSteps++;
 
-		if (target.canFindDistanceToPoint(curNode))
-			nearest.add(curNode, getDistanceSquared(target, curNode));
-		double curNodeValue = curNode.getValue(dimension);
+		if (canFindDistanceBetween(target, curNode.data))
+			nearest.add(curNode.data, getDistanceSquared(target, curNode.data));
+		double curNodeValue = getValue(curNode.data, dimension);
 		int nextDimension = (dimension + 1) % dimensions;
 
-		if (target.getValue(dimension) < curNodeValue) {
+		if (getValue(target, dimension) < curNodeValue) {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][1];
-			hr[dimension][1] = curNodeValue;
-			nearestSegmentBBFOriginal(nearest, hr, target, curNode.getLeft(), nextDimension);
-			hr[dimension][1] = tmp;
+			double tmp = nearest.hr[dimension][1];
+			nearest.hr[dimension][1] = curNodeValue;
+			nearestSegmentBBFOriginal(nearest, target, curNode.left, nextDimension);
+			nearest.hr[dimension][1] = tmp;
 
-			if (searchSteps > 0) {
-				searchSteps--;
+			if (nearest.searchSteps > 0) {
+				nearest.searchSteps--;
 				// Prepare the "further" hyper rectangle
-				tmp = hr[dimension][0];
-				hr[dimension][0] = curNodeValue;
+				tmp = nearest.hr[dimension][0];
+				nearest.hr[dimension][0] = curNodeValue;
 				// Check the "further" hyper rectangle:
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
 				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-					nearestSegmentBBFOriginal(nearest, hr, target, curNode.getRight(), nextDimension);
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegmentBBFOriginal(nearest, target, curNode.right, nextDimension);
 				// Restore the hyper rectangle
-				hr[dimension][0] = tmp;
+				nearest.hr[dimension][0] = tmp;
 			}
 		} else {
 			// Prepare and check the "nearer" hyper rectangle
-			double tmp = hr[dimension][0];
-			hr[dimension][0] = curNodeValue;			
-			nearestSegmentBBFOriginal(nearest, hr, target, curNode.getRight(), nextDimension);
-			hr[dimension][0] = tmp;
+			double tmp = nearest.hr[dimension][0];
+			nearest.hr[dimension][0] = curNodeValue;			
+			nearestSegmentBBFOriginal(nearest, target, curNode.right, nextDimension);
+			nearest.hr[dimension][0] = tmp;
 
-			if (searchSteps > 0) {
-				searchSteps--;
+			if (nearest.searchSteps > 0) {
+				nearest.searchSteps--;
 				// Prepare the "further" hyper rectangle
-				tmp = hr[dimension][1];
-				hr[dimension][1] = curNodeValue;
+				tmp = nearest.hr[dimension][1];
+				nearest.hr[dimension][1] = curNodeValue;
 				// Check the "further" hyper rectangle:
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
 				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-					nearestSegmentBBFOriginal(nearest, hr, target, curNode.getLeft(), nextDimension);
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegmentBBFOriginal(nearest, target, curNode.left, nextDimension);
 				// Restore the hyper rectangle
-				hr[dimension][1] = tmp;
+				nearest.hr[dimension][1] = tmp;
 			}
 		}
 	}
 	
-	public NearestNeighbours getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
-		NearestNeighbours result = new NearestNeighbours(target, maxNeighbours);
-		for (int i = dimensions - 1; i >= 0; i--) {
-			hyperRectangle[i][0] = Double.MIN_VALUE;
-			hyperRectangle[i][1] = Double.MAX_VALUE;
-		}
-		usedSearchSteps = 0;
-		this.searchSteps = maxSearchSteps; 
-		nearestSegmentBBFOriginal(result, hyperRectangle, target, root, 0);
-		if (usedSearchSteps > maxUsedSearchSteps)
-			maxUsedSearchSteps = usedSearchSteps;
-		return result;
-	}
-	
-	private void toXML_recursive(E node, Element dest, KDNodeSaverXML<E> saver) {
-		if (node == null)
-			return;
-		saver.nodeToXML(node, dest);
-		if (node.getLeft() != null) {
-			Element left = XMLHelper.makeAttrEl("Item", "Left");
-			toXML_recursive(node.getLeft(), left, saver);
-			dest.addContent(left);
-		}
-		if (node.getRight() != null) {
-			Element right = XMLHelper.makeAttrEl("Item", "Right");
-			toXML_recursive(node.getRight(), right, saver);
-			dest.addContent(right);
-		}
-	}
-	
-	/**
-	 * Stores the tree in a hierarchical XML form. All the items in the tree are stored as
-	 * XML elements called "Item" having one attribute value named "v". The "v" attribute
-	 * can have one of the tree possible values, i.e. "Root", "Left" and "Right".
-	 * 
-	 * All "Item" XML elements can have one sub "Item" sub element with the "v" attribute
-	 * set to "Left" and one sub element with "v" attibute set to "Right"
-	 * 
-	 * Before saving the tree the {@link #balanceIfNeeded()} is called.
-	 * 
-	 * @see #fromXML(Element, KDNodeSaverXML)
-	 */
-	public void toXML(Element dest, KDNodeSaverXML<E> saver) {
-		balanceIfNeeded();
-		dest.addContent(XMLHelper.makeAttrEl("Dimensions", Integer.toString(dimensions)));
-		Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
-		toXML_recursive(root, rootNode, saver);
-		dest.addContent(rootNode);
-	}
-	
-	private void fromXML_ReadChildren(Element source, KDNodeSaverXML<E> reader) throws JDOMException {
-		if (source == null)
-			return;
-		List children = source.getChildren();
-		for (int i = children.size() - 1; i >= 0; i++) {
-			Content child_content = (Content) children.get(i);
-			if (child_content instanceof Element) {
-				Element child = (Element)child_content;
-				if (child.getName().equals("Item")) {
-					E node = reader.nodeFromXML(child);
-					if (node != null)
-						add(node);
-					fromXML_ReadChildren(child, reader);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Reads the tree from XML (see {@link #toXML(Element, KDNodeSaverXML)}).
-	 *  
-	 * The tree is read ignoring the "v" attributes of the "Item" elements.
-	 * An "Item" element is ALLOWED to have more than two "Item" sub elements.
-	 * If the node reader fails in preparing a node it can return null and the node
-	 * will ignored.
-	 * 
-	 * After reading the tree the {@link #balanceIfNeeded()} is called.
-	 *   
-	 * @throws JDOMException
-	 */
-	public static KDTree fromXML(Element source, KDNodeSaverXML reader) throws JDOMException {
-		KDTree result = new KDTree();
-		result.dimensions = Integer.parseInt(XMLHelper.getAttrEl(source, "Dimensions"));
-		result.hyperRectangle = new double[result.dimensions][2];
-		result.root = null;
-		result.fromXML_ReadChildren(source, reader);
-		result.balanceIfNeeded();
-		return result;
-	}
+	public NearestNeighbours<E> getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
 
-	private void toTextStream_recursive(PrintWriter fou, E node, KDNodeSaver saver) {
-		if (node == null)
-			return;
-		fou.println(saver.nodeToString(node));
-		toTextStream_recursive(fou, node.getLeft(), saver);
-		toTextStream_recursive(fou, node.getRight(), saver);
-	}
-	
-	/**
-	 * The tree is stored to a text stream one node at a line.
-	 * After reading the tree the {@link #balanceIfNeeded()} is called.
-	 */
-	public void toTextStream(PrintWriter fou, KDNodeSaver saver) {
-		toTextStream_recursive(fou, root, saver);
-	}
-	
-	/**
-	 * Reads a tree from a text stream one node at a line. The method {@link #balanceIfNeeded()}
-	 * is invoked 
-	 *  
-	 */
-	public static KDTree fromTextStream(int dimensions, BufferedReader fin, KDNodeSaver reader) throws IOException {
-		KDTree result = new KDTree();
-		result.dimensions = dimensions;
-		result.hyperRectangle = new double[result.dimensions][2];
-		while (fin.ready()) {
-			String str = fin.readLine().trim();
-			if ((str.length() > 0) && (str.charAt(0) != '#'))
-				result.add((KDNode) reader.nodeFromString(str));
-		}
-		result.balanceIfNeeded();
+		result.searchSteps = maxSearchSteps;
+		nearestSegmentBBFOriginal(result, target, root, 0);
 		return result;
 	}
-
-	private void add_recursive(E node, E curNode, int dimension, int depthLevel) {
+	
+	private void add_recursive(Node<E> node, Node<E> curNode, int dimension, int depthLevel) {
 		depthLevel++;
-		double value = node.getValue(dimension);
+		double value = getValue(node.data, dimension);
 		int nextDimension = (dimension + 1) % dimensions;
-		if (value < curNode.getValue(dimension)) {
-			if (curNode.getLeft() == null) {
+		if (value < getValue(curNode.data, dimension)) {
+			if (curNode.left == null) {
 				if (treeDepth < depthLevel)
 					treeDepth = depthLevel;
-				curNode.setLeft(node);
+				curNode.left = node;
 			} else
-				add_recursive(node, curNode.getLeft(), nextDimension, depthLevel);
+				add_recursive(node, curNode.left, nextDimension, depthLevel);
 		} else {
-			if (curNode.getRight() == null) {
+			if (curNode.right == null) {
 				if (treeDepth < depthLevel) 
 					treeDepth = depthLevel;
-				curNode.setRight(node);
+				curNode.right = node;
 			} else
-				add_recursive(node, curNode.getRight(), nextDimension, depthLevel);
+				add_recursive(node, curNode.right, nextDimension, depthLevel);
 		}		
 	}
 
@@ -572,24 +541,27 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 	 * Add a node to the tree. The tree might get disbalanced using this method.
 	 * To balance the tree use {@link #balance()} or better {@link #balanceIfNeeded()}. 
 	 */
-	public void add(E node) {
-		if (node == null)
+	public void add(E data) {
+		if (data == null)
 			return;
-		node.setLeft(null);
-		node.setRight(null);
+		Node<E> node = new Node<E>();
+		node.data = data;
+		node.left = null;
+		node.right = null;
 		if (root == null) { 
 			root = node;
 		} else {
 			add_recursive(node, root, 0, 1);
 		}
-		m_size++;
+		mutations++;
+		size++;
 	}
 	
 	/**
 	 * Returns the number of the elements in the tree. 
 	 */
-	public int size() {
-		return m_size;
+	public int getSize() {
+		return size;
 	}
 	
 	/**
@@ -610,29 +582,32 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 
 	private class Itr implements Iterator<E> {
 		
-		private Stack<IteratorVisit<E>>stack;
+		private final int mutationsAtIteratorCreate;
+		
+		private Stack<IteratorVisit<Node<E>>>stack;
 
-		private E nextItem;
+		private Node<E> nextItem;
 
 		Itr() {
-			stack = new Stack<IteratorVisit<E>>();
+			stack = new Stack<IteratorVisit<Node<E>>>();
 			nextItem = root;
+			mutationsAtIteratorCreate = mutations;
 			if (root != null) {
-				IteratorVisit<E>v = new IteratorVisit<E>();
+				IteratorVisit<Node<E>>v = new IteratorVisit<Node<E>>();
 				v.item = root;
 				v.status = 0;
 				stack.push(v);
 			}
 		}
 		
-		private E getNext() {
+		private Node<E> getNext() {
 			while (!stack.empty()) {
-				IteratorVisit<E>v = stack.peek();
+				IteratorVisit<Node<E>>v = stack.peek();
 				if (v.status == 0) {
 					v.status++;
-					E tmp = v.item.getLeft();
+					Node<E> tmp = v.item.left;
 					if (tmp != null) {
-						v = new IteratorVisit<E>();
+						v = new IteratorVisit<Node<E>>();
 						v.item = tmp;
 						v.status = 0;
 						stack.push(v);
@@ -641,9 +616,9 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 				}
 				if (v.status == 1) {
 					v.status++;
-					E tmp = v.item.getRight();
+					Node<E> tmp = v.item.right;
 					if (tmp != null) {
-						v = new IteratorVisit<E>();
+						v = new IteratorVisit<Node<E>>();
 						v.item = tmp;
 						v.status = 0;
 						stack.push(v);
@@ -654,19 +629,29 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 			}
 			return null;
 		}
+
+		/*
+		 * Idea borrowed from java.util.AbstractList#iterator()
+		 */
+		private void checkForModification() {
+			if (mutationsAtIteratorCreate != mutations)
+				throw new ConcurrentModificationException();
+		}
 		
 		public boolean hasNext() {
+			checkForModification();
 			if (nextItem == null) 
 				nextItem = getNext();
 			return nextItem != null;
 		}
 
 		public E next() {
-			E result = nextItem;
+			checkForModification();
+			Node<E> result = nextItem;
 			nextItem = null;
 			if (result == null) 
 				result = getNext();
-			return result;
+			return result == null ? null : result.data;
 		}
 
 		public void remove() {
@@ -676,5 +661,13 @@ public class KDTree<E extends KDNode<E>> implements Iterable<E>{
 
 	public Iterator<E> iterator() {
 		return new Itr();
+	}
+	
+	public Iterator<E> snapshotIterator() {
+		return toList().iterator();
+	}
+	
+	public Node<E> getRoot() {
+		return root;
 	}
 }

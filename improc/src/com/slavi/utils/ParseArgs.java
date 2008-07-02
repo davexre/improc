@@ -1,9 +1,7 @@
 package com.slavi.utils;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -177,7 +175,7 @@ public class ParseArgs {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String str = "\"qqq=\"asd qw\\eqwe\\\"zxc rty.fgh\" zzz";
+//		String str = "\"qqq=\"asd qw\\eqwe\\\"zxc rty.fgh\" zzz";
 //		String expr = "(\".*\")|(\\w\\w*)";
 //		String expr = "(\".*(a{0}?).*\")|(\\w++)";
 //		String expr = "(\"((\\\\\")|[^\"(\\\\\")])+\")|(\\w++)";
@@ -185,15 +183,17 @@ public class ParseArgs {
 		BufferedReader fin = new BufferedReader(new InputStreamReader(
 				ParseArgs.class.getResourceAsStream("ParseArgs.txt")));
 		String expr = fin.readLine();
+		String str = fin.readLine();
 		fin.close();
 		
 		System.out.println(str);
 		System.out.println("-------");
+		int i = 1;
 
 		Pattern p = Pattern.compile(expr);
 		Matcher m = p.matcher(str);
 		while (m.find()) {
-			System.out.println("|" + str.substring(m.start(), m.end()) + "|");
+			System.out.printf("%5d|%s|\n", i++, str.substring(m.start(), m.end()));
 		}
 
 		
@@ -206,8 +206,8 @@ public class ParseArgs {
 //		}
 
 //		String res[] = str.split(expr);
-//		for (String i : res)
-//			System.out.println(i);
+//		for (String s : res)
+//			System.out.printf("%5d|%s|\n", i++, s);
 		
 		System.out.println("-------");
 	}
