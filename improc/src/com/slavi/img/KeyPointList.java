@@ -128,7 +128,8 @@ public class KeyPointList {
 		double scale = 1.0;
 		while (true) {
 			ExecutionProfile profile = PDLoweDetector.makeTasks(img, scale, hook);
-			ExecutorService exec = Executors.newSingleThreadExecutor(); // newFixedThreadPool(profile.parallelTasks);
+//			ExecutorService exec = Executors.newSingleThreadExecutor();
+//			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
 			System.out.println(profile);
 			System.out.println("---------------------");
 			for (Runnable task : profile.tasks) {
@@ -303,16 +304,17 @@ public class KeyPointList {
 	public static void main(String[] args) throws IOException {
 		File kplFile = new File(Const.tempDir + "/ttt.kpl");
 		File image = new File(Const.sourceImage);
+		System.out.println("Source image is " + Const.sourceImage);
 		
 		Marker.mark("Single threaded");
-//		KeyPointList l1 = buildKeyPointFileSingleThreaded(kplFile, image);
+		KeyPointList l1 = buildKeyPointFileSingleThreaded(kplFile, image);
 		Marker.release();
 		Marker.mark("Multithreaded");
 		KeyPointList l2 = buildKeyPointFileMultiThreaded(kplFile, image);
 		Marker.release();
 		
 		System.out.println("----------------------- Comparing -----------------");
-//		l1.compareToList(l2);
+		l1.compareToList(l2);
 
 	}
 }

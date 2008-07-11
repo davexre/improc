@@ -35,7 +35,12 @@ public class PDLoweDetector implements Runnable {
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
 		this.destExtent = dest;
-		this.nextLevelBlurredImage = nextLevelBlurredImage;
+		Rectangle r = src.getExtent();
+		r.x = (src.minX() + 1) >> 1;
+		r.y = (src.minY() + 1) >> 1;
+		r.width = (src.maxX() >> 1) - r.x + 1;
+		r.height = (src.maxY() >> 1) - r.y + 1;
+		this.nextLevelBlurredImage = new DImageWrapper(nextLevelBlurredImage, r);
 	}
 	
 	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
@@ -727,7 +732,18 @@ public class PDLoweDetector implements Runnable {
 		
 		for (int j = minY; j <= maxY; j += 2) {
 			for (int i = minX; i <= maxX; i += 2) {
-				nextLevelBlurredImage.setPixel(i >> 1, j >> 1, blurred1.getPixel(i, j));
+				try {
+					nextLevelBlurredImage.setPixel(i >> 1, j >> 1, blurred1.getPixel(i, j));
+				} catch (Exception e) {
+					e.printStackTrace(System.out);
+					System.out.println("ERROR");
+					System.out.println("DEST EXTENT = " + nextLevelBlurredImage.getExtent());
+					System.out.println("SRC EXTENT  = " + blurred1.getExtent());
+					System.out.println("minX = " + minX);
+					System.out.println("maxX = " + maxX);
+					System.out.println("minY = " + minY);
+					System.out.println("maxY = " + maxY);
+				}
 			}
 		}
 	}
@@ -834,7 +850,8 @@ public class PDLoweDetector implements Runnable {
 		Rectangle srcExtent = source.getExtent();
 		ExecutionProfile profile = suggestedProfile;
 		profile.tasks = new ArrayList<Runnable>();
-		profile.nextLevelBlurredImage = new PDImageMapBuffer(new Rectangle(source.getSizeX() >> 1, source.getSizeY() >> 1));
+		profile.nextLevelBlurredImage = new PDImageMapBuffer(new Rectangle((source.getSizeX() + 1) >> 1, (source.getSizeY() + 1) >> 1));
+		profile.nextLevelBlurredImage = new ImageWriteTracker(profile.nextLevelBlurredImage, false, true);
 		
 		Rectangle rect = new Rectangle(suggestedProfile.srcWindowSizeX, suggestedProfile.srcWindowSizeY);
 		rect = PDLoweDetector.getEffectiveTargetExtent(rect);
