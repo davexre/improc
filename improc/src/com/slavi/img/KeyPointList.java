@@ -8,14 +8,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
-import com.slavi.tree.KDTree;
 import com.slavi.tree.KDNodeSaver;
+import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
 import com.slavi.utils.FileStamp;
 import com.slavi.utils.Marker;

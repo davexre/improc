@@ -123,7 +123,7 @@ public class KeyPoint {
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
 			((int)(sp.doubleY * multiply) != (int)(doubleY * multiply)) )
-//			return false;
+			return false;
 		for (int k = 0; k < numDirections; k++) {
 			for (int j = 0; j < descriptorSize; j++) {
 				for (int i = 0; i < descriptorSize; i++) {
