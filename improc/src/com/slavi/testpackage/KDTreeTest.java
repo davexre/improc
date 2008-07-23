@@ -75,7 +75,7 @@ public class KDTreeTest {
 		System.out.println();
 	}
 	
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		int dimensions = 2;
 		int itemsPerDimension = 5;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
@@ -106,5 +106,19 @@ public class KDTreeTest {
 		
 		System.out.println("Numer of items=" + items.size());
 		System.out.println("Max used steps=" + maxUsedSearchSteps);
+	}
+	
+	public static void main(String[] args) {
+		int dimensions = 2;
+		int itemsPerDimension = 5;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
+		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+		MyKDTree tree = new MyKDTree(dimensions, items);
+//		printNodesList(items);
+		printNode(tree.getRoot(), 0);
+		MyKDData item = items.get(3);
+		System.out.println("Item to find:");
+		System.out.println(item);
+		System.out.println(tree.contains(item));
 	}
 }

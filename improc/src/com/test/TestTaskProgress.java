@@ -123,8 +123,29 @@ public class TestTaskProgress {
 		System.out.println(result);
 	}
 	
+	static class JobThrowingException implements Runnable {
+		public void run() {
+			SwtUtl.activeWaitDialogSetStatus("Before exception", 5);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			throw new RuntimeException("Dummy exception");
+		}
+	}
+
+	public static void testJobThrowingException() {
+		JobThrowingException t = new JobThrowingException();
+		System.out.println("Before starting job");
+		boolean result = SwtUtl.openWaitDialog("Testing", t, 10);
+		System.out.println(result);
+	}
+	
 	public static void main(String[] args) {
-		test3();
+		test2();
+//		test3();
+//		testJobThrowingException();
 	}
 	
 }

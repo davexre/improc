@@ -753,8 +753,8 @@ public class PDLoweDetector implements Runnable {
 	public void run()  {
 		try {
 			long start = System.currentTimeMillis();
-			System.out.println("+++++");
-			System.out.println(this);
+//			System.out.println("+++++");
+//			System.out.println(this);
 			DetectFeaturesInSingleLevel();
 			long end = System.currentTimeMillis();
 			timeElapsed.getAndAdd(end - start);
@@ -844,6 +844,22 @@ public class PDLoweDetector implements Runnable {
 
 	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook) {
 		return makeTasks(source, scale, hook, suggestExecutionProfile(source.getExtent()));
+	}
+	
+	public static ExecutionProfile makeOneTaskProfile(Rectangle srcExtent) {
+		ExecutionProfile result = new ExecutionProfile();
+		result.sourceExtentX = srcExtent.width;
+		result.sourceExtentY = srcExtent.height;
+		
+		Runtime runtime = Runtime.getRuntime();
+		result.numberOfProcessors = runtime.availableProcessors();
+		long usedMemory = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+		result.availableMemory = runtime.maxMemory() - usedMemory;
+		
+		result.parallelTasks = 1;
+		result.srcWindowSizeX = result.sourceExtentX;
+		result.srcWindowSizeY = result.sourceExtentY;
+		return result;
 	}
 	
 	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook, ExecutionProfile suggestedProfile) {

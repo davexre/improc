@@ -125,12 +125,15 @@ public abstract class KDTree<E> implements Iterable<E>{
 	
 	private volatile int mutations;
 	
+	private boolean ignoreDuplicates;
+	
 	public KDTree(int dimensions) {
 		this.dimensions = dimensions;
 		this.size = 0;
 		this.treeDepth = 0;
 		this.root = null;
 		this.mutations = 0;
+		this.ignoreDuplicates = false;
 	}
 
 	public KDTree(int dimensions, List<E> items) {
@@ -376,6 +379,52 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return result;
 	}
 
+	/**
+	 * Compares the corresponding dimension values two items and returns true if all are equal.
+	 * 
+	 * The items a and b may not be included in the tree.
+	 */
+	public boolean compareItems(E a, E b) {
+		for (int i = dimensions - 1; i >= 0; i--)
+			if (getValue(a, i) != getValue(b, i))
+				return false;		
+		return true;
+	}
+	
+	/**
+	 * Searches for an item in the tree that has all the dimension values equal to the
+	 * values in target item.
+	 * The returned value is a reference to the first found matching item. 
+	 */
+	public E findMatching(E target) {
+		Node<E> curNode = root;
+		int dimension = 0;
+		while (curNode != null) {
+			double curNodeValue = getValue(curNode.data, dimension);
+			double curDimTarget = getValue(target, dimension);
+			
+			if (curDimTarget < curNodeValue) {
+				curNode = curNode.left;
+			} else {
+				if (curDimTarget == curNodeValue) {
+					if (compareItems(target, curNode.data))
+						return curNode.data;
+				}
+				curNode = curNode.right;
+			}
+			dimension = (dimension + 1) % dimensions;
+		}		
+		return null;
+	}	
+
+	/**
+	 * Returns true if an item having the same values in all of its 
+	 * dimensions is contained in the tree. 
+	 */
+	public boolean contains(E item) {
+		return findMatching(item) != null;
+	}
+	
 	private void nearestSegmentBBF(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension) {
 		if (curNode == null) 
 			return;
@@ -538,14 +587,26 @@ public abstract class KDTree<E> implements Iterable<E>{
 	}
 
 	/**
-	 * Add a node to the tree. The tree might get disbalanced using this method.
-	 * To balance the tree use {@link #balance()} or better {@link #balanceIfNeeded()}. 
+	 * Adds a node to the tree.
+	 *  
+	 * The tree might get disbalanced using this method.
+	 * <p>
+	 * To balance the tree use {@link #balance()} or better {@link #balanceIfNeeded()}.
+	 * <p>
+	 * Setting the property ignoreDuplicates to true will cause the add to invoke
+	 * {@link #contains(Object)} to check is such an item exists in the tree. If 
+	 * {@link #contains(Object)} returns true, i.e. the item being add is duplicated
+	 * the method will ignore the item and will silently return.
+	 * <p>
+	 * Null items are discarded/ignored.   
 	 */
-	public void add(E data) {
-		if (data == null)
+	public void add(E item) {
+		if (item == null)
+			return;
+		if (ignoreDuplicates && contains(item))
 			return;
 		Node<E> node = new Node<E>();
-		node.data = data;
+		node.data = item;
 		node.left = null;
 		node.right = null;
 		if (root == null) { 
@@ -670,4 +731,30 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public Node<E> getRoot() {
 		return root;
 	}
+
+	/**
+	 * Specifies whether to accept or to ignore duplicated items.
+	 * 
+	 * Setting this property to true will cause invocation of
+	 * {@link #contains(Object)} at each {@link #add(Object)} and
+	 * thus slowing down the addition of new items.
+	 * <p>
+	 * Changing this value affects only newly added items.
+	 * <p>
+	 * The default value is false, i.e. duplicates are accepted and
+	 * adding new objects is faster. 
+	 * @see #add(Object)  
+	 */
+	public void setIgnoreDuplicates(boolean ignoreDuplicates) {
+		this.ignoreDuplicates = ignoreDuplicates;
+	}
+	
+	/**
+	 * @see #setIgnoreDuplicates(boolean)
+	 * @see #add(Object)  
+	 */
+	public boolean getIgnoreDuplicates() {
+		return ignoreDuplicates;
+	}
+	
 }

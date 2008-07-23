@@ -6,8 +6,6 @@ import java.io.PrintWriter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.events.ArmEvent;
-import org.eclipse.swt.events.ArmListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -23,7 +21,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
@@ -352,8 +352,8 @@ public class SwtUtl {
 		waitDialogTaskProgress = new TaskProgress(waitDialogShell, 
 				maxProgressValue < 1 ? SWT.INDETERMINATE : SWT.NONE, runnable);
 		waitDialogTaskProgress.setProgressMaximum(maxProgressValue);
-		waitDialogTaskProgress.addArmListener(new ArmListener() {
-			public void widgetArmed(ArmEvent e) {
+		waitDialogTaskProgress.addListener(TaskProgress.TaskFinished, new Listener() {
+			public void handleEvent(Event event) {
 				waitDialogShell.close();
 			}
 		});
