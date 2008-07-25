@@ -14,6 +14,7 @@ import com.slavi.img.KeyPointList;
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.img.KeyPointList.KeyPointListSaver;
 import com.slavi.img.KeyPointList.KeyPointTree;
+import com.slavi.parallel.img.DWindowedImageUtils;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.utils.FindFileIterator;
@@ -111,6 +112,7 @@ public class DLoweCompareResult {
 //				} catch (InterruptedException e) {
 //				}
 //			}
+//			DWindowedImageUtils. profile.nextLevelBlurredImage
 			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
 			img.scaleHalf(tmp);
 			scale *= 2.0;
@@ -121,6 +123,29 @@ public class DLoweCompareResult {
 		return result;
 	}
 	
+	public static boolean compareKeyPoints(KeyPoint kp1, KeyPoint kp2) {
+		int multiply = 10000;
+		if (
+			(kp2.imgX != kp1.imgX) || 
+			(kp2.imgY != kp1.imgY)  
+//			((int)(kp2.level * multiply) != (int)(kp1.level * multiply)) || 
+//			((int)(kp2.degree * multiply) != (int)(kp1.degree * multiply)) ||
+//			((int)(kp2.kpScale * multiply) != (int)(kp1.kpScale * multiply)) || 
+//			((int)(kp2.doubleX * multiply) != (int)(kp1.doubleX * multiply)) ||
+//			((int)(kp2.doubleY * multiply) != (int)(kp1.doubleY * multiply)) 
+			)
+			return false;
+//		for (int k = 0; k < KeyPoint.numDirections; k++) {
+//			for (int j = 0; j < KeyPoint.descriptorSize; j++) {
+//				for (int i = 0; i < KeyPoint.descriptorSize; i++) {
+//					if (kp2.getItem(i, j, k) != kp1.getItem(i, j, k))
+//						return false;
+//				}
+//			}
+//		}
+		return true;
+	}
+	
 	public static boolean compare(KeyPointList kp1, KeyPointList kp2) {
 //		if (kp1.kdtree.getSize() != kp2.kdtree.getSize())
 //			return false;
@@ -128,33 +153,42 @@ public class DLoweCompareResult {
 		ArrayList p1 = kp1.kdtree.toList();
 		ArrayList p2 = kp2.kdtree.toList();
 
+		boolean result = true;
+		int totalMatch = 0;
 		for (int i = p1.size() - 1; i >= 0; i--) {
 			KeyPoint sp1 = (KeyPoint)p1.get(i);
 			boolean matchingFound = false;
 			for (int j = p2.size() - 1; j >= 0; j--) {
 				KeyPoint sp2 = (KeyPoint)p2.get(j);
-				if (sp1.equals(sp2)) {
-					if (matchingFound) {
-						System.out.println(sp1);
-						System.out.println(sp2);
-						return false; // Found a second one
-					}
+				if (compareKeyPoints(sp1, sp2)) {
+//					if (matchingFound) {
+//						System.out.println(sp1);
+//						System.out.println(sp2);
+//						return false; // Found a second one
+//					}
 					matchingFound = true;
-					p2.remove(j);
+					System.out.println();
+					System.out.println(sp1);
+					System.out.println(sp2);
 					break;
 				}
 			}
-			if (!matchingFound) {
-				System.out.println(sp1);
-				System.out.println("--------------");
-				new KeyPointList.KeyPointListSaver().toTextStream(kp2.kdtree, new PrintWriter(System.out));
-				return false;
-			}
+			if (matchingFound) {
+				totalMatch++;;
+			} else
+				result = false;
+//			if (!matchingFound) {
+//				System.out.println(sp1);
+//				System.out.println("--------------");
+//				new KeyPointList.KeyPointListSaver().toTextStream(kp2.kdtree, new PrintWriter(System.out));
+//				return false;
+//			}
 		}
 
-		if (p2.size() != 0)
-			return false;
-		return true;
+//		if (p2.size() != 0)
+//			return false;
+		System.out.println("Total matched " + totalMatch + " / " + p1.size());
+		return result;
 	}
 	
 	public static boolean compare2(KeyPointList kp1, KeyPointList kp2) {
@@ -214,6 +248,14 @@ public class DLoweCompareResult {
 
 		System.out.println("========= COMPARING RESULTS ==========");
 		Marker.mark();
+//		for (KeyPoint kp : kp1.kdtree) {
+//			System.out.println(kp.imgScale + "\t" + kp.imgX + "\t" + kp.imgY + "\t" + kp.doubleX + "\t" + kp.doubleY);
+//		}
+//		System.out.println("---------------------");
+//		for (KeyPoint kp : kp2.kdtree) {
+//			System.out.println(kp.imgScale + "\t" + kp.imgX + "\t" + kp.imgY + "\t" + kp.doubleX + "\t" + kp.doubleY);
+//		}
+		
 		boolean b = compare(kp2, kp1);
 		System.out.println(b ? "ok" : "FAILED");
 //		kp1.compareToList(kp2);

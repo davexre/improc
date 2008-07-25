@@ -856,9 +856,10 @@ public class PDLoweDetector implements Runnable {
 		long usedMemory = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 		result.availableMemory = runtime.maxMemory() - usedMemory;
 		
+		Rectangle r = PDLoweDetector.getNeededSourceExtent(srcExtent);
 		result.parallelTasks = 1;
-		result.srcWindowSizeX = result.sourceExtentX;
-		result.srcWindowSizeY = result.sourceExtentY;
+		result.srcWindowSizeX = r.width; // result.sourceExtentX;
+		result.srcWindowSizeY = r.height; // result.sourceExtentY;
 		return result;
 	}
 	

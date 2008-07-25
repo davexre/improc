@@ -712,6 +712,8 @@ public class DLoweDetector {
 		} // end of for aLevel
 	}
 	
+	public static DImageMap firstLastBlurredImage = null;
+	
 	public void DetectFeatures(DImageMap theImage, int scaleSpaceLevels,
 			int minimumRequiredPixelsize) {
 		// ??? more initializers
@@ -728,6 +730,10 @@ public class DLoweDetector {
 			if (curImage.getSizeX() / 2 > minimumRequiredPixelsize) { 
 				DImageMap tmpImage = new DImageMap(curImage.getSizeX() / 2, curImage.getSizeY() / 2); 
 				curImage = lastBlured1Img;
+				if (firstLastBlurredImage == null) {
+					firstLastBlurredImage = new DImageMap(1, 1); 
+					lastBlured1Img.copyTo(firstLastBlurredImage);
+				}
 				
 				curImage.scaleHalf(tmpImage); 
 				curImage = tmpImage; 

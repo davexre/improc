@@ -261,7 +261,7 @@ public class KeyPointList {
 	
 	public void compareToList(KeyPointList dest) {
 		ArrayList points = kdtree.toList();
-		ArrayList destPoints = kdtree.toList();
+		ArrayList destPoints = dest.kdtree.toList();
 		
 		int matchedCount1 = 0;
 		for (int i = points.size() - 1; i >= 0; i--) {

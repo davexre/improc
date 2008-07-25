@@ -1,4 +1,4 @@
-package com.slavi.parallel.img;
+package com.slavi.img;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import com.slavi.matrix.Matrix;
-import com.slavi.parallel.img.BufferedBMPImage;
 import com.slavi.statistics.AffineTransformer;
 import com.slavi.statistics.LeastSquaresAdjust;
 

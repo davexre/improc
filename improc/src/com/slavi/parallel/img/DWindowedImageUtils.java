@@ -170,6 +170,19 @@ public class DWindowedImageUtils {
 	}
 	
 	/**
+	 * Subtract image2 from image1 and return the result.
+	 * The extent of the resulting image is the intersection of both images. 
+	 */
+	public static DWindowedImage sub(DWindowedImage i1, DWindowedImage i2) {
+		Rectangle ext = i1.getExtent().intersection(i2.getExtent());
+		PDImageMapBuffer result = new PDImageMapBuffer(ext);
+		for (int i = result.minX(); i <= result.maxX(); i++)
+			for (int j = result.minY(); j <= result.maxY(); j++)
+				result.setPixel(i, j, i1.getPixel(i, j) - i2.getPixel(i, j));
+		return result;
+	}
+	
+	/**
 	 * Converts this image to BufferedImage.TYPE_BYTE_GRAY image scaling
 	 * the pixel values as to fall in the interval [0..255].
 	 */
