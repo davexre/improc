@@ -447,7 +447,7 @@ public class DLoweDetector {
 		// But as we operate in the current octave, the size relative to the
 		// anchoring images is missing the imgScale factor.
 		double kpScale = initialSigma
-				* Math.pow(2.0, (sp.level + sp.adjS) / scaleSpaceLevels);
+				* Math.pow(2.0, (sp.dogLevel + sp.adjS) / scaleSpaceLevels);
 
 		// Lowe03, "A gaussian-weighted circular window with a \sigma three
 		// times that of the scale of the keypoint".
@@ -586,7 +586,7 @@ public class DLoweDetector {
 				sp2.imgX = sp.imgX;
 				sp2.imgY = sp.imgY;
 				sp2.kpScale = sp.kpScale;
-				sp2.level = sp.level;
+				sp2.dogLevel = sp.dogLevel;
 				sp2.imgScale = sp.imgScale;
 				
 				createDescriptor(sp2, magnitude, direction);
@@ -609,7 +609,7 @@ public class DLoweDetector {
 //		System.out.println(img.calcStatistics());
 	}
 
-	private void DetectFeaturesInSingleDOG(DImageMap[] DOGs, DImageMap magnitude, DImageMap direction, int aLevel, double scale, int scaleSpaceLevels, double sigma) {
+	private void DetectFeaturesInSingleDOG(DImageMap[] DOGs, DImageMap magnitude, DImageMap direction, int dogLevel, double scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
 		// Border pixels are skipped
 
@@ -639,7 +639,7 @@ public class DLoweDetector {
 				localizeIsWeakCount++;
 
 				// Ok. We have located a keypoint.
-				tempKeyPoint.level = aLevel+1;
+				tempKeyPoint.dogLevel = dogLevel+1;
 				tempKeyPoint.imgScale = scale;
 
 				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
@@ -650,8 +650,8 @@ public class DLoweDetector {
 	int isLocalExtremaCount;
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
-
-	private void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
+	
+	public void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
 			int scaleSpaceLevels) {
 
 		isLocalExtremaCount = 0;
@@ -673,18 +673,18 @@ public class DLoweDetector {
 
 		debugPrintImage(theImage, scale, "A", 0);
 
-		for (int aLevel = -2; aLevel < scaleSpaceLevels; aLevel++) {
+		for (int dogLevel = -2; dogLevel < scaleSpaceLevels; dogLevel++) {
 			DImageMap tmpImageMap;
-			DGaussianFilter gf = new DGaussianFilter(sigma);
 			tmpImageMap = blured0;
 			blured0 = blured1;
 			lastBlured1Img = blured1 = blured2;
-			
 			blured2 = tmpImageMap;
-			// gf.applyGaussianFilter(blured1, blured2);
-			gf.applyGaussianFilterOriginal(blured1, blured2);
 
-			debugPrintImage(tmpImageMap, scale, "B", aLevel);
+			DGaussianFilter gf = new DGaussianFilter(sigma);
+			gf.applyGaussianFilter(blured1, blured2);
+//			gf.applyGaussianFilterOriginal(blured1, blured2);
+			
+			debugPrintImage(tmpImageMap, scale, "B", dogLevel);
 			
 			sigma *= Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula !!!
 
@@ -696,19 +696,22 @@ public class DLoweDetector {
 				for (int j = tmpImageMap.getSizeY() - 1; j >= 0; j--)
 					tmpImageMap.setPixel(i, j, blured2.getPixel(i, j)
 							- blured1.getPixel(i, j));
-			if (aLevel < 0)
+			if (dogLevel < 0)
 				continue;
 			
-			debugPrintImage(tmpImageMap, scale, "G", aLevel);
+			debugPrintImage(tmpImageMap, scale, "G", dogLevel);
 			
 			// Compute gradient magnitude and direction plane
 			blured0.computeMagnitude(magnitude);
 			blured0.computeDirection(direction);
 
-			debugPrintImage(magnitude, scale, "M", aLevel);
-			debugPrintImage(direction, scale, "D", aLevel);
+			DImageMap temp = new DImageMap(1, 1);
+			magnitude.copyTo(temp);
 			
-			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
+			debugPrintImage(magnitude, scale, "M", dogLevel);
+			debugPrintImage(direction, scale, "D", dogLevel);
+			
+			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, dogLevel, scale, scaleSpaceLevels, sigma);
 		} // end of for aLevel
 	}
 	
@@ -719,11 +722,18 @@ public class DLoweDetector {
 		// ??? more initializers
 		double scale = 1;
 		DImageMap curImage = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
-		DGaussianFilter gf = new DGaussianFilter(1.5);
-		gf.applyGaussianFilter(theImage, curImage);
+//		DGaussianFilter gf = new DGaussianFilter(1.5);
+//		gf.applyGaussianFilter(theImage, curImage);
 		theImage.copyTo(curImage);
 
+		int count = 0;
 		while (curImage != null) {
+			try {
+				curImage.toImageFile("d:/temp/a" + (count++) + ".png");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			DetectFeaturesInSingleLevel(curImage, scale, scaleSpaceLevels);
 			// Next scale down level
 		

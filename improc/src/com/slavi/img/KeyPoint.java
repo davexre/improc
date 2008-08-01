@@ -29,7 +29,7 @@ public class KeyPoint {
 
 	public double doubleY;
 
-	public double level;
+	public int dogLevel;
 
 	public double adjS;
 
@@ -59,7 +59,7 @@ public class KeyPoint {
 		result.append("\t");
 		result.append(Double.toString(doubleY));
 		result.append("\t");
-		result.append(Double.toString(level));
+		result.append(Double.toString(dogLevel));
 		result.append("\t");
 		result.append(Double.toString(adjS));
 		result.append("\t");
@@ -93,7 +93,7 @@ public class KeyPoint {
 		r.imgY = Integer.parseInt(st.nextToken());
 		r.doubleX = Double.parseDouble(st.nextToken());
 		r.doubleY = Double.parseDouble(st.nextToken());
-		r.level = Double.parseDouble(st.nextToken());
+		r.dogLevel = Integer.parseInt(st.nextToken());
 		r.adjS = Double.parseDouble(st.nextToken());
 		r.kpScale = Double.parseDouble(st.nextToken());
 		r.degree = Double.parseDouble(st.nextToken());
@@ -118,7 +118,7 @@ public class KeyPoint {
 		if (
 			(sp.imgX != imgX) || 
 			(sp.imgY != imgY) || 
-			((int)(sp.level * multiply) != (int)(level * multiply)) || 
+			((int)(sp.dogLevel * multiply) != (int)(dogLevel * multiply)) || 
 			((int)(sp.degree * multiply) != (int)(degree * multiply)) ||
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
@@ -156,7 +156,7 @@ public class KeyPoint {
 		dest.addContent(XMLHelper.makeAttrEl("imgY", Integer.toString(imgY)));
 		dest.addContent(XMLHelper.makeAttrEl("doubleX", Double.toString(doubleX)));
 		dest.addContent(XMLHelper.makeAttrEl("doubleY", Double.toString(doubleY)));
-		dest.addContent(XMLHelper.makeAttrEl("level", Double.toString(level)));
+		dest.addContent(XMLHelper.makeAttrEl("dogLevel", Double.toString(dogLevel)));
 		dest.addContent(XMLHelper.makeAttrEl("adjS", Double.toString(adjS)));
 		dest.addContent(XMLHelper.makeAttrEl("kpScale", Double.toString(kpScale)));
 		dest.addContent(XMLHelper.makeAttrEl("degree", Double.toString(degree)));
@@ -173,7 +173,7 @@ public class KeyPoint {
 		r.imgY = Integer.parseInt(XMLHelper.getAttrEl(source, "imgY"));
 		r.doubleX = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleX"));
 		r.doubleY = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleY"));
-		r.level = Double.parseDouble(XMLHelper.getAttrEl(source, "level"));
+		r.dogLevel = Integer.parseInt(XMLHelper.getAttrEl(source, "dogLevel"));
 		r.adjS = Double.parseDouble(XMLHelper.getAttrEl(source, "adjS"));
 		r.kpScale = Double.parseDouble(XMLHelper.getAttrEl(source, "kpScale"));
 		r.degree = Double.parseDouble(XMLHelper.getAttrEl(source, "degree"));

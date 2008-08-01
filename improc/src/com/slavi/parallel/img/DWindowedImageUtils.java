@@ -122,6 +122,12 @@ public class DWindowedImageUtils {
 				dest.setPixel(i, j, PComputeDirection.borderColorValue);
 	}
 	
+	public static PDImageMapBuffer makeCopy(DWindowedImage source) {
+		PDImageMapBuffer result = new PDImageMapBuffer(source.getExtent());
+		copyTo(source, result);
+		return result;
+	}
+	
 	/**
 	 * Makes a copy of this image into the dest image.
 	 */

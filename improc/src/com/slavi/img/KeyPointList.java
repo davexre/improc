@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import com.slavi.img.DLoweDetector.Hook;
+import com.slavi.parallel.img.DWindowedImage;
+import com.slavi.parallel.img.PDImageMapBuffer;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.tree.KDNodeSaver;
@@ -116,14 +118,14 @@ public class KeyPointList {
 	}
 	
 	private static KeyPointList buildKeyPointFileMultiThreaded(File kplFile, File image) throws IOException {
-		DImageMap img = new DImageMap(image);
+		DWindowedImage img = new PDImageMapBuffer(image);
 		KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.getSizeX();
-		result.imageSizeY = img.getSizeY();
+		result.imageSizeX = img.maxX() + 1;
+		result.imageSizeY = img.maxY() + 1;
 
 		Hook hook = new ListenerImpl(result);
 		
-		double scale = 1.0;
+		int scale = 1;
 		while (true) {
 			ExecutionProfile profile = PDLoweDetector.makeTasks(img, scale, hook);
 //			ExecutorService exec = Executors.newSingleThreadExecutor();
@@ -146,11 +148,11 @@ public class KeyPointList {
 //				} catch (InterruptedException e) {
 //				}
 //			}
-			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
-			img.scaleHalf(tmp);
-			scale *= 2.0;
-			img = tmp;
-			if (img.getSizeX() / 2 <= 64) 
+//			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
+//			img.scaleHalf(tmp);
+			scale *= 2;
+			img = profile.nextLevelBlurredImage;
+			if (img.maxX() / 2 <= 64) 
 				break;
 		};		
 		return result;

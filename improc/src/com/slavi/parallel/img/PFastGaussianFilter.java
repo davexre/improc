@@ -91,29 +91,16 @@ public class PFastGaussianFilter {
 		}
 
 		for (int destJ = dMinY; destJ <= dMaxY; destJ++) {
+			int srcJ = (destJ <= sMinY) ? sMinY :
+				(destJ >= sMaxY) ? sMaxY : destJ;
 			// fill in the buffer
+			double lowValue = dest.getPixel(sMinX, srcJ);
+			double highValue = dest.getPixel(sMaxX, srcJ);
 			int lowIndex = dMinX - maskRadius + 1;
 			int highIndex = dMaxX + maskRadius - 1;
 			for (int i = lowIndex, bufIndex = 0; i <= highIndex;  i++, bufIndex++) {
-				double value;
-				if ((i <= dMinX) || (i >= dMaxX)) {
-					int atX = (i <= sMinX) ? sMinX : (i >= sMaxX) ? sMaxX : i;
-					
-					value = 0.0;
-					for (int k = 0, j = destJ - maskRadius + 1; k < mask.length; k++, j++) {
-						double tmp;
-						if (j <= sMinY)
-							tmp = source.getPixel(atX, sMinY);
-						else if (j >= sMaxY)
-							tmp = source.getPixel(atX, sMaxY);
-						else
-							tmp = source.getPixel(atX, j);
-						value += mask[k] * tmp;
-					}
-				} else {
-					value = dest.getPixel(i, destJ);
-				}
-				buf[bufIndex] = value;
+				buf[bufIndex] = (i <= sMinX) ? lowValue : 
+					(i >= sMaxX) ? highValue : dest.getPixel(i, srcJ);
 			}
 			// apply mask
 			for (int i = dMinX, bufIndex = 0; i <= dMaxX; i++, bufIndex++) {

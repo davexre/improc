@@ -6,10 +6,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.slavi.img.DImageMap;
 import com.slavi.img.KeyPoint;
 import com.slavi.img.KeyPointList;
 import com.slavi.img.DLoweDetector.Hook;
+import com.slavi.parallel.img.DWindowedImage;
+import com.slavi.parallel.img.PDImageMapBuffer;
 import com.slavi.parallel.img.PDLoweDetector;
 import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.utils.Marker;
@@ -40,7 +41,7 @@ public class PDLoweDetectorTest {
 	KeyPointList oldDLowe;
 
 	public void doIt() throws IOException, InterruptedException {
-		DImageMap src = new DImageMap(new File(finName));
+		DWindowedImage src = new PDImageMapBuffer(new File(finName));
 
 		newDLowe = new KeyPointList();
 		Hook hook = new DLoweHook(newDLowe);
@@ -86,7 +87,7 @@ public class PDLoweDetectorTest {
 		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
 */		
 		///////////////////////////////////
-		ExecutionProfile profile = PDLoweDetector.makeTasks(src, 1.0, hook);
+		ExecutionProfile profile = PDLoweDetector.makeTasks(src, 1, hook);
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		System.out.println(profile);
 		

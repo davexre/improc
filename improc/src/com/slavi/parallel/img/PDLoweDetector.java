@@ -1,13 +1,13 @@
 package com.slavi.parallel.img;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.slavi.img.DImageMap;
 import com.slavi.img.KeyPoint;
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.matrix.DiagonalMatrix;
@@ -24,17 +24,17 @@ public class PDLoweDetector implements Runnable {
 	
 	DWindowedImage nextLevelBlurredImage;
 
-	double scale;
+	int scale;
 
 	int scaleSpaceLevels;
 
-	Rectangle destExtent;
+	Rectangle dloweExtent;
 	
-	public PDLoweDetector(DWindowedImage src, Rectangle dest, DWindowedImage nextLevelBlurredImage, double scale, int scaleSpaceLevels) {
+	public PDLoweDetector(DWindowedImage src, Rectangle dloweExtent, DWindowedImage nextLevelBlurredImage, int scale, int scaleSpaceLevels) {
 		this.src = src;
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
-		this.destExtent = dest;
+		this.dloweExtent = dloweExtent;
 		Rectangle r = src.getExtent();
 		r.x = (src.minX() + 1) >> 1;
 		r.y = (src.minY() + 1) >> 1;
@@ -465,7 +465,7 @@ public class PDLoweDetector implements Runnable {
 		// But as we operate in the current octave, the size relative to the
 		// anchoring images is missing the imgScale factor.
 		double kpScale = initialSigma
-				* Math.pow(2.0, (sp.level + sp.adjS) / scaleSpaceLevels);
+				* Math.pow(2.0, (sp.dogLevel + sp.adjS) / scaleSpaceLevels);
 
 		// Lowe03, "A gaussian-weighted circular window with a \sigma three
 		// times that of the scale of the keypoint".
@@ -604,7 +604,7 @@ public class PDLoweDetector implements Runnable {
 				sp2.imgX = sp.imgX;
 				sp2.imgY = sp.imgY;
 				sp2.kpScale = sp.kpScale;
-				sp2.level = sp.level;
+				sp2.dogLevel = sp.dogLevel;
 				sp2.imgScale = sp.imgScale;
 				
 				createDescriptor(sp2, magnitude, direction);
@@ -614,7 +614,7 @@ public class PDLoweDetector implements Runnable {
 		}
 	}
 	
-	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, double scale, int scaleSpaceLevels, double sigma) {
+	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, int scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
 		// Border pixels are skipped
 
@@ -647,7 +647,7 @@ public class PDLoweDetector implements Runnable {
 				localizeIsWeakCount++;
 
 				// Ok. We have located a keypoint.
-				tempKeyPoint.level = aLevel+1;
+				tempKeyPoint.dogLevel = aLevel+1;
 				tempKeyPoint.imgScale = scale;
 
 				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
@@ -659,7 +659,7 @@ public class PDLoweDetector implements Runnable {
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
 	
-	void DetectFeaturesInSingleLevel() throws InterruptedException, ExecutionException {
+	void DetectFeaturesInSingleLevel() throws InterruptedException, ExecutionException, IOException {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
 
@@ -669,8 +669,9 @@ public class PDLoweDetector implements Runnable {
 		PDImageMapBuffer magnitude = new PDImageMapBuffer(srcExtent);
 		PDImageMapBuffer direction = new PDImageMapBuffer(srcExtent);
 
-		Rectangle dogExtent = new Rectangle(destExtent.x - 1, destExtent.y - 1, destExtent.width + 2, destExtent.height + 2);
+		Rectangle dogExtent = new Rectangle(dloweExtent.x - 1, dloweExtent.y - 1, dloweExtent.width + 2, dloweExtent.height + 2);
 		dogExtent = dogExtent.intersection(srcExtent);
+		
 		PDImageMapBuffer[] DOGs = new PDImageMapBuffer[3];
 		for (int i = DOGs.length - 1; i >= 0; i--)
 			DOGs[i] = new PDImageMapBuffer(dogExtent);
@@ -679,16 +680,10 @@ public class PDLoweDetector implements Runnable {
 		isTooEdgeLikeCount = 0;
 		localizeIsWeakCount = 0;
 
-		Rectangle curExtent;
-		
-		curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(srcExtent));
-		blurred1.setExtent(curExtent);
 		PFastGaussianFilter.applyFilter(src, blurred1, sigma);
 		computeDOG(src, blurred1, DOGs[1]);
 		sigma = getNextSigma(sigma, scaleSpaceLevels);
 
-		curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
-		blurred2.setExtent(curExtent);
 		PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 		computeDOG(blurred1, blurred2, DOGs[2]);
 		sigma = getNextSigma(sigma, scaleSpaceLevels);
@@ -705,13 +700,10 @@ public class PDLoweDetector implements Runnable {
 			DOGs[1] = DOGs[2];
 			DOGs[2] = tmpimap;
 
-			magnitude.setExtent(dogExtent.union(PComputeMagnitude.getEffectiveTargetExtent(curExtent)));
-			PComputeMagnitude.computeMagnitude(blurred1, magnitude);
-			direction.setExtent(dogExtent.union(PComputeDirection.getEffectiveTargetExtent(curExtent)));
-			PComputeDirection.computeDirection(blurred1, direction);
+			PComputeMagnitude.computeMagnitude(blurred0, magnitude);
+			PComputeDirection.computeDirection(blurred0, direction);
+			
 			// Compute next DOG
-			curExtent = dogExtent.union(PFastGaussianFilter.getEffectiveTargetExtent(curExtent));
-			blurred2.setExtent(curExtent);
 			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 			computeDOG(blurred1, blurred2, DOGs[2]);
 			sigma = getNextSigma(sigma, scaleSpaceLevels);
@@ -720,10 +712,10 @@ public class PDLoweDetector implements Runnable {
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
 		
-		int minX = blurred1.minX();
-		int minY = blurred1.minY();
-		int maxX = blurred1.maxX();
-		int maxY = blurred1.maxY();
+		int minX = dloweExtent.x;
+		int minY = dloweExtent.y;
+		int maxX = dloweExtent.x + dloweExtent.width - 1;
+		int maxY = dloweExtent.y + dloweExtent.height - 1;
 		
 		if ((minX & 0x01) != 0)
 			minX++;
@@ -781,10 +773,10 @@ public class PDLoweDetector implements Runnable {
 		public int parallelTasks;
 		public int numberOfProcessors;
 		public long availableMemory;
-		public int sourceExtentX;
-		public int sourceExtentY;
-		public int srcWindowSizeX;
-		public int srcWindowSizeY;
+//		public int sourceExtentX;
+//		public int sourceExtentY;
+		public int destWindowSizeX;
+		public int destWindowSizeY;
 		public List<Runnable> tasks;
 		public DWindowedImage nextLevelBlurredImage;
 		
@@ -794,10 +786,10 @@ public class PDLoweDetector implements Runnable {
 			sb.append("\nTotal number of tasks   :");   sb.append(tasks == null ? 0 : tasks.size());
 			sb.append("\nNumber of processors    :");	sb.append(numberOfProcessors);
 			sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
-			sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
-			sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
-			sb.append("\nWindow extent X         :");	sb.append(srcWindowSizeX);
-			sb.append("\nWindow extent Y         :");	sb.append(srcWindowSizeY);
+//			sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
+//			sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
+			sb.append("\nWindow extent X         :");	sb.append(destWindowSizeX);
+			sb.append("\nWindow extent Y         :");	sb.append(destWindowSizeY);
 			return sb.toString();
 		}
 	}
@@ -813,8 +805,8 @@ public class PDLoweDetector implements Runnable {
 	 */
 	public static ExecutionProfile suggestExecutionProfile(Rectangle srcExtent, double maxMemoryUsageAllowed, int userSpecifiedMinSizeOfTaskWindow) {
 		ExecutionProfile result = new ExecutionProfile();
-		result.sourceExtentX = srcExtent.width;
-		result.sourceExtentY = srcExtent.height;
+//		result.sourceExtentX = srcExtent.width;
+//		result.sourceExtentY = srcExtent.height;
 		
 		maxMemoryUsageAllowed = Math.max(0.1, Math.min(0.9, maxMemoryUsageAllowed));
 		userSpecifiedMinSizeOfTaskWindow = Math.max(100, userSpecifiedMinSizeOfTaskWindow);
@@ -828,63 +820,66 @@ public class PDLoweDetector implements Runnable {
 		long memPerParallelTask = (long)(result.availableMemory * maxMemoryUsageAllowed) / result.parallelTasks;
 		
 		int tasksForExtent = (int) Math.ceil( 
-			(double)(result.sourceExtentX * result.sourceExtentY * requiredMemoryPerPixel) / 
+			(double)(srcExtent.width * srcExtent.height * requiredMemoryPerPixel) / 
 			(double) memPerParallelTask);
 		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks);
 		int divisionsX = Math.max(1, (int)Math.round(
-				Math.sqrt(tasksForExtent * result.sourceExtentX / result.sourceExtentY)));
+				Math.sqrt(tasksForExtent * srcExtent.width / srcExtent.height)));
 		int divisionsY = (int)Math.ceil((double)tasksForExtent / divisionsX);
 		
-		result.srcWindowSizeX = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
-				Math.ceil((double)result.sourceExtentX / divisionsX));
-		result.srcWindowSizeY = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
-				Math.ceil((double)result.sourceExtentY / divisionsY));
+		result.destWindowSizeX = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
+				Math.ceil((double)srcExtent.width / divisionsX));
+		result.destWindowSizeY = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 
+				Math.ceil((double)srcExtent.height / divisionsY));
 		return result;
 	}
 
-	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook) {
+	public static ExecutionProfile makeTasks(DWindowedImage source, int scale, Hook hook) {
 		return makeTasks(source, scale, hook, suggestExecutionProfile(source.getExtent()));
 	}
 	
 	public static ExecutionProfile makeOneTaskProfile(Rectangle srcExtent) {
 		ExecutionProfile result = new ExecutionProfile();
-		result.sourceExtentX = srcExtent.width;
-		result.sourceExtentY = srcExtent.height;
+//		result.sourceExtentX = srcExtent.width;
+//		result.sourceExtentY = srcExtent.height;
 		
 		Runtime runtime = Runtime.getRuntime();
 		result.numberOfProcessors = runtime.availableProcessors();
 		long usedMemory = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
 		result.availableMemory = runtime.maxMemory() - usedMemory;
 		
-		Rectangle r = PDLoweDetector.getNeededSourceExtent(srcExtent);
 		result.parallelTasks = 1;
-		result.srcWindowSizeX = r.width; // result.sourceExtentX;
-		result.srcWindowSizeY = r.height; // result.sourceExtentY;
+		result.destWindowSizeX = srcExtent.width;
+		result.destWindowSizeY = srcExtent.height;
 		return result;
 	}
 	
-	public static ExecutionProfile makeTasks(DImageMap source, double scale, Hook hook, ExecutionProfile suggestedProfile) {
+	public static ExecutionProfile makeTasks(DWindowedImage source, int scale, Hook hook, ExecutionProfile suggestedProfile) {
 		Rectangle srcExtent = source.getExtent();
 		ExecutionProfile profile = suggestedProfile;
 		profile.tasks = new ArrayList<Runnable>();
-		profile.nextLevelBlurredImage = new PDImageMapBuffer(new Rectangle((source.getSizeX() + 1) >> 1, (source.getSizeY() + 1) >> 1));
+		Rectangle nextLevelBlurredImageExt = new Rectangle(
+				(srcExtent.x + 1) >> 1,
+				(srcExtent.y + 1) >> 1,
+				(srcExtent.width + 1) >> 1,
+				(srcExtent.height + 1) >> 1);
+		profile.nextLevelBlurredImage = new PDImageMapBuffer(nextLevelBlurredImageExt);
 		profile.nextLevelBlurredImage = new ImageWriteTracker(profile.nextLevelBlurredImage, false, true);
 		
-		Rectangle rect = new Rectangle(suggestedProfile.srcWindowSizeX, suggestedProfile.srcWindowSizeY);
-		rect = PDLoweDetector.getEffectiveTargetExtent(rect);
+		Rectangle rect = new Rectangle(suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
+		rect = PDLoweDetector.getNeededSourceExtent(rect, defaultScaleSpaceLevels);
 		
-		for (int sminx = 0; sminx < srcExtent.width; sminx += rect.width) {
-			for (int sminy = 0; sminy < srcExtent.height; sminy += rect.height) {
-				Rectangle destR = new Rectangle(rect.x + sminx, rect.y + sminy, rect.width, rect.height);
-				Rectangle srcR = new Rectangle(sminx, sminy, profile.srcWindowSizeX, profile.srcWindowSizeY);
+		for (int sminx = 0; sminx < srcExtent.width; sminx += suggestedProfile.destWindowSizeX) {
+			for (int sminy = 0; sminy < srcExtent.height; sminy += suggestedProfile.destWindowSizeY) {
+				Rectangle srcR = new Rectangle(sminx + rect.x, sminy + rect.y, rect.width, rect.height);
 				srcR = srcR.intersection(srcExtent);
+				Rectangle destR = new Rectangle(sminx, sminy, suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
 				destR = destR.intersection(srcExtent);
 				if (srcR.isEmpty() || destR.isEmpty()) {
-					break;
-//					throw new RuntimeException("empty");
+					throw new RuntimeException("empty");
 				}
 				DImageWrapper srcW = new DImageWrapper(source, srcR);
-				PDLoweDetector task = new PDLoweDetector(srcW, destR, profile.nextLevelBlurredImage, scale, 3);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, profile.nextLevelBlurredImage, scale, defaultScaleSpaceLevels);
 				task.hook = hook;
 				profile.tasks.add(task);
 			}
@@ -897,10 +892,10 @@ public class PDLoweDetector implements Runnable {
 		StringBuilder r = new StringBuilder();
 		r.append("Source X,Y                :"); r.append(srcExtent.x); r.append(","); r.append(srcExtent.y);
 		r.append("\nSource width, height      :"); r.append(srcExtent.width); r.append(","); r.append(srcExtent.height);
-		r.append("\nDestination X,Y           :"); r.append(destExtent.x); r.append(","); r.append(destExtent.y);
-		r.append("\nDestination width, height :"); r.append(destExtent.width); r.append(","); r.append(destExtent.height);
+		r.append("\nDestination X,Y           :"); r.append(dloweExtent.x); r.append(","); r.append(dloweExtent.y);
+		r.append("\nDestination width, height :"); r.append(dloweExtent.width); r.append(","); r.append(dloweExtent.height);
 		r.append("\nScale                     :"); r.append(scale);
-		if (srcExtent.isEmpty() || destExtent.isEmpty())
+		if (srcExtent.isEmpty() || dloweExtent.isEmpty())
 			throw new RuntimeException("zxc");
 		return r.toString();
 	}
