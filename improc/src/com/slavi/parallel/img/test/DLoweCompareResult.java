@@ -242,10 +242,10 @@ public class DLoweCompareResult {
 	public static void makeMap(KeyPointList kp, String fouName) throws IOException {
 		PDImageMapBuffer buf = new PDImageMapBuffer(new Rectangle(kp.imageSizeX, kp.imageSizeY));
 		for (KeyPoint sp : kp.kdtree) {
-			if (sp.imgScale != 3)
+			if (sp.imgScale != 1)
 				continue;
-			System.out.println("qqqq");
-			buf.setPixel(sp.imgX, sp.imgY, 1.0);
+//			System.out.println("qqqq");
+			buf.setPixel((int)sp.doubleX, (int)sp.doubleY, 1.0);
 		}
 		DWindowedImageUtils.toImageFile(buf, fouName);
 	}
@@ -278,8 +278,8 @@ public class DLoweCompareResult {
 
 		System.out.println("========= COMPARING RESULTS ==========");
 		Marker.mark();
-		makeMap(kp1, "d:/temp/asd1.png");
-		makeMap(kp2, "d:/temp/asd2.png");
+		makeMap(kp1, Const.workDir + "/asd1.png");
+		makeMap(kp2, Const.workDir + "/asd2.png");
 //		for (KeyPoint kp : kp1.kdtree) {
 //			System.out.println(kp.imgScale + "\t" + kp.imgX + "\t" + kp.imgY + "\t" + kp.doubleX + "\t" + kp.doubleY);
 //		}
@@ -309,8 +309,8 @@ public class DLoweCompareResult {
 	}
 	
 	public static void main(String[] args) throws IOException {
-//		doIt(Const.smallImage);
-		doIt("D:/Users/s/Images/DSC_0237.JPG");
+		doIt(Const.smallImage);
+//		doIt("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt3("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt2("D:/Users/s/Images/*.jpg");
 //		doIt2("D:/Users/s/Images/DSC_0237.JPG");
