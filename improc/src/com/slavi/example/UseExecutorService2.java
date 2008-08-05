@@ -11,8 +11,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.slavi.example.UseExecutorService.MainTask;
-
 public class UseExecutorService2 {
 	static final int MaxJobsPerTask = 3;
 
@@ -42,6 +40,8 @@ public class UseExecutorService2 {
 			public Void call() throws Exception {
 				System.out.println("Started job   " + id + " (" + Thread.currentThread().getId() + ")");
 				Thread.sleep(500);
+//				if (id == 5)
+//					throw new Exception("InternalJob.call");
 				System.out.println("Finished job  " + id + " (" + Thread.currentThread().getId() + ")");
 				return null;
 			}
@@ -67,17 +67,21 @@ public class UseExecutorService2 {
 
 		public void onError(Callable<Void> task, Exception e) {
 			System.out.println(e);
+			throw new RuntimeException("onError");
 		}
 
 		public void onJobFinished(Callable<Void> task, Void result) {
+//			throw new RuntimeException("onJobFinished");
 		}
 
 		public void onFinally() {
 			System.out.println("FINALLY");
+			throw new RuntimeException("onFinally");
 		}
 
 		public void onPrepare() {
-			System.out.print("PREPARE");
+			System.out.println("PREPARE");
+			throw new RuntimeException("onPrepare");
 		}
 	}
 	
@@ -111,6 +115,7 @@ public class UseExecutorService2 {
 			}
 			
 			public Void call() {
+				Exception e = null;
 				try {
 					V jobResult = job.call();
 					
@@ -135,41 +140,66 @@ public class UseExecutorService2 {
 						task.onJobFinished(job, jobResult);
 						makeJobs();
 					}
-				} catch (Exception e) {
+				} catch (Exception ex) {
+					e = ex;
+				}
+				if (e != null) {
+					boolean shouldFinish;
 					synchronized (lock) {
 						taskCanceled = true;
-						if (taskException != null) // If more than one tasks throws an exception keep the first thrown one. 
+						if (taskException == null) // If more than one tasks throws an exception keep the first thrown one. 
 							taskException = e;
 						jobsRunning.remove(this);
+						shouldFinish = jobsRunning.isEmpty();
 					}
 					try {
 						task.onError(job, e);
 					} catch (Exception ignoreThis) {
 					}
-					synchronized (lock) {
-						if (jobsRunning.isEmpty()) {
-							finished = true;
-							try {
-								task.onFinally();
-							} catch (Exception ignoreThis) {
-							}
-							lock.notifyAll();
-						}
+					if (shouldFinish) {
+						internalFinish();
 					}
 				}
 				return null;
 			}
 		}
 		
+		private void internalFinish() {
+			boolean shouldNotify = false;
+			synchronized (lock) {
+				if (!finished) {
+					finished = true;
+					shouldNotify = true;
+				}
+			}
+			if (shouldNotify) {
+				try {
+					task.onFinally();
+					synchronized (lock) {
+						lock.notifyAll();
+					}
+				} catch (Exception e) {
+					synchronized (lock) {
+						taskCanceled = true;
+						if (taskException == null)
+							taskException = e;
+						lock.notifyAll();
+					}
+				}
+			}
+		}
+		
 		private void makeJobs() {
 			if (taskCanceled) {
-				finished = true;
+				internalFinish();
+				return;
 			}
 			synchronized(lock) {
 				if (!finished) {
 					jobsToDo = task.getNextStepTasks();
 					if ((jobsToDo == null) || (jobsToDo.peek() == null)) {
-						finished = true;
+						internalFinish();
+						return;
 					} else {
 						int i = 0;
 						while (i < maxParallelTasks) {
@@ -182,11 +212,6 @@ public class UseExecutorService2 {
 						}
 					}
 				}
-			}
-			if (finished) {
-				task.onFinally();
-				lock.notifyAll();
-				return;
 			}
 		}
 		
@@ -208,20 +233,18 @@ public class UseExecutorService2 {
 
 			public Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
 					TimeoutException {
-				while (!finished) {
-					synchronized (lock) {
-						if (!finished)
-							lock.wait(unit.toNanos(timeout));
-						if (finished) {
-							if (taskException != null) {
-								throw new ExecutionException("Error executing task/subtask", taskException);
-							}
-							if (taskCanceled) {
-								throw new InterruptedException();
-							}
-							System.out.println("GOT RESULT");
-							return null;
+				synchronized (lock) {
+					if (!finished) {
+						lock.wait(unit.toNanos(timeout));
+					}
+					if (finished) {
+						if (taskException != null) {
+							throw new ExecutionException("Error executing task/subtask", taskException);
 						}
+						if (taskCanceled) {
+							throw new InterruptedException();
+						}
+						return null;
 					}
 				}
 				return null;
@@ -238,6 +261,14 @@ public class UseExecutorService2 {
 		}
 		
 		public Future<Void> start() {
+			try {
+				task.onPrepare();
+			} catch (Exception e) {
+				synchronized (lock) {
+					taskCanceled = true;
+					taskException = e;					
+				}
+			}
 			makeJobs();
 			return new InternalFuture();
 		}
@@ -255,9 +286,12 @@ public class UseExecutorService2 {
 		} catch (InterruptedException e) {
 		}
 		System.out.println("Submitted main task" + " (" + Thread.currentThread().getId() + ")");
-		ft.get();
-		System.out.println("Got answer from main task" + " (" + Thread.currentThread().getId() + ")");
-		exec.shutdown();
+		try {
+			ft.get();
+			System.out.println("Got answer from main task" + " (" + Thread.currentThread().getId() + ")");
+		} finally {
+			exec.shutdown();
+		}
 		System.out.println("Main finished." + " (" + Thread.currentThread().getId() + ")");
 	}	
 }
