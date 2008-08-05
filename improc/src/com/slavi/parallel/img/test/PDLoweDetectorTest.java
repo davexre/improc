@@ -10,9 +10,10 @@ import com.slavi.img.KeyPoint;
 import com.slavi.img.KeyPointList;
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.parallel.img.DWindowedImage;
+import com.slavi.parallel.img.ExecutePDLowe;
+import com.slavi.parallel.img.ExecutionProfile;
 import com.slavi.parallel.img.PDImageMapBuffer;
 import com.slavi.parallel.img.PDLoweDetector;
-import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.utils.Marker;
 import com.slavi.utils.Utl;
 
@@ -87,7 +88,7 @@ public class PDLoweDetectorTest {
 		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
 */		
 		///////////////////////////////////
-		ExecutionProfile profile = PDLoweDetector.makeTasks(src, 1, hook);
+		ExecutionProfile profile = ExecutePDLowe.makeTasks(src, 1, hook);
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		System.out.println(profile);
 		

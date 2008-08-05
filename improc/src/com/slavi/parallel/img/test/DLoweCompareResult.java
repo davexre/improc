@@ -13,9 +13,10 @@ import com.slavi.img.KeyPointList;
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.parallel.img.DWindowedImage;
 import com.slavi.parallel.img.DWindowedImageUtils;
+import com.slavi.parallel.img.ExecutePDLowe;
+import com.slavi.parallel.img.ExecutionProfile;
 import com.slavi.parallel.img.PDImageMapBuffer;
 import com.slavi.parallel.img.PDLoweDetector;
-import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.utils.FindFileIterator;
 import com.slavi.utils.Marker;
 
@@ -93,10 +94,10 @@ public class DLoweCompareResult {
 //			ExecutionProfile profile = PDLoweDetector.makeOneTaskProfile(img.getExtent());
 //			PDLoweDetector.makeTasks(img, scale, hook, profile);
 			DWindowedImageUtils.toImageFile(img, "d:/temp/b" + (count++) + ".png");
-			ExecutionProfile profile = PDLoweDetector.suggestExecutionProfile(img.getExtent());
+			ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
 			profile.destWindowSizeX = profile.destWindowSizeX / 2 + 1;
 			profile.destWindowSizeY = profile.destWindowSizeY / 2 + 1;
-			PDLoweDetector.makeTasks(img, scale, hook, profile);
+			ExecutePDLowe.makeTasks(img, scale, hook, profile);
 //			ExecutorService exec = Executors.newSingleThreadExecutor();
 //			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
 //			System.out.println(profile);

@@ -122,8 +122,8 @@ public class UseExecutorService {
 	
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		ExecutorService exec;
-//		exec = Executors.newSingleThreadExecutor();
-		exec = Executors.newFixedThreadPool(5);
+		exec = Executors.newSingleThreadExecutor();
+//		exec = Executors.newFixedThreadPool(5);
 		System.out.println("Creating main task" + " (" + Thread.currentThread().getId() + ")");
 		Future<Void> ft = new MainTask(exec, 3).start();
 		try {

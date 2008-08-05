@@ -57,7 +57,7 @@ public class Marker {
 
 	/**
 	 * Puts a marker in the marker stack. Every call to this method should have 
-	 * a correspondin call to {@link #release()}. Calls to this method 
+	 * a corresponding call to {@link #release()}. Calls to this method 
 	 * may be nested.
 	 * @param markName	the name of the marker 
 	 */

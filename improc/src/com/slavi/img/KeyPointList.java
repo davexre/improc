@@ -11,9 +11,9 @@ import java.util.StringTokenizer;
 
 import com.slavi.img.DLoweDetector.Hook;
 import com.slavi.parallel.img.DWindowedImage;
+import com.slavi.parallel.img.ExecutePDLowe;
+import com.slavi.parallel.img.ExecutionProfile;
 import com.slavi.parallel.img.PDImageMapBuffer;
-import com.slavi.parallel.img.PDLoweDetector;
-import com.slavi.parallel.img.PDLoweDetector.ExecutionProfile;
 import com.slavi.tree.KDNodeSaver;
 import com.slavi.tree.KDTree;
 import com.slavi.utils.AbsoluteToRelativePathMaker;
@@ -127,7 +127,7 @@ public class KeyPointList {
 		
 		int scale = 1;
 		while (true) {
-			ExecutionProfile profile = PDLoweDetector.makeTasks(img, scale, hook);
+			ExecutionProfile profile = ExecutePDLowe.makeTasks(img, scale, hook);
 //			ExecutorService exec = Executors.newSingleThreadExecutor();
 //			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
 			System.out.println(profile);
