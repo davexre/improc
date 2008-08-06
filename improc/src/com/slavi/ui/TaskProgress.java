@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
 
-import com.slavi.utils.SwtUtl;
+import com.slavi.util.ui.SwtUtl;
 
 public class TaskProgress extends Composite {
 
