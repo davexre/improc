@@ -58,7 +58,7 @@ public class TestSteppedParallelTaskExecutor {
 		}
 
 		public void onError(Callable<Void> task, Exception e) {
-			System.out.println(e);
+			System.out.println("ONERROR: " + e);
 //			throw new RuntimeException("onError");
 		}
 
@@ -81,7 +81,7 @@ public class TestSteppedParallelTaskExecutor {
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		ExecutorService exec;
 //		exec = Executors.newSingleThreadExecutor();
-		exec = Executors.newFixedThreadPool(5);
+		exec = Executors.newFixedThreadPool(2);
 		System.out.println("Creating main task" + " (" + Thread.currentThread().getId() + ")");
 		MySteppedParallelTask task = new MySteppedParallelTask(3);
 		Future<Void> ft = new SteppedParallelTaskExecutor(exec, 2, task).start();
@@ -91,6 +91,8 @@ public class TestSteppedParallelTaskExecutor {
 		}
 		System.out.println("Submitted main task" + " (" + Thread.currentThread().getId() + ")");
 		try {
+			//ft.cancel(true);
+			exec.shutdown();
 			ft.get();
 			System.out.println("Got answer from main task" + " (" + Thread.currentThread().getId() + ")");
 		} finally {

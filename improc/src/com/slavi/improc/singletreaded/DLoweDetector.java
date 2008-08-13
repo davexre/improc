@@ -676,6 +676,8 @@ public class DLoweDetector {
 
 		debugPrintImage(theImage, scale, "A", 0);
 
+		
+		int dogcount = 0;
 		for (int dogLevel = -2; dogLevel < scaleSpaceLevels; dogLevel++) {
 			DImageMap tmpImageMap;
 			tmpImageMap = blured0;
@@ -699,14 +701,21 @@ public class DLoweDetector {
 				for (int j = tmpImageMap.getSizeY() - 1; j >= 0; j--)
 					tmpImageMap.setPixel(i, j, blured2.getPixel(i, j)
 							- blured1.getPixel(i, j));
-			if (dogLevel < 0)
-				continue;
-			
 			debugPrintImage(tmpImageMap, scale, "G", dogLevel);
 			
 			// Compute gradient magnitude and direction plane
 			blured0.computeMagnitude(magnitude);
 			blured0.computeDirection(direction);
+			if (dogLevel < 0)
+				continue;
+			try {
+				tmpImageMap.toImageFile(Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "d.png");
+				magnitude.toImageFile(Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "d.png");
+				direction.toImageFile(Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "d.png");
+				dogcount++;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			DImageMap temp = new DImageMap(1, 1);
 			magnitude.copyTo(temp);
@@ -723,16 +732,15 @@ public class DLoweDetector {
 	public void DetectFeatures(DImageMap theImage, int scaleSpaceLevels,
 			int minimumRequiredPixelsize) {
 		// ??? more initializers
-		double scale = 1;
+		int scale = 1;
 		DImageMap curImage = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 //		DGaussianFilter gf = new DGaussianFilter(1.5);
 //		gf.applyGaussianFilter(theImage, curImage);
 		theImage.copyTo(curImage);
 
-		int count = 0;
 		while (curImage != null) {
 			try {
-				curImage.toImageFile("d:/temp/a" + (count++) + ".png");
+				curImage.toImageFile(Const.workDir + "/dlowe_nextlevel_" + scale + "d.png");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

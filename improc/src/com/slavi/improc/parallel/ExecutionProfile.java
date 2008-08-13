@@ -15,13 +15,13 @@ public class ExecutionProfile {
 //	public int sourceExtentY;
 	public int destWindowSizeX;
 	public int destWindowSizeY;
-	public List<Runnable> tasks;
-	public DWindowedImage nextLevelBlurredImage;
+//	public List<Runnable> tasks;
+//	public DWindowedImage nextLevelBlurredImage;
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Parallel tasks          :");		sb.append(parallelTasks);
-		sb.append("\nTotal number of tasks   :");   sb.append(tasks == null ? 0 : tasks.size());
+//		sb.append("\nTotal number of tasks   :");   sb.append(tasks == null ? 0 : tasks.size());
 		sb.append("\nNumber of processors    :");	sb.append(numberOfProcessors);
 		sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
 //		sb.append("\nSource extent X         :");	sb.append(sourceExtentX);

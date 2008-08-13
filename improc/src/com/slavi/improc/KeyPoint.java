@@ -49,8 +49,6 @@ public class KeyPoint {
 
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-		result.append(id);
-		result.append("\t");
 		result.append(imgX);
 		result.append("\t");
 		result.append(imgY);
@@ -66,6 +64,8 @@ public class KeyPoint {
 		result.append(Double.toString(kpScale));
 		result.append("\t");
 		result.append(Double.toString(degree));
+		result.append("\t");
+		result.append(id);
 		result.append("\t");
 
 		boolean first = true;
@@ -88,7 +88,6 @@ public class KeyPoint {
 		if (st.countTokens() != 9 + featureVectorLinearSize)
 			throw new IllegalArgumentException("KeyPoint.fromString: Malformed source string.");
 		KeyPoint r = new KeyPoint();
-		r.id = Integer.parseInt(st.nextToken());
 		r.imgX = Integer.parseInt(st.nextToken());
 		r.imgY = Integer.parseInt(st.nextToken());
 		r.doubleX = Double.parseDouble(st.nextToken());
@@ -97,6 +96,7 @@ public class KeyPoint {
 		r.adjS = Double.parseDouble(st.nextToken());
 		r.kpScale = Double.parseDouble(st.nextToken());
 		r.degree = Double.parseDouble(st.nextToken());
+		r.id = Integer.parseInt(st.nextToken());
 		for (int k = 0; k < numDirections; k++) 
 			for (int j = 0; j < descriptorSize; j++) 
 				for (int i = 0; i < descriptorSize; i++) {

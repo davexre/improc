@@ -88,20 +88,20 @@ public class TestPDLoweDetector {
 		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
 */		
 		///////////////////////////////////
-		ExecutionProfile profile = ExecutePDLowe.makeTasks(src, 1, hook);
+/* TODO: FIXME:		ExecutionProfile profile = ExecutePDLowe.makeTasks(src, 1, hook);
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		System.out.println(profile);
 		
 		System.gc();
 		Marker.mark("started");
-		for (Runnable task : profile.tasks)
-			exec.execute(task);
+//		for (Runnable task : profile.tasks)
+//			exec.execute(task);
 		exec.shutdown();
 		while (!exec.isTerminated())
 			exec.awaitTermination(1000, TimeUnit.SECONDS);
 		Marker.release();
-		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
-		
+//		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
+*/		
 		/////////////////////////////////
 /*		
 		DLoweDetector d = new DLoweDetector();

@@ -126,7 +126,7 @@ public class KeyPointList {
 		Hook hook = new ListenerImpl(result);
 		
 		int scale = 1;
-		while (true) {
+/* TODO: FIXME:		while (true) {
 			ExecutionProfile profile = ExecutePDLowe.makeTasks(img, scale, hook);
 //			ExecutorService exec = Executors.newSingleThreadExecutor();
 //			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
@@ -154,7 +154,7 @@ public class KeyPointList {
 			img = profile.nextLevelBlurredImage;
 			if (img.maxX() / 2 <= 64) 
 				break;
-		};		
+		};*/		
 		return result;
 	}
 	

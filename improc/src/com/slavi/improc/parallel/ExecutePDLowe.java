@@ -3,14 +3,33 @@ package com.slavi.improc.parallel;
 import java.awt.Rectangle;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.Callable;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
+import com.slavi.image.DWindowedImageUtils;
 import com.slavi.image.ImageWriteTracker;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
+import com.slavi.util.Const;
+import com.slavi.util.concurrent.SteppedParallelTask;
 
-public class ExecutePDLowe {
+public class ExecutePDLowe implements SteppedParallelTask<Void> {
+	int scale;
+	Hook hook;
+	ExecutionProfile suggestedProfile;
+	DWindowedImage nextLevelBlurredImage;
+	
+	public ExecutePDLowe(DWindowedImage source, Hook hook, ExecutionProfile suggestedProfile) {
+		this.nextLevelBlurredImage = source;
+		source = null;
+		this.hook = hook;
+		this.scale = 1;
+		this.suggestedProfile = suggestedProfile;
+	}
+/*	
 	public static ExecutionProfile makeTasks(DWindowedImage source, int scale, Hook hook) {
 		return makeTasks(source, scale, hook, ExecutionProfile.suggestExecutionProfile(source.getExtent()));
 	}
@@ -62,5 +81,57 @@ public class ExecutePDLowe {
 			}
 		}
 		return profile;
+	}*/
+
+	public Queue<Callable<Void>> getNextStepTasks() throws Exception {
+		if ((nextLevelBlurredImage == null) || (nextLevelBlurredImage.maxX() <= 32)) 
+			return null;
+		
+		LinkedList<Callable<Void>> result = new LinkedList<Callable<Void>>();
+		DWindowedImage source = nextLevelBlurredImage;
+		Rectangle srcExtent = source.getExtent();
+		Rectangle nextLevelBlurredImageExt = new Rectangle(
+				(srcExtent.x + 1) >> 1,
+				(srcExtent.y + 1) >> 1,
+				(srcExtent.width + 1) >> 1,
+				(srcExtent.height + 1) >> 1);
+		DWindowedImageUtils.toImageFile(nextLevelBlurredImage, Const.workDir + "/dlowe_nextlevel_" + scale + "p.png");
+		nextLevelBlurredImage = new PDImageMapBuffer(nextLevelBlurredImageExt);
+//		nextLevelBlurredImage = new ImageWriteTracker(nextLevelBlurredImage, false, true);
+
+		Rectangle rect = new Rectangle(suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
+		rect = PDLoweDetector.getNeededSourceExtent(rect, PDLoweDetector.defaultScaleSpaceLevels);
+		
+		for (int sminx = 0; sminx < srcExtent.width; sminx += suggestedProfile.destWindowSizeX) {
+			for (int sminy = 0; sminy < srcExtent.height; sminy += suggestedProfile.destWindowSizeY) {
+				Rectangle srcR = new Rectangle(sminx + rect.x, sminy + rect.y, rect.width, rect.height);
+				srcR = srcR.intersection(srcExtent);
+				Rectangle destR = new Rectangle(sminx, sminy, suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
+				destR = destR.intersection(srcExtent);
+				if (srcR.isEmpty() || destR.isEmpty()) {
+					throw new RuntimeException("empty");
+				}
+				DImageWrapper srcW = new DImageWrapper(source, srcR);
+				PDLoweDetector task = new PDLoweDetector(srcW, destR, nextLevelBlurredImage, scale, PDLoweDetector.defaultScaleSpaceLevels);
+				task.hook = hook;
+				result.add(task);
+			}
+		}
+		scale *= 2.0;
+//		nextLevelBlurredImage = null;
+		
+		return result;
+	}
+
+	public void onError(Callable<Void> task, Exception e) {
+	}
+
+	public void onFinally() throws Exception {
+	}
+
+	public void onPrepare() throws Exception {
+	}
+
+	public void onSubtaskFinished(Callable<Void> subtask, Void result) throws Exception {
 	}
 }

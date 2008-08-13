@@ -2,18 +2,21 @@ package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
+import com.slavi.image.DWindowedImageUtils;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.Const;
 
-public class PDLoweDetector implements Runnable {
+public class PDLoweDetector implements Callable<Void> {
 
 	public Hook hook = null;
 
@@ -687,6 +690,7 @@ public class PDLoweDetector implements Runnable {
 		computeDOG(blurred1, blurred2, DOGs[2]);
 		sigma = getNextSigma(sigma, scaleSpaceLevels);
 
+		int dogcount = 0;
 		for (int aLevel = 0; aLevel < scaleSpaceLevels; aLevel++) {
 			// Shift blurred
 			PDImageMapBuffer tmpimap = blurred0;
@@ -705,6 +709,10 @@ public class PDLoweDetector implements Runnable {
 			// Compute next DOG
 			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 			computeDOG(blurred1, blurred2, DOGs[2]);
+			DWindowedImageUtils.toImageFile(DOGs[2], Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "p.png");
+			DWindowedImageUtils.toImageFile(magnitude, Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "p.png");
+			DWindowedImageUtils.toImageFile(direction, Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "p.png");
+			dogcount++;
 			sigma = getNextSigma(sigma, scaleSpaceLevels);
 
 			// detect
@@ -739,19 +747,9 @@ public class PDLoweDetector implements Runnable {
 		}
 	}
 	
-	public static AtomicLong timeElapsed = new AtomicLong(0);
-	
-	public void run()  {
-		try {
-			long start = System.currentTimeMillis();
-//			System.out.println("+++++");
-//			System.out.println(this);
-			DetectFeaturesInSingleLevel();
-			long end = System.currentTimeMillis();
-			timeElapsed.getAndAdd(end - start);
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
+	public Void call() throws Exception {
+		DetectFeaturesInSingleLevel();
+		return null;
 	}
 
 	public String toString() {
