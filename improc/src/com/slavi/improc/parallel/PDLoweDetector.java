@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
@@ -12,8 +11,8 @@ import com.slavi.image.DWindowedImageUtils;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
-import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.util.Const;
 
 public class PDLoweDetector implements Callable<Void> {
@@ -38,10 +37,14 @@ public class PDLoweDetector implements Callable<Void> {
 		this.scaleSpaceLevels = scaleSpaceLevels;
 		this.dloweExtent = dloweExtent;
 		Rectangle r = src.getExtent();
-		r.x = (src.minX() + 1) >> 1;
-		r.y = (src.minY() + 1) >> 1;
-		r.width = (src.maxX() >> 1) - r.x + 1;
-		r.height = (src.maxY() >> 1) - r.y + 1;
+//		r.x = (src.minX() + 1) >> 1;
+//		r.y = (src.minY() + 1) >> 1;
+//		r.width = (src.maxX() >> 1) - r.x + 1;
+//		r.height = (src.maxY() >> 1) - r.y + 1;
+		r.x = (dloweExtent.x + 1) >> 1;
+		r.y = (dloweExtent.y + 1) >> 1;
+		r.width = ((dloweExtent.x + dloweExtent.width) >> 1) - r.x;
+		r.height = ((dloweExtent.y + dloweExtent.height) >> 1) - r.y;
 		this.nextLevelBlurredImage = new DImageWrapper(nextLevelBlurredImage, r);
 	}
 	
@@ -718,8 +721,14 @@ public class PDLoweDetector implements Callable<Void> {
 			// detect
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
+
+		for (int j = nextLevelBlurredImage.minY(); j <= nextLevelBlurredImage.maxY(); j++) {
+			for (int i = nextLevelBlurredImage.minX(); i <= nextLevelBlurredImage.maxX(); i++) {
+				nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i << 1, j << 1));
+			}
+		}
 		
-		int minX = dloweExtent.x;
+/*		int minX = dloweExtent.x;
 		int minY = dloweExtent.y;
 		int maxX = dloweExtent.x + dloweExtent.width - 1;
 		int maxY = dloweExtent.y + dloweExtent.height - 1;
@@ -744,7 +753,7 @@ public class PDLoweDetector implements Callable<Void> {
 					System.out.println("maxY = " + maxY);
 				}
 			}
-		}
+		}*/
 	}
 	
 	public Void call() throws Exception {

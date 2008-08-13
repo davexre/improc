@@ -1,14 +1,12 @@
 package com.slavi.improc.singletreaded;
 
-import java.io.File;
 import java.io.IOException;
 
 import com.slavi.improc.DImageMap;
 import com.slavi.improc.KeyPoint;
-import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.util.Const;
-import com.slavi.util.Marker;
 
 /**
  * @author Slavian Petrov

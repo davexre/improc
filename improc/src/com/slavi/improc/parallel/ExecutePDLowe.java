@@ -1,8 +1,6 @@
 package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
-import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -10,7 +8,6 @@ import java.util.concurrent.Callable;
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.DWindowedImageUtils;
-import com.slavi.image.ImageWriteTracker;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.util.Const;
@@ -90,11 +87,16 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 		LinkedList<Callable<Void>> result = new LinkedList<Callable<Void>>();
 		DWindowedImage source = nextLevelBlurredImage;
 		Rectangle srcExtent = source.getExtent();
+//		Rectangle nextLevelBlurredImageExt = new Rectangle(
+//				(srcExtent.x + 1) >> 1,
+//				(srcExtent.y + 1) >> 1,
+//				(srcExtent.width + 1) >> 1,
+//				(srcExtent.height + 1) >> 1);
 		Rectangle nextLevelBlurredImageExt = new Rectangle(
-				(srcExtent.x + 1) >> 1,
-				(srcExtent.y + 1) >> 1,
-				(srcExtent.width + 1) >> 1,
-				(srcExtent.height + 1) >> 1);
+				srcExtent.x >> 1,
+				srcExtent.y >> 1,
+				srcExtent.width >> 1,
+				srcExtent.height >> 1);
 		DWindowedImageUtils.toImageFile(nextLevelBlurredImage, Const.workDir + "/dlowe_nextlevel_" + scale + "p.png");
 		nextLevelBlurredImage = new PDImageMapBuffer(nextLevelBlurredImageExt);
 //		nextLevelBlurredImage = new ImageWriteTracker(nextLevelBlurredImage, false, true);
@@ -118,8 +120,6 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 			}
 		}
 		scale *= 2.0;
-//		nextLevelBlurredImage = null;
-		
 		return result;
 	}
 

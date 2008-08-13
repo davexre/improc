@@ -3,19 +3,12 @@ package com.slavi.improc.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.improc.parallel.ExecutePDLowe;
-import com.slavi.improc.parallel.ExecutionProfile;
-import com.slavi.improc.parallel.PDLoweDetector;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
-import com.slavi.util.Marker;
-import com.slavi.util.Utl;
 
 public class TestPDLoweDetector {
 	

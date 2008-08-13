@@ -157,21 +157,21 @@ public class DLoweCompareResult {
 			(kp2.imgX != kp1.imgX) || 
 			(kp2.imgY != kp1.imgY) ||  
 			((int)(kp2.dogLevel * multiply) != (int)(kp1.dogLevel * multiply)) || 
-//			((int)(kp2.degree * multiply) != (int)(kp1.degree * multiply)) ||
-//			((int)(kp2.kpScale * multiply) != (int)(kp1.kpScale * multiply)) || 
-//			((int)(kp2.doubleX * multiply) != (int)(kp1.doubleX * multiply)) ||
-//			((int)(kp2.doubleY * multiply) != (int)(kp1.doubleY * multiply)) ||
+			((int)(kp2.degree * multiply) != (int)(kp1.degree * multiply)) ||
+			((int)(kp2.kpScale * multiply) != (int)(kp1.kpScale * multiply)) || 
+			((int)(kp2.doubleX * multiply) != (int)(kp1.doubleX * multiply)) ||
+			((int)(kp2.doubleY * multiply) != (int)(kp1.doubleY * multiply)) ||
 			false
 			)
 			return false;
-//		for (int k = 0; k < KeyPoint.numDirections; k++) {
-//			for (int j = 0; j < KeyPoint.descriptorSize; j++) {
-//				for (int i = 0; i < KeyPoint.descriptorSize; i++) {
-//					if (kp2.getItem(i, j, k) != kp1.getItem(i, j, k))
-//						return false;
-//				}
-//			}
-//		}
+		for (int k = 0; k < KeyPoint.numDirections; k++) {
+			for (int j = 0; j < KeyPoint.descriptorSize; j++) {
+				for (int i = 0; i < KeyPoint.descriptorSize; i++) {
+					if (kp2.getItem(i, j, k) != kp1.getItem(i, j, k))
+						return false;
+				}
+			}
+		}
 		return true;
 	}
 	
@@ -199,8 +199,6 @@ public class DLoweCompareResult {
 		int totalMatch = 0;
 		for (int i = p1.size() - 1; i >= 0; i--) {
 			KeyPoint sp1 = (KeyPoint)p1.get(i);
-			if (sp1.dogLevel != 1)
-				continue;
 			buf.setPixel(sp1.imgX, sp1.imgY, 1.0);
 			
 			boolean matchingFound = false;
@@ -211,7 +209,7 @@ public class DLoweCompareResult {
 						System.out.println("== DUPLICATED");
 						System.out.println(sp1);
 						System.out.println(sp2);
-						result = false; // Found a second one
+//						result = false; // Found a second one
 					}
 					matchingFound = true;
 				}
@@ -339,9 +337,9 @@ public class DLoweCompareResult {
 		for (KeyPoint kp : l2) out.println(kp);
 		out.close();
 		
-//		boolean b = true;
-//		b = compare(kp1, kp2);
-//		System.out.println(b ? "ok" : "FAILED");
+		boolean b = true;
+		b = compare(kp1, kp2);
+		System.out.println(b ? "ok" : "FAILED");
 //		kp1.compareToList(kp2);
 		Marker.release();
 	}
@@ -360,7 +358,7 @@ public class DLoweCompareResult {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		doIt(Const.smallImage);
+		doIt(Const.sourceImage);
 //		doIt("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt3("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt2("D:/Users/s/Images/*.jpg");

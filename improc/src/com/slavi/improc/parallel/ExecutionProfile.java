@@ -2,9 +2,7 @@ package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
 import java.lang.management.ManagementFactory;
-import java.util.List;
 
-import com.slavi.image.DWindowedImage;
 import com.slavi.util.Utl;
 
 public class ExecutionProfile {
