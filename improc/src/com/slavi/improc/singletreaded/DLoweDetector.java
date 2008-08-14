@@ -706,14 +706,14 @@ public class DLoweDetector {
 			blured0.computeDirection(direction);
 			if (dogLevel < 0)
 				continue;
-			try {
-				tmpImageMap.toImageFile(Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "d.png");
-				magnitude.toImageFile(Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "d.png");
-				direction.toImageFile(Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "d.png");
-				dogcount++;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				tmpImageMap.toImageFile(Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "d.png");
+//				magnitude.toImageFile(Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "d.png");
+//				direction.toImageFile(Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "d.png");
+//				dogcount++;
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 
 			DImageMap temp = new DImageMap(1, 1);
 			magnitude.copyTo(temp);

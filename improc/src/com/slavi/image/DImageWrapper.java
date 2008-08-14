@@ -20,7 +20,7 @@ public class DImageWrapper implements DWindowedImage {
 		this.imageExtent = image.getExtent();
 		this.extent = extent;
 	}
-
+	
 	public DImageWrapper(DWindowedImage image, Rectangle extent) {
 		if (!image.getExtent().contains(extent))
 			throw new IllegalArgumentException("Invalid size\nimage extent is " + image.getExtent() + "\nnew extent is " + extent);

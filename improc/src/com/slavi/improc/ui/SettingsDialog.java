@@ -1,4 +1,4 @@
-package com.slavi.improc;
+package com.slavi.improc.ui;
 
 import java.io.File;
 import java.util.Properties;
@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Text;
 
 import com.slavi.util.ui.SwtUtl;
 
-public class Settings {
+public class SettingsDialog {
 	
 	Shell shell;
 
@@ -34,7 +34,7 @@ public class Settings {
 	
 	DirectoryDialog browseForFolderDialog = null;
 	
-	public Settings(Shell parent) {
+	public SettingsDialog(Shell parent) {
 		shell = new Shell(parent, SWT.SHELL_TRIM);
 		createWidgets();
 		SwtUtl.centerShell(shell);

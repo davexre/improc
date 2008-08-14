@@ -2,6 +2,7 @@ package com.slavi.util.ui;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.concurrent.Callable;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -379,5 +380,35 @@ public class SwtUtl {
 		waitDialogTaskProgress = null;
 		waitDialogShell = null;
 		return result;
+	}
+	
+	private static class CallableWrapper<V> implements Runnable {
+		final Callable<V> callable;
+		V result;
+		Exception exception;
+		
+		public CallableWrapper(Callable<V> callable) {
+			this.callable = callable;
+		}
+		
+		public void run() {
+			try {
+				result = callable.call();
+			} catch (Exception e) {
+				exception = e;
+				SwtUtl.activeWaitDialogAbortTask();
+			}
+		}
+	}
+	
+	public static <V> V openWaitDialog(final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
+		CallableWrapper<V> wrapper = new CallableWrapper(callable);
+		boolean res = openWaitDialog(title, wrapper, maxProgressValue);
+		if (res && (wrapper.exception == null)) {
+			return wrapper.result;
+		}
+		if (wrapper.exception != null)
+			throw wrapper.exception;
+		throw new InterruptedException("Aborted");
 	}
 }

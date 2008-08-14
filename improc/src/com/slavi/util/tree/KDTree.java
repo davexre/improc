@@ -140,7 +140,6 @@ public abstract class KDTree<E> implements Iterable<E>{
 		this(dimensions);
 		for (E item : items)
 			add(item);
-		balanceIfNeeded();
 	}
 	
 	/**

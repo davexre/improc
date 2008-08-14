@@ -36,16 +36,24 @@ public class PDLoweDetector implements Callable<Void> {
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
 		this.dloweExtent = dloweExtent;
-		Rectangle r = src.getExtent();
+		Rectangle r = new Rectangle();
 //		r.x = (src.minX() + 1) >> 1;
 //		r.y = (src.minY() + 1) >> 1;
 //		r.width = (src.maxX() >> 1) - r.x + 1;
 //		r.height = (src.maxY() >> 1) - r.y + 1;
 		r.x = (dloweExtent.x + 1) >> 1;
 		r.y = (dloweExtent.y + 1) >> 1;
-		r.width = ((dloweExtent.x + dloweExtent.width) >> 1) - r.x;
-		r.height = ((dloweExtent.y + dloweExtent.height) >> 1) - r.y;
-		this.nextLevelBlurredImage = new DImageWrapper(nextLevelBlurredImage, r);
+		r.width = ((dloweExtent.x + dloweExtent.width - 1) >> 1) - r.x + 1;
+		r.height = ((dloweExtent.y + dloweExtent.height - 1) >> 1) - r.y + 1;
+		if (r.x + r.width - 1 > nextLevelBlurredImage.maxX())
+			r.width = nextLevelBlurredImage.maxX() - r.x + 1;
+		if (r.y + r.height - 1 > nextLevelBlurredImage.maxY())
+			r.height = nextLevelBlurredImage.maxY() - r.y + 1;
+		
+		if ((r.width == 0) || (r.height == 0))
+			this.nextLevelBlurredImage = null; 	// TODO: Ugly hack
+		else
+			this.nextLevelBlurredImage = new DImageWrapper(nextLevelBlurredImage, r);
 	}
 	
 	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
@@ -712,9 +720,9 @@ public class PDLoweDetector implements Callable<Void> {
 			// Compute next DOG
 			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 			computeDOG(blurred1, blurred2, DOGs[2]);
-			DWindowedImageUtils.toImageFile(DOGs[2], Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "p.png");
-			DWindowedImageUtils.toImageFile(magnitude, Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "p.png");
-			DWindowedImageUtils.toImageFile(direction, Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "p.png");
+//			DWindowedImageUtils.toImageFile(DOGs[2], Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "p.png");
+//			DWindowedImageUtils.toImageFile(magnitude, Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "p.png");
+//			DWindowedImageUtils.toImageFile(direction, Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "p.png");
 			dogcount++;
 			sigma = getNextSigma(sigma, scaleSpaceLevels);
 
@@ -722,11 +730,12 @@ public class PDLoweDetector implements Callable<Void> {
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
 
-		for (int j = nextLevelBlurredImage.minY(); j <= nextLevelBlurredImage.maxY(); j++) {
-			for (int i = nextLevelBlurredImage.minX(); i <= nextLevelBlurredImage.maxX(); i++) {
-				nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i << 1, j << 1));
+		if (nextLevelBlurredImage != null)
+			for (int j = nextLevelBlurredImage.minY(); j <= nextLevelBlurredImage.maxY(); j++) {
+				for (int i = nextLevelBlurredImage.minX(); i <= nextLevelBlurredImage.maxX(); i++) {
+					nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i << 1, j << 1));
+				}
 			}
-		}
 		
 /*		int minX = dloweExtent.x;
 		int minY = dloweExtent.y;

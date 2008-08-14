@@ -56,6 +56,7 @@ public class DLoweCompareResult {
 				for (int j2 = 0; j2 < KeyPoint.descriptorSize; j2++) 
 					for (int k2 = 0; k2 < KeyPoint.numDirections; k2++) 
 						kp.setItem(i2, j2, k2, (byte)sp.getItem(i2, j2, k2));
+			kp.keyPointList = result;
 			result.kdtree.add(kp);
 		}
 		return result;
@@ -72,6 +73,7 @@ public class DLoweCompareResult {
 		DLoweDetector d = new DLoweDetector();
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
+				scalePoint.keyPointList = result;
 				result.kdtree.add(scalePoint);
 			}		
 		};
@@ -91,10 +93,13 @@ public class DLoweCompareResult {
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
+				scalePoint.keyPointList = result;
 				result.kdtree.add(scalePoint);
 			}		
 		};
 		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
+		profile.destWindowSizeX /= 2;
+		profile.destWindowSizeY /= 2;
 		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
 
 		ExecutorService exec;
@@ -154,11 +159,11 @@ public class DLoweCompareResult {
 	public static boolean compareKeyPoints(KeyPoint kp1, KeyPoint kp2) {
 		int multiply = 10000;
 		if (
-			(kp2.imgX != kp1.imgX) || 
-			(kp2.imgY != kp1.imgY) ||  
-			((int)(kp2.dogLevel * multiply) != (int)(kp1.dogLevel * multiply)) || 
-			((int)(kp2.degree * multiply) != (int)(kp1.degree * multiply)) ||
-			((int)(kp2.kpScale * multiply) != (int)(kp1.kpScale * multiply)) || 
+//			(kp2.imgX != kp1.imgX) || 
+//			(kp2.imgY != kp1.imgY) ||  
+//			((int)(kp2.dogLevel * multiply) != (int)(kp1.dogLevel * multiply)) || 
+//			((int)(kp2.degree * multiply) != (int)(kp1.degree * multiply)) ||
+//			((int)(kp2.kpScale * multiply) != (int)(kp1.kpScale * multiply)) || 
 			((int)(kp2.doubleX * multiply) != (int)(kp1.doubleX * multiply)) ||
 			((int)(kp2.doubleY * multiply) != (int)(kp1.doubleY * multiply)) ||
 			false
@@ -173,6 +178,20 @@ public class DLoweCompareResult {
 			}
 		}
 		return true;
+	}
+	
+	static void pinKeyPoint(DWindowedImage buf, KeyPoint kp) {
+		int x = (int)kp.doubleX;
+		int y = (int)kp.doubleY;
+		if (x > buf.maxX())
+			x = buf.maxX();
+		if (y > buf.maxY())
+			y = buf.maxY();
+		if (x < buf.minX())
+			x = buf.minX();
+		if (y < buf.minY())
+			y = buf.minY();
+		buf.setPixel(x, y, 1.0);
 	}
 	
 	public static boolean compare(KeyPointList kp1, KeyPointList kp2) throws IOException {
@@ -194,12 +213,14 @@ public class DLoweCompareResult {
 //		System.out.println("------------------");
 		
 		PDImageMapBuffer buf = new PDImageMapBuffer(new Rectangle(kp1.imageSizeX, kp1.imageSizeY));
+		PDImageMapBuffer buf2 = new PDImageMapBuffer(new Rectangle(kp1.imageSizeX, kp1.imageSizeY));
 		
 		boolean result = true;
 		int totalMatch = 0;
 		for (int i = p1.size() - 1; i >= 0; i--) {
 			KeyPoint sp1 = (KeyPoint)p1.get(i);
-			buf.setPixel(sp1.imgX, sp1.imgY, 1.0);
+			if (sp1.dogLevel == 1) 
+				pinKeyPoint(buf2, sp1);
 			
 			boolean matchingFound = false;
 			for (int j = p2.size() - 1; j >= 0; j--) {
@@ -220,12 +241,24 @@ public class DLoweCompareResult {
 				result = false;
 			if (!matchingFound) {
 				System.out.println(sp1);
+				if (sp1.dogLevel == 1) 
+					pinKeyPoint(buf, sp1);
 				result = false;
 			}
 		}
 
-		System.out.println("Total matched " + totalMatch + " / " + p1.size() + "/" + p2.size());
-		DWindowedImageUtils.toImageFile(buf, "d:/temp/asd.png");
+		System.out.print("Total matched " + totalMatch + " / " + p1.size() + "/" + p2.size());
+		DWindowedImageUtils.toImageFile(buf, Const.workDir + "/points_0notMatched.png");
+		DWindowedImageUtils.toImageFile(buf2, Const.workDir + "/points_1.png");
+
+		buf = new PDImageMapBuffer(new Rectangle(kp1.imageSizeX, kp1.imageSizeY));
+		for (int j = p2.size() - 1; j >= 0; j--) {
+			KeyPoint sp2 = (KeyPoint)p2.get(j);
+			if (sp2.dogLevel == 1) 
+				pinKeyPoint(buf, sp2);
+		}
+		DWindowedImageUtils.toImageFile(buf, Const.workDir + "/points_2.png");
+		
 		return result;
 	}
 	
@@ -349,16 +382,19 @@ public class DLoweCompareResult {
 		int count = 0;
 		for (File f = ff.next(); f != null; f = ff.next()) {
 			String fileName = f.getAbsolutePath();
-			System.out.print("Processing image (" + (count++) + ") " + fileName);
-			KeyPointList kp1 = makeWithOldWorkingDetector(fileName);
-			KeyPointList kp2 = makeWithParallelDetector(fileName);
+			System.out.print("Processing image (" + (count++) + ") " + fileName + " ");
+//			KeyPointList kp1 = makeWithOldWorkingDetector(fileName);
+			KeyPointList kp1 = makeWithParallelDetector(fileName);
+			KeyPointList kp2 = makeWithSingleThreadedDetector(fileName);
 			boolean b = compare(kp1, kp2);
 			System.out.println(b ? " ok" : " FAILED");
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		doIt(Const.sourceImage);
+//		doIt("D:/Users/s/Images/20080627 SAP Teambuilding v selo Chiflika (Troian)/2008-06-27/P1010199.JPG");
+		doIt2(Const.smallImage);
+//		doIt(Const.sourceImage);
 //		doIt("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt3("D:/Users/s/Images/DSC_0237.JPG");
 //		doIt2("D:/Users/s/Images/*.jpg");

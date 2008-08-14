@@ -41,16 +41,14 @@ public abstract class KDNodeSaverXML<E> {
 	 * All "Item" XML elements can have one sub "Item" sub element with the "v" attribute
 	 * set to "Left" and one sub element with "v" attribute set to "Right"
 	 * 
-	 * Before saving the tree the {@link #balanceIfNeeded()} is called.
-	 * 
 	 * @see #fromXML(Element, KDNodeSaverXML)
+	 * @see KDTree#balanceIfNeeded();
 	 */
 	public void toXML(KDTree<E> tree, Element dest) {
 		if (tree instanceof ConcurrentKDTree) {
 			((ConcurrentKDTree)tree).lock.readLock().lock();
 		}
 		try {
-			tree.balanceIfNeeded();
 			dest.addContent(XMLHelper.makeAttrEl("Dimensions", Integer.toString(tree.dimensions)));
 			Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
 			toXML_recursive(tree.root, rootNode);
@@ -88,8 +86,6 @@ public abstract class KDNodeSaverXML<E> {
 	 * If the node reader fails in preparing a node it can return null and the node
 	 * will ignored.
 	 * 
-	 * After reading the tree the {@link #balanceIfNeeded()} is called.
-	 *   
 	 * @throws JDOMException
 	 * @return The number of items read. 
 	 */
@@ -97,7 +93,6 @@ public abstract class KDNodeSaverXML<E> {
 		int dimensions = Integer.parseInt(XMLHelper.getAttrEl(source, "Dimensions"));
 		KDTree<E> result = getTree(dimensions);
 		fromXML_ReadChildren(result, source);
-		result.balanceIfNeeded();
 		return result;
 	}
 }

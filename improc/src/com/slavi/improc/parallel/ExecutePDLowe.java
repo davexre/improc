@@ -101,14 +101,19 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 		nextLevelBlurredImage = new PDImageMapBuffer(nextLevelBlurredImageExt);
 //		nextLevelBlurredImage = new ImageWriteTracker(nextLevelBlurredImage, false, true);
 
-		Rectangle rect = new Rectangle(suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
+		int dx = (int)Math.ceil((double)srcExtent.width / 
+				Math.ceil((double)srcExtent.width / (double)suggestedProfile.destWindowSizeX));
+		int dy = (int)Math.ceil((double)srcExtent.height / 
+				Math.ceil((double)srcExtent.height / (double)suggestedProfile.destWindowSizeY));
+		
+		Rectangle rect = new Rectangle(dx, dy);
 		rect = PDLoweDetector.getNeededSourceExtent(rect, PDLoweDetector.defaultScaleSpaceLevels);
 		
-		for (int sminx = 0; sminx < srcExtent.width; sminx += suggestedProfile.destWindowSizeX) {
-			for (int sminy = 0; sminy < srcExtent.height; sminy += suggestedProfile.destWindowSizeY) {
+		for (int sminx = 0; sminx < srcExtent.width; sminx += dx) {
+			for (int sminy = 0; sminy < srcExtent.height; sminy += dy) {
 				Rectangle srcR = new Rectangle(sminx + rect.x, sminy + rect.y, rect.width, rect.height);
 				srcR = srcR.intersection(srcExtent);
-				Rectangle destR = new Rectangle(sminx, sminy, suggestedProfile.destWindowSizeX, suggestedProfile.destWindowSizeY);
+				Rectangle destR = new Rectangle(sminx, sminy, dx, dy);
 				destR = destR.intersection(srcExtent);
 				if (srcR.isEmpty() || destR.isEmpty()) {
 					throw new RuntimeException("empty");

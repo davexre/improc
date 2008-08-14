@@ -9,6 +9,8 @@ import org.jdom.JDOMException;
 import com.slavi.util.XMLHelper;
 
 public class KeyPoint {
+	public KeyPointList keyPointList = null;
+	
 	public int id = hashCode();
 	
 	public static final int numDirections = 8;

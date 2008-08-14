@@ -36,7 +36,7 @@ public class KeyPointPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		doUpdateKeyPointPairList(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
 	}
 
@@ -58,7 +58,7 @@ public class KeyPointPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		if (image1.getName().compareTo(image2.getName()) > 0) {
 			File tmp = image1;
 			image1 = image2;
@@ -136,7 +136,7 @@ public class KeyPointPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		KeyPointPairList result = doUpdateKeyPointPairList(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
 		if (result != null)
 			return result;

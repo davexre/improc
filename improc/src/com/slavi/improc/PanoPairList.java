@@ -44,7 +44,7 @@ public class PanoPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		doUpdatePanoPairList(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
 	}
 
@@ -66,7 +66,7 @@ public class PanoPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		if (image1.getName().compareTo(image2.getName()) > 0) {
 			File tmp = image1;
 			image1 = image2;
@@ -163,7 +163,7 @@ public class PanoPairList {
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
-			File image1, File image2) throws IOException {
+			File image1, File image2) throws Exception {
 		PanoPairList result = doUpdatePanoPairList(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
 		if (result != null)
 			return result;

@@ -8,12 +8,18 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
+import com.slavi.improc.parallel.ExecutePDLowe;
+import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.singletreaded.DLoweDetector;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.util.Utl;
+import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 import com.slavi.util.tree.KDNodeSaver;
@@ -40,6 +46,12 @@ public class KeyPointList {
 	}
 	
 	public static class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
+		final KeyPointList keyPointList;
+		
+		public KeyPointListSaver(KeyPointList keyPointList) {
+			this.keyPointList = keyPointList;
+		}
+		
 		public KDTree<KeyPoint> getTree(int dimensions) {
 			if (dimensions != KeyPoint.featureVectorLinearSize)
 				throw new IllegalArgumentException("Invalid dimension"); 
@@ -68,14 +80,14 @@ public class KeyPointList {
 		r.imageSizeX = Integer.parseInt(st.nextToken());
 		r.imageSizeY = Integer.parseInt(st.nextToken());
 		r.kdtree = new KeyPointTree(); 
-		new KeyPointListSaver().fromTextStream(r.kdtree, fin);
+		new KeyPointListSaver(r).fromTextStream(r.kdtree, fin);
 		return r;
 	}
 
 	private void toTextStream(PrintWriter fou) {
 		fou.println(imageFileStamp.toString());
 		fou.println(imageSizeX + "\t" + imageSizeY);
-		new KeyPointListSaver().toTextStream(kdtree, fou);
+		new KeyPointListSaver(this).toTextStream(kdtree, fou);
 	}
 
 	private static class ListenerImpl implements Hook {
@@ -84,7 +96,9 @@ public class KeyPointList {
 		public ListenerImpl(KeyPointList spl) {
 			this.scalePointList = spl;
 		}
+		
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
+			scalePoint.keyPointList = scalePointList;
 			scalePointList.kdtree.add(scalePoint);
 		}		
 	}
@@ -92,7 +106,7 @@ public class KeyPointList {
 	public static void updateKeyPointFileIfNecessary(
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
-			File image) throws IOException {
+			File image) throws Exception {
 		doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
 	}
 	
@@ -104,7 +118,7 @@ public class KeyPointList {
 				rootImagesDir.getRelativePath(image, false)), "spf"));
 	}
 	
-	public static KeyPointList buildKeyPointFileSingleThreaded(File kplFile, File image) throws IOException {
+	public static KeyPointList buildKeyPointFileSingleThreaded(File image) throws Exception {
 		DImageMap img = new DImageMap(image);
 		KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.getSizeX();
@@ -115,51 +129,38 @@ public class KeyPointList {
 		return result;
 	}
 	
-	public static KeyPointList buildKeyPointFileMultiThreaded(File kplFile, File image) throws IOException {
+	public static KeyPointList buildKeyPointFileMultiThreaded(File image) throws Exception {
 		DWindowedImage img = new PDImageMapBuffer(image);
-		KeyPointList result = new KeyPointList();
+		final KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.maxX() + 1;
 		result.imageSizeY = img.maxY() + 1;
 
-		Hook hook = new ListenerImpl(result);
-		
-		int scale = 1;
-/* TODO: FIXME:		while (true) {
-			ExecutionProfile profile = ExecutePDLowe.makeTasks(img, scale, hook);
-//			ExecutorService exec = Executors.newSingleThreadExecutor();
-//			ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
-			System.out.println(profile);
-			System.out.println("---------------------");
-			for (Runnable task : profile.tasks) {
-				System.out.println(task);
-				System.out.println();
-			}
-			for (Runnable task : profile.tasks)
-				task.run();
-				
-//			for (Runnable task : profile.tasks)
-//				exec.execute(task);
-//			exec.shutdown();
-//			while (!exec.isTerminated()) {
-//				try {
-//					exec.awaitTermination(1000, TimeUnit.SECONDS);
-//				} catch (InterruptedException e) {
-//				}
-//			}
-//			DImageMap tmp = new DImageMap(img.getSizeX() >> 1, img.getSizeY() >> 1);
-//			img.scaleHalf(tmp);
-			scale *= 2;
-			img = profile.nextLevelBlurredImage;
-			if (img.maxX() / 2 <= 64) 
-				break;
-		};*/		
+		result.imageSizeX = img.maxX() + 1;
+		result.imageSizeY = img.maxY() + 1;
+
+		Hook hook = new Hook() {
+			public synchronized void keyPointCreated(KeyPoint scalePoint) {
+				scalePoint.keyPointList = result;
+				result.kdtree.add(scalePoint);
+			}		
+		};
+		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
+		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
+
+		ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
+		Future<Void> ft = new SteppedParallelTaskExecutor(exec, profile.parallelTasks, execPDLowe).start();
+		try {
+			ft.get();
+		} finally {
+			exec.shutdown();
+		}		
 		return result;
 	}
 	
 	private static KeyPointList doUpdateKeyPointFileIfNecessary(
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
-			File image) throws IOException {
+			File image) throws Exception {
 		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
 		
 		try {
@@ -178,8 +179,8 @@ public class KeyPointList {
 		} catch (IOException e) {
 		}
 		
-//		KeyPointList result = buildKeyPointFileSingleThreaded(kplFile, image);
-		KeyPointList result = buildKeyPointFileMultiThreaded(kplFile, image);
+//		KeyPointList result = buildKeyPointFileSingleThreaded(image);
+		KeyPointList result = buildKeyPointFileMultiThreaded(image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
@@ -198,7 +199,7 @@ public class KeyPointList {
 	public static KeyPointList readKeyPointFile(
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
-			File image) throws IOException {
+			File image) throws Exception {
 		KeyPointList result = doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
 		if (result != null)
 			return result;

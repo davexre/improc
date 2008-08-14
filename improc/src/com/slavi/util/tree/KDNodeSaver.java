@@ -24,7 +24,6 @@ public abstract class KDNodeSaver<E> {
 	
 	/**
 	 * The tree is stored to a text stream one node at a line.
-	 * After reading the tree the {@link #balanceIfNeeded()} is called.
 	 */
 	public void toTextStream(KDTree<E> tree, PrintWriter fou) {
 		if (tree instanceof ConcurrentKDTree) {
@@ -42,7 +41,6 @@ public abstract class KDNodeSaver<E> {
 	/**
 	 * Reads and APPENDS nodes from a text stream one node at a line till EOF.
 	 * If a line is empty or if the very first character is # the line is ignored. 
-	 * The method {@link #balanceIfNeeded()} is invoked.
 	 * @return The number of items read. 
 	 */
 	public int fromTextStream(KDTree<E> tree, BufferedReader fin) throws IOException {
@@ -54,7 +52,6 @@ public abstract class KDNodeSaver<E> {
 				result++;
 			}
 		}
-		tree.balanceIfNeeded();
 		return result;
 	}
 }
