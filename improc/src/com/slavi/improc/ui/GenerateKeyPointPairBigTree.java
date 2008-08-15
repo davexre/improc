@@ -29,7 +29,7 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 		for (int i = 0; i < images.size(); i++) {
 			String image = images.get(i); 
 			String statusMessage = (i + 1) + "/" + images.size() + " " + image;
-			System.out.print(statusMessage);
+			System.out.println(statusMessage);
 			SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
 			KeyPointList l = KeyPointList.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(image));
 			result.keyPointLists.add(l);
@@ -37,7 +37,12 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 				result.kdtree.add(kp);
 			}
 		}
+		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);
+		System.out.println("Tree size        : " + result.kdtree.getSize());
+		System.out.println("Tree depth before: " + result.kdtree.getTreeDepth());
 		result.kdtree.balanceIfNeeded();
+		System.out.println("Tree depth after : " + result.kdtree.getTreeDepth());
+		
 		return result;
 	}
 }

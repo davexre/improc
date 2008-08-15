@@ -59,7 +59,9 @@ public class KeyPointList {
 		}
 
 		public KeyPoint nodeFromString(String source) {
-			return KeyPoint.fromString(source);
+			KeyPoint result = KeyPoint.fromString(source);
+			result.keyPointList = keyPointList;
+			return result;
 		}
 
 		public String nodeToString(KeyPoint node) {
@@ -207,7 +209,6 @@ public class KeyPointList {
 		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
 		BufferedReader fin = new BufferedReader(new FileReader(kplFile));
 		fin.readLine(); // Skip header.
-		result = new KeyPointList();
 		result = KeyPointList.fromTextStream(fin, rootImagesDir);
 		return result;
 	}

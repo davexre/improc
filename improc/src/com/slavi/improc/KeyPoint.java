@@ -94,7 +94,7 @@ public class KeyPoint {
 		r.imgY = Integer.parseInt(st.nextToken());
 		r.doubleX = Double.parseDouble(st.nextToken());
 		r.doubleY = Double.parseDouble(st.nextToken());
-		r.dogLevel = Integer.parseInt(st.nextToken());
+		r.dogLevel = (int) Double.parseDouble(st.nextToken());
 		r.adjS = Double.parseDouble(st.nextToken());
 		r.kpScale = Double.parseDouble(st.nextToken());
 		r.degree = Double.parseDouble(st.nextToken());
