@@ -31,7 +31,7 @@ public class TestStatistics {
 		statLT.setB(0.9);
 		statLT.start();
 		for (int i = 0; i < items.size(); i++)
-			statLT.addValue(((StatisticsItemBasic)items.get(i)).getValue());
+			statLT.addValue(items.get(i).getValue());
 		statLT.stop();
 		System.out.println(statLT.toString());
 		System.out.println("------------");
@@ -46,6 +46,6 @@ public class TestStatistics {
 		System.out.println("------------");
 		
 		for (int i = 0; i < items.size(); i++)
-			System.out.println(((StatisticsItemBasic)items.get(i)).toString());
+			System.out.println(items.get(i).toString());
 	}
 }

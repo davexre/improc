@@ -13,7 +13,7 @@ public class TestAffineTransformer {
 
 	private static double degreeToRad = Math.PI / 180;
 	
-	private ArrayList points;
+	private ArrayList<TestPointPair> points;
 	
 	AffineTransform jTransform;
 	
@@ -50,7 +50,7 @@ public class TestAffineTransformer {
 		
 	private void addp(int x, int y) {
 		Point2D.Double sd = new Point2D.Double(x, y);
-		PointsPair pair = new TestPointPair(sd);
+		TestPointPair pair = new TestPointPair(sd);
 		points.add(pair);
 	}
 	
@@ -65,7 +65,7 @@ public class TestAffineTransformer {
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
 		
-		points = new ArrayList();
+		points = new ArrayList<TestPointPair>();
 		for (int xcounter = 0; xcounter < 2; xcounter++) {
 			for (int ycounter = 0; ycounter < 2; ycounter++) {
 				addp(xcounter, ycounter);
@@ -83,7 +83,7 @@ public class TestAffineTransformer {
 		System.out.println(tr.toString());
 		
 		Matrix dest = new Matrix(2, 1);
-		pair = (TestPointPair)points.get(0);
+		pair = points.get(0);
 		tr.transform(pair.source, dest);
 		System.out.println("" + pair.target2D.x + "\t" + pair.target2D.y);
 		System.out.println("" + dest.getItem(0,0) + "\t" + dest.getItem(1,0));

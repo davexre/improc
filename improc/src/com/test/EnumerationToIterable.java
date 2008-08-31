@@ -44,7 +44,7 @@ public class EnumerationToIterable<E> implements Iterable<E> {
 	public static void main(String[] args) {
 		String path = System.getProperty("java.class.path");
 		StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
-		for (Object s : new EnumerationToIterable(st)) {
+		for (Object s : new EnumerationToIterable<Object>(st)) {
 			System.out.println(s);
 		}
 	}

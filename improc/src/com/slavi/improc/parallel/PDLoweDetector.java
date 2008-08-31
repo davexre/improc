@@ -1,19 +1,15 @@
 package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
-import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
-import com.slavi.image.DWindowedImageUtils;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
-import com.slavi.util.Const;
 
 public class PDLoweDetector implements Callable<Void> {
 
@@ -672,7 +668,7 @@ public class PDLoweDetector implements Callable<Void> {
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
 	
-	void DetectFeaturesInSingleLevel() throws InterruptedException, ExecutionException, IOException {
+	void DetectFeaturesInSingleLevel() {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
 

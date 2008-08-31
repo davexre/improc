@@ -170,7 +170,7 @@ public class TaskProgress extends Composite {
 		}
 	}
 	
-	private class TaskFinishedNotification implements Runnable {
+	class TaskFinishedNotification implements Runnable {
 		public void run() {
 			if (!isDisposed()) {
 				taskStatusText.setText(isAborted() ? "Aborted" : "Finished");

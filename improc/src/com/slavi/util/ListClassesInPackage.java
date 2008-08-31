@@ -100,7 +100,7 @@ public class ListClassesInPackage {
 	/**
 	 * Returns the absolute path to the root folder for the specified class. 
 	 */
-	public static String getClassRootLocation(Class theClass) {
+	public static String getClassRootLocation(Class<?> theClass) {
 		String result = theClass.getResource("").getFile();
 		if (result.startsWith("file:/")) {
 			int index = result.indexOf(".jar!/");

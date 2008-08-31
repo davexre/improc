@@ -3,6 +3,7 @@ package com.test.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.util.Marker;
 import com.slavi.util.tree.KDTree;
 
 public class TestKDTree {
@@ -75,7 +76,7 @@ public class TestKDTree {
 		System.out.println();
 	}
 	
-	public static void main2(String[] args) {
+	public static void main2() {
 		int dimensions = 2;
 		int itemsPerDimension = 5;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
@@ -109,13 +110,20 @@ public class TestKDTree {
 	}
 	
 	public static void main(String[] args) {
-		int dimensions = 2;
-		int itemsPerDimension = 5;
-		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
+		int dimensions = 10;
+		int itemsPerDimension = 3;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
 		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
 		MyKDTree tree = new MyKDTree(dimensions, items);
 //		printNodesList(items);
-		printNode(tree.getRoot(), 0);
+//		printNode(tree.getRoot(), 0);
+		Marker.mark();
+		System.out.println("Tree size : " + tree.getSize());
+		System.out.println("Tree depth: " + tree.getTreeDepth());
+		tree.balance();
+		System.out.println("Tree size : " + tree.getSize());
+		System.out.println("Tree depth: " + tree.getTreeDepth());
+		Marker.release();
 		MyKDData item = items.get(3);
 		System.out.println("Item to find:");
 		System.out.println(item);

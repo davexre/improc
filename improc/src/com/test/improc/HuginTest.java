@@ -13,24 +13,22 @@ import com.slavi.math.transform.PointsPair;
 
 public class HuginTest {
 
-	private static class CompareByDelta implements Comparator {
+	private static class CompareByDelta implements Comparator<PointsPair> {
 		public static final CompareByDelta instance = new CompareByDelta();
 
-		public int compare(Object o1, Object o2) {
-			PointsPair spp1 = (PointsPair)o1;
-			PointsPair spp2 = (PointsPair)o2;
+		public int compare(PointsPair spp1, PointsPair spp2) {
 			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
 	
-	public static void sortByDelta(ArrayList items) {
+	public static void sortByDelta(ArrayList<PointsPair> items) {
 		Collections.sort(items, CompareByDelta.instance);
 	}		
 
 	public static void main(String[] args) throws Exception {
 		String fileName = "./../../images/hugin.txt";
 		BufferedReader f = new BufferedReader(new FileReader(fileName));
-		ArrayList items = new ArrayList();
+		ArrayList<PointsPair> items = new ArrayList<PointsPair>();
 		
 		while (f.ready()) {
 			String s = f.readLine();
@@ -56,7 +54,7 @@ public class HuginTest {
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
 		for (int i = 0; i < items.size(); i++) {
-			PointsPair pp = (PointsPair) items.get(i);
+			PointsPair pp = items.get(i);
 			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.getValue()));
 		}
 	}

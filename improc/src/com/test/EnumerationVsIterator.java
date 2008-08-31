@@ -6,10 +6,10 @@ import java.util.Vector;
 
 public class EnumerationVsIterator {
 	public static void main(String[] args) {
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 //		Object element;
-		Enumeration enum1;
-		Iterator iter;
+		Enumeration<?> enum1;
+		Iterator<?> iter;
 		long start;
 
 		for (int i = 0; i < 1000000; i++) {

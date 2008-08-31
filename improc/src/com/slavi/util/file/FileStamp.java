@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.jdom.Element;
-import org.jdom.JDOMException;
 
 import com.slavi.util.XMLHelper;
 
@@ -19,7 +18,7 @@ public class FileStamp {
 	
 	private long length;
 	
-	private FileStamp() {};
+	private FileStamp() {}
 	
 	public FileStamp(String relativeFileName) {
 		this(relativeFileName, null);
@@ -97,7 +96,7 @@ public class FileStamp {
 		dest.addContent(XMLHelper.makeAttrEl("DateText", (new Date(lastModified)).toString()));
 	}
 	
-	public static FileStamp fromXML(Element source, AbsoluteToRelativePathMaker rootDir) throws JDOMException {
+	public static FileStamp fromXML(Element source, AbsoluteToRelativePathMaker rootDir) {
 		FileStamp result = new FileStamp();
 		result.rootDir = rootDir;
 		String fileName = XMLHelper.getAttrEl(source, "File", "");

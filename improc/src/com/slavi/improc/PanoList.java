@@ -63,10 +63,6 @@ public class PanoList {
 		return null;
 	}
 	
-	public void processPanoPairList(ArrayList<PanoPairList> ppl) {
-		
-	}
-	
 	private static class ImageFileData {
 		String image;
 		int sizeX, sizeY, id;

@@ -206,7 +206,7 @@ public class ScalePoint extends KDNodeBase {
 		r.adjS = Double.parseDouble(XMLHelper.getAttrEl(source, "adjS"));
 		r.kpScale = Double.parseDouble(XMLHelper.getAttrEl(source, "kpScale"));
 		r.degree = Double.parseDouble(XMLHelper.getAttrEl(source, "degree"));
-		List fList = source.getChildren("f");
+		List<?> fList = source.getChildren("f");
 		if (fList.size() != ScalePoint.descriptorSize * ScalePoint.descriptorSize * ScalePoint.numDirections)
 			throw new JDOMException("Number of feature elements goes not match.");
 		int count = 0;

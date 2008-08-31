@@ -20,27 +20,15 @@ public class ColorConversion {
 		final int BLU = 2;
 
 		public double abs(double v) {
-			if (v > 0) {
-				return v;
-			} else {
-				return -v;
-			}
+			return v > 0 ? v : -v;
 		}
 
 		public double max(double a, double b) {
-			if (a > b) {
-				return a;
-			} else {
-				return b;
-			}
+			return a > b ? a : b;
 		}
 
 		public double min(double a, double b) {
-			if (a < b) {
-				return a;
-			} else {
-				return b;
-			}
+			return a < b ? a : b;
 		}
 
 		public double clip(double v) {
@@ -48,7 +36,7 @@ public class ColorConversion {
 			return min(1, max(0, v));
 		}
 
-	};
+	}
 
 	class HSV extends ColorInput {
 		final int HUE = 3;

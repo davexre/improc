@@ -137,12 +137,11 @@ public class AbsoluteToRelativePathMaker {
 		}
 		if (f == null) {
 			return file.getPath();
-		} else {
-			String fn = "";
-			for (int i = elementIndex - 1; i >= 0; i--)
-				fn = fn + ".." + File.separator;
-			return fn + trimmed;
 		}
+		String fn = "";
+		for (int i = elementIndex - 1; i >= 0; i--)
+			fn = fn + ".." + File.separator;
+		return fn + trimmed;
 	}
 	
 	public File getFullPathFile(String aRelativePath) {

@@ -92,7 +92,7 @@ public class SymmetricMatrix {
 	/**
 	 * Saves the matrix to a text stream
 	 */
-	public void save(PrintStream fou) throws IOException {
+	public void save(PrintStream fou) {
 		fou.print(this.toString());
 	}
 
@@ -594,7 +594,7 @@ public class SymmetricMatrix {
 	 *         value is false.
 	 */
 	public boolean inverse() {
-		ArrayList xchg = new ArrayList();
+		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 
 		for (int i = 0; i < sizeM; i++) {
 			double A = getItem(i, i);
@@ -637,7 +637,7 @@ public class SymmetricMatrix {
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {
-			XchgRec x = (XchgRec)xchg.get(i);
+			XchgRec x = xchg.get(i);
 			exchangeX(x.a, x.b);
 		}
 		return true;
@@ -696,7 +696,7 @@ public class SymmetricMatrix {
 	
 	public static SymmetricMatrix fromXML(Element source) throws JDOMException {
 		// Determine matrix size;
-		List rows = source.getChildren("row");
+		List<?> rows = source.getChildren("row");
 		int size = rows.size();
 		for (int i = 0; i < rows.size(); i++)
 			size = Math.max(size, ((Element)rows.get(i)).getChildren("item").size());
@@ -706,7 +706,7 @@ public class SymmetricMatrix {
 		SymmetricMatrix r = new SymmetricMatrix(size);
 		r.make0();
 		for (int j = rows.size() - 1; j >= 0; j--) {
-			List items = ((Element)rows.get(j)).getChildren("item");
+			List<?> items = ((Element)rows.get(j)).getChildren("item");
 			if (items.size() > j)
 				throw new JDOMException("Number of elements at row " + j + 
 						" exceeds the maximum allowed (" + j + ")");

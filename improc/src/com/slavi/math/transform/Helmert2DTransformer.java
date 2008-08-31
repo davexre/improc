@@ -1,7 +1,6 @@
 package com.slavi.math.transform;
 
 import org.jdom.Element;
-import org.jdom.JDOMException;
 
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.XMLHelper;
@@ -54,7 +53,7 @@ public class Helmert2DTransformer extends BaseTransformer {
 		dest.addContent(XMLHelper.makeAttrEl("D", Double.toString(d)));
 	}
 	
-	public static Helmert2DTransformer fromXML(Element source) throws JDOMException {
+	public static Helmert2DTransformer fromXML(Element source) {
 		Helmert2DTransformer r = new Helmert2DTransformer();
 		r.a = Double.parseDouble(XMLHelper.getAttrEl(source, "A"));
 		r.b = Double.parseDouble(XMLHelper.getAttrEl(source, "B"));

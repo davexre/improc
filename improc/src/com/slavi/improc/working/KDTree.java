@@ -2,6 +2,7 @@ package com.slavi.improc.working;
 
 import java.util.ArrayList;
 
+@SuppressWarnings("unchecked")
 public class KDTree {
 	int dimensions;
 

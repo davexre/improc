@@ -22,7 +22,7 @@ public class ConvertAutoanoKeyFile {
 		spl.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
 		spl.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
 		
-		List kpl = root.getChild("Arr").getChildren("KeypointN");
+		List<?> kpl = root.getChild("Arr").getChildren("KeypointN");
 		
 		for (int counter = 0; counter < kpl.size(); counter++) {
 			Element key = (Element)kpl.get(counter);
@@ -36,7 +36,7 @@ public class ConvertAutoanoKeyFile {
 			sp.level = Integer.parseInt(key.getChildText("Level"));
 			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
 			
-			List descr = key.getChild("Descriptor").getChildren("int");
+			List<?> descr = key.getChild("Descriptor").getChildren("int");
 			for (int i = 0; i < ScalePoint.descriptorSize; i++) {
 				for (int j = 0; j < ScalePoint.descriptorSize; j++) {
 					for (int k = 0; k < ScalePoint.numDirections; k++) {

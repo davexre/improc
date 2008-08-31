@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * This class contains utility methods for debuging purposes. 
+ * This class contains utility methods for debugging purposes. 
  */
 public class DumpUtils {
 	
@@ -36,7 +36,7 @@ public class DumpUtils {
 	}
 	
 	/**
-	 * Reads all public fields of the object displaying thier 
+	 * Reads all public fields of the object displaying their 
 	 * names and values on the system console.
 	 * @param object		the object to be displayed
 	 * @see #showObject(Object, boolean, boolean)
@@ -46,7 +46,7 @@ public class DumpUtils {
 	}
 	
 	/**
-	 * Reads all fields and methods of the object displaying thier 
+	 * Reads all fields and methods of the object displaying their 
 	 * names and values on the system console.
 	 * @param object		the object to be displayed.
 	 * @param showHidden	if false the hidden (private) fields and 
@@ -58,11 +58,11 @@ public class DumpUtils {
 			System.out.println("Show object: Object is null.");
 			return;
 		}
-		Class c = object.getClass();
+		Class<?> c = object.getClass();
 		System.out.println("Show object:" + c.getName());
 		System.out.println("  toString()=" + object.toString());
-		ArrayList lst = new ArrayList();
-		Class loopC = c;
+		ArrayList<String> lst = new ArrayList<String>();
+		Class<?> loopC = c;
 		while (loopC != null) {
 			Field[] fields = loopC.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
@@ -82,7 +82,7 @@ public class DumpUtils {
 		}
 		Collections.sort(lst, String.CASE_INSENSITIVE_ORDER);
 		for (int i = 0; i < lst.size(); i++)
-			System.out.println("  " + (String)lst.get(i));
+			System.out.println("  " + lst.get(i));
 		
 		if (!showMethods) 
 			return;
@@ -96,7 +96,7 @@ public class DumpUtils {
 					continue;
 				if (m.getGenericParameterTypes().length != 0) 
 					continue;
-				Class retClass = m.getReturnType();  
+				Class<?> retClass = m.getReturnType();  
 				if (retClass == Void.TYPE) 
 					continue;
 				if (!((m.getName().indexOf("get") == 0) || (m.getName().indexOf("is") == 0)))
@@ -114,7 +114,7 @@ public class DumpUtils {
 		}
 		Collections.sort(lst, String.CASE_INSENSITIVE_ORDER);
 		for (int i = 0; i < lst.size(); i++)
-			System.out.println("  " + (String)lst.get(i));
+			System.out.println("  " + lst.get(i));
 	}
 	
 //	public static void showHttpParameterValues(HttpServletRequest request)

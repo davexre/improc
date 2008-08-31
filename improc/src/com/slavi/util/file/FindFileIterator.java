@@ -27,7 +27,7 @@ import com.slavi.util.Utl;
  */
 public class FindFileIterator implements Iterator<File> {
 
-	private static class FileBookmark {
+	static class FileBookmark {
 		public File files[];
 		
 		public int itemsCount = 0;

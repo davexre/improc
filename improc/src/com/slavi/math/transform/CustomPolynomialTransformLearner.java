@@ -11,10 +11,11 @@ public class CustomPolynomialTransformLearner extends BaseTransformLearner {
 	protected LeastSquaresAdjust lsa;
 
 	public CustomPolynomialTransformLearner(int polynomPower, int inputSize, int outputSize) {
-		this(polynomPower, inputSize, outputSize, new ArrayList());
+		this(polynomPower, inputSize, outputSize, new ArrayList<PointsPair>());
 	}
 	
-	public CustomPolynomialTransformLearner(int polynomPower, int inputSize, int outputSize, ArrayList pointsPairList) {
+	public CustomPolynomialTransformLearner(int polynomPower, int inputSize, int outputSize, 
+			ArrayList<? extends PointsPair> pointsPairList) {
 		super(
 			new PolynomialTransformer(polynomPower, inputSize, outputSize), 
 			pointsPairList);

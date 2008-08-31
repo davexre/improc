@@ -463,7 +463,7 @@ public class AdjAffine {
 		bo.close();
 	}
 	
-	public void doTheJob() throws IOException {
+	public void doTheJob() {
 		if ( (il.size() < 2) || (il.size() > ipl.size()))
 			return;		
 		

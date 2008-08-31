@@ -35,7 +35,7 @@ public class GenerateKeyPointPairFiles implements Callable<Void> {
 				String fileName2 = images.get(j); 
 				File image1 = new File(fileName1);
 				File image2 = new File(fileName2);
-				File kpplFile = KeyPointPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
+				File kpplFile = KeyPointPairList.getFile(imagesRoot, keyPointPairFileRoot, image1, image2); 
 				String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();
 				System.out.print(statusMessage);
 				SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);

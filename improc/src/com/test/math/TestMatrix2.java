@@ -38,7 +38,7 @@ public class TestMatrix2 {
 		fin.close();
 	}
 
-	public void testTriangularMatrixInverse() throws IOException {
+	public void testTriangularMatrixInverse() {
 		SymmetricMatrix ta, tb;
 		System.out.println("*** Source ***");
 		tm.save(System.out);
@@ -54,7 +54,7 @@ public class TestMatrix2 {
 			System.out.println("*** Failed to inverse the matrix");
 	}
 
-	public void testMatrixInverse() throws IOException {
+	public void testMatrixInverse() {
 		Matrix a, b;
 		System.out.println("*** Source ***");
 		m.save(System.out);

@@ -158,8 +158,8 @@ public class TestCompareDLowes {
 	}
 
 	public static void compareFiles(String fname1, String fname2) throws Exception {
-		ArrayList list1 = new ArrayList();
-		ArrayList list2= new ArrayList();
+		ArrayList<Data> list1 = new ArrayList<Data>();
+		ArrayList<Data> list2= new ArrayList<Data>();
 		
 		BufferedReader fin1 = new BufferedReader(new FileReader(fname1));
 		BufferedReader fin2 = new BufferedReader(new FileReader(fname2));
@@ -175,10 +175,10 @@ public class TestCompareDLowes {
 				
 		int matchedCount1 = 0;
 		for (int i = list1.size() - 1; i >= 0; i--) {
-			Data sp1 = (Data)list1.get(i);
+			Data sp1 = list1.get(i);
 			boolean matchingFound = false;
 			for (int j = list2.size() - 1; j >= 0; j--) {
-				Data sp2 = (Data)list2.get(j);
+				Data sp2 = list2.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -191,10 +191,10 @@ public class TestCompareDLowes {
 
 		int matchedCount2 = 0;
 		for (int j = list2.size() - 1; j >= 0; j--) {
-			Data sp2 = (Data)list2.get(j);
+			Data sp2 = list2.get(j);
 			boolean matchingFound = false;
 			for (int i = list1.size() - 1; i >= 0; i--) {
-				Data sp1 = (Data)list1.get(i);
+				Data sp1 = list1.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;

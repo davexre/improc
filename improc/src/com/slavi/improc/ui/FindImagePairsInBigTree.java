@@ -35,10 +35,9 @@ public class FindImagePairsInBigTree implements Callable<Void> {
 		public static String id(KeyPointList from, KeyPointList to) {
 			String i1 = from.imageFileStamp.getFile().getName();
 			String i2 = to.imageFileStamp.getFile().getName();
-			if (i1.compareTo(i2) < 0) {
+			if (i1.compareTo(i2) < 0)
 				return i1 + "\t" + i2; 
-			} else
-				return i2 + "\t" + i1;
+			return i2 + "\t" + i1;
 		}
 	}
 	

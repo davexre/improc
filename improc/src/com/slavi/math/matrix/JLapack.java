@@ -591,7 +591,7 @@ public class JLapack {
 			result.SINL = SLT;
 			result.COSR = CRT;
 			result.SINR = SRT;
-		};
+		}
 		// DLASV2:236 Correct signs of SSMAX and SSMIN
 		double tsign = 0;
 		if (pmax == 1)
@@ -1764,7 +1764,7 @@ public class JLapack {
 	 *     and backtransform them using the input matrices supplied in VR and/or VL;
 	 * SELECT = [empty] 				
 	 */
-	public void DTREVC(Matrix T, Matrix VL, Matrix VR) {
+/*	public void DTREVC(Matrix T, Matrix VL, Matrix VR) {
 		// DTREVC:279 Compute 1-norm of each column of strictly upper triangular
 		// part of T to control overflow in triangular solver.
 		Matrix work = new Matrix(T.getSizeX(), 1);
@@ -1812,6 +1812,7 @@ public class JLapack {
 		}
 			
 	}
+*/	
 	
 	/**
 	 * <b>LAPACK:</b> SUBROUTINE DHSEQR( JOB, COMPZ, N, ILO, IHI, H, LDH, WR, WI, Z, LDZ, WORK, LWORK, INFO )

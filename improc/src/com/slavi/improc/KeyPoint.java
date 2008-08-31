@@ -120,7 +120,7 @@ public class KeyPoint {
 		if (
 			(sp.imgX != imgX) || 
 			(sp.imgY != imgY) || 
-			((int)(sp.dogLevel * multiply) != (int)(dogLevel * multiply)) || 
+			(sp.dogLevel != dogLevel) || 
 			((int)(sp.degree * multiply) != (int)(degree * multiply)) ||
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
@@ -129,8 +129,8 @@ public class KeyPoint {
 		for (int k = 0; k < numDirections; k++) {
 			for (int j = 0; j < descriptorSize; j++) {
 				for (int i = 0; i < descriptorSize; i++) {
-					if ((int)(sp.featureVector[i][j][k]) != 
-						(int)(featureVector[i][j][k]))
+					if (sp.featureVector[i][j][k] != 
+						featureVector[i][j][k])
 						return false;
 				}
 			}
@@ -179,7 +179,7 @@ public class KeyPoint {
 		r.adjS = Double.parseDouble(XMLHelper.getAttrEl(source, "adjS"));
 		r.kpScale = Double.parseDouble(XMLHelper.getAttrEl(source, "kpScale"));
 		r.degree = Double.parseDouble(XMLHelper.getAttrEl(source, "degree"));
-		List fList = source.getChildren("f");
+		List<?> fList = source.getChildren("f");
 		if (fList.size() != KeyPoint.descriptorSize * KeyPoint.descriptorSize * KeyPoint.numDirections)
 			throw new JDOMException("Number of feature elements goes not match.");
 		int count = 0;

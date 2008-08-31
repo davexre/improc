@@ -84,7 +84,7 @@ public class TestSteppedParallelTaskExecutor {
 		exec = Executors.newFixedThreadPool(2);
 		System.out.println("Creating main task" + " (" + Thread.currentThread().getId() + ")");
 		MySteppedParallelTask task = new MySteppedParallelTask(3);
-		Future<Void> ft = new SteppedParallelTaskExecutor(exec, 2, task).start();
+		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, 2, task).start();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

@@ -119,13 +119,13 @@ public abstract class KDTree<E> implements Iterable<E>{
 
 	protected Node<E> root;
 	
-	private volatile int size;
+	volatile int size;
 	
-	private volatile int treeDepth;
+	volatile int treeDepth;
 	
-	private volatile int mutations;
+	volatile int mutations;
 	
-	private boolean ignoreDuplicates;
+	boolean ignoreDuplicates;
 	
 	public KDTree(int dimensions) {
 		this.dimensions = dimensions;
@@ -372,7 +372,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * 
 	 * @see #getNearestNeighboursBBF(Object, int, int)
 	 */
-	public NearestNeighbours getNearestNeighbours(E target, int maxNeighbours) {
+	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours) {
 		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
 		nearestSegment(result, target, root, 0);
 		return result;
@@ -635,7 +635,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return treeDepth;
 	}
 	
-	private static class IteratorVisit<E> {
+	static class IteratorVisit<E> {
 		E item;
 		byte status;
 	}

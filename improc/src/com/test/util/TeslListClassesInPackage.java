@@ -1,12 +1,10 @@
 package com.test.util;
 
-import java.io.IOException;
-
 import com.slavi.util.ListClassesInPackage;
 
 public class TeslListClassesInPackage {
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 //		String packageName = "org.jdom";
 //		String packageName = "com.slavi";
 //		String packageName = "com.slavi.ui";
@@ -15,7 +13,7 @@ public class TeslListClassesInPackage {
 //		for (String item : r) {
 //			System.out.println(item);
 //		}
-		Class theClass = ListClassesInPackage.class;
+		Class<?> theClass = ListClassesInPackage.class;
 		String s = ListClassesInPackage.getClassRootLocation(theClass);
 		
 		System.out.println(s);

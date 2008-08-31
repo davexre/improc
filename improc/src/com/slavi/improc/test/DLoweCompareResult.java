@@ -40,7 +40,7 @@ public class DLoweCompareResult {
 		result.imageSizeX = img.getSizeX();
 		result.imageSizeY = img.getSizeY();
 		for (int i = ld.scalePointList.points.size() - 1; i >= 0; i--) {
-			com.slavi.improc.working.ScalePoint sp = (com.slavi.improc.working.ScalePoint) ld.scalePointList.points.get(i);
+			com.slavi.improc.working.ScalePoint sp = ld.scalePointList.points.get(i);
 			KeyPoint kp = new KeyPoint();
 
 			kp.imgX = sp.imgX;
@@ -105,7 +105,7 @@ public class DLoweCompareResult {
 		ExecutorService exec;
 //		exec = Executors.newSingleThreadExecutor();
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
-		Future<Void> ft = new SteppedParallelTaskExecutor(exec, 2, execPDLowe).start();
+		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, 2, execPDLowe).start();
 		try {
 			ft.get();
 		} finally {
@@ -198,8 +198,8 @@ public class DLoweCompareResult {
 //		if (kp1.kdtree.getSize() != kp2.kdtree.getSize())
 //			return false;
 		
-		ArrayList p1 = kp1.kdtree.toList();
-		ArrayList p2 = kp2.kdtree.toList();
+		ArrayList<KeyPoint> p1 = kp1.kdtree.toList();
+		ArrayList<KeyPoint> p2 = kp2.kdtree.toList();
 
 //		int count = 0;
 //		for (DWindowedImage i : directionsPAR) {
@@ -218,13 +218,13 @@ public class DLoweCompareResult {
 		boolean result = true;
 		int totalMatch = 0;
 		for (int i = p1.size() - 1; i >= 0; i--) {
-			KeyPoint sp1 = (KeyPoint)p1.get(i);
+			KeyPoint sp1 = p1.get(i);
 			if (sp1.dogLevel == 1) 
 				pinKeyPoint(buf2, sp1);
 			
 			boolean matchingFound = false;
 			for (int j = p2.size() - 1; j >= 0; j--) {
-				KeyPoint sp2 = (KeyPoint)p2.get(j);
+				KeyPoint sp2 = p2.get(j);
 				if (compareKeyPoints(sp1, sp2)) {
 					if (matchingFound) {
 						System.out.println("== DUPLICATED");
@@ -236,7 +236,7 @@ public class DLoweCompareResult {
 				}
 			}
 			if (matchingFound) {
-				totalMatch++;;
+				totalMatch++;
 			} else
 				result = false;
 			if (!matchingFound) {
@@ -253,7 +253,7 @@ public class DLoweCompareResult {
 
 		buf = new PDImageMapBuffer(new Rectangle(kp1.imageSizeX, kp1.imageSizeY));
 		for (int j = p2.size() - 1; j >= 0; j--) {
-			KeyPoint sp2 = (KeyPoint)p2.get(j);
+			KeyPoint sp2 = p2.get(j);
 			if (sp2.dogLevel == 1) 
 				pinKeyPoint(buf, sp2);
 		}
@@ -263,14 +263,14 @@ public class DLoweCompareResult {
 	}
 	
 	public static boolean compare2(KeyPointList kp1, KeyPointList kp2) {
-		ArrayList p1 = kp1.kdtree.toList();
-		ArrayList p2 = kp2.kdtree.toList();
+		ArrayList<KeyPoint> p1 = kp1.kdtree.toList();
+		ArrayList<KeyPoint> p2 = kp2.kdtree.toList();
 
 		for (int i = p1.size() - 1; i >= 0; i--) {
-			KeyPoint sp1 = (KeyPoint)p1.get(i);
+			KeyPoint sp1 = p1.get(i);
 			boolean matchingFound = false;
 			for (int j = p2.size() - 1; j >= 0; j--) {
-				KeyPoint sp2 = (KeyPoint)p2.get(j);
+				KeyPoint sp2 = p2.get(j);
 				if (sp1.equals(sp2)) {
 					if (matchingFound) {
 //						System.out.println(sp1);

@@ -3,6 +3,7 @@ package com.slavi.util;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class is used for tracking the memory and CPU used for specific blocks
@@ -36,17 +37,42 @@ import java.util.Stack;
  */
 public class Marker {
 
-	protected static class InternalMarker {
+	static class InternalMarker {
 		public String id;
+
+		public int garbageCounterMark;
 
 		public long mark;
 		
 		public long memoryUsed;
 	}
 
-	protected static final Stack marks = new Stack();
+	static class TinyGarbage {
+		public void finalize() {
+			garbageCounter.incrementAndGet();
+			new TinyGarbage();
+		}
+	}
+	
+	static final Stack<InternalMarker> marks;
 
-	private static int markerId = 1;
+	static final AtomicInteger garbageCounter;
+	
+	static int markerId;
+	
+	static {
+		marks = new Stack<InternalMarker>();
+		markerId = 1;
+		garbageCounter = new AtomicInteger(0);
+		new TinyGarbage();
+	}
+	
+	/**
+	 * Returns the internally maintained garbage collection counter. 
+	 */
+	public static int getGarbageCollectionCounter() {
+		return garbageCounter.get();
+	}
 	
 	/**
 	 * Puts a marker in the marker stack with the default name "Marker 1", "Marker 2", ..., etc.
@@ -67,6 +93,7 @@ public class Marker {
 		marker.mark = System.currentTimeMillis();
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 		marker.memoryUsed = memoryUsage.getUsed();
+		marker.garbageCounterMark = garbageCounter.get();
 
 		marks.push(marker);
 		System.out.println("Set block marker \"" + markName + "\", memory used " + Utl.getFormatBytes(marker.memoryUsed));
@@ -77,11 +104,16 @@ public class Marker {
 		if (marks.empty())
 			throw new RuntimeException(
 					"TimeStiatistics: Called release() without a matching call to mark()");
-		InternalMarker m = (InternalMarker)marks.pop();
+		InternalMarker m = marks.pop();
+		int garbageCounterDelta = garbageCounter.get() - m.garbageCounterMark;
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
-		System.out.println("Block \"" + m.id + "\" elapsed "
-				+ Utl.getFormatedMilliseconds(now - m.mark) + 
-				", memory used " + Utl.getFormatBytes(memoryUsage.getUsed()) + 
-				", memory delta " + Utl.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed));
+		System.out.println("Block \"" + m.id + "\" elapsed " + 
+			Utl.getFormatedMilliseconds(now - m.mark) + 
+			", memory used " + Utl.getFormatBytes(memoryUsage.getUsed()) + 
+			", memory delta " + Utl.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed) +
+			(garbageCounterDelta == 0 ? 
+					", garbage collection NOT invoked" : 
+					", garbage collection invoked " + Integer.toString(garbageCounterDelta) + " times")
+		);
 	}
 }

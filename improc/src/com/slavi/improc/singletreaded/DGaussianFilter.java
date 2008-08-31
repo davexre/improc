@@ -25,7 +25,7 @@ public class DGaussianFilter {
 			prefix = " ";
 		}
 		return result + "\n";
-	};
+	}
 
 	public DGaussianFilter() {
 		this(1.5);

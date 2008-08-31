@@ -15,8 +15,6 @@ public abstract class KDNodeSaverXML<E> {
 	
 	public abstract E nodeFromXML(Element source) throws JDOMException;
 
-	public abstract KDTree<E>getTree(int dimensions);
-	
 	private void toXML_recursive(Node<E> node, Element dest) {
 		if (node == null)
 			return;
@@ -46,16 +44,15 @@ public abstract class KDNodeSaverXML<E> {
 	 */
 	public void toXML(KDTree<E> tree, Element dest) {
 		if (tree instanceof ConcurrentKDTree) {
-			((ConcurrentKDTree)tree).lock.readLock().lock();
+			((ConcurrentKDTree<E>)tree).lock.readLock().lock();
 		}
 		try {
-			dest.addContent(XMLHelper.makeAttrEl("Dimensions", Integer.toString(tree.dimensions)));
 			Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
 			toXML_recursive(tree.root, rootNode);
 			dest.addContent(rootNode);
 		} finally {
 			if (tree instanceof ConcurrentKDTree) {
-				((ConcurrentKDTree)tree).lock.readLock().unlock();
+				((ConcurrentKDTree<E>)tree).lock.readLock().unlock();
 			}
 		}
 	}
@@ -63,7 +60,7 @@ public abstract class KDNodeSaverXML<E> {
 	private void fromXML_ReadChildren(KDTree<E> tree, Element source) throws JDOMException {
 		if (source == null)
 			return;
-		List children = source.getChildren();
+		List<?> children = source.getChildren();
 		for (int i = children.size() - 1; i >= 0; i++) {
 			Content child_content = (Content) children.get(i);
 			if (child_content instanceof Element) {
@@ -89,10 +86,9 @@ public abstract class KDNodeSaverXML<E> {
 	 * @throws JDOMException
 	 * @return The number of items read. 
 	 */
-	public KDTree<E> fromXML(KDTree<E> tree, Element source) throws JDOMException {
-		int dimensions = Integer.parseInt(XMLHelper.getAttrEl(source, "Dimensions"));
-		KDTree<E> result = getTree(dimensions);
-		fromXML_ReadChildren(result, source);
-		return result;
+	public int fromXML(KDTree<E> tree, Element source) throws JDOMException {
+		int result = tree.getSize();
+		fromXML_ReadChildren(tree, source);
+		return tree.getSize() - result;
 	}
 }

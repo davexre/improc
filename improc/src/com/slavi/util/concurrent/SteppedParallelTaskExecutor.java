@@ -11,16 +11,16 @@ import java.util.concurrent.TimeoutException;
 
 public class SteppedParallelTaskExecutor<V> {
 	
-	private ExecutorService exec;
-	private int maxParallelTasks;
-	private SteppedParallelTask<V> task;
+	ExecutorService exec;
+	int maxParallelTasks;
+	SteppedParallelTask<V> task;
 
-	private Object lock = new Object();
-	private volatile boolean finished = false;
-	private volatile boolean taskCanceled = false;
-	private Exception taskException = null;
-	private HashMap<SubtaskWrapper, Future<Void>> subtasksSubmitted = new HashMap<SubtaskWrapper, Future<Void>>();
-	private Queue<Callable<V>> subtasksToDo;
+	Object lock = new Object();
+	volatile boolean finished = false;
+	volatile boolean taskCanceled = false;
+	Exception taskException = null;
+	HashMap<SubtaskWrapper, Future<Void>> subtasksSubmitted = new HashMap<SubtaskWrapper, Future<Void>>();
+	Queue<Callable<V>> subtasksToDo;
 	
 	public SteppedParallelTaskExecutor(ExecutorService exec, int maxParallelTasks, SteppedParallelTask<V> task) {
 		if (maxParallelTasks < 1)
@@ -98,7 +98,7 @@ public class SteppedParallelTaskExecutor<V> {
 		}
 	}
 	
-	private void internalFinish() {
+	void internalFinish() {
 		boolean shouldNotify = false;
 		synchronized (lock) {
 			if (!finished) {
@@ -123,7 +123,7 @@ public class SteppedParallelTaskExecutor<V> {
 		}
 	}
 	
-	private void makeSubtasks() {
+	void makeSubtasks() {
 		if (taskCanceled) {
 			internalFinish();
 			return;
@@ -141,22 +141,21 @@ public class SteppedParallelTaskExecutor<V> {
 				if ((subtasksToDo == null) || (subtasksToDo.peek() == null)) {
 					internalFinish();
 					return;
-				} else {
-					int i = 0;
-					while (i < maxParallelTasks) {
-						Callable<V> subtask = subtasksToDo.poll();
-						if (subtask == null)
-							break;
-						SubtaskWrapper subtaskWrapper = new SubtaskWrapper(subtask);
-						Future<Void> f = exec.submit(subtaskWrapper);
-						subtasksSubmitted.put(subtaskWrapper, f);
-					}
+				}
+				int i = 0;
+				while (i < maxParallelTasks) {
+					Callable<V> subtask = subtasksToDo.poll();
+					if (subtask == null)
+						break;
+					SubtaskWrapper subtaskWrapper = new SubtaskWrapper(subtask);
+					Future<Void> f = exec.submit(subtaskWrapper);
+					subtasksSubmitted.put(subtaskWrapper, f);
 				}
 			}
 		}
 	}
 
-	private void internalCancelTask(boolean mayInterrupt) {
+	void internalCancelTask(boolean mayInterrupt) {
 		synchronized (lock) {
 			if (!taskCanceled) {
 				taskCanceled = true;
@@ -167,7 +166,7 @@ public class SteppedParallelTaskExecutor<V> {
 		}
 	}
 	
-	private class InternalFuture implements Future<Void> {
+	class InternalFuture implements Future<Void> {
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			internalCancelTask(mayInterruptIfRunning);
 			return true;

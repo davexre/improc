@@ -12,8 +12,6 @@ public abstract class KDNodeSaver<E> {
 	
 	public abstract E nodeFromString(String source);
 
-	public abstract KDTree<E>getTree(int dimensions);
-
 	private void toTextStream_recursive(Node<E> node, PrintWriter fou) {
 		if (node == null)
 			return;
@@ -27,13 +25,13 @@ public abstract class KDNodeSaver<E> {
 	 */
 	public void toTextStream(KDTree<E> tree, PrintWriter fou) {
 		if (tree instanceof ConcurrentKDTree) {
-			((ConcurrentKDTree)tree).lock.readLock().lock();
+			((ConcurrentKDTree<E>)tree).lock.readLock().lock();
 		}
 		try {
 			toTextStream_recursive(tree.root, fou);
 		} finally {
 			if (tree instanceof ConcurrentKDTree) {
-				((ConcurrentKDTree)tree).lock.readLock().unlock();
+				((ConcurrentKDTree<E>)tree).lock.readLock().unlock();
 			}
 		}
 	}

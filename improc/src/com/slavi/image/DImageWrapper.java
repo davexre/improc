@@ -35,12 +35,11 @@ public class DImageWrapper implements DWindowedImage {
 	}
 
 	public double getPixel(int atX, int atY) {
-		if (extent.contains(atX, atY))
-			return image == null ? imageBuf.getPixel(atX, atY) : image.getPixel(atX, atY);
-		else
+		if (!extent.contains(atX, atY))
 			throw new IllegalArgumentException("Invalid coordinates X=" + 
 					atX + " [" + extent.x + ".." + (extent.x + extent.width) + 
 					"] Y=" + atY + " [" + extent.y + ".." + (extent.y + extent.height) + "]");
+		return image == null ? imageBuf.getPixel(atX, atY) : image.getPixel(atX, atY);
 	}
 
 	public void setPixel(int atX, int atY, double value) {

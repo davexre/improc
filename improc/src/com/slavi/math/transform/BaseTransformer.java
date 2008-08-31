@@ -68,5 +68,10 @@ public abstract class BaseTransformer {
 		t = d.getItem(1, 0);
 		if (minY > t) minY = t;
 		if (maxY < t) maxY = t;
+		
+		dest.x = minX;
+		dest.y = minY;
+		dest.width = maxX - minX;
+		dest.height = maxY - minY;
 	}
 }

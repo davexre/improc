@@ -158,13 +158,4 @@ public class CustomPolynomialTransformer extends BaseTransformer {
 			result = (result + polynomPower + 1) / numVariables; 
 		return (int)result;
 	}
-	
-	
-	public Matrix makeSymetricPolynomialCoefficients(int numVariables, int polynomPower) {
-		Matrix result = null;
-		
-		
-		
-		return result;
-	}
 }

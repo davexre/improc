@@ -36,8 +36,8 @@ public class GeneratePanoPairFiles implements Callable<PanoList> {
 				String fileName2 = images.get(j);
 				File image1 = new File(fileName1);
 				File image2 = new File(fileName2);
-				File kpplFile = PanoPairList.getFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2); 
-				String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();;
+				File kpplFile = PanoPairList.getFile(imagesRoot, keyPointPairFileRoot, image1, image2); 
+				String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();
 				System.out.print(statusMessage);
 				SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
 				PanoPairList ppl = PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);

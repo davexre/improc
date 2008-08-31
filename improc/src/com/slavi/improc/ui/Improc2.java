@@ -10,6 +10,8 @@ import com.slavi.util.ui.SwtUtl;
 public class Improc2 {
 	public void doTheJob() throws Exception {
 		Settings settings = Settings.getSettings();
+		if (settings == null)
+			return;
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);
 		AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(settings.keyPointFileRootStr);
 //		AbsoluteToRelativePathMaker keyPointPairFileRoot = new AbsoluteToRelativePathMaker(settings.keyPointPairFileRootStr);

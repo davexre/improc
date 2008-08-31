@@ -68,12 +68,11 @@ public class PDImageMapBuffer implements DWindowedImage {
 	}
 	
 	public double getPixel(int atX, int atY) {
-		if (extent.contains(atX, atY))
-			return pixels[atX - extent.x][atY - extent.y];
-		else
+		if (!extent.contains(atX, atY))
 			throw new IllegalArgumentException("Invalid coordinates X=" + 
 					atX + " [" + extent.x + ".." + (extent.x + extent.width) + 
 					"] Y=" + atY + " [" + extent.y + ".." + (extent.y + extent.height) + "]");
+		return pixels[atX - extent.x][atY - extent.y];
 	}
 
 	public void setPixel(int atX, int atY, double value) {

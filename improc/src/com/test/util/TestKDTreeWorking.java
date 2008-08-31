@@ -38,7 +38,7 @@ public class TestKDTreeWorking {
 		}
 	}
 	
-	protected static void generateItems(ArrayList items, double[] value, int dimension, int itemsPerDimension) {
+	protected static void generateItems(ArrayList<KDNodeTest> items, double[] value, int dimension, int itemsPerDimension) {
 		if (dimension < 0) {
 			items.add(new KDNodeTest(value));
 		} else {
@@ -63,9 +63,9 @@ public class TestKDTreeWorking {
 		}
 	}
 	
-	public static void printNodesList(ArrayList items) {
+	public static void printNodesList(ArrayList<? extends KDNode> items) {
 		for (int i = 0; i < items.size(); i++) {
-			KDNode n = (KDNode) items.get(i);
+			KDNode n = items.get(i);
 			System.out.printf("%5d  %s\n", i, n.toString());
 		}
 		System.out.println();
@@ -74,13 +74,13 @@ public class TestKDTreeWorking {
 	public static void main(String[] args) {
 		int dimensions = 2;
 		int itemsPerDimension = 5;
-		ArrayList items = new ArrayList();
+		ArrayList<KDNodeTest> items = new ArrayList<KDNodeTest>();
 		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
 //		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
 
 		printNodesList(items);
 		
-		KDNode thePoint = (KDNode)items.get(2);
+		KDNode thePoint = items.get(2);
 
 		KDTree tree = new KDTree(items, dimensions);
 		printNode(tree.root, 0);
@@ -93,7 +93,7 @@ public class TestKDTreeWorking {
 		}
 		System.out.println("Used search steps=" + tree.usedSearchSteps);
 		for (int i = 0; i < items.size(); i++) {
-		  nnlst = tree.getNearestNeighbours((KDNode)items.get(i), 5);
+		  nnlst = tree.getNearestNeighbours(items.get(i), 5);
 		}
 		
 		System.out.println("Numer of items=" + items.size());

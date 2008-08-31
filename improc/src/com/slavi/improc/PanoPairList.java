@@ -49,7 +49,6 @@ public class PanoPairList {
 	}
 
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
 			File image1, File image2) {
 		if (image1.getName().compareTo(image2.getName()) > 0) {
@@ -75,7 +74,7 @@ public class PanoPairList {
 		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
 		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
 		
-		File panoFile = getFile(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
+		File panoFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 
 		try {
 			if (panoFile.isFile()) {
@@ -117,7 +116,7 @@ public class PanoPairList {
 //		kppl.displayTop(30);
 		
 		for (int i = 0; i < kppl.items.size(); i++) {
-			KeyPointPair pp = (KeyPointPair) kppl.items.get(i);
+			KeyPointPair pp = kppl.items.get(i);
 			if (pp.getValue() < 2.0) {
 				result.items.add(new PanoPair(pp));
 			}				
@@ -168,7 +167,7 @@ public class PanoPairList {
 		if (result != null)
 			return result;
 				
-		File kppFile = getFile(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
+		File kppFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 		BufferedReader fin = new BufferedReader(new FileReader(kppFile));
 		fin.readLine(); // Skip header.
 		result = new PanoPairList();

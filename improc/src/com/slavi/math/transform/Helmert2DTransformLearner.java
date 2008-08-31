@@ -11,10 +11,10 @@ public class Helmert2DTransformLearner extends BaseTransformLearner {
 	protected LeastSquaresAdjust lsa;
 
 	public Helmert2DTransformLearner() {
-		this(new ArrayList());
+		this(new ArrayList<PointsPair>());
 	}
 	
-	public Helmert2DTransformLearner(ArrayList pointsPairList) {
+	public Helmert2DTransformLearner(ArrayList<? extends PointsPair> pointsPairList) {
 		super(new Helmert2DTransformer(), pointsPairList);
 
 		this.coefs = new Matrix(4, 1);

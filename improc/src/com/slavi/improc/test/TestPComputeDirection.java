@@ -22,11 +22,6 @@ public class TestPComputeDirection {
 	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
 	static final String fouName = "D:/temp/test.jpg";
 
-	public static void main1(String[] args) {
-		Rectangle r = new Rectangle(0, 0, 400, 500);
-		System.out.println(r.contains(1, 1));
-	}
-
 	public void doIt() throws IOException, InterruptedException {
 		DImageMap src = new DImageMap(new File(finName));
 		DImageMap dest = new DImageMap(src.getSizeX(), src.getSizeY());

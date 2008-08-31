@@ -133,8 +133,7 @@ public class DLoweDetector {
 	}
 
 	protected boolean localizeIsWeak(DImageMap[] DOGs, int x, int y,
-			ScalePoint sp, @SuppressWarnings("unused")
-			int level) {
+			ScalePoint sp) {
 		DImageMap below = DOGs[0];
 		DImageMap current = DOGs[1];
 		DImageMap above = DOGs[2];
@@ -727,7 +726,7 @@ public class DLoweDetector {
 					// moving the
 					// point a border is reached, then skip this point.
 					ScalePoint sp = new ScalePoint();
-					if (localizeIsWeak(DOGs, i, j, sp, aLevel+1))
+					if (localizeIsWeak(DOGs, i, j, sp))
 						continue;
 					localizeIsWeakCount++;
 
@@ -801,7 +800,7 @@ public class DLoweDetector {
 		autoPanoPoints.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
 		autoPanoPoints.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
 		
-		List kpl = root.getChild("Arr").getChildren("KeypointN");
+		List<?> kpl = root.getChild("Arr").getChildren("KeypointN");
 		
 		for (int counter = 0; counter < kpl.size(); counter++) {
 			Element key = (Element)kpl.get(counter);
@@ -815,7 +814,7 @@ public class DLoweDetector {
 			sp.level = Integer.parseInt(key.getChildText("Level"));
 			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
 			
-			List descr = key.getChild("Descriptor").getChildren("int");
+			List<?> descr = key.getChild("Descriptor").getChildren("int");
 			for (int i = 0; i < ScalePoint.descriptorSize; i++) {
 				for (int j = 0; j < ScalePoint.descriptorSize; j++) {
 					for (int k = 0; k < ScalePoint.numDirections; k++) {
@@ -834,10 +833,10 @@ public class DLoweDetector {
 	public void compareKeyLists(ScalePointList list1, ScalePointList list2) throws Exception {
 		int matchedCount1 = 0;
 		for (int i = list1.points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+			ScalePoint sp1 = list1.points.get(i);
 //			boolean matchingFound = false;
 			for (int j = list2.points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+				ScalePoint sp2 = list2.points.get(j);
 				if (sp1.equals(sp2)) {
 //					matchingFound = true;
 					matchedCount1++;
@@ -850,10 +849,10 @@ public class DLoweDetector {
 
 		int matchedCount2 = 0;
 		for (int j = list2.points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+			ScalePoint sp2 = list2.points.get(j);
 //			boolean matchingFound = false;
 			for (int i = list1.points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+				ScalePoint sp1 = list1.points.get(i);
 				if (sp1.equals(sp2)) {
 //					matchingFound = true;
 					matchedCount2++;

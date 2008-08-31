@@ -21,7 +21,7 @@ public class TestJLapack {
 		wri.printM("Result=");
 	}
 	
-	public static void main2(String[] args) throws Exception {
+	public static void main2() throws Exception {
 		JLapack jl = new JLapack();
 
 		BufferedReader fin = new BufferedReader(new FileReader(

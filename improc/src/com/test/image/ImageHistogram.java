@@ -102,7 +102,7 @@ public class ImageHistogram {
 			}		
 	}
 	
-	public void fixRGB(BufferedImage bi, BufferedImage bo, int newAvgR, int newAvgG, int newAvgB) throws IOException {
+	public void fixRGB(BufferedImage bi, BufferedImage bo, int newAvgR, int newAvgG, int newAvgB) {
 		int sizeX = bi.getWidth();
 		int sizeY = bi.getHeight();
 		

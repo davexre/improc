@@ -600,15 +600,6 @@ public class DLoweDetector {
 	private DImageMap lastBlured1Img = null;
 	
 	String workDir = "D:/Temp/t1/";
-	private void debugPrintImage(DImageMap img, double scale, String type, int level) {
-//		try {
-//			img.toImageFile(workDir + Integer.toString((int)scale) + "-" + type + "-" + level + ".jpg");
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("**** " + Integer.toString((int) scale) + "\t" + type + "\t" + level + "\t");
-//		System.out.println(img.calcStatistics());
-	}
 
 	private void DetectFeaturesInSingleDOG(DImageMap[] DOGs, DImageMap magnitude, DImageMap direction, int dogLevel, double scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
@@ -672,10 +663,7 @@ public class DLoweDetector {
 
 		theImage.copyTo(blured2);
 
-		debugPrintImage(theImage, scale, "A", 0);
-
-		
-		int dogcount = 0;
+//		int dogcount = 0;
 		for (int dogLevel = -2; dogLevel < scaleSpaceLevels; dogLevel++) {
 			DImageMap tmpImageMap;
 			tmpImageMap = blured0;
@@ -687,8 +675,6 @@ public class DLoweDetector {
 			gf.applyGaussianFilter(blured1, blured2);
 //			gf.applyGaussianFilterOriginal(blured1, blured2);
 			
-			debugPrintImage(tmpImageMap, scale, "B", dogLevel);
-			
 			sigma *= Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula !!!
 
 			tmpImageMap = DOGs[0];
@@ -699,8 +685,6 @@ public class DLoweDetector {
 				for (int j = tmpImageMap.getSizeY() - 1; j >= 0; j--)
 					tmpImageMap.setPixel(i, j, blured2.getPixel(i, j)
 							- blured1.getPixel(i, j));
-			debugPrintImage(tmpImageMap, scale, "G", dogLevel);
-			
 			// Compute gradient magnitude and direction plane
 			blured0.computeMagnitude(magnitude);
 			blured0.computeDirection(direction);
@@ -717,9 +701,6 @@ public class DLoweDetector {
 
 			DImageMap temp = new DImageMap(1, 1);
 			magnitude.copyTo(temp);
-			
-			debugPrintImage(magnitude, scale, "M", dogLevel);
-			debugPrintImage(direction, scale, "D", dogLevel);
 			
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, dogLevel, scale, scaleSpaceLevels, sigma);
 		} // end of for aLevel

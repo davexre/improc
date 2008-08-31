@@ -41,7 +41,6 @@ public class KeyPointPairList {
 	}
 
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
-			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			AbsoluteToRelativePathMaker rootKeyPointPairFileDir,
 			File image1, File image2) {
 		if (image1.getName().compareTo(image2.getName()) > 0) {
@@ -67,7 +66,7 @@ public class KeyPointPairList {
 		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
 		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
 		
-		File kppFile = getFile(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
+		File kppFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 		try {
 			if (kppFile.isFile()) {
 				BufferedReader fin = new BufferedReader(new FileReader(kppFile));
@@ -141,7 +140,7 @@ public class KeyPointPairList {
 		if (result != null)
 			return result;
 				
-		File kppFile = getFile(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
+		File kppFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 		BufferedReader fin = new BufferedReader(new FileReader(kppFile));
 		fin.readLine(); // Skip header.
 		result = new KeyPointPairList();
@@ -217,12 +216,10 @@ public class KeyPointPairList {
 		}
 	}
 	
-	private static class CompareByDistance implements Comparator {
+	private static class CompareByDistance implements Comparator<KeyPointPair> {
 		public static final CompareByDistance instance = new CompareByDistance();
 
-		public int compare(Object o1, Object o2) {
-			KeyPointPair spp1 = (KeyPointPair)o1;
-			KeyPointPair spp2 = (KeyPointPair)o2;
+		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(spp1.distanceToNearest, spp2.distanceToNearest);
 		} 
 	}
@@ -230,12 +227,10 @@ public class KeyPointPairList {
 		Collections.sort(items, CompareByDistance.instance);
 	}
 	
-	private static class CompareByOverallFitness implements Comparator {
+	private static class CompareByOverallFitness implements Comparator<KeyPointPair> {
 		public static final CompareByOverallFitness instance = new CompareByOverallFitness();
 
-		public int compare(Object o1, Object o2) {
-			KeyPointPair spp1 = (KeyPointPair)o1;
-			KeyPointPair spp2 = (KeyPointPair)o2;
+		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(spp1.overallFitness, spp2.overallFitness);
 		} 
 	}
@@ -243,12 +238,10 @@ public class KeyPointPairList {
 		Collections.sort(items, CompareByOverallFitness.instance);
 	}
 	
-	private static class CompareByDiscrepancy implements Comparator {
+	private static class CompareByDiscrepancy implements Comparator<KeyPointPair> {
 		public static final CompareByDiscrepancy instance = new CompareByDiscrepancy();
 
-		public int compare(Object o1, Object o2) {
-			KeyPointPair spp1 = (KeyPointPair)o1;
-			KeyPointPair spp2 = (KeyPointPair)o2;
+		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
@@ -256,12 +249,10 @@ public class KeyPointPairList {
 		Collections.sort(items, CompareByDiscrepancy.instance);
 	}		
 
-	private static class CompareByWeight implements Comparator {
+	private static class CompareByWeight implements Comparator<KeyPointPair> {
 		public static final CompareByWeight instance = new CompareByWeight();
 
-		public int compare(Object o1, Object o2) {
-			KeyPointPair spp1 = (KeyPointPair)o1;
-			KeyPointPair spp2 = (KeyPointPair)o2;
+		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(spp2.getWeight(), spp1.getWeight());  // Weight comparison is DESCENDING
 		} 
 	}
@@ -273,12 +264,10 @@ public class KeyPointPairList {
 		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
 	}
 	
-	private static class CompareByOrientationDelta implements Comparator {
+	private static class CompareByOrientationDelta implements Comparator<KeyPointPair> {
 		public static final CompareByOrientationDelta instance = new CompareByOrientationDelta();
 
-		public int compare(Object o1, Object o2) {
-			KeyPointPair spp1 = (KeyPointPair)o1;
-			KeyPointPair spp2 = (KeyPointPair)o2;
+		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(
 				fixAnglePI(spp1.sourceSP.degree - spp1.targetSP.degree), 
 				fixAnglePI(spp2.sourceSP.degree - spp2.targetSP.degree));

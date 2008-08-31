@@ -257,9 +257,9 @@ public class AffineAdjust {
 	}
 	
 	
-	void calcUsingOriginPoint(AdjImagePair origin) {
-		
-	}
+//	void calcUsingOriginPoint(AdjImagePair origin) {
+//		
+//	}
 	
 	public static void main(String[] args) {
 		try {

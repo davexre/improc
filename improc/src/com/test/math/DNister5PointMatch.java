@@ -12,7 +12,7 @@ import com.slavi.math.transform.PointsPair;
 
 public class DNister5PointMatch {
 
-	ArrayList pairs = new ArrayList();
+	ArrayList<PointsPair> pairs = new ArrayList<PointsPair>();
 	
 	public void checkSVD(Matrix source, Matrix u, Matrix v, Matrix s) {
 		final double precision = 1000000.0;
@@ -198,7 +198,7 @@ public class DNister5PointMatch {
 		Matrix Q = new Matrix(9, pairs.size());
 		
 		for (int i = pairs.size() - 1; i >= 0 ; i--) {
-			PointsPair pp = (PointsPair)pairs.get(i);
+			PointsPair pp = pairs.get(i);
 			Q.setItem(0, i, pp.source.getItem(0, 0) * pp.target.getItem(0, 0));
 			Q.setItem(1, i, pp.source.getItem(1, 0) * pp.target.getItem(0, 0));
 			Q.setItem(2, i,                           pp.target.getItem(0, 0));

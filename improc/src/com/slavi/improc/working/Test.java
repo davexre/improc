@@ -87,10 +87,10 @@ public class Test {
 
 		int matchedCount1 = 0;
 		for (int i = list1.points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+			ScalePoint sp1 = list1.points.get(i);
 			boolean matchingFound = false;
 			for (int j = list2.points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+				ScalePoint sp2 = list2.points.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -103,10 +103,10 @@ public class Test {
 
 		int matchedCount2 = 0;
 		for (int j = list2.points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)list2.points.get(j);
+			ScalePoint sp2 = list2.points.get(j);
 			boolean matchingFound = false;
 			for (int i = list1.points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)list1.points.get(i);
+				ScalePoint sp1 = list1.points.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
@@ -155,8 +155,8 @@ public class Test {
 	}
 
 	public static void compareFiles(String fname1, String fname2) throws Exception {
-		ArrayList list1 = new ArrayList();
-		ArrayList list2= new ArrayList();
+		ArrayList<Data> list1 = new ArrayList<Data>();
+		ArrayList<Data> list2 = new ArrayList<Data>();
 		
 		BufferedReader fin1 = new BufferedReader(new FileReader(fname1));
 		BufferedReader fin2 = new BufferedReader(new FileReader(fname2));
@@ -169,10 +169,10 @@ public class Test {
 				
 		int matchedCount1 = 0;
 		for (int i = list1.size() - 1; i >= 0; i--) {
-			Data sp1 = (Data)list1.get(i);
+			Data sp1 = list1.get(i);
 			boolean matchingFound = false;
 			for (int j = list2.size() - 1; j >= 0; j--) {
-				Data sp2 = (Data)list2.get(j);
+				Data sp2 = list2.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -185,10 +185,10 @@ public class Test {
 
 		int matchedCount2 = 0;
 		for (int j = list2.size() - 1; j >= 0; j--) {
-			Data sp2 = (Data)list2.get(j);
+			Data sp2 = list2.get(j);
 			boolean matchingFound = false;
 			for (int i = list1.size() - 1; i >= 0; i--) {
-				Data sp1 = (Data)list1.get(i);
+				Data sp1 = list1.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;

@@ -35,7 +35,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 
-	public NearestNeighbours getNearestNeighbours(E target, int maxNeighbours) {
+	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours) {
 		lock.readLock().lock();
 		try {
 			return super.getNearestNeighbours(target, maxNeighbours);
@@ -44,7 +44,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 
-	public NearestNeighbours getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
+	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
 		lock.readLock().lock();
 		try {
 			return super.getNearestNeighboursBBF(target, maxNeighbours, maxSearchSteps);
@@ -53,7 +53,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 
-	public NearestNeighbours getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
+	public NearestNeighbours<E> getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
 		lock.readLock().lock();
 		try {
 			return super.getNearestNeighboursBBFOriginal(target, maxNeighbours, maxSearchSteps);

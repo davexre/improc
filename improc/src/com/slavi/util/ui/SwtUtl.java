@@ -295,7 +295,7 @@ public class SwtUtl {
 	
 	private static TaskProgress waitDialogTaskProgress = null; 
 
-	private static Shell waitDialogShell = null;
+	static Shell waitDialogShell = null;
 	
 	/**
 	 * Updates the currently open wait dialog's status and progress bar value.
@@ -402,7 +402,7 @@ public class SwtUtl {
 	}
 	
 	public static <V> V openWaitDialog(final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
-		CallableWrapper<V> wrapper = new CallableWrapper(callable);
+		CallableWrapper<V> wrapper = new CallableWrapper<V>(callable);
 		boolean res = openWaitDialog(title, wrapper, maxProgressValue);
 		if (res && (wrapper.exception == null)) {
 			return wrapper.result;

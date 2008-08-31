@@ -23,7 +23,7 @@ public class BGaussianFilter {
 			prefix = " ";
 		}
 		return result + "\n";
-	};
+	}
 
 	public BGaussianFilter() {
 		this(1.5);

@@ -19,7 +19,7 @@ public class TestKDTree {
 		r.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
 		r.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
 		
-		List kpl = root.getChild("Arr").getChildren("KeypointN");
+		List<?> kpl = root.getChild("Arr").getChildren("KeypointN");
 		
 		for (int counter = 0; counter < kpl.size(); counter++) {
 			Element key = (Element)kpl.get(counter);
@@ -34,7 +34,7 @@ public class TestKDTree {
 			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
 			sp.scalePointList = r;
 			
-			List descr = key.getChild("Descriptor").getChildren("int");
+			List<?> descr = key.getChild("Descriptor").getChildren("int");
 			for (int i = 0; i < ScalePoint.descriptorSize; i++) {
 				for (int j = 0; j < ScalePoint.descriptorSize; j++) {
 					for (int k = 0; k < ScalePoint.numDirections; k++) {
@@ -61,7 +61,7 @@ public class TestKDTree {
 		int searchSteps = (int) (Math.max(130.0, (Math.log(a.points.size()) / Math.log (1000.0)) * 130.0));
 		
 		for (int p = 0; p < a.points.size(); p++) {
-			ScalePoint ap = (ScalePoint) a.points.get(p);
+			ScalePoint ap = a.points.get(p);
 			//NearestNeighbours nnlst =
 			b.kdtree.getNearestNeighboursBBF(ap, 2, searchSteps);
 //			if (nnlst.size() < 2)
@@ -84,7 +84,7 @@ public class TestKDTree {
 //		a2.kdtree.balance();
 		System.out.println("a1.points.size() = " + a1.points.size());
 //		buildPointPairList(a1, a2);
-		NearestNeighbours nnlst = a2.kdtree.getNearestNeighbours((KDNode) a1.points.get(0), 2);
+		NearestNeighbours nnlst = a2.kdtree.getNearestNeighbours(a1.points.get(0), 2);
 		System.out.println("usedSearchSteps  = " + a2.kdtree.usedSearchSteps);
 		System.out.println("searchSteps      = " + a2.kdtree.searchSteps);
 		System.out.println("nnlst.size()     = " + nnlst.size());		

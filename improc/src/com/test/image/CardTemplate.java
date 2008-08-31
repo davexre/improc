@@ -201,7 +201,7 @@ public class CardTemplate {
 		// posX, posY = bottom left corner of the text rectangle
 		g.setColor(tb.color);
 		for (int i = layouts.size() - 1; i >= 0; i--) {
-			TextLayout tl = (TextLayout) layouts.get(i);
+			TextLayout tl = layouts.get(i);
 			float posX;
 			if (tb.hAlign == HARIGHT)
 				posX = (float) (tb.x + tb.width - tl.getBounds().getWidth());

@@ -12,7 +12,7 @@ import com.slavi.util.XMLHelper;
 
 public class ScalePointPairList {
 
-	public ArrayList items;
+	public ArrayList<ScalePointPair> items;
 
 	String sourceImageFileName;
 	int sourceImageSizeX;
@@ -23,11 +23,11 @@ public class ScalePointPairList {
 	int targetImageSizeY;
 	
 	private ScalePointPairList() {
-		items = new ArrayList();
+		items = new ArrayList<ScalePointPair>();
 	}
 
 	public ScalePointPairList(ScalePointList source, ScalePointList target) {
-		items = new ArrayList();
+		items = new ArrayList<ScalePointPair>();
 		sourceImageFileName = source.imageFileName;
 		sourceImageSizeX = source.imageSizeX;
 		sourceImageSizeY = source.imageSizeY;
@@ -40,7 +40,7 @@ public class ScalePointPairList {
 	public void addPair(ScalePoint sourceSP, ScalePoint targetSP, double distanceToNearest, double distanceToNearest2) {
 		ScalePointPair sp = new ScalePointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
 		for (int i = items.size() - 1; i >= 0; i--) {
-			ScalePointPair aSP = (ScalePointPair) items.get(i);
+			ScalePointPair aSP = items.get(i);
 			if (aSP.targetSP == sp.targetSP) {
 				aSP.targetReused = true;
 				sp.targetReused = true;
@@ -61,7 +61,7 @@ public class ScalePointPairList {
 		
 		for (int i = 0; i < items.size(); i++) {
 			Element e = new Element("sppair");
-			((ScalePointPair) items.get(i)).toXML(e);
+			items.get(i).toXML(e);
 			dest.addContent(e);
 		}
 	}
@@ -76,7 +76,7 @@ public class ScalePointPairList {
 		r.targetImageSizeX = Integer.parseInt(XMLHelper.getAttrEl(source, "targetImageSizeX"));
 		r.targetImageSizeY = Integer.parseInt(XMLHelper.getAttrEl(source, "targetImageSizeY"));
 		
-		List pairs = source.getChildren("sppair");
+		List<?> pairs = source.getChildren("sppair");
 		for (int i = 0; i < pairs.size(); i++) {
 			Element e = (Element) pairs.get(i);
 			ScalePointPair pp = ScalePointPair.fromXML(e);
@@ -89,7 +89,7 @@ public class ScalePointPairList {
 	public int countGoodItems() {
 		int r = 0;
 		for (int i = items.size() - 1; i >= 0; i--)
-			if (!((ScalePointPair) items.get(i)).isBad())
+			if (!items.get(i).isBad())
 				r++;
 		return r;
 	}
@@ -97,7 +97,7 @@ public class ScalePointPairList {
 	public int leaveGoodTopElements(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			ScalePointPair sp = (ScalePointPair)items.get(i);
+			ScalePointPair sp = items.get(i);
 			if (count >= numElements) { 
 				sp.setBad(true);
 			} else {
@@ -111,7 +111,7 @@ public class ScalePointPairList {
 	public int leaveGoodTopElements2(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
-			ScalePointPair sp = (ScalePointPair)items.get(i);
+			ScalePointPair sp = items.get(i);
 			if (sp.targetReused || (count >= numElements)) { 
 				sp.setBad(true);
 			} else {
@@ -122,12 +122,10 @@ public class ScalePointPairList {
 		return count;
 	}
 	
-	private static class CompareByDistance implements Comparator {
+	private static class CompareByDistance implements Comparator<ScalePointPair> {
 		public static final CompareByDistance instance = new CompareByDistance();
 
-		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
 			return Double.compare(spp1.distanceToNearest, spp2.distanceToNearest);
 		} 
 	}
@@ -135,12 +133,10 @@ public class ScalePointPairList {
 		Collections.sort(items, CompareByDistance.instance);
 	}
 	
-	private static class CompareByOverallFitness implements Comparator {
+	private static class CompareByOverallFitness implements Comparator<ScalePointPair> {
 		public static final CompareByOverallFitness instance = new CompareByOverallFitness();
 
-		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
 			return Double.compare(spp1.overallFitness, spp2.overallFitness);
 		} 
 	}
@@ -148,12 +144,10 @@ public class ScalePointPairList {
 		Collections.sort(items, CompareByOverallFitness.instance);
 	}
 	
-	private static class CompareByDelta implements Comparator {
+	private static class CompareByDelta implements Comparator<ScalePointPair> {
 		public static final CompareByDelta instance = new CompareByDelta();
 
-		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
 			return Double.compare(spp1.getValue(), spp2.getValue());
 		} 
 	}
@@ -161,12 +155,10 @@ public class ScalePointPairList {
 		Collections.sort(items, CompareByDelta.instance);
 	}		
 
-	private static class CompareByWeight implements Comparator {
+	private static class CompareByWeight implements Comparator<ScalePointPair> {
 		public static final CompareByWeight instance = new CompareByWeight();
 
-		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
 			return Double.compare(spp2.getWeight(), spp1.getWeight());  // Weight comparison is DESCENDING
 		} 
 	}
@@ -178,12 +170,10 @@ public class ScalePointPairList {
 		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
 	}
 	
-	private static class CompareByOrientationDelta implements Comparator {
+	private static class CompareByOrientationDelta implements Comparator<ScalePointPair> {
 		public static final CompareByOrientationDelta instance = new CompareByOrientationDelta();
 
-		public int compare(Object o1, Object o2) {
-			ScalePointPair spp1 = (ScalePointPair)o1;
-			ScalePointPair spp2 = (ScalePointPair)o2;
+		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
 			return Double.compare(
 				fixAnglePI(spp1.sourceSP.degree - spp1.targetSP.degree), 
 				fixAnglePI(spp2.sourceSP.degree - spp2.targetSP.degree));

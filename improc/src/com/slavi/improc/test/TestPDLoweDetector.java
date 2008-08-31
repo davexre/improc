@@ -1,11 +1,5 @@
 package com.slavi.improc.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-
-import com.slavi.image.DWindowedImage;
-import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
@@ -35,12 +29,12 @@ public class TestPDLoweDetector {
 	KeyPointList newDLowe;
 	KeyPointList oldDLowe;
 
-	public void doIt() throws IOException, InterruptedException {
-		DWindowedImage src = new PDImageMapBuffer(new File(finName));
+	public void doIt() {
+//		DWindowedImage src = new PDImageMapBuffer(new File(finName));
 
 		newDLowe = new KeyPointList();
-		Hook hook = new DLoweHook(newDLowe);
-		ExecutorService exec;
+//		Hook hook = new DLoweHook(newDLowe);
+//		ExecutorService exec;
 		
 /*		///////////////////////////////////
 		exec = Executors.newFixedThreadPool(2);
@@ -117,7 +111,7 @@ public class TestPDLoweDetector {
 		
 	}
 
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) {
 		new TestPDLoweDetector().doIt();
 
 //		Runtime runtime = Runtime.getRuntime();

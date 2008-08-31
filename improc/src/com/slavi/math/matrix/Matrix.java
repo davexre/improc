@@ -113,7 +113,7 @@ public class Matrix {
 	/**
 	 * Saves the matrix to a text stream
 	 */
-	public void save(PrintStream fou) throws IOException {
+	public void save(PrintStream fou) {
 		fou.printf(this.toString(), (Object[])null);
 	}
 
@@ -693,7 +693,7 @@ public class Matrix {
 		if (sizeX != sizeY) {
 			throw new Error("Invalid argument");
 		}
-		ArrayList xchg = new ArrayList();
+		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 
 		for (int i = 0; i < sizeX; i++) {
 			double A = m[i][i];
@@ -739,7 +739,7 @@ public class Matrix {
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {
-			XchgRec x = (XchgRec)xchg.get(i);
+			XchgRec x = xchg.get(i);
 			exchangeY(x.a, x.b);
 		}
 		return true;
@@ -802,16 +802,16 @@ public class Matrix {
 		MatrixCompareResult res = new MatrixCompareResult();
 		res.A = this;
 		res.B = second;
-		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
+		// *** Р�Р·С‡РёСЃР»СЏРІР°РЅРµ РЅР° РєРѕСЂРµР»Р°С†РёСЏС‚Р° (Pearson's r) РјРµР¶РґСѓ РґР°РЅРЅРёС‚Рµ. ***
 
-		// Средно аритметично.
+		// РЎСЂРµРґРЅРѕ Р°СЂРёС‚РјРµС‚РёС‡РЅРѕ.
 		double S = sizeX * sizeY;
 		res.AvgA = sumAll() / S;
 		res.AvgB = second.sumAll() / S;
 		res.SAA = 0;
 		res.SAB = 0;
 		res.SBB = 0;
-		// Коефициенти на корелация.
+		// РљРѕРµС„РёС†РёРµРЅС‚Рё РЅР° РєРѕСЂРµР»Р°С†РёСЏ.
 		double dA, dB;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
@@ -822,7 +822,7 @@ public class Matrix {
 				res.SAB += dA * dB;
 			}
 
-		// Коефициент на корелация на Pearson
+		// РљРѕРµС„РёС†РёРµРЅС‚ РЅР° РєРѕСЂРµР»Р°С†РёСЏ РЅР° Pearson
 		res.PearsonR = res.SAB / Math.sqrt(res.SAA * res.SBB);
 		return res;
 	}
@@ -838,7 +838,7 @@ public class Matrix {
 	
 	public static Matrix fromXML(Element source) throws JDOMException {
 		// Determine matrix size;
-		List rows = source.getChildren("row");
+		List<?> rows = source.getChildren("row");
 		int cols = 0;
 		for (int i = 0; i < rows.size(); i++)
 			cols = Math.max(cols, ((Element)rows.get(i)).getChildren("item").size());
@@ -848,7 +848,7 @@ public class Matrix {
 		Matrix r = new Matrix(cols, rows.size());
 		r.make0();
 		for (int j = rows.size() - 1; j >= 0; j--) {
-			List items = ((Element)rows.get(j)).getChildren("item");
+			List<?> items = ((Element)rows.get(j)).getChildren("item");
 			for (int i = items.size() - 1; i >= 0; i--) {
 				Element item = (Element)items.get(i);
 				String v = item.getAttributeValue("v");
@@ -884,12 +884,8 @@ public class Matrix {
 	// MY SVD translation from LAPACK's DGESVD
 	
 	public void svd(Matrix w, Matrix v) {
-		@SuppressWarnings("unused")
-		int i, its, j, jj, k, l = 0, nm = 0;
-		@SuppressWarnings("unused")
-		boolean flag;
-		@SuppressWarnings("unused")
-		double c, f, h, s, x, y, z;
+		int i, j, k, l = 0;
+		double f, h, s;
 		double anorm = 0., g = 0., scale = 0.;
 //		if (sizeX < sizeY)
 //			throw new IllegalArgumentException("m < n");

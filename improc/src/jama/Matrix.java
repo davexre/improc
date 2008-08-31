@@ -51,6 +51,7 @@ import java.util.Locale;
 @version 5 August 1998
 */
 
+@SuppressWarnings("unchecked")
 public class Matrix implements Cloneable, java.io.Serializable {
 
 /* ------------------------
@@ -985,7 +986,7 @@ public class Matrix implements Cloneable, java.io.Serializable {
    @param input the input stream.
    */
 
-   public static Matrix read (BufferedReader input) throws java.io.IOException {
+public static Matrix read (BufferedReader input) throws java.io.IOException {
       StreamTokenizer tokenizer= new StreamTokenizer(input);
 
       // Although StreamTokenizer will parse numbers, it doesn't recognize
@@ -1000,8 +1001,9 @@ public class Matrix implements Cloneable, java.io.Serializable {
       tokenizer.eolIsSignificant(true);
       java.util.Vector v = new java.util.Vector();
 
-      // Ignore initial empty lines
-      while (tokenizer.nextToken() == StreamTokenizer.TT_EOL);
+      while (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
+    	  // Ignore initial empty lines
+      }
       if (tokenizer.ttype == StreamTokenizer.TT_EOF)
 	throw new java.io.IOException("Unexpected EOF on matrix read.");
       do {

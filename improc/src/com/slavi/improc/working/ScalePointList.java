@@ -15,12 +15,12 @@ public class ScalePointList {
 
 	public int imageSizeY = 0;
 
-	public ArrayList points;
+	public ArrayList<ScalePoint> points;
 	
 	public KDTree kdtree = null;
 
 	public ScalePointList() {
-		points = new ArrayList();
+		points = new ArrayList<ScalePoint>();
 	}
 	
 	public void buildTree() {
@@ -30,10 +30,10 @@ public class ScalePointList {
 	public void compareToList(ScalePointList dest) throws Exception {
 		int matchedCount1 = 0;
 		for (int i = points.size() - 1; i >= 0; i--) {
-			ScalePoint sp1 = (ScalePoint)points.get(i);
+			ScalePoint sp1 = points.get(i);
 			boolean matchingFound = false;
 			for (int j = dest.points.size() - 1; j >= 0; j--) {
-				ScalePoint sp2 = (ScalePoint)dest.points.get(j);
+				ScalePoint sp2 = dest.points.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -46,10 +46,10 @@ public class ScalePointList {
 
 		int matchedCount2 = 0;
 		for (int j = dest.points.size() - 1; j >= 0; j--) {
-			ScalePoint sp2 = (ScalePoint)dest.points.get(j);
+			ScalePoint sp2 = dest.points.get(j);
 			boolean matchingFound = false;
 			for (int i = points.size() - 1; i >= 0; i--) {
-				ScalePoint sp1 = (ScalePoint)points.get(i);
+				ScalePoint sp1 = points.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
@@ -71,7 +71,7 @@ public class ScalePointList {
 		dest.addContent(XMLHelper.makeAttrEl("imageSizeY", Integer.toString(imageSizeY)));
 		for (int i = 0; i < points.size(); i++) {
 			Element e = new Element("ScalePoint");
-			((ScalePoint)points.get(i)).toXML(e);
+			points.get(i).toXML(e);
 			dest.addContent(e);
 		}
 	}
@@ -81,7 +81,7 @@ public class ScalePointList {
 		r.imageFileName = XMLHelper.getAttrEl(source, "imageFileName");
 		r.imageSizeX = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeX"));
 		r.imageSizeY = Integer.parseInt(XMLHelper.getAttrEl(source, "imageSizeY"));
-		List list = source.getChildren("ScalePoint");
+		List<?> list = source.getChildren("ScalePoint");
 		for (int i = 0; i < list.size(); i++) {
 			ScalePoint sp = ScalePoint.fromXML((Element)list.get(i));
 			sp.scalePointList = r;

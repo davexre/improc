@@ -12,7 +12,7 @@ public class NNetTrain {
   
   protected int currentItem = -1;
 
-  public ArrayList items = new ArrayList();
+  public ArrayList<NNetLearnPair> items = new ArrayList<NNetLearnPair>();
   
   public boolean isAborting() {
     return aborting;
@@ -47,7 +47,7 @@ public class NNetTrain {
           (currentItem >= 0) && (!aborting); 
           currentItem--) {
         double[] op;
-        NNetLearnPair p = (NNetLearnPair)items.get(currentItem);
+        NNetLearnPair p = items.get(currentItem);
         net.feedForward(p.getInputPattern());
         op = p.getOutputPattern();
         for (int i = er.length - 1; i >= 0; i--)

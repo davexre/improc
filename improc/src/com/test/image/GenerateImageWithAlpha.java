@@ -71,8 +71,8 @@ public class GenerateImageWithAlpha {
 
 		// Find the image reader, read the image and scale it to the
 		// necessary size.
-		for (Iterator i = ImageIO.getImageReaders(iis); i.hasNext();) {
-			ImageReader ir = (ImageReader) i.next();
+		for (Iterator<ImageReader> i = ImageIO.getImageReaders(iis); i.hasNext();) {
+			ImageReader ir = i.next();
 			try {
 				iis.reset();
 				ir.setInput(iis);
@@ -189,8 +189,8 @@ public class GenerateImageWithAlpha {
 				String imgName = rs.getString(1);
 				byte[] picture = rs.getBytes(2);
 				ImageInputStream iis = new MemoryCacheImageInputStream(new ByteArrayInputStream(picture));
-				for (Iterator imgReader = ImageIO.getImageReaders(iis); imgReader.hasNext();) {
-					ImageReader ir = (ImageReader) imgReader.next();
+				for (Iterator<ImageReader> imgReader = ImageIO.getImageReaders(iis); imgReader.hasNext();) {
+					ImageReader ir = imgReader.next();
 					try {
 						iis.reset();
 						ir.setInput(iis);

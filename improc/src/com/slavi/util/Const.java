@@ -52,5 +52,5 @@ public class Const {
 		} catch (IOException e) {
 			throw new RuntimeException("User consts file not found or incomplete");
 		}
-	};
+	}
 }

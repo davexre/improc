@@ -20,8 +20,6 @@ public class Escapes {
 				case '\'': f.format("%s", "\\'"); break;
 				case '\\': f.format("%s", "\\\\"); break;
 				default:
-					if (f == null)
-						f = new Formatter();
 					if (c < 32 || c > 200) {
 						f.format("\\%03o|", (int)c);
 					} else {

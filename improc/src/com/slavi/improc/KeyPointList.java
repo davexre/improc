@@ -52,12 +52,6 @@ public class KeyPointList {
 			this.keyPointList = keyPointList;
 		}
 		
-		public KDTree<KeyPoint> getTree(int dimensions) {
-			if (dimensions != KeyPoint.featureVectorLinearSize)
-				throw new IllegalArgumentException("Invalid dimension"); 
-			return new KeyPointTree();
-		}
-
 		public KeyPoint nodeFromString(String source) {
 			KeyPoint result = KeyPoint.fromString(source);
 			result.keyPointList = keyPointList;
@@ -150,7 +144,7 @@ public class KeyPointList {
 		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
 
 		ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
-		Future<Void> ft = new SteppedParallelTaskExecutor(exec, profile.parallelTasks, execPDLowe).start();
+		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, profile.parallelTasks, execPDLowe).start();
 		try {
 			ft.get();
 		} finally {
@@ -262,15 +256,15 @@ public class KeyPointList {
 	*/
 	
 	public void compareToList(KeyPointList dest) {
-		ArrayList points = kdtree.toList();
-		ArrayList destPoints = dest.kdtree.toList();
+		ArrayList<KeyPoint> points = kdtree.toList();
+		ArrayList<KeyPoint> destPoints = dest.kdtree.toList();
 		
 		int matchedCount1 = 0;
 		for (int i = points.size() - 1; i >= 0; i--) {
-			KeyPoint sp1 = (KeyPoint)points.get(i);
+			KeyPoint sp1 = points.get(i);
 			boolean matchingFound = false;
 			for (int j = destPoints.size() - 1; j >= 0; j--) {
-				KeyPoint sp2 = (KeyPoint)destPoints.get(j);
+				KeyPoint sp2 = destPoints.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -283,10 +277,10 @@ public class KeyPointList {
 
 		int matchedCount2 = 0;
 		for (int j = destPoints.size() - 1; j >= 0; j--) {
-			KeyPoint sp2 = (KeyPoint)destPoints.get(j);
+			KeyPoint sp2 = destPoints.get(j);
 			boolean matchingFound = false;
 			for (int i = points.size() - 1; i >= 0; i--) {
-				KeyPoint sp1 = (KeyPoint)points.get(i);
+				KeyPoint sp1 = points.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
