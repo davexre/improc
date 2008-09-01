@@ -22,7 +22,7 @@ public class TestPDLoweDetector {
 
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
 			scalePoint.keyPointList = spl;
-			spl.kdtree.add(scalePoint);
+			spl.add(scalePoint);
 		}
 	}
 	
@@ -76,7 +76,7 @@ public class TestPDLoweDetector {
 		System.out.println(Utl.getFormatedMilliseconds(PDLoweDetector.timeElapsed.get()));
 */		
 		///////////////////////////////////
-/* TODO: FIXME:		ExecutionProfile profile = ExecutePDLowe.makeTasks(src, 1, hook);
+/* 		ExecutionProfile profile = ExecutePDLowe.makeTasks(src, 1, hook);
 		exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		System.out.println(profile);
 		

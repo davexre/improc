@@ -76,7 +76,7 @@ public class FindImagePairsInBigTree implements Callable<Void> {
 			}
 		});
 		for (pair p : lst) {
-			System.out.println(p.count + "\t" + p.from.kdtree.getSize() + "\t" + p.to.kdtree.getSize() + "\t" + p.id);
+			System.out.println(p.count + "\t" + p.from.getSize() + "\t" + p.to.getSize() + "\t" + p.id);
 		}
 		return null;
 	}

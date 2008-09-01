@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.slavi.improc.KeyPointList;
+import com.slavi.improc.KeyPointListSaver;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.ui.SwtUtl;
 
@@ -32,8 +33,8 @@ public class GenerateKeyPointFiles implements Callable<Void> {
 			System.out.print(statusMessage);
 			SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
 //			KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
-			KeyPointList kpl = KeyPointList.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(fileName));
-			System.out.println(" (" + kpl.kdtree.getSize() + " key points)");
+			KeyPointList kpl = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(fileName));
+			System.out.println(" (" + kpl.getSize() + " key points)");
 		}
 		return null;
 	}

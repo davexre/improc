@@ -63,8 +63,8 @@ public class KeyPointPairList {
 			image1 = image2;
 			image2 = tmp;
 		}
-		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
-		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
+		KeyPointListSaver.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
+		KeyPointListSaver.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
 		
 		File kppFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 		try {
@@ -85,14 +85,14 @@ public class KeyPointPairList {
 		// Build the KeyPointPairList file
 		KeyPointPairList result = new KeyPointPairList();
 		
-		result.source = KeyPointList.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image1);
-		result.target = KeyPointList.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
-		result.sourceKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image1) ), rootKeyPointFileDir);
-		result.targetKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image2) ), rootKeyPointFileDir);
-		int searchSteps = (int) (Math.max(130.0, (Math.log(result.source.kdtree.getSize()) / Math.log (1000.0)) * 130.0));
+		result.source = KeyPointListSaver.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image1);
+		result.target = KeyPointListSaver.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
+		result.sourceKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointListSaver.getFile(rootImagesDir, rootKeyPointFileDir, image1) ), rootKeyPointFileDir);
+		result.targetKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointListSaver.getFile(rootImagesDir, rootKeyPointFileDir, image2) ), rootKeyPointFileDir);
+		int searchSteps = (int) (Math.max(130.0, (Math.log(result.source.getSize()) / Math.log (1000.0)) * 130.0));
 
-		for (KeyPoint p1 : result.source.kdtree) {
-			KDTree.NearestNeighbours<KeyPoint> nnlst = result.target.kdtree.getNearestNeighboursBBF(p1, 2, searchSteps);
+		for (KeyPoint p1 : result.source) {
+			KDTree.NearestNeighbours<KeyPoint> nnlst = result.target.getNearestNeighboursBBF(p1, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;
 			if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
@@ -144,8 +144,8 @@ public class KeyPointPairList {
 		BufferedReader fin = new BufferedReader(new FileReader(kppFile));
 		fin.readLine(); // Skip header.
 		result = new KeyPointPairList();
-		result.source = KeyPointList.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image1);
-		result.target = KeyPointList.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
+		result.source = KeyPointListSaver.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image1);
+		result.target = KeyPointListSaver.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
 		result.sourceKPL = FileStamp.fromString(fin.readLine(), rootKeyPointFileDir);
 		result.targetKPL = FileStamp.fromString(fin.readLine(), rootKeyPointFileDir);
 		result.items = new ArrayList<KeyPointPair>();

@@ -11,7 +11,9 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public abstract boolean canFindDistanceBetween(E fromNode, E toNode);
 	
 	public abstract double getValue(E node, int dimensionIndex);
-	
+
+	// TODO: Fix this warning
+	@SuppressWarnings("unchecked")
 	public static class NearestNeighbours<E>{
 		NearestNeighbours(E target, int maxCapacity, int dimensions) {
 			this.target = target;

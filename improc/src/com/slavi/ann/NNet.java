@@ -19,6 +19,8 @@ public class NNet extends NNLayerBase {
 			layers.get(i).setLearningRate(learningRate);
 	}
 
+	// TODO: Fix this warning
+	@SuppressWarnings("unchecked")
 	public NNet(int sizeInput, int sizeOutput) {
 		this(sizeInput, new int[] { sizeInput * 2, sizeOutput }, 
 			new Class[] { NNClassicLayer.class, NNClassicLayer.class });

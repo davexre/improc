@@ -71,8 +71,8 @@ public class PanoPairList {
 			image1 = image2;
 			image2 = tmp;
 		}
-		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
-		KeyPointList.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
+		KeyPointListSaver.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image1);
+		KeyPointListSaver.updateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image2);
 		
 		File panoFile = getFile(rootImagesDir, rootKeyPointPairFileDir, image1, image2);
 
@@ -94,8 +94,8 @@ public class PanoPairList {
 		// Build the PanoPairList file
 		KeyPointPairList kppl = KeyPointPairList.readKeyPointPairFile(rootImagesDir, rootKeyPointFileDir, rootKeyPointPairFileDir, image1, image2);
 		PanoPairList result = new PanoPairList();
-		result.sourceKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image1) ), rootKeyPointFileDir);
-		result.targetKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointList.getFile(rootImagesDir, rootKeyPointFileDir, image2) ), rootKeyPointFileDir);
+		result.sourceKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointListSaver.getFile(rootImagesDir, rootKeyPointFileDir, image1) ), rootKeyPointFileDir);
+		result.targetKPL = new FileStamp(rootKeyPointFileDir.getRelativePath(KeyPointListSaver.getFile(rootImagesDir, rootKeyPointFileDir, image2) ), rootKeyPointFileDir);
 		result.sourceImageSizeX = kppl.source.imageSizeX;
 		result.sourceImageSizeY = kppl.source.imageSizeY;
 		result.targetImageSizeX = kppl.target.imageSizeX;
