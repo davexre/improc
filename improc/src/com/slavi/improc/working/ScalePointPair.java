@@ -44,8 +44,6 @@ public class ScalePointPair extends PointsPair {
 	public ScalePointPair(ScalePoint sourceSP, ScalePoint targetSP, double distanceToNearest, double distanceToNearest2) {
 		this.source = getMatrixFromScalePoint(sourceSP);
 		this.target = getMatrixFromScalePoint(targetSP);
-		this.sourceTransformed = new Matrix(this.target.getSizeX(), this.target.getSizeY());
-		this.previousBadStatus = false;
 		
 		this.sourceSP = sourceSP;
 		this.targetSP = targetSP;
@@ -104,8 +102,6 @@ public class ScalePointPair extends PointsPair {
 
 		e = source.getChild("targetSP");
 		r.targetSP = ScalePoint.fromXML(e);
-
-		r.sourceTransformed = new Matrix(r.source.getSizeX(), r.source.getSizeY());
 		return r;
 	}
 }

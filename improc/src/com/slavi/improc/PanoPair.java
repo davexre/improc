@@ -12,8 +12,8 @@ public class PanoPair {
 		sy = kpp.sourceSP.doubleY;
 		tx = kpp.targetSP.doubleX;
 		ty = kpp.targetSP.doubleY;
-		discrepancy = kpp.getValue();
-		weight = kpp.getComputedWeight();
+		discrepancy = kpp.discrepancy;
+		weight = kpp.getWeight();
 	}
 	
 	public static PanoPair fromString(String s) {

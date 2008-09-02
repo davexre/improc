@@ -53,10 +53,11 @@ public class AffineTransformLearner extends BaseTransformLearner {
 					sourceScale.getItem(i, 0));
 			}
 			coefs.setItem(transformer.inputSize, 0, 1.0);
+			double computedWeight = getComputedWeight(item);
 			for (int i = transformer.outputSize - 1; i >= 0; i--) {
 				double L = (item.target.getItem(i, 0) - targetOrigin.getItem(i, 0)) / 
 					targetScale.getItem(i, 0);
-				lsa.addMeasurement(coefs, item.getComputedWeight(), L, i);
+				lsa.addMeasurement(coefs, computedWeight, L, i);
 			}
 		}
 		if (!lsa.calculate()) 

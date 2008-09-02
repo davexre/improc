@@ -44,7 +44,6 @@ public class TestAffineTransformer {
 			jTransform.transform(source2D, target2D);
 			source = point2DToMatrix(source2D);
 			target = point2DToMatrix(target2D);
-			sourceTransformed = new Matrix(2, 1);
 		}
 	}
 		

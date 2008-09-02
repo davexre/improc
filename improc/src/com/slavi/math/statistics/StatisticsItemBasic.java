@@ -6,8 +6,6 @@ public class StatisticsItemBasic implements StatisticsItem {
 
 	private double weight = 1.0;
 
-	private double computedWeight = 0.0;
-
 	private boolean bad = false;
 
 	public StatisticsItemBasic() {
@@ -38,14 +36,6 @@ public class StatisticsItemBasic implements StatisticsItem {
 		this.weight = weight;
 	}
 
-	public double getComputedWeight() {
-		return computedWeight;
-	}
-
-	public void setComputedWeight(double computedWeight) {
-		this.computedWeight = computedWeight;
-	}
-
 	public boolean isBad() {
 		return bad;
 	}
@@ -57,7 +47,6 @@ public class StatisticsItemBasic implements StatisticsItem {
 	public String toString() {
 		return 	(bad ? "BAD" : "   ") +
 			" Value=" + Double.toString(value) + 
-			"\tW=" + Double.toString(weight) + 
-			"\tComputed wight=" + Double.toString(computedWeight); 
+			"\tW=" + Double.toString(weight); 
 	}
 }

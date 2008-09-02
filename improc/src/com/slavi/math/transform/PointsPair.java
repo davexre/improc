@@ -4,41 +4,53 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.statistics.StatisticsItemBasic;
 import com.slavi.util.XMLHelper;
 
-public class PointsPair extends StatisticsItemBasic {
+public class PointsPair {
 	
 	public Matrix source;
 
 	public Matrix target;
 	
-	public Matrix sourceTransformed;
+	private boolean bad;
+
+	private double weight;
 	
 	/**
 	 * The distance between target and sourceTransformed.
 	 * The formula is:
 	 * discrepancy = sqrt(sum(pow(target.getItem(i,0) - soruceTransformed.getItem(i,0), 2)))
-	 * 
-	 * public double discrepancy; 
 	 */
-
-	public boolean previousBadStatus;
+	public double discrepancy; 
 
 	public PointsPair() {
-		super(0.0, 1.0);
 		source = null;
 		target = null;
-		sourceTransformed = null;
-		previousBadStatus = false;
+		bad = false;
+		weight = 1.0;
 	}
 
 	public PointsPair(Matrix source, Matrix target, double weight) {
-		super(0.0, weight);
 		this.source = source;
 		this.target = target;
-		this.sourceTransformed = new Matrix(target.getSizeX(), target.getSizeY());
-		this.previousBadStatus = false;
+		this.bad = false;
+		this.weight = weight;
+	}
+
+	public boolean isBad() {
+		return bad;
+	}
+
+	public void setBad(boolean bad) {
+		this.bad = bad;
+	}
+	
+	public double getWeight() {
+		return weight;
+	}
+	
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 
 	public void toXML(Element dest) {
@@ -68,8 +80,6 @@ public class PointsPair extends StatisticsItemBasic {
 
 		e = source.getChild("target");
 		r.target = Matrix.fromXML(e);
-
-		r.sourceTransformed = new Matrix(r.source.getSizeX(), r.source.getSizeY());
 		return r;
 	}
 }

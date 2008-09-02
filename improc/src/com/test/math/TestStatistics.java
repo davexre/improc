@@ -31,7 +31,7 @@ public class TestStatistics {
 		statLT.setB(0.9);
 		statLT.start();
 		for (int i = 0; i < items.size(); i++)
-			statLT.addValue(items.get(i).getValue());
+			statLT.addValue(items.get(i).getValue(), items.get(i).getWeight());
 		statLT.stop();
 		System.out.println(statLT.toString());
 		System.out.println("------------");

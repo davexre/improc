@@ -67,9 +67,10 @@ public class CustomPolynomialTransformLearner extends BaseTransformLearner {
 				}
 				coefs.setItem(j, 0, tmp);
 			}
+			double computedWeight = getComputedWeight(item);
 			for (int i = tr.outputSize - 1; i >= 0; i--) {
 				double L = tmpT.getItem(i, 0);						
-				lsa.addMeasurement(coefs, item.getComputedWeight(), L, i);
+				lsa.addMeasurement(coefs, computedWeight, L, i);
 			}
 		}
 		lsa.calculate();

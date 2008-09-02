@@ -148,7 +148,7 @@ public class ScalePointPairList {
 		public static final CompareByDelta instance = new CompareByDelta();
 
 		public int compare(ScalePointPair spp1, ScalePointPair spp2) {
-			return Double.compare(spp1.getValue(), spp2.getValue());
+			return Double.compare(spp1.discrepancy, spp2.discrepancy);
 		} 
 	}
 	public void sortByDelta() {

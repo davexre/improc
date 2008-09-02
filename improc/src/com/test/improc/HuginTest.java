@@ -17,7 +17,7 @@ public class HuginTest {
 		public static final CompareByDelta instance = new CompareByDelta();
 
 		public int compare(PointsPair spp1, PointsPair spp2) {
-			return Double.compare(spp1.getValue(), spp2.getValue());
+			return Double.compare(spp1.discrepancy, spp2.discrepancy);
 		} 
 	}
 	
@@ -55,7 +55,7 @@ public class HuginTest {
 		System.out.println(delta.toString());
 		for (int i = 0; i < items.size(); i++) {
 			PointsPair pp = items.get(i);
-			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.getValue()));
+			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.discrepancy));
 		}
 	}
 

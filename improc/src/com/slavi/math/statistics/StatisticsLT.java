@@ -10,9 +10,18 @@ public class StatisticsLT extends StatisticsBase {
 
 	protected double sumValues[] = new double[5];
 	
+	protected double sumWeight;
+	
 	protected int itemsCount;
 	
 	public void addValue(double value) {
+		addValue(value, 1.0);
+	}
+	
+	public void addValue(double value, double weight) {
+		if (weight < 0.0)
+			throw new IllegalArgumentException("Negative weight received by Statistics."); 
+		
 		double absValue = Math.abs(value);
 		if (itemsCount == 0) {
 			MaxX = MinX = value;
@@ -28,11 +37,11 @@ public class StatisticsLT extends StatisticsBase {
 				AbsMaxX = absValue;
 		}
 		itemsCount++;
-		double value2 = value * value;
-		sumValues[1] += value;
-		sumValues[2] += value2;
-		sumValues[3] += value2 * value;
-		sumValues[4] += value2 * value2;
+		sumWeight += weight;
+		sumValues[1] += value * weight;
+		sumValues[2] += value * value * weight;
+		sumValues[3] += value * value * value * weight;
+		sumValues[4] += value * value * value * value * weight;
 	}
 
 	public void start() {
@@ -40,14 +49,14 @@ public class StatisticsLT extends StatisticsBase {
 	}
 	
 	public void stop() {
-		if (itemsCount == 0)
+		if (sumWeight <= 0.0)
 			return;
 		// стр.26,48
 		// Пресмятане на Начален момент от 1,2,3 и 4 ред. (1-ви ред = средно тежестно).
-		M[1] = sumValues[1] / itemsCount;
-		M[2] = sumValues[2] / itemsCount;
-		M[3] = sumValues[3] / itemsCount;
-		M[4] = sumValues[4] / itemsCount;
+		M[1] = sumValues[1] / sumWeight;
+		M[2] = sumValues[2] / sumWeight;
+		M[3] = sumValues[3] / sumWeight;
+		M[4] = sumValues[4] / sumWeight;
 
 		// стр.26,48
 		// Пресмятане на Централен момент от 2,3 и 4 ред. (2-ри ред = дисперсия)
@@ -77,6 +86,7 @@ public class StatisticsLT extends StatisticsBase {
     	super.resetCalculations();
     	for (int i = sumValues.length - 1; i >= 0; i--)
     		sumValues[i] = 0.0;
+    	sumWeight = 0.0;
     	itemsCount = 0;
     }
 }

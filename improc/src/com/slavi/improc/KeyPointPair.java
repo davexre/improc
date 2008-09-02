@@ -45,8 +45,6 @@ public class KeyPointPair extends PointsPair {
 	
 	public KeyPointPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
 		super(getMatrixFromScalePoint(sourceSP), getMatrixFromScalePoint(targetSP), 1.0);
-		this.sourceTransformed = new Matrix(this.target.getSizeX(), this.target.getSizeY());
-		
 		this.sourceSP = sourceSP;
 		this.targetSP = targetSP;
 		this.distanceToNearest = distanceToNearest;
@@ -116,8 +114,6 @@ public class KeyPointPair extends PointsPair {
 
 		e = source.getChild("targetSP");
 		r.targetSP = KeyPoint.fromXML(e);
-
-		r.sourceTransformed = new Matrix(r.source.getSizeX(), r.source.getSizeY());
 		return r;
 	}
 }

@@ -53,20 +53,21 @@ public class Helmert2DTransformLearner extends BaseTransformLearner {
 			double a = (item.source.getItem(0, 0) - sourceOrigin.getItem(0, 0)) / aSourceScale;
 			double b = (item.source.getItem(1, 0) - sourceOrigin.getItem(1, 0)) / aSourceScale;
 			double L;
+			double computedWeight = getComputedWeight(item);
 			
 			L = (item.target.getItem(0, 0) - targetOrigin.getItem(0, 0)) / aTargetScale;
 			coefs.setItem(0, 0, a);
 			coefs.setItem(1, 0, -b);
 			coefs.setItem(2, 0, 1.0);
 			coefs.setItem(3, 0, 0.0);
-			lsa.addMeasurement(coefs, item.getComputedWeight(), L, 0);
+			lsa.addMeasurement(coefs, computedWeight, L, 0);
 			
 			L = (item.target.getItem(1, 0) - targetOrigin.getItem(1, 0)) / aTargetScale;
 			coefs.setItem(0, 0, b);
 			coefs.setItem(1, 0, a);
 			coefs.setItem(2, 0, 0.0);
 			coefs.setItem(3, 0, 1.0);
-			lsa.addMeasurement(coefs, item.getComputedWeight(), L, 0);
+			lsa.addMeasurement(coefs, computedWeight, L, 0);
 		}
 		lsa.calculate();
 

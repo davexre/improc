@@ -16,17 +16,6 @@ public interface StatisticsItem {
 	public double getWeight();
 
 	/**
-	 * Тежест, изчислена по формулата P/sum(P) или тежестта, с която са
-	 * извършени сметките.
-	 */
-	public double getComputedWeight();
-
-	/**
-	 * @see #getComputedWeight(Object)
-	 */
-	public void setComputedWeight(double computedWeight);
-
-	/**
 	 * Попълва се от CalculateONE. Показва дали дадената стойност попада извън
 	 * доверителния интервал. Ако флагът е вдигнат, а това означава "лоша"
 	 * стойност - тя ще се изгнорира при следващите извиквания на CalculateONE.
