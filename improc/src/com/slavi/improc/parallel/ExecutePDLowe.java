@@ -124,7 +124,7 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 				result.add(task);
 			}
 		}
-		scale *= 2.0;
+		scale *= 2;
 		return result;
 	}
 

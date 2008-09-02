@@ -29,7 +29,7 @@ public class Improc2 {
 		System.out.println("---------- Find image pairs in BIG tree");
 		SwtUtl.openWaitDialog("Find image pairs in BIG tree", 
 				new FindImagePairsInBigTree(bigTree), 
-				bigTree.kdtree.getSize());
+				bigTree.getSize());
 
 		System.out.println("Done.");
 	}

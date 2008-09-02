@@ -56,7 +56,6 @@ public class DLoweCompareResult {
 				for (int j2 = 0; j2 < KeyPoint.descriptorSize; j2++) 
 					for (int k2 = 0; k2 < KeyPoint.numDirections; k2++) 
 						kp.setItem(i2, j2, k2, (byte)sp.getItem(i2, j2, k2));
-			kp.keyPointList = result;
 			result.add(kp);
 		}
 		return result;
@@ -73,7 +72,6 @@ public class DLoweCompareResult {
 		DLoweDetector d = new DLoweDetector();
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				scalePoint.keyPointList = result;
 				result.add(scalePoint);
 			}		
 		};
@@ -93,7 +91,6 @@ public class DLoweCompareResult {
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				scalePoint.keyPointList = result;
 				result.add(scalePoint);
 			}		
 		};

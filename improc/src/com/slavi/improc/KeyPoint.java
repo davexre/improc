@@ -21,23 +21,23 @@ public class KeyPoint {
 	
 	public static final int featureVectorLinearSize = descriptorSize * descriptorSize * numDirections;
 
-	public int imgX;
+	public int imgX;		// TODO: Obsolete
 
-	public int imgY;
+	public int imgY;		// TODO: Obsolete
 
-	public double imgScale;
+	public double imgScale; // TODO: Obsolete
 	
 	public double doubleX;
 
 	public double doubleY;
 
-	public int dogLevel;
+	public int dogLevel; 	// TODO: Obsolete
 
-	public double adjS;
+	public double adjS;		// TODO: Obsolete
 
-	public double kpScale;
+	public double kpScale;	// TODO: Obsolete
 
-	public double degree;
+	public double degree;	// TODO: Obsolete
 	
 	byte[][][] featureVector = new byte[descriptorSize][descriptorSize][numDirections];
 

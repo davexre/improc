@@ -46,7 +46,6 @@ public class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
 		}
 		
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
-			scalePoint.keyPointList = scalePointList;
 			scalePointList.add(scalePoint);
 		}		
 	}
@@ -88,7 +87,6 @@ public class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				scalePoint.keyPointList = result;
 				result.add(scalePoint);
 			}		
 		};

@@ -32,6 +32,11 @@ public class KeyPointList extends KDTree<KeyPoint> {
 		return node.getValue(dimensionIndex);
 	}
 	
+	public void add(KeyPoint item) {
+		item.keyPointList = this;
+		super.add(item);
+	}
+	
 	public static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
 		r.imageFileStamp = FileStamp.fromString(fin.readLine(), rootImagesDir);

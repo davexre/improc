@@ -199,26 +199,25 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * 
 	 * where
 	 * 
-	 * maxDepthDeviation = {@link #getSize()} * 0.05 (5%)
-	 * and also 3 <= maxDepthDeviation <= 7 
+	 * maxDepthDeviation = {@link #getTreeDepth()} * 0.05 (5%)
+	 * and also 3 <= maxDepthDeviation
 	 */
+	private static final double log2 = Math.log(2.0);
 	public boolean isBalanceNeeded() {
-		final double log2 = Math.log(2.0);
 		int curSize = getSize();
+		int curDepth = getTreeDepth();
 		int perfectDepth = (int)(Math.ceil(Math.log(curSize) / log2));
-		int maxDepthDeviation = (int)(curSize * 0.05);
+		int maxDepthDeviation = (int)(curDepth * 0.05);
 		if (maxDepthDeviation < 3)
 			maxDepthDeviation = 3;
-		if (maxDepthDeviation > 7)
-			maxDepthDeviation = 7;
-		return perfectDepth + maxDepthDeviation < getTreeDepth();
+		return perfectDepth + maxDepthDeviation < curDepth;
 	}
 
 	/**
-	 * The numberOfUnsuccessfullSorts is used to avoid endles recurssion if the list of items contains
+	 * The numberOfUnsuccessfullSorts is used to avoid endless recursion if the list of items contains
 	 * more than [dimensions] number of elements with equal values for ALL dimensions.
 	 * 
-	 * If the items list contains more than one element with equal value in a speciffic dimension, the
+	 * If the items list contains more than one element with equal value in a specific dimension, the
 	 * list is recursively sorted using the next dimension.  
 	 */
 	private int deepSort(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int numberOfUnsuccessfullSorts) {

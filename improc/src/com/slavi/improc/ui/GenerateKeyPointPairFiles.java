@@ -29,7 +29,7 @@ public class GenerateKeyPointPairFiles implements Callable<Void> {
 		for (int i = 0, pairsCount = 0; i < images.size(); i++) {
 			for (int j = i + 1; j < images.size(); j++, pairsCount++) {
 				if (Thread.interrupted()) {
-					break;
+					throw new InterruptedException();
 				}
 				String fileName1 = images.get(i); 
 				String fileName2 = images.get(j); 

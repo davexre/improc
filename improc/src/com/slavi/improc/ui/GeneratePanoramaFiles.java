@@ -24,7 +24,10 @@ public class GeneratePanoramaFiles implements Callable<Void> {
 		int panoCount = 1;
 		int maxItems = panoList.items.size();
 		AdjAffine adjustAffine = new AdjAffine();
-		while (!Thread.interrupted()) {
+		while (true) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			ArrayList<PanoPairList>chain = panoList.getImageChain();
 			if (chain == null)
 				break;

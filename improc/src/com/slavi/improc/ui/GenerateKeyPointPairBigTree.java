@@ -28,6 +28,9 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 	public KeyPointPairBigTree call() throws Exception {
 		KeyPointPairBigTree result = new KeyPointPairBigTree();
 		for (int i = 0; i < images.size(); i++) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			String image = images.get(i); 
 			String statusMessage = (i + 1) + "/" + images.size() + " " + image;
 			System.out.println(statusMessage);
@@ -35,14 +38,14 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 			KeyPointList l = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(image));
 			result.keyPointLists.add(l);
 			for (KeyPoint kp : l) {
-				result.kdtree.add(kp);
+				result.add(kp);
 			}
 		}
-		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);
-		System.out.println("Tree size        : " + result.kdtree.getSize());
-		System.out.println("Tree depth before: " + result.kdtree.getTreeDepth());
-		result.kdtree.balanceIfNeeded();
-		System.out.println("Tree depth after : " + result.kdtree.getTreeDepth());
+//		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);
+//		System.out.println("Tree size        : " + result.getSize());
+//		System.out.println("Tree depth before: " + result.getTreeDepth());
+//		result.balanceIfNeeded();
+//		System.out.println("Tree depth after : " + result.getTreeDepth());
 		
 		return result;
 	}

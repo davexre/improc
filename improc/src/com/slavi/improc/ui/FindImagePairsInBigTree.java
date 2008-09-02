@@ -44,13 +44,16 @@ public class FindImagePairsInBigTree implements Callable<Void> {
 	public Void call() throws Exception {
 		HashMap<String, pair> map = new HashMap<String, pair>();
 		
-		int searchSteps = (int) (Math.max(130.0, (Math.log(bt.kdtree.getSize()) / Math.log (1000.0)) * 130.0));
+		int searchSteps = (int) (Math.max(130.0, (Math.log(bt.getSize()) / Math.log (1000.0)) * 130.0));
 		int count = 0;
-		String dummy = "/" + Integer.toString(bt.kdtree.getSize());
-		for (KeyPoint kp : bt.kdtree) {
+		String dummy = "/" + Integer.toString(bt.getSize());
+		for (KeyPoint kp : bt) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			count++;
 			SwtUtl.activeWaitDialogSetStatus(Integer.toString(count) + dummy, count);
-			KDTree.NearestNeighbours<KeyPoint> nnlst = bt.kdtree.getNearestNeighboursBBF(kp, 2, searchSteps);
+			KDTree.NearestNeighbours<KeyPoint> nnlst = bt.getNearestNeighboursBBF(kp, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;
 			if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {

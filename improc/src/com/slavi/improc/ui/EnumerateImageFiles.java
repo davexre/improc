@@ -18,8 +18,7 @@ public class EnumerateImageFiles implements Callable<ArrayList<String>> {
 		int numberOfImages = 0;
 		while (imagesIterator.hasNext()) {
 			if (Thread.interrupted()) {
-				numberOfImages = 0;
-				break;
+				throw new InterruptedException();
 			}
 			numberOfImages++;
 			result.add(imagesIterator.next().getPath());
