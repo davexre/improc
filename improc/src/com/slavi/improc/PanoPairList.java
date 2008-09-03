@@ -36,7 +36,7 @@ public class PanoPairList {
 	
 	public int targetImageSizeY; 
 	
-	private PanoPairList() {
+	public PanoPairList() {
 		items = new ArrayList<PanoPair>();
 	}
 

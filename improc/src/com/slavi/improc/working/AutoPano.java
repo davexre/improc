@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 import org.jdom.Element;
 
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.statistics.StatisticsLT;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.BaseTransformLearner;
 import com.slavi.util.Marker;
@@ -270,7 +270,7 @@ public class AutoPano {
 	}
 	
 	public void analyzePointsPairList() throws Exception {
-		StatisticsLT stat = new StatisticsLT();
+		Statistics stat = new Statistics();
 		stat.start();
 		for (int i = 0; i < pointPairs.items.size(); i++) {
 			ScalePointPair pp = pointPairs.items.get(i);

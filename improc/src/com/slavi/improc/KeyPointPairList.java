@@ -28,7 +28,7 @@ public class KeyPointPairList {
 
 	public FileStamp targetKPL = null;
 
-	private KeyPointPairList() {
+	public KeyPointPairList() {
 		items = new ArrayList<KeyPointPair>();
 	}
 

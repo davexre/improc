@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.slavi.math.statistics.StatisticsLT;
+import com.slavi.math.adjust.Statistics;
 
 /**
  * This class represents a gray scale image with the pixels stored 
@@ -289,10 +289,10 @@ public class DImageMap {
 	}
 
 	/**
-	 * Calculates the pixel statistics using the class {@link StatisticsLT}. 
+	 * Calculates the pixel statistics using the class {@link Statistics}. 
 	 */
-	public StatisticsLT calcStatistics() {
-		StatisticsLT result = new StatisticsLT();
+	public Statistics calcStatistics() {
+		Statistics result = new Statistics();
 		result.start();
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
@@ -341,7 +341,7 @@ public class DImageMap {
 	 * pixels with extremely low or extremely high values.
 	 */
 	public void applyStatisticsFilter(double timesStandardDeviation) {
-		StatisticsLT stat = calcStatistics();
+		Statistics stat = calcStatistics();
 		double stdDev = timesStandardDeviation * stat.getStdDeviation();
 		double minVal = stat.getAvgValue() - stdDev;
 		double maxVal = stat.getAvgValue() + stdDev;

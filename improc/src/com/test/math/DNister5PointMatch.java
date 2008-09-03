@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 
 public class DNister5PointMatch {
 
@@ -199,15 +200,15 @@ public class DNister5PointMatch {
 		
 		for (int i = pairs.size() - 1; i >= 0 ; i--) {
 			PointsPair pp = pairs.get(i);
-			Q.setItem(0, i, pp.source.getItem(0, 0) * pp.target.getItem(0, 0));
-			Q.setItem(1, i, pp.source.getItem(1, 0) * pp.target.getItem(0, 0));
-			Q.setItem(2, i,                           pp.target.getItem(0, 0));
-			Q.setItem(3, i, pp.source.getItem(0, 0) * pp.target.getItem(1, 0));
-			Q.setItem(4, i, pp.source.getItem(1, 0) * pp.target.getItem(1, 0));
-			Q.setItem(5, i,                           pp.target.getItem(1, 0));
-			Q.setItem(6, i, pp.source.getItem(0, 0)                          );
-			Q.setItem(7, i, pp.source.getItem(1, 0)                          );
-			Q.setItem(8, i, 1                                                );
+			Q.setItem(0, i, pp.getSourceCoord(0) * pp.getTargetCoord(0));
+			Q.setItem(1, i, pp.getSourceCoord(1) * pp.getTargetCoord(0));
+			Q.setItem(2, i,                        pp.getTargetCoord(0));
+			Q.setItem(3, i, pp.getSourceCoord(0) * pp.getTargetCoord(1));
+			Q.setItem(4, i, pp.getSourceCoord(1) * pp.getTargetCoord(1));
+			Q.setItem(5, i,                        pp.getTargetCoord(1));
+			Q.setItem(6, i, pp.getSourceCoord(0)                       );
+			Q.setItem(7, i, pp.getSourceCoord(1)                       );
+			Q.setItem(8, i, 1                                          );
 		}
 		
 		Q.printM("Q");
@@ -591,7 +592,7 @@ public class DNister5PointMatch {
 			src.setItem(1, 0, Double.parseDouble(st.nextToken()));
 			dest.setItem(0, 0, Double.parseDouble(st.nextToken()));
 			dest.setItem(1, 0, Double.parseDouble(st.nextToken()));
-			PointsPair pp = new PointsPair(src, dest, 1.0);
+			PointsPair pp = new PointsPairBase(src, dest, 1.0);
 			pairs.add(pp);
 		}
 		fin.close();

@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.slavi.math.statistics.StatisticsLT;
+import com.slavi.math.adjust.Statistics;
 
 public class DWindowedImageUtils {
 	/**
@@ -158,15 +158,15 @@ public class DWindowedImageUtils {
 	}
 	
 	/**
-	 * Calculates the pixel statistics using the class {@link StatisticsLT}. 
+	 * Calculates the pixel statistics using the class {@link Statistics}. 
 	 */
-	public static StatisticsLT calcStatistics(DWindowedImage image) {
+	public static Statistics calcStatistics(DWindowedImage image) {
 		int minX = image.minX();
 		int maxX = image.maxX();
 		int minY = image.minY();
 		int maxY = image.maxY();
 
-		StatisticsLT result = new StatisticsLT();
+		Statistics result = new Statistics();
 		result.start();
 		for (int i = minX; i <= maxX; i++)
 			for (int j = minY; j <= maxY; j++) 
@@ -237,7 +237,7 @@ public class DWindowedImageUtils {
 		int minY = image.minY();
 		int maxY = image.maxY();
 
-		StatisticsLT stat = calcStatistics(image);
+		Statistics stat = calcStatistics(image);
 		double stdDev = timesStandardDeviation * stat.getStdDeviation();
 		double minVal = stat.getAvgValue() - stdDev;
 		double maxVal = stat.getAvgValue() + stdDev;

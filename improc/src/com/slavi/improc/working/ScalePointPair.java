@@ -4,10 +4,10 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 import com.slavi.util.XMLHelper;
 
-public class ScalePointPair extends PointsPair {
+public class ScalePointPair extends PointsPairBase {
 	public int id;
 	
 	public ScalePoint sourceSP;

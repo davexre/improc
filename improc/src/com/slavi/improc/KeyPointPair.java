@@ -5,11 +5,10 @@ import java.util.StringTokenizer;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.PointsPair;
 import com.slavi.util.XMLHelper;
 
-public class KeyPointPair extends PointsPair {
+public class KeyPointPair implements PointsPair {
 	public int id = hashCode();
 	
 	public KeyPoint sourceSP;
@@ -36,15 +35,7 @@ public class KeyPointPair extends PointsPair {
 		targetReused = false;
 	}
 	
-	private static Matrix getMatrixFromScalePoint(KeyPoint sp) {
-		Matrix r = new Matrix(2, 1);
-		r.setItem(0, 0, sp.doubleX);
-		r.setItem(1, 0, sp.doubleY);
-		return r;
-	}
-	
 	public KeyPointPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
-		super(getMatrixFromScalePoint(sourceSP), getMatrixFromScalePoint(targetSP), 1.0);
 		this.sourceSP = sourceSP;
 		this.targetSP = targetSP;
 		this.distanceToNearest = distanceToNearest;
@@ -61,7 +52,7 @@ public class KeyPointPair extends PointsPair {
 		return
 			Double.toString(distanceToNearest) + ":" + 
 			Double.toString(distanceToNearest2) + ":" +
-			source.toString() + ":" + target.toString();
+			sourceSP.toString() + ":" + targetSP.toString();
 	}
 	
 	public static KeyPointPair fromString(String str) {
@@ -79,14 +70,6 @@ public class KeyPointPair extends PointsPair {
 		dest.addContent(XMLHelper.makeAttrEl("dist1", Double.toString(distanceToNearest)));
 		dest.addContent(XMLHelper.makeAttrEl("dist2", Double.toString(distanceToNearest2)));
 		
-		e = new Element("source");
-		source.toXML(e);
-		dest.addContent(e);
-		
-		e = new Element("target");
-		target.toXML(e);
-		dest.addContent(e);
-		
 		e = new Element("sourceSP");
 		sourceSP.toXML(e);
 		dest.addContent(e);
@@ -103,17 +86,49 @@ public class KeyPointPair extends PointsPair {
 		r.distanceToNearest = Double.parseDouble(XMLHelper.getAttrEl(source, "dist1"));
 		r.distanceToNearest2 = Double.parseDouble(XMLHelper.getAttrEl(source, "dist2"));
 		
-		e = source.getChild("source");
-		r.source = Matrix.fromXML(e);
-
-		e = source.getChild("target");
-		r.target = Matrix.fromXML(e);
-
 		e = source.getChild("sourceSP");
 		r.sourceSP = KeyPoint.fromXML(e);
 
 		e = source.getChild("targetSP");
 		r.targetSP = KeyPoint.fromXML(e);
 		return r;
+	}
+
+	double discrepancy;
+	public double getDiscrepancy() {
+		return discrepancy;
+	}
+
+	public double getSourceCoord(int coordIndex) {
+		switch (coordIndex) {
+			case 0: return sourceSP.doubleX;
+			case 1: return sourceSP.doubleY;
+			default: throw new IllegalArgumentException("Index out of range [0..1]");
+		}
+	}
+
+	public double getTargetCoord(int coordIndex) {
+		switch (coordIndex) {
+			case 0: return targetSP.doubleX;
+			case 1: return targetSP.doubleY;
+			default: throw new IllegalArgumentException("Index out of range [0..1]");
+		}
+	}
+
+	public double getWeight() {
+		return 1.0;
+	}
+
+	boolean bad;
+	public boolean isBad() {
+		return bad;
+	}
+
+	public void setBad(boolean bad) {
+		this.bad = bad;
+	}
+
+	public void setDiscrepancy(double discrepancy) {
+		this.discrepancy = discrepancy;
 	}
 }

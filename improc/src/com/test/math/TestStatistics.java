@@ -5,16 +5,50 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import com.slavi.math.statistics.Statistics;
-import com.slavi.math.statistics.StatisticsItemBasic;
-import com.slavi.math.statistics.StatisticsLT;
+import com.slavi.math.adjust.Statistics;
 
 public class TestStatistics {
 
+	public static class MyData {
+		boolean bad;
+		double value;
+		double weight;
+		
+		public MyData(double value, double weight) {
+			this.bad = false;
+			this.value = value;
+			this.weight = weight;
+		}
+		
+		public String toString() {
+			return 	(bad ? "BAD" : "   ") +
+				" Value=" + Double.toString(value) + 
+				"\tW=" + Double.toString(weight); 
+		}
+	}
+	
+	public static boolean calculateOne(ArrayList<MyData> items, Statistics stat) {
+		stat.start();
+		for (MyData item : items) {
+			if (!item.bad)
+				stat.addValue(item.value, item.weight);
+		}
+		stat.stop();
+
+		boolean hasNewBad = false;
+		for (MyData item : items) {
+			boolean newBad = stat.isBad(item.value);
+			if (newBad != item.bad)
+				hasNewBad = true;
+			item.bad = newBad;
+		}
+		return hasNewBad;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		BufferedReader fin = new BufferedReader(new FileReader(TestStatistics.class
 				.getResource("StatisticsTest.txt").getFile()));
-		ArrayList<StatisticsItemBasic> items = new ArrayList<StatisticsItemBasic>();
+		ArrayList<MyData> items = new ArrayList<MyData>();
 		while (fin.ready()) {
 			String str = fin.readLine();
 			if (str.equals(""))
@@ -22,30 +56,21 @@ public class TestStatistics {
 			StringTokenizer st = new StringTokenizer(str, "\t");
 			double value = Double.parseDouble(st.nextToken());
 			double weight = Double.parseDouble(st.nextToken());
-			StatisticsItemBasic item = new StatisticsItemBasic(value, weight);
+			MyData item = new MyData(value, weight);
 			items.add(item);
 		}
 		fin.close();
 
-		StatisticsLT statLT = new StatisticsLT();
-		statLT.setB(0.9);
-		statLT.start();
-		for (int i = 0; i < items.size(); i++)
-			statLT.addValue(items.get(i).getValue(), items.get(i).getWeight());
-		statLT.stop();
-		System.out.println(statLT.toString());
-		System.out.println("------------");
-		
 		Statistics stat = new Statistics();
 		stat.setB(0.9);
-		while (stat.calculateOne(items) > 0) {
-			System.out.println(stat.toString());
-			System.out.println("------------");
-		}
+		for (int i = 0; i < 5; i++)
+			if (!calculateOne(items, stat))
+				break;
 		System.out.println(stat.toString());
 		System.out.println("------------");
 		
-		for (int i = 0; i < items.size(); i++)
-			System.out.println(items.get(i).toString());
+		for (MyData item : items) {
+			System.out.println(item.toString());
+		}
 	}
 }

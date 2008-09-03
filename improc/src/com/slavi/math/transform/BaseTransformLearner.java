@@ -2,8 +2,8 @@ package com.slavi.math.transform;
 
 import java.util.ArrayList;
 
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.statistics.StatisticsLT;
 
 public abstract class BaseTransformLearner {
 
@@ -88,37 +88,53 @@ public abstract class BaseTransformLearner {
 			if (item.isBad())
 				continue;
 			if (isFirst) {
-				item.source.copyTo(sourceMin);
-				item.source.copyTo(sourceMax);
-				item.target.copyTo(targetMin);
-				item.target.copyTo(targetMax);
+				for (int i = transformer.getInputSize() - 1; i >= 0; i--) {
+					double v = item.getSourceCoord(i);
+					sourceMin.setItem(i, 0, v);;
+					sourceMax.setItem(i, 0, v);;
+				}
+				for (int i = transformer.getOutputSize() - 1; i >= 0; i--) {
+					double v = item.getTargetCoord(i);
+					targetMin.setItem(i, 0, v);;
+					targetMax.setItem(i, 0, v);;
+				}
 			} else {
-				item.source.mMin(sourceMin, sourceMin);
-				item.source.mMax(sourceMax, sourceMax);
-				item.target.mMin(targetMin, targetMin);
-				item.target.mMax(targetMax, targetMax);
+				for (int i = transformer.getInputSize() - 1; i >= 0; i--) {
+					double v = item.getSourceCoord(i);
+					if (v < sourceMin.getItem(i, 0))
+						sourceMin.setItem(i, 0, v);
+					if (v > sourceMax.getItem(i, 0))
+						sourceMax.setItem(i, 0, v);
+				}
+				for (int i = transformer.getOutputSize() - 1; i >= 0; i--) {
+					double v = item.getTargetCoord(i);
+					if (v < targetMin.getItem(i, 0))
+						targetMin.setItem(i, 0, v);
+					if (v > targetMax.getItem(i, 0))
+						targetMax.setItem(i, 0, v);
+				}
 			}
 			double computedWeight = getComputedWeight(item);
 			for (int i = transformer.inputSize - 1; i >= 0; i--)
-				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + item.source.getItem(i, 0) * computedWeight);
+				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + item.getSourceCoord(i) * computedWeight);
 			for (int i = transformer.outputSize - 1; i >= 0; i--)
-				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + item.target.getItem(i, 0) * computedWeight);
+				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + item.getTargetCoord(i) * computedWeight);
 			isFirst = false;
 		}
 		
 		double t;
-		for (int i = transformer.inputSize - 1; i >= 0; i--) {
+		for (int i = transformer.getInputSize() - 1; i >= 0; i--) {
 			t = sourceMax.getItem(i, 0) - sourceMin.getItem(i, 0);
 			sourceScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
 		}
-		for (int i = transformer.outputSize - 1; i >= 0; i--) {
+		for (int i = transformer.getOutputSize() - 1; i >= 0; i--) {
 			t = targetMax.getItem(i, 0) - targetMin.getItem(i, 0);
 			targetScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
 		}
 	}
 	
 	protected boolean isAdjusted() {
-		StatisticsLT stat = new StatisticsLT();
+		Statistics stat = new Statistics();
 
 		Matrix source = new Matrix(transformer.getInputSize(), 1);
 		Matrix sourceTransformed = new Matrix(transformer.getOutputSize(), 1);
@@ -126,15 +142,15 @@ public abstract class BaseTransformLearner {
 		for (PointsPair item : items) {
 			// Compute for all points, so no item.isBad check
 			for (int i = transformer.getInputSize() - 1; i >= 0; i--)
-				source.setItem(i, 0, item.source.getItem(i, 0));
+				source.setItem(i, 0, item.getSourceCoord(i));
 			transformer.transform(source, sourceTransformed);
 			// Compute distance between target and sourceTransformed
 			double sum2 = 0;
 			for (int i = transformer.outputSize - 1; i >= 0; i--) {
-				double d = item.target.getItem(i, 0) - sourceTransformed.getItem(i, 0);
+				double d = item.getTargetCoord(i) - sourceTransformed.getItem(i, 0);
 				sum2 += d * d;
 			}
-			item.discrepancy = Math.sqrt(sum2);
+			item.setDiscrepancy(Math.sqrt(sum2));
 		}
 		
 		boolean iterationHasBad = false;
@@ -142,13 +158,13 @@ public abstract class BaseTransformLearner {
 			stat.start();
 			for (PointsPair item : items) {
 				if (!item.isBad()) {
-					stat.addValue(item.discrepancy, item.getWeight());
+					stat.addValue(item.getDiscrepancy(), item.getWeight());
 				}
 			}
 			stat.stop();
 			iterationHasBad = false;
 			for (PointsPair item : items) {
-				if ((!item.isBad()) && stat.isBad(item.discrepancy)) {
+				if ((!item.isBad()) && stat.isBad(item.getDiscrepancy())) {
 					iterationHasBad = true;
 					break;
 				}
@@ -161,7 +177,7 @@ public abstract class BaseTransformLearner {
 			adjusted = false;
 		for (PointsPair item : items) {
 			boolean oldIsBad = item.isBad();
-			boolean curIsBad = stat.isBad(item.discrepancy);
+			boolean curIsBad = stat.isBad(item.getDiscrepancy());
 			if (oldIsBad == curIsBad) {
 				item.setBad(curIsBad);
 				adjusted = false;
@@ -170,21 +186,21 @@ public abstract class BaseTransformLearner {
 		return adjusted;
 	}
 
-	private static final double MAX_WEIGHT = 100.0;
-	private static final double MAX_WEIGHT_INVERTED = 1.0 / MAX_WEIGHT;
-	/**
-	 * Re-computes the weight of <b>all</b> points using the inverted distance
-	 * (discrepancy) between transformed source and target points. 
-	 * The formula is:
-	 * MAX_WEIGHT = 100
-	 * discrepancy = Sqrt(Sum(Pow(target[i] - tramsformer.transform(source[i]))))
-	 * weight = discrepancy >= (1/MAX_WEIGHT) ? MAX_WEIGHT : 1/discrepancy 
-	 */
-	public void recomputeWeights() {
-		for (PointsPair item : items) {
-			item.setWeight(item.discrepancy >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.discrepancy);
-		}
-	}
+//	private static final double MAX_WEIGHT = 100.0;
+//	private static final double MAX_WEIGHT_INVERTED = 1.0 / MAX_WEIGHT;
+//	/**
+//	 * Re-computes the weight of <b>all</b> points using the inverted distance
+//	 * (discrepancy) between transformed source and target points. 
+//	 * The formula is:
+//	 * MAX_WEIGHT = 100
+//	 * discrepancy = Sqrt(Sum(Pow(target[i] - tramsformer.transform(source[i]))))
+//	 * weight = discrepancy >= (1/MAX_WEIGHT) ? MAX_WEIGHT : 1/discrepancy 
+//	 */
+//	public void recomputeWeights() {
+//		for (PointsPair item : items) {
+//			item.setWeight(item.getDiscrepancy() >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.getDiscrepancy());
+//		}
+//	}
 	
 	/**
 	 * Computes the maximum absolute difference between each 
@@ -201,10 +217,10 @@ public abstract class BaseTransformLearner {
 			if (item.isBad() && ignoreBad)
 				continue;
 			for (int i = transformer.getInputSize() - 1; i >= 0; i--)
-				source.setItem(i, 0, item.source.getItem(i, 0));
+				source.setItem(i, 0, item.getSourceCoord(i));
 			transformer.transform(source, sourceTransformed);
 			for (int i = transformer.getOutputSize() - 1; i >= 0; i--) {
-				double d = Math.abs(item.target.getItem(i, 0) - sourceTransformed.getItem(i, 0));
+				double d = Math.abs(item.getTargetCoord(i) - sourceTransformed.getItem(i, 0));
 				if (d > result.getItem(i, 0))
 					result.setItem(i, 0, d);
 			}

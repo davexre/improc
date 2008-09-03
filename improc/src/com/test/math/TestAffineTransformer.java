@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.AffineTransformer;
-import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 
 public class TestAffineTransformer {
 
@@ -33,7 +33,7 @@ public class TestAffineTransformer {
 		return r;
 	}
 	
-	public class TestPointPair extends PointsPair {
+	public class TestPointPair extends PointsPairBase {
 		public Point2D.Double source2D;
 		public Point2D.Double target2D;
 		

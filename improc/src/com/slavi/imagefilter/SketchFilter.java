@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
 import com.slavi.improc.DImageMap;
-import com.slavi.math.statistics.StatisticsLT;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Const;
 
 public class SketchFilter implements BufferedImageFilter {
@@ -58,7 +58,7 @@ public class SketchFilter implements BufferedImageFilter {
 			theImage = null;
 		else
 			theImage = new DImageMap(image);
-		StatisticsLT stat = theImage.calcStatistics();
+		Statistics stat = theImage.calcStatistics();
 		System.out.println(stat);
 	}
 	

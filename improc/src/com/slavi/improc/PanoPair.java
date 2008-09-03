@@ -12,7 +12,7 @@ public class PanoPair {
 		sy = kpp.sourceSP.doubleY;
 		tx = kpp.targetSP.doubleX;
 		ty = kpp.targetSP.doubleY;
-		discrepancy = kpp.discrepancy;
+		discrepancy = kpp.getDiscrepancy();
 		weight = kpp.getWeight();
 	}
 	

@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 import com.slavi.math.transform.PolynomialTransformLearner;
 import com.slavi.math.transform.PolynomialTransformer;
 
 public class TestPolynomialTransformer {
 
-	public ArrayList<PointsPair> points;
+	public ArrayList<PointsPairBase> points;
 	
 	public PolynomialTransformLearner learner;
 	
@@ -42,7 +42,7 @@ public class TestPolynomialTransformer {
 	
 	public TestPolynomialTransformer(int numCoordinates, BufferedReader fin) throws IOException {
 		this.numCoordinates = numCoordinates;
-		points = new ArrayList<PointsPair>();
+		points = new ArrayList<PointsPairBase>();
 		// read points
 		String str = fin.readLine();
 		while (fin.ready()) {
@@ -57,7 +57,7 @@ public class TestPolynomialTransformer {
 				source.setItem(i, 0, Double.parseDouble(st.nextToken()));
 			for (int i = 0; i < numCoordinates; i++)
 				target.setItem(i, 0, Double.parseDouble(st.nextToken()));
-			PointsPair pair = new PointsPair(source, target, 1);
+			PointsPairBase pair = new PointsPairBase(source, target, 1);
 			points.add(pair);
 		}
 	}
@@ -85,7 +85,7 @@ public class TestPolynomialTransformer {
 		Matrix maxDif = new Matrix(numCoordinates, 1);
 		boolean isFirst = true;
 		for (int p = 0; p < points.size(); p++) {
-			PointsPair item = points.get(0);
+			PointsPairBase item = points.get(0);
 			if (item.isBad())
 				continue;
 			transformer.transform(item.source, dest);

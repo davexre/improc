@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.Helmert2DTransformer;
-import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 
 public class TestHelmert2DTransformer {
 
@@ -33,7 +33,7 @@ public class TestHelmert2DTransformer {
 		return r;
 	}
 	
-	public class TestPointPair extends PointsPair {
+	public class TestPointPair extends PointsPairBase {
 		public Point2D.Double source2D;
 		public Point2D.Double target2D;
 		

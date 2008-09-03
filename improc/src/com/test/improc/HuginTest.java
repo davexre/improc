@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.PointsPair;
+import com.slavi.math.transform.PointsPairBase;
 
 public class HuginTest {
 
@@ -17,7 +18,7 @@ public class HuginTest {
 		public static final CompareByDelta instance = new CompareByDelta();
 
 		public int compare(PointsPair spp1, PointsPair spp2) {
-			return Double.compare(spp1.discrepancy, spp2.discrepancy);
+			return Double.compare(spp1.getDiscrepancy(), spp2.getDiscrepancy());
 		} 
 	}
 	
@@ -40,7 +41,7 @@ public class HuginTest {
 			target.setItem(0, 0, Double.parseDouble(st.nextToken()));
 			target.setItem(1, 0, Double.parseDouble(st.nextToken()));
 			
-			PointsPair pp = new PointsPair(source, target, 1);
+			PointsPair pp = new PointsPairBase(source, target, 1);
 			items.add(pp);
 		}
 		
@@ -55,7 +56,7 @@ public class HuginTest {
 		System.out.println(delta.toString());
 		for (int i = 0; i < items.size(); i++) {
 			PointsPair pp = items.get(i);
-			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.discrepancy));
+			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.getDiscrepancy()));
 		}
 	}
 

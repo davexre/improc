@@ -1,4 +1,4 @@
-package com.slavi.math.statistics;
+package com.slavi.math.adjust;
 
 import org.jdom.Element;
 
@@ -8,13 +8,13 @@ import com.slavi.util.XMLHelper;
  * Формулите са взети от "Теория на математическата обработка на геодезическите
  * измервания", Техника, 1988, проф.к.т.н.инж.Стефан Н. Атанасов.
  */
-public abstract class StatisticsBase {
+public class Statistics {
 
 	/**
 	 * Вероятността (по подразбиране) за попадане на случайната величина в
 	 * интервал, симетричен спрямо математическото очакване.
 	 */
-	public static final double CDefStatB = 0.98;
+	public static final double CDefaultStatB = 0.98;
 
 	// Констати, определящи елементите, които ще се показват при
     // отпечатване (процедура Display). Изпозват се в комбинации с
@@ -49,7 +49,7 @@ public abstract class StatisticsBase {
 	 * обикновено са 0.9; 0.95 или 0.96. Използва се за определяне на
 	 * Доверителния интервал на средно тежестното, стр.53,285.
 	 */
-    protected double B = CDefStatB;
+    protected double B = CDefaultStatB;
 
     // Брой на "добрите", с които е изчислявано.
     protected double MinX;
@@ -61,14 +61,19 @@ public abstract class StatisticsBase {
 	 * очакване - средно тежестно, стр.26,48
 	 * Average = M[1]
 	 */
-    protected double M[] = new double[5];
+    protected double M1;
+    protected double M2;
+    protected double M3;
+    protected double M4;
 
     /**
 	 * Централен момент от s-ти ред (D[2] = Дисперсия, стр.26,48
 	 * Variance = D[2] / Items.Count - 1
 	 * Standard deviation = Sqrt(Variance) 
 	 */
-    protected double D[] = new double [5];
+    protected double D2;
+    protected double D3;
+    protected double D4;
 
     /**
 	 * Асиметрия
@@ -90,6 +95,101 @@ public abstract class StatisticsBase {
 	 * @see #J_Start
 	 */
     protected double  J_End;
+	
+    protected double sumValues1;
+    protected double sumValues2;
+    protected double sumValues3;
+    protected double sumValues4;
+	
+	protected double sumWeight;
+	
+	protected int itemsCount;
+	
+	public void addValue(double value) {
+		addValue(value, 1.0);
+	}
+	
+	public void addValue(double value, double weight) {
+		if (weight < 0.0)
+			throw new IllegalArgumentException("Negative weight received by Statistics."); 
+		
+		double absValue = Math.abs(value);
+		if (itemsCount == 0) {
+			MaxX = MinX = value;
+			AbsMinX = AbsMaxX = absValue;
+		} else {
+			if (value < MinX)
+				MinX = value;
+			if (value > MaxX) 
+				MaxX = value;
+			if (absValue < AbsMinX)
+				AbsMinX = absValue;
+			if (absValue > AbsMaxX)
+				AbsMaxX = absValue;
+		}
+		itemsCount++;
+		sumWeight += weight;
+		sumValues1 += value * weight;
+		sumValues2 += value * value * weight;
+		sumValues3 += value * value * value * weight;
+		sumValues4 += value * value * value * value * weight;
+	}
+
+	public void start() {
+		resetCalculations();
+	}
+	
+	public void stop() {
+		if (sumWeight <= 0.0)
+			return;
+		// стр.26,48
+		// Пресмятане на Начален момент от 1,2,3 и 4 ред. (1-ви ред = средно тежестно).
+		M1 = sumValues1 / sumWeight;
+		M2 = sumValues2 / sumWeight;
+		M3 = sumValues3 / sumWeight;
+		M4 = sumValues4 / sumWeight;
+
+		// стр.26,48
+		// Пресмятане на Централен момент от 2,3 и 4 ред. (2-ри ред = дисперсия)
+		double m1_2 = M1 * M1;
+		D2 = M2 - m1_2;
+		D3 = M3 - 3.0 * M1 * M2 + 2.0 * (m1_2 * M1);
+		D4 = M4 - 4.0 * M1 * M3 + 6.0 * m1_2 * M2 - 3.0 * (m1_2 * m1_2);
+
+		// стр.27,48
+		// Пресмятане на Асиметрия и Ексцес.
+		A = D3 == 0 ? 0 : D3 / Math.sqrt(Math.abs(D3));
+		E = D4 == 0 ? 0 : (D4 / Math.sqrt(Math.abs(D4))) - 3.0;  
+
+		// стр.54,285
+		// Определяне на Доверителния интервал.
+		double r = Laplas.get_T_from_Laplas(B) * Math.sqrt(Math.abs(D2));
+		J_Start = M1 - r;
+		J_End = M1 + r;
+	}
+	
+	public int getItemsCount() {
+		return itemsCount;
+	}
+
+    public void resetCalculations() {
+    	M1 = 0.0;
+    	M2 = 0.0;
+    	M3 = 0.0;
+    	M4 = 0.0;
+    	D2 = 0.0;
+    	D3 = 0.0;
+    	D4 = 0.0;
+    	J_Start = J_End = A = E = MaxX = MinX = 0.0;
+    	if ((B < 0.0) || (B > 1.0))
+    		B = CDefaultStatB;
+    	sumValues1 = 0.0;
+    	sumValues2 = 0.0;
+    	sumValues3 = 0.0;
+    	sumValues4 = 0.0;
+    	sumWeight = 0.0;
+    	itemsCount = 0;
+    }
     
     public double getA() {
 		return A;
@@ -112,7 +212,12 @@ public abstract class StatisticsBase {
 	}
 
 	public double getD(int index) {
-		return D[index];
+		switch (index) {
+			case 2: return D2;
+			case 3: return D3;
+			case 4: return D4;
+			default: throw new IllegalArgumentException("Index out of range [2..4]");
+		}
 	}
 
 	public double getE() {
@@ -128,7 +233,13 @@ public abstract class StatisticsBase {
 	}
 
 	public double getM(int index) {
-		return M[index];
+		switch (index) {
+			case 1: return M1;
+			case 2: return M2;
+			case 3: return M3;
+			case 4: return M4;
+			default: throw new IllegalArgumentException("Index out of range [1..4]");
+		}
 	}
 
 	public double getMaxX() {
@@ -143,30 +254,19 @@ public abstract class StatisticsBase {
 	 * Средно тежестна стойност
 	 */
     public double getAvgValue() {
-    	return M[1];
+    	return M1;
     }
     
     public double getStdDeviation() {
-    	return Math.sqrt(D[2] / (getItemsCount() - 1));
+    	return Math.sqrt(D2 / (getItemsCount() - 1));
     }
 	
     public boolean hasBadValues() {
     	return (MinX < J_Start) || (MaxX > J_End);
     }
-    public abstract int getItemsCount();
     
     public boolean isBad(double value) {
     	return (value < J_Start) || (value > J_End);
-    }
-    
-    protected void resetCalculations() {
-    	for (int i = M.length - 1; i >= 0; i--)
-    		M[i] = 0.0;
-    	for (int i = D.length - 1; i >= 0; i--)
-    		D[i] = 0.0;
-    	J_Start = J_End = A = E = MaxX = MinX = 0.0;
-    	if ((B < 0.0) || (B > 1.0))
-    		B = CDefStatB;
     }
     
     public String toString(int style) {
@@ -203,10 +303,10 @@ public abstract class StatisticsBase {
     	if ((style & CStatMD) != 0) {
 	    	for (int i = 2; i <= 4; i++)
 	    		b.append(String.format("\nM[%d]              = %.4f", 
-	    				new Object[] { new Integer(i), new Double(M[i]) } ));
+	    				new Object[] { new Integer(i), new Double(getM(i)) } ));
 	    	for (int i = 2; i <= 4; i++)
 	    		b.append(String.format("\nD[%d]              = %.4f", 
-	    				new Object[] { new Integer(i), new Double(D[i]) } ));
+	    				new Object[] { new Integer(i), new Double(getD(i)) } ));
     	}
     	if (((style & CStatErrors) != 0) && hasBadValues()) 
     		b.append("\n*** There is/are BAD value(s) ***");
@@ -256,9 +356,9 @@ public abstract class StatisticsBase {
     		b.append("\t" + Double.toString(this.MaxX - this.MinX));
     	if ((style & CStatMD) != 0) {
 	    	for (int i = 2; i <= 4; i++)
-	    		b.append("\t" + Double.toString(M[i]));
+	    		b.append("\t" + Double.toString(getM(i)));
 	    	for (int i = 2; i <= 4; i++)
-	    		b.append("\t" + Double.toString(D[i]));
+	    		b.append("\t" + Double.toString(getD(i)));
     	}
     	if (((style & CStatErrors) != 0) && hasBadValues()) 
     		b.append("\tFAILED");
@@ -293,11 +393,11 @@ public abstract class StatisticsBase {
 		dest.addContent(XMLHelper.makeAttrEl("Delta", Double.toString(MaxX - MinX)));
 		Element m = new Element("M");
     	for (int i = 2; i <= 4; i++)
-    		m.addContent(XMLHelper.makeAttrEl("M" + i, Double.toString(M[i])));
+    		m.addContent(XMLHelper.makeAttrEl("M" + i, Double.toString(getM(i))));
     	dest.addContent(m);
 		Element d = new Element("D");
     	for (int i = 2; i <= 4; i++)
-    		d.addContent(XMLHelper.makeAttrEl("D" + i, Double.toString(D[i])));
+    		d.addContent(XMLHelper.makeAttrEl("D" + i, Double.toString(getD(i))));
     	dest.addContent(d);
 	}
 }

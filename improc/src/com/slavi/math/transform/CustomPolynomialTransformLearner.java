@@ -56,8 +56,10 @@ public class CustomPolynomialTransformLearner extends BaseTransformLearner {
 			if (item.isBad())
 				continue;
 
-			item.source.mSub(sourceOrigin, tmpS);
-			item.target.mSub(targetOrigin, tmpT);
+			for (int i = tr.inputSize - 1; i >= 0; i--)
+				tmpS.setItem(i, 0, item.getSourceCoord(i) - sourceOrigin.getItem(i, 0));
+			for (int i = tr.outputSize - 1; i >= 0; i--)
+				tmpT.setItem(i, 0, item.getTargetCoord(i) - targetOrigin.getItem(i, 0));
 			tmpS.termDiv(sourceScale, tmpS);
 			tmpT.termDiv(targetScale, tmpT);
 			for (int j = tr.numPoints - 1; j >= 0; j--) {
