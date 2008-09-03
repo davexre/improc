@@ -37,13 +37,13 @@ public class GeneratePanoramaFiles implements Callable<Void> {
 			System.out.print(statusMessage);
 			SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
-			PanoList.writeToPtoFile(fou, chain);
+			int imagesInChain = PanoList.writeToPtoFile(fou, chain);
 			
-			adjustAffine.initWithPanoList(chain);
-			adjustAffine.doTheJob();
+//			adjustAffine.initWithPanoList(chain);
+//			adjustAffine.doTheJob();
 			
 			panoCount++;
-			System.out.println(" (" + chain.size() + " images in chain)");
+			System.out.println(" (" + imagesInChain + " images in chain) with " + chain.size() + " combinations");
 		}
 		return null;
 	}

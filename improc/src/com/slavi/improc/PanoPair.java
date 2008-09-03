@@ -4,6 +4,7 @@ import java.util.StringTokenizer;
 
 public class PanoPair {
 	public double sx, sy, tx, ty, discrepancy, weight;
+	public double distance1, distance2;
 	
 	public PanoPair() {}
 	
@@ -13,6 +14,8 @@ public class PanoPair {
 		tx = kpp.targetSP.doubleX;
 		ty = kpp.targetSP.doubleY;
 		discrepancy = kpp.getDiscrepancy();
+		distance1 = kpp.distanceToNearest;
+		distance2 = kpp.distanceToNearest2;
 		weight = kpp.getWeight();
 	}
 	

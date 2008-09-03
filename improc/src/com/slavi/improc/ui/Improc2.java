@@ -27,7 +27,8 @@ public class Improc2 {
 		KeyPointPairBigTree bigTree = SwtUtl.openWaitDialog("Generating key point BIG tree", 
 				new GenerateKeyPointPairBigTree(images, imagesRoot, keyPointFileRoot), 
 				images.size() - 1);
-		images = null;
+		System.out.println("Tree size        : " + bigTree.getSize());
+		System.out.println("Tree depth before: " + bigTree.getTreeDepth());
 		
 //		System.out.println("---------- Find image pairs in BIG tree");
 //		SwtUtl.openWaitDialog("Find image pairs in BIG tree", 
@@ -37,7 +38,8 @@ public class Improc2 {
 		System.out.println("---------- Generating key point pairs from BIG tree");
 		ArrayList<KeyPointPairList> kppl = SwtUtl.openWaitDialog("Generating key point pairs from BIG tree", 
 				new GenerateKeyPointPairsFromBigTree(bigTree),
-				bigTree.getSize() - 1);
+				images.size() - 1);
+		images = null;
 		bigTree = null;
 		
 		System.out.println("---------- Generating pano pairs from key point pairs");

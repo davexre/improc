@@ -7,10 +7,8 @@ import java.util.concurrent.Callable;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
-import com.slavi.image.DWindowedImageUtils;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
-import com.slavi.util.Const;
 import com.slavi.util.concurrent.SteppedParallelTask;
 
 public class ExecutePDLowe implements SteppedParallelTask<Void> {
@@ -97,7 +95,7 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 				srcExtent.y >> 1,
 				srcExtent.width >> 1,
 				srcExtent.height >> 1);
-		DWindowedImageUtils.toImageFile(nextLevelBlurredImage, Const.workDir + "/dlowe_nextlevel_" + scale + "p.png");
+//		DWindowedImageUtils.toImageFile(nextLevelBlurredImage, Const.workDir + "/dlowe_nextlevel_" + scale + "p.png");
 		nextLevelBlurredImage = new PDImageMapBuffer(nextLevelBlurredImageExt);
 //		nextLevelBlurredImage = new ImageWriteTracker(nextLevelBlurredImage, false, true);
 

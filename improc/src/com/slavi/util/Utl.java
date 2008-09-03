@@ -203,7 +203,7 @@ public class Utl {
 		return cEncode(s, flag, null);
 	}
 	
-	public enum CENCODE { Default, NoSpace, NoSpecialSymbolsShort, NoSpecialSymbols, NoSpecialSymbolsCustom, AlphaNumericOnly };
+	public enum CENCODE { Default, NoSpace, NoSpecialSymbolsShort, NoSpecialSymbols, NoSpecialSymbolsCustom, AlphaNumericOnly }
 	
 	private static final String specialSymbolsShort = " !#$%&,/:;@^|";
 	
@@ -290,7 +290,7 @@ public class Utl {
 		return f.toString();
 	}
 
-	private enum ESCAPE { None, NormalChar, Slash, Unicode, Octal };
+	private enum ESCAPE { None, NormalChar, Slash, Unicode, Octal }
 
 	/**
 	 * Decodes a string previously encoded by {@link #cEncode(String)} 

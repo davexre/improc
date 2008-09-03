@@ -60,6 +60,10 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			result.transform = (AffineTransformer) atl.transformer;
 			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
 			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
+			result.sourceImageSizeX = kppl.source.imageSizeX;
+			result.sourceImageSizeY = kppl.source.imageSizeY;
+			result.targetImageSizeX = kppl.target.imageSizeX;
+			result.targetImageSizeY = kppl.target.imageSizeY;
 
 			panoList.addItem(result);
 			int count = processed.incrementAndGet();

@@ -45,12 +45,15 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 
 		KeyPointList image;
 		
+		int skipped = 0;
+		
 		public ProcessOneImage(KeyPointList image) {
 			this.image = image;
 		}
 		
 		public Void call() throws Exception {
-			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
+//			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
+			int searchSteps = tree.getTreeDepth() * 2;
 			int imageId = image.hashCode();
 			String strId = Integer.toString(imageId);
 			
@@ -61,7 +64,9 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
 				if (nnlst.size() < 2)
 					continue;
-				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
+//				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
+				if (nnlst.getDistanceToTarget(0) * 2.0 > nnlst.getDistanceToTarget(1)) {
+					skipped++;
 					continue;
 				}
 				KeyPoint kp2 = nnlst.getItem(0);
@@ -95,7 +100,9 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				}
 			}
 			int count = processed.incrementAndGet();
-			SwtUtl.activeWaitDialogSetStatus(null, count);
+			SwtUtl.activeWaitDialogSetStatus("Processing " + 
+					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
+			System.out.println(image.imageFileStamp.getFile().getAbsolutePath() + " has skipped " + skipped + " points.");
 			return null;
 		}
 	}
