@@ -34,16 +34,14 @@ public class GeneratePanoramaFiles implements Callable<Void> {
 			File fou = keyPointPairFileRoot.getFullPathFile("Pano" + panoCount + ".pto");
 
 			String statusMessage = fou.getAbsolutePath();
-			System.out.print(statusMessage);
 			SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
-			int imagesInChain = PanoList.writeToPtoFile(fou, chain);
+			PanoList.writeToPtoFile(fou, chain);
 			
 //			adjustAffine.initWithPanoList(chain);
 //			adjustAffine.doTheJob();
 			
 			panoCount++;
-			System.out.println(" (" + imagesInChain + " images in chain) with " + chain.size() + " combinations");
 		}
 		return null;
 	}

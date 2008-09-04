@@ -112,6 +112,7 @@ public class PanoList {
 		fou.println("v p1 r1 y1");
 		fou.println();
 
+		int totalPairCount = 0;
 		fou2.println("dicrepancy\tdistance1\tdistance2\tweight");
 		for (PanoPairList p : chain) {
 			ImageFileData sd = map.get(p.sourceImage);
@@ -120,6 +121,7 @@ public class PanoList {
 			for (PanoPair pp : p.items) {
 				//fou.println("c n{0} N{1} x{2} y{3} X{4} Y{5} t0");
 				//imageNameTab[ms.File1], imageNameTab[ms.File2],m.Kp1.X, m.Kp1.Y, m.Kp2.X, m.Kp2.Y
+				totalPairCount++;
 				fou.println("c n" + sd.id + " N" + td.id +
 					" x" + Double.toString(pp.sx) + 
 					" y" + Double.toString(pp.sy) + 
@@ -132,6 +134,8 @@ public class PanoList {
 		fou.println();
 		fou.println("# match list automatically generated");
 		fou2.close();
+		System.out.println(ptoFile.getAbsolutePath() + " (" + chain.size() + " images in chain) with " + 
+				chain.size() + " combinations with " + totalPairCount + " total pair count");
 		return map.size();
 	}
 }

@@ -41,6 +41,12 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			PanoPairList result = new PanoPairList();
 			result.items = new ArrayList<PanoPair>();
 
+			for (KeyPointPair pp : kppl.items) {
+				if (pp.distanceToNearest > pp.distanceToNearest2 * 0.6) {
+					pp.setBad(true);
+				}	
+			}
+			
 			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items);
 
 			checkInterrupted(); atl.calculateOne();

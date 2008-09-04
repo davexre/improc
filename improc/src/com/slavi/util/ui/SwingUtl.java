@@ -8,11 +8,11 @@ import javax.swing.JOptionPane;
 
 /**
  * This class contains utility functions for creating user interface using the
- * standart SWING library
+ * Standard SWING library
  */
 public class SwingUtl {
 	/**
-	 * Opens the standart SWING directory chooser dialog.
+	 * Opens the standard SWING directory chooser dialog.
 	 * @see #getDirectory(Component)
 	 */
 	public static String getDirectory() {
@@ -20,7 +20,7 @@ public class SwingUtl {
 	}
 	
 	/**
-	 * Opens the standart SWING directory chooser dialog.
+	 * Opens the standard SWING directory chooser dialog.
 	 * <p>
 	 * Returns the selected directory or if
 	 * canceled returns an EMPTY string "" not a null.
@@ -38,7 +38,7 @@ public class SwingUtl {
 	}
 	
 	/**
-	 * Opens the standart SWING file chooser dialog.
+	 * Opens the standard SWING file chooser dialog.
 	 * @see #getFileName(Component)
 	 */
 	public static String getFileName() {
@@ -46,7 +46,7 @@ public class SwingUtl {
 	}
 	
 	/**
-	 * Opens the standart SWING file chooser dialog.
+	 * Opens the standard SWING file chooser dialog.
 	 * <p>
 	 * Returns the selected file or if
 	 * canceled returns an EMPTY string "" not a null. The
@@ -65,7 +65,7 @@ public class SwingUtl {
 	}
 
 	/**
-	 * Opens the standart SWING JOptionPane dialog.
+	 * Opens the standard SWING JOptionPane dialog.
 	 * <p>
 	 * The default selected options is the first object in the list.
 	 * Returns the selected object or null is the dialog is canceled.
