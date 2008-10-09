@@ -82,7 +82,7 @@ public class Utl {
 	 * <tr><td>c:\temp\somefile.log</td><td>&nbsp;</td><td>c:\temp\somefile.</td></tr>
 	 * <tr><td>c:\temp\somefile</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
 	 * <tr><td>c:\temp.tmp\somefile.log</td><td>txt</td><td>c:\temp.tmp\somefile.txt</td></tr>
-	 * <tr><td>c:\temp.tmp\somefile</td><td>txt</td><td><b>c:\temp.txt</b></td></tr>
+	 * <tr><td><b>c:\temp.tmp\somefile</b></td><td><b>txt</b></td><td><b>c:\temp.txt</b></td></tr>
 	 * </table>
 	 */
 	public static String chageFileExtension(String fileName, String newExtension) {
@@ -246,45 +246,43 @@ public class Utl {
 			switch (c) {
 				case '\0': 
 					f.format("%s", "\\0"); 
-					break;
+					continue;
 				case '\b': 
 					f.format("%s", "\\b"); 
-					break;
+					continue;
 				case '\t': 
 					f.format("%s", "\\t"); 
-					break;
+					continue;
 				case '\f': 
 					f.format("%s", "\\f"); 
-					break;
+					continue;
 				case '\r': 
 					f.format("%s", "\\r"); 
-					break;
+					continue;
 				case '\n': 
 					f.format("%s", "\\n"); 
-					break;
+					continue;
 				case '\\': 
 					f.format("%s", "\\\\"); 
-					break;
+					continue;
 				case '\"':
 				case '\'': 
 					if (curSpecialSymbols.indexOf(c) < 0) {
 						f.format("\\%c", c); 
-						break;
-					} // Note: No break!!! (will go to default)
-				default:
-					if ((flag == CENCODE.Default) && (ic >= 32) && (ic < 256)) {
-						f.format("%c", c);
-					} else if ((flag == CENCODE.AlphaNumericOnly) && (alphaNumericSymbols.indexOf(c) >= 0)) { 
-						f.format("%c", c);
-					} else if ((curSpecialSymbols != null) && (ic >= 32) && (ic < 256) && (curSpecialSymbols.indexOf(c) < 0)) {
-						f.format("%c", c);
-					} else {
-						if ((ic >= 0) && (ic < 256))
-							f.format("\\%03o", ic);
-						else
-							f.format("\\u%04x", ic);
+						continue;
 					}
-					break;
+			}
+			if ((flag == CENCODE.Default) && (ic >= 32) && (ic < 256)) {
+				f.format("%c", c);
+			} else if ((flag == CENCODE.AlphaNumericOnly) && (alphaNumericSymbols.indexOf(c) >= 0)) { 
+				f.format("%c", c);
+			} else if ((curSpecialSymbols != null) && (ic >= 32) && (ic < 256) && (curSpecialSymbols.indexOf(c) < 0)) {
+				f.format("%c", c);
+			} else {
+				if ((ic >= 0) && (ic < 256))
+					f.format("\\%03o", ic);
+				else
+					f.format("\\u%04x", ic);
 			}
 		}
 		return f.toString();

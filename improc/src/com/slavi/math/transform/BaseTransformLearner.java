@@ -90,13 +90,13 @@ public abstract class BaseTransformLearner {
 			if (isFirst) {
 				for (int i = transformer.getInputSize() - 1; i >= 0; i--) {
 					double v = item.getSourceCoord(i);
-					sourceMin.setItem(i, 0, v);;
-					sourceMax.setItem(i, 0, v);;
+					sourceMin.setItem(i, 0, v);
+					sourceMax.setItem(i, 0, v);
 				}
 				for (int i = transformer.getOutputSize() - 1; i >= 0; i--) {
 					double v = item.getTargetCoord(i);
-					targetMin.setItem(i, 0, v);;
-					targetMax.setItem(i, 0, v);;
+					targetMin.setItem(i, 0, v);
+					targetMax.setItem(i, 0, v);
 				}
 			} else {
 				for (int i = transformer.getInputSize() - 1; i >= 0; i--) {
