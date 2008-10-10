@@ -7,7 +7,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-
 /**
  * This class represents a gray scale image with the pixels stored 
  * in an array of doubles used by routines for parallel image processing.

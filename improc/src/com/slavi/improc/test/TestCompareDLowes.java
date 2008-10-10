@@ -8,8 +8,8 @@ import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
-import com.slavi.improc.DImageMap;
 import com.slavi.improc.singletreaded.DGaussianFilter;
+import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.util.Marker;
 
 public class TestCompareDLowes {

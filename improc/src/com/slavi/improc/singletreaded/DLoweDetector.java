@@ -2,7 +2,6 @@ package com.slavi.improc.singletreaded;
 
 import java.io.IOException;
 
-import com.slavi.improc.DImageMap;
 import com.slavi.improc.KeyPoint;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;

@@ -3,7 +3,7 @@ package com.slavi.improc.test;
 import java.io.File;
 import java.io.IOException;
 
-import com.slavi.improc.DImageMap;
+import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.improc.singletreaded.DLoweDetector;
 import com.slavi.util.Const;
 import com.slavi.util.Marker;

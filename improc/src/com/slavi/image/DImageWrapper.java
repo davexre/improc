@@ -2,7 +2,7 @@ package com.slavi.image;
 
 import java.awt.Rectangle;
 
-import com.slavi.improc.DImageMap;
+import com.slavi.improc.singletreaded.DImageMap;
 
 public class DImageWrapper implements DWindowedImage {
 

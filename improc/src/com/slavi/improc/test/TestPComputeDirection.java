@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.image.DImageWrapper;
-import com.slavi.improc.DImageMap;
 import com.slavi.improc.parallel.PComputeDirection;
+import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.util.Marker;
 
 public class TestPComputeDirection {

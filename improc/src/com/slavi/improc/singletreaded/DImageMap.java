@@ -1,4 +1,4 @@
-package com.slavi.improc;
+package com.slavi.improc.singletreaded;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;

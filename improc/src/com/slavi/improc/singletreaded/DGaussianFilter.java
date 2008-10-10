@@ -1,6 +1,5 @@
 package com.slavi.improc.singletreaded;
 
-import com.slavi.improc.DImageMap;
 
 public class DGaussianFilter {
 

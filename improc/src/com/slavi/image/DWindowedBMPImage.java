@@ -6,17 +6,34 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.InvalidParameterException;
 
-public class DWindowedBMPImage implements DWindowedImage {
+public class DWindowedBMPImage implements DWindowedImage  {
 
-	protected RandomAccessFile f;
+	static class ImageRow {
+		int callId;
+		int row;
+		boolean isModified;
+		double[] data;
+	}
 	
-	protected int sizeX;
+	ImageRow[] rows;
 	
-	protected int sizeY;
+	ImageRow[] allBufferedRows;
 	
-	protected int dataoffset;
+	int lastCallId;
 	
-	protected int rowpadding;
+	int rowWriteCounter;
+	
+	int rowReadCounter;
+	
+	RandomAccessFile f;
+	
+	int sizeX;
+	
+	int sizeY;
+	
+	int dataoffset;
+	
+	int rowpadding;
 	
 	public Rectangle getExtent() {
 		return new Rectangle(0, 0, sizeX, sizeY);
@@ -44,30 +61,8 @@ public class DWindowedBMPImage implements DWindowedImage {
 		return dataoffset + atX * 3 + (sizeX * 3 + rowpadding) * (sizeY - atY - 1);
 	}
 	
-	public double getPixel(int atX, int atY) {
-		long pos = getFilePosition(atX, atY);
-		try {
-			f.seek(pos);
-			return (f.readByte() + f.readByte() + f.readByte()) / (3.0 * 255.0); 
-		} catch (IOException e) {
-			throw new RuntimeException("Error getting pixel", e);
-		}
-	}
-	
-	public void setPixel(int atX, int atY, double value) {
-		long pos = getFilePosition(atX, atY);
-		try {
-			f.seek(pos);
-			byte v = (byte)Math.max(0, Math.min(255, Math.round(value * 255.0)));
-			f.writeByte(v); 
-			f.writeByte(v); 
-			f.writeByte(v); 
-		} catch (IOException e) {
-			throw new RuntimeException("Error setting pixel", e);
-		}
-	}
-
-	protected void readHeader() throws IOException {
+	protected void readHeader(File theFile) throws IOException {
+		f = new RandomAccessFile(theFile, "rw");
 		f.seek(0);
 		if ((f.readByte() != 'B') || (f.readByte() == 'M'))
 			throw new IOException("Invalid file format");
@@ -121,12 +116,24 @@ public class DWindowedBMPImage implements DWindowedImage {
 				((dw >> 24) & 0x000000ff));
 	}
 	
-	public DWindowedBMPImage(File theFile) throws IOException {
-		this.f = new RandomAccessFile(theFile, "rw");
-		readHeader();
+	protected DWindowedBMPImage() {
+	}
+
+	public static DWindowedBMPImage open(File theFile) throws IOException {
+		DWindowedBMPImage result = new DWindowedBMPImage();
+		result.readHeader(theFile);
+		result.makeRows((int) (result.sizeY / 10));
+		return result;
 	}
 	
-	public DWindowedBMPImage(File theFile, int sizeX, int sizeY) throws IOException {
+	public static DWindowedBMPImage open(File theFile, int bufferedRows) throws IOException {
+		DWindowedBMPImage result = new DWindowedBMPImage();
+		result.readHeader(theFile);
+		result.makeRows(bufferedRows);
+		return result;
+	} 
+
+	protected void crateInFile_noMakeRows(File theFile, int sizeX, int sizeY) throws IOException {
 		this.f = new RandomAccessFile(theFile, "rw");
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
@@ -157,7 +164,137 @@ public class DWindowedBMPImage implements DWindowedImage {
 		writeDWord(0);		// the number of important colors used, or 0 when every color is important; generally ignored.
 	}
 	
+	public static DWindowedBMPImage create(File theFile, int sizeX, int sizeY, int bufferedRows) throws IOException {
+		DWindowedBMPImage result = new DWindowedBMPImage();
+		result.crateInFile_noMakeRows(theFile, sizeX, sizeY);
+		result.makeRows(bufferedRows);
+		return result;
+	}
+
+	public static DWindowedBMPImage create(File theFile, int sizeX, int sizeY) throws IOException {
+		DWindowedBMPImage result = new DWindowedBMPImage();
+		result.crateInFile_noMakeRows(theFile, sizeX, sizeY);
+		result.makeRows((int) (result.sizeY / 10));
+		return result;
+	}
+	
+	protected void makeRows(int bufferedRows) {
+		rows = new ImageRow[sizeY];
+		if (bufferedRows < 10)
+			bufferedRows = 10;
+		if (bufferedRows > sizeY)
+			bufferedRows = sizeY;
+		allBufferedRows = new ImageRow[bufferedRows];
+		for (int i = bufferedRows - 1; i >= 0; i--) {
+			ImageRow ir = new ImageRow();
+			ir.callId = 0;
+			ir.row = i;
+			ir.isModified = false;
+			ir.data = new double[sizeX];
+			rows[i] = ir;
+			allBufferedRows[i] = ir;
+		}
+		for (int i = sizeY - 1; i >= bufferedRows; i--) {
+			rows[i] = null;
+		}
+		lastCallId = 0;
+		rowReadCounter = 0;
+		rowWriteCounter = 0;
+	}
+
+	ImageRow getRow(int row) throws IOException {
+		ImageRow r = rows[row];
+		if (r != null) {
+			r.callId = ++lastCallId;
+			return r;
+		}
+		// Select the oldest accessed row 
+		int minId = lastCallId;
+		for (int i = allBufferedRows.length - 1; i >= 0; i--) {
+			ImageRow tmp = allBufferedRows[i];
+			if (tmp.callId <= minId) {
+				minId = tmp.callId;
+				r = tmp;
+			}
+		}
+		// If the selected row is modified, save it
+		flushRow(r);
+		// Assign the selected ImageRow a new row
+		rows[r.row] = null;
+		rows[row] = r;
+		r.row = row;
+		int decrementCallId = r.callId;
+		lastCallId -= decrementCallId;
+		for (int i = allBufferedRows.length - 1; i >= 0; i--) {
+			allBufferedRows[i].callId -= decrementCallId;
+		}
+		// Read the pixel data for the new row
+		long filePos = getFilePosition(0, row);
+		f.seek(filePos);
+		for (int i = 0; i < sizeX; i++) {
+			r.data[i] = (f.readByte() + f.readByte() + f.readByte()) / (3.0 * 255.0); 
+		}
+		rowReadCounter++;
+		r.callId = ++lastCallId;
+		return r;
+	}
+
+	void flushRow(ImageRow r) throws IOException {
+		if (r.isModified) {
+			rowWriteCounter++;
+			long filePos = getFilePosition(0, r.row);
+			f.seek(filePos);
+			for (int i = 0; i < sizeX; i++) {
+				byte v = (byte)Math.max(0, Math.min(255, Math.round(r.data[i] * 255.0)));
+				f.writeByte(v); 
+				f.writeByte(v); 
+				f.writeByte(v); 
+			}
+		}
+	}
+	
+	public double getPixel(int atX, int atY) {
+		if ((atX < 0) || (atX > sizeX) || (atY < 0) || (atY > sizeY))
+			throw new InvalidParameterException("Invalid coordinates");
+		try {
+			return getRow(atY).data[atX];
+		} catch (IOException e) {
+			throw new RuntimeException("Error getting pixel", e);
+		}
+	}
+
+	public void setPixel(int atX, int atY, double value) {
+		if ((atX < 0) || (atX > sizeX) || (atY < 0) || (atY > sizeY))
+			throw new InvalidParameterException("Invalid coordinates");
+		try {
+			ImageRow r = getRow(atY);
+			r.data[atX] = value;
+			r.isModified = true;
+		} catch (IOException e) {
+			throw new RuntimeException("Error setting pixel", e);
+		}
+	}
+
 	public void close() throws IOException {
+		for (int i = allBufferedRows.length - 1; i >= 0; i--) {
+			flushRow(allBufferedRows[i]);
+		}
 		f.close();
+	}
+
+	public int getRowWriteCounter() {
+		return rowWriteCounter;
+	}
+
+	public int getRowReadCounter() {
+		return rowReadCounter;
+	}
+	
+	public String toString() {
+		return "DBufferedBMPImage: width:" + Integer.toString(sizeX) + 
+				" height:" + Integer.toString(sizeY) +
+				" rowBufSize:" + Integer.toString(allBufferedRows.length) + 
+				" rowReads:" + Integer.toString(rowReadCounter) + 
+				" rowWrites:" + Integer.toString(rowWriteCounter);
 	}
 }

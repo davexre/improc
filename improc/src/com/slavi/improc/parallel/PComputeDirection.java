@@ -3,7 +3,6 @@ package com.slavi.improc.parallel;
 import java.awt.Rectangle;
 
 import com.slavi.image.DWindowedImage;
-import com.slavi.improc.DImageMap;
 
 /**
  * Parallel Compute direction of an ImageMap (using DWindowedImage)
@@ -13,8 +12,8 @@ public class PComputeDirection {
 
 	/**
 	 * Specifies the value for the one-pixel border of the computed magnitude or
-	 * direction map. Used by {@link #computeMagnitude(DImageMap)} and 
-	 * {@link #computeDirection(DImageMap)}.
+	 * direction map. Used by {@link #computeDirection(DWindowedImage, DWindowedImage)} and 
+	 * {@link PComputeMagnitude#computeMagnitude(DWindowedImage, DWindowedImage)}.
 	 */
 	static final double borderColorValue = 0.0;
 	

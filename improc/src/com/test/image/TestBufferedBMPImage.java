@@ -13,7 +13,7 @@ public class TestBufferedBMPImage {
 		String fname = Const.smallImage;
 		String fou = Const.tempDir + "/output.bmp";
 		BufferedImage im = ImageIO.read(new File(fname));
-		BufferedBMPImage out = new BufferedBMPImage(new File(fou), im.getWidth(), im.getHeight());
+		BufferedBMPImage out = BufferedBMPImage.create(new File(fou), im.getWidth(), im.getHeight());
 		try {
 			for (int j = out.maxY(); j >= out.minY(); j--) 
 				for (int i = out.maxX(); i >= out.minX(); i--) {

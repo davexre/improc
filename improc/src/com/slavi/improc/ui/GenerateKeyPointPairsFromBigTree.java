@@ -131,7 +131,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(15);
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
 
 		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
 		for (KeyPointList k : tree.keyPointLists) {

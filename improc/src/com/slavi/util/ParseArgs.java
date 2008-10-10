@@ -1,16 +1,92 @@
 package com.slavi.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * Utility class to process command line parameters.
+ */
 public class ParseArgs {
+	/**
+	 * Contains all recognized options (an item starting with a '-' sign) optionally followed by an '='.
+	 */
 	public Map<String, String> options;
 	
+	/**
+	 * Contains all strings that are not recognized as options. 
+	 * The order of the strings is preserved.
+	 * See the examples in the class comment.
+	 */
 	public String remainingArgs[];
 	
 	private ParseArgs() { }
 	
+	/**
+	 * Searches for an option in the options map. If the specified option is not
+	 * present in the options map or its value is null or empty string, the 
+	 * default value is returned.
+	 * <p>Example:<br>
+	 * <code>
+	 * Input string array:<br>
+	 * "string1", "-option1=someValue", "-option2="<br>
+	 * getOption("-option1", "defaultValue1") -> returns "someValue" 
+	 * getOption("-option2", "defaultValue2") -> returns "defaultValue2"
+	 * </code>
+	 * 
+	 * @param option
+	 * @param defaultValue
+	 * @return
+	 */
+	public String getOption(String option, String defaultValue) {
+		String result = options.get(option);
+		if ((result == null) || (result.equals("")))
+			result = defaultValue;
+		return result;
+	}
+	
+	/**
+	 * Utility method to check the validity of the options.
+	 * Returns true if all keys in the options map are present in the validOptions list.
+	 * Returns false otherwise.
+	 * <p>Example:<br>
+	 * <code>
+	 * ParseArgs args = ...
+	 * if (!args.isOptionsValid("-id", "-d", "-vp")) {
+	 *   <show error message> // The only valid options are -id, -d and/or -vp
+	 * }
+	 * </code>
+	 * 
+	 * @param validOptions
+	 * @return
+	 */
+	public boolean isOptionsValid(String...validOptions) {
+		Arrays.sort(validOptions, null);
+		for (String key : options.keySet()) {
+			int indx = Arrays.binarySearch(validOptions, key, null);
+			if (indx < 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isStringInList(String value, String...validValues) {
+		return indexOf(value, validValues) >= 0;
+	}
+	
+	/**
+	 * Returns the index of the value in the valuesList or -1 if the value is not found. 
+	 * The comparison is NOT case sensitive.
+	 */
+	public int indexOf(String value, String...valuesList) {
+		for (int i = 0; i < valuesList.length; i++)
+			if (valuesList[i].equalsIgnoreCase(value)) 
+				return i;
+		return -1;
+	}
+
 	/**
 	 * Processes command line parameters expecting each option to be preceded with a "-" sign.
 	 * <p>

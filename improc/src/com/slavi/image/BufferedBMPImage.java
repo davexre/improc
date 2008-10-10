@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import java.security.InvalidParameterException;
 
 public class BufferedBMPImage {
+	
 	static class ImageRow {
 		int callId;
 		int row;
@@ -24,15 +25,15 @@ public class BufferedBMPImage {
 	
 	int rowReadCounter;
 	
-	protected RandomAccessFile f;
+	RandomAccessFile f;
 	
-	protected int sizeX;
+	int sizeX;
 	
-	protected int sizeY;
+	int sizeY;
 	
-	protected int dataoffset;
+	int dataoffset;
 	
-	protected int rowpadding;
+	int rowpadding;
 	
 	public Rectangle getExtent() {
 		return new Rectangle(0, 0, sizeX, sizeY);
@@ -60,7 +61,8 @@ public class BufferedBMPImage {
 		return dataoffset + atX * 3 + (sizeX * 3 + rowpadding) * (sizeY - atY - 1);
 	}
 	
-	protected void readHeader() throws IOException {
+	protected void readHeader(File theFile) throws IOException {
+		f = new RandomAccessFile(theFile, "rw");
 		f.seek(0);
 		if ((f.readByte() != 'B') || (f.readByte() == 'M'))
 			throw new IOException("Invalid file format");
@@ -113,13 +115,25 @@ public class BufferedBMPImage {
 				((dw >> 8) & 0x0000ff00) |
 				((dw >> 24) & 0x000000ff));
 	}
-	public BufferedBMPImage(File theFile) throws IOException {
-		this.f = new RandomAccessFile(theFile, "rw");
-		readHeader();
-		makeRows();
+	
+	protected BufferedBMPImage() {
 	}
-
-	public BufferedBMPImage(File theFile, int sizeX, int sizeY) throws IOException {
+	
+	public static BufferedBMPImage open(File theFile) throws IOException {
+		BufferedBMPImage result = new BufferedBMPImage();
+		result.readHeader(theFile);
+		result.makeRows((int) (result.sizeY / 10));
+		return result;
+	}
+	
+	public static BufferedBMPImage open(File theFile, int bufferedRows) throws IOException {
+		BufferedBMPImage result = new BufferedBMPImage();
+		result.readHeader(theFile);
+		result.makeRows(bufferedRows);
+		return result;
+	} 
+	
+	protected void crateInFile_noMakeRows(File theFile, int sizeX, int sizeY) throws IOException {
 		this.f = new RandomAccessFile(theFile, "rw");
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
@@ -148,12 +162,28 @@ public class BufferedBMPImage {
 		writeDWord(0);		// the vertical resolution of the image. (pixel per meter, signed integer)
 		writeDWord(0);		// the number of colors in the color palette, or 0 to default to 2n.
 		writeDWord(0);		// the number of important colors used, or 0 when every color is important; generally ignored.
-		makeRows();
+	}
+	
+	public static BufferedBMPImage create(File theFile, int sizeX, int sizeY, int bufferedRows) throws IOException {
+		BufferedBMPImage result = new BufferedBMPImage();
+		result.crateInFile_noMakeRows(theFile, sizeX, sizeY);
+		result.makeRows(bufferedRows);
+		return result;
 	}
 
-	void makeRows() {
+	public static BufferedBMPImage create(File theFile, int sizeX, int sizeY) throws IOException {
+		BufferedBMPImage result = new BufferedBMPImage();
+		result.crateInFile_noMakeRows(theFile, sizeX, sizeY);
+		result.makeRows((int) (result.sizeY / 10));
+		return result;
+	}
+	
+	protected void makeRows(int bufferedRows) {
 		rows = new ImageRow[sizeY];
-		int bufferedRows = Math.min(10, sizeY);
+		if (bufferedRows < 10)
+			bufferedRows = 10;
+		if (bufferedRows > sizeY)
+			bufferedRows = sizeY;
 		allBufferedRows = new ImageRow[bufferedRows];
 		for (int i = bufferedRows - 1; i >= 0; i--) {
 			ImageRow ir = new ImageRow();
@@ -258,5 +288,13 @@ public class BufferedBMPImage {
 
 	public int getRowReadCounter() {
 		return rowReadCounter;
+	}
+	
+	public String toString() {
+		return "BufferedBMPImage: width:" + Integer.toString(sizeX) + 
+				" height:" + Integer.toString(sizeY) +
+				" rowBufSize:" + Integer.toString(allBufferedRows.length) + 
+				" rowReads:" + Integer.toString(rowReadCounter) + 
+				" rowWrites:" + Integer.toString(rowWriteCounter);
 	}
 }

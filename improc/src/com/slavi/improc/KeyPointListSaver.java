@@ -13,6 +13,7 @@ import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.parallel.ExecutePDLowe;
 import com.slavi.improc.parallel.ExecutionProfile;
+import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.improc.singletreaded.DLoweDetector;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.util.Utl;

@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
-import com.slavi.improc.DImageMap;
+import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Const;
 

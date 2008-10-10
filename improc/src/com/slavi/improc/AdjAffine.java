@@ -339,7 +339,7 @@ public class AdjAffine {
 	}
 	
 	public void flattenImages1(String outputFileName) throws IOException {
-		BufferedBMPImage bo = new BufferedBMPImage(new File(outputFileName), (int)worldExtent.width, (int)worldExtent.height);
+		BufferedBMPImage bo = BufferedBMPImage.create(new File(outputFileName), (int)worldExtent.width, (int)worldExtent.height);
 		// Clear the output image
 		for (int j = bo.minY(); j <= bo.maxY(); j++)
 			for (int i = bo.minX(); i <= bo.maxX(); i++)
@@ -404,7 +404,7 @@ public class AdjAffine {
 		int width = (int)worldExtent.width;
 		int height = (int)worldExtent.height;
 
-		BufferedBMPImage bo = new BufferedBMPImage(new File(outputFileName), width, height);
+		BufferedBMPImage bo = BufferedBMPImage.create(new File(outputFileName), width, height);
 		short buf[][][] = new short[2][width][height];
 		
 		Matrix src = new Matrix(1, 3);
