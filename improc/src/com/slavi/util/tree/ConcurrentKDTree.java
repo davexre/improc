@@ -53,15 +53,15 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 
-	public NearestNeighbours<E> getNearestNeighboursBBFOriginal(E target, int maxNeighbours, int maxSearchSteps) {
+	public E findMatching(E target) {
 		lock.readLock().lock();
 		try {
-			return super.getNearestNeighboursBBFOriginal(target, maxNeighbours, maxSearchSteps);
+			return super.findMatching(target);
 		} finally {
 			lock.readLock().unlock();
 		}
 	}
-
+	
 	public void add(E node) {
 		if (node == null)
 			return;
