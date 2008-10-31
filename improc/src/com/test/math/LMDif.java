@@ -69,11 +69,34 @@ public class LMDif {
 			// the corresponding diagonal element of r.
 			sdiag.setItem(j, 0, r.getItem(j, j));
 			r.setItem(j, j, x.getItem(j, 0));
-			
-			// solve the triangular system for z. if the system is
-			// singular, then obtain a least squares solution.
-			
 		}
+		// solve the triangular system for z. if the system is
+		// singular, then obtain a least squares solution.
+		int nsing = n;
+		for (int j = 0; j < n; j++) {
+			if( (sdiag.getItem(j, 0) == 0.0) && (nsing == n) )
+				nsing = j;
+			if(nsing < n)
+				wa.setItem(j, 00, 0.0);
+		}
+		if (nsing >= 1) {
+			for (int k=0; k<nsing; k++) {
+				int j = nsing - k - 1;
+				double sum = 0.0;
+				int jp1 = j + 1;
+				if (nsing > jp1) {
+					for (int i = jp1; i<nsing; i++ ) {
+						sum += r.getItem(jp1, i) * wa.getItem(i, 0);
+					}
+				}
+				wa.setItem(j, 0, (wa.getItem(j, 0) - sum) / sdiag.getItem(j, 0));
+			}			
+		}
+		// permute the components of z back to components of x.
+//		for (int j = 0; j < n; j++) {
+//			l = ipvt[j];
+//			x[l] = wa[j];
+//		}
 	}
 	
 	
