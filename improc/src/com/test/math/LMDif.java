@@ -3,7 +3,187 @@ package com.test.math;
 import com.slavi.math.matrix.Matrix;
 
 public class LMDif {
+	
+	public static class PTRect {
+		long	top;
+		long	bottom;
+		long	left;
+		long	right;
+	}
 
+	// Preferences structure for tool correct
+	public static class cPrefs {
+		long 	magic;					//  File validity check, must be 20
+		int 			radial;					//  Radial correction requested?
+		double[][]	radial_params = new double[3][5];	//  3 colors x (4 coeffic. for 3rd order polys + correction radius)
+		int 			vertical;				//  Vertical shift requested ?
+		double[]		vertical_params = new double[3];		//  3 colors x vertical shift value
+		int			horizontal;				//  horizontal tilt ( in screenpoints)
+		double[]			horizontal_params = new double[3];	//  3 colours x horizontal shift value
+		int			shear;					//  shear correction requested?
+		double			shear_x;				//  horizontal shear values
+		double			shear_y;				//  vertical shear values
+		int 			resize;					//  scaling requested ?
+		long			width;					//  new width
+		long			height;					//  new height
+		int			luminance;				//  correct luminance variation?
+		double[]			lum_params = new double[3];			//  parameters for luminance corrections
+		int			correction_mode;		//  0 - radial correction;1 - vertical correction;2 - deregistration
+		int			cutFrame;				//  remove frame? 0 - no; 1 - yes
+		int			fwidth;
+		int 			fheight;
+		int			frame;
+		int			fourier;				//  Fourier filtering requested?
+		int			fourier_mode;			//  _faddBlurr vs _fremoveBlurr
+		String		psf;					//  Point Spread Function, full path/fsspec to psd-file
+		int			fourier_nf;				//  Noise filtering: _nf_internal vs _nf_custom
+		String		nff;					//  noise filtered file: full path/fsspec to psd-file
+		double			filterfactor;			//  Hunt factor
+		double			fourier_frame;			//  To correct edge errors
+
+	}
+	
+	public static class Image {
+		long width;
+		long height;
+		long bytesPerLine;
+		long bitsPerPixel;	// Must be 24 or 32
+		long dataSize; 
+		byte[][] data;
+		long dataformat;		// rgb, Lab etc
+		long format;			// Projection: rectilinear etc
+		double hfov;
+		double yaw;
+		double pitch;
+		double roll;
+		cPrefs cP;				// How to correct the image
+		String name;
+		PTRect selection;
+	}
+	
+	// Indicate to optimizer which variables to optimize
+	public static class optVars {
+		int hfov;								//  optimize hfov? 0-no 1-yes , etc
+		int yaw;				
+		int pitch;				
+		int roll;				
+		int a;
+		int b;
+		int c;					
+		int d;
+		int e;
+	}
+
+	// Control Points to adjust images
+	public static class controlPoint {
+		int[]  num = new int[2];							// Indices of Images 
+		double[] x = new double[2];								// x - Coordinates 
+		double[] y = new double[2];								// y - Coordinates 
+		int  type;								// What to optimize: 0-r, 1-x, 2-y
+	}
+	
+	public static class triangle {
+		int[] vert = new int[3];	// Three vertices from list
+		int nIm;		// number of image for texture mapping
+	}
+	
+	public static class stitchBuffer {	// Used describe how images should be merged
+		String				srcName;		// Buffer should be merged to image; 0 if not.
+		String				destName;		// Converted image (ie pano) should be saved to buffer; 0 if not
+		int				feather;		// Width of feather
+		int				colcorrect;		// Should the images be color corrected?
+		int				seam;			// Where to put the seam (see above)
+	}
+	
+	public static class size_Prefs { // sPrefs	// Preferences structure for 'pref' dialog
+		long			magic;					//  File validity check; must be 70
+		int				displayPart;			// Display cropped/framed image ?
+		int				saveFile;				// Save to tempfile? 0-no, 1-yes
+		String		sFile;					// Full path to file (short name)
+		int				launchApp;				// Open sFile ?
+		String		lApp;					// the Application to launch
+		int				interpolator;			// Which interpolator to use 
+		double			gamma;					// Gamma correction value
+		int				noAlpha;				// If new file is created: Don't save mask (Photoshop LE)
+		int				optCreatePano;			// Optimizer creates panos? 0  no/ 1 yes
+	}
+	
+	public static class CoordInfo {	// Real World 3D coordinates
+		int  num;								// auxilliary index
+		double[] x = new double[3];
+		int[]  set = new int[3];
+	}
+	
+	public interface lmfunc {
+		public void lmFunc();
+	}
+	
+	// Global data structure used by alignment optimization
+	public static class AlignInfo {
+		Image 				im;				// Array of Pointers to Image Structs
+		optVars				opt;				// Mark variables to optimize
+		int				numIm;				// Number of images 
+		controlPoint 			cpt;				// List of Control points
+		triangle			t;				// List of triangular faces
+		int				nt;				// Number of triangular faces
+		int     			numPts;				// Number of Control Points
+		int				numParam;			// Number of parameters to optimize
+		Image				pano;				// Panoramic Image decription
+		stitchBuffer				st;				// Info on how to stitch the panorama
+//		void				data;		// ????
+		lmfunc				fcn;
+		size_Prefs				sP;	
+		CoordInfo			cim;				// Real World coordinates
+	}
+	
+
+	/**
+	 * subroutine qrsolv
+	 * 
+	 * given an m by n matrix a, an n by n diagonal matrix d,
+	 * and an m-vector b, the problem is to determine an x which
+	 * solves the system
+	 * <pre>
+	 *   a*x = b ,	  d*x = 0 ,
+	 * </pre>
+	 * in the least squares sense.
+	 * 
+	 * this subroutine completes the solution of the problem
+	 * if it is provided with the necessary information from the
+	 * qr factorization, with column pivoting, of a. that is, if
+	 * a*p = q*r, where p is a permutation matrix, q has orthogonal
+	 * columns, and r is an upper triangular matrix with diagonal
+	 * elements of nonincreasing magnitude, then qrsolv expects
+	 * the full upper triangle of r, the permutation matrix p,
+	 * and the first n components of (q transpose)*b. the system
+	 * a*x = b, d*x = 0, is then equivalent to
+	 * <pre>
+	 *    t	   t
+	 * r*z = q *b ,  p *d*p*z = 0 ,
+	 * </pre>
+	 * where x = p*z. if this system does not have full rank,
+	 * then a least squares solution is obtained. on output qrsolv
+	 * also provides an upper triangular matrix s such that
+	 * <pre>
+	 *    t	 t		 t
+	 *   p *(a *a + d*d)*p = s *s .
+	 * </pre>
+	 * s is computed within qrsolv and may be of separate interest.
+	 * 
+	 * 
+	 * 
+	 * @param r		is an n by n array. on input the full upper triangle
+	 * 				must contain the full upper triangle of the matrix r.
+	 * 				on output the full upper triangle is unaltered, and the
+	 * 				strict lower triangle contains the strict upper triangle
+	 * 				(transposed) of the upper triangular matrix s.
+	 * @param diag	is an input array of length n which must contain the
+	 * 				diagonal elements of the matrix d.
+	 * @param x		is an output array of length n which contains the least
+	 * 				squares solution of the system a*x = b, d*x = 0.
+	 * @param qtb	is an input array of length n which must contain the first
+	 * 				n elements of the vector (q transpose)*b.
+	 */
 	public void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb) {
 		int m = r.getSizeY();
 		int n = r.getSizeX();
