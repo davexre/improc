@@ -135,7 +135,67 @@ public class LMDif {
 		size_Prefs				sP;	
 		CoordInfo			cim;				// Real World coordinates
 	}
-	
+
+	/**
+	 * subroutine lmpar
+	 * 
+	 * given an m by n matrix a, an n by n nonsingular diagonal
+	 * matrix d, an m-vector b, and a positive number delta,
+	 * the problem is to determine a value for the parameter
+	 * par such that if x solves the system
+	 * 
+	 * ...
+	 */
+	public void lmpar(Matrix r, Matrix diag, Matrix x, Matrix qtb) {
+		int m = r.getSizeY();
+		int n = r.getSizeX();
+		
+		if ((m < n) ||
+			(qtb.getSizeX() != n) || (qtb.getSizeY() != 1) ||
+			(diag.getSizeX() != 1) || (diag.getSizeY() != n)) {
+			throw new IllegalArgumentException();
+		}
+		
+		// compute and store in x the gauss-newton direction. if the
+		// jacobian is rank-deficient, obtain a least squares solution.
+
+		int nsing = n;
+		Matrix wa1 = new Matrix(n, 1);
+		for (int j = 0; j < n; j++) {
+			wa1.setItem(j, 0, qtb.getItem(j, 0));
+			if ((r.getItem(j, j) == 0.0) && (nsing == n))
+				nsing = j;
+			if (nsing < n)
+				wa1.setItem(j, 0, 0.0);
+		}
+
+		for (int k = 0; k < nsing; k++) {
+			int j = nsing - k - 1;
+			wa1.setItem(j, 0, wa1.getItem(j, 0) / r.getItem(j, j));
+			double temp = wa1.getItem(j, 0);
+			int jm1 = j - 1;
+			for (int i = 0; i <= jm1; i++) {
+				wa1.setItem(i, 0, wa1.getItem(i, 0) - temp * r.getItem(i, j));
+			}
+		}
+
+		for (int j = 0; j < n; j++) {
+			x.setItem(j, 0, wa1.getItem(j, 0));
+		}
+		
+		// initialize the iteration counter.
+		// evaluate the function at the origin, and test
+		// for acceptance of the gauss-newton direction.
+		Matrix wa2 = new Matrix(n, 1);
+		for (int j = 0; j < n; j++) {
+			wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
+		}
+		
+		double dxnorm = wa2.getForbeniusNorm();
+		// if the jacobian is not rank deficient, the newton
+
+		
+	}	
 
 	/**
 	 * subroutine qrsolv
@@ -189,7 +249,7 @@ public class LMDif {
 		int n = r.getSizeX();
 		
 		if ((m < n) ||
-			(qtb.getSizeX() != n) || (qtb.getSizeX() != 1) ||
+			(qtb.getSizeX() != n) || (qtb.getSizeY() != 1) ||
 			(diag.getSizeX() != 1) || (diag.getSizeY() != n)) {
 			throw new IllegalArgumentException();
 		}
