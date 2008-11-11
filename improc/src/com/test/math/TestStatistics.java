@@ -54,6 +54,7 @@ public class TestStatistics {
 			if (str.equals(""))
 				break;
 			StringTokenizer st = new StringTokenizer(str, "\t");
+			st.nextToken();
 			double value = Double.parseDouble(st.nextToken());
 			double weight = Double.parseDouble(st.nextToken());
 			MyData item = new MyData(value, weight);
@@ -63,9 +64,9 @@ public class TestStatistics {
 
 		Statistics stat = new Statistics();
 		stat.setB(0.9);
-		for (int i = 0; i < 5; i++)
-			if (!calculateOne(items, stat))
-				break;
+//		for (int i = 0; i < 5; i++)
+			if (!calculateOne(items, stat));
+//				break;
 		System.out.println(stat.toString());
 		System.out.println("------------");
 		
