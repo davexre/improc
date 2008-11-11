@@ -48,13 +48,13 @@ public class Matrix {
 	/**
 	 * Compares two matrices element by element.
 	 * 
-	 * @return Returns true if all the ements of the matrices are equal.
+	 * @return Returns true if all the elements of the matrices are equal.
 	 */
 	public boolean equals(Object obj) {
-		if (obj == null || !(obj instanceof Matrix))
-			return false;
 		if (obj == this)
 			return true;
+		if (obj == null || !(obj instanceof Matrix))
+			return false;
 		Matrix a = (Matrix) obj;
 		if ((a.sizeX != sizeX) || (a.sizeY != sizeY))
 			return false;
@@ -65,6 +65,21 @@ public class Matrix {
 		return true;
 	}
 
+	public boolean equals(Matrix a, double tolerance) {
+		if (a == null)
+			return false;
+		if (a == this)
+			return true;
+		if ((sizeX != a.sizeX) || (sizeY != a.sizeY))
+			return false;
+		tolerance = Math.abs(tolerance);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				if (Math.abs(m[i][j] - a.m[i][j]) > tolerance)
+					return false;
+		return true;
+	}
+	
 	public String toMatlabString(String variableName) {
 		StringBuilder result = new StringBuilder();
 		result.append(variableName);
@@ -588,12 +603,38 @@ public class Matrix {
 	}
 
 	/**
+	 * Returns true if this matrix is the identity matrix
+	 */
+	public boolean isE(double tolerance) {
+		tolerance = Math.abs(tolerance);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double d = i == j ? m[i][j] - 1.0 : m[i][j]; 
+				if (Math.abs(d) > tolerance)
+					return false;
+			}
+		return true;
+	}
+	
+	/**
 	 * Makes a zero matrix. All elements are set to 0.
 	 */
 	public void make0() {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
 				m[i][j] = 0;
+	}
+	
+	/**
+	 * Returns true if all elements are 0. 
+	 */
+	public boolean is0(double tolerance) {
+		tolerance = Math.abs(tolerance);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				if (Math.abs(m[i][j]) > tolerance)
+					return false;
+		return true;
 	}
 
 	/**
@@ -802,16 +843,16 @@ public class Matrix {
 		MatrixCompareResult res = new MatrixCompareResult();
 		res.A = this;
 		res.B = second;
-		// *** Р�Р·С‡РёСЃР»СЏРІР°РЅРµ РЅР° РєРѕСЂРµР»Р°С†РёСЏС‚Р° (Pearson's r) РјРµР¶РґСѓ РґР°РЅРЅРёС‚Рµ. ***
+		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
 
-		// РЎСЂРµРґРЅРѕ Р°СЂРёС‚РјРµС‚РёС‡РЅРѕ.
+		// Средно аритметично.
 		double S = sizeX * sizeY;
 		res.AvgA = sumAll() / S;
 		res.AvgB = second.sumAll() / S;
 		res.SAA = 0;
 		res.SAB = 0;
 		res.SBB = 0;
-		// РљРѕРµС„РёС†РёРµРЅС‚Рё РЅР° РєРѕСЂРµР»Р°С†РёСЏ.
+		// Коефициенти на корелация.
 		double dA, dB;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
@@ -822,7 +863,7 @@ public class Matrix {
 				res.SAB += dA * dB;
 			}
 
-		// РљРѕРµС„РёС†РёРµРЅС‚ РЅР° РєРѕСЂРµР»Р°С†РёСЏ РЅР° Pearson
+		// Коефициент на корелация на Pearson
 		res.PearsonR = res.SAB / Math.sqrt(res.SAA * res.SBB);
 		return res;
 	}
