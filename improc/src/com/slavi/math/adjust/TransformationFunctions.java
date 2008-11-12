@@ -1,16 +1,30 @@
 package com.slavi.math.adjust;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Point2D.Double;
+import java.util.List;
 
 import com.slavi.math.matrix.Matrix;
 
 public class TransformationFunctions {
-
+	private static final double R_EPS = 1.0e-6;
+	
+	private static final int MAXITER = 100;
+	
 	public interface TransformationFunction {
-		public void transform(Point2D.Double dest, Point2D.Double src);
+		public void transform(Point2D.Double src, Point2D.Double dest);
 	}
 
+	public static void execute_stack(List<TransformationFunctions.TransformationFunction>stack, Point2D.Double src, Point2D.Double dest) {
+		Point2D.Double tmp = new Point2D.Double(src.x, src.y);
+		dest.x = 0;
+		dest.y = 0;
+		for (TransformationFunctions.TransformationFunction f : stack) {
+			f.transform(tmp, dest);
+			tmp.x = dest.x;
+			tmp.y = dest.y;
+		}
+	}	
+	
 	/**
 	 * Rotate equirectangular image
 	 */
@@ -18,7 +32,7 @@ public class TransformationFunctions {
 		double var0;	// double 180degree_turn(screenpoints)
 		double var1;	// double turn(screenpoints);
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x + var1;
 
 			while (src.x < -var0)
@@ -34,10 +48,6 @@ public class TransformationFunctions {
 		}
 	}
 
-	static final double R_EPS = 1.0e-6;
-	
-	static final int MAXITER = 100;
-	
 	/**
 	 * Calculate inverse 4th order polynomial correction using Newton
 	 * Don't use on large image (slow)!
@@ -49,7 +59,7 @@ public class TransformationFunctions {
 		double c3;
 		double c4;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double rd = (Math.sqrt(dest.x * dest.x + dest.y * dest.y )) / c4; // Normalized
 			double rs = rd;
 
@@ -81,7 +91,7 @@ public class TransformationFunctions {
 		double c3;
 		double c4;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double rd = Math.abs(dest.y) / c4; // Normalized 
 			double rs = rd;
 
@@ -110,7 +120,7 @@ public class TransformationFunctions {
 		double scaleHorizontal;
 		double scaleVertical;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x * scaleHorizontal;
 			src.y = dest.y * scaleVertical;
 		}
@@ -125,7 +135,7 @@ public class TransformationFunctions {
 		double shearHorizontal;
 		double shearVertical;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x + dest.y * shearHorizontal;
 			src.y = dest.y + dest.x * shearVertical;
 		}
@@ -139,7 +149,7 @@ public class TransformationFunctions {
 	public static class Horiz implements TransformationFunction {
 		double shiftHorizontal;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x + shiftHorizontal;
 			src.y = dest.y;
 		}
@@ -152,7 +162,7 @@ public class TransformationFunctions {
 	public static class Vert implements TransformationFunction {
 		double shiftVertical;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x;
 			src.y = dest.y + shiftVertical;
 		}
@@ -170,7 +180,7 @@ public class TransformationFunctions {
 		double c4;
 		double c5;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y) / c4;
 			double scale;
 			if (r < c5)
@@ -198,7 +208,7 @@ public class TransformationFunctions {
 		double c3;
 		double c4;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.abs(dest.y / c4);
 			double scale = ((c3 * r + c2) * r + c1) * r + c0;
 			src.x = dest.x;
@@ -221,7 +231,7 @@ public class TransformationFunctions {
 		double c3;
 		double c4;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.abs(dest.y / c4);
 			double scale = (c3 * r + c2) * r + c1;
 			src.x = dest.x + Math.abs(dest.y) * scale;
@@ -237,11 +247,11 @@ public class TransformationFunctions {
 		}
 	}
 
-	public static class PerspShpere implements TransformationFunction {
+	public static class PerspSphere implements TransformationFunction {
 		Matrix m;
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y);
 			double theta = r / distance;
 			double s;
@@ -267,7 +277,7 @@ public class TransformationFunctions {
 			src.y = theta * vv1;
 		}
 		
-		public PerspShpere(Matrix m, double distance) {
+		public PerspSphere(Matrix m, double distance) {
 			this.m = m;
 			this.distance = distance;
 		}
@@ -279,7 +289,7 @@ public class TransformationFunctions {
 		double offsetX;
 		double offsetY;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double v0 = dest.x + offsetX;
 			double v1 = dest.y + offsetY;
 			double v2 = distance;
@@ -303,7 +313,7 @@ public class TransformationFunctions {
 	public static class RectPano implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = distance * Math.tan(dest.x / distance);
 			src.y = dest.y / Math.cos(dest.x / distance);
 		}
@@ -316,7 +326,7 @@ public class TransformationFunctions {
 	public static class PanoRect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = distance * Math.atan(dest.x / distance);
 			src.y = dest.y / Math.cos(src.x / distance);
 		}
@@ -329,7 +339,7 @@ public class TransformationFunctions {
 	public static class RectErect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double phi = dest.x / distance;
 			double theta = -dest.y / distance + Math.PI / 2.0;
 			if (theta < 0) {
@@ -352,7 +362,7 @@ public class TransformationFunctions {
 	public static class PanoErect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x;
 			src.y = distance * Math.tan(dest.y / distance);
 		}
@@ -365,7 +375,7 @@ public class TransformationFunctions {
 	public static class ErectPano implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = dest.x;
 			src.y = distance * Math.atan(dest.y / distance);
 		}
@@ -375,27 +385,27 @@ public class TransformationFunctions {
 		}
 	}
 
-	public static class ShpereCPErect implements TransformationFunction {
+	public static class SphereCPErect implements TransformationFunction {
 		double distance;
 		double b;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double phi = -dest.x / (distance * Math.PI / 2.0);
 			double theta =  -(dest.y + b) / (Math.PI / 2.0) ;
 			src.x = theta * Math.cos(phi);
 			src.y = theta * Math.sin(phi);
 		}
 		
-		public ShpereCPErect(double distance, double b) {
+		public SphereCPErect(double distance, double b) {
 			this.distance = distance;
 			this.b = b;
 		}
 	}
 
-	public static class ShpereTPErect implements TransformationFunction {
+	public static class SphereTPErect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double phi = dest.x / distance;
 			double theta = -dest.y / distance + Math.PI / 2;
 			if (theta < 0) {
@@ -418,16 +428,16 @@ public class TransformationFunctions {
 			src.y = theta * v1 / r;
 		}
 		
-		public ShpereTPErect(double distance) {
+		public SphereTPErect(double distance) {
 			this.distance = distance;
 		}
 	}
 
-	public static class ErectShpereCP implements TransformationFunction {
+	public static class ErectSphereCP implements TransformationFunction {
 		double distance;
 		double b;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double theta = Math.sqrt(dest.x * dest.x + dest.y * dest.y) ;
 			double phi = Math.atan2(dest.y, -dest.x);
 			
@@ -435,16 +445,16 @@ public class TransformationFunctions {
 			src.y = theta - b;
 		}
 		
-		public ErectShpereCP(double distance, double b) {
+		public ErectSphereCP(double distance, double b) {
 			this.distance = distance;
 			this.b = b;
 		}
 	}
 
-	public static class RectShpereTP implements TransformationFunction {
+	public static class RectSphereTP implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y);
 			double theta = r / distance;
 			
@@ -460,15 +470,15 @@ public class TransformationFunctions {
 			src.y = rho * dest.y ;
 		}
 		
-		public RectShpereTP(double distance) {
+		public RectSphereTP(double distance) {
 			this.distance = distance;
 		}
 	}
 	
-	public static class ShpereTPRect implements TransformationFunction {
+	public static class SphereTPRect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y) / distance;
 			double theta;
 			if( r== 0.0 )
@@ -480,15 +490,15 @@ public class TransformationFunctions {
 			src.y = theta * dest.y;
 		}
 		
-		public ShpereTPRect(double distance) {
+		public SphereTPRect(double distance) {
 			this.distance = distance;
 		}
 	}
 	
-	public static class ShpereTPPano implements TransformationFunction {
+	public static class SphereTPPano implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double phi = dest.x / distance;
 			double s = distance * Math.sin(phi);	//  y' -> x
 			double r = Math.sqrt(s*s + dest.y * dest.y);
@@ -497,15 +507,15 @@ public class TransformationFunctions {
 			src.y = theta * dest.y;
 		}
 		
-		public ShpereTPPano(double distance) {
+		public SphereTPPano(double distance) {
 			this.distance = distance;
 		}
 	}
 	
-	public static class PanoShpereTP implements TransformationFunction {
+	public static class PanoSphereTP implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y);
 			double theta = r / distance;
 			double s;
@@ -520,22 +530,22 @@ public class TransformationFunctions {
 			src.y = distance * s * dest.y / Math.sqrt(v0 * v0 + v1 * v1);
 		}
 		
-		public PanoShpereTP(double distance) {
+		public PanoSphereTP(double distance) {
 			this.distance = distance;
 		}
 	}
 	
-	public static class ShpereCPPano implements TransformationFunction {
+	public static class SphereCPPano implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			double phi = -dest.x / (distance * Math.PI / 2.0) ;
 			double theta = Math.PI /2.0 + Math.atan(dest.y / (distance * Math.PI / 2.0));
 			src.x = distance * theta * Math.cos(phi);
 			src.y = distance * theta * Math.sin(phi);
 		}
 		
-		public ShpereCPPano(double distance) {
+		public SphereCPPano(double distance) {
 			this.distance = distance;
 		}
 	}
@@ -543,7 +553,7 @@ public class TransformationFunctions {
 	public static class ErectRect implements TransformationFunction {
 		double distance;
 		
-		public void transform(Double dest, Double src) {
+		public void transform(Point2D.Double src, Point2D.Double dest) {
 			src.x = distance * Math.atan2(dest.x, distance);
 			src.y = distance * Math.atan2(dest.y, Math.sqrt(distance * distance + dest.x * dest.x));
 		}
@@ -553,5 +563,122 @@ public class TransformationFunctions {
 		}
 	}
 	
+	public static class ErectSphereTP implements TransformationFunction {
+		double distance;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double r = Math.sqrt(dest.x * dest.x + dest.y * dest.y);
+			double theta = r / distance;
+			double s;
+			if(theta == 0.0)
+				s = 1.0 / distance;
+			else
+				s = Math.sin(theta) / r;
+			double v1 = s * dest.x;   
+			double v0 = Math.cos(theta);				
+			src.x = distance * Math.atan2(v1, v0);
+			src.y = distance * Math.atan(s * dest.y / Math.sqrt(v0 * v0 + v1 * v1)); 
+		}
+		
+		public ErectSphereTP(double distance) {
+			this.distance = distance;
+		}
+	}
 	
+	public static class MirrorSphereCP implements TransformationFunction {
+		double distance;
+		double b;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double theta = Math.sqrt(dest.x * dest.x + dest.y * dest.y ) / distance;
+			double phi = Math.atan2(dest.y , dest.x);
+			double rho = b * Math.sin( theta / 2.0 );
+			src.x = -rho * Math.cos(phi);
+			src.y = rho * Math.sin(phi);
+		}
+		
+		public MirrorSphereCP(double distance, double b) {
+			this.distance = distance;
+			this.b = b;
+		}
+	}
+
+	public static class MirrorErect implements TransformationFunction {
+		double distance;
+		double b;
+		double b2;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double phi = dest.x / (distance * Math.PI / 2.0);
+			double theta = -(dest.y + b2) / (distance * Math.PI / 2.0);
+			double rho = b * Math.sin(theta / 2.0);
+			src.x = -rho * Math.cos(phi);
+			src.y = rho * Math.sin(phi);
+		}
+		
+		public MirrorErect(double distance, double b, double b2) {
+			this.distance = distance;
+			this.b = b;
+			this.b2 = b2;
+		}
+	}
+	
+	public static class MirrorPano implements TransformationFunction {
+		double distance;
+		double b;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double phi = -dest.x / (distance * Math.PI / 2.0) ;
+			double theta = Math.PI / 2.0 + Math.atan(dest.y / (distance * Math.PI / 2.0));
+			double rho = b * Math.sin(theta / 2.0);
+			src.x = rho * Math.cos(phi);
+			src.y = rho * Math.sin(phi);
+		}
+		
+		public MirrorPano(double distance, double b) {
+			this.distance = distance;
+			this.b = b;
+		}
+	}
+
+	public static class SphereCPMirror implements TransformationFunction {
+		double distance;
+		double b;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double rho = Math.sqrt(dest.x * dest.x + dest.y * dest.y);
+			double theta = 2.0 * Math.asin(rho / b);
+			double phi = Math.atan2(dest.y, dest.x);
+			src.x = distance * theta * Math.cos(phi);
+			src.y = distance * theta * Math.sin(phi);
+		}
+		
+		public SphereCPMirror(double distance, double b) {
+			this.distance = distance;
+			this.b = b;
+		}
+	}
+
+	public static class ShiftScaleRotate implements TransformationFunction {
+		double shiftX;
+		double shiftY;
+		double scale;
+		double cosPhi;
+		double sinPhi;
+		
+		public void transform(Point2D.Double src, Point2D.Double dest) {
+			double x = dest.x - shiftX;
+			double y = dest.y - shiftY;
+			src.x = (x * cosPhi - y * sinPhi) * scale;
+			src.y = (x * sinPhi + y * cosPhi) * scale;
+		}
+		
+		public ShiftScaleRotate(double shiftX, double shiftY, double scale, double cosPhi, double sinPhi) {
+			this.shiftX = shiftX;
+			this.shiftY = shiftY;
+			this.scale = scale;
+			this.cosPhi = cosPhi;
+			this.sinPhi = sinPhi;
+		}
+	}
 }

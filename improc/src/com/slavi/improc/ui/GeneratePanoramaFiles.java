@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import com.slavi.improc.AdjAffine;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
@@ -23,7 +22,7 @@ public class GeneratePanoramaFiles implements Callable<Void> {
 	public Void call() throws Exception {
 		int panoCount = 1;
 		int maxItems = panoList.items.size();
-		AdjAffine adjustAffine = new AdjAffine();
+//		AdjAffine adjustAffine = new AdjAffine();
 		while (true) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();

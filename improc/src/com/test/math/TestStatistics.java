@@ -65,7 +65,7 @@ public class TestStatistics {
 		Statistics stat = new Statistics();
 		stat.setB(0.9);
 //		for (int i = 0; i < 5; i++)
-			if (!calculateOne(items, stat));
+			if (!calculateOne(items, stat))
 //				break;
 		System.out.println(stat.toString());
 		System.out.println("------------");
