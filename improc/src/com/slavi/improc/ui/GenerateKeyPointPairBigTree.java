@@ -9,7 +9,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree> {
 
@@ -34,7 +34,7 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 			String image = images.get(i); 
 			String statusMessage = (i + 1) + "/" + images.size() + " " + image;
 			System.out.println(statusMessage);
-			SwtUtl.activeWaitDialogSetStatus(statusMessage, i);
+			SwtUtil.activeWaitDialogSetStatus(statusMessage, i);
 			KeyPointList l = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(image));
 			result.keyPointLists.add(l);
 			for (KeyPoint kp : l) {

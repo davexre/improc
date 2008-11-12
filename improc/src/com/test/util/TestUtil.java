@@ -2,11 +2,11 @@ package com.test.util;
 
 import java.util.regex.Pattern;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
-public class TestUtl {
+public class TestUtil {
 	public static void testToRegexpStr(String wildcard, String testStr) {
-		String regexp = Utl.toRegexpStr(wildcard);
+		String regexp = Util.toRegexpStr(wildcard);
 		System.out.print(wildcard + "\t" + testStr + "\t" + regexp + "\t");
 		System.out.println(Pattern.matches(regexp, testStr));
 	}

@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class ImageFilter {
 	Display display;
@@ -97,7 +97,7 @@ public class ImageFilter {
 		btnOpen.setText("&Open");
 		btnOpen.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String fin = SwtUtl.openFile(shell, "Select an image", null, SwtUtl.imageFileFilter);
+				String fin = SwtUtil.openFile(shell, "Select an image", null, SwtUtil.imageFileFilter);
 				if (fin == null)
 					return;
 				try {
@@ -105,7 +105,7 @@ public class ImageFilter {
 					lblCurFile.setText(fin);
 					setSourceImage(src);
 				} catch (IOException e1) {
-					SwtUtl.msgboxError(shell, "Error opening file " + fin);
+					SwtUtil.msgboxError(shell, "Error opening file " + fin);
 				}
 			}
 		});
@@ -114,13 +114,13 @@ public class ImageFilter {
 		btnSave.setText("&Save");
 		btnSave.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String fou = SwtUtl.saveFile(shell, null, null, new File(lblCurFile.getText()).getName(), SwtUtl.imageFileFilter);
+				String fou = SwtUtil.saveFile(shell, null, null, new File(lblCurFile.getText()).getName(), SwtUtil.imageFileFilter);
 				if (fou == null)
 					return;
 				try {
 					ImageIO.write(outputImage, "png", new File(fou));
 				} catch (IOException e1) {
-					SwtUtl.msgboxError(shell, "Error saving image " + fou);
+					SwtUtil.msgboxError(shell, "Error saving image " + fou);
 				}
 			}
 		});

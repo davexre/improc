@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
 /**
  * This class is used for generating file paths relative to
@@ -40,7 +40,7 @@ public class AbsoluteToRelativePathMaker {
 	 * application.
 	 */
 	public AbsoluteToRelativePathMaker() {
-		this(Utl.getCurrentDir());
+		this(Util.getCurrentDir());
 	}
 	
 	public AbsoluteToRelativePathMaker(String rootDir) {

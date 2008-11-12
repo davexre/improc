@@ -16,7 +16,7 @@ import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.improc.singletreaded.DLoweDetector;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
@@ -61,7 +61,7 @@ public class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) {
-		return new File(Utl.chageFileExtension(
+		return new File(Util.chageFileExtension(
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image, false)), "spf"));
 	}

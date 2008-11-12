@@ -1,8 +1,25 @@
-package com.test.math;
+package com.slavi.math.adjust;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
+
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 
 public class LMDif {
+	
+	// Actual parameters used by Xform functions for pano-creation
+	public static class MakeParams {
+		double 	scale[] = new double[2];	// scaling factors for resize;
+		double 	shear[]  = new double[2];	// shear values
+		double  rot[] = new double[2];		// horizontal rotation params
+		Object	perspect[] = null;			// Parameters for perspective control functions
+		double	rad[] = new double[6];		// coefficients for polynomial correction (0,...3) and source width/2 (4) and correction radius (5)	
+		Matrix	mt = null;					// Matrix
+		double  distance = 0;
+		double	horizontal = 0;
+		double	vertical = 0;
+	}
 	
 	public static class PTRect {
 		long	top;
@@ -11,6 +28,13 @@ public class LMDif {
 		long	right;
 	}
 
+	public static enum cPrefsCorrectionMode {
+		Radial,
+		Vertical,
+		Deregister,
+		Morph
+	}
+	
 	// Preferences structure for tool correct
 	public static class cPrefs {
 		long 	magic;					//  File validity check, must be 20
@@ -28,7 +52,7 @@ public class LMDif {
 		long			height;					//  new height
 		int			luminance;				//  correct luminance variation?
 		double[]			lum_params = new double[3];			//  parameters for luminance corrections
-		int			correction_mode;		//  0 - radial correction;1 - vertical correction;2 - deregistration
+		cPrefsCorrectionMode correction_mode;		//  0 - radial correction;1 - vertical correction;2 - deregistration
 		int			cutFrame;				//  remove frame? 0 - no; 1 - yes
 		int			fwidth;
 		int 			fheight;
@@ -43,6 +67,19 @@ public class LMDif {
 
 	}
 	
+	public static enum ImageFormat {
+		Rectilinear,
+		Panorama,
+		FisheyeCirc,
+		FisheyeFF,
+		Equirectangular,
+		SphericalCP,
+		ShpericalTP,
+		Miirror,
+		Orthographic,
+		Cubic
+	}
+	
 	public static class Image {
 		long width;
 		long height;
@@ -51,7 +88,7 @@ public class LMDif {
 		long dataSize; 
 		byte[][] data;
 		long dataformat;		// rgb, Lab etc
-		long format;			// Projection: rectilinear etc
+		ImageFormat format;			// Projection: rectilinear etc
 		double hfov;
 		double yaw;
 		double pitch;
@@ -149,6 +186,81 @@ public class LMDif {
 	}
 	
 	private static double C_FACTOR = 100.0;
+
+	MakeParams makeParams(Image im, Image pn, int colorIndex) {
+		MakeParams mp = new MakeParams();
+		double a = im.hfov * MathUtil.deg2rad;	// field of view in rad
+		double b = pn.hfov * MathUtil.deg2rad;
+		mp.mt = MathUtil.makeAngles(- im.pitch * MathUtil.deg2rad, 0.0, - im.roll * MathUtil.deg2rad, false);
+		
+		double scale;
+		double distance;
+		if (pn.format == ImageFormat.Rectilinear) {
+			distance = (double) pn.width / (2.0 * Math.tan(b / 2.0));
+			if (im.format == ImageFormat.Rectilinear) {
+				// rectilinear image
+				scale = ((double) pn.hfov / im.hfov) * 
+						(a / (2.0 * Math.tan(a / 2.0))) * ((double)im.width / pn.width) * 2.0 * Math.tan(b/2.0) / b;
+			} else {
+				// pamoramic or fisheye image
+				scale = ((double)pn.hfov / im.hfov) * ((double)im.width/ (double) pn.width)
+				   * 2.0 * Math.tan(b/2.0) / b; 
+			}
+		} else {
+			// equirectangular or panoramic or fisheye
+			distance = ((double) pn.width) / b;
+			if (im.format == ImageFormat.Rectilinear) {
+				// rectilinear image
+				scale = ((double)pn.hfov / im.hfov) * (a /(2.0 * Math.tan(a/2.0))) * ((double)im.width)/ ((double) pn.width);
+			} else {
+				// pamoramic or fisheye image
+				scale = ((double)pn.hfov / im.hfov) * ((double)im.width)/ ((double) pn.width);
+			}
+		}
+		mp.scale[0] = mp.scale[1] = scale;
+		mp.distance = distance;
+		mp.shear[0] = im.cP.shear_x / im.height;
+		mp.shear[1] = im.cP.shear_y / im.width;
+
+		mp.rot[0]		= mp.distance * Math.PI;						// 180Ў in screenpoints
+		mp.rot[1]		= -im.yaw * mp.distance * MathUtil.deg2rad; 	//    rotation angle in screenpoints
+		mp.perspect[0] = mp.mt;
+		mp.perspect[1] = mp.distance;
+
+		for(int i = 0; i < 4; i++) {
+			mp.rad[i] = im.cP.radial_params[colorIndex][i];
+		}
+		mp.rad[5] = im.cP.radial_params[colorIndex][4];
+		
+		if (im.cP.correction_mode == cPrefsCorrectionMode.Radial)
+			mp.rad[4] = ( (double)( im.width < im.height ? im.width : im.height) ) / 2.0;
+		else
+			mp.rad[4] = ((double) im.height) / 2.0;
+		
+		mp.horizontal 	= im.cP.horizontal_params[colorIndex];
+		mp.vertical 	= im.cP.vertical_params[colorIndex];
+		
+		int i = 0;
+		switch (pn.format) {
+		case Rectilinear:
+			// Convert rectilinear to equirect
+			break;
+
+		case Panorama:
+			// Convert panoramic to equirect
+			break;
+		
+		case FisheyeCirc:
+		case FisheyeFF:
+			// Convert panoramic to sphere
+			
+			break;
+		}
+		
+		
+		
+		return mp;
+	}
 	
 	/** 
 	 * Levenberg-Marquardt function measuring the quality of the fit in fvec[]

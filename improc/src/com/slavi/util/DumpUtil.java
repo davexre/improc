@@ -8,7 +8,7 @@ import java.util.Collections;
 /**
  * This class contains utility methods for debugging purposes. 
  */
-public class DumpUtils {
+public class DumpUtil {
 	
 	/**
 	 * This method displays the name of the method that invoked

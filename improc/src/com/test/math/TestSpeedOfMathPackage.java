@@ -1,6 +1,6 @@
 package com.test.math;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
 public class TestSpeedOfMathPackage {
 
@@ -16,7 +16,7 @@ public class TestSpeedOfMathPackage {
 					System.out.println("Should not happen");
 			}
 		long aend = System.currentTimeMillis();
-		System.out.println("Elapsed " + Utl.getFormatedMilliseconds(aend - astart));
+		System.out.println("Elapsed " + Util.getFormatedMilliseconds(aend - astart));
 	}
 
 	public static void testNumberOfSQRs() {
@@ -29,7 +29,7 @@ public class TestSpeedOfMathPackage {
 					System.out.println("Should not happen");
 			}
 		long aend = System.currentTimeMillis();
-		System.out.println("Elapsed " + Utl.getFormatedMilliseconds(aend - astart));
+		System.out.println("Elapsed " + Util.getFormatedMilliseconds(aend - astart));
 	}
 	
 	public static void testNumberOfMathSQRs() {
@@ -42,7 +42,7 @@ public class TestSpeedOfMathPackage {
 					System.out.println("Should not happen");
 			}
 		long aend = System.currentTimeMillis();
-		System.out.println("Elapsed " + Utl.getFormatedMilliseconds(aend - astart));
+		System.out.println("Elapsed " + Util.getFormatedMilliseconds(aend - astart));
 	}
 	
 	

@@ -7,7 +7,7 @@ import java.util.Locale;
 /**
  * This class contains utility static methods for general purpose.  
  */
-public class Utl {
+public class Util {
 	/**
 	 * Returns the "human" representation of a time delta specified in milliseconds
 	 * like "1 hour 23 minutes 45.6 seconds".

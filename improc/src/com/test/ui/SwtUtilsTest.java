@@ -11,7 +11,7 @@ import org.jdom.transform.XSLTransformException;
 import org.jdom.transform.XSLTransformer;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class SwtUtilsTest {
 
@@ -33,13 +33,13 @@ public class SwtUtilsTest {
 		xout.output(doc.getRootElement(), fou);
 		String html = fou.toString();
 		fou.close();
-		SwtUtl.showHTML(null, "", html);
+		SwtUtil.showHTML(null, "", html);
 	}
 	
 	void openFileTest() {
-		System.out.println(SwtUtl.openFile(null, "Some title", null, null));
-		System.out.println(SwtUtl.openFile(null, "Some title", null, null));
-		System.out.println(SwtUtl.openFile(null, "Some title", null, null));
+		System.out.println(SwtUtil.openFile(null, "Some title", null, null));
+		System.out.println(SwtUtil.openFile(null, "Some title", null, null));
+		System.out.println(SwtUtil.openFile(null, "Some title", null, null));
 	}
 	
 	public static void main(String[] args) throws Exception {

@@ -1,8 +1,8 @@
 package com.test.util;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
-public class TestUtlEncode {
+public class TestUtilEncode {
 
 	static final String testStr[] = {
 		"Това е на кирилица",
@@ -16,8 +16,8 @@ public class TestUtlEncode {
 	public static void main(String[] args) {
 		int i = 0;
 		for (String s : testStr) {
-			String e = Utl.cEncode(s);
-			String d = Utl.cDecode(e);
+			String e = Util.cEncode(s);
+			String d = Util.cDecode(e);
 			if (!s.equals(d)) {
 				System.out.println("Failed test string " + i);
 				System.out.println("  Test    string (length " + s.length() + ") is [" + s + "]");

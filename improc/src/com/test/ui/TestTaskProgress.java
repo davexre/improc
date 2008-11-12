@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class TestTaskProgress {
 
@@ -76,7 +76,7 @@ public class TestTaskProgress {
 		public void run() {
 			try {
 				for (int i = 0; i < iterations; i++) {
-					SwtUtl.activeWaitDialogSetStatus("thread step " + i, i);
+					SwtUtil.activeWaitDialogSetStatus("thread step " + i, i);
 					Thread.sleep(1000);
 				}
 			} catch (InterruptedException e) {
@@ -87,7 +87,7 @@ public class TestTaskProgress {
 
 	public static void test2() {
 		dummyJob2 job = new dummyJob2(8);
-		boolean result = SwtUtl.openWaitDialog("Title", job, 8);
+		boolean result = SwtUtil.openWaitDialog("Title", job, 8);
 		System.out.println(result);
 	}
 	
@@ -101,12 +101,12 @@ public class TestTaskProgress {
 		public void run() {
 			try {
 				for (int i = 0; i < iterations; i++) {
-					SwtUtl.activeWaitDialogSetStatus("thread step " + i, i);
+					SwtUtil.activeWaitDialogSetStatus("thread step " + i, i);
 					Thread.sleep(1000);
 					if (i == iterations / 2) {
-						SwtUtl.getActiveWaitDialogShell().getDisplay().asyncExec(new Runnable() {
+						SwtUtil.getActiveWaitDialogShell().getDisplay().asyncExec(new Runnable() {
 							public void run() {
-								SwtUtl.msgbox(null, "asdasdasd");	
+								SwtUtil.msgbox(null, "asdasdasd");	
 							}
 						});
 					}
@@ -119,13 +119,13 @@ public class TestTaskProgress {
 	
 	public static void test3() {
 		dummyJob3 job = new dummyJob3(8);
-		boolean result = SwtUtl.openWaitDialog("Base dialog", job, 8);
+		boolean result = SwtUtil.openWaitDialog("Base dialog", job, 8);
 		System.out.println(result);
 	}
 	
 	static class JobThrowingException implements Runnable {
 		public void run() {
-			SwtUtl.activeWaitDialogSetStatus("Before exception", 5);
+			SwtUtil.activeWaitDialogSetStatus("Before exception", 5);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -138,7 +138,7 @@ public class TestTaskProgress {
 	public static void testJobThrowingException() {
 		JobThrowingException t = new JobThrowingException();
 		System.out.println("Before starting job");
-		boolean result = SwtUtl.openWaitDialog("Testing", t, 10);
+		boolean result = SwtUtil.openWaitDialog("Testing", t, 10);
 		System.out.println(result);
 	}
 	

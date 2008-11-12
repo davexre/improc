@@ -3,7 +3,7 @@ package com.slavi.improc.parallel;
 import java.awt.Rectangle;
 import java.lang.management.ManagementFactory;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
 public class ExecutionProfile {
 	public int parallelTasks;
@@ -21,7 +21,7 @@ public class ExecutionProfile {
 		sb.append("Parallel tasks          :");		sb.append(parallelTasks);
 //		sb.append("\nTotal number of tasks   :");   sb.append(tasks == null ? 0 : tasks.size());
 		sb.append("\nNumber of processors    :");	sb.append(numberOfProcessors);
-		sb.append("\nAvailable memory        :");	sb.append(Utl.getFormatBytes(availableMemory));
+		sb.append("\nAvailable memory        :");	sb.append(Util.getFormatBytes(availableMemory));
 //		sb.append("\nSource extent X         :");	sb.append(sourceExtentX);
 //		sb.append("\nSource extent Y         :");	sb.append(sourceExtentY);
 		sb.append("\nWindow extent X         :");	sb.append(destWindowSizeX);

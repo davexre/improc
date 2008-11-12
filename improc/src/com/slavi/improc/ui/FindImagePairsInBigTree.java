@@ -10,7 +10,7 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.util.tree.KDTree;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class FindImagePairsInBigTree implements Callable<Void> {
 
@@ -52,7 +52,7 @@ public class FindImagePairsInBigTree implements Callable<Void> {
 				throw new InterruptedException();
 			}
 			count++;
-			SwtUtl.activeWaitDialogSetStatus(Integer.toString(count) + dummy, count);
+			SwtUtil.activeWaitDialogSetStatus(Integer.toString(count) + dummy, count);
 			KDTree.NearestNeighbours<KeyPoint> nnlst = bt.getNearestNeighboursBBF(kp, 2, searchSteps);
 			if (nnlst.size() < 2)
 				continue;

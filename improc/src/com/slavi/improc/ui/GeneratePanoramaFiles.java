@@ -8,7 +8,7 @@ import com.slavi.improc.AdjAffine;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoramaFiles implements Callable<Void> {
 
@@ -34,7 +34,7 @@ public class GeneratePanoramaFiles implements Callable<Void> {
 			File fou = keyPointPairFileRoot.getFullPathFile("Pano" + panoCount + ".pto");
 
 			String statusMessage = fou.getAbsolutePath();
-			SwtUtl.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
+			SwtUtil.activeWaitDialogSetStatus(statusMessage, maxItems - panoList.items.size());
 
 			PanoList.writeToPtoFile(fou, chain);
 			

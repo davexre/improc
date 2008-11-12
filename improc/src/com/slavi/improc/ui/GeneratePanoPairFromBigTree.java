@@ -14,7 +14,7 @@ import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.AffineTransformer;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 
@@ -73,7 +73,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 
 			panoList.addItem(result);
 			int count = processed.incrementAndGet();
-			SwtUtl.activeWaitDialogSetStatus(null, count);
+			SwtUtil.activeWaitDialogSetStatus(null, count);
 			return null;
 		}
 	}

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-import com.slavi.util.Utl;
+import com.slavi.util.Util;
 
 /**
  * This class implements a file iterator based on a wildcard search
@@ -107,7 +107,7 @@ public class FindFileIterator implements Iterator<File> {
 		fi.startDir = f.getParent();
 		if ((fi.startDir == null) || (fi.equals("")))
 			fi.startDir = ".";
-		fi.patternStr = Utl.toRegexpStr(f.getName());
+		fi.patternStr = Util.toRegexpStr(f.getName());
 		fi.reset();
 		return fi;
 	}

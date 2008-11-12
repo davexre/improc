@@ -34,7 +34,7 @@ import com.slavi.ui.TaskProgress;
  * This class contains utility methods for creating user interface using
  * the SWT (Standard Widget Toolkit) library.   
  */
-public class SwtUtl {
+public class SwtUtil {
 	
 	public static Shell makeShell(Shell parent, int style) {
 		return parent == null ? new Shell(Display.getDefault(), style) : new Shell(parent, style);
@@ -158,7 +158,7 @@ public class SwtUtl {
 	 * Show an HTML document in a resizable modal dialog box. The dialog box has a "save" button.  
 	 */
 	public static void showHTML(Shell parent, final String message, final String html) {
-		final Shell shell = SwtUtl.makeShell(parent, SWT.DIALOG_TRIM);
+		final Shell shell = SwtUtil.makeShell(parent, SWT.DIALOG_TRIM);
 		shell.setText(message);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
@@ -187,7 +187,7 @@ public class SwtUtl {
 		saveBtn.setText("&Save");
 		saveBtn.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String fouName = SwtUtl.saveFile(shell, "Save as", "", "", SwtUtl.makeFileFilter("HTML files", "*.html"));
+				String fouName = SwtUtil.saveFile(shell, "Save as", "", "", SwtUtil.makeFileFilter("HTML files", "*.html"));
 				if (fouName == null)
 					return;
 				PrintWriter fou = null;
@@ -198,7 +198,7 @@ public class SwtUtl {
 				} finally {
 					try {
 						if (fou != null && fou.checkError()) {
-							SwtUtl.msgboxError(shell, "Save failed");
+							SwtUtil.msgboxError(shell, "Save failed");
 						}
 						if (fou != null) {
 							fou.close();
@@ -225,7 +225,7 @@ public class SwtUtl {
 		}
 		shell.pack();
 		shell.open();
-		SwtUtl.centerShell(shell);
+		SwtUtil.centerShell(shell);
 		Display display = shell.getDisplay();
 		if (display == null)
 			display = Display.getDefault();
@@ -396,7 +396,7 @@ public class SwtUtl {
 				result = callable.call();
 			} catch (Exception e) {
 				exception = e;
-				SwtUtl.activeWaitDialogAbortTask();
+				SwtUtil.activeWaitDialogAbortTask();
 			}
 		}
 	}

@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFiles implements Callable<PanoList> {
 	List<String> images;
@@ -39,7 +39,7 @@ public class GeneratePanoPairFiles implements Callable<PanoList> {
 				File kpplFile = PanoPairList.getFile(imagesRoot, keyPointPairFileRoot, image1, image2); 
 				String statusMessage = (i + 1) + "/" + (j + 1) + "/" + images.size() + " " + kpplFile.getPath();
 				System.out.print(statusMessage);
-				SwtUtl.activeWaitDialogSetStatus(statusMessage, pairsCount);
+				SwtUtil.activeWaitDialogSetStatus(statusMessage, pairsCount);
 				PanoPairList ppl = PanoPairList.readPanoPairFile(imagesRoot, keyPointFileRoot, keyPointPairFileRoot, image1, image2);
 				result.addItem(ppl);
 				System.out.println(" (" + ppl.items.size() + " pano paris)");

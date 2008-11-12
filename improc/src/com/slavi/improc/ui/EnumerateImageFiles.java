@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import com.slavi.util.file.FindFileIterator;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class EnumerateImageFiles implements Callable<ArrayList<String>> {
 	FindFileIterator imagesIterator;
@@ -22,7 +22,7 @@ public class EnumerateImageFiles implements Callable<ArrayList<String>> {
 			}
 			numberOfImages++;
 			result.add(imagesIterator.next().getPath());
-			SwtUtl.activeWaitDialogSetStatus("Found " + numberOfImages + " images", 0);
+			SwtUtil.activeWaitDialogSetStatus("Found " + numberOfImages + " images", 0);
 		}
 		return result;
 	}

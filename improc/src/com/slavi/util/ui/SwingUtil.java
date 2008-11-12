@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
  * This class contains utility functions for creating user interface using the
  * Standard SWING library
  */
-public class SwingUtl {
+public class SwingUtil {
 	/**
 	 * Opens the standard SWING directory chooser dialog.
 	 * @see #getDirectory(Component)

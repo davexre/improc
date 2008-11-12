@@ -96,7 +96,7 @@ public class Marker {
 		marker.garbageCounterMark = garbageCounter.get();
 
 		marks.push(marker);
-		System.out.println("Set block marker \"" + markName + "\", memory used " + Utl.getFormatBytes(marker.memoryUsed));
+		System.out.println("Set block marker \"" + markName + "\", memory used " + Util.getFormatBytes(marker.memoryUsed));
 	}
 
 	public synchronized static void release() {
@@ -108,9 +108,9 @@ public class Marker {
 		int garbageCounterDelta = garbageCounter.get() - m.garbageCounterMark;
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 		System.out.println("Block \"" + m.id + "\" elapsed " + 
-			Utl.getFormatedMilliseconds(now - m.mark) + 
-			", memory used " + Utl.getFormatBytes(memoryUsage.getUsed()) + 
-			", memory delta " + Utl.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed) +
+			Util.getFormatedMilliseconds(now - m.mark) + 
+			", memory used " + Util.getFormatBytes(memoryUsage.getUsed()) + 
+			", memory delta " + Util.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed) +
 			(garbageCounterDelta == 0 ? 
 					", garbage collection NOT invoked" : 
 					", garbage collection invoked " + Integer.toString(garbageCounterDelta) + " times")

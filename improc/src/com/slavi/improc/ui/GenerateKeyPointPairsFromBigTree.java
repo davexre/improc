@@ -16,7 +16,7 @@ import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.tree.KDTree;
-import com.slavi.util.ui.SwtUtl;
+import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyPointPairList>> {
 
@@ -117,7 +117,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				}
 			}
 			int count = processed.incrementAndGet();
-			SwtUtl.activeWaitDialogSetStatus("Processing " + 
+			SwtUtil.activeWaitDialogSetStatus("Processing " + 
 					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
 			System.out.println(image.imageFileStamp.getFile().getAbsolutePath() + " (" + totalPairCount + ")");
 			return null;
