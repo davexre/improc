@@ -1,8 +1,11 @@
 package com.slavi.math.adjust;
 
 import java.awt.geom.Point2D;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LMDif.LMDifFcn;
@@ -161,11 +164,11 @@ public class PanoAdjust implements LMDifFcn {
 
 	// Global data structure used by alignment optimization
 	public static class AlignInfo {
-		Image 				im[];				// Array of Pointers to Image Structs
-		optVars				opt[];				// Mark variables to optimize
+		ArrayList<Image>im = new ArrayList<Image>();					// Array of Pointers to Image Structs
+		ArrayList<optVars>opt = new ArrayList<optVars>();				// Mark variables to optimize
 		int				numIm;				// Number of images 
-		ControlPoint 			cpt[];				// List of Control points
-		triangle			t;				// List of triangular faces
+		ArrayList<ControlPoint>cpt = new ArrayList<ControlPoint>();		// List of Control points
+		ArrayList<triangle>t = new ArrayList<triangle>();				// List of triangular faces
 		int				nt;				// Number of triangular faces
 		int     			numPts;				// Number of Control Points
 		int				numParam;			// Number of parameters to optimize
@@ -173,8 +176,8 @@ public class PanoAdjust implements LMDifFcn {
 		stitchBuffer				st;				// Info on how to stitch the panorama
 //		void				data;		// ????
 		lmfunc				fcn;
-		size_Prefs				sP;	
-		CoordInfo			cim;				// Real World coordinates
+		size_Prefs sP = new size_Prefs();	
+		ArrayList<CoordInfo>cim = new ArrayList<CoordInfo>();			// Real World coordinates
 	}
 
 	AlignInfo g;
@@ -513,72 +516,75 @@ public class PanoAdjust implements LMDifFcn {
 		int k;
 		// Set global preferences structures using LM-params
 		for (int i = 0; i < g.numIm; i++) {
-			if ((k = g.opt[i].yaw) > 0) {
+			Image im = g.im.get(i);
+			optVars opt = g.opt.get(i);
+			
+			if ((k = g.opt.get(i).yaw) > 0) {
 				if (k == 1) {
-					g.im[i].yaw = x.getItem(j++, 0);
-					g.im[i].yaw = NORM_ANGLE(g.im[i].yaw);
+					im.yaw = x.getItem(j++, 0);
+					im.yaw = NORM_ANGLE(im.yaw);
 				} else {
-					g.im[i].yaw = g.im[k - 2].yaw;
+					im.yaw = g.im.get(k - 2).yaw;
 				}
 			}
-			if ((k = g.opt[i].pitch) > 0) {
+			if ((k = opt.pitch) > 0) {
 				if (k == 1) {
-					g.im[i].pitch = x.getItem(j++, 0);
-					g.im[i].pitch = NORM_ANGLE(g.im[i].pitch);
+					im.pitch = x.getItem(j++, 0);
+					im.pitch = NORM_ANGLE(im.pitch);
 				} else {
-					g.im[i].pitch = g.im[k - 2].pitch;
+					im.pitch = g.im.get(k - 2).pitch;
 				}
 			}
-			if ((k = g.opt[i].roll) > 0) {
+			if ((k = opt.roll) > 0) {
 				if (k == 1) {
-					g.im[i].roll = x.getItem(j++, 0);
-					NORM_ANGLE(g.im[i].roll);
+					im.roll = x.getItem(j++, 0);
+					NORM_ANGLE(im.roll);
 				} else {
-					g.im[i].roll = g.im[k - 2].roll;
+					im.roll = g.im.get(k - 2).roll;
 				}
 			}
-			if ((k = g.opt[i].hfov) > 0) {
+			if ((k = opt.hfov) > 0) {
 				if (k == 1) {
-					g.im[i].hfov = x.getItem(j++, 0);
-					if (g.im[i].hfov < 0.0)
-						g.im[i].hfov = -g.im[i].hfov;
+					im.hfov = x.getItem(j++, 0);
+					if (im.hfov < 0.0)
+						im.hfov = -im.hfov;
 				} else {
-					g.im[i].hfov = g.im[k - 2].hfov;
+					im.hfov = g.im.get(k - 2).hfov;
 				}
 			}
-			if ((k = g.opt[i].a) > 0) {
+			if ((k = opt.a) > 0) {
 				if (k == 1) {
-					g.im[i].cP.radial_params[0][3] = x.getItem(j++, 0) / C_FACTOR;
+					im.cP.radial_params[0][3] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
-					g.im[i].cP.radial_params[0][3] = g.im[k - 2].cP.radial_params[0][3];
+					im.cP.radial_params[0][3] = g.im.get(k - 2).cP.radial_params[0][3];
 				}
 			}
-			if ((k = g.opt[i].b) > 0) {
+			if ((k = opt.b) > 0) {
 				if (k == 1) {
-					g.im[i].cP.radial_params[0][2] = x.getItem(j++, 0) / C_FACTOR;
+					im.cP.radial_params[0][2] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
-					g.im[i].cP.radial_params[0][2] = g.im[k - 2].cP.radial_params[0][2];
+					im.cP.radial_params[0][2] = g.im.get(k - 2).cP.radial_params[0][2];
 				}
 			}
-			if ((k = g.opt[i].c) > 0) {
+			if ((k = opt.c) > 0) {
 				if (k == 1) {
-					g.im[i].cP.radial_params[0][1] = x.getItem(j++, 0)/ C_FACTOR;
+					im.cP.radial_params[0][1] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
-					g.im[i].cP.radial_params[0][1] = g.im[k - 2].cP.radial_params[0][1];
+					im.cP.radial_params[0][1] = g.im.get(k - 2).cP.radial_params[0][1];
 				}
 			}
-			if ((k = g.opt[i].d) > 0) {
+			if ((k = opt.d) > 0) {
 				if (k == 1) {
-					g.im[i].cP.horizontal_params[0] = x.getItem(j++, 0);
+					im.cP.horizontal_params[0] = x.getItem(j++, 0);
 				} else {
-					g.im[i].cP.horizontal_params[0] = g.im[k - 2].cP.horizontal_params[0];
+					im.cP.horizontal_params[0] = g.im.get(k - 2).cP.horizontal_params[0];
 				}
 			}
-			if ((k = g.opt[i].e) > 0) {
+			if ((k = opt.e) > 0) {
 				if (k == 1) {
-					g.im[i].cP.vertical_params[0] = x.getItem(j++, 0);
+					im.cP.vertical_params[0] = x.getItem(j++, 0);
 				} else {
-					g.im[i].cP.vertical_params[0] = g.im[k - 2].cP.vertical_params[0];
+					im.cP.vertical_params[0] = g.im.get(k - 2).cP.vertical_params[0];
 				}
 			}
 		}
@@ -586,7 +592,7 @@ public class PanoAdjust implements LMDifFcn {
 		// Calculate distances
 		double avg = 0.0;
 		for (int i = 0; i < g.numPts; i++) {
-			ControlPoint cp = g.cpt[i];
+			ControlPoint cp = g.cpt.get(i);
 			double d = distControlPoint(cp, cp.type == OptimizeType.r);
 			fvec.setItem(i, 0, d);
 			avg += d;
@@ -598,6 +604,398 @@ public class PanoAdjust implements LMDifFcn {
 	
 	void RunLMOptimizer() {
 		// Initialize optimization params
+		int n = g.numParam;
+		int m = g.numPts;
+		Matrix x = new Matrix(n, 1);
+		Matrix fvec = new Matrix(m, 1);
 		
+		// Set LM params using global preferences structure
+		// Change to cover range 0....1 (roughly)
+		int j = 0; // Counter for optimization parameters
+		for (int i = 0; i < g.numIm; i++) {
+			Image im = g.im.get(i);
+			optVars opt = g.opt.get(i);
+			
+			if(opt.yaw != 0)		// optimize alpha? 0-no 1-yes
+				x.setItem(j++, 0, im.yaw);
+			if(opt.pitch != 0)		// optimize pitch? 0-no 1-yes
+				x.setItem(j++, 0, im.pitch);
+			if(opt.roll != 0)		// optimize gamma? 0-no 1-yes
+				x.setItem(j++, 0, im.roll);
+			if(opt.hfov != 0)		// optimize hfov? 0-no 1-yes
+				x.setItem(j++, 0, im.hfov);
+			if(opt.a != 0)			// optimize a? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.radial_params[0][3] * C_FACTOR);
+			if(opt.b != 0)			// optimize b? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.radial_params[0][2] * C_FACTOR);
+			if(opt.c != 0)			// optimize c? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.radial_params[0][1] * C_FACTOR);
+			if(opt.d != 0)			// optimize d? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.horizontal_params[0]);
+			if(opt.e != 0)			// optimize e? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.vertical_params[0]);
+		}
+		if (j != g.numParam)
+			throw new RuntimeException("Invalid value for numParam");
+		
+		LMDif.lmdif(this, x, fvec);
 	}
+
+	private void readImageLine(StringTokenizer st, Image im, optVars opt, CoordInfo ci) {
+		String t;
+		while ((t = st.nextToken()) != null) {
+			if (t.length() <= 0)
+				continue;
+			if ("w".equals(t)) {
+				im.width = Long.parseLong(st.nextToken());
+			} else if ("h".equals(t)) {
+				im.height = Long.parseLong(st.nextToken());
+			} else if ("v".equals(t)) {
+				opt.hfov = Integer.parseInt(st.nextToken());
+			} else if ("v=".equals(t)) {
+				im.hfov = Double.parseDouble(st.nextToken());
+			} else if ("a".equals(t)) {
+				opt.a = Integer.parseInt(st.nextToken()) + 2;
+				im.cP.radial = true;
+			} else if ("a=".equals(t)) {
+				im.cP.radial_params[0][3] = Double.parseDouble(st.nextToken());
+				im.cP.radial = true;
+			} else if ("b".equals(t)) {
+				opt.b = Integer.parseInt(st.nextToken()) + 2;
+				im.cP.radial = true;
+			} else if ("b=".equals(t)) {
+				im.cP.radial_params[0][2] = Double.parseDouble(st.nextToken());
+				im.cP.radial = true;
+			} else if ("c".equals(t)) {
+				opt.c = Integer.parseInt(st.nextToken()) + 2;
+				im.cP.radial = true;
+			} else if ("c=".equals(t)) {
+				im.cP.radial_params[0][1] = Double.parseDouble(st.nextToken());
+				im.cP.radial = true;
+			} else if ("f".equals(t)) {
+				int k = Integer.parseInt(st.nextToken());
+				switch (k) {
+				case 0: im.format = ImageFormat.Rectilinear; break;
+				case 1: 
+					im.format = ImageFormat.Panorama;
+					im.cP.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					break;
+				case 2: im.format = ImageFormat.FisheyeCirc; break;
+				case 3: im.format = ImageFormat.FisheyeFF; break;
+				case 4: 
+					im.format = ImageFormat.Equirectangular; 
+					im.cP.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					break;
+				case 8: im.format = ImageFormat.Orthographic; break;
+				default:
+					throw new RuntimeException("invalid imgae format");
+				}
+			} else if ("o".equals(t)) {
+				im.cP.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
+			} else if ("y".equals(t)) {
+				opt.yaw = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("y=".equals(t)) {
+				im.yaw = Double.parseDouble(st.nextToken());
+			} else if ("p".equals(t)) {
+				opt.pitch = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("p=".equals(t)) {
+				im.pitch = Double.parseDouble(st.nextToken());
+			} else if ("r".equals(t)) {
+				opt.roll = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("r=".equals(t)) {
+				im.roll = Double.parseDouble(st.nextToken());
+			} else if ("d".equals(t)) {
+				opt.d = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("d=".equals(t)) {
+				im.cP.horizontal_params[0] = Double.parseDouble(st.nextToken());
+				im.cP.horizontal = true;
+			} else if ("e".equals(t)) {
+				opt.e = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("e=".equals(t)) {
+				im.cP.vertical_params[0] = Double.parseDouble(st.nextToken());
+				im.cP.vertical = true;
+			} else if ("n".equals(t)) {
+				im.name = st.nextToken();
+			} else if ("m".equals(t)) {
+				im.cP.frame = Integer.parseInt(st.nextToken());
+				im.cP.cutFrame = true;
+			} else if ("mx".equals(t)) {
+				im.cP.fwidth = Integer.parseInt(st.nextToken());
+				im.cP.cutFrame = true;
+			} else if ("my".equals(t)) {
+				im.cP.fheight = Integer.parseInt(st.nextToken());
+				im.cP.cutFrame = true;
+			} else if ("X".equals(t)) {
+				ci.x[0] = Double.parseDouble(st.nextToken());
+			} else if ("Y".equals(t)) {
+				ci.x[1] = Double.parseDouble(st.nextToken());
+			} else if ("Z".equals(t)) {
+				ci.x[2] = Double.parseDouble(st.nextToken());
+			} else if ("S".equals(t)) {
+				im.selection.left = Integer.parseInt(st.nextToken(","));
+				im.selection.right = Integer.parseInt(st.nextToken(","));
+				im.selection.top = Integer.parseInt(st.nextToken(","));
+				im.selection.bottom = Integer.parseInt(st.nextToken());
+			} else if ("C".equals(t)) {
+				im.selection.left = Integer.parseInt(st.nextToken(","));
+				im.selection.right = Integer.parseInt(st.nextToken(","));
+				im.selection.top = Integer.parseInt(st.nextToken(","));
+				im.selection.bottom = Integer.parseInt(st.nextToken());
+				im.cP.cutFrame = true;
+			} else if ("+".equals(t)) {
+				g.st.srcName = st.nextToken();
+			} else if ("-".equals(t)) {
+				g.st.destName = st.nextToken();
+			} else if ("u".equals(t)) {
+				g.st.feather = Integer.parseInt(st.nextToken());
+			} else if ("s".equals(t)) {
+				g.st.seam = Integer.parseInt(st.nextToken());
+				// if(sBuf.seam != _dest)
+				//	sBuf.seam = _middle;
+			} else if ("k".equals(t)) {
+				int i = Integer.parseInt(st.nextToken());
+				g.st.colcorrect |= i & 3; 
+				g.st.colcorrect += (i + 1) * 4; 
+			}
+		}
+		
+		// Set 4th polynomial parameter
+		im.cP.radial_params[0][0] = 1.0 - (im.cP.radial_params[0][3] + im.cP.radial_params[0][2] + im.cP.radial_params[0][1]);
+		for (int col = 1; col < 3; col++) {
+			for (int i = 0; i < 4; i++)
+				im.cP.radial_params[col][i]	= im.cP.radial_params[0][i];
+			im.cP.vertical_params[col] = im.cP.vertical_params[0];
+			im.cP.horizontal_params[col] = im.cP.horizontal_params[0];
+		}
+		// Restrict radial correction to monotonous interval
+		double a[] = new double[4];
+		for (int i = 0; i < 3; i++) {
+			for (int k = 0; k < 4; k++) {
+				a[k] = 0.0;//1.0e-10;
+				if (im.cP.radial_params[i][k] != 0.0 ) {
+					a[k] = (k + 1) * im.cP.radial_params[i][k];
+				}
+			}
+			im.cP.radial_params[i][4] = smallestRoot(a);
+		}
+	}
+	
+	public void readPanoScript(BufferedReader fin) throws IOException {
+		while (fin.ready()) {
+			String s = fin.readLine();
+			if (s == null || s.length() <= 0)
+				continue;
+			StringTokenizer st = new StringTokenizer(s);
+			st.nextToken();
+			
+			char c = s.charAt(0);
+			switch (c) {
+			case 'i': {
+				// Image description
+				Image im = new Image();
+				optVars opt = new optVars();
+				CoordInfo ci = new CoordInfo();
+				readImageLine(st, im, opt, ci);
+				g.im.add(im);
+				g.opt.add(opt);
+				g.cim.add(ci);
+				break;
+			}
+			case 't': {
+				// Triangle
+				triangle tr = new triangle();
+				String t;
+				int i = 0;
+				while ((t = st.nextToken()) != null) {
+					if (t.length() <= 0)
+						continue;
+					if ("i".equals(t)) {
+						tr.nIm = Integer.parseInt(st.nextToken());
+					} else {
+						if (i < 3) {
+							tr.vert[i++] = Integer.parseInt(st.nextToken());
+						} else {
+							st.nextToken();
+						}
+					}
+				}
+				g.t.add(tr);
+				break;
+			}
+			case 'c': {
+				// Control Point
+				ControlPoint cp = new ControlPoint();
+				String t;
+				while ((t = st.nextToken()) != null) {
+					if (t.length() <= 0)
+						continue;
+					if ("t".equals(t)) {
+						int type = Integer.parseInt(st.nextToken());
+						switch (type) {
+						case 1: cp.type = OptimizeType.x; break;
+						case 2: cp.type = OptimizeType.y; break;
+						case 0: 
+						default: cp.type = OptimizeType.r; break;
+						}
+					} else if ("n".equals(t)) {
+						int n = Integer.parseInt(st.nextToken());
+						cp.im0 = g.im.get(n);
+					} else if ("N".equals(t)) {
+						int n = Integer.parseInt(st.nextToken());
+						cp.im1 = g.im.get(n);
+					} else if ("x".equals(t)) {
+						cp.x0 = Integer.parseInt(st.nextToken());
+					} else if ("X".equals(t)) {
+						cp.x1 = Integer.parseInt(st.nextToken());
+					} else if ("y".equals(t)) {
+						cp.y0 = Integer.parseInt(st.nextToken());
+					} else if ("Y".equals(t)) {
+						cp.y1 = Integer.parseInt(st.nextToken());
+					} else if ("i".equals(t)) {
+						int n = Integer.parseInt(st.nextToken());
+						cp.im1 = cp.im0 = g.im.get(n);
+					}
+				}
+				g.cpt.add(cp);
+				break;
+			}
+			case 'm': {
+				// Mode description
+				String t;
+				while ((t = st.nextToken()) != null) {
+					if (t.length() <= 0)
+						continue;
+					if ("g".equals(t)) {
+						g.sP.gamma = Double.parseDouble(st.nextToken());
+					} else if ("i".equals(t)) {
+						g.sP.interpolator = Integer.parseInt(st.nextToken());
+					} else if ("p".equals(t)) {
+						g.sP.optCreatePano = Integer.parseInt(st.nextToken());
+					}
+				}
+				break;
+			}
+			case 'v': {
+				// Variables to optimize
+				String t;
+				while ((t = st.nextToken()) != null) {
+					if (t.length() <= 0)
+						continue;
+					int n = Integer.parseInt(st.nextToken());
+					if ("y".equals(t)) {
+						g.opt.get(n).yaw = 1;
+					} else if ("p".equals(t)) {
+						g.opt.get(n).pitch = 1;
+					} else if ("r".equals(t)) {
+						g.opt.get(n).roll = 1;
+					} else if ("v".equals(t)) {
+						g.opt.get(n).hfov = 1;
+					} else if ("a".equals(t)) {
+						g.opt.get(n).a = 1;
+					} else if ("b".equals(t)) {
+						g.opt.get(n).b = 1;
+					} else if ("c".equals(t)) {
+						g.opt.get(n).c = 1;
+					} else if ("d".equals(t)) {
+						g.opt.get(n).d = 1;
+					} else if ("e".equals(t)) {
+						g.opt.get(n).e = 1;
+					} else if ("X".equals(t)) {
+						g.cim.get(n).set[0] = 0;
+					} else if ("Y".equals(t)) {
+						g.cim.get(n).set[1] = 0;
+					} else if ("Z".equals(t)) {
+						g.cim.get(n).set[2] = 0;
+					}
+				}
+				break;
+			}
+			case 'p':
+				// panorama
+				g.pano = new Image();
+				optVars opt = new optVars();
+				CoordInfo ci = new CoordInfo();
+				readImageLine(st, g.pano, opt, ci);
+				if (g.pano.format == ImageFormat.FisheyeCirc)
+					g.pano.format = ImageFormat.Equirectangular;
+				break;
+			case '*':
+				// End of script-data
+			default:
+				break;
+			}
+		}
+		
+		
+		//////////////// more
+	}
+	
+	public double cubeRoot(double x) {
+		if (x == 0.0)
+			return 0.0;
+		else if( x > 0.0 )
+			return Math.pow(x, 1.0/3.0);
+		else
+			return -Math.pow(-x, 1.0/3.0);
+	}
+	
+	int squareZero(double a[], double root[]){
+		if (a[2] == 0.0) { 
+			// linear equation
+			if (a[1] == 0.0) { 
+				// constant
+				if (a[0] == 0.0) {
+					root[0] = 0.0;
+					return 1; 
+				} else {
+					return 0;
+				}
+			} else {
+				root[0] = -a[0] / a[1];
+				return 1; 
+			}
+		} else {
+			if (4.0 * a[2] * a[0] > a[1] * a[1]) {
+				return 0; 
+			} else {
+				root[0] = (- a[1] + Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
+				root[1] = (- a[1] - Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
+				return 2;
+			}
+		}
+	}
+	
+	int cubeZero(double a[], double root[]){
+		if (a[3] == 0.0) { 
+			// second order polynomial
+			return squareZero(a, root);
+		}else{
+			double p = ((-1.0/3.0) * (a[2]/a[3]) * (a[2]/a[3]) + a[1]/a[3]) / 3.0;
+			double q = ((2.0/27.0) * (a[2]/a[3]) * (a[2]/a[3]) * (a[2]/a[3]) - (1.0/3.0) * (a[2]/a[3]) * (a[1]/a[3]) + a[0]/a[3]) / 2.0;
+			
+			if( q*q + p*p*p >= 0.0 ){
+				root[0] = cubeRoot(-q + Math.sqrt(q*q + p*p*p)) + cubeRoot(-q - Math.sqrt(q*q + p*p*p)) - a[2] / (3.0 * a[3]); 
+				return 1;
+			}else{
+				double phi = Math.acos( -q / Math.sqrt(-p*p*p) );
+				root[0] =  2.0 * Math.sqrt(-p) * Math.cos(phi/3.0) - a[2] / (3.0 * a[3]); 
+				root[1] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 + Math.PI/3.0) - a[2] / (3.0 * a[3]); 
+				root[2] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 - Math.PI/3.0) - a[2] / (3.0 * a[3]); 
+				return 3;
+			}
+		}
+	}
+	
+	double smallestRoot(double p[]) {
+		double root[] = new double[3];
+		double sroot = 1000.0;
+		
+		int n = cubeZero(p, root);
+		for (int i = 0; i < n; i++) {
+			if (root[i] > 0.0 && root[i] < sroot)
+				sroot = root[i];
+		}
+		return sroot;
+	}
+
 }

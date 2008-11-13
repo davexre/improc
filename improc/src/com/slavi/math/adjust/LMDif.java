@@ -60,7 +60,7 @@ public class LMDif {
 	 * @param fvec	is an output array of length m which contains
 	 * 				the functions evaluated at the output x.
 	 */
-	public void lmdif(LMDifFcn fcn, Matrix x, Matrix fvec) {
+	public static void lmdif(LMDifFcn fcn, Matrix x, Matrix fvec) {
 		int m = fvec.getSizeX();	// the number of functions.
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 
@@ -284,7 +284,7 @@ public class LMDif {
 	 * 
 	 * ...
 	 */
-	public double lmpar(Matrix r, Matrix diag, Matrix x, Matrix qtb, double delta, Matrix sdiag) {
+	static double lmpar(Matrix r, Matrix diag, Matrix x, Matrix qtb, double delta, Matrix sdiag) {
 		double par = 0.0;
 		int m = r.getSizeY();
 		int n = r.getSizeX();
@@ -472,7 +472,7 @@ public class LMDif {
 	 * @param qtb	is an input array of length n which must contain the first
 	 * 				n elements of the vector (q transpose)*b.
 	 */
-	public void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb) {
+	static void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb) {
 		int m = r.getSizeY();
 		int n = r.getSizeX();
 		
