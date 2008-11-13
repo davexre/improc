@@ -3,9 +3,9 @@ package com.slavi.math.adjust;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LMDif.LMDifFcn;
@@ -173,14 +173,14 @@ public class PanoAdjust implements LMDifFcn {
 		int     			numPts;				// Number of Control Points
 		int				numParam;			// Number of parameters to optimize
 		Image				pano;				// Panoramic Image decription
-		stitchBuffer				st;				// Info on how to stitch the panorama
+		stitchBuffer st = new stitchBuffer();				// Info on how to stitch the panorama
 //		void				data;		// ????
 		lmfunc				fcn;
 		size_Prefs sP = new size_Prefs();	
 		ArrayList<CoordInfo>cim = new ArrayList<CoordInfo>();			// Real World coordinates
 	}
 
-	AlignInfo g;
+	AlignInfo g = new AlignInfo();
 	
 	// Set Makeparameters depending on adjustprefs, color and source image
 	@SuppressWarnings("incomplete-switch")
@@ -641,7 +641,7 @@ public class PanoAdjust implements LMDifFcn {
 		LMDif.lmdif(this, x, fvec);
 	}
 
-	private void readImageLine(StringTokenizer st, Image im, optVars opt, CoordInfo ci) {
+	private void readImageLine(PTOTokenizer st, Image im, optVars opt, CoordInfo ci) {
 		String t;
 		while ((t = st.nextToken()) != null) {
 			if (t.length() <= 0)
@@ -650,26 +650,26 @@ public class PanoAdjust implements LMDifFcn {
 				im.width = Long.parseLong(st.nextToken());
 			} else if ("h".equals(t)) {
 				im.height = Long.parseLong(st.nextToken());
-			} else if ("v".equals(t)) {
-				opt.hfov = Integer.parseInt(st.nextToken());
 			} else if ("v=".equals(t)) {
+				opt.hfov = Integer.parseInt(st.nextToken());
+			} else if ("v".equals(t)) {
 				im.hfov = Double.parseDouble(st.nextToken());
-			} else if ("a".equals(t)) {
+			} else if ("a=".equals(t)) {
 				opt.a = Integer.parseInt(st.nextToken()) + 2;
 				im.cP.radial = true;
-			} else if ("a=".equals(t)) {
+			} else if ("a".equals(t)) {
 				im.cP.radial_params[0][3] = Double.parseDouble(st.nextToken());
 				im.cP.radial = true;
-			} else if ("b".equals(t)) {
+			} else if ("b=".equals(t)) {
 				opt.b = Integer.parseInt(st.nextToken()) + 2;
 				im.cP.radial = true;
-			} else if ("b=".equals(t)) {
+			} else if ("b".equals(t)) {
 				im.cP.radial_params[0][2] = Double.parseDouble(st.nextToken());
 				im.cP.radial = true;
-			} else if ("c".equals(t)) {
+			} else if ("c=".equals(t)) {
 				opt.c = Integer.parseInt(st.nextToken()) + 2;
 				im.cP.radial = true;
-			} else if ("c=".equals(t)) {
+			} else if ("c".equals(t)) {
 				im.cP.radial_params[0][1] = Double.parseDouble(st.nextToken());
 				im.cP.radial = true;
 			} else if ("f".equals(t)) {
@@ -692,26 +692,26 @@ public class PanoAdjust implements LMDifFcn {
 				}
 			} else if ("o".equals(t)) {
 				im.cP.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
-			} else if ("y".equals(t)) {
-				opt.yaw = Integer.parseInt(st.nextToken()) + 2;
 			} else if ("y=".equals(t)) {
+				opt.yaw = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("y".equals(t)) {
 				im.yaw = Double.parseDouble(st.nextToken());
-			} else if ("p".equals(t)) {
-				opt.pitch = Integer.parseInt(st.nextToken()) + 2;
 			} else if ("p=".equals(t)) {
+				opt.pitch = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("p".equals(t)) {
 				im.pitch = Double.parseDouble(st.nextToken());
-			} else if ("r".equals(t)) {
-				opt.roll = Integer.parseInt(st.nextToken()) + 2;
 			} else if ("r=".equals(t)) {
+				opt.roll = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("r".equals(t)) {
 				im.roll = Double.parseDouble(st.nextToken());
-			} else if ("d".equals(t)) {
-				opt.d = Integer.parseInt(st.nextToken()) + 2;
 			} else if ("d=".equals(t)) {
+				opt.d = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("d".equals(t)) {
 				im.cP.horizontal_params[0] = Double.parseDouble(st.nextToken());
 				im.cP.horizontal = true;
-			} else if ("e".equals(t)) {
-				opt.e = Integer.parseInt(st.nextToken()) + 2;
 			} else if ("e=".equals(t)) {
+				opt.e = Integer.parseInt(st.nextToken()) + 2;
+			} else if ("e".equals(t)) {
 				im.cP.vertical_params[0] = Double.parseDouble(st.nextToken());
 				im.cP.vertical = true;
 			} else if ("n".equals(t)) {
@@ -732,14 +732,14 @@ public class PanoAdjust implements LMDifFcn {
 			} else if ("Z".equals(t)) {
 				ci.x[2] = Double.parseDouble(st.nextToken());
 			} else if ("S".equals(t)) {
-				im.selection.left = Integer.parseInt(st.nextToken(","));
-				im.selection.right = Integer.parseInt(st.nextToken(","));
-				im.selection.top = Integer.parseInt(st.nextToken(","));
+				im.selection.left = Integer.parseInt(st.nextToken());
+				im.selection.right = Integer.parseInt(st.nextToken());
+				im.selection.top = Integer.parseInt(st.nextToken());
 				im.selection.bottom = Integer.parseInt(st.nextToken());
 			} else if ("C".equals(t)) {
-				im.selection.left = Integer.parseInt(st.nextToken(","));
-				im.selection.right = Integer.parseInt(st.nextToken(","));
-				im.selection.top = Integer.parseInt(st.nextToken(","));
+				im.selection.left = Integer.parseInt(st.nextToken());
+				im.selection.right = Integer.parseInt(st.nextToken());
+				im.selection.top = Integer.parseInt(st.nextToken());
 				im.selection.bottom = Integer.parseInt(st.nextToken());
 				im.cP.cutFrame = true;
 			} else if ("+".equals(t)) {
@@ -785,7 +785,7 @@ public class PanoAdjust implements LMDifFcn {
 			String s = fin.readLine();
 			if (s == null || s.length() <= 0)
 				continue;
-			StringTokenizer st = new StringTokenizer(s);
+			PTOTokenizer st = new PTOTokenizer(s);
 			st.nextToken();
 			
 			char c = s.charAt(0);
@@ -844,13 +844,13 @@ public class PanoAdjust implements LMDifFcn {
 						int n = Integer.parseInt(st.nextToken());
 						cp.im1 = g.im.get(n);
 					} else if ("x".equals(t)) {
-						cp.x0 = Integer.parseInt(st.nextToken());
+						cp.x0 = Double.parseDouble(st.nextToken());
 					} else if ("X".equals(t)) {
-						cp.x1 = Integer.parseInt(st.nextToken());
+						cp.x1 = Double.parseDouble(st.nextToken());
 					} else if ("y".equals(t)) {
-						cp.y0 = Integer.parseInt(st.nextToken());
+						cp.y0 = Double.parseDouble(st.nextToken());
 					} else if ("Y".equals(t)) {
-						cp.y1 = Integer.parseInt(st.nextToken());
+						cp.y1 = Double.parseDouble(st.nextToken());
 					} else if ("i".equals(t)) {
 						int n = Integer.parseInt(st.nextToken());
 						cp.im1 = cp.im0 = g.im.get(n);
@@ -946,44 +946,39 @@ public class PanoAdjust implements LMDifFcn {
 				// constant
 				if (a[0] == 0.0) {
 					root[0] = 0.0;
-					return 1; 
-				} else {
-					return 0;
+					return 1;
 				}
-			} else {
-				root[0] = -a[0] / a[1];
-				return 1; 
+				return 0;
 			}
-		} else {
-			if (4.0 * a[2] * a[0] > a[1] * a[1]) {
-				return 0; 
-			} else {
-				root[0] = (- a[1] + Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
-				root[1] = (- a[1] - Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
-				return 2;
-			}
+			root[0] = -a[0] / a[1];
+			return 1; 
 		}
+		if (4.0 * a[2] * a[0] > a[1] * a[1]) {
+			return 0; 
+		}
+		root[0] = (- a[1] + Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
+		root[1] = (- a[1] - Math.sqrt( a[1] * a[1] - 4.0 * a[2] * a[0] )) / (2.0 * a[2]);
+		return 2;
 	}
 	
 	int cubeZero(double a[], double root[]){
 		if (a[3] == 0.0) { 
 			// second order polynomial
 			return squareZero(a, root);
-		}else{
-			double p = ((-1.0/3.0) * (a[2]/a[3]) * (a[2]/a[3]) + a[1]/a[3]) / 3.0;
-			double q = ((2.0/27.0) * (a[2]/a[3]) * (a[2]/a[3]) * (a[2]/a[3]) - (1.0/3.0) * (a[2]/a[3]) * (a[1]/a[3]) + a[0]/a[3]) / 2.0;
-			
-			if( q*q + p*p*p >= 0.0 ){
-				root[0] = cubeRoot(-q + Math.sqrt(q*q + p*p*p)) + cubeRoot(-q - Math.sqrt(q*q + p*p*p)) - a[2] / (3.0 * a[3]); 
-				return 1;
-			}else{
-				double phi = Math.acos( -q / Math.sqrt(-p*p*p) );
-				root[0] =  2.0 * Math.sqrt(-p) * Math.cos(phi/3.0) - a[2] / (3.0 * a[3]); 
-				root[1] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 + Math.PI/3.0) - a[2] / (3.0 * a[3]); 
-				root[2] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 - Math.PI/3.0) - a[2] / (3.0 * a[3]); 
-				return 3;
-			}
 		}
+		double p = ((-1.0/3.0) * (a[2]/a[3]) * (a[2]/a[3]) + a[1]/a[3]) / 3.0;
+		double q = ((2.0/27.0) * (a[2]/a[3]) * (a[2]/a[3]) * (a[2]/a[3]) - 
+					(1.0/3.0) * (a[2]/a[3]) * (a[1]/a[3]) + a[0]/a[3]) / 2.0;
+		
+		if (q*q + p*p*p >= 0.0) {
+			root[0] = cubeRoot(-q + Math.sqrt(q*q + p*p*p)) + cubeRoot(-q - Math.sqrt(q*q + p*p*p)) - a[2] / (3.0 * a[3]); 
+			return 1;
+		}
+		double phi = Math.acos( -q / Math.sqrt(-p*p*p) );
+		root[0] =  2.0 * Math.sqrt(-p) * Math.cos(phi/3.0) - a[2] / (3.0 * a[3]); 
+		root[1] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 + Math.PI/3.0) - a[2] / (3.0 * a[3]); 
+		root[2] = -2.0 * Math.sqrt(-p) * Math.cos(phi/3.0 - Math.PI/3.0) - a[2] / (3.0 * a[3]); 
+		return 3;
 	}
 	
 	double smallestRoot(double p[]) {
@@ -998,4 +993,11 @@ public class PanoAdjust implements LMDifFcn {
 		return sroot;
 	}
 
+	public static void main(String[] args) throws IOException {
+		BufferedReader fin = new BufferedReader(new InputStreamReader(
+				PanoAdjust.class.getResourceAsStream("optimizer.txt")));
+		PanoAdjust panoAdjust = new PanoAdjust();
+		panoAdjust.readPanoScript(fin);
+		fin.close();
+	}
 }
