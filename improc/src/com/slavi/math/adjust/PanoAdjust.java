@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -928,6 +929,78 @@ public class PanoAdjust implements LMDifFcn {
 		
 		
 		//////////////// more
+	}
+	
+	public void writePanoScript(PrintWriter fou) {
+		int format = 0;
+		switch (g.pano.format) {
+		case Rectilinear:		format = 0; break;
+		case Panorama:			format = 1; break;
+		case FisheyeCirc:		format = 2; break;
+		case FisheyeFF:			format = 0; break;
+		case Equirectangular:	format = 0; break;
+		case SphericalCP:		format = 0; break;
+		case ShpericalTP:		format = 0; break;
+		case Mirror:			format = 0; break;
+		case Orthographic:		format = 0; break;
+		case Cubic:				format = 0; break;
+		}
+		fou.println("p " + Integer.toString(format) + " w" + Long.toString(g.pano.width) + " h" + Long.toString(g.pano.height) +
+				" v" + Double.toString(g.pano.hfov) + " n\"" + g.pano.name + "\"");
+		
+		
+		for (int i = 0; i < g.numIm; i++) {
+			Image im = g.im.get(i);
+			switch (im.format) {
+			case Rectilinear:		format = 0; break;
+			case Panorama:			format = 1; break;
+			case FisheyeCirc:		format = 2; break;
+			case FisheyeFF:			format = 3; break;
+			case Equirectangular:	format = 4; break;
+			case SphericalCP:		format = 0; break;
+			case ShpericalTP:		format = 0; break;
+			case Mirror:			format = 0; break;
+			case Orthographic:		format = 8; break;
+			case Cubic:				format = 0; break;
+			}
+			
+			int optHfov, opta, optb, optc;
+			optVars opt = g.opt.get(i);
+			if (opt.hfov == 1 || (opt.hfov > 1 &&  g.opt.get(opt.hfov-2).hfov == 1))
+				optHfov = 1;
+			else
+				optHfov = 0;
+
+			if (opt.a == 1 || (opt.a > 1 &&  g.opt.get(opt.a-2).a == 1 ))
+				opta = 1;
+			else
+				opta = 0;
+							
+			if (opt.b == 1 || (opt.b > 1 &&  g.opt.get(opt.b-2).b == 1 ))
+				optb = 1;
+			else
+				optb = 0;
+							
+			if (opt.c == 1 || (opt.c > 1 &&  g.opt.get(opt.c-2).c == 1 ))
+				optc = 1;
+			else
+				optc = 0;
+
+			fou.println("i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
+					" a" + Double.toString(im.cP.radial_params[0][3]) + 
+					" b" + Double.toString(im.cP.radial_params[0][2]) + 
+					" c" + Double.toString(im.cP.radial_params[0][1]) + 
+					" d" + Double.toString(im.cP.horizontal_params[0]) + 
+					" e" + Double.toString(im.cP.vertical_params[0]) +
+					" g0" +
+					" p" + Double.toString(im.pitch) +
+					" r" + Double.toString(im.roll) +
+					" t0" +
+					" v" + Double.toString(im.hfov) +
+					" y" + Double.toString(im.yaw) +
+					" u" + Double.toString(g.st.feather) +
+					" n\"" + im.name + "\"");
+		}
 	}
 	
 	public double cubeRoot(double x) {
