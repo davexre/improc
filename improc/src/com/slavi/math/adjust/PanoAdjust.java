@@ -167,11 +167,11 @@ public class PanoAdjust implements LMDifFcn {
 	public static class AlignInfo {
 		ArrayList<Image>im = new ArrayList<Image>();					// Array of Pointers to Image Structs
 		ArrayList<optVars>opt = new ArrayList<optVars>();				// Mark variables to optimize
-		int				numIm;				// Number of images 
+		//int				numIm;	 -> im.size()			// Number of images 
 		ArrayList<ControlPoint>cpt = new ArrayList<ControlPoint>();		// List of Control points
 		ArrayList<triangle>t = new ArrayList<triangle>();				// List of triangular faces
 		int				nt;				// Number of triangular faces
-		int     			numPts;				// Number of Control Points
+		//int     			numPts;  -> cpt.size()				// Number of Control Points
 		int				numParam;			// Number of parameters to optimize
 		Image				pano;				// Panoramic Image decription
 		stitchBuffer st = new stitchBuffer();				// Info on how to stitch the panorama
@@ -516,7 +516,7 @@ public class PanoAdjust implements LMDifFcn {
 		int j = 0;
 		int k;
 		// Set global preferences structures using LM-params
-		for (int i = 0; i < g.numIm; i++) {
+		for (int i = 0; i < g.im.size(); i++) {
 			Image im = g.im.get(i);
 			optVars opt = g.opt.get(i);
 			
@@ -592,28 +592,28 @@ public class PanoAdjust implements LMDifFcn {
 		
 		// Calculate distances
 		double avg = 0.0;
-		for (int i = 0; i < g.numPts; i++) {
+		for (int i = 0; i < g.cpt.size(); i++) {
 			ControlPoint cp = g.cpt.get(i);
 			double d = distControlPoint(cp, cp.type == OptimizeType.r);
 			fvec.setItem(i, 0, d);
 			avg += d;
 		}
-		avg /= g.numPts;
-		for (int i = g.numPts; i < m; i++)
+		avg /= g.cpt.size();
+		for (int i = g.cpt.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);
 	}
 	
 	void RunLMOptimizer() {
 		// Initialize optimization params
 		int n = g.numParam;
-		int m = g.numPts;
+		int m = g.cpt.size();
 		Matrix x = new Matrix(n, 1);
 		Matrix fvec = new Matrix(m, 1);
 		
 		// Set LM params using global preferences structure
 		// Change to cover range 0....1 (roughly)
 		int j = 0; // Counter for optimization parameters
-		for (int i = 0; i < g.numIm; i++) {
+		for (int i = 0; i < g.im.size(); i++) {
 			Image im = g.im.get(i);
 			optVars opt = g.opt.get(i);
 			
@@ -782,6 +782,7 @@ public class PanoAdjust implements LMDifFcn {
 	}
 	
 	public void readPanoScript(BufferedReader fin) throws IOException {
+		int variablesToOptimize = 0;
 		while (fin.ready()) {
 			String s = fin.readLine();
 			if (s == null || s.length() <= 0)
@@ -885,28 +886,40 @@ public class PanoAdjust implements LMDifFcn {
 					int n = Integer.parseInt(st.nextToken());
 					if ("y".equals(t)) {
 						g.opt.get(n).yaw = 1;
+						variablesToOptimize++;
 					} else if ("p".equals(t)) {
 						g.opt.get(n).pitch = 1;
+						variablesToOptimize++;
 					} else if ("r".equals(t)) {
 						g.opt.get(n).roll = 1;
+						variablesToOptimize++;
 					} else if ("v".equals(t)) {
 						g.opt.get(n).hfov = 1;
+						variablesToOptimize++;
 					} else if ("a".equals(t)) {
 						g.opt.get(n).a = 1;
+						variablesToOptimize++;
 					} else if ("b".equals(t)) {
 						g.opt.get(n).b = 1;
+						variablesToOptimize++;
 					} else if ("c".equals(t)) {
 						g.opt.get(n).c = 1;
+						variablesToOptimize++;
 					} else if ("d".equals(t)) {
 						g.opt.get(n).d = 1;
+						variablesToOptimize++;
 					} else if ("e".equals(t)) {
 						g.opt.get(n).e = 1;
+						variablesToOptimize++;
 					} else if ("X".equals(t)) {
 						g.cim.get(n).set[0] = 0;
+						variablesToOptimize++;
 					} else if ("Y".equals(t)) {
 						g.cim.get(n).set[1] = 0;
+						variablesToOptimize++;
 					} else if ("Z".equals(t)) {
 						g.cim.get(n).set[2] = 0;
+						variablesToOptimize++;
 					}
 				}
 				break;
@@ -926,9 +939,68 @@ public class PanoAdjust implements LMDifFcn {
 				break;
 			}
 		}
+				
+		// Set up Panorama description
 		
+		if ((g.pano.width == 0) && (g.im.get(0).hfov != 0.0)) {
+			// Set default for panorama width based on first image
+			g.pano.width = (int)(((double)g.pano.hfov / g.im.get(0).hfov ) * g.im.get(0).width);
+			g.pano.width /= 10; 
+			g.pano.width *= 10; // Round to multiple of 10
+		}
 		
-		//////////////// more
+		if (g.pano.height == 0)
+			g.pano.height = g.pano.width / 2;
+
+		// Set up global information structure
+		g.numParam 	= variablesToOptimize;
+		// Set initial values for linked variables
+		for (int i = 0; i < g.im.size(); i++){
+			Image im = g.im.get(i);
+			int k = g.opt.get(i).yaw - 2;
+			if( k >= 0 ) im.yaw = g.im.get(k).yaw;
+
+			k = g.opt.get(i).pitch - 2;
+			if( k >= 0 ) im.pitch = g.im.get(k).pitch;
+
+			k = g.opt.get(i).roll - 2;
+			if( k >= 0 ) im.roll = g.im.get(k).roll;
+
+			k = g.opt.get(i).hfov - 2;
+			if( k >= 0 ) im.hfov = g.im.get(k).hfov;
+
+			k = g.opt.get(i).a - 2;
+			if( k >= 0 ) im.cP.radial_params[0][3] = g.im.get(k).cP.radial_params[0][3];
+
+			k = g.opt.get(i).b - 2;
+			if( k >= 0 ) im.cP.radial_params[0][2] = g.im.get(k).cP.radial_params[0][2];
+
+			k = g.opt.get(i).c - 2;
+			if( k >= 0 ) im.cP.radial_params[0][1] = g.im.get(k).cP.radial_params[0][1];
+
+			k = g.opt.get(i).d - 2;
+			if( k >= 0 ) im.cP.horizontal_params[0] = g.im.get(k).cP.horizontal_params[0];
+
+			k = g.opt.get(i).e - 2;
+			if( k >= 0 ) im.cP.vertical_params[0] = g.im.get(k).cP.vertical_params[0];
+
+			im.cP.radial_params[0][0] = 1.0 - (im.cP.radial_params[0][3]
+												+ im.cP.radial_params[0][2]
+												+ im.cP.radial_params[0][1] ) ;
+			SetEquColor(im.cP);
+		}
+		
+		System.out.println("!!!!!!!!!!!!!!!!!! n=" + g.numParam + " !!! m=" + g.cpt.size());
+	}
+	
+	void SetEquColor( cPrefs cP )
+	{
+		for(int col = 1; col < 3; col++) {
+			for(int i = 0; i < 4; i++)
+				cP.radial_params[col][i] = cP.radial_params[0][i];
+			cP.vertical_params[col] = cP.vertical_params[0];
+			cP.horizontal_params[col] = cP.horizontal_params[0];
+		}
 	}
 	
 	public void writePanoScript(PrintWriter fou) {
@@ -949,7 +1021,7 @@ public class PanoAdjust implements LMDifFcn {
 				" v" + Double.toString(g.pano.hfov) + " n\"" + g.pano.name + "\"");
 		
 		
-		for (int i = 0; i < g.numIm; i++) {
+		for (int i = 0; i < g.im.size(); i++) {
 			Image im = g.im.get(i);
 			switch (im.format) {
 			case Rectilinear:		format = 0; break;
@@ -1071,6 +1143,8 @@ public class PanoAdjust implements LMDifFcn {
 				PanoAdjust.class.getResourceAsStream("optimizer.txt")));
 		PanoAdjust panoAdjust = new PanoAdjust();
 		panoAdjust.readPanoScript(fin);
+		panoAdjust.RunLMOptimizer();
 		fin.close();
+		System.out.println("Done");
 	}
 }

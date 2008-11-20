@@ -74,6 +74,8 @@ public class LMDif {
 		while (true) {
 			// calculate the jacobian matrix.
 			Matrix fdjac = fdjac2(fcn, x, fvec);
+			// compute the qr factorization of the jacobian.
+
 			// compute the initial column norms
 			Matrix diag = new Matrix(n, 1);
 			Matrix wa2 = new Matrix(n, 1);
@@ -93,17 +95,16 @@ public class LMDif {
 						}
 					}
 					d = scale * Math.sqrt(sum);
-					wa2.setItem(n, 0, d);
+					wa2.setItem(j, 0, d);
 					if (d == 0.0)
 						d = 1.0;
-					diag.setItem(n, 0, d);
+					diag.setItem(j, 0, d);
 				}
 			}
 			
-			// compute the qr factorization of the jacobian.
-			Matrix q = new Matrix();
+			Matrix q = fdjac.makeCopy();
 			Matrix tau = new Matrix();
-			fdjac.qr(q, tau);
+			q.qrDecomposition(tau);
 			Matrix wa1 = new Matrix(n, 1);
 			for (int i = 0; i < n; i++)
 				wa1.setItem(i, 0, fdjac.getItem(i, i));
