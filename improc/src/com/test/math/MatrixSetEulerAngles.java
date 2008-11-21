@@ -25,29 +25,29 @@ public class MatrixSetEulerAngles {
 
 		rx.setItem(0, 1, 0.0);
 		rx.setItem(1, 1, ca);
-		rx.setItem(2, 1, -sa);
+		rx.setItem(2, 1, sa);
 
 		rx.setItem(0, 2, 0.0);
-		rx.setItem(1, 2, sa);
+		rx.setItem(1, 2, -sa);
 		rx.setItem(2, 2, ca);
 		// ry
 		ry.setItem(0, 0, cb);
 		ry.setItem(1, 0, 0.0);
-		ry.setItem(2, 0, sb);
+		ry.setItem(2, 0, -sb);
 
 		ry.setItem(0, 1, 0.0);
 		ry.setItem(1, 1, 1.0);
 		ry.setItem(2, 1, 0.0);
 
-		ry.setItem(0, 2, -sb);
+		ry.setItem(0, 2, sb);
 		ry.setItem(1, 2, 0.0);
 		ry.setItem(2, 2, cb);
 		// rz
 		rz.setItem(0, 0, cc);
-		rz.setItem(1, 0, -sc);
+		rz.setItem(1, 0, sc);
 		rz.setItem(2, 0, 0.0);
 
-		rz.setItem(0, 1, sc);
+		rz.setItem(0, 1, -sc);
 		rz.setItem(1, 1, cc);
 		rz.setItem(2, 1, 0.0);
 
@@ -65,9 +65,9 @@ public class MatrixSetEulerAngles {
 	}
 
 	static void test(boolean type) {
-		double a = 10 * MathUtil.deg2rad; 
-		double b = 20 * MathUtil.deg2rad; 
-		double c = 30 * MathUtil.deg2rad;
+		double a = 30 * MathUtil.deg2rad; 
+		double b = 25 * MathUtil.deg2rad; 
+		double c = 20 * MathUtil.deg2rad;
 		
 		Matrix m1 = makeAngles(a, b, c, type);
 		Matrix m2 = MathUtil.makeAngles(a, b, c, type);
@@ -84,7 +84,7 @@ public class MatrixSetEulerAngles {
 	}
 	
 	public static void main(String[] args) {
-		test(true);
+//		test(true);
 		test(false);
 	}
 }

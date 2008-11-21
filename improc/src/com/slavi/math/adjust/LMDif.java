@@ -4,6 +4,8 @@ import com.slavi.math.matrix.Matrix;
 
 public class LMDif {
 	
+	public static boolean showDetails = false;
+	
 	public interface LMDifFcn {
 		public void fcn(Matrix x, Matrix fvec);
 	}
@@ -37,9 +39,24 @@ public class LMDif {
 				h = eps;
 			x.setItem(j, 0, temp + h);
 			fcn.fcn(x, wa);
+			for (int i = 0; i < m; i++) {
+				if (wa.getItem(i, 0) != fvec.getItem(i, 0)) {
+					System.out.println("J= " + j + " I=" + i + " WA=" + wa.getItem(i, 0) + " fvec=" + fvec.getItem(i, 0));
+					System.exit(0);
+				}
+			}
+//			wa.printM("WA");
+			System.exit(0);
+
 			x.setItem(j, 0, temp);
 			for (int i = 0; i < m; i++) {
 				fjac.setItem(i, j, (wa.getItem(i, 0) - fvec.getItem(i, 0)) / h);
+			}
+			if (j == 0) {
+				for (int i = 0; i < m; i++) {
+					System.out.println(fjac.getItem(i, j));
+				}
+				System.exit(0);
 			}
 		}
 		return fjac;
@@ -74,6 +91,8 @@ public class LMDif {
 		while (true) {
 			// calculate the jacobian matrix.
 			Matrix fdjac = fdjac2(fcn, x, fvec);
+//			fdjac.printM("FDJAC");
+			System.exit(0);
 			// compute the qr factorization of the jacobian.
 
 			// compute the initial column norms

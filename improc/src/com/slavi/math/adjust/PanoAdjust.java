@@ -129,6 +129,10 @@ public class PanoAdjust implements LMDifFcn {
 		double x0, x1;  //double[] x = new double[2];		// x - Coordinates 
 		double y0, y1;  //double[] y = new double[2];		// y - Coordinates 
 		OptimizeType type;				// What to optimize: 0-r, 1-x, 2-y
+		
+		public String toString() {
+			return "x0=" + x0 + " y0=" + y0 + " x1=" + x1 + " y1=" + y1;
+		}
 	}
 	
 	public static class triangle {
@@ -352,6 +356,7 @@ public class PanoAdjust implements LMDifFcn {
 			}
 		}
 		double scaleX = 1.0 / scaleY;
+		scaleY = scaleX;
 //		double shearX = im.cP.shear_x / im.height;
 //		double shearY = im.cP.shear_y / im.width;
 		double horizontal = -im.cP.horizontal_params[colorIndex];
@@ -370,6 +375,10 @@ public class PanoAdjust implements LMDifFcn {
 		else
 			rad4 = ((double) im.height) / 2.0;
 			
+//		System.out.printf("hor=%f vert=%f rad0=%f, rad1=%f rad2=%f rad3=%f rad4=%f rad5=\n", horizontal, vertical, rad0, rad1, rad2, rad3, rad4);
+//		System.out.printf("rot0=%f rot1=%f dist=%f\n", rotX, rotY, distance);
+//		mt.printM("MT=");
+		
 		ArrayList<TransformationFunctions.TransformationFunction>stack = 
 			new ArrayList<TransformationFunctions.TransformationFunction>();
 
@@ -433,6 +442,9 @@ public class PanoAdjust implements LMDifFcn {
 			break;
 		}
 
+//		for (TransformationFunctions.TransformationFunction i : stack) {
+//			System.out.println(i.getClass().getName());
+//		}		
 		return stack;
 	}
 
@@ -446,17 +458,24 @@ public class PanoAdjust implements LMDifFcn {
 		Point2D.Double src = new Point2D.Double();
 
 		List<TransformationFunctions.TransformationFunction> stack = makeInvParams(cp.im0, sph, 0);
-		src.x = cp.x0 - (double) cp.im0.width / 2.0 - 0.5;
-		src.y = cp.y0 - (double) cp.im0.height / 2.0 - 0.5;
+		src.x = cp.x0 - (double) cp.im0.width / 2.0 + 0.5;
+		src.y = cp.y0 - (double) cp.im0.height / 2.0 + 0.5;
 		Point2D.Double dest0 = new Point2D.Double();
 		TransformationFunctions.execute_stack(stack, src, dest0);
 
 		stack = makeInvParams(cp.im1, sph, 0);
-		src.x = cp.x1 - (double) cp.im1.width / 2.0 - 0.5;
-		src.y = cp.y1 - (double) cp.im1.height / 2.0 - 0.5;
+		src.x = cp.x1 - (double) cp.im1.width / 2.0 + 0.5;
+		src.y = cp.y1 - (double) cp.im1.height / 2.0 + 0.5;
 		Point2D.Double dest1 = new Point2D.Double();
 		TransformationFunctions.execute_stack(stack, src, dest1);
 
+		if (LMDif.showDetails) {
+			System.out.println("destX0=" + dest0.x);
+			System.out.println("destY0=" + dest0.y);
+			System.out.println("destX1=" + dest1.x);
+			System.out.println("destY1=" + dest1.y);
+		}
+		
 		if (isSphere) {
 			dest0.x = dest0.x * MathUtil.deg2rad; 
 			dest0.y = dest0.y * MathUtil.deg2rad + Math.PI / 2.0;
@@ -471,6 +490,8 @@ public class PanoAdjust implements LMDifFcn {
 			double b1x2 = - Math.cos(dest1.x) * Math.sin(dest1.y);
 			
 			double scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
+			if (LMDif.showDetails)
+				System.out.println("Panowidth=" + scalarProduct);
 			return Math.acos(scalarProduct) * g.pano.width / (2.0 * Math.PI);
 		}
 		// take care of wrapping and points at edge of panorama
@@ -594,10 +615,19 @@ public class PanoAdjust implements LMDifFcn {
 		double avg = 0.0;
 		for (int i = 0; i < g.cpt.size(); i++) {
 			ControlPoint cp = g.cpt.get(i);
+			LMDif.showDetails = i==355;
 			double d = distControlPoint(cp, cp.type == OptimizeType.r);
 			fvec.setItem(i, 0, d);
 			avg += d;
+
+			if (LMDif.showDetails) {
+				System.out.println("CP 355=" + cp);
+				System.out.println("D=" + d);
+			}
 		}
+//		if (LMDif.showDetails)
+//			fvec.printM("FVEC");
+		
 		avg /= g.cpt.size();
 		for (int i = g.cpt.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);

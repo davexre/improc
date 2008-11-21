@@ -19,7 +19,8 @@ public class TransformationFunctions {
 		dest.x = 0;
 		dest.y = 0;
 		for (TransformationFunctions.TransformationFunction f : stack) {
-			f.transform(tmp, dest);
+//			System.out.println(f.getClass().getName());
+			f.transform(dest, tmp);
 			tmp.x = dest.x;
 			tmp.y = dest.y;
 		}

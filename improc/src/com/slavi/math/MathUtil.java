@@ -61,20 +61,20 @@ public class MathUtil {
 			 *  0		sa			ca
 			 *  
 			 *  (mz*mx)*my
-			 *  cc*cb-sb*sc*sa		-sc*ca		sb*cc+cb*sc*sa
+			 *  cc*cb+sb*sc*sa		-sc*ca		sb*cc+cb*sc*sa
 			 *  sc*cb+sb*cc*sa		cc*ca		sc*sb-cb*cc*sa
 			 *  -ca*sb				sa			ca*cb
 			 */
-			r.setItem(0, 0, cc*cb-sb*sc*sa);
-			r.setItem(1, 0, -sc*ca);
-			r.setItem(2, 0, sb*cc+cb*sc*sa);
+			r.setItem(0, 0, cc*cb+sb*sc*sa);
+			r.setItem(1, 0, sc*ca);
+			r.setItem(2, 0, -sb*cc+cb*sc*sa);
 			
-			r.setItem(0, 1, sc*cb+sb*cc*sa);
+			r.setItem(0, 1, -sc*cb+sb*cc*sa);
 			r.setItem(1, 1, cc*ca);
-			r.setItem(2, 1, sc*sb-cb*cc*sa);
+			r.setItem(2, 1, sc*sb+cb*cc*sa);
 			
-			r.setItem(0, 2, -ca*sb);
-			r.setItem(1, 2, sa);
+			r.setItem(0, 2, ca*sb);
+			r.setItem(1, 2, -sa);
 			r.setItem(2, 2, ca*cb);
 		} else {
 			/*
@@ -89,16 +89,16 @@ public class MathUtil {
 			 *  sa*sc*cb-ca*sb		sa*cc		sa*sc*sb+ca*cb
 			 */
 			r.setItem(0, 0, cc*cb);
-			r.setItem(1, 0, -sc);
-			r.setItem(2, 0, sb*cc);
+			r.setItem(1, 0, sc);
+			r.setItem(2, 0, -sb*cc);
 			
-			r.setItem(0, 1, ca*sc*cb+sa*sb);
+			r.setItem(0, 1, -ca*sc*cb+sa*sb);
 			r.setItem(1, 1, ca*cc);
-			r.setItem(2, 1, ca*sc*sb-sa*cb);
+			r.setItem(2, 1, ca*sc*sb+sa*cb);
 			
-			r.setItem(0, 2, sa*sc*cb-ca*sb);
-			r.setItem(1, 2, sa*cc);
-			r.setItem(2, 2, sa*sc*sb+ca*cb);
+			r.setItem(0, 2, sa*sc*cb+ca*sb);
+			r.setItem(1, 2, -sa*cc);
+			r.setItem(2, 2, -sa*sc*sb+ca*cb);
 		}
 		return r;
 	}

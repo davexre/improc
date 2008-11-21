@@ -1246,7 +1246,16 @@ public class Matrix {
 	
 	public void printM(String title) {
 		System.out.println(title);
-		System.out.print(toString());
+//		System.out.print(toString());
+		for (int j = 0; j < sizeY; j++) {
+			for (int i = 0; i < sizeX; ) {
+				System.out.print(String.format(Locale.US, "%1$10.6f ",new Object[] { new Double(m[i][j]) } ));
+				i++;
+				if (i % 5 == 0)
+					System.out.println();
+			}
+			System.out.println();
+		}
 	}
 
 	
