@@ -469,12 +469,16 @@ public class PanoAdjust implements LMDifFcn {
 		Point2D.Double dest1 = new Point2D.Double();
 		TransformationFunctions.execute_stack(stack, src, dest1);
 
-		if (LMDif.showDetails) {
-			System.out.println("destX0=" + dest0.x);
-			System.out.println("destY0=" + dest0.y);
-			System.out.println("destX1=" + dest1.x);
-			System.out.println("destY1=" + dest1.y);
-		}
+//		if (LMDif.showDetails) {
+//			System.out.printf("IMYAW=%f\n", cp.im1.yaw);
+//			System.out.println("src X1=" + src.x);
+//			System.out.println("src Y1=" + src.y);
+//			
+//			System.out.println("destX0=" + dest0.x);
+//			System.out.println("destY0=" + dest0.y);
+//			System.out.println("destX1=" + dest1.x);
+//			System.out.println("destY1=" + dest1.y);
+//		}
 		
 		if (isSphere) {
 			dest0.x = dest0.x * MathUtil.deg2rad; 
@@ -490,8 +494,10 @@ public class PanoAdjust implements LMDifFcn {
 			double b1x2 = - Math.cos(dest1.x) * Math.sin(dest1.y);
 			
 			double scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
-			if (LMDif.showDetails)
-				System.out.println("Panowidth=" + scalarProduct);
+//			if (LMDif.showDetails) {
+//				double r = Math.acos(scalarProduct) * 10000;
+//				System.out.println("Panowidth=" + r);
+//			}
 			return Math.acos(scalarProduct) * g.pano.width / (2.0 * Math.PI);
 		}
 		// take care of wrapping and points at edge of panorama
@@ -543,6 +549,8 @@ public class PanoAdjust implements LMDifFcn {
 			
 			if ((k = g.opt.get(i).yaw) > 0) {
 				if (k == 1) {
+//					System.out.printf("YAW=%f\n", im.yaw);
+//					System.out.printf("YAWNEW=%f\n", x.getItem(j, 0));
 					im.yaw = x.getItem(j++, 0);
 					im.yaw = NORM_ANGLE(im.yaw);
 				} else {
@@ -615,25 +623,26 @@ public class PanoAdjust implements LMDifFcn {
 		double avg = 0.0;
 		for (int i = 0; i < g.cpt.size(); i++) {
 			ControlPoint cp = g.cpt.get(i);
-			LMDif.showDetails = i==355;
 			double d = distControlPoint(cp, cp.type == OptimizeType.r);
+//			if (LMDif.showDetails)
+//				System.out.printf("!!%12.8f\n", d);
 			fvec.setItem(i, 0, d);
 			avg += d;
 
-			if (LMDif.showDetails) {
-				System.out.println("CP 355=" + cp);
-				System.out.println("D=" + d);
-			}
+//			if (LMDif.showDetails) {
+//				System.out.println("CP 355=" + cp);
+//				System.out.println("D=" + d);
+//			}
 		}
-//		if (LMDif.showDetails)
-//			fvec.printM("FVEC");
 		
 		avg /= g.cpt.size();
 		for (int i = g.cpt.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);
+//		if (LMDif.showDetails)
+//			fvec.printM("FVEC");
 	}
 	
-	void RunLMOptimizer() {
+	void RunLMOptimizer() throws Exception {
 		// Initialize optimization params
 		int n = g.numParam;
 		int m = g.cpt.size();
@@ -1168,7 +1177,7 @@ public class PanoAdjust implements LMDifFcn {
 		return sroot;
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		BufferedReader fin = new BufferedReader(new InputStreamReader(
 				PanoAdjust.class.getResourceAsStream("optimizer.txt")));
 		PanoAdjust panoAdjust = new PanoAdjust();

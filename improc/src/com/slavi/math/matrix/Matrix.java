@@ -91,7 +91,7 @@ public class Matrix {
 				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(m[i][j]) } ));
 				result.append(m[i][j]);
 			}
-			result.append(";");
+			result.append(";\n");
 		}
 		result.append("];");
 		return result.toString();
@@ -1249,7 +1249,7 @@ public class Matrix {
 //		System.out.print(toString());
 		for (int j = 0; j < sizeY; j++) {
 			for (int i = 0; i < sizeX; ) {
-				System.out.print(String.format(Locale.US, "%1$10.6f ",new Object[] { new Double(m[i][j]) } ));
+				System.out.print(String.format(Locale.US, "%12.8f\t",new Object[] { new Double(m[i][j]) } ));
 				i++;
 				if (i % 5 == 0)
 					System.out.println();

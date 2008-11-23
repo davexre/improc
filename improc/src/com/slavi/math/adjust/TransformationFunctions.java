@@ -18,11 +18,19 @@ public class TransformationFunctions {
 		Point2D.Double tmp = new Point2D.Double(src.x, src.y);
 		dest.x = 0;
 		dest.y = 0;
+		int i = 0;
 		for (TransformationFunctions.TransformationFunction f : stack) {
-//			System.out.println(f.getClass().getName());
 			f.transform(dest, tmp);
 			tmp.x = dest.x;
 			tmp.y = dest.y;
+//			if (LMDif.showDetails) {
+//				if (i == 7) {
+//					System.out.println(f.getClass().getName());
+//					System.out.println("DDdestX=" + dest.x * 10000);
+//					System.out.println("DDdestY=" + dest.y);
+//				}
+//			}
+			i++;
 		}
 	}	
 	
@@ -41,6 +49,12 @@ public class TransformationFunctions {
 			while (src.x > var0)
 				src.x -= 2.0 * var0;
 			src.y = dest.y;
+//			if (LMDif.showDetails) {
+//				System.out.printf("ROT:var1=%f\n", var1 * 10000);
+//				System.out.println("var0=" + var0 * 10000);
+//				System.out.println("src.x=" + src.x * 10000);
+//				System.out.println("dest.x=" + dest.x * 10000);
+//			} 
 		}
 		
 		public RotateErect(double var0, double var1) {
