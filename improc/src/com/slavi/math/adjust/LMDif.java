@@ -2,6 +2,7 @@ package com.slavi.math.adjust;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 import com.slavi.math.matrix.Matrix;
 
@@ -391,11 +392,10 @@ public class LMDif {
 			
 			while (true) {
 				// determine the levenberg-marquardt parameter.
-//				System.out.println(wa1.toMatlabString("mwa1"));
+				System.out.println(wa1.toMatlabString("mwa1"));
 				double par = lmpar(fdjac, diag, wa1, qtf, delta, wa2, ipvt);
+				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
 //				System.out.println(wa1.toMatlabString("mwa1"));
-				
-//				System.out.printf("LMPAR=%12.8f\n", par);
 //				System.exit(0);
 				
 				// store the direction p and x + p. calculate the norm of p.
@@ -405,6 +405,8 @@ public class LMDif {
 					wa2.setItem(j, 0, x.getItem(j, 0) + wa1.getItem(j, 0));
 					wa3.setItem(j, 0, diag.getItem(j, 0) * wa1.getItem(j, 0));
 				}
+//				System.out.println(wa1.toMatlabString("mwa1"));
+
 				double pnorm = wa3.getForbeniusNorm();
 				// on the first iteration, adjust the initial step bound.
 				if (iter == 1) 
@@ -418,6 +420,8 @@ public class LMDif {
 //				System.exit(0);
 				
 				double fnorm1 = wa4.getForbeniusNorm();
+//				System.out.printf("pnorm %12.8f  fnorm1 %12.8f\n", pnorm, fnorm1);
+//				System.exit(0);
 				// compute the qr factorization of the jacobian.
 				double actred = -1.0;
 				if (p1 * fnorm1 < fnorm) {
@@ -451,8 +455,8 @@ public class LMDif {
 //				System.out.printf("prered=%12.8f\n", prered);
 //				System.out.printf("dirder=%12.8f\n", dirder);
 //				System.out.printf("ratio =%12.8f\n", ratio);
-//				
 //				System.exit(0);
+
 				// update the step bound.
 				if (ratio <= 0.25) {
 					double temp;
@@ -652,24 +656,42 @@ public class LMDif {
 			for (int j = 0; j < n; j++) {
 				wa1.setItem(j, 0, temp * diag.getItem(j, 0));
 			}
-			System.out.println(wa1.toMatlabString("wa1"));
+//			System.out.println(wa1.toMatlabString("wa1"));
+//			System.out.printf("mr=[\n");
+//			for (int j = 0; j < n; j++) {
+//				for (int i = 0; i < n; i++) {
+//					System.out.printf(Locale.US, "%12.8f\t", r.getItem(i, j));
+//				}
+//				System.out.printf(";\n");
+//			}
+//			System.out.printf("];\n");
+
 //			System.exit(0);
-			qrsolv(r, wa1, x, qtb, ipvt);
+			qrsolv(r, wa1, x, qtb, sdiag, ipvt);
 			for (int j = 0; j < n; j++) {
 				wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
 			}
 			dxnorm = wa2.getForbeniusNorm();
 			temp = fp;
 			fp = dxnorm - delta;
+			System.out.printf("dxnorm=%12.8f\n", dxnorm);
+			System.out.printf("temp  =%12.8f\n", temp);
+			System.out.printf("fp    =%12.8f\n", fp);
+			
+			
 			// if the function is small enough, accept the current value
 			// of par. also test for the exceptional cases where parl
 			// is zero or the number of iterations has reached 10.
-			if ( (Math.abs(fp) <= p1 * delta) || ((parl == 0.0) && (fp <= temp) && (temp < 0.0)) || (iter == 10))
+			if ((Math.abs(fp) <= p1 * delta) || 
+				((parl == 0.0) && (fp <= temp) && (temp < 0.0)) || 
+				(iter == 10))
 				break;
 			// compute the newton correction.
 			for (int j = 0; j < n; j++) {
-				wa1.setItem(j, 0, diag.getItem(j, 0) * (wa2.getItem(j, 0) / dxnorm));
+				wa1.setItem(j, 0, diag.getItem(ipvt[j], 0) * (wa2.getItem(ipvt[j], 0) / dxnorm));
 			}
+			
+//			System.out.println(sdiag.toMatlabString("msd"));
 			for (int j = 0; j < n; j++) {
 				wa1.setItem(j, 0, wa1.getItem(j, 0) / sdiag.getItem(j, 0));
 				temp = wa1.getItem(j, 0);
@@ -680,6 +702,12 @@ public class LMDif {
 			}
 			temp = wa1.getForbeniusNorm();
 			double parc = ((fp / delta) / temp) / temp;
+			
+//			System.out.printf("parc=%12.8f\n", parc);
+//			System.out.printf("temp=%12.8f\n", temp);
+//			System.out.println(wa1.toMatlabString("wa1"));
+//			System.exit(0);
+
 			// depending on the sign of the function, update parl or paru.
 			if (fp > 0.0)
 				parl = Math.max(parl, par);
@@ -738,11 +766,10 @@ public class LMDif {
 	 * @param qtb	is an input array of length n which must contain the first
 	 * 				n elements of the vector (q transpose)*b.
 	 */
-	static void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb, int ipvt[]) {
+	static void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb, Matrix sdiag, int ipvt[]) {
 		int m = r.getSizeX();
-		int n = r.getSizeY();
-		
-		if ((m < n) ||
+		int n = r.getSizeY(); 
+		if ( //(m < n) ||
 			(qtb.getSizeX() != n) || (qtb.getSizeY() != 1) ||
 			(diag.getSizeX() != n) || (diag.getSizeY() != 1)) {
 			throw new IllegalArgumentException();
@@ -753,17 +780,27 @@ public class LMDif {
 		// copy r and (q transpose)*b to preserve input and initialize s.
 		// in particular, save the diagonal elements of r in x.
 
-		for (int i = n - 1; i >= 0; i--) {
-			for (int j = i - 1; j >= 0; j--)
-				r.setItem(j, i, r.getItem(i, j));
-			x.setItem(i, 0, r.getItem(i, i));
+		for (int j = 0; j < n; j++) {
+			for (int i = j; i < n; i++)
+				r.setItem(i, j, r.getItem(j, i));
+			x.setItem(j, 0, r.getItem(j, j));
 		}
 		
-		Matrix sdiag = new Matrix(n, 1);
-		sdiag.makeR(12345678);
-		System.out.println(diag.toMatlabString("diag"));
+//		System.out.printf("mr=[\n");
+//		for (int jj = 0; jj < n; jj++) {
+//			for (int ii = 0; ii < n; ii++) {
+//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
+//			}
+//			System.out.printf(";\n");
+//		}
+//		System.out.printf("];\n");
+//		System.exit(0);
+		
+//		System.out.println(diag.toMatlabString("diag"));
 		// eliminate the diagonal matrix d using a givens rotation.
 		for (int j = 0; j < n; j++) {
+			// prepare the row of d to be eliminated, locating the
+			// diagonal element using p from the qr factorization.
 			if (diag.getItem(ipvt[j], 0) != 0.0) {
 				for (int k = j; k < n; k++)
 					sdiag.setItem(k, 0, 0.0);
@@ -779,6 +816,7 @@ public class LMDif {
 					if (sdiag.getItem(k, 0) == 0.0)
 						continue;
 					double sin, cos;
+//					System.out.printf("k=%d r[kk]=%12.8f sdiag[k]=%12.8f\n", k, r.getItem(k, k), sdiag.getItem(k, 0));
 					if (Math.abs(r.getItem(k, k)) < Math.abs(sdiag.getItem(k, 0))) {
 						double cotan = r.getItem(k, k) / sdiag.getItem(k, 0);
 						sin = 0.5 / Math.sqrt(0.25 + 0.25 * cotan * cotan);
@@ -788,8 +826,9 @@ public class LMDif {
 						cos = 0.5 / Math.sqrt(0.25 + 0.25 * tan * tan);
 						sin = cos * tan;
 					}
-					System.out.printf("SIN=%12.8f\n", sin);
-					System.out.printf("COS=%12.8f\n", cos);
+//					System.out.println(sdiag.toMatlabString("msd"));
+//					System.out.printf("SIN=%12.8f\n", sin);
+//					System.out.printf("COS=%12.8f\n", cos);
 					// compute the modified diagonal element of r and
 					// the modified element of ((q transpose)*b,0).
 					r.setItem(k, k, cos * r.getItem(k, k) + sin * sdiag.getItem(k, 0));
@@ -797,28 +836,48 @@ public class LMDif {
 					qtbpj = -sin * wa.getItem(k, 0) + cos * qtbpj;
 					wa.setItem(k, 0, temp);
 					
-					System.out.printf("r[kk]=%12.8f\n", r.getItem(k, k));
-					System.out.printf("temp =%12.8f\n", temp);
-					System.out.printf("qtbpj=%12.8f\n", qtbpj);
-					System.out.printf("wa[k]=%12.8f\n", wa.getItem(k, 0));
-					
-					System.out.println(sdiag.toMatlabString("msd"));
-					System.out.println(r.toMatlabString("mr"));
+//					System.out.printf("r[kk]=%12.8f\n", r.getItem(k, k));
+//					System.out.printf("temp =%12.8f\n", temp);
+//					System.out.printf("qtbpj=%12.8f\n", qtbpj);
+//					System.out.printf("wa[k]=%12.8f\n", wa.getItem(k, 0));
+//					
+//					System.out.println(sdiag.toMatlabString("msd"));
+//					System.out.println(r.toMatlabString("mr"));
 					// accumulate the tranformation in the row of s.
 					for (int i = k + 1; i < n; i++) {
 						temp = cos * r.getItem(i, k) + sin * sdiag.getItem(i, 0);
 						sdiag.setItem(i, 0, -sin * r.getItem(i, k) + cos * sdiag.getItem(i, 0));
 						r.setItem(i, k, temp);
 					}
-					System.out.println(sdiag.toMatlabString("msd"));
-					System.exit(0);
+					
+//					System.out.printf("mr=[\n");
+//					for (int jj = 0; jj < n; jj++) {
+//						for (int ii = 0; ii < n; ii++) {
+//							System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
+//						}
+//						System.out.printf(";\n");
+//					}
+//					System.out.printf("];\n");
+					
 				}
 			}
 			// store the diagonal element of s and restore
 			// the corresponding diagonal element of r.
 			sdiag.setItem(j, 0, r.getItem(j, j));
 			r.setItem(j, j, x.getItem(j, 0));
+//			System.exit(0);
 		}
+
+//		System.out.println(sdiag.toMatlabString("msd"));
+//		System.out.printf("mr=[\n");
+//		for (int jj = 0; jj < n; jj++) {
+//			for (int ii = 0; ii < n; ii++) {
+//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
+//			}
+//			System.out.printf(";\n");
+//		}
+//		System.out.printf("];\n");
+//		System.exit(0);
 		
 		// solve the triangular system for z. if the system is
 		// singular, then obtain a least squares solution.
@@ -827,7 +886,7 @@ public class LMDif {
 			if( (sdiag.getItem(j, 0) == 0.0) && (nsing == n) )
 				nsing = j;
 			if(nsing < n)
-				wa.setItem(j, 00, 0.0);
+				wa.setItem(j, 0, 0.0);
 		}
 		if (nsing >= 1) {
 			for (int k=0; k<nsing; k++) {
@@ -836,7 +895,7 @@ public class LMDif {
 				int jp1 = j + 1;
 				if (nsing > jp1) {
 					for (int i = jp1; i<nsing; i++ ) {
-						sum += r.getItem(jp1, i) * wa.getItem(i, 0);
+						sum += r.getItem(i, j) * wa.getItem(i, 0);
 					}
 				}
 				wa.setItem(j, 0, (wa.getItem(j, 0) - sum) / sdiag.getItem(j, 0));
@@ -847,5 +906,8 @@ public class LMDif {
 			int l = ipvt[j];
 			x.setItem(l, 0, wa.getItem(j, 0));
 		}
+
+//		System.out.println(x.toMatlabString("mx"));
+//		System.exit(0);
 	}
 }
