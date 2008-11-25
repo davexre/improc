@@ -42,22 +42,22 @@ public class LMDif {
 			if (h == 0.0)
 				h = eps;
 //			System.out.printf("**** TEMP = %f\n", temp);
-			if (j == 25)
-				System.out.printf("**** H    = %12.8f\n", h);
+//			if (j == 25)
+//				System.out.printf("**** H    = %12.8f\n", h);
 //			System.out.printf("**** EPS  = %f\n", eps * 1e15);
 //			System.out.printf("**** EPSFCN= %f\n", epsfcn * 1e15);
 			x.setItem(j, 0, temp + h);
 			showDetails = j == 25;
 			fcn.fcn(x, wa);
-			for (int i = 0; i < m; i++) {
-				if (showDetails && wa.getItem(i, 0) != fvec.getItem(i, 0)) {
-					System.out.printf("J= %d I=%d WA=%12.8f\n", j, i, (wa.getItem(i, 0)));
+//			for (int i = 0; i < m; i++) {
+//				if (showDetails && wa.getItem(i, 0) != fvec.getItem(i, 0)) {
+//					System.out.printf("J= %d I=%d WA=%12.8f\n", j, i, (wa.getItem(i, 0)));
 //					System.exit(0);
-				}
-			}
+//				}
+//			}
 //			wa.printM("WA");
-			if (showDetails)
-				System.exit(0);
+//			if (showDetails)
+//				System.exit(0);
 
 			x.setItem(j, 0, temp);
 			for (int i = 0; i < m; i++) {
@@ -233,19 +233,21 @@ public class LMDif {
 //		System.out.printf("fnorm=%12.8f\n", fnorm);
 //		System.exit(0);
 		
+		double par = 0.0;
 		double xnorm = 0.0;
 		double delta = 0.0;
 		int iter = 1;
 		while (true) {
 			// calculate the jacobian matrix.
-			//Matrix fdjac = fdjac2(fcn, x, fvec);
-			Matrix fdjacCheat = new Matrix(30, 411);
-			BufferedReader fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("FJAC.txt")));
-			fin.readLine();
-			fdjacCheat.load(fin);
-			fin.close();
-			Matrix fdjac = new Matrix();
-			fdjacCheat.transpose(fdjac);
+			Matrix fdjac = fdjac2(fcn, x, fvec);
+//			System.out.println("CHEAT!");
+//			Matrix fdjacCheat = new Matrix(30, 411);
+//			BufferedReader fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("FJAC.txt")));
+//			fin.readLine();
+//			fdjacCheat.load(fin);
+//			fin.close();
+//			Matrix fdjac = new Matrix();
+//			fdjacCheat.transpose(fdjac);
 			
 			
 //			System.out.println(fdjac.toMatlabString("FDJAC"));
@@ -310,15 +312,15 @@ public class LMDif {
 //				System.out.println(ipvt[i]);
 //			System.exit(0);
 
-			fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("WA.txt")));
-			fin.readLine();
-			wa1.load(fin);
-			fin.readLine();
-			wa2.load(fin);
-			fin.readLine();
-			fdjacCheat.load(fin);
-			fdjacCheat.transpose(fdjac);
-			fin.close();
+//			fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("WA.txt")));
+//			fin.readLine();
+//			wa1.load(fin);
+//			fin.readLine();
+//			wa2.load(fin);
+//			fin.readLine();
+//			fdjacCheat.load(fin);
+//			fdjacCheat.transpose(fdjac);
+//			fin.close();
 
 			// on the first iteration and if mode is 1, scale according
 			// to the norms of the columns of the initial jacobian.
@@ -393,7 +395,7 @@ public class LMDif {
 			while (true) {
 				// determine the levenberg-marquardt parameter.
 //				System.out.println(wa1.toMatlabString("mwa1"));
-				double par = lmpar(fdjac, diag, wa1, qtf, delta, wa2, ipvt);
+				par = lmpar(par, fdjac, diag, wa1, qtf, delta, wa2, ipvt);
 				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
 //				System.out.println(wa1.toMatlabString("mwa1"));
 //				System.exit(0);
@@ -492,8 +494,8 @@ public class LMDif {
 					iter++;
 				}
 
-				if (iter > 3)
-					System.exit(0);
+//				if (iter > 3)
+//					System.exit(0);
 				
 				// tests for convergence.
 				if ( (Math.abs(actred) <= ftol) && (prered <= ftol) && (0.5 * ratio <= 1.0)) {
@@ -525,8 +527,6 @@ public class LMDif {
 				if (ratio >= 0.0001)
 					break;
 			}
-			
-			iter++;
 		}
 		
 	}	
@@ -543,8 +543,7 @@ public class LMDif {
 	 * 
 	 * ...
 	 */
-	static double lmpar(Matrix r, Matrix diag, Matrix x, Matrix qtb, double delta, Matrix sdiag, int ipvt[]) {
-		double par = 0.0;
+	static double lmpar(double par, Matrix r, Matrix diag, Matrix x, Matrix qtb, double delta, Matrix sdiag, int ipvt[]) {
 		int m = r.getSizeX();
 		int n = r.getSizeY();
 		
@@ -553,6 +552,17 @@ public class LMDif {
 			(diag.getSizeX() != n) || (diag.getSizeY() != 1)) {
 			throw new IllegalArgumentException();
 		}
+
+//		System.out.printf("mr=[\n");
+//		for (int j = 0; j < n; j++) {
+//			for (int i = 0; i < n; i++) {
+//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(i, j));
+//			}
+//			System.out.printf(";\n");
+//		}
+//		System.out.printf("];\n");
+		
+//		System.out.println(qtb.toMatlabString("md"));
 		
 		// compute and store in x the gauss-newton direction. if the
 		// jacobian is rank-deficient, obtain a least squares solution.
@@ -636,19 +646,25 @@ public class LMDif {
 			for (int i = 0; i <= j; i++) {
 				sum += r.getItem(i, j) * qtb.getItem(i, 0);
 			}
-			wa1.setItem(j, 0, sum / diag.getItem(j, 0));
+			wa1.setItem(j, 0, sum / diag.getItem(ipvt[j], 0));
 		}
 		double gnorm = wa1.getForbeniusNorm();
 		double paru = gnorm / delta;
 		if (paru == 0.0) {
 			paru = DWARF / Math.min(delta, p1);
 		}
+//		System.out.printf("gnorm=%12.8f\n", gnorm);
+//		System.out.printf("delta=%12.8f\n", delta);
+//		System.out.printf("paru =%12.8f\n", paru);
+//		System.out.printf("parl =%12.8f\n", parl);
+		
 		// if the input par lies outside of the interval (parl,paru),
 		// set par to the closer endpoint.
 		par = Math.max(par, parl);
 		par = Math.min(par, paru);
 		if (par == 0.0)
 			par = gnorm / dxnorm;
+//		System.out.printf("par  =%12.8f\n", par);
 		
 		int iter = 0;
 		while (true) {
@@ -661,7 +677,8 @@ public class LMDif {
 			for (int j = 0; j < n; j++) {
 				wa1.setItem(j, 0, temp * diag.getItem(j, 0));
 			}
-//			System.out.println(wa1.toMatlabString("wa1"));
+//			System.out.printf("TEMP=%12.8f\n", temp);
+//			System.out.println(diag.toMatlabString("md"));
 //			System.out.printf("mr=[\n");
 //			for (int j = 0; j < n; j++) {
 //				for (int i = 0; i < n; i++) {
@@ -674,10 +691,11 @@ public class LMDif {
 //			System.exit(0);
 //			System.out.printf("R_NORM=%12.8f\n", r.getForbeniusNorm());
 //			System.out.println(qtb.toMatlabString("qtb"));
+
 //			System.out.printf("X_NORM=%12.8f\n", x.getForbeniusNorm());
 //			System.out.printf("WA1_NORM=%12.8f\n", wa1.getForbeniusNorm());
 //			System.out.printf("QTB_NORM=%12.8f\n", qtb.getForbeniusNorm());
-//			System.out.printf("sdiag_NORM=%12.8f\n", sdiag.getForbeniusNorm());
+//			System.out.printf("sdiag_NORM=%12.8f\n\n", sdiag.getForbeniusNorm());
 			
 			qrsolv(r, wa1, x, qtb, sdiag, ipvt);
 			for (int j = 0; j < n; j++) {
@@ -690,6 +708,11 @@ public class LMDif {
 //			System.out.printf("dxnorm=%12.8f\n", dxnorm);
 //			System.out.printf("temp  =%12.8f\n", temp);
 //			System.out.printf("fp    =%12.8f\n", fp);
+//			System.out.printf("X_NORM=%12.8f\n", x.getForbeniusNorm());
+//			System.out.printf("WA1_NORM=%12.8f\n", wa1.getForbeniusNorm());
+//			System.out.printf("QTB_NORM=%12.8f\n", qtb.getForbeniusNorm());
+//			System.out.printf("sdiag_NORM=%12.8f\n", sdiag.getForbeniusNorm());
+//			System.out.println();
 			
 			
 			// if the function is small enough, accept the current value
@@ -728,6 +751,9 @@ public class LMDif {
 				paru = Math.min(paru, par);
 			// compute an improved estimate for par.
 			par = Math.max(parl, par + parc);
+//			System.out.printf("paru =%12.8f\n", paru);
+//			System.out.printf("parl =%12.8f\n", parl);
+//			System.out.printf("fp   =%12.8f\n", fp);
 			
 //			if (iter > 2)
 //				System.exit(0);
@@ -812,7 +838,7 @@ public class LMDif {
 //		System.out.printf("];\n");
 //		System.exit(0);
 		
-//		System.out.println(diag.toMatlabString("diag"));
+//		System.out.println(diag.toMatlabString("md"));
 		// eliminate the diagonal matrix d using a givens rotation.
 		for (int j = 0; j < n; j++) {
 			// prepare the row of d to be eliminated, locating the
@@ -894,6 +920,9 @@ public class LMDif {
 //		}
 //		System.out.printf("];\n");
 //		System.exit(0);
+//		System.out.printf("diagNorm =%12.8f\n", diag.getForbeniusNorm());
+//		System.out.printf("x norm   =%12.8f\n", x.getForbeniusNorm());
+//		System.out.printf("wa norm  =%12.8f\n", wa.getForbeniusNorm());
 		
 		// solve the triangular system for z. if the system is
 		// singular, then obtain a least squares solution.
