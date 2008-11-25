@@ -392,7 +392,7 @@ public class LMDif {
 			
 			while (true) {
 				// determine the levenberg-marquardt parameter.
-				System.out.println(wa1.toMatlabString("mwa1"));
+//				System.out.println(wa1.toMatlabString("mwa1"));
 				double par = lmpar(fdjac, diag, wa1, qtf, delta, wa2, ipvt);
 				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
 //				System.out.println(wa1.toMatlabString("mwa1"));
@@ -491,6 +491,10 @@ public class LMDif {
 					fnorm = fnorm1;
 					iter++;
 				}
+
+				if (iter > 3)
+					System.exit(0);
+				
 				// tests for convergence.
 				if ( (Math.abs(actred) <= ftol) && (prered <= ftol) && (0.5 * ratio <= 1.0)) {
 					// both actual and predicted relative reduction in the sum of squares are at most ftol.
@@ -649,6 +653,7 @@ public class LMDif {
 		int iter = 0;
 		while (true) {
 			iter++;
+//			System.out.printf("iter  =%d\n", iter);
 			// evaluate the function at the current value of par.
 			if (par == 0.0)
 				par = Math.max(DWARF, paru * 0.001);
@@ -667,6 +672,13 @@ public class LMDif {
 //			System.out.printf("];\n");
 
 //			System.exit(0);
+//			System.out.printf("R_NORM=%12.8f\n", r.getForbeniusNorm());
+//			System.out.println(qtb.toMatlabString("qtb"));
+//			System.out.printf("X_NORM=%12.8f\n", x.getForbeniusNorm());
+//			System.out.printf("WA1_NORM=%12.8f\n", wa1.getForbeniusNorm());
+//			System.out.printf("QTB_NORM=%12.8f\n", qtb.getForbeniusNorm());
+//			System.out.printf("sdiag_NORM=%12.8f\n", sdiag.getForbeniusNorm());
+			
 			qrsolv(r, wa1, x, qtb, sdiag, ipvt);
 			for (int j = 0; j < n; j++) {
 				wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
@@ -674,9 +686,10 @@ public class LMDif {
 			dxnorm = wa2.getForbeniusNorm();
 			temp = fp;
 			fp = dxnorm - delta;
-			System.out.printf("dxnorm=%12.8f\n", dxnorm);
-			System.out.printf("temp  =%12.8f\n", temp);
-			System.out.printf("fp    =%12.8f\n", fp);
+			
+//			System.out.printf("dxnorm=%12.8f\n", dxnorm);
+//			System.out.printf("temp  =%12.8f\n", temp);
+//			System.out.printf("fp    =%12.8f\n", fp);
 			
 			
 			// if the function is small enough, accept the current value
@@ -715,6 +728,9 @@ public class LMDif {
 				paru = Math.min(paru, par);
 			// compute an improved estimate for par.
 			par = Math.max(parl, par + parc);
+			
+//			if (iter > 2)
+//				System.exit(0);
 		}
 		return par;
 	}	
@@ -775,7 +791,7 @@ public class LMDif {
 			throw new IllegalArgumentException();
 		}
 		x.resize(n, 1);
-		Matrix wa = qtb; //???
+		Matrix wa = qtb.makeCopy();
 		
 		// copy r and (q transpose)*b to preserve input and initialize s.
 		// in particular, save the diagonal elements of r in x.
