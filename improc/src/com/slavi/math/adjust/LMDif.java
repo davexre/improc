@@ -494,8 +494,8 @@ public class LMDif {
 					iter++;
 				}
 
-//				if (iter > 3)
-//					System.exit(0);
+				if (iter > 7)
+					System.exit(0);
 				
 				// tests for convergence.
 				if ( (Math.abs(actred) <= ftol) && (prered <= ftol) && (0.5 * ratio <= 1.0)) {

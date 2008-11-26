@@ -640,6 +640,12 @@ public class PanoAdjust implements LMDifFcn {
 			fvec.setItem(i, 0, avg);
 //		if (LMDif.showDetails)
 //			fvec.printM("FVEC");
+		System.out.printf("fvec norm=%12.8f\n", fvec.getForbeniusNorm());
+		
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e) {
+		}
 	}
 	
 	void RunLMOptimizer() throws Exception {
