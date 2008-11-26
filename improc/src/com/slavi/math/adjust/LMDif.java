@@ -34,46 +34,36 @@ public class LMDif {
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 		double eps = Math.sqrt(epsfcn);
 		
+//		System.out.printf("x=%12.8f fvec=%12.8f\n", x.getForbeniusNorm(), fvec.getForbeniusNorm());
+//		System.out.printf("eps=%20.18f\n", eps);
+		
 		Matrix fjac = new Matrix(m, n);
 		Matrix wa = new Matrix(m, 1);
+		Matrix tmp = new Matrix(m, 1);
 		for (int j = 0; j < n; j++) {
 			double temp = x.getItem(j, 0);
 			double h = eps * Math.abs(temp); // TODO: Проблеми с точността!!!???
 			if (h == 0.0)
 				h = eps;
+			h = 0.1;		// TODO: REMOVE THIS LINE!!!
 //			System.out.printf("**** TEMP = %f\n", temp);
 //			if (j == 25)
 //				System.out.printf("**** H    = %12.8f\n", h);
 //			System.out.printf("**** EPS  = %f\n", eps * 1e15);
 //			System.out.printf("**** EPSFCN= %f\n", epsfcn * 1e15);
 			x.setItem(j, 0, temp + h);
-			showDetails = j == 25;
 			fcn.fcn(x, wa);
-//			for (int i = 0; i < m; i++) {
-//				if (showDetails && wa.getItem(i, 0) != fvec.getItem(i, 0)) {
-//					System.out.printf("J= %d I=%d WA=%12.8f\n", j, i, (wa.getItem(i, 0)));
-//					System.exit(0);
-//				}
-//			}
-//			wa.printM("WA");
-//			if (showDetails)
-//				System.exit(0);
+//			System.out.printf("j=%d xnorm=%12.8f wanorm=%12.8f\n", j, x.getForbeniusNorm(), wa.getForbeniusNorm());
 
 			x.setItem(j, 0, temp);
 			for (int i = 0; i < m; i++) {
-				fjac.setItem(i, j, (wa.getItem(i, 0) - fvec.getItem(i, 0)) / h);
-//				if (j == 16)
-//					System.out.printf(Locale.US, "%12.8f\n", fjac.getItem(i, j));
+				temp = (wa.getItem(i, 0) - fvec.getItem(i, 0)) / h;
+				fjac.setItem(i, j, temp);
+				tmp.setItem(i, 0, temp);
 			}
-//			if (j == 16)
-//				System.exit(0);
-//			if (j == 0) {
-//				for (int i = 0; i < m; i++) {
-//					System.out.println(fjac.getItem(i, j));
-//				}
-//				System.exit(0);
-//			}
+//			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
+//		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
 		return fjac;
 	}
 	
@@ -240,6 +230,10 @@ public class LMDif {
 		while (true) {
 			// calculate the jacobian matrix.
 			Matrix fdjac = fdjac2(fcn, x, fvec);
+//			Matrix ft = new Matrix();
+//			fdjac.transpose(ft);
+//			System.out.println(ft.toMatlabString("mf"));
+
 //			System.out.println("CHEAT!");
 //			Matrix fdjacCheat = new Matrix(30, 411);
 //			BufferedReader fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("FJAC.txt")));
@@ -338,6 +332,8 @@ public class LMDif {
 				
 			// form (q transpose)*fvec and store the first n components in qtf.
 			Matrix wa4 = fvec.makeCopy();
+//			System.out.printf("wa4 norm=%12.8f\n", wa4.getForbeniusNorm());
+//			System.out.println(fdjac.toMatlabString("mf"));
 			Matrix qtf = new Matrix(n, 1);
 			for (int j = 0; j < n; j++) {
 				double temp3 = fdjac.getItem(j, j);
@@ -402,6 +398,7 @@ public class LMDif {
 				
 				// store the direction p and x + p. calculate the norm of p.
 				Matrix wa3 = new Matrix(n, 1);
+		//		System.out.printf("wa1 norm=%12.8f  xnorm=%12.8f\n", wa1.getForbeniusNorm(), x.getForbeniusNorm());
 				for (int j = 0; j < n; j++) {
 					wa1.setItem(j, 0, -wa1.getItem(j, 0));
 					wa2.setItem(j, 0, x.getItem(j, 0) + wa1.getItem(j, 0));
@@ -552,7 +549,7 @@ public class LMDif {
 			(diag.getSizeX() != n) || (diag.getSizeY() != 1)) {
 			throw new IllegalArgumentException();
 		}
-
+		
 //		System.out.printf("mr=[\n");
 //		for (int j = 0; j < n; j++) {
 //			for (int i = 0; i < n; i++) {
@@ -698,6 +695,7 @@ public class LMDif {
 //			System.out.printf("sdiag_NORM=%12.8f\n\n", sdiag.getForbeniusNorm());
 			
 			qrsolv(r, wa1, x, qtb, sdiag, ipvt);
+			System.out.printf("qrsolv xnorm=%12.8f\n", x.getForbeniusNorm());
 			for (int j = 0; j < n; j++) {
 				wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
 			}
