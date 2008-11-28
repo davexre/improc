@@ -1,9 +1,5 @@
 package com.slavi.math.adjust;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Locale;
-
 import com.slavi.math.matrix.Matrix;
 
 public class LMDif {
@@ -34,8 +30,8 @@ public class LMDif {
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 		double eps = Math.sqrt(epsfcn);
 		
-//		System.out.printf("x=%12.8f fvec=%12.8f\n", x.getForbeniusNorm(), fvec.getForbeniusNorm());
-//		System.out.printf("eps=%20.18f\n", eps);
+		System.out.printf("x=%12.8f fvec=%12.8f\n", x.getForbeniusNorm(), fvec.getForbeniusNorm());
+		System.out.printf("eps=%20.18f\n", eps);
 		
 		Matrix fjac = new Matrix(m, n);
 		Matrix wa = new Matrix(m, 1);
@@ -63,7 +59,7 @@ public class LMDif {
 			}
 //			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
-//		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
+		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
 		return fjac;
 	}
 	
@@ -227,6 +223,8 @@ public class LMDif {
 		double xnorm = 0.0;
 		double delta = 0.0;
 		int iter = 1;
+		Matrix diag = new Matrix(n, 1);
+		Matrix wa2 = new Matrix(n, 1);
 		while (true) {
 			// calculate the jacobian matrix.
 			Matrix fdjac = fdjac2(fcn, x, fvec);
@@ -234,91 +232,22 @@ public class LMDif {
 //			fdjac.transpose(ft);
 //			System.out.println(ft.toMatlabString("mf"));
 
-//			System.out.println("CHEAT!");
-//			Matrix fdjacCheat = new Matrix(30, 411);
-//			BufferedReader fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("FJAC.txt")));
-//			fin.readLine();
-//			fdjacCheat.load(fin);
-//			fin.close();
-//			Matrix fdjac = new Matrix();
-//			fdjacCheat.transpose(fdjac);
-			
-			
-//			System.out.println(fdjac.toMatlabString("FDJAC"));
-			//fdjac.printM("FDJAC");
-//			System.out.println("---------");
-//			for (int i = 0; i < fdjac.getSizeX(); i++) {
-//				for (int j = 0; j < fdjac.getSizeY(); j++) {
-//					System.out.printf(Locale.US, "%12.8f\t", fdjac.getItem(i, j));
-//				}
-//				System.out.println();
-//			}
-//			System.exit(0);
 			// compute the qr factorization of the jacobian.
 
-			// compute the initial column norms
-			Matrix diag = new Matrix(n, 1);
-			Matrix wa2 = new Matrix(n, 1);
-			for (int j = 0; j < n; j++) {
-				double scale = 0.0;
-				double sum = 1.0;
-				for (int i = 0; i < m; i++) {
-					double d = Math.abs(fdjac.getItem(i, j));
-					if (d != 0.0) {
-						if (scale < d) {
-							double d1 = scale / d;
-							sum = 1.0 + sum * d1 * d1;
-							scale = d;
-						} else {
-							double d1 = d / scale;
-							sum += d1 * d1;
-						}
-					}
-					d = scale * Math.sqrt(sum);
-					wa2.setItem(j, 0, d);
-					if (d == 0.0)
-						d = 1.0;
-					diag.setItem(j, 0, d);
-				}
-			}
-			
-//			Matrix tau = new Matrix();
-//			q.qrDecomposition(tau);
-//			fdjac.qr(q, tau);
-//			System.out.println(q.toMatlabString("Q"));
-//			System.out.println(fdjac.toMatlabString("r"));
-
-//			Matrix wa1 = new Matrix(n, 1);
-//			for (int i = 0; i < n; i++)
-//				wa1.setItem(i, 0, fdjac.getItem(i, i));
-			
 			Matrix wa1 = new Matrix();
-//			fdjac.transpose(wa1);
-//			System.out.println(wa1.toMatlabString("mf"));
-//			System.exit(0);
-
 			int[] ipvt = qrfac(fdjac, wa1, wa2);
-//			System.out.println(q.toMatlabString("MQ"));
-//			System.out.println(wa1.toMatlabString("MWA1"));
-//			System.out.println(wa2.toMatlabString("MWA2"));
-//			System.out.println("IPVT=");
-//			for (int i = 0; i < ipvt.length; i++)
-//				System.out.println(ipvt[i]);
-//			System.exit(0);
-
-//			fin = new BufferedReader(new InputStreamReader(LMDif.class.getResourceAsStream("WA.txt")));
-//			fin.readLine();
-//			wa1.load(fin);
-//			fin.readLine();
-//			wa2.load(fin);
-//			fin.readLine();
-//			fdjacCheat.load(fin);
-//			fdjacCheat.transpose(fdjac);
-//			fin.close();
-
+			System.out.printf("WA1=%12.8f  WA2=%12.8f\n", wa1.getForbeniusNorm(), wa2.getForbeniusNorm());
+			
 			// on the first iteration and if mode is 1, scale according
 			// to the norms of the columns of the initial jacobian.
 			if (iter == 1) {
+				for (int j = 0; j < n; j++) {
+					diag.setItem(j, 0, wa2.getItem(j, 0));
+					if (wa2.getItem(j, 0) == 0.0)
+						diag.setItem(j, 0, 1.0);
+					
+				}
+				
 				// on the first iteration, calculate the norm of the scaled x
 				// and initialize the step bound delta.
 				Matrix wa3 = new Matrix(n, 1);
@@ -329,6 +258,8 @@ public class LMDif {
 				delta = (xnorm == 0.0 ? factor : factor * xnorm);
 //				System.out.printf("DELTA=%12.8f\n", delta);
 			}
+//			System.out.printf("AA Diag=%12.8f\n", diag.getForbeniusNorm());
+//			System.out.printf("AA wa2=%12.8f\n", wa2.getForbeniusNorm());
 				
 			// form (q transpose)*fvec and store the first n components in qtf.
 			Matrix wa4 = fvec.makeCopy();
@@ -379,6 +310,8 @@ public class LMDif {
 			if (gnorm <= gtol)
 				return; 
 			
+//			System.out.printf("Diag=%12.8f\n", diag.getForbeniusNorm());
+//			System.out.printf("wa2=%12.8f\n", wa2.getForbeniusNorm());
 			// rescale if necessary.
 			for (int j = 0; j < n; j++) {
 				diag.setItem(j, 0, Math.max(diag.getItem(j, 0), wa2.getItem(j, 0)));
@@ -391,6 +324,7 @@ public class LMDif {
 			while (true) {
 				// determine the levenberg-marquardt parameter.
 //				System.out.println(wa1.toMatlabString("mwa1"));
+//				System.out.printf("Diag=%12.8f\n", diag.getForbeniusNorm());
 				par = lmpar(par, fdjac, diag, wa1, qtf, delta, wa2, ipvt);
 				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
 //				System.out.println(wa1.toMatlabString("mwa1"));
@@ -521,8 +455,9 @@ public class LMDif {
 					return;
 				}
 				
-				if (ratio >= 0.0001)
+				if (ratio >= 0.0001) {
 					break;
+				}
 			}
 		}
 		
@@ -695,7 +630,7 @@ public class LMDif {
 //			System.out.printf("sdiag_NORM=%12.8f\n\n", sdiag.getForbeniusNorm());
 			
 			qrsolv(r, wa1, x, qtb, sdiag, ipvt);
-			System.out.printf("qrsolv xnorm=%12.8f\n", x.getForbeniusNorm());
+//			System.out.printf("qrsolv xnorm=%12.8f\n", x.getForbeniusNorm());
 			for (int j = 0; j < n; j++) {
 				wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
 			}
@@ -718,8 +653,10 @@ public class LMDif {
 			// is zero or the number of iterations has reached 10.
 			if ((Math.abs(fp) <= p1 * delta) || 
 				((parl == 0.0) && (fp <= temp) && (temp < 0.0)) || 
-				(iter == 10))
+				(iter == 10)) {
+				//System.out.println("BREAK LMPAR");
 				break;
+			}
 			// compute the newton correction.
 			for (int j = 0; j < n; j++) {
 				wa1.setItem(j, 0, diag.getItem(ipvt[j], 0) * (wa2.getItem(ipvt[j], 0) / dxnorm));
