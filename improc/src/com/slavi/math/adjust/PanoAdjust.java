@@ -13,10 +13,6 @@ import com.slavi.math.adjust.LMDif.LMDifFcn;
 import com.slavi.math.matrix.Matrix;
 
 public class PanoAdjust implements LMDifFcn {
-	public interface lmfunc {
-		public void lmFunc();
-	}
-
 	double NORM_ANGLE(double x) {
 		while (x > 180.0) {
 			x -= 360.0;
@@ -180,7 +176,6 @@ public class PanoAdjust implements LMDifFcn {
 		Image				pano;				// Panoramic Image decription
 		stitchBuffer st = new stitchBuffer();				// Info on how to stitch the panorama
 //		void				data;		// ????
-		lmfunc				fcn;
 		size_Prefs sP = new size_Prefs();	
 		ArrayList<CoordInfo>cim = new ArrayList<CoordInfo>();			// Real World coordinates
 	}
@@ -536,9 +531,21 @@ public class PanoAdjust implements LMDifFcn {
 	 * @param fvec	is an output array of length m which contains
 	 * 				the functions evaluated at the output x.
 	 */
-	public void fcn(Matrix x, Matrix fvec) {
+	private int numIt = 0;
+	public void fcn(Matrix x, Matrix fvec, int iflag) {
 		int m = fvec.getSizeX();	// the number of functions.
 //		int n = x.getSizeX();		// the number of variables. n must not exceed m.
+		
+		if (iflag == 0) {
+			double r = 0.0;
+			for (int i = 0; i < m; i++) {
+				r += fvec.getItem(i, 0);
+			}
+			r = Math.sqrt(r / (double) m);
+			System.out.printf("Average Difference between Controlpoints \nafter %d iteration(s): %g pixels\n", numIt, r);
+			numIt += 10;
+			return;
+		}
 		
 		int j = 0;
 		int k;

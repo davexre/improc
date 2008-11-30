@@ -7,7 +7,7 @@ public class LMDif {
 	public static boolean showDetails = false;
 	
 	public interface LMDifFcn {
-		public void fcn(Matrix x, Matrix fvec);
+		public void fcn(Matrix x, Matrix fvec, int iflag);
 	}
 	
 	/* resolution of arithmetic */
@@ -41,15 +41,17 @@ public class LMDif {
 			double h = eps * Math.abs(temp); // TODO: Проблеми с точността!!!???
 			if (h == 0.0)
 				h = eps;
-			h = 0.1;		// TODO: REMOVE THIS LINE!!!
-//			System.out.printf("**** TEMP = %f\n", temp);
+//			h = 0.1;		// TODO: REMOVE THIS LINE!!!
+			System.out.printf("\nJ=%d\n", j);
+			System.out.printf("TEMP = %20.18f\n", temp);
 //			if (j == 25)
-//				System.out.printf("**** H    = %12.8f\n", h);
+			System.out.printf("H    = %20.18f\n", h);
 //			System.out.printf("**** EPS  = %f\n", eps * 1e15);
 //			System.out.printf("**** EPSFCN= %f\n", epsfcn * 1e15);
 			x.setItem(j, 0, temp + h);
-			fcn.fcn(x, wa);
-//			System.out.printf("j=%d xnorm=%12.8f wanorm=%12.8f\n", j, x.getForbeniusNorm(), wa.getForbeniusNorm());
+			fcn.fcn(x, wa, 1);
+			System.out.printf("x    =%20.18f\n", x.getForbeniusNorm());
+			System.out.printf("wa   =%20.18f\n", wa.getForbeniusNorm());
 
 			x.setItem(j, 0, temp);
 			for (int i = 0; i < m; i++) {
@@ -60,6 +62,7 @@ public class LMDif {
 //			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
 		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
+		System.exit(0);
 		return fjac;
 	}
 	
@@ -214,7 +217,7 @@ public class LMDif {
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 
 		// evaluate the function at the starting point and calculate its norm.
-		fcn.fcn(x, fvec);
+		fcn.fcn(x, fvec, 1);
 		double fnorm = fvec.getForbeniusNorm();
 //		System.out.printf("fnorm=%12.8f\n", fnorm);
 //		System.exit(0);
@@ -232,6 +235,11 @@ public class LMDif {
 //			fdjac.transpose(ft);
 //			System.out.println(ft.toMatlabString("mf"));
 
+			// if requested, call fcn to enable printing of iterates.
+			if ((iter - 1) % 10 == 0) {
+				fcn.fcn(x, fvec, 0);
+			}
+			
 			// compute the qr factorization of the jacobian.
 
 			Matrix wa1 = new Matrix();
@@ -348,7 +356,7 @@ public class LMDif {
 //				System.out.printf("delta=%12.8f\n", delta);
 
 				// evaluate the function at x + p and calculate its norm.
-				fcn.fcn(wa2, wa4);
+				fcn.fcn(wa2, wa4, 1);
 //				System.out.println(wa4.toMatlabString("mwa4"));
 //				System.exit(0);
 				
@@ -403,13 +411,14 @@ public class LMDif {
 					} 
 					delta = temp * Math.min(delta, pnorm / p1);
 					par = par / temp;
+//					System.out.printf("temp=%12.8f\n", temp);
 				} else {
 					if ((par == 0.0) || (ratio >= 0.75)) {
 						delta = pnorm / 0.5;
 						par = 0.5 * par;
 					}
 				}
-				
+//				System.out.printf("par=%12.8f\n", par);
 				// test for successful iteration.
 				if (ratio >= 0.0001) {
 					// successful iteration. update x, fvec, and their norms.
@@ -425,8 +434,8 @@ public class LMDif {
 					iter++;
 				}
 
-				if (iter > 7)
-					System.exit(0);
+//				if (iter > 7)
+//					System.exit(0);
 				
 				// tests for convergence.
 				if ( (Math.abs(actred) <= ftol) && (prered <= ftol) && (0.5 * ratio <= 1.0)) {
@@ -460,7 +469,6 @@ public class LMDif {
 				}
 			}
 		}
-		
 	}	
 	
 	static final double p1 = 0.1;
@@ -484,7 +492,12 @@ public class LMDif {
 			(diag.getSizeX() != n) || (diag.getSizeY() != 1)) {
 			throw new IllegalArgumentException();
 		}
-		
+//		System.out.printf("\nlmpar:par  =%12.8f\n", par);
+//		System.out.printf("lmpar:r    =%12.8f\n", r.getForbeniusNorm());
+//		System.out.printf("lmpar:diag =%12.8f\n", diag.getForbeniusNorm());
+//		System.out.printf("lmpar:qtb  =%12.8f\n", qtb.getForbeniusNorm());
+//		System.out.printf("lmpar:delta=%12.8f\n", delta);
+				
 //		System.out.printf("mr=[\n");
 //		for (int j = 0; j < n; j++) {
 //			for (int i = 0; i < n; i++) {
@@ -753,6 +766,7 @@ public class LMDif {
 		}
 		x.resize(n, 1);
 		Matrix wa = qtb.makeCopy();
+		sdiag.make0();
 		
 		// copy r and (q transpose)*b to preserve input and initialize s.
 		// in particular, save the diagonal elements of r in x.
