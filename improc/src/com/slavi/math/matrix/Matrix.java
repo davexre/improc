@@ -334,7 +334,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Retuns sum the of all elements of the matrix.
+	 * Returns sum the of all elements of the matrix.
 	 */
 	public double sumAll() {
 		double D = 0;
@@ -345,7 +345,18 @@ public class Matrix {
 	}
 
 	/**
-	 * Retuns the maximum value of all elements of the matrix.
+	 * Returns the sum the of the absolute values of the matrix.
+	 */
+	public double sumAbs() {
+		double D = 0;
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				D += Math.abs(m[i][j]);
+		return D;
+	}
+
+	/**
+	 * Returns the maximum value of all elements of the matrix.
 	 */
 	public double max() {
 		if ((sizeX == 0) || (sizeY == 0))
@@ -381,7 +392,7 @@ public class Matrix {
 	}
 	
 	/**
-	 * Retuns the minimum value of all elements of the matrix.
+	 * Returns the minimum value of all elements of the matrix.
 	 */
 	public double min() {
 		if ((sizeX == 0) || (sizeY == 0))

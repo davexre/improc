@@ -42,24 +42,24 @@ public class LMDif {
 			if (h == 0.0)
 				h = eps;
 //			h = 0.1;		// TODO: REMOVE THIS LINE!!!
-			System.out.printf("\nJ=%d\n", j);
-			System.out.printf("TEMP = %20.18f\n", temp);
-			System.out.printf("H    = %20.18f\n", h);
+//			System.out.printf("\nJ=%d\n", j);
+//			System.out.printf("TEMP = %20.18f\n", temp);
+//			System.out.printf("H    = %20.18f\n", h);
 			x.setItem(j, 0, temp + h);
 			fcn.fcn(x, wa, 1);
-			System.out.printf("x    =%20.18f\n", x.getForbeniusNorm());
-			System.out.printf("wa   =%20.18f\n", wa.getForbeniusNorm());
-
+//			System.out.printf("x    =%20.18f\n", x.getForbeniusNorm());
+//			System.out.printf("wa   =%20.18f\n", wa.getForbeniusNorm());
+//			System.out.printf("sumwa=%20.18f\n", wa.sumAbs());
+			
 			x.setItem(j, 0, temp);
 			for (int i = 0; i < m; i++) {
 				temp = (wa.getItem(i, 0) - fvec.getItem(i, 0)) / h;
 				fjac.setItem(i, j, temp);
 				tmp.setItem(i, 0, temp);
 			}
-			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
+//			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
-		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
-		System.exit(0);
+//		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
 		return fjac;
 	}
 	
@@ -223,6 +223,9 @@ public class LMDif {
 			// if requested, call fcn to enable printing of iterates.
 			if ((iter - 1) % 10 == 0) {
 				fcn.fcn(x, fvec, 0);
+			}
+			if (iter % 41 == 0) {
+				break;
 			}
 			
 			// compute the qr factorization of the jacobian.

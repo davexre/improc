@@ -413,14 +413,14 @@ public class PanoAdjust implements LMDifFcn {
 			stack.add(new TransformationFunctions.SphereTPErect(distance));
 			break;
 		}
-		
+
 		// Perspective Control spherical Image
 		stack.add(new TransformationFunctions.PerspSphere(mt, distance));
 		// Convert spherical image to equirect.
 		stack.add(new TransformationFunctions.ErectSphereTP(distance));
 		// Rotate equirect. image horizontally
 		stack.add(new TransformationFunctions.RotateErect(rotX, rotY));
-		
+
 		switch (pn.format) {
 		case Rectilinear:
 			// Convert rectilinear to equirect
