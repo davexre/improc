@@ -631,23 +631,13 @@ public class PanoAdjust implements LMDifFcn {
 		for (int i = 0; i < g.cpt.size(); i++) {
 			ControlPoint cp = g.cpt.get(i);
 			double d = distControlPoint(cp, cp.type == OptimizeType.r);
-//			if (LMDif.showDetails)
-//				System.out.printf("!!%12.8f\n", d);
 			fvec.setItem(i, 0, d);
 			avg += d;
-
-//			if (LMDif.showDetails) {
-//				System.out.println("CP 355=" + cp);
-//				System.out.println("D=" + d);
-//			}
 		}
 		
 		avg /= g.cpt.size();
 		for (int i = g.cpt.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);
-//		if (LMDif.showDetails)
-//			fvec.printM("FVEC");
-//		System.out.printf("fvec norm=%12.8f xnorm=%12.8f\n", fvec.getForbeniusNorm(), x.getForbeniusNorm());
 		
 		try {
 			Thread.sleep(1);
@@ -1041,8 +1031,6 @@ public class PanoAdjust implements LMDifFcn {
 												+ im.cP.radial_params[0][1] ) ;
 			SetEquColor(im.cP);
 		}
-		
-		System.out.println("!!!!!!!!!!!!!!!!!! n=" + g.numParam + " !!! m=" + g.cpt.size());
 	}
 	
 	void SetEquColor( cPrefs cP )

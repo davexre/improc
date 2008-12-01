@@ -44,10 +44,7 @@ public class LMDif {
 //			h = 0.1;		// TODO: REMOVE THIS LINE!!!
 			System.out.printf("\nJ=%d\n", j);
 			System.out.printf("TEMP = %20.18f\n", temp);
-//			if (j == 25)
 			System.out.printf("H    = %20.18f\n", h);
-//			System.out.printf("**** EPS  = %f\n", eps * 1e15);
-//			System.out.printf("**** EPSFCN= %f\n", epsfcn * 1e15);
 			x.setItem(j, 0, temp + h);
 			fcn.fcn(x, wa, 1);
 			System.out.printf("x    =%20.18f\n", x.getForbeniusNorm());
@@ -59,7 +56,7 @@ public class LMDif {
 				fjac.setItem(i, j, temp);
 				tmp.setItem(i, 0, temp);
 			}
-//			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
+			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
 		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
 		System.exit(0);
@@ -90,12 +87,9 @@ public class LMDif {
 				}
 			}
 			rdiag.setItem(j, 0, scale * Math.sqrt(sum));
-//			System.out.printf("r[%d]=%12.8f\n", j, rdiag.getItem(j, 0));
 			ipvt[j] = j;
 		}
 		
-//		for (int i = 0; i < n; i++)
-//			System.out.printf("acnorm=%12.8f\n", rdiag.getItem(i, 0));
 		rdiag.copyTo(acnorm);
 		Matrix wa = rdiag.makeCopy();
 		// reduce a to r with householder transformations.
@@ -107,7 +101,6 @@ public class LMDif {
 				if (rdiag.getItem(k, 0) > rdiag.getItem(kmax, 0))
 					kmax = k;
 			if (kmax != j) {
-//				System.out.printf("j=%d kmax=%d r[j]=%f r[kmax]=%f\n", j, kmax, rdiag.getItem(j, 0), rdiag.getItem(kmax, 0));
 				for (int i = 0; i < m; i++) {
 					double tmp = a.getItem(i, j);
 					a.setItem(i, j, a.getItem(i, kmax));
@@ -138,10 +131,8 @@ public class LMDif {
 				}
 			}
 			double ajnorm = scale * Math.sqrt(sum);
-//			System.out.printf("ajnorm=%12.8f\n", ajnorm);
 			if (ajnorm != 0.0) {
 				if (a.getItem(j, j) < 0.0) {
-//					System.out.printf("inverted at j=%d a(j,j)=%12.8f\n", j, a.getItem(j, j) * 1000000000);
 					ajnorm = -ajnorm;
 				}
 				for (int i = j; i < m; i++) {
@@ -190,7 +181,6 @@ public class LMDif {
 				}
 			}
 			rdiag.setItem(j, 0, -ajnorm);
-//			System.exit(0);
 		}
 		return ipvt;
 	}
@@ -220,7 +210,6 @@ public class LMDif {
 		fcn.fcn(x, fvec, 1);
 		double fnorm = fvec.getForbeniusNorm();
 //		System.out.printf("fnorm=%12.8f\n", fnorm);
-//		System.exit(0);
 		
 		double par = 0.0;
 		double xnorm = 0.0;
@@ -231,17 +220,12 @@ public class LMDif {
 		while (true) {
 			// calculate the jacobian matrix.
 			Matrix fdjac = fdjac2(fcn, x, fvec);
-//			Matrix ft = new Matrix();
-//			fdjac.transpose(ft);
-//			System.out.println(ft.toMatlabString("mf"));
-
 			// if requested, call fcn to enable printing of iterates.
 			if ((iter - 1) % 10 == 0) {
 				fcn.fcn(x, fvec, 0);
 			}
 			
 			// compute the qr factorization of the jacobian.
-
 			Matrix wa1 = new Matrix();
 			int[] ipvt = qrfac(fdjac, wa1, wa2);
 			System.out.printf("WA1=%12.8f  WA2=%12.8f\n", wa1.getForbeniusNorm(), wa2.getForbeniusNorm());
@@ -264,7 +248,6 @@ public class LMDif {
 				}
 				xnorm = wa3.getForbeniusNorm();
 				delta = (xnorm == 0.0 ? factor : factor * xnorm);
-//				System.out.printf("DELTA=%12.8f\n", delta);
 			}
 //			System.out.printf("AA Diag=%12.8f\n", diag.getForbeniusNorm());
 //			System.out.printf("AA wa2=%12.8f\n", wa2.getForbeniusNorm());
@@ -272,7 +255,6 @@ public class LMDif {
 			// form (q transpose)*fvec and store the first n components in qtf.
 			Matrix wa4 = fvec.makeCopy();
 //			System.out.printf("wa4 norm=%12.8f\n", wa4.getForbeniusNorm());
-//			System.out.println(fdjac.toMatlabString("mf"));
 			Matrix qtf = new Matrix(n, 1);
 			for (int j = 0; j < n; j++) {
 				double temp3 = fdjac.getItem(j, j);
@@ -290,11 +272,6 @@ public class LMDif {
 				qtf.setItem(j, 0, wa4.getItem(j, 0));
 			}
 
-//			System.out.println(fdjac.toMatlabString("mf"));
-//			System.out.println(qtf.toMatlabString("mqtf"));
-//			System.exit(0);
-			
-			
 			// compute the norm of the scaled gradient.
 			double gnorm = 0.0;
 			if (fnorm != 0.0) {
@@ -309,10 +286,8 @@ public class LMDif {
 					}
 				}
 			}
-
 //			System.out.printf("gnorm=%12.8f\n", gnorm);
 //			System.out.printf("fnorm=%12.8f\n", fnorm);
-//			System.exit(0);
 			
 			// test for convergence of the gradient norm.
 			if (gnorm <= gtol)
@@ -325,18 +300,13 @@ public class LMDif {
 				diag.setItem(j, 0, Math.max(diag.getItem(j, 0), wa2.getItem(j, 0)));
 			}
 			
-//			System.out.println(diag.toMatlabString("mdiag"));
 //			System.out.printf("delta=%12.8f\n", delta);
-//			System.exit(0);
 			
 			while (true) {
 				// determine the levenberg-marquardt parameter.
-//				System.out.println(wa1.toMatlabString("mwa1"));
 //				System.out.printf("Diag=%12.8f\n", diag.getForbeniusNorm());
 				par = lmpar(par, fdjac, diag, wa1, qtf, delta, wa2, ipvt);
 				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
-//				System.out.println(wa1.toMatlabString("mwa1"));
-//				System.exit(0);
 				
 				// store the direction p and x + p. calculate the norm of p.
 				Matrix wa3 = new Matrix(n, 1);
@@ -346,7 +316,6 @@ public class LMDif {
 					wa2.setItem(j, 0, x.getItem(j, 0) + wa1.getItem(j, 0));
 					wa3.setItem(j, 0, diag.getItem(j, 0) * wa1.getItem(j, 0));
 				}
-//				System.out.println(wa1.toMatlabString("mwa1"));
 
 				double pnorm = wa3.getForbeniusNorm();
 				// on the first iteration, adjust the initial step bound.
@@ -357,12 +326,9 @@ public class LMDif {
 
 				// evaluate the function at x + p and calculate its norm.
 				fcn.fcn(wa2, wa4, 1);
-//				System.out.println(wa4.toMatlabString("mwa4"));
-//				System.exit(0);
 				
 				double fnorm1 = wa4.getForbeniusNorm();
 //				System.out.printf("pnorm %12.8f  fnorm1 %12.8f\n", pnorm, fnorm1);
-//				System.exit(0);
 				// compute the qr factorization of the jacobian.
 				double actred = -1.0;
 				if (p1 * fnorm1 < fnorm) {
@@ -380,7 +346,6 @@ public class LMDif {
 						wa3.setItem(i, 0, wa3.getItem(i, 0) + fdjac.getItem(i, j) * temp);
 					}
 				}
-//				System.out.println(wa3.toMatlabString("mwa3"));
 				
 				double temp1 = wa3.getForbeniusNorm() / fnorm;
 				double temp2 = (Math.sqrt(par) * pnorm) / fnorm;
@@ -396,7 +361,6 @@ public class LMDif {
 //				System.out.printf("prered=%12.8f\n", prered);
 //				System.out.printf("dirder=%12.8f\n", dirder);
 //				System.out.printf("ratio =%12.8f\n", ratio);
-//				System.exit(0);
 
 				// update the step bound.
 				if (ratio <= 0.25) {
@@ -498,17 +462,6 @@ public class LMDif {
 //		System.out.printf("lmpar:qtb  =%12.8f\n", qtb.getForbeniusNorm());
 //		System.out.printf("lmpar:delta=%12.8f\n", delta);
 				
-//		System.out.printf("mr=[\n");
-//		for (int j = 0; j < n; j++) {
-//			for (int i = 0; i < n; i++) {
-//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(i, j));
-//			}
-//			System.out.printf(";\n");
-//		}
-//		System.out.printf("];\n");
-		
-//		System.out.println(qtb.toMatlabString("md"));
-		
 		// compute and store in x the gauss-newton direction. if the
 		// jacobian is rank-deficient, obtain a least squares solution.
 
@@ -544,7 +497,6 @@ public class LMDif {
 		for (int j = 0; j < n; j++) {
 			wa2.setItem(j, 0, diag.getItem(j, 0) * x.getItem(j, 0));
 		}
-//		System.out.println(wa2.toMatlabString("wa2"));
 		
 		double dxnorm = wa2.getForbeniusNorm();
 		double fp = dxnorm - delta;
@@ -564,7 +516,6 @@ public class LMDif {
 				wa1.setItem(j, 0, diag.getItem(ipvt[j], 0) * (wa2.getItem(ipvt[j], 0) / dxnorm));
 			}
 //			System.out.printf("dxnorm=%12.8f\n", dxnorm);
-//			System.out.println(wa1.toMatlabString("mwa1"));
 
 			for (int j = 0; j < n; j++) {
 				double sum = 0.0;
@@ -623,20 +574,7 @@ public class LMDif {
 				wa1.setItem(j, 0, temp * diag.getItem(j, 0));
 			}
 //			System.out.printf("TEMP=%12.8f\n", temp);
-//			System.out.println(diag.toMatlabString("md"));
-//			System.out.printf("mr=[\n");
-//			for (int j = 0; j < n; j++) {
-//				for (int i = 0; i < n; i++) {
-//					System.out.printf(Locale.US, "%12.8f\t", r.getItem(i, j));
-//				}
-//				System.out.printf(";\n");
-//			}
-//			System.out.printf("];\n");
-
-//			System.exit(0);
 //			System.out.printf("R_NORM=%12.8f\n", r.getForbeniusNorm());
-//			System.out.println(qtb.toMatlabString("qtb"));
-
 //			System.out.printf("X_NORM=%12.8f\n", x.getForbeniusNorm());
 //			System.out.printf("WA1_NORM=%12.8f\n", wa1.getForbeniusNorm());
 //			System.out.printf("QTB_NORM=%12.8f\n", qtb.getForbeniusNorm());
@@ -658,8 +596,6 @@ public class LMDif {
 //			System.out.printf("WA1_NORM=%12.8f\n", wa1.getForbeniusNorm());
 //			System.out.printf("QTB_NORM=%12.8f\n", qtb.getForbeniusNorm());
 //			System.out.printf("sdiag_NORM=%12.8f\n", sdiag.getForbeniusNorm());
-//			System.out.println();
-			
 			
 			// if the function is small enough, accept the current value
 			// of par. also test for the exceptional cases where parl
@@ -689,8 +625,6 @@ public class LMDif {
 			
 //			System.out.printf("parc=%12.8f\n", parc);
 //			System.out.printf("temp=%12.8f\n", temp);
-//			System.out.println(wa1.toMatlabString("wa1"));
-//			System.exit(0);
 
 			// depending on the sign of the function, update parl or paru.
 			if (fp > 0.0)
@@ -777,17 +711,6 @@ public class LMDif {
 			x.setItem(j, 0, r.getItem(j, j));
 		}
 		
-//		System.out.printf("mr=[\n");
-//		for (int jj = 0; jj < n; jj++) {
-//			for (int ii = 0; ii < n; ii++) {
-//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
-//			}
-//			System.out.printf(";\n");
-//		}
-//		System.out.printf("];\n");
-//		System.exit(0);
-		
-//		System.out.println(diag.toMatlabString("md"));
 		// eliminate the diagonal matrix d using a givens rotation.
 		for (int j = 0; j < n; j++) {
 			// prepare the row of d to be eliminated, locating the
@@ -807,7 +730,6 @@ public class LMDif {
 					if (sdiag.getItem(k, 0) == 0.0)
 						continue;
 					double sin, cos;
-//					System.out.printf("k=%d r[kk]=%12.8f sdiag[k]=%12.8f\n", k, r.getItem(k, k), sdiag.getItem(k, 0));
 					if (Math.abs(r.getItem(k, k)) < Math.abs(sdiag.getItem(k, 0))) {
 						double cotan = r.getItem(k, k) / sdiag.getItem(k, 0);
 						sin = 0.5 / Math.sqrt(0.25 + 0.25 * cotan * cotan);
@@ -817,7 +739,6 @@ public class LMDif {
 						cos = 0.5 / Math.sqrt(0.25 + 0.25 * tan * tan);
 						sin = cos * tan;
 					}
-//					System.out.println(sdiag.toMatlabString("msd"));
 //					System.out.printf("SIN=%12.8f\n", sin);
 //					System.out.printf("COS=%12.8f\n", cos);
 					// compute the modified diagonal element of r and
@@ -832,43 +753,20 @@ public class LMDif {
 //					System.out.printf("qtbpj=%12.8f\n", qtbpj);
 //					System.out.printf("wa[k]=%12.8f\n", wa.getItem(k, 0));
 //					
-//					System.out.println(sdiag.toMatlabString("msd"));
-//					System.out.println(r.toMatlabString("mr"));
 					// accumulate the tranformation in the row of s.
 					for (int i = k + 1; i < n; i++) {
 						temp = cos * r.getItem(i, k) + sin * sdiag.getItem(i, 0);
 						sdiag.setItem(i, 0, -sin * r.getItem(i, k) + cos * sdiag.getItem(i, 0));
 						r.setItem(i, k, temp);
 					}
-					
-//					System.out.printf("mr=[\n");
-//					for (int jj = 0; jj < n; jj++) {
-//						for (int ii = 0; ii < n; ii++) {
-//							System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
-//						}
-//						System.out.printf(";\n");
-//					}
-//					System.out.printf("];\n");
-					
 				}
 			}
 			// store the diagonal element of s and restore
 			// the corresponding diagonal element of r.
 			sdiag.setItem(j, 0, r.getItem(j, j));
 			r.setItem(j, j, x.getItem(j, 0));
-//			System.exit(0);
 		}
 
-//		System.out.println(sdiag.toMatlabString("msd"));
-//		System.out.printf("mr=[\n");
-//		for (int jj = 0; jj < n; jj++) {
-//			for (int ii = 0; ii < n; ii++) {
-//				System.out.printf(Locale.US, "%12.8f\t", r.getItem(ii, jj));
-//			}
-//			System.out.printf(";\n");
-//		}
-//		System.out.printf("];\n");
-//		System.exit(0);
 //		System.out.printf("diagNorm =%12.8f\n", diag.getForbeniusNorm());
 //		System.out.printf("x norm   =%12.8f\n", x.getForbeniusNorm());
 //		System.out.printf("wa norm  =%12.8f\n", wa.getForbeniusNorm());
@@ -900,8 +798,5 @@ public class LMDif {
 			int l = ipvt[j];
 			x.setItem(l, 0, wa.getItem(j, 0));
 		}
-
-//		System.out.println(x.toMatlabString("mx"));
-//		System.exit(0);
 	}
 }
