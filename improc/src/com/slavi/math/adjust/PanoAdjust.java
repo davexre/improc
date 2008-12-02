@@ -4,7 +4,7 @@ import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -554,7 +554,7 @@ public class PanoAdjust implements LMDifFcn {
 			Image im = g.im.get(i);
 			optVars opt = g.opt.get(i);
 			
-			if ((k = g.opt.get(i).yaw) > 0) {
+			if ((k = opt.yaw) > 0) {
 				if (k == 1) {
 //					System.out.printf("YAW=%f\n", im.yaw);
 //					System.out.printf("YAWNEW=%f\n", x.getItem(j, 0));
@@ -1000,7 +1000,8 @@ public class PanoAdjust implements LMDifFcn {
 		for (int i = 0; i < g.im.size(); i++){
 			Image im = g.im.get(i);
 			int k = g.opt.get(i).yaw - 2;
-			if( k >= 0 ) im.yaw = g.im.get(k).yaw;
+			if( k >= 0 ) 
+				im.yaw = g.im.get(k).yaw;
 
 			k = g.opt.get(i).pitch - 2;
 			if( k >= 0 ) im.pitch = g.im.get(k).pitch;
@@ -1043,7 +1044,7 @@ public class PanoAdjust implements LMDifFcn {
 		}
 	}
 	
-	public void writePanoScript(PrintWriter fou) {
+	public void writePanoScript(PrintStream fou) {
 		int format = 0;
 		switch (g.pano.format) {
 		case Rectilinear:		format = 0; break;
@@ -1098,7 +1099,25 @@ public class PanoAdjust implements LMDifFcn {
 			else
 				optc = 0;
 
-			fou.println("i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
+			fou.printf("i w%d", im.width);
+			fou.printf(" h%d", im.height);
+			fou.printf(" f%d", format);
+			fou.printf(" a%f", im.cP.radial_params[0][3]);
+			fou.printf(" b%f", im.cP.radial_params[0][2]);
+			fou.printf(" c%f", im.cP.radial_params[0][1]);
+			fou.printf(" d%f", im.cP.horizontal_params[0]); 
+			fou.printf(" e%f", im.cP.vertical_params[0]);
+			fou.printf(" g0");
+			fou.printf(" p%f", im.pitch);
+			fou.printf(" r%f", im.roll);
+			fou.printf(" t0");
+			fou.printf(" v%f", im.hfov);
+			fou.printf(" y%f", im.yaw);
+			fou.printf(" u%d", g.st.feather);
+			fou.printf(" n\"%s\"", im.name);
+			fou.printf("\n");
+			
+/*			fou.println("i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
 					" a" + Double.toString(im.cP.radial_params[0][3]) + 
 					" b" + Double.toString(im.cP.radial_params[0][2]) + 
 					" c" + Double.toString(im.cP.radial_params[0][1]) + 
@@ -1111,7 +1130,7 @@ public class PanoAdjust implements LMDifFcn {
 					" v" + Double.toString(im.hfov) +
 					" y" + Double.toString(im.yaw) +
 					" u" + Double.toString(g.st.feather) +
-					" n\"" + im.name + "\"");
+					" n\"" + im.name + "\"");*/
 		}
 	}
 	
@@ -1183,8 +1202,10 @@ public class PanoAdjust implements LMDifFcn {
 				PanoAdjust.class.getResourceAsStream("optimizer.txt")));
 		PanoAdjust panoAdjust = new PanoAdjust();
 		panoAdjust.readPanoScript(fin);
+		
 		panoAdjust.RunLMOptimizer();
 		fin.close();
+		panoAdjust.writePanoScript(System.out);
 		System.out.println("Done");
 	}
 }
