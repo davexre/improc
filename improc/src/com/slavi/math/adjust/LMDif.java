@@ -30,7 +30,8 @@ public class LMDif {
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 		double eps = Math.sqrt(epsfcn);
 		
-		System.out.printf("x=%12.8f fvec=%12.8f\n", x.getForbeniusNorm(), fvec.getForbeniusNorm());
+		System.out.printf("x=%20.18f\n", x.getForbeniusNorm());
+		System.out.printf("fvec=%20.18f\n", fvec.getForbeniusNorm());
 		System.out.printf("eps=%20.18f\n", eps);
 		
 		Matrix fjac = new Matrix(m, n);
@@ -41,7 +42,7 @@ public class LMDif {
 			double h = eps * Math.abs(temp); // TODO: Проблеми с точността!!!???
 			if (h == 0.0)
 				h = eps;
-//			h = 0.1;		// TODO: REMOVE THIS LINE!!!
+			h = 0.1;		// TODO: REMOVE THIS LINE!!!
 //			System.out.printf("\nJ=%d\n", j);
 //			System.out.printf("TEMP = %20.18f\n", temp);
 //			System.out.printf("H    = %20.18f\n", h);
@@ -60,6 +61,7 @@ public class LMDif {
 //			System.out.printf("fjac()=%12.8f\n", tmp.getForbeniusNorm());
 		}
 //		System.out.printf("fjac=%12.8f\n", fjac.getForbeniusNorm());
+//		System.exit(0);
 		return fjac;
 	}
 	
@@ -694,7 +696,7 @@ public class LMDif {
 	 * 				n elements of the vector (q transpose)*b.
 	 */
 	static void qrsolv(Matrix r, Matrix diag, Matrix x, Matrix qtb, Matrix sdiag, int ipvt[]) {
-		int m = r.getSizeX();
+//		int m = r.getSizeX();
 		int n = r.getSizeY(); 
 		if ( //(m < n) ||
 			(qtb.getSizeX() != n) || (qtb.getSizeY() != 1) ||

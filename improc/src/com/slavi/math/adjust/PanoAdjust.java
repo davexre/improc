@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LMDif.LMDifFcn;
@@ -183,8 +182,7 @@ public class PanoAdjust implements LMDifFcn {
 	AlignInfo g = new AlignInfo();
 	
 	// Set Makeparameters depending on adjustprefs, color and source image
-	@SuppressWarnings("incomplete-switch")
-	List<TransformationFunctions.TransformationFunction> makeParams(Image im, Image pn, int colorIndex) {
+	void makeParams(Point2D.Double p, Image im, Image pn, int colorIndex) {
 		double a = im.hfov * MathUtil.deg2rad;	// field of view in rad
 		double b = pn.hfov * MathUtil.deg2rad;
 		Matrix mt = MathUtil.makeAngles(- im.pitch * MathUtil.deg2rad, 0.0, - im.roll * MathUtil.deg2rad, false);
@@ -232,45 +230,44 @@ public class PanoAdjust implements LMDifFcn {
 		else
 			rad4 = ((double) im.height) / 2.0;
 		
-		ArrayList<TransformationFunctions.TransformationFunction>stack = 
-			new ArrayList<TransformationFunctions.TransformationFunction>();
-		
 		switch (pn.format) {
 		case Rectilinear:
 			// Convert rectilinear to equirect
-			stack.add(new TransformationFunctions.ErectRect(distance));
+			TransformationFunctions.erectRect(p, distance);
 			break;
 		case Panorama:
 			// Convert panoramic to equirect
-			stack.add(new TransformationFunctions.ErectPano(distance));
+			TransformationFunctions.erectPano(p, distance);
 			break;
 		case FisheyeCirc:
 		case FisheyeFF:
 			// Convert panoramic to sphere
-			stack.add(new TransformationFunctions.ErectSphereTP(distance));
+			TransformationFunctions.erectSphereTP(p, distance);
+			break;
+		default:
 			break;
 		}
 		
 		// Rotate equirect. image horizontally
-		stack.add(new TransformationFunctions.RotateErect(rotX, rotY));
+		TransformationFunctions.rotateErect(p, rotX, rotY);
 		// Convert spherical image to equirect.
-		stack.add(new TransformationFunctions.SphereTPErect(distance));
+		TransformationFunctions.sphereTPErect(p, distance);
 		// Perspective Control spherical Image
-		stack.add(new TransformationFunctions.PerspSphere(mt, distance));
+		TransformationFunctions.perspSphere(p, mt, distance);
 		
 		// Perform radial correction
 		if (im.cP.horizontal)
-			stack.add(new TransformationFunctions.Horiz(horizontal));
+			TransformationFunctions.horiz(p, horizontal);
 		if (im.cP.vertical)
-			stack.add(new TransformationFunctions.Vert(vertical));
+			TransformationFunctions.vert(p, vertical);
 		if (im.cP.radial) {
 			switch (im.cP.correction_mode) {
 			case Radial:
 			case Morph:
-				stack.add(new TransformationFunctions.InvRadial(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Vertical:
-				stack.add(new TransformationFunctions.InvVertical(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.invVertical(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Deregister:
 				break;
@@ -280,47 +277,47 @@ public class PanoAdjust implements LMDifFcn {
 		switch (im.format) {
 		case Rectilinear:
 			// Convert rectilinear to spherical
-			stack.add(new TransformationFunctions.RectSphereTP(distance));
+			TransformationFunctions.rectSphereTP(p, distance);
 			break;
 		case Panorama:
 			// Convert panoramic to spherical
-			stack.add(new TransformationFunctions.PanoSphereTP(distance));
+			TransformationFunctions.panoSphereTP(p, distance);
 			break;
 		case Equirectangular:
 			// Convert PSphere to spherical
-			stack.add(new TransformationFunctions.ErectSphereTP(distance));
+			TransformationFunctions.erectSphereTP(p, distance);
+			break;
+		default:
 			break;
 		}
 		
 		// Scale image
-		stack.add(new TransformationFunctions.Resize(scale, scale));
+		TransformationFunctions.resize(p, scale, scale);
 		
 		if (im.cP.shear)
-			stack.add(new TransformationFunctions.Shear(shearX, shearY));
+			TransformationFunctions.shear(p, shearX, shearY);
 		if (im.cP.horizontal)
-			stack.add(new TransformationFunctions.Horiz(horizontal));
+			TransformationFunctions.horiz(p, horizontal);
 		if (im.cP.vertical)
-			stack.add(new TransformationFunctions.Vert(vertical));
+			TransformationFunctions.vert(p, vertical);
 		if (im.cP.radial) {
 			switch (im.cP.correction_mode) {
 			case Radial:
 			case Morph:
-				stack.add(new TransformationFunctions.Radial(rad0, rad1, rad2, rad3, rad4, rad4));
+				TransformationFunctions.radial(p, rad0, rad1, rad2, rad3, rad4, rad4);
 				break;
 			case Vertical:
-				stack.add(new TransformationFunctions.Vertical(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.vertical(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Deregister:
-				stack.add(new TransformationFunctions.Deregister(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.deregister(p, /*rad0,*/ rad1, rad2, rad3, rad4);
 				break;
 			}
 		}
-		return stack;
 	}
-
+	
 	// Set inverse Makeparameters depending on adjustprefs, color and source image
-	@SuppressWarnings("incomplete-switch")
-	List<TransformationFunctions.TransformationFunction> makeInvParams(Image im, Image pn, int colorIndex) {
+	static void makeInvParams(Point2D.Double p, Image im, Image pn, int colorIndex) {
 		double a = im.hfov * MathUtil.deg2rad;	// field of view in rad
 		double b = pn.hfov * MathUtil.deg2rad;
 		Matrix mt = MathUtil.makeAngles(im.pitch * MathUtil.deg2rad, 0.0, im.roll * MathUtil.deg2rad, true);
@@ -374,22 +371,19 @@ public class PanoAdjust implements LMDifFcn {
 //		System.out.printf("rot0=%f rot1=%f dist=%f\n", rotX, rotY, distance);
 //		mt.printM("MT=");
 		
-		ArrayList<TransformationFunctions.TransformationFunction>stack = 
-			new ArrayList<TransformationFunctions.TransformationFunction>();
-
 		// Perform radial correction
 		if (im.cP.horizontal)
-			stack.add(new TransformationFunctions.Horiz(horizontal));
+			TransformationFunctions.horiz(p, horizontal);
 		if (im.cP.vertical)
-			stack.add(new TransformationFunctions.Vert(vertical));
+			TransformationFunctions.vert(p, vertical);
 		if (im.cP.radial) {
 			switch (im.cP.correction_mode) {
 			case Radial:
 			case Morph:
-				stack.add(new TransformationFunctions.InvRadial(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Vertical:
-				stack.add(new TransformationFunctions.InvVertical(rad0, rad1, rad2, rad3, rad4));
+				TransformationFunctions.invVertical(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Deregister:
 				break;
@@ -397,128 +391,100 @@ public class PanoAdjust implements LMDifFcn {
 		}
 
 		// Scale image
-		stack.add(new TransformationFunctions.Resize(scaleX, scaleY));
+		TransformationFunctions.resize(p, scaleX, scaleY);
 
 		switch (im.format) {
 		case Rectilinear:
 			// Convert rectilinear to spherical
-			stack.add(new TransformationFunctions.SphereTPRect(distance));
+			TransformationFunctions.sphereTPRect(p, distance);
 			break;
 		case Panorama:
 			// Convert panoramic to spherical
-			stack.add(new TransformationFunctions.SphereTPPano(distance));
+			TransformationFunctions.sphereTPPano(p, distance);
 			break;
 		case Equirectangular:
 			// Convert PSphere to spherical
-			stack.add(new TransformationFunctions.SphereTPErect(distance));
+			TransformationFunctions.sphereTPErect(p, distance);
+			break;
+		default:
 			break;
 		}
 
 		// Perspective Control spherical Image
-		stack.add(new TransformationFunctions.PerspSphere(mt, distance));
+		TransformationFunctions.perspSphere(p, mt, distance);
 		// Convert spherical image to equirect.
-		stack.add(new TransformationFunctions.ErectSphereTP(distance));
+		TransformationFunctions.erectSphereTP(p, distance);
 		// Rotate equirect. image horizontally
-		stack.add(new TransformationFunctions.RotateErect(rotX, rotY));
+		TransformationFunctions.rotateErect(p, rotX, rotY);
 
 		switch (pn.format) {
 		case Rectilinear:
 			// Convert rectilinear to equirect
-			stack.add(new TransformationFunctions.RectErect(distance));
+			TransformationFunctions.rectErect(p, distance);
 			break;
 		case Panorama:
 			// Convert panoramic to equirect
-			stack.add(new TransformationFunctions.PanoErect(distance));
+			TransformationFunctions.panoErect(p, distance);
 			break;
 		case FisheyeCirc:
 		case FisheyeFF:
 			// Convert panoramic to sphere
-			stack.add(new TransformationFunctions.SphereTPErect(distance));
+			TransformationFunctions.sphereTPErect(p, distance);
+			break;
+		default:
 			break;
 		}
-
-//		for (TransformationFunctions.TransformationFunction i : stack) {
-//			System.out.println(i.getClass().getName());
-//		}		
-		return stack;
 	}
 
-	double distControlPoint(ControlPoint cp, boolean isSphere) {
-		Image sph = new Image();
-		sph.width = 360;
-		sph.height = 180;
-		sph.format = ImageFormat.Equirectangular;
-		sph.hfov = 360.0;
-		
-		Point2D.Double src = new Point2D.Double();
+	double distControlPoint(Point2D.Double p0, Point2D.Double p1, ControlPoint cp, Image pn, boolean isSphere) {
+		p0.x = cp.x0 - (double) cp.im0.width / 2.0 + 0.5;
+		p0.y = cp.y0 - (double) cp.im0.height / 2.0 + 0.5;
+		makeInvParams(p0, cp.im0, pn, 0);
 
-		List<TransformationFunctions.TransformationFunction> stack = makeInvParams(cp.im0, sph, 0);
-		src.x = cp.x0 - (double) cp.im0.width / 2.0 + 0.5;
-		src.y = cp.y0 - (double) cp.im0.height / 2.0 + 0.5;
-		Point2D.Double dest0 = new Point2D.Double();
-		TransformationFunctions.execute_stack(stack, src, dest0);
+		p1.x = cp.x1 - (double) cp.im1.width / 2.0 + 0.5;
+		p1.y = cp.y1 - (double) cp.im1.height / 2.0 + 0.5;
+		makeInvParams(p1, cp.im1, pn, 0);
 
-		stack = makeInvParams(cp.im1, sph, 0);
-		src.x = cp.x1 - (double) cp.im1.width / 2.0 + 0.5;
-		src.y = cp.y1 - (double) cp.im1.height / 2.0 + 0.5;
-		Point2D.Double dest1 = new Point2D.Double();
-		TransformationFunctions.execute_stack(stack, src, dest1);
-
-//		if (LMDif.showDetails) {
-//			System.out.printf("IMYAW=%f\n", cp.im1.yaw);
-//			System.out.println("src X1=" + src.x);
-//			System.out.println("src Y1=" + src.y);
-//			
-//			System.out.println("destX0=" + dest0.x);
-//			System.out.println("destY0=" + dest0.y);
-//			System.out.println("destX1=" + dest1.x);
-//			System.out.println("destY1=" + dest1.y);
-//		}
-		
 		if (isSphere) {
-			dest0.x = dest0.x * MathUtil.deg2rad; 
-			dest0.y = dest0.y * MathUtil.deg2rad + Math.PI / 2.0;
-			double b0x0 =   Math.sin(dest0.x) * Math.sin(dest0.y);
-			double b0x1 =   Math.cos(dest0.y);
-			double b0x2 = - Math.cos(dest0.x) * Math.sin(dest0.y);
+			p0.x = p0.x * MathUtil.deg2rad; 
+			p0.y = p0.y * MathUtil.deg2rad + Math.PI / 2.0;
+			double b0x0 =   Math.sin(p0.x) * Math.sin(p0.y);
+			double b0x1 =   Math.cos(p0.y);
+			double b0x2 = - Math.cos(p0.x) * Math.sin(p0.y);
 	
-			dest1.x = dest1.x * MathUtil.deg2rad; 
-			dest1.y = dest1.y * MathUtil.deg2rad + Math.PI / 2.0;
-			double b1x0 =   Math.sin(dest1.x) * Math.sin(dest1.y);
-			double b1x1 =   Math.cos(dest1.y);
-			double b1x2 = - Math.cos(dest1.x) * Math.sin(dest1.y);
+			p1.x = p1.x * MathUtil.deg2rad; 
+			p1.y = p1.y * MathUtil.deg2rad + Math.PI / 2.0;
+			double b1x0 =   Math.sin(p1.x) * Math.sin(p1.y);
+			double b1x1 =   Math.cos(p1.y);
+			double b1x2 = - Math.cos(p1.x) * Math.sin(p1.y);
 			
 			double scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
-//			if (LMDif.showDetails) {
-//				double r = Math.acos(scalarProduct) * 10000;
-//				System.out.println("Panowidth=" + r);
-//			}
 			return Math.acos(scalarProduct) * g.pano.width / (2.0 * Math.PI);
 		}
 		// take care of wrapping and points at edge of panorama
 		if (g.pano.hfov == 360.0) {
-			double delta = Math.abs(dest0.x - dest1.x);
+			double delta = Math.abs(p0.x - p1.x);
 			if (delta > g.pano.width / 2.0) {
-				if (dest0.x < dest1.x)
-					dest0.x += g.pano.width;
+				if (p0.x < p1.x)
+					p0.x += g.pano.width;
 				else
-					dest1.x += g.pano.width;
+					p1.x += g.pano.width;
 			}
 		}
 		// What do we want to optimize?
 		switch (cp.type) {
 		case x:
 			// x difference
-			return (dest0.x - dest1.x) * (dest0.x - dest1.x);
+			return (p0.x - p1.x) * (p0.x - p1.x);
 		case y:
 			// y-difference
-			return (dest0.y - dest1.y) * (dest0.y - dest1.y);
+			return (p0.y - p1.y) * (p0.y - p1.y);
 		case r:
 		default:
 			// square of distance
 			return
-				(dest0.y - dest1.y) * (dest0.y - dest1.y) + 
-				(dest0.x - dest1.x) * (dest0.x - dest1.x); 
+				(p0.y - p1.y) * (p0.y - p1.y) + 
+				(p0.x - p1.x) * (p0.x - p1.x); 
 		}
 	}
 	
@@ -627,10 +593,20 @@ public class PanoAdjust implements LMDifFcn {
 		}
 		
 		// Calculate distances
+		Point2D.Double p0 = new Point2D.Double();
+		Point2D.Double p1 = new Point2D.Double();
+		Image sph = new Image();
+		sph.width = 360;
+		sph.height = 180;
+		sph.format = ImageFormat.Equirectangular;
+		sph.hfov = 360.0;
 		double avg = 0.0;
+		
 		for (int i = 0; i < g.cpt.size(); i++) {
 			ControlPoint cp = g.cpt.get(i);
-			double d = distControlPoint(cp, cp.type == OptimizeType.r);
+			double d = distControlPoint(p0, p1, cp, 
+					cp.type == OptimizeType.r ? sph : g.pano, 
+					cp.type == OptimizeType.r);
 			fvec.setItem(i, 0, d);
 			avg += d;
 		}
@@ -1077,7 +1053,7 @@ public class PanoAdjust implements LMDifFcn {
 			case Cubic:				format = 0; break;
 			}
 			
-			int optHfov, opta, optb, optc;
+/*			int optHfov, opta, optb, optc;
 			optVars opt = g.opt.get(i);
 			if (opt.hfov == 1 || (opt.hfov > 1 &&  g.opt.get(opt.hfov-2).hfov == 1))
 				optHfov = 1;
@@ -1097,7 +1073,7 @@ public class PanoAdjust implements LMDifFcn {
 			if (opt.c == 1 || (opt.c > 1 &&  g.opt.get(opt.c-2).c == 1 ))
 				optc = 1;
 			else
-				optc = 0;
+				optc = 0;*/
 
 			fou.printf("i w%d", im.width);
 			fou.printf(" h%d", im.height);
