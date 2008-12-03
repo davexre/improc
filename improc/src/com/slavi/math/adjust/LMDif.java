@@ -65,6 +65,41 @@ public class LMDif {
 		return fjac;
 	}
 	
+	public static void main(String[] args) {
+		Matrix m = Matrix.fromOneLineString("3 4 5; 1 2 3; 2 3 4;");
+//		Matrix m = Matrix.fromOneLineString("1 2 3; 2 3 4; 3 4 5");
+		Matrix a = m.makeCopy();
+		Matrix b = m.makeCopy();
+		Matrix c = m.makeCopy();
+		Matrix q = new Matrix();
+		Matrix tau = new Matrix();
+		Matrix rdiag = new Matrix();
+		Matrix acnorm = new Matrix();
+
+		int ipvt[] = qrfac(a, rdiag, acnorm);
+		for (int i : ipvt) {
+			System.out.print(i + " ");
+		}
+		System.out.println();
+		a.printM("a");
+		rdiag.printM("rdiag");
+		acnorm.printM("acnorm");
+		for (int i = 0; i < 3; i++)
+			b.setItem(i, i, rdiag.getItem(i, 0));
+		a.mMul(b, c);
+		c.printM("c");
+		
+		
+		System.out.println("----------");
+		a = m.makeCopy();
+		a.qr(q, tau);
+		a.printM("r");
+		q.printM("q");
+		tau.printM("tau");
+		q.mMul(a, c);
+		c.printM("q*r");
+	}
+		
 	static int[] qrfac(Matrix a, Matrix rdiag, Matrix acnorm) {
 		int m = a.getSizeX();
 		int n = a.getSizeY();

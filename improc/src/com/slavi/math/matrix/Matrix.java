@@ -97,6 +97,39 @@ public class Matrix {
 		return result.toString();
 	}
 	
+	public String toOneLineString() {
+		StringBuilder result = new StringBuilder();
+		for (int j = 0; j < sizeY; j++) {
+			for (int i = 0; i < sizeX; i++) {
+				if (i != 0)
+					result.append(" ");
+				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(m[i][j]) } ));
+			}
+			result.append(";");
+		}
+		return result.toString();
+	}
+	
+	public static Matrix fromOneLineString(String str) {
+		StringTokenizer st = new StringTokenizer(str, ";");
+		int sizeY = st.countTokens();
+		int sizeX = 0;
+		for (int j = 0; j < sizeY; j++) {
+			StringTokenizer st2 = new StringTokenizer(st.nextToken());
+			sizeX = Math.max(sizeX, st2.countTokens());
+		}
+		st = new StringTokenizer(str, ";");
+		Matrix result = new Matrix(sizeX, sizeY);
+		for (int j = 0; j < sizeY; j++) {
+			StringTokenizer st2 = new StringTokenizer(st.nextToken());
+			int i = 0;
+			while (st2.hasMoreTokens()) {
+				result.setItem(i++, j, Double.parseDouble(st2.nextToken()));
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
