@@ -1,4 +1,4 @@
-package com.slavi.math.adjust;
+package com.slavi.improc.pano;
 
 import java.awt.geom.Point2D;
 

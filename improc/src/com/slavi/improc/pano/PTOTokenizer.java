@@ -1,4 +1,4 @@
-package com.slavi.math.adjust;
+package com.slavi.improc.pano;
 
 public class PTOTokenizer {
 

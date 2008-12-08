@@ -1,4 +1,4 @@
-package com.slavi.math.adjust;
+package com.slavi.improc.pano;
 
 import com.slavi.math.matrix.Matrix;
 
@@ -99,7 +99,7 @@ public class LMDif {
 		q.mMul(a, c);
 		c.printM("q*r");
 	}
-		
+
 	static int[] qrfac(Matrix a, Matrix rdiag, Matrix acnorm) {
 		int m = a.getSizeX();
 		int n = a.getSizeY();
