@@ -16,7 +16,7 @@ public class JLapack {
 	 * LAPACK: DOUBLE PRECISION FUNCTION DLAPY2( X, Y )
 	 * sqrt(a^2 + b^2) without under/overflow. 
 	 */
-	private static double hypot(double a, double b) {
+	public static double hypot(double a, double b) {
 		double result;
 		double absA = Math.abs(a);
 		double absB = Math.abs(b);

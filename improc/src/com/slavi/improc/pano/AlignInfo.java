@@ -1,5 +1,6 @@
 package com.slavi.improc.pano;
 
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 
 import com.slavi.improc.pano.ControlPoint.OptimizeType;
 import com.slavi.improc.pano.Image.ImageFormat;
+import com.slavi.math.matrix.JLapack;
 
 public class AlignInfo {
 
@@ -115,6 +117,41 @@ public class AlignInfo {
 //	void				data;		// ????
 	SizePref sizePref = new SizePref();	
 	ArrayList<CoordInfo>coordInfos = new ArrayList<CoordInfo>();			// Real World coordinates
+	
+	public int getOptimalPanoWidth() {
+		double scale = 0.0;
+		Point2D.Double p0 = new Point2D.Double();
+		Point2D.Double p1 = new Point2D.Double();
+		for (int i = 0; i < images.size(); i++) {
+			Image src = images.get(i);
+			double roll = src.roll;
+			double yaw = src.yaw;
+			double pitch = src.pitch;
+			src.roll = 0.0;
+			src.yaw = 0.0;
+			src.pitch = 0.0;
+			
+			p0.x = 0.0;
+			p0.y = 0.0;
+			PanoAdjust.makeInvParams(p0, src, pano, 0);
+			p1.x = 1.0;
+			p1.y = 1.0;
+			PanoAdjust.makeInvParams(p1, src, pano, 0);
+			
+			double s = JLapack.hypot(p1.x - p0.x, p1.y - p0.y) / Math.sqrt(2.0);
+			if (scale < s)
+				scale = s;
+			src.roll = roll;
+			src.yaw = yaw;
+			src.pitch = pitch;
+		}
+		return (int) (scale * (double) pano.width); // same scale for height
+	}
+	
+	
+
+	
+	/////////////////////////
 	
 	static public double cubeRoot(double x) {
 		if (x == 0.0)
