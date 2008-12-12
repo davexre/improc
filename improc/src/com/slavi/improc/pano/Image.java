@@ -17,8 +17,8 @@ public class Image {
 		Cubic
 	}
 	
-	public long width = 0;
-	public long height = 0;
+	public int width = 0;
+	public int height = 0;
 	public long bytesPerLine = 0;
 	public long bitsPerPixel = 0;	// Must be 24 or 32
 	public long dataSize = 0;

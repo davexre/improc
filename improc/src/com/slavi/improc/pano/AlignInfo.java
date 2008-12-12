@@ -222,9 +222,9 @@ public class AlignInfo {
 			if (t.length() <= 0)
 				continue;
 			if ("w".equals(t)) {
-				image.width = Long.parseLong(tokenizer.nextToken());
+				image.width = Integer.parseInt(tokenizer.nextToken());
 			} else if ("h".equals(t)) {
-				image.height = Long.parseLong(tokenizer.nextToken());
+				image.height = Integer.parseInt(tokenizer.nextToken());
 			} else if ("v=".equals(t)) {
 				opt.hfov = Integer.parseInt(tokenizer.nextToken());
 			} else if ("v".equals(t)) {
