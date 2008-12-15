@@ -1,6 +1,6 @@
 # PTOptimizer script, written by hugin
 
-p f2 w3000 h1500 v360  n"JPEG q90"
+p f2 w3000 h1500 v200  n"JPEG q90"
 m g1 i0
 
 # image lines

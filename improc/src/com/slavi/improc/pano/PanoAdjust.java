@@ -10,6 +10,7 @@ import com.slavi.improc.pano.ControlPoint.OptimizeType;
 import com.slavi.improc.pano.Image.ImageFormat;
 import com.slavi.improc.pano.LMDif.LMDifFcn;
 import com.slavi.math.MathUtil;
+import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 
 public class PanoAdjust implements LMDifFcn {
@@ -173,30 +174,23 @@ public class PanoAdjust implements LMDifFcn {
 		if (destImg.format == ImageFormat.Rectilinear) {
 			// rectilinear panorama
 			distance = (double) destImg.width / (2.0 * Math.tan(b / 2.0));
-			if (srcImg.format == ImageFormat.Rectilinear) {
-				// rectilinear image
-				scaleY = ((double) destImg.hfov / srcImg.hfov) * 
-						(a / (2.0 * Math.tan(a / 2.0))) * ((double)srcImg.width / destImg.width) * 2.0 * Math.tan(b/2.0) / b;
-			} else {
-				// pamoramic or fisheye image
-				scaleY = ((double)destImg.hfov / srcImg.hfov) * ((double)srcImg.width/ (double) destImg.width)
-				   * 2.0 * Math.tan(b/2.0) / b; 
-			}
 		} else {
 			// equirectangular or panoramic or fisheye
 			distance = ((double) destImg.width) / b;
-			if (srcImg.format == ImageFormat.Rectilinear) {
-				// rectilinear image
-				scaleY = ((double)destImg.hfov / srcImg.hfov) * (a /(2.0 * Math.tan(a/2.0))) * ((double)srcImg.width)/ ((double) destImg.width);
-			} else {
-				// pamoramic or fisheye image
-				scaleY = ((double)destImg.hfov / srcImg.hfov) * ((double)srcImg.width)/ ((double) destImg.width);
-			}
 		}
+
+		if (srcImg.format == ImageFormat.Rectilinear) {
+			// rectilinear image
+			scaleY = (double) srcImg.width / (2.0 * Math.tan(a/2.0)) / distance; 
+		} else {
+			// pamoramic or fisheye image
+			scaleY = ((double) srcImg.width) / a / distance;
+		}
+				
 		double scaleX = 1.0 / scaleY;
 		scaleY = scaleX;
-//		double shearX = im.cP.shear_x / im.height;
-//		double shearY = im.cP.shear_y / im.width;
+		double shearX = - srcImg.cP.shear_x / srcImg.height;
+		double shearY = - srcImg.cP.shear_y / srcImg.width;
 		double horizontal = -srcImg.cP.horizontal_params[colorIndex];
 		double vertical = -srcImg.cP.vertical_params[colorIndex];
 		double rotX	= distance * Math.PI;						// 180Ў in screenpoints
@@ -206,6 +200,7 @@ public class PanoAdjust implements LMDifFcn {
 		double rad2 = srcImg.cP.radial_params[colorIndex][2];
 		double rad3 = srcImg.cP.radial_params[colorIndex][3];
 		double rad4 = srcImg.cP.radial_params[colorIndex][4];
+		double rad5 = rad4;
 
 		if ((srcImg.cP.correction_mode == cPrefsCorrectionMode.Radial) ||
 			(srcImg.cP.correction_mode == cPrefsCorrectionMode.Morph))
@@ -218,6 +213,8 @@ public class PanoAdjust implements LMDifFcn {
 //		mt.printM("MT=");
 		
 		// Perform radial correction
+		if (srcImg.cP.shear)
+			TransformationFunctions.shear(p, shearX, shearY);
 		if (srcImg.cP.horizontal)
 			TransformationFunctions.horiz(p, horizontal);
 		if (srcImg.cP.vertical)
@@ -282,6 +279,8 @@ public class PanoAdjust implements LMDifFcn {
 		}
 	}
 
+	int fcnPanoNperCP = 1; // number of functions per control point, 1 or 2
+	
 	double distControlPoint(Point2D.Double p0, Point2D.Double p1, ControlPoint cp, Image image, boolean isSphere) {
 		p0.x = cp.x0 - (double) cp.image0.width / 2.0 + 0.5;
 		p0.y = cp.y0 - (double) cp.image0.height / 2.0 + 0.5;
@@ -303,9 +302,36 @@ public class PanoAdjust implements LMDifFcn {
 			double b1x0 =   Math.sin(p1.x) * Math.sin(p1.y);
 			double b1x1 =   Math.cos(p1.y);
 			double b1x2 = - Math.cos(p1.x) * Math.sin(p1.y);
+
+//			double scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
+//			return Math.acos(scalarProduct) * alignInfo.pano.width / (2.0 * Math.PI);
 			
-			double scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
-			return Math.acos(scalarProduct) * alignInfo.pano.width / (2.0 * Math.PI);
+			// new
+			double radiansToPixelsFactor = alignInfo.pano.width / (alignInfo.pano.hfov * (Math.PI / 180.0));
+			double dlon = p0.x - p1.x;
+			if (dlon < -Math.PI) dlon += 2.0 * Math.PI;
+			if (dlon > Math.PI) dlon -= 2.0 * Math.PI;
+
+			cp.distanceComponent0 = (dlon * Math.sin(0.5 * (p0.y + p1.y))) * radiansToPixelsFactor; 
+			cp.distanceComponent1 = (p0.y - p1.y) * radiansToPixelsFactor;
+			
+			double rx0 = b0x1 * b1x2 - b0x2 * b1x1;
+			double rx1 = b0x2 * b1x0 - b0x0 * b1x2;
+			double rx2 = b0x0 * b1x1 - b0x1 * b1x0;
+			
+			double scalarProduct = rx0 * rx0 + rx1 * rx1 + rx2 * rx2;
+			double dangle = Math.asin(Math.sqrt(scalarProduct));
+			
+			scalarProduct = b0x0 * b1x0 + b0x1 * b1x1 + b0x2 * b1x2;
+			if (scalarProduct < 0.0)
+				dangle = Math.PI - dangle;
+			double dist = dangle * radiansToPixelsFactor;
+
+//			System.out.printf("CP[%d] x0=%10.8f y0=%10.8f x1=%10.8f y1=%10.8f\n", alignInfo.controlPoints.indexOf(cp), p0.x, p0.y, p1.x, p1.y);
+//			System.out.printf("CP[%d] dangle=%10.8f scalarProduct=%10.8f\n", alignInfo.controlPoints.indexOf(cp), dangle, scalarProduct);
+//			System.out.printf("CP[%d] dist=%10.8f radiansToPixelsFactor=%10.8f\n", alignInfo.controlPoints.indexOf(cp), dist, radiansToPixelsFactor);
+			
+			return dist;			
 		}
 		// take care of wrapping and points at edge of panorama
 		if (alignInfo.pano.hfov == 360.0) {
@@ -318,21 +344,33 @@ public class PanoAdjust implements LMDifFcn {
 			}
 		}
 		// What do we want to optimize?
+		double result = 0.0;
 		switch (cp.type) {
 		case x:
 			// x difference
-			return (p0.x - p1.x) * (p0.x - p1.x);
+			result = (p0.x - p1.x) * (p0.x - p1.x);
+			break;
 		case y:
 			// y-difference
-			return (p0.y - p1.y) * (p0.y - p1.y);
+			result = (p0.y - p1.y) * (p0.y - p1.y);
+			break;
 		case r:
-		default:
+		default: 
 			// square of distance
-			return
+//			cp.distanceComponent0 = p0.y - p1.y;
+//			cp.distanceComponent1 = p0.x - p1.x;
+			result = 
 				(p0.y - p1.y) * (p0.y - p1.y) + 
-				(p0.x - p1.x) * (p0.x - p1.x); 
+				(p0.x - p1.x) * (p0.x - p1.x);
+			break;
 		}
+		cp.distanceComponent0 = Math.sqrt(result);
+		cp.distanceComponent1 = 0.0;
+		return result;
 	}
+	
+	boolean needInitialAvgFov = true;
+	double initialAvgFov = 0.0;
 	
 	/** 
 	 * Levenberg-Marquardt function measuring the quality of the fit in fvec[]
@@ -351,16 +389,17 @@ public class PanoAdjust implements LMDifFcn {
 		if (iflag == 0) {
 			double r = 0.0;
 			for (int i = 0; i < m; i++) {
-				r += fvec.getItem(i, 0);
+				r += fvec.getItem(i, 0) * fvec.getItem(i, 0);
 			}
-			r = Math.sqrt(r / (double) m);
-			System.out.printf("Average Difference between Controlpoints \nafter %d iteration(s): %g pixels\n", numIt, r);
+			r = Math.sqrt(r / (double) m) * Math.sqrt((double) fcnPanoNperCP);
+			System.out.printf("Average Difference between Controlpoints \nafter %d iteration(s): %10.8f pixels\n", numIt, r);
 			numIt += 10;
 			return;
 		}
 		
 		int j = 0;
 		int k;
+		double sumhfov = 0.0;
 		// Set global preferences structures using LM-params
 		for (int i = 0; i < alignInfo.images.size(); i++) {
 			Image im = alignInfo.images.get(i);
@@ -368,8 +407,6 @@ public class PanoAdjust implements LMDifFcn {
 			
 			if ((k = opt.yaw) > 0) {
 				if (k == 1) {
-//					System.out.printf("YAW=%f\n", im.yaw);
-//					System.out.printf("YAWNEW=%f\n", x.getItem(j, 0));
 					im.yaw = x.getItem(j++, 0);
 					im.yaw = NORM_ANGLE(im.yaw);
 				} else {
@@ -401,6 +438,7 @@ public class PanoAdjust implements LMDifFcn {
 					im.hfov = alignInfo.images.get(k - 2).hfov;
 				}
 			}
+			sumhfov += im.hfov;
 			if ((k = opt.a) > 0) {
 				if (k == 1) {
 					im.cP.radial_params[0][3] = x.getItem(j++, 0) / C_FACTOR;
@@ -436,8 +474,32 @@ public class PanoAdjust implements LMDifFcn {
 					im.cP.vertical_params[0] = alignInfo.images.get(k - 2).cP.vertical_params[0];
 				}
 			}
+			if ((k = opt.shear_x) > 0) {
+				if (k == 1) {
+					im.cP.shear_x = x.getItem(j++, 0);
+				} else {
+					im.cP.shear_x = alignInfo.images.get(k - 2).cP.shear_x;
+				}
+			}
+			if ((k = opt.shear_y) > 0) {
+				if (k == 1) {
+					im.cP.shear_y = x.getItem(j++, 0);
+				} else {
+					im.cP.shear_y = alignInfo.images.get(k - 2).cP.shear_y;
+				}
+			}
+			
+			im.cP.radial_params[0][0] = 1.0 - 
+					(im.cP.radial_params[0][3] + im.cP.radial_params[0][2] + im.cP.radial_params[0][1]);
 		}
 		
+		double avgfovFromSAP = sumhfov / alignInfo.images.size();
+		
+		if (needInitialAvgFov) {
+			initialAvgFov = avgfovFromSAP;
+			needInitialAvgFov = false;
+		}
+		//System.out.printf("avgfovFromSAP=%10.8f\n", avgfovFromSAP);
 		// Calculate distances
 		Point2D.Double p0 = new Point2D.Double();
 		Point2D.Double p1 = new Point2D.Double();
@@ -453,14 +515,19 @@ public class PanoAdjust implements LMDifFcn {
 			double d = distControlPoint(p0, p1, cp, 
 					cp.type == OptimizeType.r ? sph : alignInfo.pano, 
 					cp.type == OptimizeType.r);
+			
+			if ((initialAvgFov / avgfovFromSAP) > 1.0) {
+				d *= initialAvgFov / avgfovFromSAP;
+			}
 			fvec.setItem(i, 0, d);
-			avg += d;
+			avg += d * d;
 		}
 		
-		avg /= alignInfo.controlPoints.size();
+		avg = Math.sqrt(avg / alignInfo.controlPoints.size());
 		for (int i = alignInfo.controlPoints.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);
 		
+		System.out.printf("fvec norm=%12.8f xnorm=%12.8f\n", fvec.getForbeniusNorm(), x.getForbeniusNorm());
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
@@ -469,6 +536,7 @@ public class PanoAdjust implements LMDifFcn {
 	
 	void RunLMOptimizer() throws Exception {
 		// Initialize optimization params
+		needInitialAvgFov = true;
 		int n = alignInfo.numParam;
 		int m = alignInfo.controlPoints.size();
 		Matrix x = new Matrix(n, 1);
@@ -499,6 +567,10 @@ public class PanoAdjust implements LMDifFcn {
 				x.setItem(j++, 0, im.cP.horizontal_params[0]);
 			if(opt.e != 0)			// optimize e? 0-no 1-yes
 				x.setItem(j++, 0, im.cP.vertical_params[0]);
+			if(opt.shear_x != 0)	// optimize shear_x? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.shear_x);
+			if(opt.shear_y != 0)	// optimize shear_y? 0-no 1-yes
+				x.setItem(j++, 0, im.cP.shear_y);
 		}
 		if (j != alignInfo.numParam)
 			throw new RuntimeException("Invalid value for numParam");
@@ -515,6 +587,39 @@ public class PanoAdjust implements LMDifFcn {
 		panoAdjust.RunLMOptimizer();
 		fin.close();
 		panoAdjust.alignInfo.writePanoScript(System.out);
+		
+		Point2D.Double p0 = new Point2D.Double();
+		Point2D.Double p1 = new Point2D.Double();
+		Point2D.Double p2 = new Point2D.Double();
+		for (int i = 0; i < panoAdjust.alignInfo.images.size(); i++) {
+			Image src = panoAdjust.alignInfo.images.get(i);
+			double roll = src.roll;
+			double yaw = src.yaw;
+			double pitch = src.pitch;
+			src.roll = 0.0;
+			src.yaw = 0.0;
+			src.pitch = 0.0;
+			
+			p0.x = 1.0;
+			p0.y = 1.0;
+			
+			p1.x = p0.x;
+			p1.y = p0.y;
+			PanoAdjust.makeInvParams(p1, src, panoAdjust.alignInfo.pano, 0);
+			p2.x = p1.x;
+			p2.y = p1.y;
+			PanoAdjust.makeInvParams(p2, src, panoAdjust.alignInfo.pano, 0);
+			
+			double s = JLapack.hypot(p2.x - p0.x, p2.y - p0.y) / Math.sqrt(2.0);
+			
+			System.out.println("im=" + i + " d=" + s + " dx=" + (p2.x-p0.x) + " dy=" + (p2.x-p0.x));
+			
+			src.roll = roll;
+			src.yaw = yaw;
+			src.pitch = pitch;
+		}
+		
+		
 		System.out.println("Done");
 	}
 }

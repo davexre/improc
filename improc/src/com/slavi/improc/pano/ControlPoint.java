@@ -12,6 +12,7 @@ public class ControlPoint {
 	double x0, x1;			//double[] x = new double[2];		// x - Coordinates 
 	double y0, y1;			//double[] y = new double[2];		// y - Coordinates 
 	OptimizeType type;		// What to optimize: 0-r, 1-x, 2-y
+	double distanceComponent0, distanceComponent1;
 	
 	public String toString() {
 		return "x0=" + x0 + " y0=" + y0 + " x1=" + x1 + " y1=" + y1;

@@ -74,6 +74,8 @@ public class AlignInfo {
 		int c;					
 		int d;
 		int e;
+		int shear_x;
+		int shear_y;
 	}
 
 	public static class StitchBuffer {	// Used describe how images should be merged
@@ -289,6 +291,16 @@ public class AlignInfo {
 			} else if ("e".equals(t)) {
 				image.cP.vertical_params[0] = Double.parseDouble(tokenizer.nextToken());
 				image.cP.vertical = true;
+			} else if ("g=".equals(t)) {
+				opt.shear_x = Integer.parseInt(tokenizer.nextToken()) + 2;
+			} else if ("g".equals(t)) {
+				image.cP.shear_x = Double.parseDouble(tokenizer.nextToken());
+				image.cP.shear = true;
+			} else if ("t=".equals(t)) {
+				opt.shear_y = Integer.parseInt(tokenizer.nextToken()) + 2;
+			} else if ("t".equals(t)) {
+				image.cP.shear_y = Double.parseDouble(tokenizer.nextToken());
+				image.cP.shear = true;
 			} else if ("n".equals(t)) {
 				image.name = tokenizer.nextToken();
 			} else if ("m".equals(t)) {
@@ -504,8 +516,8 @@ public class AlignInfo {
 				optVars opt = new optVars();
 				CoordInfo ci = new CoordInfo();
 				readImageLine(tokenizer, pano, opt, ci);
-				if (pano.format == ImageFormat.FisheyeCirc)
-					pano.format = ImageFormat.Equirectangular;
+//				if (pano.format == ImageFormat.FisheyeCirc)
+//					pano.format = ImageFormat.Equirectangular;
 				break;
 			case '*':
 				// End of script-data
@@ -590,7 +602,7 @@ public class AlignInfo {
 		case Orthographic:		format = 0; break;
 		case Cubic:				format = 0; break;
 		}
-		fou.println("p " + Integer.toString(format) + " w" + Long.toString(pano.width) + " h" + Long.toString(pano.height) +
+		fou.println("p f" + Integer.toString(format) + " w" + Long.toString(pano.width) + " h" + Long.toString(pano.height) +
 				" v" + Double.toString(pano.hfov) + " n\"" + pano.name + "\"");
 		
 		

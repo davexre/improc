@@ -42,7 +42,7 @@ public class LMDif {
 			double h = eps * Math.abs(temp); // TODO: Проблеми с точността!!!???
 			if (h == 0.0)
 				h = eps;
-			h = 0.1;		// TODO: REMOVE THIS LINE!!!
+//			h = 0.1;		// TODO: REMOVE THIS LINE!!!
 //			System.out.printf("\nJ=%d\n", j);
 //			System.out.printf("TEMP = %20.18f\n", temp);
 //			System.out.printf("H    = %20.18f\n", h);
@@ -266,6 +266,7 @@ public class LMDif {
 			}
 			
 			// compute the qr factorization of the jacobian.
+			System.out.printf("fdjac=%12.8f\n", fdjac.getForbeniusNorm());
 			Matrix wa1 = new Matrix();
 			int[] ipvt = qrfac(fdjac, wa1, wa2);
 			System.out.printf("WA1=%12.8f  WA2=%12.8f\n", wa1.getForbeniusNorm(), wa2.getForbeniusNorm());
