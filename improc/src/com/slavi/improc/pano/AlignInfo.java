@@ -1,10 +1,12 @@
 package com.slavi.improc.pano;
 
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.slavi.improc.pano.ControlPoint.OptimizeType;
 import com.slavi.improc.pano.Image.ImageFormat;
@@ -139,6 +141,7 @@ public class AlignInfo {
 			p1.x = 1.0;
 			p1.y = 1.0;
 			PanoAdjust.makeInvParams(p1, src, pano, 0);
+			src.extentInPano = new Rectangle2D.Double(p0.x, p0.y, p1.x, p1.y);
 			
 			double s = JLapack.hypot(p1.x - p0.x, p1.y - p0.y) / Math.sqrt(2.0);
 			if (scale < s)
@@ -150,8 +153,87 @@ public class AlignInfo {
 		return (int) (scale * (double) pano.width); // same scale for height
 	}
 	
-	
+	public Point2D.Double getFieldOfView() {
+		double hfov = pano.hfov;
+		int width = pano.width;
+		int height = pano.height;
+		ImageFormat format = pano.format;
+		
+		pano.hfov = 360.0;
+		pano.width = 360;
+		pano.height = 180;
+		pano.format = ImageFormat.Equirectangular;
 
+		double srcX = pano.width / 2.0;
+		double srcY = pano.height / 2.0;
+		
+		Point2D.Double p = new Point2D.Double();
+		Point2D.Double min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+		Point2D.Double max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+		for (Image image : images) {
+			double destX = image.width / 2.0;
+			double destY = image.height / 2.0;
+			
+			for (int i = 0; i < image.width; i++) {
+				p.x = i - srcX;
+				p.y = 0 - srcY;
+				PanoAdjust.makeParams(p, image, pano, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+
+				p.x = i - srcX;
+				p.y = image.height - 1 - srcY;
+				PanoAdjust.makeParams(p, image, pano, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+			}
+				
+			for (int j = 0; j < image.height; j++) {
+				p.x = 0 - srcX;
+				p.y = j - srcY;
+				PanoAdjust.makeParams(p, image, pano, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+
+				p.x = image.width - 1 - srcX;
+				p.y = j - srcY;
+				PanoAdjust.makeParams(p, image, pano, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+			}
+		}
+		pano.hfov = hfov;
+		pano.width = width;
+		pano.height = height;
+		pano.format = format;
+
+		min.x -= 180.0;
+		min.y -= 90.0;
+		max.x -= 180.0;
+		max.y -= 90.0;
+		p.x = 2.0 * Math.max(Math.abs(min.x), Math.abs(max.x));
+		p.y = 2.0 * Math.max(Math.abs(min.y), Math.abs(max.y));
+		
+		pano.width = (int) p.x;
+		pano.height = (int) p.y;
+		return p;
+	}
 	
 	/////////////////////////
 	
@@ -643,25 +725,25 @@ public class AlignInfo {
 			else
 				optc = 0;*/
 
-			fou.printf("i w%d", im.width);
-			fou.printf(" h%d", im.height);
-			fou.printf(" f%d", format);
-			fou.printf(" a%f", im.cP.radial_params[0][3]);
-			fou.printf(" b%f", im.cP.radial_params[0][2]);
-			fou.printf(" c%f", im.cP.radial_params[0][1]);
-			fou.printf(" d%f", im.cP.horizontal_params[0]); 
-			fou.printf(" e%f", im.cP.vertical_params[0]);
-			fou.printf(" g0");
-			fou.printf(" p%f", im.pitch);
-			fou.printf(" r%f", im.roll);
-			fou.printf(" t0");
-			fou.printf(" v%f", im.hfov);
-			fou.printf(" y%f", im.yaw);
-			fou.printf(" u%d", stitchBuffer.feather);
-			fou.printf(" n\"%s\"", im.name);
-			fou.printf("\n");
+			fou.printf(Locale.US, "i w%d", im.width);
+			fou.printf(Locale.US, " h%d", im.height);
+			fou.printf(Locale.US, " f%d", format);
+			fou.printf(Locale.US, " a%f", im.cP.radial_params[0][3]);
+			fou.printf(Locale.US, " b%f", im.cP.radial_params[0][2]);
+			fou.printf(Locale.US, " c%f", im.cP.radial_params[0][1]);
+			fou.printf(Locale.US, " d%f", im.cP.horizontal_params[0]); 
+			fou.printf(Locale.US, " e%f", im.cP.vertical_params[0]);
+			fou.printf(Locale.US, " g0");
+			fou.printf(Locale.US, " p%f", im.pitch);
+			fou.printf(Locale.US, " r%f", im.roll);
+			fou.printf(Locale.US, " t0");
+			fou.printf(Locale.US, " v%f", im.hfov);
+			fou.printf(Locale.US, " y%f", im.yaw);
+			fou.printf(Locale.US, " u%d", stitchBuffer.feather);
+			fou.printf(Locale.US, " n\"%s\"", im.name);
+			fou.printf(Locale.US, "\n");
 			
-/*			fou.println("i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
+/*			fou.println(Locale.US, "i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
 					" a" + Double.toString(im.cP.radial_params[0][3]) + 
 					" b" + Double.toString(im.cP.radial_params[0][2]) + 
 					" c" + Double.toString(im.cP.radial_params[0][1]) + 

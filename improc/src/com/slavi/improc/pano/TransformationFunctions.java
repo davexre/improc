@@ -30,7 +30,10 @@ public class TransformationFunctions {
 	 */
 	public static void invRadial(Point2D.Double p, double c0, double c1, 
 			double c2, double c3, double c4) {
-		double rd = (Math.sqrt(p.x * p.x + p.y * p.y )) / c4; // Normalized
+		double rd = Math.sqrt(p.x * p.x + p.y * p.y );
+		if ((rd == 0.0) || (c4 == 0.0))
+			return;
+		rd /= c4; // Normalized
 		double rs = rd;
 
 		double f = (((c3 * rs + c2) * rs + c1) * rs + c0) * rs;

@@ -1,5 +1,7 @@
 package com.slavi.improc.pano;
 
+import java.awt.geom.Rectangle2D;
+
 import com.slavi.improc.pano.AlignInfo.PTRect;
 import com.slavi.improc.pano.AlignInfo.cPrefs;
 
@@ -32,4 +34,7 @@ public class Image {
 	public cPrefs cP = new cPrefs();		// How to correct the image
 	public String name = "";
 	public PTRect selection = null;
+	
+	public Rectangle2D.Double extentInPano;
+	
 }

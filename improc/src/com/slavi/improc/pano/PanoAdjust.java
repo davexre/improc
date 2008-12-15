@@ -64,7 +64,7 @@ public class PanoAdjust implements LMDifFcn {
 		double horizontal = srcImg.cP.horizontal_params[colorIndex];
 		double vertical = srcImg.cP.vertical_params[colorIndex];
 		double rotX	= distance * Math.PI;						// 180Ў in screenpoints
-		double rotY = -srcImg.yaw * distance * MathUtil.deg2rad; 	//    rotation angle in screenpoints
+		double rotY = -srcImg.yaw * MathUtil.deg2rad * distance; 	//    rotation angle in screenpoints
 		double rad0 = srcImg.cP.radial_params[colorIndex][0];
 		double rad1 = srcImg.cP.radial_params[colorIndex][1];
 		double rad2 = srcImg.cP.radial_params[colorIndex][2];
@@ -575,7 +575,8 @@ public class PanoAdjust implements LMDifFcn {
 		if (j != alignInfo.numParam)
 			throw new RuntimeException("Invalid value for numParam");
 		
-		LMDif.lmdif(this, x, fvec);
+		LMDif.lmdif(this, x, fvec, 0.05);
+		LMDif.lmdif(this, x, fvec, 0.0001);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -587,7 +588,7 @@ public class PanoAdjust implements LMDifFcn {
 		panoAdjust.RunLMOptimizer();
 		fin.close();
 		panoAdjust.alignInfo.writePanoScript(System.out);
-		
+
 		Point2D.Double p0 = new Point2D.Double();
 		Point2D.Double p1 = new Point2D.Double();
 		Point2D.Double p2 = new Point2D.Double();

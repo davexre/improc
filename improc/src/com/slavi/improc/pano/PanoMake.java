@@ -1,6 +1,11 @@
 package com.slavi.improc.pano;
 
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import com.slavi.improc.pano.Image.ImageFormat;
 
@@ -42,36 +47,40 @@ public class PanoMake {
 		return false;
 	}
 		
-	public void makePanoOneImage(Image image, Image pano, int colorIndex) {
+	public void makePanoOneImage(Image image, Image pano, int colorIndex) throws IOException {
 		double w2 = pano.width / 2.0 - 0.5;
 		double h2 = pano.height / 2.0 - 0.5;
 		double sw2 = image.width / 2.0 - 0.5;
 		double sh2 = image.height / 2.0 - 0.5;
 		Point2D.Double p = new Point2D.Double();
+		BufferedImage bimage = ImageIO.read(new File(image.name));
 		
 		for (int y = pano.height - 1; y >= 0; y--) {
 			double y_d = (double) y - h2;
 			
 			for (int x = pano.width - 1; x >= 0; x--) {
 				double x_d = (double) x - w2;
-				// Get source cartesian coordinates 
+				// Get source Cartesian coordinates 
 				p.x = x_d;
 				p.y = y_d;
 				PanoAdjust.makeParams(p, image, pano, colorIndex);
-				// Convert source cartesian coordinates to screen coordinates
+				// Convert source Cartesian coordinates to screen coordinates
 				p.x += sw2;
 				p.y += sh2;
 				// Is the pixel valid, i.e. from within source image?
 				if ((p.x < 0) || (p.x >= image.width) ||
 					(p.y < 0) || (p.y >= image.height))
 					continue;
+				
+				
+				
 				// Extract integer and fractions of source screen coordinates
 				int xc = (int) p.x;
 				int yc = (int) p.y;
 				p.x -= xc;
 				p.y -= yc;
 				
-				//// TODO: more....
+				int color = bimage.getRGB(xc, yc);
 			}
 		}
 	}

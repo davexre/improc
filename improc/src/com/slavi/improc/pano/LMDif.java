@@ -14,7 +14,7 @@ public class LMDif {
 	static final double MACHEP = 1.2e-16;  	
 	static final double DBL_EPSILON = 2220446049.250313 / 1e25; // 1.0e-14;
 	static final double gtol = DBL_EPSILON;
-	static final double ftol = DBL_EPSILON;
+//	static final double ftol = DBL_EPSILON;
 	static final double xtol = DBL_EPSILON;
 	static final double epsfcn = DBL_EPSILON * 10.0;//1.0e-15;
 	
@@ -42,7 +42,7 @@ public class LMDif {
 			double h = eps * Math.abs(temp); // TODO: Проблеми с точността!!!???
 			if (h == 0.0)
 				h = eps;
-//			h = 0.1;		// TODO: REMOVE THIS LINE!!!
+			h = 0.1;		// TODO: REMOVE THIS LINE!!!
 //			System.out.printf("\nJ=%d\n", j);
 //			System.out.printf("TEMP = %20.18f\n", temp);
 //			System.out.printf("H    = %20.18f\n", h);
@@ -239,7 +239,7 @@ public class LMDif {
 	 * 				the functions evaluated at the output x.
 	 * @throws Exception 
 	 */
-	public static void lmdif(LMDifFcn fcn, Matrix x, Matrix fvec) throws Exception {
+	public static void lmdif(LMDifFcn fcn, Matrix x, Matrix fvec, double ftol) throws Exception {
 		int m = fvec.getSizeX();	// the number of functions.
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 
