@@ -35,6 +35,6 @@ public class Image {
 	public String name = "";
 	public PTRect selection = null;
 	
-	public Rectangle2D.Double extentInPano;
+	public Rectangle2D.Double extentInPano = new Rectangle2D.Double();
 	
 }

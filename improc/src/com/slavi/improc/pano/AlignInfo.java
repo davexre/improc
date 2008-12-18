@@ -122,7 +122,13 @@ public class AlignInfo {
 	SizePref sizePref = new SizePref();	
 	ArrayList<CoordInfo>coordInfos = new ArrayList<CoordInfo>();			// Real World coordinates
 	
-	public int getOptimalPanoWidth() {
+	public void calcOptimalPanoWidth() {
+		calculateExtents(pano);
+		pano.width = (int) pano.extentInPano.width;
+		pano.height = (int) pano.extentInPano.height;
+	}
+	
+	public int getOptimalPanoWidthORIGINAL() {
 		double scale = 0.0;
 		Point2D.Double p0 = new Point2D.Double();
 		Point2D.Double p1 = new Point2D.Double();
@@ -143,7 +149,7 @@ public class AlignInfo {
 			PanoAdjust.makeInvParams(p1, src, pano, 0);
 			src.extentInPano = new Rectangle2D.Double(p0.x, p0.y, p1.x, p1.y);
 			
-			double s = JLapack.hypot(p1.x - p0.x, p1.y - p0.y) / Math.sqrt(2.0);
+			double s = JLapack.hypot(p1.x - p0.x, p1.y - p0.y);
 			if (scale < s)
 				scale = s;
 			src.roll = roll;
@@ -152,8 +158,94 @@ public class AlignInfo {
 		}
 		return (int) (scale * (double) pano.width); // same scale for height
 	}
+
+	void calculateExtents(Image dest) {
+		Point2D.Double p = new Point2D.Double();
+		Point2D.Double min = new Point2D.Double();
+		Point2D.Double max = new Point2D.Double();
+		double destX = dest.width / 2.0 - 0.5;
+		double destY = dest.height / 2.0 - 0.5;
+		boolean isFirst = true;
+		
+		for (Image image : images) {
+			double srcX = image.width / 2.0 - 0.5;
+			double srcY = image.height / 2.0 - 0.5;
+			
+			min.x = min.y = Double.POSITIVE_INFINITY;
+			max.x = max.y = Double.NEGATIVE_INFINITY;
+			for (int i = 0; i < image.width; i++) {
+				p.x = i - srcX;
+				p.y = 0 - srcY;
+				PanoAdjust.makeInvParams(p, image, dest, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+
+				p.x = i - srcX;
+				p.y = image.height - 1 - srcY;
+				PanoAdjust.makeInvParams(p, image, dest, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+			}
+				
+			for (int j = 0; j < image.height; j++) {
+				p.x = 0 - srcX;
+				p.y = j - srcY;
+				PanoAdjust.makeInvParams(p, image, dest, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+
+				p.x = image.width - 1 - srcX;
+				p.y = j - srcY;
+				PanoAdjust.makeInvParams(p, image, dest, 0);
+				p.x += destX;
+				p.y += destY;
+				if (min.x > p.x) min.x = p.x; 
+				if (min.y > p.y) min.y = p.y; 
+				if (max.x < p.x) max.x = p.x; 
+				if (max.y < p.y) max.y = p.y; 
+			}
+			
+			image.extentInPano.x = min.x;
+			image.extentInPano.y = min.y;
+			image.extentInPano.width = max.x - min.x;
+			image.extentInPano.height = max.y - min.y;
+			
+			if (isFirst) {
+				dest.extentInPano.x = image.extentInPano.x;
+				dest.extentInPano.y = image.extentInPano.y;
+				dest.extentInPano.width = image.extentInPano.width;
+				dest.extentInPano.height = image.extentInPano.height;
+				isFirst = false;
+			} else {
+				Rectangle2D.union(image.extentInPano, dest.extentInPano, dest.extentInPano);
+			}
+		}
+	}
 	
 	public Point2D.Double getFieldOfView() {
+		Image dest = new Image();
+		dest.hfov = 360.0;
+		dest.width = 360;
+		dest.height = 180;
+		dest.format = ImageFormat.Equirectangular;
+		calculateExtents(dest);
+		System.out.println("Pano extent is " + dest.extentInPano);
+		return new Point2D.Double(dest.extentInPano.width, dest.extentInPano.height);
+	}
+
+	public Point2D.Double getFieldOfViewOriginal() {
 		double hfov = pano.hfov;
 		int width = pano.width;
 		int height = pano.height;
@@ -164,20 +256,20 @@ public class AlignInfo {
 		pano.height = 180;
 		pano.format = ImageFormat.Equirectangular;
 
-		double srcX = pano.width / 2.0;
-		double srcY = pano.height / 2.0;
+		double destX = pano.width / 2.0;
+		double destY = pano.height / 2.0;
 		
 		Point2D.Double p = new Point2D.Double();
 		Point2D.Double min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		Point2D.Double max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 		for (Image image : images) {
-			double destX = image.width / 2.0;
-			double destY = image.height / 2.0;
+			double srcX = image.width / 2.0;
+			double srcY = image.height / 2.0;
 			
 			for (int i = 0; i < image.width; i++) {
 				p.x = i - srcX;
 				p.y = 0 - srcY;
-				PanoAdjust.makeParams(p, image, pano, 0);
+				PanoAdjust.makeInvParams(p, image, pano, 0);
 				p.x += destX;
 				p.y += destY;
 				if (min.x > p.x) min.x = p.x; 
@@ -187,7 +279,7 @@ public class AlignInfo {
 
 				p.x = i - srcX;
 				p.y = image.height - 1 - srcY;
-				PanoAdjust.makeParams(p, image, pano, 0);
+				PanoAdjust.makeInvParams(p, image, pano, 0);
 				p.x += destX;
 				p.y += destY;
 				if (min.x > p.x) min.x = p.x; 
@@ -232,6 +324,7 @@ public class AlignInfo {
 		
 		pano.width = (int) p.x;
 		pano.height = (int) p.y;
+		
 		return p;
 	}
 	

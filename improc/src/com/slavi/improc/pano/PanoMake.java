@@ -8,6 +8,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.slavi.improc.pano.Image.ImageFormat;
+import com.slavi.util.Const;
 
 public class PanoMake {
 
@@ -85,10 +86,57 @@ public class PanoMake {
 		}
 	}
 	
-	public void makePano(AlignInfo ainfo) {
+	public static void makePano(AlignInfo ainfo) throws IOException {
+		BufferedImage bi = new BufferedImage(ainfo.pano.width, ainfo.pano.height, BufferedImage.TYPE_INT_RGB);
+		Point2D.Double p = new Point2D.Double();
+		Point2D.Double p2 = new Point2D.Double();
+		
+		double srcX = ainfo.pano.width / 2.0 - 0.5;
+		double srcY = ainfo.pano.height / 2.0 - 0.5;
+
+		double scale = ainfo.pano.width / ainfo.pano.extentInPano.width;
+		
 		for (Image image : ainfo.images) {
+			int x1 = (int) image.extentInPano.x;
+			int x2 = (int) (image.extentInPano.width + image.extentInPano.x);
+			int y1 = (int) image.extentInPano.y;
+			int y2 = (int) (image.extentInPano.height + image.extentInPano.y);
+			BufferedImage im = ImageIO.read(new File(image.name));
+
+			double destX = image.width / 2.0 - 0.5;
+			double destY = image.height / 2.0 - 0.5;
 			
+			for (int j = y1; j <= y2; j++)
+				for (int i = x1; i <= x2; i++) {
+					int atX = (int) ((i - ainfo.pano.extentInPano.x) * scale);
+					int atY = (int) ((j - ainfo.pano.extentInPano.y) * scale);
+
+					if ((atX < 0) || (atX >= ainfo.pano.width) ||
+						(atY < 0) || (atY >= ainfo.pano.height))
+							continue;
+					
+					p.x = atX - srcX; 
+					p.y = atY - srcY;
+					PanoAdjust.makeParams(p, image, ainfo.pano, 0);
+//					p2.x = p.x;
+//					p2.y = p.y;
+//					PanoAdjust.makeInvParams(p, image, ainfo.pano, 0);
+//					p2.x += srcX;
+//					p2.y += srcY;
+					
+					p.x += destX;
+					p.y += destY;
+					
+					int x = (int) p.x;
+					int y = (int) p.y;
+					if ((x < 0) || (x >= im.getWidth()) ||
+						(y < 0) || (y >= im.getHeight()))
+						continue;
+					bi.setRGB(atX, atY, im.getRGB(x, y));
+				}
 		}
+		System.out.println("Output file is " + Const.outputImage);
+		ImageIO.write(bi, "jpg", new File(Const.outputImage));
 	}
 	
 }

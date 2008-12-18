@@ -527,7 +527,7 @@ public class PanoAdjust implements LMDifFcn {
 		for (int i = alignInfo.controlPoints.size(); i < m; i++)
 			fvec.setItem(i, 0, avg);
 		
-		System.out.printf("fvec norm=%12.8f xnorm=%12.8f\n", fvec.getForbeniusNorm(), x.getForbeniusNorm());
+//		System.out.printf("fvec norm=%12.8f xnorm=%12.8f\n", fvec.getForbeniusNorm(), x.getForbeniusNorm());
 		try {
 			Thread.sleep(1);
 		} catch (InterruptedException e) {
@@ -620,6 +620,32 @@ public class PanoAdjust implements LMDifFcn {
 			src.pitch = pitch;
 		}
 		
+		Point2D.Double fov = panoAdjust.alignInfo.getFieldOfView();
+		System.out.println("FOV=" + fov);
+		panoAdjust.alignInfo.pano.hfov = fov.x;
+		panoAdjust.alignInfo.calcOptimalPanoWidth();
+		panoAdjust.alignInfo.calculateExtents(panoAdjust.alignInfo.pano);
+		System.out.println("Pano extent is " + panoAdjust.alignInfo.pano.extentInPano);
+		System.out.println("Width =" + panoAdjust.alignInfo.pano.width);
+		System.out.println("Height=" + panoAdjust.alignInfo.pano.height);
+
+		p0.x = 1.0;
+		p0.y = 1.0;
+		
+		p1.x = p0.x;
+		p1.y = p0.y;
+		Image image = panoAdjust.alignInfo.images.get(0);
+		PanoAdjust.makeInvParams(p1, image, panoAdjust.alignInfo.pano, 0);
+		
+		p2.x = p1.x;
+		p2.y = p1.y;
+		PanoAdjust.makeParams(p2, image, panoAdjust.alignInfo.pano, 0);
+		
+		System.out.println("P0=" + p0);
+		System.out.println("P1=" + p1);
+		System.out.println("P2=" + p2);
+		
+		PanoMake.makePano(panoAdjust.alignInfo);
 		
 		System.out.println("Done");
 	}

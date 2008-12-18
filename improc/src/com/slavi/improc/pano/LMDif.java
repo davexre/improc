@@ -30,9 +30,9 @@ public class LMDif {
 		int n = x.getSizeX();		// the number of variables. n must not exceed m.
 		double eps = Math.sqrt(epsfcn);
 		
-		System.out.printf("x=%20.18f\n", x.getForbeniusNorm());
-		System.out.printf("fvec=%20.18f\n", fvec.getForbeniusNorm());
-		System.out.printf("eps=%20.18f\n", eps);
+//		System.out.printf("x=%20.18f\n", x.getForbeniusNorm());
+//		System.out.printf("fvec=%20.18f\n", fvec.getForbeniusNorm());
+//		System.out.printf("eps=%20.18f\n", eps);
 		
 		Matrix fjac = new Matrix(m, n);
 		Matrix wa = new Matrix(m, 1);
@@ -266,10 +266,10 @@ public class LMDif {
 			}
 			
 			// compute the qr factorization of the jacobian.
-			System.out.printf("fdjac=%12.8f\n", fdjac.getForbeniusNorm());
+//			System.out.printf("fdjac=%12.8f\n", fdjac.getForbeniusNorm());
 			Matrix wa1 = new Matrix();
 			int[] ipvt = qrfac(fdjac, wa1, wa2);
-			System.out.printf("WA1=%12.8f  WA2=%12.8f\n", wa1.getForbeniusNorm(), wa2.getForbeniusNorm());
+//			System.out.printf("WA1=%12.8f  WA2=%12.8f\n", wa1.getForbeniusNorm(), wa2.getForbeniusNorm());
 			
 			// on the first iteration and if mode is 1, scale according
 			// to the norms of the columns of the initial jacobian.
@@ -347,7 +347,7 @@ public class LMDif {
 				// determine the levenberg-marquardt parameter.
 //				System.out.printf("Diag=%12.8f\n", diag.getForbeniusNorm());
 				par = lmpar(par, fdjac, diag, wa1, qtf, delta, wa2, ipvt);
-				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
+//				System.out.printf("LMPAR=%12.8f  iter=%d\n", par, iter);
 				
 				// store the direction p and x + p. calculate the norm of p.
 				Matrix wa3 = new Matrix(n, 1);
