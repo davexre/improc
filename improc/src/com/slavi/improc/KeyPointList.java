@@ -21,7 +21,7 @@ public class KeyPointList extends KDTree<KeyPoint> {
 	public int imageSizeY;
 	
 	public KeyPointList() {
-		super(KeyPoint.featureVectorLinearSize);
+		super(KeyPoint.featureVectorLinearSize, false);
 	}
 
 	public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {

@@ -150,17 +150,14 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				}
 				task.get();
 			}
-		} catch (Exception e) {
+		} finally {
 			exec.shutdownNow();
-			throw e;
 		}
 
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 		for (KeyPointPairList k : keyPointPairLists.values()) {
 			result.add(k);
 		}
-
-		exec.shutdown();
 		return result;
 	}
 }

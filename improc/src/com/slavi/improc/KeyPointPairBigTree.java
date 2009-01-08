@@ -2,13 +2,13 @@ package com.slavi.improc;
 
 import java.util.ArrayList;
 
-import com.slavi.util.tree.KDTree;
+import com.slavi.util.tree.ConcurrentKDTree;
 
-public class KeyPointPairBigTree extends KDTree<KeyPoint> {
+public class KeyPointPairBigTree extends ConcurrentKDTree<KeyPoint> {
 	public final ArrayList<KeyPointList> keyPointLists = new ArrayList<KeyPointList>();
 
 	public KeyPointPairBigTree() {
-		super(KeyPoint.featureVectorLinearSize);
+		super(KeyPoint.featureVectorLinearSize, false);
 	}
 
 	public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {

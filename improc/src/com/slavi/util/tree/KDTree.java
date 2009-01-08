@@ -104,6 +104,12 @@ public abstract class KDTree<E> implements Iterable<E>{
 		protected E data;
 		protected Node<E> left, right;
 		
+		Node(E data) {
+			this.data = data;
+			left = null;
+			right = null;
+		}
+		
 		public E getData() {
 			return data;
 		}
@@ -129,17 +135,17 @@ public abstract class KDTree<E> implements Iterable<E>{
 	
 	boolean ignoreDuplicates;
 	
-	public KDTree(int dimensions) {
+	public KDTree(int dimensions, boolean ignoreDuplicates) {
 		this.dimensions = dimensions;
 		this.size = 0;
 		this.treeDepth = 0;
 		this.root = null;
 		this.mutations = 0;
-		this.ignoreDuplicates = false;
+		this.ignoreDuplicates = ignoreDuplicates;
 	}
 
-	public KDTree(int dimensions, List<E> items) {
-		this(dimensions);
+	public KDTree(int dimensions, List<E> items, boolean ignoreDuplicates) {
+		this(dimensions, ignoreDuplicates);
 		for (E item : items)
 			add(item);
 	}
@@ -283,8 +289,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			items.set(startIndex, tmp);
 		}
 		int nextDimension = (curDimension + 1) % dimensions;
-		Node<E> result = new Node<E>();
-		result.data = items.get(startIndex);
+		Node<E> result = new Node<E>(items.get(startIndex));
 		depthLevel++;
 		if (depthLevel > treeDepth)
 			treeDepth = depthLevel;
@@ -453,24 +458,31 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return result;
 	}
 
-	private void add_recursive(Node<E> node, Node<E> curNode, int dimension, int depthLevel) {
+	private void add_recursive(E data, Node<E> curNode, int dimension, int depthLevel) {
 		depthLevel++;
-		double value = getValue(node.data, dimension);
+		double value = getValue(data, dimension);
+		double curNodeValue = getValue(curNode.data, dimension);
 		int nextDimension = (dimension + 1) % dimensions;
-		if (value < getValue(curNode.data, dimension)) {
+		if (value < curNodeValue) {
 			if (curNode.left == null) {
 				if (treeDepth < depthLevel)
 					treeDepth = depthLevel;
-				curNode.left = node;
+				curNode.left = new Node<E>(data);
+				mutations++;
+				size++;
 			} else
-				add_recursive(node, curNode.left, nextDimension, depthLevel);
+				add_recursive(data, curNode.left, nextDimension, depthLevel);
+		} else if ((!ignoreDuplicates) && (value == curNodeValue) && compareItems(data, curNode.data)) {
+			return;
 		} else {
 			if (curNode.right == null) {
 				if (treeDepth < depthLevel) 
 					treeDepth = depthLevel;
-				curNode.right = node;
+				curNode.right = new Node<E>(data);
+				mutations++;
+				size++;
 			} else
-				add_recursive(node, curNode.right, nextDimension, depthLevel);
+				add_recursive(data, curNode.right, nextDimension, depthLevel);
 		}		
 	}
 
@@ -491,19 +503,13 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public void add(E item) {
 		if (item == null)
 			return;
-		if (ignoreDuplicates && contains(item))
-			return;
-		Node<E> node = new Node<E>();
-		node.data = item;
-		node.left = null;
-		node.right = null;
 		if (root == null) { 
-			root = node;
+			root = new Node<E>(item);
+			mutations++;
+			size++;
 		} else {
-			add_recursive(node, root, 0, 1);
+			add_recursive(item, root, 0, 1);
 		}
-		mutations++;
-		size++;
 	}
 	
 	/**

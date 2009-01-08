@@ -10,7 +10,7 @@ public class TestKDTree {
 	
 	public static class MyKDTree extends KDTree<MyKDData> {
 		public MyKDTree(int dimensions, List<MyKDData> items) {
-			super(dimensions, items);
+			super(dimensions, items, false);
 		}
 
 		public boolean canFindDistanceBetween(MyKDData fromNode, MyKDData toNode) {
@@ -109,7 +109,7 @@ public class TestKDTree {
 		System.out.println("Max used steps=" + maxUsedSearchSteps);
 	}
 	
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		int dimensions = 10;
 		int itemsPerDimension = 3;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
@@ -128,5 +128,22 @@ public class TestKDTree {
 		System.out.println("Item to find:");
 		System.out.println(item);
 		System.out.println(tree.contains(item));
+	}
+	
+	public static void main(String[] args) throws Exception {
+		int dimensions = 3;
+		int itemsPerDimension = 1;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
+		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+		MyKDTree tree = new MyKDTree(dimensions, items);
+		int itemsCount = tree.getSize();
+		if (items.size() != itemsCount)
+			throw new Exception("Incorrect tree addition");
+		for (MyKDData item : items)
+			tree.add(item);
+		itemsCount = tree.getSize();
+		if (items.size() != itemsCount)
+			throw new Exception("Duplicated items exist in tree");
+		System.out.println("OK");
 	}
 }

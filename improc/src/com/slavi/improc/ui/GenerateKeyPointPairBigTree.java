@@ -1,8 +1,12 @@
 package com.slavi.improc.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
@@ -24,23 +28,61 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 		this.imagesRoot = imagesRoot;
 		this.keyPointFileRoot = keyPointFileRoot;
 	}
+
+	class ProcessOne implements Callable<Void> {
+
+		String image;
+		
+		KeyPointPairBigTree bigTree;
+		
+		public ProcessOne(KeyPointPairBigTree bigTree, String image) {
+			this.bigTree = bigTree;
+			this.image = image;
+		}
+		
+		public Void call() throws Exception {
+			KeyPointList l = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(image));
+			synchronized(bigTree.keyPointLists) {
+				bigTree.keyPointLists.add(l);
+				String statusMessage = (bigTree.keyPointLists.size()) + "/" + images.size() + " " + image;
+				System.out.println(statusMessage);
+				SwtUtil.activeWaitDialogSetStatus(statusMessage, bigTree.keyPointLists.size() - 1);
+			}
+			for (KeyPoint kp : l) {
+				bigTree.add(kp);
+			}
+			return null;
+		}
+	}
 	
 	public KeyPointPairBigTree call() throws Exception {
-		KeyPointPairBigTree result = new KeyPointPairBigTree();
+		Runtime runtime = Runtime.getRuntime();
+		int numberOfProcessors = runtime.availableProcessors();
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
+
+		final KeyPointPairBigTree result = new KeyPointPairBigTree();
+		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(images.size());
 		for (int i = 0; i < images.size(); i++) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
 			}
-			String image = images.get(i); 
-			String statusMessage = (i + 1) + "/" + images.size() + " " + image;
-			System.out.println(statusMessage);
-			SwtUtil.activeWaitDialogSetStatus(statusMessage, i);
-			KeyPointList l = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(image));
-			result.keyPointLists.add(l);
-			for (KeyPoint kp : l) {
-				result.add(kp);
-			}
+			String image = images.get(i);
+			Future<?> f = exec.submit(new ProcessOne(result, image));
+			tasks.add(f);
 		}
+		
+		try {
+			for (Future<?> task : tasks) {
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
+				task.get();
+			}
+		} catch (Exception e) {
+			exec.shutdownNow();
+			throw e;
+		}
+
 //		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);
 //		System.out.println("Tree size        : " + result.getSize());
 //		System.out.println("Tree depth before: " + result.getTreeDepth());
