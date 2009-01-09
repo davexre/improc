@@ -18,18 +18,20 @@ import com.slavi.util.tree.KDTree;
 public class KeyPointPairList {
 	public static final String fileHeader = "KeyPointPair file version 1.2";
 
-	public ArrayList<KeyPointPair> items;
+	/**
+	 * Mapping between source points and KeyPointPairs
+	 */
+	public final HashMap<KeyPoint, KeyPointPair> items = new HashMap<KeyPoint, KeyPointPair>();
 	
-	public KeyPointList source;
+	public KeyPointList source = null;
 
-	public KeyPointList target;
+	public KeyPointList target = null;
 	
 	public FileStamp sourceKPL = null;
 
 	public FileStamp targetKPL = null;
 
 	public KeyPointPairList() {
-		items = new ArrayList<KeyPointPair>();
 	}
 
 	public static void updateKeyPointPairFileIfNecessary(
@@ -100,12 +102,12 @@ public class KeyPointPairList {
 			}
 			KeyPoint p2 = nnlst.getItem(0);
 			KeyPointPair kpp = new KeyPointPair(p1, p2, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
-			for (KeyPointPair i : result.items) 
+			for (KeyPointPair i : result.items.values()) 
 				if (i.targetSP == p2) {
 					kpp.targetReused = true;
 					break;
 				}
-			result.items.add(kpp);
+			result.items.put(kpp.sourceSP, kpp);
 		}
 		
 		// The point pair list is built. Now save it.
@@ -115,7 +117,7 @@ public class KeyPointPairList {
 		fou.println(result.sourceKPL.toString());
 		fou.println(result.targetKPL.toString());
 		
-		for (KeyPointPair i : result.items) {
+		for (KeyPointPair i : result.items.values()) {
 			fou.println(
 				Double.toString(i.distanceToNearest) + " \t" +
 				Double.toString(i.distanceToNearest2) + " \t" +
@@ -148,7 +150,6 @@ public class KeyPointPairList {
 		result.target = KeyPointListSaver.readKeyPointFile(rootImagesDir, rootKeyPointFileDir, image2);
 		result.sourceKPL = FileStamp.fromString(fin.readLine(), rootKeyPointFileDir);
 		result.targetKPL = FileStamp.fromString(fin.readLine(), rootKeyPointFileDir);
-		result.items = new ArrayList<KeyPointPair>();
 		HashMap<Integer, KeyPoint> sourceMap = result.source.makeMap();
 		HashMap<Integer, KeyPoint> targetMap = result.target.makeMap();
 
@@ -165,7 +166,7 @@ public class KeyPointPairList {
 				KeyPoint targetSP = targetMap.get(targetPointId);
 				KeyPointPair kpp = new KeyPointPair(sourceSP, targetSP, distanceToNearest, distanceToNearest2);
 				kpp.targetReused = targetReused;
-				result.items.add(kpp);
+				result.items.put(kpp.sourceSP, kpp);
 			}
 		}
 		return result;
@@ -175,12 +176,13 @@ public class KeyPointPairList {
 
 	public int countGoodItems() {
 		int r = 0;
-		for (int i = items.size() - 1; i >= 0; i--)
-			if (!items.get(i).isBad())
+		for (KeyPointPair sp : items.values()) {
+			if (!sp.isBad())
 				r++;
+		}
 		return r;
 	}
-	
+/*	
 	public int leaveGoodTopElements(int numElements) {
 		int count = 0;
 		for (int i = 0; i < items.size(); i++) {
@@ -208,10 +210,9 @@ public class KeyPointPairList {
 		}
 		return count;
 	}
-	
+*/	
 	public void leaveGoodElements(double maxDiscrepancy) {
-		for (int i = 0; i < items.size(); i++) {
-			KeyPointPair sp = items.get(i);
+		for (KeyPointPair sp : items.values()) {
 			sp.setBad(sp.discrepancy > maxDiscrepancy);
 		}
 	}
@@ -223,8 +224,10 @@ public class KeyPointPairList {
 			return Double.compare(spp1.distanceToNearest, spp2.distanceToNearest);
 		} 
 	}
-	public void sortByDistance() {
-		Collections.sort(items, CompareByDistance.instance);
+	public ArrayList<KeyPointPair> sortByDistance() {
+		ArrayList<KeyPointPair>result = new ArrayList<KeyPointPair>(items.values());
+		Collections.sort(result, CompareByDistance.instance);
+		return result;
 	}
 	
 	private static class CompareByOverallFitness implements Comparator<KeyPointPair> {
@@ -234,8 +237,10 @@ public class KeyPointPairList {
 			return Double.compare(spp1.overallFitness, spp2.overallFitness);
 		} 
 	}
-	public void sortByOverallFitness() {
-		Collections.sort(items, CompareByOverallFitness.instance);
+	public ArrayList<KeyPointPair> sortByOverallFitness() {
+		ArrayList<KeyPointPair>result = new ArrayList<KeyPointPair>(items.values());
+		Collections.sort(result, CompareByOverallFitness.instance);
+		return result;
 	}
 	
 	private static class CompareByDiscrepancy implements Comparator<KeyPointPair> {
@@ -245,8 +250,10 @@ public class KeyPointPairList {
 			return Double.compare(spp1.discrepancy, spp2.discrepancy);
 		} 
 	}
-	public void sortByDiscrepancy() {
-		Collections.sort(items, CompareByDiscrepancy.instance);
+	public ArrayList<KeyPointPair> sortByDiscrepancy() {
+		ArrayList<KeyPointPair>result = new ArrayList<KeyPointPair>(items.values());
+		Collections.sort(result, CompareByDiscrepancy.instance);
+		return result;
 	}		
 
 	private static class CompareByWeight implements Comparator<KeyPointPair> {
@@ -256,8 +263,10 @@ public class KeyPointPairList {
 			return Double.compare(spp2.getWeight(), spp1.getWeight());  // Weight comparison is DESCENDING
 		} 
 	}
-	public void sortByWeight() {
-		Collections.sort(items, CompareByWeight.instance);
+	public ArrayList<KeyPointPair> sortByWeight() {
+		ArrayList<KeyPointPair>result = new ArrayList<KeyPointPair>(items.values());
+		Collections.sort(result, CompareByWeight.instance);
+		return result;
 	}
 
 	protected static double fixAnglePI(double angle) {
@@ -274,11 +283,13 @@ public class KeyPointPairList {
 		} 
 	}
 	
-	public void sortByOrientationDelta() {
-		Collections.sort(items, CompareByOrientationDelta.instance);
+	public ArrayList<KeyPointPair> sortByOrientationDelta() {
+		ArrayList<KeyPointPair>result = new ArrayList<KeyPointPair>(items.values());
+		Collections.sort(result, CompareByOrientationDelta.instance);
+		return result;
 	}
 	
-	public void displayTop(int maxTop) {
+	public static void displayTop(ArrayList<KeyPointPair> items, int maxTop) {
 		maxTop = (maxTop <= 0 ? items.size() : Math.min(maxTop, items.size()));
 		for (int i = 0; i < maxTop; i++) {
 			KeyPointPair pp = items.get(i);

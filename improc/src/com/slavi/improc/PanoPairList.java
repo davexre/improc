@@ -102,7 +102,7 @@ public class PanoPairList {
 		result.targetImageSizeY = kppl.target.imageSizeY;
 		result.items = new ArrayList<PanoPair>();
 
-		AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items);
+		AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
 		atl.calculateOne();
 		atl.calculateOne();
 		atl.calculateOne();

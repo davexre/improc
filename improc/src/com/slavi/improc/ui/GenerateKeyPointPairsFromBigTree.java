@@ -51,7 +51,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 		
 		public Void call() throws Exception {
 //			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
-			int searchSteps = tree.getTreeDepth() * 2;
+			int searchSteps = tree.getTreeDepth() / 2;
 			int imageId = image.hashCode();
 			String strId = Integer.toString(imageId);
 			
@@ -83,15 +83,21 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				
 				KeyPointPairList kppl = getKeyPointPairList(pairId, kpS.keyPointList, kpT.keyPointList);
 				synchronized (kppl) {
-					boolean duplicated = false;
-					for (KeyPointPair i : kppl.items) {
-//						if (i.sourceSP == kpS && i.targetSP == kpT) {
-//							if (i.distanceToNearest2 < nnlst.getDistanceToTarget(1))
-//								i.distanceToNearest2 = nnlst.getDistanceToTarget(1);
-//							duplicated = true;
-//							break;
-//						}
-
+					KeyPointPair pair = kppl.items.get(kpS);
+					if (pair == null) {
+						pair = new KeyPointPair(kpS, kpT, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));						
+						totalPairCount++;
+						kppl.items.put(pair.sourceSP, pair);
+					} else if (pair.distanceToNearest > nnlst.getDistanceToTarget(0)) {
+						pair.targetSP = kpT;
+						pair.distanceToNearest = nnlst.getDistanceToTarget(0);
+						pair.distanceToNearest2 = nnlst.getDistanceToTarget(1);
+					}
+				}
+/*
+				synchronized (kppl) {
+ 					boolean duplicated = false;
+					for (KeyPointPair i : kppl.items.values()) {
 						if (i.sourceSP == kpS) {
 							if (i.distanceToNearest > nnlst.getDistanceToTarget(0)) {
 								i.targetSP = kpT;
@@ -112,9 +118,10 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 					if (!duplicated) {
 						KeyPointPair kpp = new KeyPointPair(kpS, kpT, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
 						totalPairCount++;
-						kppl.items.add(kpp);
+						kppl.items.put(kpp.sourceSP, kpp);
 					}
 				}
+*/
 			}
 			int count = processed.incrementAndGet();
 			SwtUtil.activeWaitDialogSetStatus("Processing " + 
@@ -131,19 +138,18 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
+
 		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
-
-		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
-		for (KeyPointList k : tree.keyPointLists) {
-			if (Thread.interrupted()) {
-				exec.shutdownNow();
-				throw new InterruptedException();
-			}
-			Future<?> f = exec.submit(new ProcessOneImage(k));
-			tasks.add(f);
-		}
-
 		try {
+			ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
+			for (KeyPointList k : tree.keyPointLists) {
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
+				Future<?> f = exec.submit(new ProcessOneImage(k));
+				tasks.add(f);
+			}
+
 			for (Future<?> task : tasks) {
 				if (Thread.interrupted()) {
 					throw new InterruptedException();

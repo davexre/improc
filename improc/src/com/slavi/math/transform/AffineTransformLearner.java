@@ -14,7 +14,7 @@ public class AffineTransformLearner extends BaseTransformLearner {
 		this(inputSize, outputSize, new ArrayList<PointsPair>());
 	}
 	
-	public AffineTransformLearner(int inputSize, int outputSize, ArrayList<? extends PointsPair> pointsPairList) {
+	public AffineTransformLearner(int inputSize, int outputSize, Iterable<? extends PointsPair> pointsPairList) {
 		super(new AffineTransformer(inputSize, outputSize), pointsPairList);
 
 		int numberOfCoefsPerCoordinate = transformer.getNumberOfCoefsPerCoordinate();

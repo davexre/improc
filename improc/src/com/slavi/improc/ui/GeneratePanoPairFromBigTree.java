@@ -41,13 +41,13 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			PanoPairList result = new PanoPairList();
 			result.items = new ArrayList<PanoPair>();
 
-			for (KeyPointPair pp : kppl.items) {
+			for (KeyPointPair pp : kppl.items.values()) {
 				if (pp.distanceToNearest > pp.distanceToNearest2 * 0.6) {
 					pp.setBad(true);
 				}	
 			}
 			
-			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items);
+			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
 
 			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
@@ -58,7 +58,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 
-			for (KeyPointPair pp : kppl.items) {
+			for (KeyPointPair pp : kppl.items.values()) {
 				if (pp.getDiscrepancy() < 2.0) {
 					result.items.add(new PanoPair(pp));
 				}				
@@ -85,17 +85,17 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 	public PanoList call() throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors);
 
-		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(keyPointPairLists.size());
-		for (KeyPointPairList k : keyPointPairLists) {
-			if (k.items.size() < 5) // TODO: Move it somewhere else?!? 
-				continue;
-			Future<?> task = exec.submit(new ProcessOneKeyPointPairList(k));
-			tasks.add(task);
-		}
-		keyPointPairLists = null;
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors);
 		try {
+			ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(keyPointPairLists.size());
+			for (KeyPointPairList k : keyPointPairLists) {
+				if (k.items.size() < 5) // TODO: Move it somewhere else?!? 
+					continue;
+				Future<?> task = exec.submit(new ProcessOneKeyPointPairList(k));
+				tasks.add(task);
+			}
+			keyPointPairLists = null;
 			for (Future<?> task : tasks) {
 				if (Thread.interrupted()) {
 					throw new InterruptedException();
@@ -103,12 +103,9 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 				task.get();
 			}
 			tasks.clear();
-		} catch (Exception e) {
+		} finally {
 			exec.shutdownNow();
-			throw e;
 		}
-
-		exec.shutdown();
 		return panoList;
 	}
 }

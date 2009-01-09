@@ -58,29 +58,28 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 	public KeyPointPairBigTree call() throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
-
 		final KeyPointPairBigTree result = new KeyPointPairBigTree();
-		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(images.size());
-		for (int i = 0; i < images.size(); i++) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			String image = images.get(i);
-			Future<?> f = exec.submit(new ProcessOne(result, image));
-			tasks.add(f);
-		}
-		
+
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
 		try {
+			ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(images.size());
+			for (int i = 0; i < images.size(); i++) {
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
+				String image = images.get(i);
+				Future<?> f = exec.submit(new ProcessOne(result, image));
+				tasks.add(f);
+			}
+		
 			for (Future<?> task : tasks) {
 				if (Thread.interrupted()) {
 					throw new InterruptedException();
 				}
 				task.get();
 			}
-		} catch (Exception e) {
+		} finally {
 			exec.shutdownNow();
-			throw e;
 		}
 
 //		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);

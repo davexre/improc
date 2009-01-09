@@ -42,7 +42,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		
 		E[] items;
 		
-		int m_size;
+		volatile int m_size;
 		
 		public int size() {
 			return m_size;
@@ -208,11 +208,9 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * maxDepthDeviation = {@link #getTreeDepth()} * 0.05 (5%)
 	 * and also 3 <= maxDepthDeviation
 	 */
-	private static final double log2 = Math.log(2.0);
 	public boolean isBalanceNeeded() {
-		int curSize = getSize();
 		int curDepth = getTreeDepth();
-		int perfectDepth = (int)(Math.ceil(Math.log(curSize) / log2));
+		int perfectDepth = getPerfectTreeDepth();
 		int maxDepthDeviation = (int)(curDepth * 0.05);
 		if (maxDepthDeviation < 3)
 			maxDepthDeviation = 3;
@@ -528,6 +526,11 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 */
 	public int getTreeDepth() {
 		return treeDepth;
+	}
+	
+	private static final double log2 = Math.log(2.0);
+	public int getPerfectTreeDepth() {
+		return (int)(Math.ceil(Math.log(size) / log2));
 	}
 	
 	static class IteratorVisit<E> {

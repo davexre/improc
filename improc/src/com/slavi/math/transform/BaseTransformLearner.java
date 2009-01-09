@@ -1,7 +1,5 @@
 package com.slavi.math.transform;
 
-import java.util.ArrayList;
-
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
@@ -21,7 +19,7 @@ public abstract class BaseTransformLearner {
 	protected Matrix targetMin;	
 	protected Matrix targetMax;	
 	
-	protected BaseTransformLearner(BaseTransformer transformer, ArrayList<? extends PointsPair> pointsPairList) {
+	protected BaseTransformLearner(BaseTransformer transformer, Iterable<? extends PointsPair> pointsPairList) {
 		this.transformer = transformer;
 		this.items = pointsPairList;
 		
