@@ -73,32 +73,44 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		int nextDimension = (dimension + 1) % dimensions;
 		if (value < curNodeValue) {
 			if (curNode.left == null) {
-				if (treeDepth < depthLevel)
-					treeDepth = depthLevel;
 				lock.readLock().unlock();
 				lock.writeLock().lock();
-				curNode.left = new Node<E>(data);
-				lock.readLock().lock();
-				lock.writeLock().unlock();
-				mutations++;
-				size++;
-			} else
-				add_recursive(data, curNode.left, nextDimension, depthLevel);
+				try {
+					if (curNode.left == null) { // recheck needed
+						if (treeDepth < depthLevel)
+							treeDepth = depthLevel;
+						curNode.left = new Node<E>(data);
+						mutations++;
+						size++;
+						return;
+					}
+				} finally {
+					lock.readLock().lock();
+					lock.writeLock().unlock();
+				}
+			} 
+			add_recursive(data, curNode.left, nextDimension, depthLevel);
 		} else if (ignoreDuplicates && (value == curNodeValue) && compareItems(data, curNode.data)) {
 			return;
 		} else {
 			if (curNode.right == null) {
-				if (treeDepth < depthLevel) 
-					treeDepth = depthLevel;
 				lock.readLock().unlock();
 				lock.writeLock().lock();
-				curNode.right = new Node<E>(data);
-				lock.readLock().lock();
-				lock.writeLock().unlock();
-				mutations++;
-				size++;
-			} else
-				add_recursive(data, curNode.right, nextDimension, depthLevel);
+				try {
+					if (curNode.right == null) { // recheck needed
+						if (treeDepth < depthLevel)
+							treeDepth = depthLevel;
+						curNode.right = new Node<E>(data);
+						mutations++;
+						size++;
+						return;
+					}
+				} finally {
+					lock.readLock().lock();
+					lock.writeLock().unlock();
+				}
+			}
+			add_recursive(data, curNode.right, nextDimension, depthLevel);
 		}		
 	}
 	
@@ -110,14 +122,20 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 			if (root == null) { 
 				lock.readLock().unlock();
 				lock.writeLock().lock();
-				root = new Node<E>(item);
-				lock.readLock().lock();
-				lock.writeLock().unlock();
-				mutations++;
-				size++;
-			} else {
-				add_recursive(item, root, 0, 1);
+				try {
+					if (root == null) { // recheck needed
+						treeDepth = 1;
+						root = new Node<E>(item);
+						mutations++;
+						size++;
+						return;
+					}
+				} finally {
+					lock.readLock().lock();
+					lock.writeLock().unlock();
+				}
 			}
+			add_recursive(item, root, 0, 1);
 		} finally {
 			lock.readLock().unlock();
 		}

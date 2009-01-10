@@ -1,6 +1,8 @@
 package com.slavi.improc.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,9 +25,94 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 	PanoList panoList = new PanoList();
 	
 	AtomicInteger processed = new AtomicInteger(0);
+
+	private static class CompareByAngle implements Comparator<KeyPointPair> {
+		public static final CompareByAngle instance = new CompareByAngle();
+
+		public int compare(KeyPointPair kpp1, KeyPointPair kpp2) {
+			return Double.compare(kpp1.angle, kpp2.angle);
+		} 
+	}
+
+	private static double C2PI = Math.PI * 2.0;
+	
+	/**
+	 * Returns the specified angle in the range 0..2*pi 
+	 */
+	public static double fixAngle2PI(double angle) {
+		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
+	}
+	
+	class ProcessOneNew implements Callable<Void> {
+		KeyPointPairList kppl;
+		
+		public ProcessOneNew(KeyPointPairList kppl) {
+			this.kppl = kppl;
+		}
+
+		void checkInterrupted() throws InterruptedException {
+			if (Thread.interrupted())
+				throw new InterruptedException();
+		}
+		
+		public Void call() throws Exception {
+			int size = kppl.items.size(); 
+			if (size < 5)
+				return null;
+			PanoPairList result = new PanoPairList();
+			result.items = new ArrayList<PanoPair>();
+
+			ArrayList<KeyPointPair>work = new ArrayList<KeyPointPair>(kppl.items.values());
+			for (KeyPointPair pp : work) {
+				pp.angle = Math.atan2(
+						pp.targetSP.doubleY - pp.sourceSP.doubleY, 
+						pp.targetSP.doubleX - pp.sourceSP.doubleX);
+			}
+			Collections.sort(work, CompareByAngle.instance);			
+			KeyPointPair prev = work.get(size - 1);
+			for (int i = 0; i < size; i++) {
+				KeyPointPair pp = work.get(i);
+				pp.d1 = fixAngle2PI(pp.angle - prev.angle);
+			}
+			
+			
+			
+			
+			
+			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
+
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			
+			kppl.leaveGoodElements(9.0); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+
+			for (KeyPointPair pp : kppl.items.values()) {
+				if (pp.getDiscrepancy() < 2.0) {
+					result.items.add(new PanoPair(pp));
+				}				
+			}
+			result.transform = (AffineTransformer) atl.transformer;
+			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
+			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
+			result.sourceImageSizeX = kppl.source.imageSizeX;
+			result.sourceImageSizeY = kppl.source.imageSizeY;
+			result.targetImageSizeX = kppl.target.imageSizeX;
+			result.targetImageSizeY = kppl.target.imageSizeY;
+
+			panoList.addItem(result);
+			int count = processed.incrementAndGet();
+			SwtUtil.activeWaitDialogSetStatus(null, count);
+			return null;
+		}
+	}
+	
+	/////////////////////////////////////////
 	
 	class ProcessOneKeyPointPairList implements Callable<Void> {
-
 		KeyPointPairList kppl;
 		
 		public ProcessOneKeyPointPairList(KeyPointPairList kppl) {
@@ -46,7 +133,6 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 					pp.setBad(true);
 				}	
 			}
-			
 			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
 
 			checkInterrupted(); atl.calculateOne();

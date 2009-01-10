@@ -22,10 +22,13 @@ public class Improc2 {
 		ArrayList<String> images = SwtUtil.openWaitDialog("Searching for images", new EnumerateImageFiles(imagesIterator), -1);
 		SwtUtil.openWaitDialog("Generating key point files", 
 				new GenerateKeyPointFiles(images, imagesRoot, keyPointFileRoot), images.size() - 1);
+			
 		System.out.println("---------- Generating key point BIG tree");
 		KeyPointPairBigTree bigTree = SwtUtil.openWaitDialog("Generating key point BIG tree", 
 				new GenerateKeyPointPairBigTree(images, imagesRoot, keyPointFileRoot), 
 				images.size() - 1);
+		System.out.println("Tree size  : " + bigTree.getSize());
+		System.out.println("Tree depth : " + bigTree.getTreeDepth());
 		System.out.println("Tree size          : " + bigTree.getSize());
 		System.out.println("Tree depth         : " + bigTree.getTreeDepth());
 		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());

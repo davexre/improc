@@ -15,6 +15,9 @@ public class KeyPointPair implements PointsPair {
 	
 	public KeyPoint targetSP;
 	
+	public double angle;
+	public double d1;
+	
 	// Distance to nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest;
 	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
