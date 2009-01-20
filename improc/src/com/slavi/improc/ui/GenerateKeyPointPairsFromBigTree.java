@@ -53,7 +53,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 //			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
 			int searchSteps = tree.getTreeDepth() / 2;
 			int imageId = image.hashCode();
-			String strId = Integer.toString(imageId);
+			String strImageId = Integer.toString(imageId);
 			
 			int totalPairCount = 0;
 			for (KeyPoint kp : image) {
@@ -72,11 +72,11 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				KeyPoint kpS, kpT;
 				
 				if (imageId > destImageId) {
-					pairId = strId + "-" + Integer.toString(destImageId);
+					pairId = strImageId + "-" + Integer.toString(destImageId);
 					kpS = kp;
 					kpT = kp2;
 				} else {
-					pairId = Integer.toString(destImageId) + "-" + strId;
+					pairId = Integer.toString(destImageId) + "-" + strImageId;
 					kpS = kp2;
 					kpT = kp;
 				}
