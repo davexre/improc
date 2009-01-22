@@ -8,8 +8,6 @@ import java.util.StringTokenizer;
 
 import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.PointsPair;
-import com.slavi.math.transform.PointsPairBase;
 
 public class DNister5PointMatch {
 
@@ -592,7 +590,7 @@ public class DNister5PointMatch {
 			src.setItem(1, 0, Double.parseDouble(st.nextToken()));
 			dest.setItem(0, 0, Double.parseDouble(st.nextToken()));
 			dest.setItem(1, 0, Double.parseDouble(st.nextToken()));
-			PointsPair pp = new PointsPairBase(src, dest, 1.0);
+			PointsPair pp = new PointsPair(src, dest, 1.0);
 			pairs.add(pp);
 		}
 		fin.close();

@@ -14,8 +14,9 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
-import com.slavi.math.transform.AffineTransformLearner;
-import com.slavi.math.transform.AffineTransformer;
+import com.slavi.improc.PanoPairTransformLerner;
+import com.slavi.improc.PanoPairTransformer;
+import com.slavi.math.MathUtil;
 import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
@@ -34,15 +35,6 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 		} 
 	}
 
-	private static double C2PI = Math.PI * 2.0;
-	
-	/**
-	 * Returns the specified angle in the range 0..2*pi 
-	 */
-	public static double fixAngle2PI(double angle) {
-		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
-	}
-	
 	class ProcessOneNew implements Callable<Void> {
 		KeyPointPairList kppl;
 		
@@ -72,14 +64,12 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			KeyPointPair prev = work.get(size - 1);
 			for (int i = 0; i < size; i++) {
 				KeyPointPair pp = work.get(i);
-				pp.d1 = fixAngle2PI(pp.angle - prev.angle);
+				pp.d1 = MathUtil.fixAngle2PI(pp.angle - prev.angle);
 			}
+					
 			
 			
-			
-			
-			
-			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
+			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
 
 			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
@@ -95,7 +85,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 					result.items.add(new PanoPair(pp));
 				}				
 			}
-			result.transform = (AffineTransformer) atl.transformer;
+			result.transform = (PanoPairTransformer) atl.transformer;
 			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
 			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
 			result.sourceImageSizeX = kppl.source.imageSizeX;
@@ -133,7 +123,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 					pp.setBad(true);
 				}	
 			}
-			AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
+			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
 
 			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
@@ -149,7 +139,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 					result.items.add(new PanoPair(pp));
 				}				
 			}
-			result.transform = (AffineTransformer) atl.transformer;
+			result.transform = (PanoPairTransformer) atl.transformer;
 			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
 			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
 			result.sourceImageSizeX = kppl.source.imageSizeX;

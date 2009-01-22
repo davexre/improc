@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 import com.slavi.util.tree.KDTree;
@@ -269,17 +270,13 @@ public class KeyPointPairList {
 		return result;
 	}
 
-	protected static double fixAnglePI(double angle) {
-		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
-	}
-	
 	private static class CompareByOrientationDelta implements Comparator<KeyPointPair> {
 		public static final CompareByOrientationDelta instance = new CompareByOrientationDelta();
 
 		public int compare(KeyPointPair spp1, KeyPointPair spp2) {
 			return Double.compare(
-				fixAnglePI(spp1.sourceSP.degree - spp1.targetSP.degree), 
-				fixAnglePI(spp2.sourceSP.degree - spp2.targetSP.degree));
+				MathUtil.fixAnglePI(spp1.sourceSP.degree - spp1.targetSP.degree), 
+				MathUtil.fixAnglePI(spp2.sourceSP.degree - spp2.targetSP.degree));
 		} 
 	}
 	

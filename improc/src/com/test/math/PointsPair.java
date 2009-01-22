@@ -1,4 +1,4 @@
-package com.slavi.math.transform;
+package com.test.math;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -6,7 +6,7 @@ import org.jdom.JDOMException;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.XMLHelper;
 
-public class PointsPairBase implements PointsPair {
+public class PointsPair {
 	public Matrix source;
 
 	public Matrix target;
@@ -22,14 +22,14 @@ public class PointsPairBase implements PointsPair {
 	 */
 	public double discrepancy; 
 
-	public PointsPairBase() {
+	public PointsPair() {
 		source = null;
 		target = null;
 		bad = false;
 		weight = 1.0;
 	}
 
-	public PointsPairBase(Matrix source, Matrix target, double weight) {
+	public PointsPair(Matrix source, Matrix target, double weight) {
 		this.source = source;
 		this.target = target;
 		this.bad = false;
@@ -83,8 +83,8 @@ public class PointsPairBase implements PointsPair {
 		dest.addContent(e);
 	}
 	
-	public static PointsPairBase fromXML(Element source) throws JDOMException {
-		PointsPairBase r = new PointsPairBase();
+	public static PointsPair fromXML(Element source) throws JDOMException {
+		PointsPair r = new PointsPair();
 		Element e;
 		
 		r.setWeight(Double.parseDouble(XMLHelper.getAttrEl(source, "weight")));

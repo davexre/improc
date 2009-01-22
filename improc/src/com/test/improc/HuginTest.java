@@ -1,16 +1,10 @@
 package com.test.improc;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.StringTokenizer;
 
-import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.AffineTransformLearner;
-import com.slavi.math.transform.PointsPair;
-import com.slavi.math.transform.PointsPairBase;
+import com.test.math.PointsPair;
 
 public class HuginTest {
 
@@ -27,7 +21,7 @@ public class HuginTest {
 	}		
 
 	public static void main(String[] args) throws Exception {
-		String fileName = "./../../images/hugin.txt";
+/*		String fileName = "./../../images/hugin.txt";
 		BufferedReader f = new BufferedReader(new FileReader(fileName));
 		ArrayList<PointsPair> items = new ArrayList<PointsPair>();
 		
@@ -41,7 +35,7 @@ public class HuginTest {
 			target.setItem(0, 0, Double.parseDouble(st.nextToken()));
 			target.setItem(1, 0, Double.parseDouble(st.nextToken()));
 			
-			PointsPair pp = new PointsPairBase(source, target, 1);
+			PointsPair pp = new PointsPair(source, target, 1);
 			items.add(pp);
 		}
 		
@@ -57,7 +51,7 @@ public class HuginTest {
 		for (int i = 0; i < items.size(); i++) {
 			PointsPair pp = items.get(i);
 			System.out.println(Integer.toString(i) + "\t" + Double.toString(pp.getDiscrepancy()));
-		}
+		}*/
 	}
 
 }

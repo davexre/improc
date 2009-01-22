@@ -2,7 +2,6 @@ package com.slavi.math.transform;
 
 import org.jdom.Element;
 
-import com.slavi.math.matrix.Matrix;
 import com.slavi.util.XMLHelper;
 
 /**
@@ -13,7 +12,7 @@ import com.slavi.util.XMLHelper;
  * 
  * @author Slavian Petrov
  */
-public class Helmert2DTransformer extends BaseTransformer {
+public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTransformer<InputType, OutputType> {
 	
 	public double a; // a = cos(Angle) * scale 
 	public double b; // b = sin(Angle) * scale
@@ -21,21 +20,25 @@ public class Helmert2DTransformer extends BaseTransformer {
 	public double d; // d = translate y
 	
 	public Helmert2DTransformer() {
-		this.inputSize = 2;
-		this.outputSize = 2;
 	}
 	
+	public int getInputSize() {
+		return 2;
+	}
+
+	public int getOutputSize() {
+		return 2;
+	}
+
 	public int getNumberOfCoefsPerCoordinate() {
 		return 4;
 	}
 	
-	public void transform(Matrix source, Matrix dest) {
-		if ((source.getSizeX() != inputSize) ||
-			(source.getSizeY() != 1))
-			throw new IllegalArgumentException("Transform received invalid point");
-		dest.resize(outputSize, 1);
-		dest.setItem(0, 0, c + a * source.getItem(0, 0) - b * source.getItem(1, 0));
-		dest.setItem(1, 0, d + b * source.getItem(0, 0) + a * source.getItem(1, 0));
+	public void transform(InputType source, OutputType dest) {
+		double x = getSourceCoord(source, 0);
+		double y = getSourceCoord(source, 1);
+		setTargetCoord(dest, 0, c + a * x - b * y);
+		setTargetCoord(dest, 1, d + b * x + a * y);
 	}
 
 	public String toString() {
@@ -53,12 +56,10 @@ public class Helmert2DTransformer extends BaseTransformer {
 		dest.addContent(XMLHelper.makeAttrEl("D", Double.toString(d)));
 	}
 	
-	public static Helmert2DTransformer fromXML(Element source) {
-		Helmert2DTransformer r = new Helmert2DTransformer();
-		r.a = Double.parseDouble(XMLHelper.getAttrEl(source, "A"));
-		r.b = Double.parseDouble(XMLHelper.getAttrEl(source, "B"));
-		r.c = Double.parseDouble(XMLHelper.getAttrEl(source, "C"));
-		r.d = Double.parseDouble(XMLHelper.getAttrEl(source, "D"));
-		return r;
+	public void fromXML(Element source) {
+		a = Double.parseDouble(XMLHelper.getAttrEl(source, "A"));
+		b = Double.parseDouble(XMLHelper.getAttrEl(source, "B"));
+		c = Double.parseDouble(XMLHelper.getAttrEl(source, "C"));
+		d = Double.parseDouble(XMLHelper.getAttrEl(source, "D"));
 	}
 }

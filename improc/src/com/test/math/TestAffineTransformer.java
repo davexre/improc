@@ -2,22 +2,129 @@ package com.test.math;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.AffineTransformer;
-import com.slavi.math.transform.PointsPairBase;
 
 public class TestAffineTransformer {
 
+	public static class MyTestData implements Map.Entry<Point2D.Double, Point2D.Double>{
+		Point2D.Double src = new Point2D.Double();
+		Point2D.Double dest = new Point2D.Double();
+		boolean isBad;
+		double discrepancy;
+
+		public MyTestData() {
+		}
+		
+		public MyTestData(AffineTransform jTransform, Point2D.Double s) {
+			src.setLocation(s);
+			jTransform.transform(src, dest);
+		}
+
+		public Double getKey() {
+			return src;
+		}
+
+		public Double getValue() {
+			return dest;
+		}
+
+		public Double setValue(Double value) {
+			throw new RuntimeException("Method not allowed");
+		}
+	}
+	
+	public static class MyTestAffineTransformer extends AffineTransformer<Point2D.Double, Point2D.Double> {
+		public int getInputSize() {
+			return 2;
+		}
+
+		public int getOutputSize() {
+			return 2;
+		}
+
+		private double getCoord(Point2D.Double item, int coordIndex) {
+			switch (coordIndex) {
+				case 0: return item.x;
+				case 1: return item.y;
+				default: throw new RuntimeException("Invalid coordinate");
+			}
+		}
+
+		private void setCoord(Point2D.Double item, int coordIndex, double value) {
+			switch (coordIndex) {
+				case 0: 
+					item.x = value;
+					break;				
+				case 1: 
+					item.y = value;
+					break;
+				default: throw new RuntimeException("Invalid coordinate");
+			}
+		}
+		
+		public double getSourceCoord(Point2D.Double item, int coordIndex) {
+			return getCoord(item, coordIndex);
+		}
+
+		public double getTargetCoord(Point2D.Double item, int coordIndex) {
+			return getCoord(item, coordIndex);
+		}
+
+		public void setSourceCoord(Point2D.Double item, int coordIndex, double value) {
+			setCoord(item, coordIndex, value);
+		}
+
+		public void setTargetCoord(Point2D.Double item, int coordIndex, double value) {
+			setCoord(item, coordIndex, value);
+		}
+	}
+	
+	public static class MyTestAffineTransformLearner extends AffineTransformLearner<Point2D.Double, Point2D.Double> {
+
+		public MyTestAffineTransformLearner(Iterable<Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
+			super(new MyTestAffineTransformer(), pointsPairList);
+		}
+
+		public Point2D.Double createTemporaryTargetObject() {
+			return new Point2D.Double();
+		}
+
+		public double getDiscrepancy(Entry<Point2D.Double, Point2D.Double> item) {
+			return ((MyTestData) item).discrepancy;
+		}
+
+		public double getWeight(Entry<Point2D.Double, Point2D.Double> item) {
+			return 1.0;
+		}
+
+		public boolean isBad(Entry<Point2D.Double, Point2D.Double> item) {
+			return ((MyTestData) item).isBad;
+		}
+
+		public void setBad(Entry<Point2D.Double, Point2D.Double> item, boolean bad) {
+			((MyTestData) item).isBad = bad;
+		}
+
+		public void setDiscrepancy(Entry<Point2D.Double, Point2D.Double> item, double discrepancy) {
+			((MyTestData) item).discrepancy = discrepancy;
+		}
+	}
+	
+	
 	private static double degreeToRad = Math.PI / 180;
 	
-	private ArrayList<TestPointPair> points;
+	private ArrayList<MyTestData> points;
 	
 	AffineTransform jTransform;
 	
-	private AffineTransformLearner learner;
+	private MyTestAffineTransformLearner learner;
 
 	private void dumpAffineTransform(AffineTransform af) {
 		double[] d = new double[6]; 
@@ -26,30 +133,9 @@ public class TestAffineTransformer {
 			System.out.println(d[i]);
 	}
 	
-	protected Matrix point2DToMatrix(Point2D source) {
-		Matrix r = new Matrix(2, 1);
-		r.setItem(0, 0, source.getX());
-		r.setItem(1, 0, source.getY());
-		return r;
-	}
-	
-	public class TestPointPair extends PointsPairBase {
-		public Point2D.Double source2D;
-		public Point2D.Double target2D;
-		
-		public TestPointPair(Point2D.Double s) {
-			super();
-			source2D = s;
-			target2D = new Point2D.Double();
-			jTransform.transform(source2D, target2D);
-			source = point2DToMatrix(source2D);
-			target = point2DToMatrix(target2D);
-		}
-	}
-		
 	private void addp(int x, int y) {
 		Point2D.Double sd = new Point2D.Double(x, y);
-		TestPointPair pair = new TestPointPair(sd);
+		MyTestData pair = new MyTestData(jTransform, sd);
 		points.add(pair);
 	}
 	
@@ -64,7 +150,7 @@ public class TestAffineTransformer {
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
 		
-		points = new ArrayList<TestPointPair>();
+		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < 2; xcounter++) {
 			for (int ycounter = 0; ycounter < 2; ycounter++) {
 				addp(xcounter, ycounter);
@@ -73,18 +159,18 @@ public class TestAffineTransformer {
 	}
 	
 	public void learn() {
-		TestPointPair pair;
-		learner = new AffineTransformLearner(2, 2, points);
+		MyTestData pair;
+		learner = new MyTestAffineTransformLearner((Iterable) points);
 
 		boolean res = learner.calculateOne();
-		AffineTransformer tr = (AffineTransformer) learner.transformer;
+		MyTestAffineTransformer tr = (MyTestAffineTransformer) learner.transformer;
 		System.out.println("Learner adjusted: " + res);
 		System.out.println(tr.toString());
 		
 		Matrix dest = new Matrix(2, 1);
 		pair = points.get(0);
-		tr.transform(pair.source, dest);
-		System.out.println("" + pair.target2D.x + "\t" + pair.target2D.y);
+		tr.transform(pair.src, pair.dest);
+		System.out.println("" + pair.dest.x + "\t" + pair.dest.y);
 		System.out.println("" + dest.getItem(0,0) + "\t" + dest.getItem(1,0));
 	}
 	

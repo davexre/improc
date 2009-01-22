@@ -29,38 +29,6 @@ import com.slavi.util.file.FindFileIterator;
 
 public class DLoweCompareResult {
 
-	static KeyPointList makeWithOldWorkingDetector(String fileName) throws IOException {
-		File fin = new File(fileName);
-		
-		com.slavi.improc.working.DLoweDetector ld = new com.slavi.improc.working.DLoweDetector();
-		com.slavi.improc.working.DImageMap img = new com.slavi.improc.working.DImageMap(fin);
-		ld.DetectFeatures(img, 3, 32);
-		
-		KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.getSizeX();
-		result.imageSizeY = img.getSizeY();
-		for (int i = ld.scalePointList.points.size() - 1; i >= 0; i--) {
-			com.slavi.improc.working.ScalePoint sp = ld.scalePointList.points.get(i);
-			KeyPoint kp = new KeyPoint();
-
-			kp.imgX = sp.imgX;
-			kp.imgY = sp.imgY;
-			kp.imgScale = sp.imgScale;
-			kp.doubleX = sp.doubleX;
-			kp.doubleY = sp.doubleY;
-			kp.dogLevel = (int)sp.level;
-			kp.adjS = sp.adjS;
-			kp.kpScale = sp.kpScale;
-			kp.degree = sp.degree;
-			for (int i2 = 0; i2 < KeyPoint.descriptorSize; i2++) 
-				for (int j2 = 0; j2 < KeyPoint.descriptorSize; j2++) 
-					for (int k2 = 0; k2 < KeyPoint.numDirections; k2++) 
-						kp.setItem(i2, j2, k2, (byte)sp.getItem(i2, j2, k2));
-			result.add(kp);
-		}
-		return result;
-	}
-
 	static KeyPointList makeWithSingleThreadedDetector(String fileName) throws IOException {
 		File fin = new File(fileName);
 		

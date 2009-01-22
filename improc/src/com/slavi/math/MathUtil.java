@@ -5,6 +5,8 @@ import java.util.Locale;
 import com.slavi.math.matrix.Matrix;
 
 public class MathUtil {
+	public static double C2PI = Math.PI * 2.0;
+
 	public static final double deg2rad = Math.PI / 180;
 	
 	public static final double rad2deg = 180 / Math.PI;
@@ -32,6 +34,20 @@ public class MathUtil {
 		return String.format(Locale.US, "%+1.0f°% 2d'% 4.1f\"", gr, min, sec);
 	}
 	
+	/**
+	 * Returns the specified angle in the range 0..2*pi 
+	 */
+	public static double fixAngle2PI(double angle) {
+		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
+	}
+	
+	/**
+	 * Returns the specified angle in the range 0..pi 
+	 */
+	public static double fixAnglePI(double angle) {
+		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
+	}
+
 	/**
 	 * Set matrix elements based on Euler angles rx, ry, rz.
 	 * @param type If true returns (mz*mx)*my otherwise returns (mx*mz)*my.

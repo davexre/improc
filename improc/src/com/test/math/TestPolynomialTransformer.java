@@ -4,20 +4,119 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.PointsPairBase;
 import com.slavi.math.transform.PolynomialTransformLearner;
 import com.slavi.math.transform.PolynomialTransformer;
 
 public class TestPolynomialTransformer {
 
-	public ArrayList<PointsPairBase> points;
+	public static class MyPoint {
+		Matrix coords;
+		
+		MyPoint(int numCoordinates) {
+			coords = new Matrix(numCoordinates, 1);
+		}
+	}
+	
+	public static class MyTestData implements Map.Entry<MyPoint, MyPoint>{
+		MyPoint src;
+		MyPoint dest;
+		boolean isBad;
+		double discrepancy;
+
+		public MyTestData(int numCoordinates) {
+			src = new MyPoint(numCoordinates);
+			dest = new MyPoint(numCoordinates);
+		}
+		
+		public MyPoint getKey() {
+			return src;
+		}
+
+		public MyPoint getValue() {
+			return dest;
+		}
+
+		public MyPoint setValue(MyPoint value) {
+			throw new RuntimeException("Method not allowed");
+		}
+	}
+	
+	public static class MyTestPolynomialTransformer extends PolynomialTransformer<MyPoint, MyPoint> {
+		int size;
+		
+		public MyTestPolynomialTransformer(int polynomPower, int size) {
+			super(polynomPower);
+			this.size = size;
+		}
+
+		public int getInputSize() {
+			return 0;
+		}
+
+		public int getOutputSize() {
+			return 0;
+		}
+
+		public double getSourceCoord(MyPoint item, int coordIndex) {
+			return item.coords.getItem(coordIndex, 0);
+		}
+
+		public double getTargetCoord(MyPoint item, int coordIndex) {
+			return item.coords.getItem(coordIndex, 0);
+		}
+
+		public void setSourceCoord(MyPoint item, int coordIndex, double value) {
+			item.coords.setItem(coordIndex, 0, value);
+		}
+
+		public void setTargetCoord(MyPoint item, int coordIndex, double value) {
+			item.coords.setItem(coordIndex, 0, value);
+		}
+	}
+	
+	public static class MyTestPolynomialTransformLearner extends PolynomialTransformLearner<MyPoint, MyPoint> {
+
+		public MyTestPolynomialTransformLearner(MyTestPolynomialTransformer transformer, Iterable<Entry<MyPoint, MyPoint>> pointsPairList) {
+			super(transformer, pointsPairList);
+		}
+
+		public MyPoint createTemporaryTargetObject() {
+			return new MyPoint(transformer.getOutputSize());
+		}
+
+		public double getDiscrepancy(Entry<MyPoint, MyPoint> item) {
+			return ((MyTestData) item).discrepancy;
+		}
+
+		public double getWeight(Entry<MyPoint, MyPoint> item) {
+			return 1.0;
+		}
+
+		public boolean isBad(Entry<MyPoint, MyPoint> item) {
+			return ((MyTestData) item).isBad;
+		}
+
+		public void setBad(Entry<MyPoint, MyPoint> item, boolean bad) {
+			((MyTestData) item).isBad = bad;
+		}
+
+		public void setDiscrepancy(Entry<MyPoint, MyPoint> item, double discrepancy) {
+			((MyTestData) item).discrepancy = discrepancy;
+		}
+	}
+
+	
+	
+	public ArrayList<MyTestData> points;
 	
 	public PolynomialTransformLearner learner;
 	
-	public PolynomialTransformer transformer;
+	public MyTestPolynomialTransformer transformer;
 	
 	public int numCoordinates;
 	
@@ -25,7 +124,7 @@ public class TestPolynomialTransformer {
 		BufferedReader fin = new BufferedReader(new FileReader(
 				TestPolynomialTransformer.class.getResource(
 					"PolynomialTransformer.txt").getFile()));
-		transformer = new PolynomialTransformer(4, 3, 3);
+		transformer = new MyTestPolynomialTransformer(4, 3);
 //		transformer.sourceOrigin.load(fin);
 //		transformer.originTarget.load(fin);
 //		transformer.scaleSource.load(fin);
@@ -42,7 +141,7 @@ public class TestPolynomialTransformer {
 	
 	public TestPolynomialTransformer(int numCoordinates, BufferedReader fin) throws IOException {
 		this.numCoordinates = numCoordinates;
-		points = new ArrayList<PointsPairBase>();
+		points = new ArrayList<MyTestData>();
 		// read points
 		String str = fin.readLine();
 		while (fin.ready()) {
@@ -51,52 +150,49 @@ public class TestPolynomialTransformer {
 				break;
 			StringTokenizer st = new StringTokenizer(str, "\t");
 			
-			Matrix source = new Matrix(numCoordinates, 1);
-			Matrix target = new Matrix(numCoordinates, 1);
+			MyTestData item = new MyTestData(numCoordinates);
 			for (int i = 0; i < numCoordinates; i++)
-				source.setItem(i, 0, Double.parseDouble(st.nextToken()));
+				item.src.coords.setItem(i, 0, Double.parseDouble(st.nextToken()));
 			for (int i = 0; i < numCoordinates; i++)
-				target.setItem(i, 0, Double.parseDouble(st.nextToken()));
-			PointsPairBase pair = new PointsPairBase(source, target, 1);
-			points.add(pair);
+				item.dest.coords.setItem(i, 0, Double.parseDouble(st.nextToken()));
+			points.add(item);
 		}
 	}
 
 	public void learn(int polynomPower) {
-		learner = new PolynomialTransformLearner(polynomPower, numCoordinates, numCoordinates, points);
+		transformer = new MyTestPolynomialTransformer(polynomPower, numCoordinates);
+		learner = new MyTestPolynomialTransformLearner(transformer, (Iterable)points);
 		int maxIterations = 100;
 		int iteration = 0;
 		boolean adjusted = false;
 		while ((iteration++ < maxIterations) && (!adjusted)) {
 			adjusted = learner.calculateOne();
 			int goodCount = 0;
-			for (int i = points.size() - 1; i >= 0; i--)
-				if (!points.get(i).isBad())
+			for (MyTestData item : points)
+				if (!learner.isBad(item))
 					goodCount++;
 			System.out.println("Iteration " + iteration + " has good " + goodCount + "/" + points.size());
 		}
 		System.out.println("Learner adjusted: " + adjusted);
-		transformer = (PolynomialTransformer) learner.transformer;
 	}
 		
 	public void testTransformer() {
-		Matrix dest = new Matrix(numCoordinates, 1);
+		MyPoint dest = new MyPoint(numCoordinates);
 		Matrix minDif = new Matrix(numCoordinates, 1);
 		Matrix maxDif = new Matrix(numCoordinates, 1);
 		boolean isFirst = true;
-		for (int p = 0; p < points.size(); p++) {
-			PointsPairBase item = points.get(0);
-			if (item.isBad())
+		for (MyTestData item : points) {
+			if (learner.isBad(item))
 				continue;
-			transformer.transform(item.source, dest);
-			item.target.mSub(dest, dest);
+			transformer.transform(item.src, dest);
+			item.dest.coords.mSub(dest.coords, dest.coords);
 			
 			if (isFirst) {
-				dest.copyTo(minDif);
-				dest.copyTo(maxDif);
+				dest.coords.copyTo(minDif);
+				dest.coords.copyTo(maxDif);
 			} else {
-				dest.mMin(minDif, minDif);
-				dest.mMax(maxDif, maxDif);
+				dest.coords.mMin(minDif, minDif);
+				dest.coords.mMax(maxDif, maxDif);
 			}
 		}
 		System.out.println("min/max diff");

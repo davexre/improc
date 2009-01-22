@@ -6,7 +6,7 @@ import org.jdom.JDOMException;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.XMLHelper;
 
-public class PolynomialTransformer extends BaseTransformer {
+public abstract class PolynomialTransformer<InputType, OutputType> extends BaseTransformer<InputType, OutputType> {
 
 	public int polynomPower;
 	
@@ -18,20 +18,19 @@ public class PolynomialTransformer extends BaseTransformer {
 	
 	protected int numPoints;
 	
-	private Matrix point; // used by transform() method
+	private double tmpSrc[];	// used by transform() method
+	private double tmpDest[]; 	// used by transform() method
 	
-	private PolynomialTransformer() {
-	}
-	
-	public PolynomialTransformer(int polynomPower, int inputSize, int outputSize) {
+	public PolynomialTransformer(int polynomPower) {
+		int inputSize = getInputSize();
+		int outputSize = getOutputSize();
 		this.polynomPower = polynomPower;
-		this.inputSize = inputSize;
-		this.outputSize = outputSize;
 		buildPolynomPowers();
 
 		sourceOrigin = new Matrix(inputSize, 1);
 		polynomCoefs = new Matrix(outputSize, numPoints);
-		point = new Matrix(inputSize, 1);
+		tmpSrc = new double[inputSize];
+		tmpDest = new double[outputSize];
 	}	
 
 	public int getNumberOfCoefsPerCoordinate() {
@@ -41,6 +40,7 @@ public class PolynomialTransformer extends BaseTransformer {
 	private static final String coefNames[] = {"X", "Y", "Z"};
 	
 	public String getCoefIndexText(int polynomCoefIndex) {
+		int inputSize = getInputSize();
 		StringBuilder b = new StringBuilder();
 		String prefix = "";
 		boolean useCoefNames = (inputSize <= coefNames.length);
@@ -61,6 +61,7 @@ public class PolynomialTransformer extends BaseTransformer {
 	}
 
 	protected void buildPolynomPowers() {
+		int inputSize = getInputSize();
 		numPoints = (int) Math.pow(polynomPower, inputSize);
 		polynomPowers = new Matrix(inputSize, numPoints);
 		for (int j = numPoints - 1; j >= 0; j--) {
@@ -73,23 +74,29 @@ public class PolynomialTransformer extends BaseTransformer {
 		}
 	}
 
-	public void transform(Matrix source, Matrix dest) {
-		if ((source.getSizeX() != inputSize) ||
-				(source.getSizeY() != 1))
-				throw new IllegalArgumentException("Transform received invalid point");
-		dest.resize(outputSize, 1);
+	public void transform(InputType source, OutputType dest) {
+		int inputSize = getInputSize();
+		int outputSize = getOutputSize();
 		
-		source.mSub(sourceOrigin, point);
-		dest.make0();
+		for (int i = 0; i < inputSize; i++) {
+			tmpSrc[i] = getSourceCoord(source, i) - sourceOrigin.getItem(i, 0);
+		}
+		for (int i = 0; i < outputSize; i++) {
+			tmpDest[i] = 0.0;
+		}
+		
 		for (int j = 0; j < numPoints; j++) {
 			double t = 1;
 			for (int i = 0; i < inputSize; i++) {
-				t *= Math.pow(point.getItem(i, 0), polynomPowers.getItem(i, j));
+				t *= Math.pow(tmpSrc[i], polynomPowers.getItem(i, j));
 			}
 			for (int i = 0; i < outputSize; i++) {
-				dest.setItem(i, 0, dest.getItem(i, 0) +
-						t * polynomCoefs.getItem(i, j));
+				tmpDest[i] += t * polynomCoefs.getItem(i, j);
 			}
+		}
+		// Copy the result
+		for (int i = 0; i < outputSize; i++) {
+			setTargetCoord(dest, i, tmpDest[i]);
 		}
 	}
 
@@ -114,8 +121,6 @@ public class PolynomialTransformer extends BaseTransformer {
 		
 	public void toXML(Element dest) {
 		dest.addContent(XMLHelper.makeAttrEl("polynomPower", Integer.toString(polynomPower)));
-		dest.addContent(XMLHelper.makeAttrEl("inputSize", Integer.toString(inputSize)));
-		dest.addContent(XMLHelper.makeAttrEl("outputSize", Integer.toString(outputSize)));
 
 		Element e;
 		
@@ -132,23 +137,21 @@ public class PolynomialTransformer extends BaseTransformer {
 		dest.addContent(e);
 	}
 
-	public static PolynomialTransformer fromXML(Element source) throws JDOMException {
-		PolynomialTransformer r = new PolynomialTransformer();
-
-		r.polynomPower = Integer.parseInt(XMLHelper.getAttrEl(source, "polynomPower"));
-		r.inputSize = Integer.parseInt(XMLHelper.getAttrEl(source, "inputSize"));
-		r.outputSize = Integer.parseInt(XMLHelper.getAttrEl(source, "outputSize"));
-		r.buildPolynomPowers();
-		r.sourceOrigin = Matrix.fromXML(source.getChild("SourceOrigin"));
-		r.polynomCoefs = Matrix.fromXML(source.getChild("polynomCoefs"));
-		r.point = new Matrix(r.inputSize, 1);
+	public void fromXML(Element source) throws JDOMException {
+		int inputSize = getInputSize();
+		int outputSize = getOutputSize();
+		polynomPower = Integer.parseInt(XMLHelper.getAttrEl(source, "polynomPower"));
+		buildPolynomPowers();
+		sourceOrigin = Matrix.fromXML(source.getChild("SourceOrigin"));
+		polynomCoefs = Matrix.fromXML(source.getChild("polynomCoefs"));
+		tmpSrc = new double[inputSize];
+		tmpDest = new double[outputSize];
 		
 		if (
-			(r.sourceOrigin.getSizeX() != r.inputSize) ||
-			(r.sourceOrigin.getSizeY() != 1) ||
-			(r.polynomCoefs.getSizeX() != r.outputSize) ||
-			(r.polynomCoefs.getSizeY() != r.numPoints) )
+			(sourceOrigin.getSizeX() != inputSize) ||
+			(sourceOrigin.getSizeY() != 1) ||
+			(polynomCoefs.getSizeX() != outputSize) ||
+			(polynomCoefs.getSizeY() != numPoints) )
 			throw new IllegalArgumentException("XML file contains malformed PolynomialTransformer data");
-		return r;
 	}
 }

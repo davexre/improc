@@ -8,8 +8,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import com.slavi.math.transform.AffineTransformLearner;
-import com.slavi.math.transform.AffineTransformer;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 
@@ -18,7 +16,7 @@ public class PanoPairList {
 
 	public ArrayList<PanoPair> items;
 	
-	public AffineTransformer transform = new AffineTransformer(2, 2);
+	public PanoPairTransformer transform = null;
 	
 	public FileStamp sourceKPL = null;
 
@@ -102,7 +100,7 @@ public class PanoPairList {
 		result.targetImageSizeY = kppl.target.imageSizeY;
 		result.items = new ArrayList<PanoPair>();
 
-		AffineTransformLearner atl = new AffineTransformLearner(2, 2, kppl.items.values());
+		PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
 		atl.calculateOne();
 		atl.calculateOne();
 		atl.calculateOne();
@@ -121,7 +119,7 @@ public class PanoPairList {
 				result.items.add(new PanoPair(pp));
 			}				
 		}
-		result.transform = (AffineTransformer) atl.transformer;
+		result.transform = (PanoPairTransformer) atl.transformer;
 
 		// The PanoPairList is built. Now save it.
 		panoFile.getParentFile().mkdirs();

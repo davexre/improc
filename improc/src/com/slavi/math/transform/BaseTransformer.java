@@ -1,34 +1,32 @@
 package com.slavi.math.transform;
 
-import java.awt.geom.Rectangle2D;
-
-import com.slavi.math.matrix.Matrix;
-
-public abstract class BaseTransformer {
-	protected int inputSize;
+public abstract class BaseTransformer<InputType, OutputType> {
 	
-	protected int outputSize;
+	public abstract int getInputSize();
 
-	public abstract void transform(Matrix source, Matrix dest);
-
-	public int getInputSize() {
-		return inputSize;
-	}
-
-	public int getOutputSize() {
-		return outputSize;
-	}
+	public abstract int getOutputSize();
 	
+	public abstract double getSourceCoord(InputType item, int coordIndex);
+
+	public abstract void setSourceCoord(InputType item, int coordIndex, double value);
+
+	public abstract double getTargetCoord(OutputType item, int coordIndex);
+	
+	public abstract void setTargetCoord(OutputType item, int coordIndex, double value);
+	
+	public abstract void transform(InputType source, OutputType dest);
+
 	public abstract int getNumberOfCoefsPerCoordinate();
 	
 	/**
 	 * Transforms the source rectangle vertices into the destination 
 	 * coordinate system and returns the extent of the transformed vertices.  
 	 */
-	public void transformExtent(Rectangle2D.Double source, Rectangle2D.Double dest) {
-		if ((inputSize != 2) || (outputSize != 2))
-			throw new UnsupportedOperationException("Tranfsorm extent is 2D only operation");
+	public void transformExtent(InputType srcMin, InputType srcMax, OutputType destMin, OutputType destMax) {
+		int inputSize = getInputSize();
+		int outputSize = getOutputSize();
 		
+/*
 		Matrix s = new Matrix(2, 1);
 		Matrix d = new Matrix(2, 1);
 		double minX, minY, maxX, maxY, t;
@@ -72,6 +70,6 @@ public abstract class BaseTransformer {
 		dest.x = minX;
 		dest.y = minY;
 		dest.width = maxX - minX;
-		dest.height = maxY - minY;
+		dest.height = maxY - minY;*/
 	}
 }

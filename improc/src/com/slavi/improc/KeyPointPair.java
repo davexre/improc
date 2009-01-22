@@ -1,14 +1,14 @@
 package com.slavi.improc;
 
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.math.transform.PointsPair;
 import com.slavi.util.XMLHelper;
 
-public class KeyPointPair implements PointsPair {
+public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public int id = hashCode();
 	
 	public KeyPoint sourceSP;
@@ -133,5 +133,18 @@ public class KeyPointPair implements PointsPair {
 
 	public void setDiscrepancy(double discrepancy) {
 		this.discrepancy = discrepancy;
+	}
+
+	public KeyPoint getKey() {
+		return sourceSP;
+	}
+
+	public KeyPoint getValue() {
+		return targetSP;
+	}
+
+	public KeyPoint setValue(KeyPoint value) {
+		throw new RuntimeException("Method not allowed");
+		//return targetSP = value;
 	}
 }

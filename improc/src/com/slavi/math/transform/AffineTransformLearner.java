@@ -1,29 +1,26 @@
 package com.slavi.math.transform;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 
-public class AffineTransformLearner extends BaseTransformLearner {
+public abstract class AffineTransformLearner<InputType, OutputType> extends BaseTransformLearner<InputType, OutputType> {
 
 	protected Matrix coefs;			// Temporary matrix, used by computeOne methods
 	protected LeastSquaresAdjust lsa;
 	
-	public AffineTransformLearner(int inputSize, int outputSize) {
-		this(inputSize, outputSize, new ArrayList<PointsPair>());
-	}
-	
-	public AffineTransformLearner(int inputSize, int outputSize, Iterable<? extends PointsPair> pointsPairList) {
-		super(new AffineTransformer(inputSize, outputSize), pointsPairList);
+	public AffineTransformLearner(AffineTransformer<InputType, OutputType> transformer, 
+			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+		super(transformer, pointsPairList);
 
 		int numberOfCoefsPerCoordinate = transformer.getNumberOfCoefsPerCoordinate();
 		this.coefs = new Matrix(numberOfCoefsPerCoordinate, 1);
-		this.lsa = new LeastSquaresAdjust(numberOfCoefsPerCoordinate, transformer.outputSize);		
+		this.lsa = new LeastSquaresAdjust(numberOfCoefsPerCoordinate, transformer.getOutputSize());		
 	}
 	
 	public int getRequiredTrainingPoints() {
-		return transformer.inputSize + 1;
+		return transformer.getInputSize() + 1;
 	}	
 
 	public static int getRequiredTrainingPoints(int inputSize) {
@@ -35,6 +32,8 @@ public class AffineTransformLearner extends BaseTransformLearner {
 	 * @return True if adjusted. False - Try again/more adjustments needed.
 	 */
 	public boolean calculateOne() {
+		int inputSize = transformer.getInputSize();
+		int outputSize = transformer.getOutputSize();
 		int goodCount = computeWeights();
 
 		if (goodCount < lsa.getRequiredPoints())
@@ -44,18 +43,20 @@ public class AffineTransformLearner extends BaseTransformLearner {
 
 		// Calculate the affine transform parameters 
 		lsa.clear();
-		for (PointsPair item : items) {
-			if (item.isBad())
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
 				continue;
 
-			for (int i = transformer.inputSize - 1; i >= 0; i--) {
-				coefs.setItem(i, 0, (item.getSourceCoord(i) - sourceOrigin.getItem(i, 0)) /
+			InputType source = item.getKey();
+			OutputType dest = item.getValue();
+			for (int i = inputSize - 1; i >= 0; i--) {
+				coefs.setItem(i, 0, (transformer.getSourceCoord(source, i) - sourceOrigin.getItem(i, 0)) /
 					sourceScale.getItem(i, 0));
 			}
-			coefs.setItem(transformer.inputSize, 0, 1.0);
+			coefs.setItem(inputSize, 0, 1.0);
 			double computedWeight = getComputedWeight(item);
-			for (int i = transformer.outputSize - 1; i >= 0; i--) {
-				double L = (item.getTargetCoord(i) - targetOrigin.getItem(i, 0)) / 
+			for (int i = outputSize - 1; i >= 0; i--) {
+				double L = (transformer.getTargetCoord(dest, i) - targetOrigin.getItem(i, 0)) / 
 					targetScale.getItem(i, 0);
 				lsa.addMeasurement(coefs, computedWeight, L, i);
 			}
@@ -67,17 +68,17 @@ public class AffineTransformLearner extends BaseTransformLearner {
 		AffineTransformer tr = (AffineTransformer)transformer;
 		Matrix u = lsa.getUnknown(); 
 
-		for (int i = transformer.outputSize - 1; i >= 0; i--) {
-			for (int j = transformer.inputSize - 1; j >= 0; j--) {
+		for (int i = outputSize - 1; i >= 0; i--) {
+			for (int j = inputSize - 1; j >= 0; j--) {
 				tr.affineCoefs.setItem(i, j, 
 					u.getItem(i, j) * targetScale.getItem(i, 0) / sourceScale.getItem(j, 0));
 			}
 			double t = 0;
-			for (int j = transformer.inputSize - 1; j >= 0; j--) { 
+			for (int j = inputSize - 1; j >= 0; j--) { 
 				t += tr.affineCoefs.getItem(i, j) * sourceOrigin.getItem(j, 0);
 			}
 			tr.origin.setItem(i, 0, targetOrigin.getItem(i, 0) - t +
-				u.getItem(i, transformer.inputSize) * targetScale.getItem(i, 0)); 
+				u.getItem(i, inputSize) * targetScale.getItem(i, 0)); 
 		}
 
 		return isAdjusted();

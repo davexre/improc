@@ -1,21 +1,18 @@
 package com.slavi.math.transform;
 
-import java.util.ArrayList;
+import java.util.Map;
 
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 
-public class Helmert2DTransformLearner extends BaseTransformLearner {
+public abstract class Helmert2DTransformLearner<InputType, OutputType> extends BaseTransformLearner<InputType, OutputType> {
 
 	protected Matrix coefs;			// Temporary matrix, used by computeOne methods
 	protected LeastSquaresAdjust lsa;
 
-	public Helmert2DTransformLearner() {
-		this(new ArrayList<PointsPair>());
-	}
-	
-	public Helmert2DTransformLearner(ArrayList<? extends PointsPair> pointsPairList) {
-		super(new Helmert2DTransformer(), pointsPairList);
+	public Helmert2DTransformLearner(Helmert2DTransformer<InputType, OutputType> transformer, 
+			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+		super(transformer, pointsPairList);
 
 		this.coefs = new Matrix(4, 1);
 		this.lsa = new LeastSquaresAdjust(4, 1);		
@@ -46,23 +43,25 @@ public class Helmert2DTransformLearner extends BaseTransformLearner {
 		
 		// Calculate the affine transform parameters 
 		lsa.clear();
-		for (PointsPair item : items) {
-			if (item.isBad())
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
 				continue;
 
-			double a = (item.getSourceCoord(0) - sourceOrigin.getItem(0, 0)) / aSourceScale;
-			double b = (item.getSourceCoord(1) - sourceOrigin.getItem(1, 0)) / aSourceScale;
+			InputType source = item.getKey();
+			OutputType dest = item.getValue();
+			double a = (transformer.getSourceCoord(source, 0) - sourceOrigin.getItem(0, 0)) / aSourceScale;
+			double b = (transformer.getSourceCoord(source, 1) - sourceOrigin.getItem(1, 0)) / aSourceScale;
 			double L;
 			double computedWeight = getComputedWeight(item);
 			
-			L = (item.getTargetCoord(0) - targetOrigin.getItem(0, 0)) / aTargetScale;
+			L = (transformer.getTargetCoord(dest, 0) - targetOrigin.getItem(0, 0)) / aTargetScale;
 			coefs.setItem(0, 0, a);
 			coefs.setItem(1, 0, -b);
 			coefs.setItem(2, 0, 1.0);
 			coefs.setItem(3, 0, 0.0);
 			lsa.addMeasurement(coefs, computedWeight, L, 0);
 			
-			L = (item.getTargetCoord(1) - targetOrigin.getItem(1, 0)) / aTargetScale;
+			L = (transformer.getTargetCoord(dest, 1) - targetOrigin.getItem(1, 0)) / aTargetScale;
 			coefs.setItem(0, 0, b);
 			coefs.setItem(1, 0, a);
 			coefs.setItem(2, 0, 0.0);

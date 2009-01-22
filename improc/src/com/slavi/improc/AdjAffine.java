@@ -1,5 +1,6 @@
 package com.slavi.improc;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,6 +15,52 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformer;
 
 public class AdjAffine {
+	
+	public static class AdjAffineTransformer extends AffineTransformer<Point2D.Double, Point2D.Double> {
+		public int getInputSize() {
+			return 2;
+		}
+
+		public int getOutputSize() {
+			return 2;
+		}
+
+		private double getCoord(Point2D.Double item, int coordIndex) {
+			switch (coordIndex) {
+				case 0: return item.x;
+				case 1: return item.y;
+				default: throw new RuntimeException("Invalid coordinate");
+			}
+		}
+
+		private void setCoord(Point2D.Double item, int coordIndex, double value) {
+			switch (coordIndex) {
+				case 0: 
+					item.x = value;
+					break;				
+				case 1: 
+					item.y = value;
+					break;
+				default: throw new RuntimeException("Invalid coordinate");
+			}
+		}
+		
+		public double getSourceCoord(Point2D.Double item, int coordIndex) {
+			return getCoord(item, coordIndex);
+		}
+
+		public double getTargetCoord(Point2D.Double item, int coordIndex) {
+			return getCoord(item, coordIndex);
+		}
+
+		public void setSourceCoord(Point2D.Double item, int coordIndex, double value) {
+			setCoord(item, coordIndex, value);
+		}
+
+		public void setTargetCoord(Point2D.Double item, int coordIndex, double value) {
+			setCoord(item, coordIndex, value);
+		}
+	}
 	
 	/**
 	 * Middle point of the {@link #worldExtent}.
@@ -314,12 +361,66 @@ public class AdjAffine {
 */
 	}
 	
+	/**
+	 * Transforms the source rectangle vertices into the destination 
+	 * coordinate system and returns the extent of the transformed vertices.  
+	 */
+	public void transformExtent(AdjAffineTransformer tr, Rectangle2D.Double source, Rectangle2D.Double dest) {
+		if ((tr.getInputSize() != 2) || (tr.getOutputSize() != 2))
+			throw new UnsupportedOperationException("Tranfsorm extent is 2D only operation");
+		
+		Point2D.Double s = new Point2D.Double();
+		Point2D.Double d = new Point2D.Double();
+		double minX, minY, maxX, maxY, t;
+		
+		s.x = source.x;
+		s.y = source.y;
+		tr.transform(s, d);
+		minX = maxX = d.x;
+		minY = maxY = d.y;
+
+		s.x = source.x + source.width;
+		s.y = source.y;
+		tr.transform(s, d);
+		t = d.x;
+		if (minX > t) minX = t;
+		if (maxX < t) maxX = t;
+		t = d.y;
+		if (minY > t) minY = t;
+		if (maxY < t) maxY = t;
+		
+		s.x = source.x;
+		s.y = source.y + source.height;
+		tr.transform(s, d);
+		t = d.x;
+		if (minX > t) minX = t;
+		if (maxX < t) maxX = t;
+		t = d.y;
+		if (minY > t) minY = t;
+		if (maxY < t) maxY = t;
+
+		s.x = source.x + source.width;
+		s.y = source.y + source.height;
+		tr.transform(s, d);
+		t = d.x;
+		if (minX > t) minX = t;
+		if (maxX < t) maxX = t;
+		t = d.y;
+		if (minY > t) minY = t;
+		if (maxY < t) maxY = t;
+		
+		dest.x = minX;
+		dest.y = minY;
+		dest.width = maxX - minX;
+		dest.height = maxY - minY;
+	}
+	
 	public void calcImageExtents() {
-		AffineTransformer tr = new AffineTransformer(2, 2);
+		AdjAffineTransformer tr = new AdjAffineTransformer();
 		worldExtent = null;
 		for (AdjImage i : il) {
 			tr.setMatrix(i.toWorld);
-			tr.transformExtent(i.extent, i.worldExtent);
+			transformExtent(tr, i.extent, i.worldExtent);
 			// Calculate the mid point of the extent of all "transformed image" extents
 			i.midWX = i.worldExtent.getCenterX();
 			i.midWY = i.worldExtent.getCenterY();
@@ -345,15 +446,11 @@ public class AdjAffine {
 			for (int i = bo.minX(); i <= bo.maxX(); i++)
 				bo.setPixel(i, j, 0);
 		
-		AffineTransformer transform = new AffineTransformer(2, 2);
-		Matrix srcPoint1 = new Matrix(2, 1);
-		srcPoint1.setItem(0, 0, 0.0);
-		srcPoint1.setItem(1, 0, 0.0);
-		Matrix srcPoint2 = new Matrix(2, 1);
-		srcPoint2.setItem(0, 0, 1.0);
-		srcPoint2.setItem(1, 0, 1.0);
-		Matrix destPoint1 = new Matrix(2, 1);
-		Matrix destPoint2 = new Matrix(2, 1);
+		AdjAffineTransformer transform = new AdjAffineTransformer();
+		Point2D.Double srcPoint1 = new Point2D.Double(0.0, 0.0);
+		Point2D.Double srcPoint2 = new Point2D.Double(1.0, 1.0);
+		Point2D.Double destPoint1 = new Point2D.Double();
+		Point2D.Double destPoint2 = new Point2D.Double();
 		for (AdjImage adjImage : il) {
 			System.out.println("Now processing image " + adjImage.imageFile);
 			BufferedImage bi = ImageIO.read(new File(adjImage.imageFile));
@@ -361,21 +458,21 @@ public class AdjAffine {
 			transform.transform(srcPoint1, destPoint1);
 			transform.transform(srcPoint2, destPoint2);
 			double radius = 0.5 * Math.sqrt(
-					Math.pow(destPoint2.getItem(0, 0) - destPoint1.getItem(0, 0), 2.0) + 
-					Math.pow(destPoint2.getItem(1, 0) - destPoint1.getItem(1, 0), 2.0));
+					Math.pow(destPoint2.x - destPoint1.x, 2.0) + 
+					Math.pow(destPoint2.y - destPoint1.y, 2.0));
 			int minX = (int)adjImage.worldExtent.getMinX();
 			int maxX = (int)adjImage.worldExtent.getMaxX();
 			int minY = (int)adjImage.worldExtent.getMinY();
 			int maxY = (int)adjImage.worldExtent.getMaxY();
 			for (int j = minY; j <= maxY; j++) {
 				for (int i = minX; i <= maxX; i++) {
-					srcPoint1.setItem(0, 0, i);
-					srcPoint1.setItem(1, 0, j);
+					srcPoint1.x = i;
+					srcPoint1.y = j;
 					transform.transform(srcPoint1, destPoint1);
-					int imgMinX = (int) (destPoint1.getItem(0, 0) - radius);
-					int imgMaxX = (int) (destPoint1.getItem(0, 0) + radius);
-					int imgMinY = (int) (destPoint1.getItem(1, 0) - radius);
-					int imgMaxY = (int) (destPoint1.getItem(1, 0) + radius);
+					int imgMinX = (int) (destPoint1.x - radius);
+					int imgMaxX = (int) (destPoint1.x + radius);
+					int imgMinY = (int) (destPoint1.y - radius);
+					int imgMaxY = (int) (destPoint1.y + radius);
 					
 					int r = 0;
 					int g = 0;
