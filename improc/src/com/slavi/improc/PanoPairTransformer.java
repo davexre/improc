@@ -28,11 +28,23 @@ public class PanoPairTransformer extends AffineTransformer<KeyPoint, KeyPoint> {
 		return getCoord(item, coordIndex);
 	}
 
+	private void setCoord(KeyPoint item, int coordIndex, double value) {
+		switch (coordIndex) {
+		case 0: 
+			item.doubleX = value;
+			break;
+		case 1: 
+			item.doubleY = value;
+			break;
+		default: throw new IllegalArgumentException("Index out of range [0..1]");
+		}
+	}
+	
 	public void setSourceCoord(KeyPoint item, int coordIndex, double value) {
-		throw new RuntimeException("Method not allowed");
+		setCoord(item, coordIndex, value);
 	}
 
 	public void setTargetCoord(KeyPoint item, int coordIndex, double value) {
-		throw new RuntimeException("Method not allowed");
+		setCoord(item, coordIndex, value);
 	}
 }

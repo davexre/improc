@@ -11,7 +11,7 @@ public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, Ke
 	}
 
 	public KeyPoint createTemporaryTargetObject() {
-		throw new RuntimeException("Method not allowed");
+		return new KeyPoint();
 	}
 
 	public double getDiscrepancy(Entry<KeyPoint, KeyPoint> item) {
