@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.slavi.improc.pano.Image.ImageFormat;
+import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.util.Const;
 
 public class PanoMake {
@@ -18,7 +18,7 @@ public class PanoMake {
 		if ((ainfo.pano.format == ImageFormat.Rectilinear) &&
 			(ainfo.pano.hfov >= 180.0))
 			throw new RuntimeException("Rectilinear Panorama can not have 180 or more degrees field of view.");
-		for (Image im : ainfo.images) {
+		for (ImageData im : ainfo.images) {
 			if ((im.format == ImageFormat.Rectilinear) &&
 				(im.hfov >= 180.0))
 				throw new RuntimeException("Rectilinear Image can not have 180 or more degrees field of view.");
@@ -28,27 +28,27 @@ public class PanoMake {
 		}
 	}
 	
-	boolean isColorSpecifiec(Image im) {
-		if (im.cP.radial) {
+	boolean isColorSpecifiec(ImageData im) {
+		if (im.radial) {
 			for (int i = 0; i < 4; i++)
-				if ((im.cP.radial_params[0][i] != im.cP.radial_params[1][i]) ||
-					(im.cP.radial_params[2][i] != im.cP.radial_params[1][i]))
+				if ((im.radial_params[0][i] != im.radial_params[1][i]) ||
+					(im.radial_params[2][i] != im.radial_params[1][i]))
 					return true;
 		}
-		if (im.cP.vertical) {
-			if ((im.cP.vertical_params[0] != im.cP.vertical_params[1]) ||
-				(im.cP.vertical_params[2] != im.cP.vertical_params[1]))
+		if (im.vertical) {
+			if ((im.vertical_params[0] != im.vertical_params[1]) ||
+				(im.vertical_params[2] != im.vertical_params[1]))
 				return true;
 		}
-		if (im.cP.horizontal) {
-			if ((im.cP.horizontal_params[0] != im.cP.horizontal_params[1]) ||
-				(im.cP.horizontal_params[2] != im.cP.horizontal_params[1]))
+		if (im.horizontal) {
+			if ((im.horizontal_params[0] != im.horizontal_params[1]) ||
+				(im.horizontal_params[2] != im.horizontal_params[1]))
 				return true;
 		}
 		return false;
 	}
 		
-	public void makePanoOneImage(Image image, Image pano, int colorIndex) throws IOException {
+	public void makePanoOneImage(ImageData image, ImageData pano, int colorIndex) throws IOException {
 		double w2 = pano.width / 2.0 - 0.5;
 		double h2 = pano.height / 2.0 - 0.5;
 		double sw2 = image.width / 2.0 - 0.5;
@@ -96,7 +96,7 @@ public class PanoMake {
 
 		double scale = ainfo.pano.width / ainfo.pano.extentInPano.width;
 		
-		for (Image image : ainfo.images) {
+		for (ImageData image : ainfo.images) {
 			int x1 = (int) image.extentInPano.x;
 			int x2 = (int) (image.extentInPano.width + image.extentInPano.x);
 			int y1 = (int) image.extentInPano.y;

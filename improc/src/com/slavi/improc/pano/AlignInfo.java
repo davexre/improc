@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import com.slavi.improc.pano.ControlPoint.OptimizeType;
-import com.slavi.improc.pano.Image.ImageFormat;
+import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.math.matrix.JLapack;
 
 public class AlignInfo {
 
 	public static class Triangle {
 		int[] vert = new int[3];	// Three vertices from list
-		Image image;		// number of image for texture mapping
+		ImageData image;		// number of image for texture mapping
 	}
 	
 	public static class PTRect {
@@ -31,38 +31,6 @@ public class AlignInfo {
 		Vertical,
 		Deregister,
 		Morph
-	}
-	
-	// Preferences structure for tool correct
-	public static class cPrefs {
-		long magic = 20L;			//  File validity check, must be 20
-		boolean radial = false;		//  Radial correction requested?
-		double[][]	radial_params = new double[3][5];	//  3 colors x (4 coeffic. for 3rd order polys + correction radius)
-		boolean vertical = false;	//  Vertical shift requested ?
-		double[] vertical_params = new double[3];		//  3 colors x vertical shift value
-		boolean horizontal = false;	//  horizontal tilt ( in screenpoints)
-		double[] horizontal_params = new double[3];	//  3 colours x horizontal shift value
-		boolean shear = false;		//  shear correction requested?
-		double shear_x = 0.0;		//  horizontal shear values
-		double shear_y = 0.0;		//  vertical shear values
-		boolean resize = false;		//  scaling requested ?
-		long width = 0;				//  new width
-		long height = 0;			//  new height
-		boolean luminance = false;	//  correct luminance variation?
-		double[] lum_params = new double[3];		//  parameters for luminance corrections
-		cPrefsCorrectionMode correction_mode = cPrefsCorrectionMode.Radial;		//  0 - radial correction;1 - vertical correction;2 - deregistration
-		boolean cutFrame = false;	//  remove frame? 0 - no; 1 - yes
-		int	fwidth = 100;
-		int fheight = 100;
-		int	frame = 0;
-		boolean fourier = false;	//  Fourier filtering requested?
-		int	fourier_mode = 0;		// default is _fremoveBlurr // _faddBlurr vs _fremoveBlurr
-		String psf = "";			//  Point Spread Function, full path/fsspec to psd-file
-		int	fourier_nf;				// default is _fremoveBlurr // Noise filtering: _nf_internal vs _nf_custom
-		String nff = "";			//  noise filtered file: full path/fsspec to psd-file
-		double filterfactor = 1.0;	//  Hunt factor
-		double fourier_frame = 0.0;	//  To correct edge errors
-
 	}
 	
 	// Indicate to optimizer which variables to optimize
@@ -108,7 +76,7 @@ public class AlignInfo {
 	}
 
 	
-	ArrayList<Image>images = new ArrayList<Image>();	// Array of Pointers to Image Structs
+	ArrayList<ImageData>images = new ArrayList<ImageData>();	// Array of Pointers to Image Structs
 	ArrayList<optVars>options = new ArrayList<optVars>();	// Mark variables to optimize
 	//int				numIm;	 -> im.size()			// Number of images 
 	ArrayList<ControlPoint>controlPoints = new ArrayList<ControlPoint>();		// List of Control points
@@ -116,7 +84,7 @@ public class AlignInfo {
 	int				nt;				// Number of triangular faces
 	//int     			numPts;  -> cpt.size()				// Number of Control Points
 	int				numParam;			// Number of parameters to optimize
-	Image				pano;				// Panoramic Image decription
+	ImageData				pano;				// Panoramic Image decription
 	StitchBuffer stitchBuffer = new StitchBuffer();				// Info on how to stitch the panorama
 //	void				data;		// ????
 	SizePref sizePref = new SizePref();	
@@ -133,7 +101,7 @@ public class AlignInfo {
 		Point2D.Double p0 = new Point2D.Double();
 		Point2D.Double p1 = new Point2D.Double();
 		for (int i = 0; i < images.size(); i++) {
-			Image src = images.get(i);
+			ImageData src = images.get(i);
 			double roll = src.roll;
 			double yaw = src.yaw;
 			double pitch = src.pitch;
@@ -159,7 +127,7 @@ public class AlignInfo {
 		return (int) (scale * (double) pano.width); // same scale for height
 	}
 
-	void calculateExtents(Image dest) {
+	void calculateExtents(ImageData dest) {
 		Point2D.Double p = new Point2D.Double();
 		Point2D.Double min = new Point2D.Double();
 		Point2D.Double max = new Point2D.Double();
@@ -167,7 +135,7 @@ public class AlignInfo {
 		double destY = dest.height / 2.0 - 0.5;
 		boolean isFirst = true;
 		
-		for (Image image : images) {
+		for (ImageData image : images) {
 			double srcX = image.width / 2.0 - 0.5;
 			double srcY = image.height / 2.0 - 0.5;
 			
@@ -235,7 +203,7 @@ public class AlignInfo {
 	}
 	
 	public Point2D.Double getFieldOfView() {
-		Image dest = new Image();
+		ImageData dest = new ImageData();
 		dest.hfov = 360.0;
 		dest.width = 360;
 		dest.height = 180;
@@ -262,7 +230,7 @@ public class AlignInfo {
 		Point2D.Double p = new Point2D.Double();
 		Point2D.Double min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 		Point2D.Double max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
-		for (Image image : images) {
+		for (ImageData image : images) {
 			double srcX = image.width / 2.0;
 			double srcY = image.height / 2.0;
 			
@@ -393,7 +361,7 @@ public class AlignInfo {
 		return sroot;
 	}
 	
-	private void readImageLine(PTOTokenizer tokenizer, Image image, optVars opt, CoordInfo ci) {
+	private void readImageLine(PTOTokenizer tokenizer, ImageData image, optVars opt, CoordInfo ci) {
 		String t;
 		while ((t = tokenizer.nextToken()) != null) {
 			if (t.length() <= 0)
@@ -408,42 +376,42 @@ public class AlignInfo {
 				image.hfov = Double.parseDouble(tokenizer.nextToken());
 			} else if ("a=".equals(t)) {
 				opt.a = Integer.parseInt(tokenizer.nextToken()) + 2;
-				image.cP.radial = true;
+				image.radial = true;
 			} else if ("a".equals(t)) {
-				image.cP.radial_params[0][3] = Double.parseDouble(tokenizer.nextToken());
-				image.cP.radial = true;
+				image.radial_params[0][3] = Double.parseDouble(tokenizer.nextToken());
+				image.radial = true;
 			} else if ("b=".equals(t)) {
 				opt.b = Integer.parseInt(tokenizer.nextToken()) + 2;
-				image.cP.radial = true;
+				image.radial = true;
 			} else if ("b".equals(t)) {
-				image.cP.radial_params[0][2] = Double.parseDouble(tokenizer.nextToken());
-				image.cP.radial = true;
+				image.radial_params[0][2] = Double.parseDouble(tokenizer.nextToken());
+				image.radial = true;
 			} else if ("c=".equals(t)) {
 				opt.c = Integer.parseInt(tokenizer.nextToken()) + 2;
-				image.cP.radial = true;
+				image.radial = true;
 			} else if ("c".equals(t)) {
-				image.cP.radial_params[0][1] = Double.parseDouble(tokenizer.nextToken());
-				image.cP.radial = true;
+				image.radial_params[0][1] = Double.parseDouble(tokenizer.nextToken());
+				image.radial = true;
 			} else if ("f".equals(t)) {
 				int k = Integer.parseInt(tokenizer.nextToken());
 				switch (k) {
 				case 0: image.format = ImageFormat.Rectilinear; break;
 				case 1: 
 					image.format = ImageFormat.Panorama;
-					image.cP.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
 					break;
 				case 2: image.format = ImageFormat.FisheyeCirc; break;
 				case 3: image.format = ImageFormat.FisheyeFF; break;
 				case 4: 
 					image.format = ImageFormat.Equirectangular; 
-					image.cP.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
 					break;
 				case 8: image.format = ImageFormat.Orthographic; break;
 				default:
 					throw new RuntimeException("invalid imgae format");
 				}
 			} else if ("o".equals(t)) {
-				image.cP.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
+				image.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
 			} else if ("y=".equals(t)) {
 				opt.yaw = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("y".equals(t)) {
@@ -459,34 +427,34 @@ public class AlignInfo {
 			} else if ("d=".equals(t)) {
 				opt.d = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("d".equals(t)) {
-				image.cP.horizontal_params[0] = Double.parseDouble(tokenizer.nextToken());
-				image.cP.horizontal = true;
+				image.horizontal_params[0] = Double.parseDouble(tokenizer.nextToken());
+				image.horizontal = true;
 			} else if ("e=".equals(t)) {
 				opt.e = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("e".equals(t)) {
-				image.cP.vertical_params[0] = Double.parseDouble(tokenizer.nextToken());
-				image.cP.vertical = true;
+				image.vertical_params[0] = Double.parseDouble(tokenizer.nextToken());
+				image.vertical = true;
 			} else if ("g=".equals(t)) {
 				opt.shear_x = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("g".equals(t)) {
-				image.cP.shear_x = Double.parseDouble(tokenizer.nextToken());
-				image.cP.shear = true;
+				image.shear_x = Double.parseDouble(tokenizer.nextToken());
+				image.shear = true;
 			} else if ("t=".equals(t)) {
 				opt.shear_y = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("t".equals(t)) {
-				image.cP.shear_y = Double.parseDouble(tokenizer.nextToken());
-				image.cP.shear = true;
+				image.shear_y = Double.parseDouble(tokenizer.nextToken());
+				image.shear = true;
 			} else if ("n".equals(t)) {
 				image.name = tokenizer.nextToken();
 			} else if ("m".equals(t)) {
-				image.cP.frame = Integer.parseInt(tokenizer.nextToken());
-				image.cP.cutFrame = true;
+				image.frame = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;
 			} else if ("mx".equals(t)) {
-				image.cP.fwidth = Integer.parseInt(tokenizer.nextToken());
-				image.cP.cutFrame = true;
+				image.fwidth = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;
 			} else if ("my".equals(t)) {
-				image.cP.fheight = Integer.parseInt(tokenizer.nextToken());
-				image.cP.cutFrame = true;
+				image.fheight = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;
 			} else if ("X".equals(t)) {
 				ci.x[0] = Double.parseDouble(tokenizer.nextToken());
 			} else if ("Y".equals(t)) {
@@ -503,7 +471,7 @@ public class AlignInfo {
 				image.selection.right = Integer.parseInt(tokenizer.nextToken());
 				image.selection.top = Integer.parseInt(tokenizer.nextToken());
 				image.selection.bottom = Integer.parseInt(tokenizer.nextToken());
-				image.cP.cutFrame = true;
+				image.cutFrame = true;
 			} else if ("+".equals(t)) {
 				stitchBuffer.srcName = tokenizer.nextToken();
 			} else if ("-".equals(t)) {
@@ -522,23 +490,23 @@ public class AlignInfo {
 		}
 		
 		// Set 4th polynomial parameter
-		image.cP.radial_params[0][0] = 1.0 - (image.cP.radial_params[0][3] + image.cP.radial_params[0][2] + image.cP.radial_params[0][1]);
+		image.radial_params[0][0] = 1.0 - (image.radial_params[0][3] + image.radial_params[0][2] + image.radial_params[0][1]);
 		for (int col = 1; col < 3; col++) {
 			for (int i = 0; i < 4; i++)
-				image.cP.radial_params[col][i]	= image.cP.radial_params[0][i];
-			image.cP.vertical_params[col] = image.cP.vertical_params[0];
-			image.cP.horizontal_params[col] = image.cP.horizontal_params[0];
+				image.radial_params[col][i]	= image.radial_params[0][i];
+			image.vertical_params[col] = image.vertical_params[0];
+			image.horizontal_params[col] = image.horizontal_params[0];
 		}
 		// Restrict radial correction to monotonous interval
 		double a[] = new double[4];
 		for (int i = 0; i < 3; i++) {
 			for (int k = 0; k < 4; k++) {
 				a[k] = 0.0;//1.0e-10;
-				if (image.cP.radial_params[i][k] != 0.0 ) {
-					a[k] = (k + 1) * image.cP.radial_params[i][k];
+				if (image.radial_params[i][k] != 0.0 ) {
+					a[k] = (k + 1) * image.radial_params[i][k];
 				}
 			}
-			image.cP.radial_params[i][4] = smallestRoot(a);
+			image.radial_params[i][4] = smallestRoot(a);
 		}
 	}
 	
@@ -555,7 +523,7 @@ public class AlignInfo {
 			switch (c) {
 			case 'i': {
 				// Image description
-				Image im = new Image();
+				ImageData im = new ImageData();
 				optVars opt = new optVars();
 				CoordInfo ci = new CoordInfo();
 				readImageLine(tokenizer, im, opt, ci);
@@ -687,7 +655,7 @@ public class AlignInfo {
 			}
 			case 'p':
 				// panorama
-				pano = new Image();
+				pano = new ImageData();
 				optVars opt = new optVars();
 				CoordInfo ci = new CoordInfo();
 				readImageLine(tokenizer, pano, opt, ci);
@@ -717,7 +685,7 @@ public class AlignInfo {
 		numParam 	= variablesToOptimize;
 		// Set initial values for linked variables
 		for (int i = 0; i < images.size(); i++){
-			Image im = images.get(i);
+			ImageData im = images.get(i);
 			int k = options.get(i).yaw - 2;
 			if( k >= 0 ) 
 				im.yaw = images.get(k).yaw;
@@ -732,34 +700,34 @@ public class AlignInfo {
 			if( k >= 0 ) im.hfov = images.get(k).hfov;
 
 			k = options.get(i).a - 2;
-			if( k >= 0 ) im.cP.radial_params[0][3] = images.get(k).cP.radial_params[0][3];
+			if( k >= 0 ) im.radial_params[0][3] = images.get(k).radial_params[0][3];
 
 			k = options.get(i).b - 2;
-			if( k >= 0 ) im.cP.radial_params[0][2] = images.get(k).cP.radial_params[0][2];
+			if( k >= 0 ) im.radial_params[0][2] = images.get(k).radial_params[0][2];
 
 			k = options.get(i).c - 2;
-			if( k >= 0 ) im.cP.radial_params[0][1] = images.get(k).cP.radial_params[0][1];
+			if( k >= 0 ) im.radial_params[0][1] = images.get(k).radial_params[0][1];
 
 			k = options.get(i).d - 2;
-			if( k >= 0 ) im.cP.horizontal_params[0] = images.get(k).cP.horizontal_params[0];
+			if( k >= 0 ) im.horizontal_params[0] = images.get(k).horizontal_params[0];
 
 			k = options.get(i).e - 2;
-			if( k >= 0 ) im.cP.vertical_params[0] = images.get(k).cP.vertical_params[0];
+			if( k >= 0 ) im.vertical_params[0] = images.get(k).vertical_params[0];
 
-			im.cP.radial_params[0][0] = 1.0 - (im.cP.radial_params[0][3]
-												+ im.cP.radial_params[0][2]
-												+ im.cP.radial_params[0][1] ) ;
-			SetEquColor(im.cP);
+			im.radial_params[0][0] = 1.0 - (im.radial_params[0][3]
+												+ im.radial_params[0][2]
+												+ im.radial_params[0][1] ) ;
+			SetEquColor(im);
 		}
 	}
 	
-	static void SetEquColor( cPrefs cP )
+	static void SetEquColor( ImageData im )
 	{
 		for(int col = 1; col < 3; col++) {
 			for(int i = 0; i < 4; i++)
-				cP.radial_params[col][i] = cP.radial_params[0][i];
-			cP.vertical_params[col] = cP.vertical_params[0];
-			cP.horizontal_params[col] = cP.horizontal_params[0];
+				im.radial_params[col][i] = im.radial_params[0][i];
+			im.vertical_params[col] = im.vertical_params[0];
+			im.horizontal_params[col] = im.horizontal_params[0];
 		}
 	}
 	
@@ -782,7 +750,7 @@ public class AlignInfo {
 		
 		
 		for (int i = 0; i < images.size(); i++) {
-			Image im = images.get(i);
+			ImageData im = images.get(i);
 			switch (im.format) {
 			case Rectilinear:		format = 0; break;
 			case Panorama:			format = 1; break;
@@ -821,11 +789,11 @@ public class AlignInfo {
 			fou.printf(Locale.US, "i w%d", im.width);
 			fou.printf(Locale.US, " h%d", im.height);
 			fou.printf(Locale.US, " f%d", format);
-			fou.printf(Locale.US, " a%f", im.cP.radial_params[0][3]);
-			fou.printf(Locale.US, " b%f", im.cP.radial_params[0][2]);
-			fou.printf(Locale.US, " c%f", im.cP.radial_params[0][1]);
-			fou.printf(Locale.US, " d%f", im.cP.horizontal_params[0]); 
-			fou.printf(Locale.US, " e%f", im.cP.vertical_params[0]);
+			fou.printf(Locale.US, " a%f", im.radial_params[0][3]);
+			fou.printf(Locale.US, " b%f", im.radial_params[0][2]);
+			fou.printf(Locale.US, " c%f", im.radial_params[0][1]);
+			fou.printf(Locale.US, " d%f", im.horizontal_params[0]); 
+			fou.printf(Locale.US, " e%f", im.vertical_params[0]);
 			fou.printf(Locale.US, " g0");
 			fou.printf(Locale.US, " p%f", im.pitch);
 			fou.printf(Locale.US, " r%f", im.roll);
@@ -837,11 +805,11 @@ public class AlignInfo {
 			fou.printf(Locale.US, "\n");
 			
 /*			fou.println(Locale.US, "i w" + Long.toString(im.width) + " h" + Long.toString(im.height) + " f" + Integer.toString(format) +
-					" a" + Double.toString(im.cP.radial_params[0][3]) + 
-					" b" + Double.toString(im.cP.radial_params[0][2]) + 
-					" c" + Double.toString(im.cP.radial_params[0][1]) + 
-					" d" + Double.toString(im.cP.horizontal_params[0]) + 
-					" e" + Double.toString(im.cP.vertical_params[0]) +
+					" a" + Double.toString(im.radial_params[0][3]) + 
+					" b" + Double.toString(im.radial_params[0][2]) + 
+					" c" + Double.toString(im.radial_params[0][1]) + 
+					" d" + Double.toString(im.horizontal_params[0]) + 
+					" e" + Double.toString(im.vertical_params[0]) +
 					" g0" +
 					" p" + Double.toString(im.pitch) +
 					" r" + Double.toString(im.roll) +
