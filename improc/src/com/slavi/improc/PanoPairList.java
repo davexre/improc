@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import com.slavi.improc.pano.ImageData;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 
@@ -33,6 +34,9 @@ public class PanoPairList {
 	public int targetImageSizeX;
 	
 	public int targetImageSizeY; 
+	
+	public ImageData source;
+	public ImageData target;
 	
 	public PanoPairList() {
 		items = new ArrayList<PanoPair>();

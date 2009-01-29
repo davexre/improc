@@ -23,7 +23,7 @@ public class PanoList {
 		int goodCount = 0;
 		for (int i = 0; i < item.items.size(); i++) {
 			PanoPair pp = item.items.get(i);
-			if (pp.discrepancy < 2.0)
+			if (pp.discrepancy < 20)
 				goodCount++;
 		}
 		if (goodCount < 10) {

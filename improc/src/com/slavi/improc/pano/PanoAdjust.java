@@ -4,9 +4,6 @@ import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import com.slavi.improc.pano.AlignInfo.cPrefsCorrectionMode;
-import com.slavi.improc.pano.AlignInfo.optVars;
-import com.slavi.improc.pano.ControlPoint.OptimizeType;
 import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.improc.pano.LMDif.LMDifFcn;
 import com.slavi.math.MathUtil;
@@ -71,11 +68,13 @@ public class PanoAdjust implements LMDifFcn {
 		double rad3 = srcImg.radial_params[colorIndex][3];
 		double rad4 = srcImg.radial_params[colorIndex][4];
 		
-		if ((srcImg.correction_mode == cPrefsCorrectionMode.Radial) ||
+		// Correction mode is always radial
+		rad4 = ( (double)( srcImg.width < srcImg.height ? srcImg.width : srcImg.height) ) / 2.0;
+/*		if ((srcImg.correction_mode == cPrefsCorrectionMode.Radial) ||
 			(srcImg.correction_mode == cPrefsCorrectionMode.Morph))
 			rad4 = ( (double)( srcImg.width < srcImg.height ? srcImg.width : srcImg.height) ) / 2.0;
 		else
-			rad4 = ((double) srcImg.height) / 2.0;
+			rad4 = ((double) srcImg.height) / 2.0;*/
 		
 		switch (destImg.format) {
 		case Rectilinear:
@@ -108,7 +107,9 @@ public class PanoAdjust implements LMDifFcn {
 		if (srcImg.vertical)
 			TransformationFunctions.vert(p, vertical);
 		if (srcImg.radial) {
-			switch (srcImg.correction_mode) {
+			// Correction mode is always radial
+			TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
+/*			switch (srcImg.correction_mode) {
 			case Radial:
 			case Morph:
 				TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
@@ -118,7 +119,7 @@ public class PanoAdjust implements LMDifFcn {
 				break;
 			case Deregister:
 				break;
-			}
+			}*/
 		}
 		
 		switch (srcImg.format) {
@@ -148,7 +149,9 @@ public class PanoAdjust implements LMDifFcn {
 		if (srcImg.vertical)
 			TransformationFunctions.vert(p, vertical);
 		if (srcImg.radial) {
-			switch (srcImg.correction_mode) {
+			// Correction mode is always radial
+			TransformationFunctions.radial(p, rad0, rad1, rad2, rad3, rad4, rad4);
+/*			switch (srcImg.correction_mode) {
 			case Radial:
 			case Morph:
 				TransformationFunctions.radial(p, rad0, rad1, rad2, rad3, rad4, rad4);
@@ -157,9 +160,9 @@ public class PanoAdjust implements LMDifFcn {
 				TransformationFunctions.vertical(p, rad0, rad1, rad2, rad3, rad4);
 				break;
 			case Deregister:
-				TransformationFunctions.deregister(p, /*rad0,*/ rad1, rad2, rad3, rad4);
+				TransformationFunctions.deregister(p, rad1, rad2, rad3, rad4);
 				break;
-			}
+			}*/
 		}
 	}
 	
@@ -202,11 +205,13 @@ public class PanoAdjust implements LMDifFcn {
 		double rad4 = srcImg.radial_params[colorIndex][4];
 		double rad5 = rad4;
 
-		if ((srcImg.correction_mode == cPrefsCorrectionMode.Radial) ||
+		// Correction mode is always radial
+		rad4 = ( (double)( srcImg.width < srcImg.height ? srcImg.width : srcImg.height) ) / 2.0;
+/*		if ((srcImg.correction_mode == cPrefsCorrectionMode.Radial) ||
 			(srcImg.correction_mode == cPrefsCorrectionMode.Morph))
 			rad4 = ( (double)( srcImg.width < srcImg.height ? srcImg.width : srcImg.height) ) / 2.0;
 		else
-			rad4 = ((double) srcImg.height) / 2.0;
+			rad4 = ((double) srcImg.height) / 2.0;*/
 			
 //		System.out.printf("hor=%f vert=%f rad0=%f, rad1=%f rad2=%f rad3=%f rad4=%f rad5=\n", horizontal, vertical, rad0, rad1, rad2, rad3, rad4);
 //		System.out.printf("rot0=%f rot1=%f dist=%f\n", rotX, rotY, distance);
@@ -220,7 +225,9 @@ public class PanoAdjust implements LMDifFcn {
 		if (srcImg.vertical)
 			TransformationFunctions.vert(p, vertical);
 		if (srcImg.radial) {
-			switch (srcImg.correction_mode) {
+			// Correction mode is always radial
+			TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
+/*			switch (srcImg.correction_mode) {
 			case Radial:
 			case Morph:
 				TransformationFunctions.invRadial(p, rad0, rad1, rad2, rad3, rad4);
@@ -230,7 +237,7 @@ public class PanoAdjust implements LMDifFcn {
 				break;
 			case Deregister:
 				break;
-			}
+			}*/
 		}
 
 		// Scale image
@@ -343,6 +350,11 @@ public class PanoAdjust implements LMDifFcn {
 					p1.x += alignInfo.pano.width;
 			}
 		}
+		// ignore type. use always r -> optimize by distance
+		double result = 
+			(p0.y - p1.y) * (p0.y - p1.y) + 
+			(p0.x - p1.x) * (p0.x - p1.x);
+/*
 		// What do we want to optimize?
 		double result = 0.0;
 		switch (cp.type) {
@@ -364,6 +376,7 @@ public class PanoAdjust implements LMDifFcn {
 				(p0.x - p1.x) * (p0.x - p1.x);
 			break;
 		}
+*/		
 		cp.distanceComponent0 = Math.sqrt(result);
 		cp.distanceComponent1 = 0.0;
 		return result;
@@ -403,9 +416,8 @@ public class PanoAdjust implements LMDifFcn {
 		// Set global preferences structures using LM-params
 		for (int i = 0; i < alignInfo.images.size(); i++) {
 			ImageData im = alignInfo.images.get(i);
-			optVars opt = alignInfo.options.get(i);
 			
-			if ((k = opt.yaw) > 0) {
+			if ((k = im.optimizeYaw) > 0) {
 				if (k == 1) {
 					im.yaw = x.getItem(j++, 0);
 					im.yaw = NORM_ANGLE(im.yaw);
@@ -413,7 +425,7 @@ public class PanoAdjust implements LMDifFcn {
 					im.yaw = alignInfo.images.get(k - 2).yaw;
 				}
 			}
-			if ((k = opt.pitch) > 0) {
+			if ((k = im.optimizePitch) > 0) {
 				if (k == 1) {
 					im.pitch = x.getItem(j++, 0);
 					im.pitch = NORM_ANGLE(im.pitch);
@@ -421,7 +433,7 @@ public class PanoAdjust implements LMDifFcn {
 					im.pitch = alignInfo.images.get(k - 2).pitch;
 				}
 			}
-			if ((k = opt.roll) > 0) {
+			if ((k = im.optimizeRoll) > 0) {
 				if (k == 1) {
 					im.roll = x.getItem(j++, 0);
 					NORM_ANGLE(im.roll);
@@ -429,7 +441,7 @@ public class PanoAdjust implements LMDifFcn {
 					im.roll = alignInfo.images.get(k - 2).roll;
 				}
 			}
-			if ((k = opt.hfov) > 0) {
+			if ((k = im.optimizeHfov) > 0) {
 				if (k == 1) {
 					im.hfov = x.getItem(j++, 0);
 					if (im.hfov < 0.0)
@@ -439,49 +451,49 @@ public class PanoAdjust implements LMDifFcn {
 				}
 			}
 			sumhfov += im.hfov;
-			if ((k = opt.a) > 0) {
+			if ((k = im.optimizeA) > 0) {
 				if (k == 1) {
 					im.radial_params[0][3] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
 					im.radial_params[0][3] = alignInfo.images.get(k - 2).radial_params[0][3];
 				}
 			}
-			if ((k = opt.b) > 0) {
+			if ((k = im.optimizeB) > 0) {
 				if (k == 1) {
 					im.radial_params[0][2] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
 					im.radial_params[0][2] = alignInfo.images.get(k - 2).radial_params[0][2];
 				}
 			}
-			if ((k = opt.c) > 0) {
+			if ((k = im.optimizeC) > 0) {
 				if (k == 1) {
 					im.radial_params[0][1] = x.getItem(j++, 0) / C_FACTOR;
 				} else {
 					im.radial_params[0][1] = alignInfo.images.get(k - 2).radial_params[0][1];
 				}
 			}
-			if ((k = opt.d) > 0) {
+			if ((k = im.optimizeD) > 0) {
 				if (k == 1) {
 					im.horizontal_params[0] = x.getItem(j++, 0);
 				} else {
 					im.horizontal_params[0] = alignInfo.images.get(k - 2).horizontal_params[0];
 				}
 			}
-			if ((k = opt.e) > 0) {
+			if ((k = im.optimizeE) > 0) {
 				if (k == 1) {
 					im.vertical_params[0] = x.getItem(j++, 0);
 				} else {
 					im.vertical_params[0] = alignInfo.images.get(k - 2).vertical_params[0];
 				}
 			}
-			if ((k = opt.shear_x) > 0) {
+			if ((k = im.optimizeShearX) > 0) {
 				if (k == 1) {
 					im.shear_x = x.getItem(j++, 0);
 				} else {
 					im.shear_x = alignInfo.images.get(k - 2).shear_x;
 				}
 			}
-			if ((k = opt.shear_y) > 0) {
+			if ((k = im.optimizeShearY) > 0) {
 				if (k == 1) {
 					im.shear_y = x.getItem(j++, 0);
 				} else {
@@ -512,9 +524,11 @@ public class PanoAdjust implements LMDifFcn {
 		
 		for (int i = 0; i < alignInfo.controlPoints.size(); i++) {
 			ControlPoint cp = alignInfo.controlPoints.get(i);
-			double d = distControlPoint(p0, p1, cp, 
-					cp.type == OptimizeType.r ? sph : alignInfo.pano, 
-					cp.type == OptimizeType.r);
+//			double d = distControlPoint(p0, p1, cp, 
+//					cp.type == OptimizeType.r ? sph : alignInfo.pano, 
+//					cp.type == OptimizeType.r);
+			// ignore type. use always r -> optimize by distance
+			double d = distControlPoint(p0, p1, cp, sph, true);
 			
 			if ((initialAvgFov / avgfovFromSAP) > 1.0) {
 				d *= initialAvgFov / avgfovFromSAP;
@@ -545,31 +559,28 @@ public class PanoAdjust implements LMDifFcn {
 		// Set LM params using global preferences structure
 		// Change to cover range 0....1 (roughly)
 		int j = 0; // Counter for optimization parameters
-		for (int i = 0; i < alignInfo.images.size(); i++) {
-			ImageData im = alignInfo.images.get(i);
-			optVars opt = alignInfo.options.get(i);
-			
-			if(opt.yaw != 0)		// optimize alpha? 0-no 1-yes
+		for (ImageData im : alignInfo.images) {
+			if(im.optimizeYaw != 0)		// optimize alpha? 0-no 1-yes
 				x.setItem(j++, 0, im.yaw);
-			if(opt.pitch != 0)		// optimize pitch? 0-no 1-yes
+			if(im.optimizePitch != 0)		// optimize pitch? 0-no 1-yes
 				x.setItem(j++, 0, im.pitch);
-			if(opt.roll != 0)		// optimize gamma? 0-no 1-yes
+			if(im.optimizeRoll != 0)		// optimize gamma? 0-no 1-yes
 				x.setItem(j++, 0, im.roll);
-			if(opt.hfov != 0)		// optimize hfov? 0-no 1-yes
+			if(im.optimizeHfov != 0)		// optimize hfov? 0-no 1-yes
 				x.setItem(j++, 0, im.hfov);
-			if(opt.a != 0)			// optimize a? 0-no 1-yes
+			if(im.optimizeA != 0)			// optimize a? 0-no 1-yes
 				x.setItem(j++, 0, im.radial_params[0][3] * C_FACTOR);
-			if(opt.b != 0)			// optimize b? 0-no 1-yes
+			if(im.optimizeB != 0)			// optimize b? 0-no 1-yes
 				x.setItem(j++, 0, im.radial_params[0][2] * C_FACTOR);
-			if(opt.c != 0)			// optimize c? 0-no 1-yes
+			if(im.optimizeC != 0)			// optimize c? 0-no 1-yes
 				x.setItem(j++, 0, im.radial_params[0][1] * C_FACTOR);
-			if(opt.d != 0)			// optimize d? 0-no 1-yes
+			if(im.optimizeD != 0)			// optimize d? 0-no 1-yes
 				x.setItem(j++, 0, im.horizontal_params[0]);
-			if(opt.e != 0)			// optimize e? 0-no 1-yes
+			if(im.optimizeE != 0)			// optimize e? 0-no 1-yes
 				x.setItem(j++, 0, im.vertical_params[0]);
-			if(opt.shear_x != 0)	// optimize shear_x? 0-no 1-yes
+			if(im.optimizeShearX != 0)	// optimize shear_x? 0-no 1-yes
 				x.setItem(j++, 0, im.shear_x);
-			if(opt.shear_y != 0)	// optimize shear_y? 0-no 1-yes
+			if(im.optimizeShearY != 0)	// optimize shear_y? 0-no 1-yes
 				x.setItem(j++, 0, im.shear_y);
 		}
 		if (j != alignInfo.numParam)

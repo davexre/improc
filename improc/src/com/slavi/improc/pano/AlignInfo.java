@@ -8,55 +8,39 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.slavi.improc.pano.ControlPoint.OptimizeType;
 import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.math.matrix.JLapack;
 
 public class AlignInfo {
 
-	public static class Triangle {
+/*	public static class Triangle {
 		int[] vert = new int[3];	// Three vertices from list
 		ImageData image;		// number of image for texture mapping
-	}
+	}*/
 	
-	public static class PTRect {
+/*	public static class PTRect {
 		long	top;
 		long	bottom;
 		long	left;
 		long	right;
-	}
+	}*/
 
-	public static enum cPrefsCorrectionMode {
+/*	public static enum cPrefsCorrectionMode {
 		Radial,
 		Vertical,
 		Deregister,
 		Morph
-	}
+	}*/
 	
-	// Indicate to optimizer which variables to optimize
-	public static class optVars {
-		int hfov;								//  optimize hfov? 0-no 1-yes , etc
-		int yaw;				
-		int pitch;				
-		int roll;				
-		int a;
-		int b;
-		int c;					
-		int d;
-		int e;
-		int shear_x;
-		int shear_y;
-	}
-
-	public static class StitchBuffer {	// Used describe how images should be merged
+/*	public static class StitchBuffer {	// Used describe how images should be merged
 		String				srcName;		// Buffer should be merged to image; 0 if not.
 		String				destName;		// Converted image (ie pano) should be saved to buffer; 0 if not
 		int				feather;		// Width of feather
 		int				colcorrect;		// Should the images be color corrected?
 		int				seam;			// Where to put the seam (see above)
-	}
+	}*/
 	
-	public static class SizePref { // sPrefs	// Preferences structure for 'pref' dialog
+/*	public static class SizePref { // sPrefs	// Preferences structure for 'pref' dialog
 		long			magic;					//  File validity check; must be 70
 		int				displayPart;			// Display cropped/framed image ?
 		int				saveFile;				// Save to tempfile? 0-no, 1-yes
@@ -67,28 +51,27 @@ public class AlignInfo {
 		double			gamma;					// Gamma correction value
 		int				noAlpha;				// If new file is created: Don't save mask (Photoshop LE)
 		int				optCreatePano;			// Optimizer creates panos? 0  no/ 1 yes
-	}
+	}*/
 	
-	public static class CoordInfo {	// Real World 3D coordinates
+/*	public static class CoordInfo {	// Real World 3D coordinates
 		int  num;								// auxilliary index
 		double[] x = new double[3];
 		int[]  set = new int[3];
-	}
+	}*/
 
 	
 	ArrayList<ImageData>images = new ArrayList<ImageData>();	// Array of Pointers to Image Structs
-	ArrayList<optVars>options = new ArrayList<optVars>();	// Mark variables to optimize
 	//int				numIm;	 -> im.size()			// Number of images 
 	ArrayList<ControlPoint>controlPoints = new ArrayList<ControlPoint>();		// List of Control points
-	ArrayList<Triangle>triangles = new ArrayList<Triangle>();				// List of triangular faces
-	int				nt;				// Number of triangular faces
+//	ArrayList<Triangle>triangles = new ArrayList<Triangle>();				// List of triangular faces
+//	int				nt;				// Number of triangular faces
 	//int     			numPts;  -> cpt.size()				// Number of Control Points
 	int				numParam;			// Number of parameters to optimize
 	ImageData				pano;				// Panoramic Image decription
-	StitchBuffer stitchBuffer = new StitchBuffer();				// Info on how to stitch the panorama
+//	StitchBuffer stitchBuffer = new StitchBuffer();				// Info on how to stitch the panorama
 //	void				data;		// ????
-	SizePref sizePref = new SizePref();	
-	ArrayList<CoordInfo>coordInfos = new ArrayList<CoordInfo>();			// Real World coordinates
+//	SizePref sizePref = new SizePref();	
+//	ArrayList<CoordInfo>coordInfos = new ArrayList<CoordInfo>();			// Real World coordinates
 	
 	public void calcOptimalPanoWidth() {
 		calculateExtents(pano);
@@ -361,7 +344,7 @@ public class AlignInfo {
 		return sroot;
 	}
 	
-	private void readImageLine(PTOTokenizer tokenizer, ImageData image, optVars opt, CoordInfo ci) {
+	private void readImageLine(PTOTokenizer tokenizer, ImageData image) {
 		String t;
 		while ((t = tokenizer.nextToken()) != null) {
 			if (t.length() <= 0)
@@ -371,23 +354,23 @@ public class AlignInfo {
 			} else if ("h".equals(t)) {
 				image.height = Integer.parseInt(tokenizer.nextToken());
 			} else if ("v=".equals(t)) {
-				opt.hfov = Integer.parseInt(tokenizer.nextToken());
+				image.optimizeHfov = Integer.parseInt(tokenizer.nextToken());
 			} else if ("v".equals(t)) {
 				image.hfov = Double.parseDouble(tokenizer.nextToken());
 			} else if ("a=".equals(t)) {
-				opt.a = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeA = Integer.parseInt(tokenizer.nextToken()) + 2;
 				image.radial = true;
 			} else if ("a".equals(t)) {
 				image.radial_params[0][3] = Double.parseDouble(tokenizer.nextToken());
 				image.radial = true;
 			} else if ("b=".equals(t)) {
-				opt.b = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeB = Integer.parseInt(tokenizer.nextToken()) + 2;
 				image.radial = true;
 			} else if ("b".equals(t)) {
 				image.radial_params[0][2] = Double.parseDouble(tokenizer.nextToken());
 				image.radial = true;
 			} else if ("c=".equals(t)) {
-				opt.c = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeC = Integer.parseInt(tokenizer.nextToken()) + 2;
 				image.radial = true;
 			} else if ("c".equals(t)) {
 				image.radial_params[0][1] = Double.parseDouble(tokenizer.nextToken());
@@ -398,94 +381,110 @@ public class AlignInfo {
 				case 0: image.format = ImageFormat.Rectilinear; break;
 				case 1: 
 					image.format = ImageFormat.Panorama;
-					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					// not supported. Correction mode is always radial
+//					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
 					break;
 				case 2: image.format = ImageFormat.FisheyeCirc; break;
 				case 3: image.format = ImageFormat.FisheyeFF; break;
 				case 4: 
 					image.format = ImageFormat.Equirectangular; 
-					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
+					// not supported. Correction mode is always radial
+//					image.correction_mode = cPrefsCorrectionMode.Vertical; // im->cP.correction_mode |= correction_mode_vertical;
 					break;
 				case 8: image.format = ImageFormat.Orthographic; break;
 				default:
 					throw new RuntimeException("invalid imgae format");
 				}
 			} else if ("o".equals(t)) {
-				image.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
+				// not supported. Correction mode is always radial
+//				image.correction_mode = cPrefsCorrectionMode.Morph; // im->cP.correction_mode |=  correction_mode_morph;
 			} else if ("y=".equals(t)) {
-				opt.yaw = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeYaw = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("y".equals(t)) {
 				image.yaw = Double.parseDouble(tokenizer.nextToken());
 			} else if ("p=".equals(t)) {
-				opt.pitch = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizePitch = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("p".equals(t)) {
 				image.pitch = Double.parseDouble(tokenizer.nextToken());
 			} else if ("r=".equals(t)) {
-				opt.roll = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeRoll = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("r".equals(t)) {
 				image.roll = Double.parseDouble(tokenizer.nextToken());
 			} else if ("d=".equals(t)) {
-				opt.d = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeD = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("d".equals(t)) {
 				image.horizontal_params[0] = Double.parseDouble(tokenizer.nextToken());
 				image.horizontal = true;
 			} else if ("e=".equals(t)) {
-				opt.e = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeE = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("e".equals(t)) {
 				image.vertical_params[0] = Double.parseDouble(tokenizer.nextToken());
 				image.vertical = true;
 			} else if ("g=".equals(t)) {
-				opt.shear_x = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeShearX = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("g".equals(t)) {
 				image.shear_x = Double.parseDouble(tokenizer.nextToken());
 				image.shear = true;
 			} else if ("t=".equals(t)) {
-				opt.shear_y = Integer.parseInt(tokenizer.nextToken()) + 2;
+				image.optimizeShearY = Integer.parseInt(tokenizer.nextToken()) + 2;
 			} else if ("t".equals(t)) {
 				image.shear_y = Double.parseDouble(tokenizer.nextToken());
 				image.shear = true;
 			} else if ("n".equals(t)) {
 				image.name = tokenizer.nextToken();
 			} else if ("m".equals(t)) {
-				image.frame = Integer.parseInt(tokenizer.nextToken());
-				image.cutFrame = true;
+				// not supported
+/*				image.frame = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;*/
 			} else if ("mx".equals(t)) {
-				image.fwidth = Integer.parseInt(tokenizer.nextToken());
-				image.cutFrame = true;
+				// not supported
+/*				image.fwidth = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;*/
 			} else if ("my".equals(t)) {
-				image.fheight = Integer.parseInt(tokenizer.nextToken());
-				image.cutFrame = true;
+				// not supported
+/*				image.fheight = Integer.parseInt(tokenizer.nextToken());
+				image.cutFrame = true;*/
 			} else if ("X".equals(t)) {
-				ci.x[0] = Double.parseDouble(tokenizer.nextToken());
+				// not supported
+//				ci.x[0] = Double.parseDouble(tokenizer.nextToken());
 			} else if ("Y".equals(t)) {
-				ci.x[1] = Double.parseDouble(tokenizer.nextToken());
+				// not supported
+//				ci.x[1] = Double.parseDouble(tokenizer.nextToken());
 			} else if ("Z".equals(t)) {
-				ci.x[2] = Double.parseDouble(tokenizer.nextToken());
+				// not supported
+//				ci.x[2] = Double.parseDouble(tokenizer.nextToken());
 			} else if ("S".equals(t)) {
-				image.selection.left = Integer.parseInt(tokenizer.nextToken());
+				// not supported
+/*				image.selection.left = Integer.parseInt(tokenizer.nextToken());
 				image.selection.right = Integer.parseInt(tokenizer.nextToken());
 				image.selection.top = Integer.parseInt(tokenizer.nextToken());
-				image.selection.bottom = Integer.parseInt(tokenizer.nextToken());
+				image.selection.bottom = Integer.parseInt(tokenizer.nextToken());*/
 			} else if ("C".equals(t)) {
-				image.selection.left = Integer.parseInt(tokenizer.nextToken());
+				// not supported
+/*				image.selection.left = Integer.parseInt(tokenizer.nextToken());
 				image.selection.right = Integer.parseInt(tokenizer.nextToken());
 				image.selection.top = Integer.parseInt(tokenizer.nextToken());
 				image.selection.bottom = Integer.parseInt(tokenizer.nextToken());
-				image.cutFrame = true;
+				image.cutFrame = true;*/
 			} else if ("+".equals(t)) {
-				stitchBuffer.srcName = tokenizer.nextToken();
+				// not supported
+//				stitchBuffer.srcName = tokenizer.nextToken();
 			} else if ("-".equals(t)) {
-				stitchBuffer.destName = tokenizer.nextToken();
+				// not supported
+//				stitchBuffer.destName = tokenizer.nextToken();
 			} else if ("u".equals(t)) {
-				stitchBuffer.feather = Integer.parseInt(tokenizer.nextToken());
+				// not supported
+//				stitchBuffer.feather = Integer.parseInt(tokenizer.nextToken());
 			} else if ("s".equals(t)) {
-				stitchBuffer.seam = Integer.parseInt(tokenizer.nextToken());
+				// not supported
+//				stitchBuffer.seam = Integer.parseInt(tokenizer.nextToken());
 				// if(sBuf.seam != _dest)
 				//	sBuf.seam = _middle;
 			} else if ("k".equals(t)) {
-				int i = Integer.parseInt(tokenizer.nextToken());
+				// not supported
+/*				int i = Integer.parseInt(tokenizer.nextToken());
 				stitchBuffer.colcorrect |= i & 3; 
-				stitchBuffer.colcorrect += (i + 1) * 4; 
+				stitchBuffer.colcorrect += (i + 1) * 4;*/ 
 			}
 		}
 		
@@ -524,17 +523,17 @@ public class AlignInfo {
 			case 'i': {
 				// Image description
 				ImageData im = new ImageData();
-				optVars opt = new optVars();
-				CoordInfo ci = new CoordInfo();
-				readImageLine(tokenizer, im, opt, ci);
+				// not supported
+//				CoordInfo ci = new CoordInfo();
+				readImageLine(tokenizer, im /*, ci*/);
 				images.add(im);
-				options.add(opt);
-				coordInfos.add(ci);
+//				coordInfos.add(ci);
 				break;
 			}
 			case 't': {
 				// Triangle
-				Triangle tr = new Triangle();
+				// not supported
+/*				Triangle tr = new Triangle();
 				String t;
 				int i = 0;
 				while ((t = tokenizer.nextToken()) != null) {
@@ -550,7 +549,7 @@ public class AlignInfo {
 						}
 					}
 				}
-				triangles.add(tr);
+				triangles.add(tr);*/
 				break;
 			}
 			case 'c': {
@@ -562,12 +561,13 @@ public class AlignInfo {
 						continue;
 					if ("t".equals(t)) {
 						int type = Integer.parseInt(tokenizer.nextToken());
-						switch (type) {
-						case 1: cp.type = OptimizeType.x; break;
-						case 2: cp.type = OptimizeType.y; break;
-						case 0: 
-						default: cp.type = OptimizeType.r; break;
-						}
+						// ignore type. use always r -> optimize by distance
+//						switch (type) {
+//						case 1: cp.type = OptimizeType.x; break;
+//						case 2: cp.type = OptimizeType.y; break;
+//						case 0: 
+//						default: cp.type = OptimizeType.r; break;
+//						}
 					} else if ("n".equals(t)) {
 						int n = Integer.parseInt(tokenizer.nextToken());
 						cp.image0 = images.get(n);
@@ -592,7 +592,8 @@ public class AlignInfo {
 			}
 			case 'm': {
 				// Mode description
-				String t;
+				// not supported
+/*				String t;
 				while ((t = tokenizer.nextToken()) != null) {
 					if (t.length() <= 0)
 						continue;
@@ -603,7 +604,7 @@ public class AlignInfo {
 					} else if ("p".equals(t)) {
 						sizePref.optCreatePano = Integer.parseInt(tokenizer.nextToken());
 					}
-				}
+				}*/
 				break;
 			}
 			case 'v': {
@@ -614,41 +615,44 @@ public class AlignInfo {
 						continue;
 					int n = Integer.parseInt(tokenizer.nextToken());
 					if ("y".equals(t)) {
-						options.get(n).yaw = 1;
+						images.get(n).optimizeYaw = 1;
 						variablesToOptimize++;
 					} else if ("p".equals(t)) {
-						options.get(n).pitch = 1;
+						images.get(n).optimizePitch = 1;
 						variablesToOptimize++;
 					} else if ("r".equals(t)) {
-						options.get(n).roll = 1;
+						images.get(n).optimizeRoll = 1;
 						variablesToOptimize++;
 					} else if ("v".equals(t)) {
-						options.get(n).hfov = 1;
+						images.get(n).optimizeHfov = 1;
 						variablesToOptimize++;
 					} else if ("a".equals(t)) {
-						options.get(n).a = 1;
+						images.get(n).optimizeA = 1;
 						variablesToOptimize++;
 					} else if ("b".equals(t)) {
-						options.get(n).b = 1;
+						images.get(n).optimizeB = 1;
 						variablesToOptimize++;
 					} else if ("c".equals(t)) {
-						options.get(n).c = 1;
+						images.get(n).optimizeC = 1;
 						variablesToOptimize++;
 					} else if ("d".equals(t)) {
-						options.get(n).d = 1;
+						images.get(n).optimizeD = 1;
 						variablesToOptimize++;
 					} else if ("e".equals(t)) {
-						options.get(n).e = 1;
+						images.get(n).optimizeE = 1;
 						variablesToOptimize++;
 					} else if ("X".equals(t)) {
-						coordInfos.get(n).set[0] = 0;
-						variablesToOptimize++;
+						// not supported
+//						coordInfos.get(n).set[0] = 0;
+//						variablesToOptimize++;
 					} else if ("Y".equals(t)) {
-						coordInfos.get(n).set[1] = 0;
-						variablesToOptimize++;
+						// not supported
+//						coordInfos.get(n).set[1] = 0;
+//						variablesToOptimize++;
 					} else if ("Z".equals(t)) {
-						coordInfos.get(n).set[2] = 0;
-						variablesToOptimize++;
+						// not supported
+//						coordInfos.get(n).set[2] = 0;
+//						variablesToOptimize++;
 					}
 				}
 				break;
@@ -656,9 +660,8 @@ public class AlignInfo {
 			case 'p':
 				// panorama
 				pano = new ImageData();
-				optVars opt = new optVars();
-				CoordInfo ci = new CoordInfo();
-				readImageLine(tokenizer, pano, opt, ci);
+//				CoordInfo ci = new CoordInfo();
+				readImageLine(tokenizer, pano /*, ci*/);
 //				if (pano.format == ImageFormat.FisheyeCirc)
 //					pano.format = ImageFormat.Equirectangular;
 				break;
@@ -686,32 +689,32 @@ public class AlignInfo {
 		// Set initial values for linked variables
 		for (int i = 0; i < images.size(); i++){
 			ImageData im = images.get(i);
-			int k = options.get(i).yaw - 2;
+			int k = images.get(i).optimizeYaw - 2;
 			if( k >= 0 ) 
 				im.yaw = images.get(k).yaw;
 
-			k = options.get(i).pitch - 2;
+			k = images.get(i).optimizePitch - 2;
 			if( k >= 0 ) im.pitch = images.get(k).pitch;
 
-			k = options.get(i).roll - 2;
+			k = images.get(i).optimizeRoll - 2;
 			if( k >= 0 ) im.roll = images.get(k).roll;
 
-			k = options.get(i).hfov - 2;
+			k = images.get(i).optimizeHfov - 2;
 			if( k >= 0 ) im.hfov = images.get(k).hfov;
 
-			k = options.get(i).a - 2;
+			k = images.get(i).optimizeA - 2;
 			if( k >= 0 ) im.radial_params[0][3] = images.get(k).radial_params[0][3];
 
-			k = options.get(i).b - 2;
+			k = images.get(i).optimizeB - 2;
 			if( k >= 0 ) im.radial_params[0][2] = images.get(k).radial_params[0][2];
 
-			k = options.get(i).c - 2;
+			k = images.get(i).optimizeC - 2;
 			if( k >= 0 ) im.radial_params[0][1] = images.get(k).radial_params[0][1];
 
-			k = options.get(i).d - 2;
+			k = images.get(i).optimizeD - 2;
 			if( k >= 0 ) im.horizontal_params[0] = images.get(k).horizontal_params[0];
 
-			k = options.get(i).e - 2;
+			k = images.get(i).optimizeE - 2;
 			if( k >= 0 ) im.vertical_params[0] = images.get(k).vertical_params[0];
 
 			im.radial_params[0][0] = 1.0 - (im.radial_params[0][3]
@@ -765,23 +768,23 @@ public class AlignInfo {
 			}
 			
 /*			int optHfov, opta, optb, optc;
-			optVars opt = g.opt.get(i);
-			if (opt.hfov == 1 || (opt.hfov > 1 &&  g.opt.get(opt.hfov-2).hfov == 1))
+			optVars opt = g.image.get(i);
+			if (image.hfov == 1 || (image.hfov > 1 &&  g.image.get(image.hfov-2).hfov == 1))
 				optHfov = 1;
 			else
 				optHfov = 0;
 
-			if (opt.a == 1 || (opt.a > 1 &&  g.opt.get(opt.a-2).a == 1 ))
+			if (image.a == 1 || (image.a > 1 &&  g.image.get(image.a-2).a == 1 ))
 				opta = 1;
 			else
 				opta = 0;
 							
-			if (opt.b == 1 || (opt.b > 1 &&  g.opt.get(opt.b-2).b == 1 ))
+			if (image.b == 1 || (image.b > 1 &&  g.image.get(image.b-2).b == 1 ))
 				optb = 1;
 			else
 				optb = 0;
 							
-			if (opt.c == 1 || (opt.c > 1 &&  g.opt.get(opt.c-2).c == 1 ))
+			if (image.c == 1 || (image.c > 1 &&  g.image.get(image.c-2).c == 1 ))
 				optc = 1;
 			else
 				optc = 0;*/
@@ -800,7 +803,7 @@ public class AlignInfo {
 			fou.printf(Locale.US, " t0");
 			fou.printf(Locale.US, " v%f", im.hfov);
 			fou.printf(Locale.US, " y%f", im.yaw);
-			fou.printf(Locale.US, " u%d", stitchBuffer.feather);
+//			fou.printf(Locale.US, " u%d", stitchBuffer.feather);
 			fou.printf(Locale.US, " n\"%s\"", im.name);
 			fou.printf(Locale.US, "\n");
 			

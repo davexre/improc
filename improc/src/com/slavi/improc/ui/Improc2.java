@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
+import com.slavi.improc.PanoPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -44,16 +45,33 @@ public class Improc2 {
 				images.size() - 1);
 		images = null;
 		bigTree = null;
+
+		System.out.println("---------- Keypoint pairs results");
+		for (KeyPointPairList l : kppl) {
+			System.out.println(Integer.toString(l.items.size()) + "\t" + 
+					l.source.imageFileStamp.getFile().getName() + "\t" + 
+					l.target.imageFileStamp.getFile().getName());
+		}
 		
 		System.out.println("---------- Generating pano pairs from key point pairs");
 		PanoList panoList = SwtUtil.openWaitDialog("Generating pano pairs from key point pairs", 
 				new GeneratePanoPairFromBigTree(kppl),
 				kppl.size() - 1);
 
-		System.out.println("---------- Generating panorama (PTO) files");
-		SwtUtil.openWaitDialog("Generating panorama (PTO) files", 
-				new GeneratePanoramaFiles(panoList, keyPointFileRoot), panoList.items.size());
+		System.out.println("---------- Pano pairs results");
+		for (PanoPairList ppl : panoList.items) {
+			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
+					ppl.sourceImage + "\t" + ppl.targetImage);
+		}
 		
+//		System.out.println("---------- Generating panorama (PTO) files");
+//		SwtUtil.openWaitDialog("Generating panorama (PTO) files", 
+//				new GeneratePanoramaFiles(panoList, keyPointFileRoot), panoList.items.size());
+		
+		System.out.println("---------- Generating panorama images");
+		SwtUtil.openWaitDialog("Generating panorama images", 
+				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
+
 		System.out.println("Done.");
 	}
 	
