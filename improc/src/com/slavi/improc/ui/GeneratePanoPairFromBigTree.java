@@ -3,12 +3,14 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
@@ -114,7 +116,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 				throw new InterruptedException();
 		}
 		
-		public Void call() throws Exception {
+/*		public Void call() throws Exception {
 			PanoPairList result = new PanoPairList();
 			result.items = new ArrayList<PanoPair>();
 
@@ -136,6 +138,62 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 
 			for (KeyPointPair pp : kppl.items.values()) {
 				if (pp.getDiscrepancy() < 20) {
+					result.items.add(new PanoPair(pp));
+				}				
+			}
+			result.transform = (PanoPairTransformer) atl.transformer;
+			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
+			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
+			result.sourceImageSizeX = kppl.source.imageSizeX;
+			result.sourceImageSizeY = kppl.source.imageSizeY;
+			result.targetImageSizeX = kppl.target.imageSizeX;
+			result.targetImageSizeY = kppl.target.imageSizeY;
+
+			panoList.addItem(result);
+			int count = processed.incrementAndGet();
+			SwtUtil.activeWaitDialogSetStatus(null, count);
+			return null;
+		}*/
+		
+		public Void call() throws Exception {
+			PanoPairList result = new PanoPairList();
+			result.items = new ArrayList<PanoPair>();
+
+//			for (KeyPointPair pp : kppl.items.values()) {
+//				if (pp.distanceToNearest > pp.distanceToNearest2 * 0.6) {
+//					pp.setBad(true);
+//				}	
+//			}
+//			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
+
+			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values()) {
+				public double getWeight(Entry<KeyPoint, KeyPoint> item) {
+					KeyPointPair kp = (KeyPointPair) item;
+					int nonzero = Math.min(kp.sourceSP.getNumberOfNonZero(), kp.targetSP.getNumberOfNonZero());
+					if (nonzero == 0)
+						nonzero = 1;
+					int unmatched = kp.getUnmatchingCount();
+					if (unmatched == 0)
+						unmatched = 1;
+					double w = (double) unmatched * kp.distanceToNearest / (double)nonzero;
+					if (w < 1.0)
+						w = 1.0;
+					return 1.0 / w;
+				}
+			};
+
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+			
+			double maxDescripancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.01; // 1% of the size
+			kppl.leaveGoodElements(maxDescripancy);
+			checkInterrupted(); atl.calculateOne();
+			checkInterrupted(); atl.calculateOne();
+
+			for (KeyPointPair pp : kppl.items.values()) {
+				if (pp.getDiscrepancy() <= maxDescripancy) {
 					result.items.add(new PanoPair(pp));
 				}				
 			}

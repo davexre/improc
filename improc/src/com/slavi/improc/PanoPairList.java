@@ -117,8 +117,7 @@ public class PanoPairList {
 //		kppl.sortByDiscrepancy();
 //		kppl.displayTop(30);
 		
-		for (int i = 0; i < kppl.items.size(); i++) {
-			KeyPointPair pp = kppl.items.get(i);
+		for (KeyPointPair pp : kppl.items.values()) {
 			if (pp.discrepancy < 2.0) {
 				result.items.add(new PanoPair(pp));
 			}				
@@ -184,6 +183,7 @@ public class PanoPairList {
 		double d[] = new double[6];
 		for (int i = 0; i < d.length; i++)
 			d[i] = Double.parseDouble(st.nextToken());
+		result.transform = new PanoPairTransformer();
 		result.transform.setMatrix(d);
 		
 		while (fin.ready()) {

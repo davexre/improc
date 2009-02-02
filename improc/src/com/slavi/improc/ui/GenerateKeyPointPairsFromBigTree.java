@@ -94,34 +94,6 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 						pair.distanceToNearest2 = nnlst.getDistanceToTarget(1);
 					}
 				}
-/*
-				synchronized (kppl) {
- 					boolean duplicated = false;
-					for (KeyPointPair i : kppl.items.values()) {
-						if (i.sourceSP == kpS) {
-							if (i.distanceToNearest > nnlst.getDistanceToTarget(0)) {
-								i.targetSP = kpT;
-								i.distanceToNearest = nnlst.getDistanceToTarget(0);
-								i.distanceToNearest2 = nnlst.getDistanceToTarget(1);
-								duplicated = true;
-							}
-						}
-						if (i.targetSP == kpT) {
-							if (i.distanceToNearest > nnlst.getDistanceToTarget(0)) {
-								i.sourceSP = kpS;
-								i.distanceToNearest = nnlst.getDistanceToTarget(0);
-								i.distanceToNearest2 = nnlst.getDistanceToTarget(1);
-								duplicated = true;
-							}
-						}
-					}
-					if (!duplicated) {
-						KeyPointPair kpp = new KeyPointPair(kpS, kpT, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));
-						totalPairCount++;
-						kppl.items.put(kpp.sourceSP, kpp);
-					}
-				}
-*/
 			}
 			int count = processed.incrementAndGet();
 			SwtUtil.activeWaitDialogSetStatus("Processing " + 

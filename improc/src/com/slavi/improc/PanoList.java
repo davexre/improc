@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import com.slavi.util.Const;
+
 public class PanoList {
 
 	public ArrayList<PanoPairList>items;
@@ -14,8 +16,8 @@ public class PanoList {
 	public PanoList() {
 		items = new ArrayList<PanoPairList>();
 	}
-
-	public void addItem(PanoPairList item) {
+	
+	public synchronized void addItem(PanoPairList item) throws Exception {
 		if (item == null)
 			return;
 		
@@ -29,6 +31,7 @@ public class PanoList {
 		if (goodCount < 10) {
 			return;
 		}
+		
 		items.add(item);
 	}
 	

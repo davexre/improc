@@ -49,6 +49,16 @@ public class KeyPoint {
 		featureVector[atX][atY][atOrientation] = aValue;
 	}
 
+	public int getNumberOfNonZero() {
+		int result = 0;
+		for (int i = 0; i < descriptorSize; i++)
+			for (int j = 0; j < descriptorSize; j++)
+				for (int k = 0; k < numDirections; k++)
+					if (featureVector[i][j][k] != 0)
+						result++;
+		return result;
+	}
+	
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append(imgX);

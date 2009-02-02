@@ -1,10 +1,12 @@
 package com.slavi.improc.ui;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +31,7 @@ public class PanoAdjust implements LMDifFcn {
 	boolean yaw = true;
 	boolean pitch = true;
 	boolean roll = true;
-	boolean hfov = false;
+	boolean hfov = true;
 	boolean a = false;
 	boolean b = false;
 	boolean c = false;
@@ -678,10 +680,24 @@ public class PanoAdjust implements LMDifFcn {
 
 	static int panoCounter = 0;
 	
+	int safeGetPixel(BufferedImage bi, int atX, int atY) {
+		if ((atX < 0) || (atX >= bi.getWidth()) ||
+			(atY < 0) || (atY >= bi.getHeight()))
+				return -1;
+		return bi.getRGB(atX, atY);
+	}
+	
+	void safeSetPixel(BufferedImage bi, int atX, int atY, int color) {
+		if ((color < 0) ||
+			(atX < 0) || (atX >= bi.getWidth()) ||
+			(atY < 0) || (atY >= bi.getHeight()))
+				return;
+		bi.setRGB(atX, atY, color);
+	}
+	
 	public void makePano() throws IOException {
 		BufferedImage bi = new BufferedImage(pano.width, pano.height, BufferedImage.TYPE_INT_RGB);
 		Point2D.Double p = new Point2D.Double();
-		Point2D.Double p2 = new Point2D.Double();
 		
 		double srcX = pano.width / 2.0 - 0.5;
 		double srcY = pano.height / 2.0 - 0.5;
@@ -730,8 +746,52 @@ public class PanoAdjust implements LMDifFcn {
 		panoCounter++;
 		String fouName = Const.tempDir + "/temp" + panoCounter + ".jpg"; 
 		System.out.println("Output file is " + fouName);
+		
+		// Draw matching points
+		for (PanoPairList l : panoChain) {
+			ImageData sourceImage = images.get(l.sourceImage);
+			ImageData targetImage = images.get(l.targetImage);
+			double sourceX = sourceImage.width / 2.0 - 0.5;
+			double sourceY = sourceImage.height / 2.0 - 0.5;
+			double targetX = targetImage.width / 2.0 - 0.5;
+			double targetY = targetImage.height / 2.0 - 0.5;
+			for (PanoPair pp : l.items) {
+				int atX = (int) ((pp.sx - pano.extentInPano.x) * scale);
+				int atY = (int) ((pp.sy - pano.extentInPano.y) * scale);
+				p.x = atX - srcX; 
+				p.y = atY - srcY;
+				makeParams(p, sourceImage, pano, 0);
+				p.x += sourceX;
+				p.y += sourceY;
+				
+				atX = (int) p.x;
+				atY = (int) p.y;
+				for (int i = 0; i < 5; i++) {
+					safeSetPixel(bi, atX - 2 + i, atY, 0xff);
+					safeSetPixel(bi, atX, atY - 2 + i, 0xff);
+				}
+				///////
+				atX = (int) ((pp.tx - pano.extentInPano.x) * scale);
+				atY = (int) ((pp.ty - pano.extentInPano.y) * scale);
+				p.x = atX - srcX; 
+				p.y = atY - srcY;
+				makeParams(p, targetImage, pano, 0);
+				p.x += targetX;
+				p.y += targetY;
+				
+				atX = (int) p.x;
+				atY = (int) p.y;
+				for (int i = 0; i < 5; i++) {
+					safeSetPixel(bi, atX - 2 + i, atY - 2 + i, 0xff);
+					safeSetPixel(bi, atX + 2 - i, atY + 2 - i, 0xff);
+				}
+			}
+		}		
+		
 		ImageIO.write(bi, "jpg", new File(fouName));
 	}
+	
+	static int dumpCount = 1;
 	
 	public void processOne(ArrayList<PanoPairList> panoChain) throws Exception {
 		this.panoChain = panoChain;
@@ -749,6 +809,27 @@ public class PanoAdjust implements LMDifFcn {
 		pano.format = ImageFormat.Equirectangular;
 		
 		RunLMOptimizer();
+		
+		String fname = Const.tempDir + "/dump" + (dumpCount++) + ".txt";
+		
+		// Dump the pano pairs in a file
+		PrintStream out = new PrintStream(fname);
+		for (String image : images.keySet()) {
+			out.println(image);
+		}
+		for (PanoPairList item : panoChain) {
+			for (PanoPair pp : item.items) {
+				out.println(
+						Double.toString(pp.discrepancy) + "\t" +
+						Double.toString(pp.distance1) + "\t" +
+						Double.toString(pp.distance2) + "\t" +
+						item.sourceImage + "\t" +
+						item.targetImage
+						);
+			}
+		}
+		System.out.println("Dump file is " + fname);
+		out.close();		
 		
 		Point2D.Double p0 = new Point2D.Double();
 		Point2D.Double p1 = new Point2D.Double();

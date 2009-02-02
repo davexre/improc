@@ -51,6 +51,31 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 		this.targetReused = false;
 	}
 
+	public int getUnmatchingCount() {
+		int result = 0;
+		for (int i = 0; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0; k < KeyPoint.numDirections; k++) {
+					if (
+						(sourceSP.featureVector[i][j][k] == 0) ^ 
+						(targetSP.featureVector[i][j][k] == 0)) 
+						result++;
+				}
+		return result;
+	}
+	
+	public int getMaxDifference() {
+		int result = 0;
+		for (int i = 0; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0; k < KeyPoint.numDirections; k++) {
+					int dif = Math.abs(sourceSP.featureVector[i][j][k] - targetSP.featureVector[i][j][k]);
+					if (result < dif)
+						result = dif;
+				}
+		return result;
+	}
+
 	public String toString() {
 		return
 			Double.toString(distanceToNearest) + ":" + 

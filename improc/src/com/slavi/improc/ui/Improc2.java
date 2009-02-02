@@ -1,11 +1,14 @@
 package com.slavi.improc.ui;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 
+import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
+import com.slavi.util.Const;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -52,6 +55,25 @@ public class Improc2 {
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
 					l.target.imageFileStamp.getFile().getName());
 		}
+		String fname = Const.tempDir + "keypoints.txt";
+		PrintStream out = new PrintStream(fname);
+		for (KeyPointPairList l : kppl) {
+			String sourceFile = l.source.imageFileStamp.getFile().getName();
+			String targetFile = l.target.imageFileStamp.getFile().getName();
+			for (KeyPointPair p : l.items.values()) {
+				out.println(
+						Double.toString(p.distanceToNearest) + "\t" +
+						Double.toString(p.distanceToNearest2) + "\t" +
+						Integer.toString(p.sourceSP.getNumberOfNonZero()) + "\t" +
+						Integer.toString(p.targetSP.getNumberOfNonZero()) + "\t" +
+						Integer.toString(p.getUnmatchingCount()) + "\t" +
+						Integer.toString(p.getMaxDifference()) + "\t" +
+						sourceFile + "\t" +
+						targetFile);
+			}
+		}		
+		out.close();
+		
 		
 		System.out.println("---------- Generating pano pairs from key point pairs");
 		PanoList panoList = SwtUtil.openWaitDialog("Generating pano pairs from key point pairs", 
