@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import com.slavi.util.Const;
-
 public class PanoList {
 
 	public ArrayList<PanoPairList>items;
@@ -29,6 +27,8 @@ public class PanoList {
 				goodCount++;
 		}
 		if (goodCount < 10) {
+			System.out.println("!!!Ignoring point pair list " + item.sourceImage + "/" + 
+					item.targetImage + " containing " + Integer.toString(item.items.size()) + " pairs");
 			return;
 		}
 		

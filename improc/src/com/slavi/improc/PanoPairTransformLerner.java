@@ -6,6 +6,8 @@ import com.slavi.math.transform.AffineTransformLearner;
 
 public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, KeyPoint> {
 
+	public boolean useWeight = true;
+	
 	public PanoPairTransformLerner(Iterable<KeyPointPair> pointsPairList) {
 		super(new PanoPairTransformer(), (Iterable) pointsPairList);
 	}
@@ -19,7 +21,16 @@ public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, Ke
 	}
 
 	public double getWeight(Entry<KeyPoint, KeyPoint> item) {
-		return ((KeyPointPair) item).getWeight();
+		double result;
+		if (useWeight)
+			result = ((KeyPointPair) item).getWeight();
+		else {
+			result = Math.abs(((KeyPointPair) item).getDiscrepancy());
+			if (result < 1.0)
+				result = 1.0;
+			result = 1.0 / result;
+		}
+		return result;
 	}
 
 	public boolean isBad(Entry<KeyPoint, KeyPoint> item) {

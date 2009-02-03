@@ -1,8 +1,8 @@
 package com.slavi.improc.ui;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -17,8 +17,6 @@ import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.PanoPairTransformLerner;
-import com.slavi.improc.PanoPairTransformer;
-import com.slavi.math.MathUtil;
 import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
@@ -27,8 +25,10 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 	
 	PanoList panoList = new PanoList();
 	
+	Map<String, PanoPairList> panoPairLists = new HashMap<String, PanoPairList>();
+	
 	AtomicInteger processed = new AtomicInteger(0);
-
+/*
 	private static class CompareByAngle implements Comparator<KeyPointPair> {
 		public static final CompareByAngle instance = new CompareByAngle();
 
@@ -101,7 +101,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			return null;
 		}
 	}
-	
+*/	
 	/////////////////////////////////////////
 	
 	class ProcessOneKeyPointPairList implements Callable<Void> {
@@ -116,48 +116,52 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 				throw new InterruptedException();
 		}
 		
-/*		public Void call() throws Exception {
-			PanoPairList result = new PanoPairList();
-			result.items = new ArrayList<PanoPair>();
-
-			for (KeyPointPair pp : kppl.items.values()) {
-				if (pp.distanceToNearest > pp.distanceToNearest2 * 0.6) {
-					pp.setBad(true);
-				}	
+		void addPair(KeyPointPair kpp) {
+			KeyPoint sourceSP = kpp.sourceSP;
+			KeyPoint targetSP = kpp.targetSP;
+			String sourceName = sourceSP.keyPointList.imageFileStamp.getFile().getAbsolutePath();
+			String targetName = targetSP.keyPointList.imageFileStamp.getFile().getAbsolutePath();
+			if (sourceName.compareTo(targetName) < 0) {
+				KeyPoint tmp = sourceSP;
+				sourceSP = targetSP;
+				targetSP = tmp;
+				String str = sourceName;
+				sourceName = targetName;
+				targetName = str;
 			}
-			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
-
-			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
+			String id = sourceName + ":" + targetName;
+			PanoPairList ppl;
+			synchronized(panoPairLists) {
+				ppl = panoPairLists.get(id);
+				if (ppl == null) {
+					ppl = new PanoPairList();
+					ppl.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
+					ppl.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
+					ppl.sourceImageSizeX = kppl.source.imageSizeX;
+					ppl.sourceImageSizeY = kppl.source.imageSizeY;
+					ppl.targetImageSizeX = kppl.target.imageSizeX;
+					ppl.targetImageSizeY = kppl.target.imageSizeY;
+					panoPairLists.put(id, ppl);
+				}
+			}
+			PanoPair pair = new PanoPair();
+			pair.sx = sourceSP.doubleX;
+			pair.sy = sourceSP.doubleY;
+			pair.tx = targetSP.doubleX;
+			pair.ty = targetSP.doubleY;
+			pair.discrepancy = kpp.getDiscrepancy();
+			pair.distance1 = kpp.distanceToNearest;
+			pair.distance2 = kpp.distanceToNearest2;
+			pair.weight = kpp.getWeight();
 			
-			kppl.leaveGoodElements(90); // Math.min(image.sizex, image.sizeY) * 0.005; // 0.5% of the size
-			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
-
-			for (KeyPointPair pp : kppl.items.values()) {
-				if (pp.getDiscrepancy() < 20) {
-					result.items.add(new PanoPair(pp));
-				}				
+			synchronized(ppl) {
+				ppl.items.add(pair);
 			}
-			result.transform = (PanoPairTransformer) atl.transformer;
-			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
-			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
-			result.sourceImageSizeX = kppl.source.imageSizeX;
-			result.sourceImageSizeY = kppl.source.imageSizeY;
-			result.targetImageSizeX = kppl.target.imageSizeX;
-			result.targetImageSizeY = kppl.target.imageSizeY;
-
-			panoList.addItem(result);
-			int count = processed.incrementAndGet();
-			SwtUtil.activeWaitDialogSetStatus(null, count);
-			return null;
-		}*/
+		}
 		
 		public Void call() throws Exception {
-			PanoPairList result = new PanoPairList();
-			result.items = new ArrayList<PanoPair>();
+//			PanoPairList result = new PanoPairList();
+//			result.items = new ArrayList<PanoPair>();
 
 //			for (KeyPointPair pp : kppl.items.values()) {
 //				if (pp.distanceToNearest > pp.distanceToNearest2 * 0.6) {
@@ -183,29 +187,34 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			};
 
 			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
-			checkInterrupted(); atl.calculateOne();
+//			checkInterrupted(); atl.calculateOne();
+			atl.useWeight = false;
+//			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 			
-			double maxDescripancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.01; // 1% of the size
+			double maxDescripancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.005; // 0.5% of the size
+			if (maxDescripancy < 1.5)
+				maxDescripancy = 1.5;
 			kppl.leaveGoodElements(maxDescripancy);
-			checkInterrupted(); atl.calculateOne();
+//			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 
 			for (KeyPointPair pp : kppl.items.values()) {
 				if (pp.getDiscrepancy() <= maxDescripancy) {
-					result.items.add(new PanoPair(pp));
+//				if (!pp.isBad()) {
+//					result.items.add(new PanoPair(pp));
+					addPair(pp);
 				}				
 			}
-			result.transform = (PanoPairTransformer) atl.transformer;
-			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
-			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
-			result.sourceImageSizeX = kppl.source.imageSizeX;
-			result.sourceImageSizeY = kppl.source.imageSizeY;
-			result.targetImageSizeX = kppl.target.imageSizeX;
-			result.targetImageSizeY = kppl.target.imageSizeY;
-
-			panoList.addItem(result);
+//			result.transform = (PanoPairTransformer) atl.transformer;
+//			result.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
+//			result.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
+//			result.sourceImageSizeX = kppl.source.imageSizeX;
+//			result.sourceImageSizeY = kppl.source.imageSizeY;
+//			result.targetImageSizeX = kppl.target.imageSizeX;
+//			result.targetImageSizeY = kppl.target.imageSizeY;
+//
+//			panoList.addItem(result);
 			int count = processed.incrementAndGet();
 			SwtUtil.activeWaitDialogSetStatus(null, count);
 			return null;
@@ -240,6 +249,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 		} finally {
 			exec.shutdownNow();
 		}
+		panoList.items.addAll(panoPairLists.values());
 		return panoList;
 	}
 }
