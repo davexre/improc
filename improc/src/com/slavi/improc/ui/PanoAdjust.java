@@ -75,8 +75,18 @@ public class PanoAdjust implements LMDifFcn {
 		while (x > 180.0) {
 			x -= 360.0;
 		}
-		while (x < -180.0) {
+		while (x <= -180.0) {
 			x += 360.0;
+		}
+		return x;
+	}
+
+	static double NORM_ANGLE_HALF(double x) {
+		while (x > 90.0) {
+			x -= 180.0;
+		}
+		while (x <= -90.0) {
+			x += 180.0;
 		}
 		return x;
 	}
@@ -105,7 +115,7 @@ public class PanoAdjust implements LMDifFcn {
 		for (ImageData im : images.values()) {
 			if (im.optimizeYaw != 0) {
 				im.yaw = x.getItem(j++, 0);
-				im.yaw = NORM_ANGLE(im.yaw);
+				im.yaw = NORM_ANGLE_HALF(im.yaw);
 			}
 			if (im.optimizePitch != 0) {
 				im.pitch = x.getItem(j++, 0);
