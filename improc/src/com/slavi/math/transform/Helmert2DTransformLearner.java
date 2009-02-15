@@ -11,7 +11,7 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 	protected LeastSquaresAdjust lsa;
 
 	public Helmert2DTransformLearner(Helmert2DTransformer<InputType, OutputType> transformer, 
-			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		super(transformer, pointsPairList);
 
 		this.coefs = new Matrix(4, 1);
@@ -71,7 +71,7 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 		lsa.calculate();
 
 		// Build transformer
-		Helmert2DTransformer tr = (Helmert2DTransformer)transformer;
+		Helmert2DTransformer<InputType, OutputType> tr = (Helmert2DTransformer<InputType, OutputType>)transformer;
 		Matrix u = lsa.getUnknown(); 
 
 		tr.a = u.getItem(0, 0) * aTargetScale / aSourceScale;

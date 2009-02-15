@@ -9,7 +9,7 @@ public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, Ke
 	public boolean useWeight = true;
 	
 	public PanoPairTransformLerner(Iterable<KeyPointPair> pointsPairList) {
-		super(new PanoPairTransformer(), (Iterable) pointsPairList);
+		super(new PanoPairTransformer(), pointsPairList);
 	}
 
 	public KeyPoint createTemporaryTargetObject() {

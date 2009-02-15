@@ -2,9 +2,6 @@ package com.slavi.math.transform;
 
 import java.util.StringTokenizer;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
-
 import com.slavi.math.matrix.Matrix;
 
 /**
@@ -158,36 +155,5 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 				affineCoefs.setItem(i, j, Double.parseDouble(st.nextToken()));
 			origin.setItem(j, 0, Double.parseDouble(st.nextToken()));
 		}
-	}
-	
-	public void toXML(Element dest) {
-		Element e;
-		
-		e = new Element("Origin");
-		origin.toXML(e);
-		dest.addContent(e);
-
-		e = new Element("Coefs");
-		affineCoefs.toXML(e);
-		dest.addContent(e);
-	}
-	
-	public void fromXML(Element source) throws JDOMException {
-		int inputSize = getInputSize();
-		int outputSize = getOutputSize();
-		Element e;
-
-		e = source.getChild("Origin");
-		origin = Matrix.fromXML(e);
-
-		e = source.getChild("Coefs");
-		affineCoefs = Matrix.fromXML(e);
-		
-		if (
-			(affineCoefs.getSizeX() != inputSize) ||
-			(affineCoefs.getSizeY() != outputSize) ||
-			(origin.getSizeX() != outputSize) ||
-			(origin.getSizeY() != 1))
-			throw new IllegalArgumentException("Invalid data for affine transformer");
 	}
 }

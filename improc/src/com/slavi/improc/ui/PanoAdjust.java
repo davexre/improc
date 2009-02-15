@@ -1,6 +1,5 @@
 package com.slavi.improc.ui;
 
-import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -22,7 +21,6 @@ import com.slavi.improc.pano.TransformationFunctions;
 import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.improc.pano.LMDif.LMDifFcn;
 import com.slavi.math.MathUtil;
-import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Const;
 
@@ -813,7 +811,7 @@ public class PanoAdjust implements LMDifFcn {
 			p2.y = p1.y;
 			PanoAdjust.makeParams(p2, src, pano, 0);
 			
-			double s = JLapack.hypot(p2.x - p0.x, p2.y - p0.y) / Math.sqrt(2.0);
+			double s = MathUtil.hypot(p2.x - p0.x, p2.y - p0.y) / Math.sqrt(2.0);
 			
 			System.out.printf("im=%d d=%10.8f dx=%10.8f dy=%10.8f\n", imageCounter, s, p2.x - p0.x, p2.x - p0.x);
 			imageCounter++;

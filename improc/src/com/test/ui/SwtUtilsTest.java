@@ -10,6 +10,7 @@ import org.jdom.output.XMLOutputter;
 import org.jdom.transform.XSLTransformException;
 import org.jdom.transform.XSLTransformer;
 
+import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.ui.SwtUtil;
 
@@ -25,7 +26,7 @@ public class SwtUtilsTest {
 		XMLOutputter xout = new XMLOutputter(Format.getPrettyFormat());
 
 		Element root = new Element("matrix");  
-		m.toXML(root);
+		XMLMatrix.instance.toXML(m, root);
 		
 		XSLTransformer transformer = new XSLTransformer(SwtUtilsTest.class.getResourceAsStream("SwtUtilsTest.xsl"));
 		Document doc = transformer.transform(new Document(root));

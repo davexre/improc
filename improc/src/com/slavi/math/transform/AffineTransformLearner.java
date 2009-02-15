@@ -11,7 +11,7 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 	protected LeastSquaresAdjust lsa;
 	
 	public AffineTransformLearner(AffineTransformer<InputType, OutputType> transformer, 
-			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		super(transformer, pointsPairList);
 
 		int numberOfCoefsPerCoordinate = transformer.getNumberOfCoefsPerCoordinate();
@@ -65,7 +65,7 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 			return false;
 
 		// Build transformer
-		AffineTransformer tr = (AffineTransformer)transformer;
+		AffineTransformer<InputType, OutputType> tr = (AffineTransformer<InputType, OutputType>)transformer;
 		Matrix u = lsa.getUnknown(); 
 
 		for (int i = outputSize - 1; i >= 0; i--) {

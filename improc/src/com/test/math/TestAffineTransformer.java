@@ -88,7 +88,7 @@ public class TestAffineTransformer {
 	
 	public static class MyTestAffineTransformLearner extends AffineTransformLearner<Point2D.Double, Point2D.Double> {
 
-		public MyTestAffineTransformLearner(Iterable<Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
+		public MyTestAffineTransformLearner(Iterable<? extends Map.Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
 			super(new MyTestAffineTransformer(), pointsPairList);
 		}
 
@@ -160,7 +160,7 @@ public class TestAffineTransformer {
 	
 	public void learn() {
 		MyTestData pair;
-		learner = new MyTestAffineTransformLearner((Iterable) points);
+		learner = new MyTestAffineTransformLearner(points);
 
 		boolean res = learner.calculateOne();
 		MyTestAffineTransformer tr = (MyTestAffineTransformer) learner.transformer;

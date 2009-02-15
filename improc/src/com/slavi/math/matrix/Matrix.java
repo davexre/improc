@@ -4,14 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
-
-import com.slavi.util.XMLHelper;
+import com.slavi.math.MathUtil;
 
 public class Matrix {
 
@@ -885,8 +881,6 @@ public class Matrix {
 			throw new IllegalArgumentException("Comparing matrices of different size");
 		}
 		MatrixCompareResult res = new MatrixCompareResult();
-		res.A = this;
-		res.B = second;
 		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
 
 		// Средно аритметично.
@@ -912,382 +906,6 @@ public class Matrix {
 		return res;
 	}
 
-	public void toXML(Element dest) {
-		for (int j = 0; j < sizeY; j++) {
-			Element row = new Element("row");
-			for (int i = 0; i < sizeX; i++)
-				row.addContent(XMLHelper.makeAttrEl("item", Double.toString(getItem(i, j))));
-			dest.addContent(row);
-		}
-	}
-	
-	public static Matrix fromXML(Element source) throws JDOMException {
-		// Determine matrix size;
-		List<?> rows = source.getChildren("row");
-		int cols = 0;
-		for (int i = 0; i < rows.size(); i++)
-			cols = Math.max(cols, ((Element)rows.get(i)).getChildren("item").size());
-		if ((rows.size() <= 0) || (cols <= 0))
-			throw new JDOMException("Invalid matrix");
-			
-		Matrix r = new Matrix(cols, rows.size());
-		r.make0();
-		for (int j = rows.size() - 1; j >= 0; j--) {
-			List<?> items = ((Element)rows.get(j)).getChildren("item");
-			for (int i = items.size() - 1; i >= 0; i--) {
-				Element item = (Element)items.get(i);
-				String v = item.getAttributeValue("v");
-				if ((v != null) && (!v.equals("")))
-					try {
-						r.setItem(i, j, Double.parseDouble(v));
-					} catch (Exception e) {
-						throw new JDOMException("Invalid matrix value ar row " + j + ", column " + i);
-					}
-			}
-		}
-		return r;
-	}
-	
-	
-	/**
-	 * sqrt(a^2 + b^2) without under/overflow.
-	 */
-//	public static double hypot(double a, double b) {
-//		double r;
-//		if (Math.abs(a) > Math.abs(b)) {
-//			r = b / a;
-//			r = Math.abs(a) * Math.sqrt(1 + r * r);
-//		} else if (b != 0) {
-//			r = a / b;
-//			r = Math.abs(b) * Math.sqrt(1 + r * r);
-//		} else {
-//			r = 0.0;
-//		}
-//		return r;
-//	}
-
-	// MY SVD translation from LAPACK's DGESVD
-	
-	public void svd(Matrix w, Matrix v) {
-		int i, j, k, l = 0;
-		double f, h, s;
-		double anorm = 0., g = 0., scale = 0.;
-//		if (sizeX < sizeY)
-//			throw new IllegalArgumentException("m < n");
-		// zliberror._assert(m>=n) ;
-		double[] rv1 = new double[sizeY];
-		w.resize(Math.min(getSizeX(), getSizeY()), 1);
-		v.resize(getSizeY(), getSizeY());
-		
-		System.out.println("SVD beware results may not be sorted!");
-
-		for (i = 0; i < sizeY; i++) {
-			l = i + 1;
-			rv1[i] = scale * g;
-			g = s = scale = 0.;
-			if (i < sizeX) {
-				for (k = i; k < sizeX; k++)
-					scale += Math.abs(this.m[k][i]);
-				if (scale != 0.0) {
-					for (k = i; k < sizeX; k++) {
-						this.m[k][i] /= scale;
-						s += this.m[k][i] * this.m[k][i];
-					}
-					f = this.m[i][i];
-					g = -SIGN(Math.sqrt(s), f);
-					h = f * g - s;
-					this.m[i][i] = f - g;
-					// if (i!=(n-1)) { // CHECK
-					for (j = l; j < sizeY; j++) {
-						for (s = 0, k = i; k < sizeX; k++)
-							s += this.m[k][i] * this.m[k][j];
-						f = s / h;
-						for (k = i; k < sizeX; k++)
-							this.m[k][j] += f * this.m[k][i];
-					}
-					// }
-					for (k = i; k < sizeX; k++)
-						this.m[k][i] *= scale;
-				}
-			}
-			w.m[i][0] = scale * g;
-			g = s = scale = 0.0;
-			if (i < sizeX && i != sizeY - 1) { //
-				for (k = l; k < sizeY; k++)
-					scale += Math.abs(this.m[i][k]);
-				if (scale != 0.) {
-					for (k = l; k < sizeY; k++) { //
-						this.m[i][k] /= scale;
-						s += this.m[i][k] * this.m[i][k];
-					}
-					f = this.m[i][l];
-					g = -SIGN(Math.sqrt(s), f);
-					h = f * g - s;
-					this.m[i][l] = f - g;
-					for (k = l; k < sizeY; k++)
-						rv1[k] = this.m[i][k] / h;
-					if (i != sizeX - 1) { //
-						for (j = l; j < sizeX; j++) { //
-							for (s = 0, k = l; k < sizeY; k++)
-								s += this.m[j][k] * this.m[i][k];
-							for (k = l; k < sizeY; k++)
-								this.m[j][k] += s * rv1[k];
-						}
-					}
-					for (k = l; k < sizeY; k++)
-						this.m[i][k] *= scale;
-				}
-			} // i<m && i!=n-1
-			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
-		} // i
-	}	
-	
-	public void svd1(Matrix w, Matrix v) {
-		int i, its, j, jj, k, l = 0, nm = 0;
-		boolean flag;
-		double c, f, h, s, x, y, z;
-		double anorm = 0., g = 0., scale = 0.;
-		if (sizeX < sizeY)
-			throw new IllegalArgumentException("m < n");
-		// zliberror._assert(m>=n) ;
-		double[] rv1 = new double[sizeY];
-		w.resize(Math.min(getSizeX(), getSizeY()), 1);
-		v.resize(getSizeY(), getSizeY());
-
-		System.out.println("SVD beware results may not be sorted!");
-
-		for (i = 0; i < sizeY; i++) {
-			l = i + 1;
-			rv1[i] = scale * g;
-			g = s = scale = 0.;
-			if (i < sizeX) {
-				for (k = i; k < sizeX; k++)
-					scale += Math.abs(this.m[k][i]);
-				if (scale != 0.0) {
-					for (k = i; k < sizeX; k++) {
-						this.m[k][i] /= scale;
-						s += this.m[k][i] * this.m[k][i];
-					}
-					f = this.m[i][i];
-					g = -SIGN(Math.sqrt(s), f);
-					h = f * g - s;
-					this.m[i][i] = f - g;
-					// if (i!=(n-1)) { // CHECK
-					for (j = l; j < sizeY; j++) {
-						for (s = 0, k = i; k < sizeX; k++)
-							s += this.m[k][i] * this.m[k][j];
-						f = s / h;
-						for (k = i; k < sizeX; k++)
-							this.m[k][j] += f * this.m[k][i];
-					}
-					// }
-					for (k = i; k < sizeX; k++)
-						this.m[k][i] *= scale;
-				}
-			}
-			w.m[i][0] = scale * g;
-			g = s = scale = 0.0;
-			if (i < sizeX && i != sizeY - 1) { //
-				for (k = l; k < sizeY; k++)
-					scale += Math.abs(this.m[i][k]);
-				if (scale != 0.) {
-					for (k = l; k < sizeY; k++) { //
-						this.m[i][k] /= scale;
-						s += this.m[i][k] * this.m[i][k];
-					}
-					f = this.m[i][l];
-					g = -SIGN(Math.sqrt(s), f);
-					h = f * g - s;
-					this.m[i][l] = f - g;
-					for (k = l; k < sizeY; k++)
-						rv1[k] = this.m[i][k] / h;
-					if (i != sizeX - 1) { //
-						for (j = l; j < sizeX; j++) { //
-							for (s = 0, k = l; k < sizeY; k++)
-								s += this.m[j][k] * this.m[i][k];
-							for (k = l; k < sizeY; k++)
-								this.m[j][k] += s * rv1[k];
-						}
-					}
-					for (k = l; k < sizeY; k++)
-						this.m[i][k] *= scale;
-				}
-			} // i<m && i!=n-1
-			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
-		} // i
-		
-		
-		for (i = sizeY - 1; i >= 0; --i) {
-			if (i < sizeY - 1) { //
-				if (g != 0.) {
-					for (j = l; j < sizeY; j++)
-						v.m[j][i] = (this.m[i][j] / this.m[i][l]) / g;
-					for (j = l; j < sizeY; j++) {
-						for (s = 0, k = l; k < sizeY; k++)
-							s += this.m[i][k] * v.m[k][j];
-						for (k = l; k < sizeY; k++)
-							v.m[k][j] += s * v.m[k][i];
-					}
-				}
-				for (j = l; j < sizeY; j++)
-					//
-					v.m[i][j] = v.m[j][i] = 0.0;
-			}
-			v.m[i][i] = 1.0;
-			g = rv1[i];
-			l = i;
-		}
-		// for (i=IMIN(m,n);i>=1;i--) { // !
-		// for (i = n-1; i>=0; --i) {
-		for (i = Math.min(sizeX - 1, sizeY - 1); i >= 0; --i) {
-			l = i + 1;
-			g = w.m[i][0];
-			if (i < sizeY - 1) //
-				for (j = l; j < sizeY; j++)
-					//
-					this.m[i][j] = 0.0;
-			if (g != 0.) {
-				g = 1. / g;
-				if (i != sizeY - 1) {
-					for (j = l; j < sizeY; j++) {
-						for (s = 0, k = l; k < sizeX; k++)
-							s += this.m[k][i] * this.m[k][j];
-						f = (s / this.m[i][i]) * g;
-						for (k = i; k < sizeX; k++)
-							this.m[k][j] += f * this.m[k][i];
-					}
-				}
-				for (j = i; j < sizeX; j++)
-					this.m[j][i] *= g;
-			} else {
-				for (j = i; j < sizeX; j++)
-					this.m[j][i] = 0.0;
-			}
-			this.m[i][i] += 1.0;
-		}
-		for (k = sizeY - 1; k >= 0; --k) {
-			for (its = 1; its <= 30; ++its) {
-				flag = true;
-				for (l = k; l >= 0; --l) {
-					nm = l - 1;
-					if ((Math.abs(rv1[l]) + anorm) == anorm) {
-						flag = false;
-						break;
-					}
-					if ((Math.abs(w.m[nm][0]) + anorm) == anorm)
-						break;
-				}
-				if (flag) {
-					c = 0.0;
-					s = 1.0;
-					for (i = l; i <= k; i++) { //
-						f = s * rv1[i];
-						rv1[i] = c * rv1[i];
-						if ((Math.abs(f) + anorm) == anorm)
-							break;
-						g = w.m[i][0];
-						h = hypot(f, g);
-						w.m[i][0] = h;
-						h = 1.0 / h;
-						c = g * h;
-						s = -f * h;
-						for (j = 0; j < sizeX; j++) {
-							y = this.m[j][nm];
-							z = this.m[j][i];
-							this.m[j][nm] = y * c + z * s;
-							this.m[j][i] = z * c - y * s;
-						}
-					}
-				} // flag
-				z = w.m[k][0];
-				if (l == k) {
-					if (z < 0.) {
-						w.m[k][0] = -z;
-						for (j = 0; j < sizeY; j++)
-							v.m[j][k] = -v.m[j][k];
-					}
-					break;
-				} // l==k
-				if (its >= 50)
-					throw new ArithmeticException("no svd convergence in 50 iterations");
-				// zliberror._assert(its<50, "no svd convergence in 50
-				// iterations");
-				x = w.m[l][0];
-				nm = k - 1;
-				y = w.m[nm][0];
-				g = rv1[nm];
-				h = rv1[k];
-				f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2 * h * y);
-				g = hypot(f, 1.0);
-				f = ((x - z) * (x + z) + h * ((y / (f + SIGN(g, f))) - h)) / x;
-				c = s = 1.0;
-				for (j = l; j <= nm; j++) {
-					i = j + 1;
-					g = rv1[i];
-					y = w.m[i][0];
-					h = s * g;
-					g = c * g;
-					z = hypot(f, h);
-					rv1[j] = z;
-					c = f / z;
-					s = h / z;
-					f = x * c + g * s;
-					g = g * c - x * s;
-					h = y * s;
-					y *= c;
-					for (jj = 0; jj < sizeY; jj++) {
-						x = v.m[jj][j];
-						z = v.m[jj][i];
-						v.m[jj][j] = x * c + z * s;
-						v.m[jj][i] = z * c - x * s;
-					}
-					z = hypot(f, h);
-					w.m[j][0] = z;
-					if (z != 0.0) {
-						z = 1.0 / z;
-						c = f * z;
-						s = h * z;
-					}
-					f = c * g + s * y;
-					x = c * y - s * g;
-					for (jj = 0; jj < sizeX; ++jj) {
-						y = this.m[jj][j];
-						z = this.m[jj][i];
-						this.m[jj][j] = y * c + z * s;
-						this.m[jj][i] = z * c - y * s;
-					}
-				} // j<nm
-				rv1[l] = 0.0;
-				rv1[k] = f;
-				w.m[k][0] = x;
-			} // its
-		} // k
-		// free rv1
-	} // svd
-
-	public static final double SIGN(double a, double b) {
-		return ((b) >= 0.0 ? Math.abs(a) : -Math.abs(a));
-	}
-	
-	/** 
-	 * sqrt(a^2 + b^2) without under/overflow. 
-	 */
-	public static double hypot(double a, double b) {
-		double r;
-		double absA = Math.abs(a);
-		double absB = Math.abs(b);
-		if (absA > absB) {
-			r = b / a;
-			r = absA * Math.sqrt(1 + r * r);
-		} else if (b != 0) {
-			r = a / b;
-			r = absB * Math.sqrt(1 + r * r);
-		} else {
-			r = 0.0;
-		}
-		return r;
-	}
-	
 	public void printM(String title) {
 		System.out.println(title);
 //		System.out.print(toString());
@@ -1302,7 +920,6 @@ public class Matrix {
 		}
 	}
 
-	
 	public void lq(Matrix q, Matrix tau) {
 		q.resize(getSizeY(), getSizeY());
 		lqDecomposition(tau);
@@ -1324,7 +941,7 @@ public class Matrix {
 			// DLARFG
 			double xnorm = 0.0;
 			for (int i = getSizeX() - 1; i > atIndex; i--)
-				xnorm = hypot(xnorm, getItem(i, atIndex));
+				xnorm = MathUtil.hypot(xnorm, getItem(i, atIndex));
 			if (xnorm == 0.0) { 
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
@@ -1333,7 +950,7 @@ public class Matrix {
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-			double beta = hypot(alpha, xnorm);
+			double beta = MathUtil.hypot(alpha, xnorm);
 			if (beta == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
@@ -1408,7 +1025,7 @@ public class Matrix {
 			// DLARFG
 			double xnorm = 0.0;
 			for (int j = getSizeY() - 1; j > atIndex; j--)
-				xnorm = hypot(xnorm, getItem(atIndex, j));
+				xnorm = MathUtil.hypot(xnorm, getItem(atIndex, j));
 			if (xnorm == 0.0) { 
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
@@ -1417,7 +1034,7 @@ public class Matrix {
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-			double beta = hypot(alpha, xnorm);
+			double beta = MathUtil.hypot(alpha, xnorm);
 			if (beta == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;

@@ -6,6 +6,7 @@ import java.util.StringTokenizer;
 
 import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SVD_Obsolete;
 
 public class MatrixSvdTest {
 	public static void main(String[] args) throws Exception {
@@ -13,10 +14,10 @@ public class MatrixSvdTest {
 				TestMatrix2.class.getResource(
 					"SVD-A.txt").getFile()));
 		StringTokenizer stt = new StringTokenizer(fin.readLine());
-		Matrix a = new Matrix(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
+		SVD_Obsolete a = new SVD_Obsolete(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
 		a.load(fin);
 		fin.close();
-		Matrix at = new Matrix();
+		SVD_Obsolete at = new SVD_Obsolete(a.getSizeX(), a.getSizeY());
 		a.transpose(at);
 		Matrix b = a.makeCopy();
 //		Matrix bt = at.makeCopy();

@@ -11,7 +11,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	protected LeastSquaresAdjust lsa;
 
 	public PolynomialTransformLearner(PolynomialTransformer<InputType, OutputType> transformer, 
-			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		super(transformer, pointsPairList);
 		int numberOfCoefsPerCoordinate = transformer.getNumberOfCoefsPerCoordinate();
 		this.coefs = new Matrix(numberOfCoefsPerCoordinate, 1);
@@ -21,7 +21,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	public int getRequiredTrainingPoints() {
 		int inputSize = transformer.getInputSize();
 		int outputSize = transformer.getOutputSize();
-		return (int) Math.ceil(Math.pow(((PolynomialTransformer)transformer).polynomPower, inputSize) * 
+		return (int) Math.ceil(Math.pow(((PolynomialTransformer<InputType, OutputType>)transformer).polynomPower, inputSize) * 
 				outputSize / inputSize);
 	}
 	
@@ -44,7 +44,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 
 		computeScaleAndOrigin();
 
-		PolynomialTransformer tr = (PolynomialTransformer)transformer;
+		PolynomialTransformer<InputType, OutputType> tr = (PolynomialTransformer<InputType, OutputType>)transformer;
 		Matrix tmpS = new Matrix(inputSize, 1);
 		Matrix tmpT = new Matrix(outputSize, 1);
 		

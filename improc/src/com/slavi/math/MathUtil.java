@@ -118,4 +118,30 @@ public class MathUtil {
 		}
 		return r;
 	}
+
+	/**
+	 * Transfer the sign of B on to A. 
+	 */
+	public static final double SIGN(double a, double b) {
+		return ((b) >= 0.0 ? Math.abs(a) : -Math.abs(a));
+	}
+	
+	/** 
+	 * sqrt(a^2 + b^2) without under/overflow. 
+	 */
+	public static double hypot(double a, double b) {
+		double r;
+		double absA = Math.abs(a);
+		double absB = Math.abs(b);
+		if (absA > absB) {
+			r = b / a;
+			r = absA * Math.sqrt(1 + r * r);
+		} else if (b != 0) {
+			r = a / b;
+			r = absB * Math.sqrt(1 + r * r);
+		} else {
+			r = 0.0;
+		}
+		return r;
+	}
 }

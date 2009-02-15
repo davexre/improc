@@ -1,8 +1,5 @@
 package com.slavi.math.adjust;
 
-import org.jdom.Element;
-
-import com.slavi.util.XMLHelper;
 
 /**
  * Формулите са взети от "Теория на математическата обработка на геодезическите
@@ -374,30 +371,4 @@ public class Statistics {
     public String toString() {
     	return toString(CStatDefault);
     }
-    
-	public void toXML(Element dest) {
-		Element conclusion = new Element("conclusion");
-		conclusion.setText(hasBadValues() ? "*** There is/are BAD value(s)" : "All values are ok");
-		dest.addContent(conclusion);
-		dest.addContent(XMLHelper.makeAttrEl("Average", Double.toString(getAvgValue())));
-		dest.addContent(XMLHelper.makeAttrEl("NumberOfItems", Integer.toString(getItemsCount())));
-		dest.addContent(XMLHelper.makeAttrEl("B", Double.toString(B)));
-		dest.addContent(XMLHelper.makeAttrEl("J_Start", Double.toString(J_Start)));
-		dest.addContent(XMLHelper.makeAttrEl("J_End", Double.toString(J_End)));
-		dest.addContent(XMLHelper.makeAttrEl("A", Double.toString(A)));
-		dest.addContent(XMLHelper.makeAttrEl("E", Double.toString(E)));
-		dest.addContent(XMLHelper.makeAttrEl("MinX", Double.toString(MinX)));
-		dest.addContent(XMLHelper.makeAttrEl("MaxX", Double.toString(MaxX)));
-		dest.addContent(XMLHelper.makeAttrEl("MinAbsX", Double.toString(AbsMinX)));
-		dest.addContent(XMLHelper.makeAttrEl("MaxAbsX", Double.toString(AbsMaxX)));
-		dest.addContent(XMLHelper.makeAttrEl("Delta", Double.toString(MaxX - MinX)));
-		Element m = new Element("M");
-    	for (int i = 2; i <= 4; i++)
-    		m.addContent(XMLHelper.makeAttrEl("M" + i, Double.toString(getM(i))));
-    	dest.addContent(m);
-		Element d = new Element("D");
-    	for (int i = 2; i <= 4; i++)
-    		d.addContent(XMLHelper.makeAttrEl("D" + i, Double.toString(getD(i))));
-    	dest.addContent(d);
-	}
 }

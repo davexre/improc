@@ -3,8 +3,9 @@ package com.test.math;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
+import com.slavi.io.xml.XMLHelper;
+import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.XMLHelper;
 
 public class PointsPair {
 	public Matrix source;
@@ -75,11 +76,11 @@ public class PointsPair {
 		dest.addContent(XMLHelper.makeAttrEl("bad", Boolean.toString(isBad())));
 		
 		e = new Element("source");
-		source.toXML(e);
+		XMLMatrix.instance.toXML(source, e);
 		dest.addContent(e);
 		
 		e = new Element("target");
-		target.toXML(e);
+		XMLMatrix.instance.toXML(target, e);
 		dest.addContent(e);
 	}
 	
@@ -91,10 +92,10 @@ public class PointsPair {
 		r.setBad(Boolean.parseBoolean(XMLHelper.getAttrEl(source, "bad", "false")));
 
 		e = source.getChild("source");
-		r.source = Matrix.fromXML(e);
+		r.source = XMLMatrix.instance.fromXML(e);
 
 		e = source.getChild("target");
-		r.target = Matrix.fromXML(e);
+		r.target = XMLMatrix.instance.fromXML(e);
 		return r;
 	}
 }

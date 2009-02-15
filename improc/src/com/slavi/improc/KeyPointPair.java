@@ -3,11 +3,6 @@ package com.slavi.improc;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
-
-import com.slavi.util.XMLHelper;
-
 public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public int id = hashCode();
 	
@@ -92,36 +87,6 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 				KeyPoint.fromString(st.nextToken()), d1, d2);
 	}	
 	
-	public void toXML(Element dest) {
-		Element e;
-		
-		dest.addContent(XMLHelper.makeAttrEl("dist1", Double.toString(distanceToNearest)));
-		dest.addContent(XMLHelper.makeAttrEl("dist2", Double.toString(distanceToNearest2)));
-		
-		e = new Element("sourceSP");
-		sourceSP.toXML(e);
-		dest.addContent(e);
-
-		e = new Element("targetSP");
-		targetSP.toXML(e);
-		dest.addContent(e);
-	}
-	
-	public static KeyPointPair fromXML(Element source) throws JDOMException {
-		KeyPointPair r = new KeyPointPair();
-		Element e;
-
-		r.distanceToNearest = Double.parseDouble(XMLHelper.getAttrEl(source, "dist1"));
-		r.distanceToNearest2 = Double.parseDouble(XMLHelper.getAttrEl(source, "dist2"));
-		
-		e = source.getChild("sourceSP");
-		r.sourceSP = KeyPoint.fromXML(e);
-
-		e = source.getChild("targetSP");
-		r.targetSP = KeyPoint.fromXML(e);
-		return r;
-	}
-
 	double discrepancy;
 	public double getDiscrepancy() {
 		return discrepancy;

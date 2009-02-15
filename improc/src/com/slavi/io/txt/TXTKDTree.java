@@ -1,12 +1,13 @@
-package com.slavi.util.tree;
+package com.slavi.io.txt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.slavi.util.tree.KDTree;
 import com.slavi.util.tree.KDTree.Node;
 
-public abstract class KDNodeSaver<E> {
+public abstract class TXTKDTree<E> {
 
 	public abstract String nodeToString(E node);
 	
@@ -15,25 +16,18 @@ public abstract class KDNodeSaver<E> {
 	private void toTextStream_recursive(Node<E> node, PrintWriter fou) {
 		if (node == null)
 			return;
-		fou.println(nodeToString(node.data));
-		toTextStream_recursive(node.left, fou);
-		toTextStream_recursive(node.right, fou);
+		fou.println(nodeToString(node.getData()));
+		toTextStream_recursive(node.getLeft(), fou);
+		toTextStream_recursive(node.getRight(), fou);
 	}
 	
 	/**
 	 * The tree is stored to a text stream one node at a line.
+	 * <p>
+	 * Note: This method is thread UNSAFE even if called on {@link com.slavi.util.tree.ConcurrentKDTree}
 	 */
 	public void toTextStream(KDTree<E> tree, PrintWriter fou) {
-		if (tree instanceof ConcurrentKDTree) {
-			((ConcurrentKDTree<E>)tree).lock.readLock().lock();
-		}
-		try {
-			toTextStream_recursive(tree.root, fou);
-		} finally {
-			if (tree instanceof ConcurrentKDTree) {
-				((ConcurrentKDTree<E>)tree).lock.readLock().unlock();
-			}
-		}
+		toTextStream_recursive(tree.getRoot(), fou);
 	}
 	
 	/**

@@ -1,10 +1,7 @@
 package com.slavi.math.adjust;
 
-import org.jdom.Element;
-
-import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.XMLHelper;
+import com.slavi.math.matrix.SymmetricMatrix;
 
 public class LeastSquaresAdjust {
 
@@ -199,28 +196,5 @@ public class LeastSquaresAdjust {
 		b.append(unknown.toString());
 
 		return b.toString();
-	}
-
-	public void toXML(Element dest) {
-		dest.addContent(XMLHelper.makeAttrEl("numCoefsPerCoordinate", Integer.toString(numCoefsPerCoordinate)));
-		dest.addContent(XMLHelper.makeAttrEl("numCoordinates", Integer.toString(numCoordinates)));
-		dest.addContent(XMLHelper.makeAttrEl("measurementCount", Integer.toString(measurementCount)));
-		dest.addContent(XMLHelper.makeAttrEl("sumPLL", Double.toString(sumPLL)));
-		dest.addContent(XMLHelper.makeAttrEl("sumP", Double.toString(sumP)));
-		dest.addContent(XMLHelper.makeAttrEl("sumLL", Double.toString(sumLL)));
-		dest.addContent(XMLHelper.makeAttrEl("medianSquareError", Double.toString(medianSquareError)));
-		Element e;
-
-		e = new Element("NormalMatrix");
-		nm.toXML(e);
-		dest.addContent(e);
-
-		e = new Element("APL");
-		apl.toXML(e);
-		dest.addContent(e);
-
-		e = new Element("Unknown");
-		unknown.toXML(e);
-		dest.addContent(e);
 	}
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import com.slavi.improc.pano.ImageData.ImageFormat;
-import com.slavi.math.matrix.JLapack;
+import com.slavi.math.MathUtil;
 
 public class AlignInfo {
 
@@ -100,7 +100,7 @@ public class AlignInfo {
 			PanoAdjust.makeInvParams(p1, src, pano, 0);
 			src.extentInPano = new Rectangle2D.Double(p0.x, p0.y, p1.x, p1.y);
 			
-			double s = JLapack.hypot(p1.x - p0.x, p1.y - p0.y);
+			double s = MathUtil.hypot(p1.x - p0.x, p1.y - p0.y);
 			if (scale < s)
 				scale = s;
 			src.roll = roll;

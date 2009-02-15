@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import com.slavi.improc.pano.ImageData.ImageFormat;
 import com.slavi.improc.pano.LMDif.LMDifFcn;
 import com.slavi.math.MathUtil;
-import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 
 public class PanoAdjust implements LMDifFcn {
@@ -622,7 +621,7 @@ public class PanoAdjust implements LMDifFcn {
 			p2.y = p1.y;
 			PanoAdjust.makeInvParams(p2, src, panoAdjust.alignInfo.pano, 0);
 			
-			double s = JLapack.hypot(p2.x - p0.x, p2.y - p0.y) / Math.sqrt(2.0);
+			double s = MathUtil.hypot(p2.x - p0.x, p2.y - p0.y) / Math.sqrt(2.0);
 			
 			System.out.println("im=" + i + " d=" + s + " dx=" + (p2.x-p0.x) + " dy=" + (p2.x-p0.x));
 			

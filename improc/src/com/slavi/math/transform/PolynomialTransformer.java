@@ -1,10 +1,6 @@
 package com.slavi.math.transform;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
-
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.XMLHelper;
 
 public abstract class PolynomialTransformer<InputType, OutputType> extends BaseTransformer<InputType, OutputType> {
 
@@ -117,41 +113,5 @@ public abstract class PolynomialTransformer<InputType, OutputType> extends BaseT
 		
 		//b.append(polynomCoefs.toString());
 		return b.toString();
-	}
-		
-	public void toXML(Element dest) {
-		dest.addContent(XMLHelper.makeAttrEl("polynomPower", Integer.toString(polynomPower)));
-
-		Element e;
-		
-		e = new Element("SourceOrigin");
-		sourceOrigin.toXML(e);
-		dest.addContent(e);
-		
-		e = new Element("Coefs");
-		polynomCoefs.toXML(e);
-		dest.addContent(e);
-
-		e = new Element("Powers");
-		polynomPowers.toXML(e);
-		dest.addContent(e);
-	}
-
-	public void fromXML(Element source) throws JDOMException {
-		int inputSize = getInputSize();
-		int outputSize = getOutputSize();
-		polynomPower = Integer.parseInt(XMLHelper.getAttrEl(source, "polynomPower"));
-		buildPolynomPowers();
-		sourceOrigin = Matrix.fromXML(source.getChild("SourceOrigin"));
-		polynomCoefs = Matrix.fromXML(source.getChild("polynomCoefs"));
-		tmpSrc = new double[inputSize];
-		tmpDest = new double[outputSize];
-		
-		if (
-			(sourceOrigin.getSizeX() != inputSize) ||
-			(sourceOrigin.getSizeY() != 1) ||
-			(polynomCoefs.getSizeX() != outputSize) ||
-			(polynomCoefs.getSizeY() != numPoints) )
-			throw new IllegalArgumentException("XML file contains malformed PolynomialTransformer data");
 	}
 }

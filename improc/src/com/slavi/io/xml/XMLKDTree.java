@@ -1,4 +1,4 @@
-package com.slavi.util.tree;
+package com.slavi.io.xml;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.util.XMLHelper;
+import com.slavi.util.tree.KDTree;
 import com.slavi.util.tree.KDTree.Node;
 
-public abstract class KDNodeSaverXML<E> {
+public abstract class XMLKDTree<E> {
 
 	public abstract void nodeToXML(E node, Element dest);
 	
@@ -18,15 +18,15 @@ public abstract class KDNodeSaverXML<E> {
 	private void toXML_recursive(Node<E> node, Element dest) {
 		if (node == null)
 			return;
-		nodeToXML(node.data, dest);
-		if (node.left != null) {
+		nodeToXML(node.getData(), dest);
+		if (node.getLeft() != null) {
 			Element left = XMLHelper.makeAttrEl("Item", "Left");
-			toXML_recursive(node.left, left);
+			toXML_recursive(node.getLeft(), left);
 			dest.addContent(left);
 		}
-		if (node.right != null) {
+		if (node.getRight() != null) {
 			Element right = XMLHelper.makeAttrEl("Item", "Right");
-			toXML_recursive(node.right, right);
+			toXML_recursive(node.getRight(), right);
 			dest.addContent(right);
 		}
 	}
@@ -35,26 +35,18 @@ public abstract class KDNodeSaverXML<E> {
 	 * Stores the tree in a hierarchical XML form. All the items in the tree are stored as
 	 * XML elements called "Item" having one attribute value named "v". The "v" attribute
 	 * can have one of the tree possible values, i.e. "Root", "Left" and "Right".
-	 * 
+	 * <p> 
 	 * All "Item" XML elements can have one sub "Item" sub element with the "v" attribute
 	 * set to "Left" and one sub element with "v" attribute set to "Right"
-	 * 
+	 * <p>
+	 * Note: This method is thread UNSAFE even if called on {@link com.slavi.util.tree.ConcurrentKDTree}
 	 * @see #fromXML(Element, KDNodeSaverXML)
-	 * @see KDTree#balanceIfNeeded();
+	 * @see com.slavi.util.tree.KDTree#balanceIfNeeded();
 	 */
 	public void toXML(KDTree<E> tree, Element dest) {
-		if (tree instanceof ConcurrentKDTree) {
-			((ConcurrentKDTree<E>)tree).lock.readLock().lock();
-		}
-		try {
-			Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
-			toXML_recursive(tree.root, rootNode);
-			dest.addContent(rootNode);
-		} finally {
-			if (tree instanceof ConcurrentKDTree) {
-				((ConcurrentKDTree<E>)tree).lock.readLock().unlock();
-			}
-		}
+		Element rootNode = XMLHelper.makeAttrEl("Item", "Root");
+		toXML_recursive(tree.getRoot(), rootNode);
+		dest.addContent(rootNode);
 	}
 	
 	private void fromXML_ReadChildren(KDTree<E> tree, Element source) throws JDOMException {

@@ -16,13 +16,13 @@ import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.singletreaded.DImageMap;
 import com.slavi.improc.singletreaded.DLoweDetector;
 import com.slavi.improc.singletreaded.DLoweDetector.Hook;
+import com.slavi.io.txt.TXTKDTree;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
-import com.slavi.util.tree.KDNodeSaver;
 
-public class KeyPointListSaver extends KDNodeSaver<KeyPoint> {
+public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	final KeyPointList keyPointList;
 
 	public KeyPointListSaver(KeyPointList keyPointList) {

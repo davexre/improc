@@ -1,37 +1,11 @@
 package com.slavi.math.matrix;
 
+import com.slavi.math.MathUtil;
+
 
 public class JLapack {
 	static final double EPS = 1.11022302E-016;
 
-	/**
-	 * Transfers the sign of the first parameter (a) to 
-	 * the second parameter (b) and returns the result.
-	 */
-	public static final double SIGN(double a, double b) {
-		return ((b) >= 0.0 ? Math.abs(a) : -Math.abs(a));
-	}
-
-	/** 
-	 * LAPACK: DOUBLE PRECISION FUNCTION DLAPY2( X, Y )
-	 * sqrt(a^2 + b^2) without under/overflow. 
-	 */
-	public static double hypot(double a, double b) {
-		double result;
-		double absA = Math.abs(a);
-		double absB = Math.abs(b);
-		if (absA > absB) {
-			result = b / a;
-			result = absA * Math.sqrt(1 + result * result);
-		} else if (b != 0) {
-			result = a / b;
-			result = absB * Math.sqrt(1 + result * result);
-		} else {
-			result = 0.0;
-		}
-		return result;
-	}
-	
 	public double DLARFG_Beta;
 	public double DLARFG_Tau;
 	/**
@@ -59,7 +33,7 @@ public class JLapack {
 	public void DLARFG_X(Matrix Src, int atX, int atY, int width, double alpha) {
 		double xnorm = 0.0;
 		for (int i = atX + width - 1; i >= atX; i--)
-			xnorm = hypot(xnorm, Src.getItem(i, atY));
+			xnorm = MathUtil.hypot(xnorm, Src.getItem(i, atY));
 		if (xnorm == 0.0) {
 			DLARFG_Beta = alpha;
 			DLARFG_Tau = 0.0;
@@ -68,7 +42,7 @@ public class JLapack {
 
 		//DLARFG_Beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 		//DLARFG_Beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-		DLARFG_Beta = hypot(alpha, xnorm);
+		DLARFG_Beta = MathUtil.hypot(alpha, xnorm);
 		if (DLARFG_Beta == 0.0) {
 			DLARFG_Tau = 0.0;
 			return;
@@ -88,7 +62,7 @@ public class JLapack {
 	public void DLARFG_Y(Matrix Src, int atX, int atY, int height, double alpha) {
 		double xnorm = 0.0;
 		for (int j = atY + height - 1; j >= atY; j--)
-			xnorm = hypot(xnorm, Src.getItem(atX, j));
+			xnorm = MathUtil.hypot(xnorm, Src.getItem(atX, j));
 		if (xnorm == 0.0) {
 			DLARFG_Beta = alpha;
 			DLARFG_Tau = 0.0;
@@ -97,7 +71,7 @@ public class JLapack {
 
 		//DLARFG_Beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 		//DLARFG_Beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
-		DLARFG_Beta = hypot(alpha, xnorm);
+		DLARFG_Beta = MathUtil.hypot(alpha, xnorm);
 		if (DLARFG_Beta == 0.0) {
 			DLARFG_Tau = 0.0;
 			return;
@@ -454,7 +428,7 @@ public class JLapack {
 	 * </pre></blockquote>
 	 */
 	public static void DLARTG(double F, double G, DLARTG_Result Result) {
-		Result.r = hypot(F, G);
+		Result.r = MathUtil.hypot(F, G);
 		Result.CS = F / Result.r;
 		Result.SN = G / Result.r;
 		if ((Result.CS < 0.0) && (Math.abs(F) > Math.abs(G))) {
@@ -569,9 +543,9 @@ public class JLapack {
 				if (MM == 0.0) {
 					// DLASV:207 Note that M is very tiny
 					if (L == 0.0)
-						T = SIGN(2.0, FT) * SIGN(1.0, GT);
+						T = MathUtil.SIGN(2.0, FT) * MathUtil.SIGN(1.0, GT);
 					else
-						T = GT / SIGN(tmpD, FT) + M / T;
+						T = GT / MathUtil.SIGN(tmpD, FT) + M / T;
 				} else
 					T = (M / (_S + T) + M / (_R + L)) * (1.0 + A);
 				L = Math.sqrt(T * T + 4.0);
@@ -595,13 +569,13 @@ public class JLapack {
 		// DLASV2:236 Correct signs of SSMAX and SSMIN
 		double tsign = 0;
 		if (pmax == 1)
-			tsign = SIGN(1.0, result.COSR) * SIGN(1.0, result.COSL) * SIGN(1.0, F);
+			tsign = MathUtil.SIGN(1.0, result.COSR) * MathUtil.SIGN(1.0, result.COSL) * MathUtil.SIGN(1.0, F);
 		if (pmax == 2)
-			tsign = SIGN(1.0, result.SINR) * SIGN(1.0, result.COSL) * SIGN(1.0, G);
+			tsign = MathUtil.SIGN(1.0, result.SINR) * MathUtil.SIGN(1.0, result.COSL) * MathUtil.SIGN(1.0, G);
 		if (pmax == 3)
-			tsign = SIGN(1.0, result.SINR) * SIGN(1.0, result.SINL) * SIGN(1.0, H);
-		result.SSMAX = SIGN(result.SSMAX, tsign);
-		result.SSMIN = SIGN(result.SSMIN, tsign * SIGN(1.0, F) * SIGN(1.0, H));
+			tsign = MathUtil.SIGN(1.0, result.SINR) * MathUtil.SIGN(1.0, result.SINL) * MathUtil.SIGN(1.0, H);
+		result.SSMAX = MathUtil.SIGN(result.SSMAX, tsign);
+		result.SSMIN = MathUtil.SIGN(result.SSMIN, tsign * MathUtil.SIGN(1.0, F) * MathUtil.SIGN(1.0, H));
 		// End DLASV2
 	}
 	
@@ -934,7 +908,7 @@ public class JLapack {
 					// DBDSQR:574 Chase bulge from top to bottom
 					// Save cosines and sines for later singular vector updates
 					double F = (Math.abs(s.getItem(ll, ll)) - shift) *
-						(SIGN(1.0, s.getItem(ll, ll)) + shift / s.getItem(ll, ll));
+						(MathUtil.SIGN(1.0, s.getItem(ll, ll)) + shift / s.getItem(ll, ll));
 					double G = E.getItem(ll, 0);
 					DLARTG_1.CS = 1.0;
 					DLARTG_2.CS = 1.0;
@@ -994,7 +968,7 @@ public class JLapack {
 					// DBDSQR:622 Chase bulge from bottom to top
 					// Save cosines and sines for later singular vector updates
 					double F = (Math.abs(s.getItem(atIndex, atIndex)) - shift) *
-						(SIGN(1.0, s.getItem(atIndex, atIndex)) + shift / s.getItem(atIndex, atIndex));
+						(MathUtil.SIGN(1.0, s.getItem(atIndex, atIndex)) + shift / s.getItem(atIndex, atIndex));
 					double G = E.getItem(atIndex - 1, 0);
 					
 					DLARTG_1.CS = 1.0;
@@ -1258,25 +1232,25 @@ public class JLapack {
 			A = temp;
 			B = -C;
 			C = 0.0;
-		} else if ( (A-D == 0.0) && (SIGN(1.0, B) != SIGN(1.0, C)) ) {
+		} else if ( (A-D == 0.0) && (MathUtil.SIGN(1.0, B) != MathUtil.SIGN(1.0, C)) ) {
 			result.CS = 1.0;
 			result.SN = 0.0;
 		} else {
 			double temp = A - D;
 			double p = temp * 0.5;
 			double BCmax = Math.max(Math.abs(B), Math.abs(C));
-			double BCmin = Math.min(Math.abs(B), Math.abs(C)) * SIGN(1.0, B) * SIGN(1.0, C);
+			double BCmin = Math.min(Math.abs(B), Math.abs(C)) * MathUtil.SIGN(1.0, B) * MathUtil.SIGN(1.0, C);
 			double scale = Math.max(Math.abs(p), BCmax);
 			double z = (p / scale) * p + (BCmax / scale) * BCmin; 
 			// If Z is of the order of the machine accuracy, postpone the
 			// decision on the nature of eigenvalues
 			if (z >= 4.0 * EPS) {
 				// Real eigenvalues. Compute A and D.
-				z = p + SIGN( Math.sqrt(scale) * Math.sqrt(z), p);
+				z = p + MathUtil.SIGN( Math.sqrt(scale) * Math.sqrt(z), p);
 				A = D + z;
 				D = D - (BCmax / z) * BCmin;
 				// Compute B and the rotation matrix
-				double tau = hypot(C, z);
+				double tau = MathUtil.hypot(C, z);
 				result.CS = z / tau;
 				result.SN = C / tau;
 				B = B - C;
@@ -1285,9 +1259,9 @@ public class JLapack {
 				// Complex eigenvalues, or real (almost) equal eigenvalues.
 				// Make diagonal elements equal.
 				double sigma = B + C;
-				double tau = hypot(sigma, temp);
+				double tau = MathUtil.hypot(sigma, temp);
 				result.CS = Math.sqrt(0.5 * (1.0 + Math.abs(sigma) / tau) );
-				result.SN = - (p / (tau * result.CS)) * SIGN(1.0, sigma);
+				result.SN = - (p / (tau * result.CS)) * MathUtil.SIGN(1.0, sigma);
 				
 				// Compute [ AA  BB ] = [ A  B ] [ CS -SN ]
 				//         [ CC  DD ]   [ C  D ] [ SN  CS ]
@@ -1307,11 +1281,11 @@ public class JLapack {
 				D = temp;
 				if (C != 0.0) {
 					if (B != 0.0) {
-						if (SIGN(1.0, B) == SIGN(1.0, C)) {
+						if (MathUtil.SIGN(1.0, B) == MathUtil.SIGN(1.0, C)) {
 							// Real eigenvalues: reduce to upper triangular form
 							double SAB = Math.sqrt(Math.abs(B));
 							double SAC = Math.sqrt(Math.abs(C));
-							p = SIGN(SAB * SAC, C);
+							p = MathUtil.SIGN(SAB * SAC, C);
 							tau = 1.0 / Math.sqrt(Math.abs(B + C));
 							A = temp + p;
 							D = temp - p;
@@ -1929,9 +1903,9 @@ public class JLapack {
 						double AVE = (A33 + A44) * 0.5;
 						if (Math.abs(A33) > Math.abs(A44)) {
 							A33 = A33 * A44 - A43A34;
-							A44 = A33 / ( SIGN(DISC, AVE) + AVE );
+							A44 = A33 / ( MathUtil.SIGN(DISC, AVE) + AVE );
 						} else {
-							A44 = SIGN(DISC, AVE) + AVE;
+							A44 = MathUtil.SIGN(DISC, AVE) + AVE;
 						}
 						A33 = A44;
 						A43A34 = 0.0;

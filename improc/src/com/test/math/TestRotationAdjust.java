@@ -230,7 +230,7 @@ public class TestRotationAdjust {
 			this.lsa = new LeastSquaresAdjust(transformer.getNumberOfCoefsPerCoordinate(), 1);		
 		}
 
-		private void setCoef(Matrix coefs, int atIndex,
+/*		private void setCoef(Matrix coefs, int atIndex,
 				int atRow, MyImagePoint source, MyImagePoint dest, double sign) {
 			double d1 = sign * source.x * (  
 				source.camera.realRot.getItem(0, atRow) * dest.x +  
@@ -244,6 +244,20 @@ public class TestRotationAdjust {
 				source.camera.realRot.getItem(0, atRow) * dest.x +  
 				source.camera.realRot.getItem(1, atRow) * dest.y +  
 				source.camera.realRot.getItem(2, atRow) * dest.camera.realFocalDistance / tr.averageFocalDistance);  
+			
+			coefs.setItem(atIndex + 0, 0, d1);
+			coefs.setItem(atIndex + 1, 0, e1);
+			coefs.setItem(atIndex + 2, 0, f1);
+		}
+*/		
+		private void setCoef(Matrix coefs, int atIndex,
+				int atRow, Matrix source, Matrix dest, double sign) {
+			double d1 = sign * source.getItem(0, 0) * (  
+				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
+			double e1 = sign * source.getItem(0, 1) * (  
+				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
+			double f1 = sign * source.getItem(0, 2) * (  
+				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
 			
 			coefs.setItem(atIndex + 0, 0, d1);
 			coefs.setItem(atIndex + 1, 0, e1);
@@ -279,13 +293,13 @@ public class TestRotationAdjust {
 				
 				p1.setItem(0, 0, source.x);
 				p1.setItem(0, 1, source.y);
-				p1.setItem(0, 2, source.camera.realFocalDistance);
-				source.camera.realRot.mMul(p1, t1);
+				p1.setItem(0, 2, source.camera.realFocalDistance); // / tr.averageFocalDistance);
+				source.camera.coefs.mMul(p1, t1);
 				
 				p2.setItem(0, 0, dest.x);
 				p2.setItem(0, 1, dest.y);
-				p2.setItem(0, 2, dest.camera.realFocalDistance);
-				dest.camera.realRot.mMul(p2, t2);
+				p2.setItem(0, 2, dest.camera.realFocalDistance); // / tr.averageFocalDistance);
+				dest.camera.coefs.mMul(p2, t2);
 				
 				for (int curCoord = 0; curCoord < 3; curCoord++) {
 					int c1 = (curCoord + 1) % 3;
@@ -295,13 +309,13 @@ public class TestRotationAdjust {
 						t1.getItem(0, c1) * t2.getItem(0, c2) -
 						t2.getItem(0, c1) * t1.getItem(0, c2);
 					if (srcIndex >= 0) {
-						setCoef(coefs, srcIndex + c1 * 3, c2, source, dest,  1.0);
-						setCoef(coefs, srcIndex + c2 * 3, c1, source, dest, -1.0);
+						setCoef(coefs, srcIndex + c1 * 3, c2, t1, t2,  1.0);
+						setCoef(coefs, srcIndex + c2 * 3, c1, t1, t2, -1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
 					}
 					if (destIndex >= 0) {
-						setCoef(coefs, destIndex + c1 * 3, c2, dest, source, -1.0);
-						setCoef(coefs, destIndex + c2 * 3, c1, dest, source,  1.0);
+						setCoef(coefs, destIndex + c1 * 3, c2, t2, t1, -1.0);
+						setCoef(coefs, destIndex + c2 * 3, c1, t2, t1,  1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
 					}
 				}

@@ -81,7 +81,7 @@ public class TestPolynomialTransformer {
 	
 	public static class MyTestPolynomialTransformLearner extends PolynomialTransformLearner<MyPoint, MyPoint> {
 
-		public MyTestPolynomialTransformLearner(MyTestPolynomialTransformer transformer, Iterable<Entry<MyPoint, MyPoint>> pointsPairList) {
+		public MyTestPolynomialTransformLearner(MyTestPolynomialTransformer transformer, Iterable<? extends Map.Entry<MyPoint, MyPoint>> pointsPairList) {
 			super(transformer, pointsPairList);
 		}
 
@@ -114,7 +114,7 @@ public class TestPolynomialTransformer {
 	
 	public ArrayList<MyTestData> points;
 	
-	public PolynomialTransformLearner learner;
+	public MyTestPolynomialTransformLearner learner;
 	
 	public MyTestPolynomialTransformer transformer;
 	
@@ -161,7 +161,7 @@ public class TestPolynomialTransformer {
 
 	public void learn(int polynomPower) {
 		transformer = new MyTestPolynomialTransformer(polynomPower, numCoordinates);
-		learner = new MyTestPolynomialTransformLearner(transformer, (Iterable)points);
+		learner = new MyTestPolynomialTransformLearner(transformer, points);
 		int maxIterations = 100;
 		int iteration = 0;
 		boolean adjusted = false;

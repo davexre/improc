@@ -87,7 +87,7 @@ public class TestHelmert2DTransformer {
 	
 	public class MyTestHelmert2DTransformLearner extends Helmert2DTransformLearner<Point2D.Double, Point2D.Double> {
 		public MyTestHelmert2DTransformLearner(MyTestHelmert2DTransformer transformer,
-				Iterable<Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
+				Iterable<? extends Map.Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
 			super(transformer, pointsPairList);
 		}
 
@@ -164,10 +164,10 @@ public class TestHelmert2DTransformer {
 	
 	public void learn() {
 		MyTestData pair;
-		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), (Iterable) points);
+		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), points);
 
 		boolean res = learner.calculateOne();
-		Helmert2DTransformer tr = (Helmert2DTransformer) learner.transformer;
+		Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) learner.transformer;
 		System.out.println("Learner adjusted: " + res);
 		System.out.println(tr.toString());
 		

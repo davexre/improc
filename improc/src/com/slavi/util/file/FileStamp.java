@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.Date;
 import java.util.StringTokenizer;
 
-import org.jdom.Element;
-
-import com.slavi.util.XMLHelper;
-
 public class FileStamp {
 	
 	private AbsoluteToRelativePathMaker rootDir;
@@ -47,8 +43,16 @@ public class FileStamp {
 		return file;
 	}
 	
+	public void setLastModified(long value) {
+		lastModified = value;
+	}
+	
 	public long getLastModified() {
 		return lastModified;		
+	}
+	
+	public void setLength(long value) {
+		length = value;
 	}
 	
 	public long getLength() {
@@ -86,23 +90,6 @@ public class FileStamp {
 		result.file = rootDir == null ? (new File(fileName)) : rootDir.getFullPathFile(fileName);
 		result.length = Long.parseLong(st.nextToken());
 		result.lastModified = Long.parseLong(st.nextToken());
-		return result;
-	}
-	
-	public void toXML(Element dest) {
-		dest.addContent(XMLHelper.makeAttrEl("File", rootDir == null ? file.getPath() : rootDir.getRelativePath(file)));
-		dest.addContent(XMLHelper.makeAttrEl("Size", Long.toString(length)));
-		dest.addContent(XMLHelper.makeAttrEl("Date", Long.toString(lastModified)));
-		dest.addContent(XMLHelper.makeAttrEl("DateText", (new Date(lastModified)).toString()));
-	}
-	
-	public static FileStamp fromXML(Element source, AbsoluteToRelativePathMaker rootDir) {
-		FileStamp result = new FileStamp();
-		result.rootDir = rootDir;
-		String fileName = XMLHelper.getAttrEl(source, "File", "");
-		result.file = rootDir == null ? (new File(fileName)) : rootDir.getFullPathFile(fileName);
-		result.length = Long.parseLong(XMLHelper.getAttrEl(source, "Size", "-1"));
-		result.lastModified = Long.parseLong(XMLHelper.getAttrEl(source, "Date", ""));
 		return result;
 	}
 }

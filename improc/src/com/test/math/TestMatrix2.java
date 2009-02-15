@@ -16,6 +16,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.matrix.Matrix;
 
@@ -76,7 +77,7 @@ public class TestMatrix2 {
 
 		Document doc = new Document();
 		Element root = new Element("matrix");
-		m.toXML(root);
+		XMLMatrix.instance.toXML(m, root);
 		doc.setRootElement(root);
 		XMLOutputter xout = new XMLOutputter(Format.getPrettyFormat());
 		xout.output(doc, new FileOutputStream(new File("c:/asd.xml")));
@@ -87,7 +88,7 @@ public class TestMatrix2 {
 		Document doc = builder.build(new File("c:/asd.xml"));  
 
 		Element matrix = doc.getRootElement();
-		Matrix m = Matrix.fromXML(matrix);
+		Matrix m = XMLMatrix.instance.fromXML(matrix);
 		System.out.println(m.toString());
 	}
 	
@@ -125,7 +126,7 @@ public class TestMatrix2 {
 		Content c = new ProcessingInstruction("xml-stylesheet", "href=\"matrix.xsl\" type=\"text/xsl\"");
 		doc.addContent(c);
 		Element root = new Element("Matrix");
-		m.toXML(root);
+		XMLMatrix.instance.toXML(m, root);
 		doc.setRootElement(root);
 
 		//doc.getContent().add(0,e);
