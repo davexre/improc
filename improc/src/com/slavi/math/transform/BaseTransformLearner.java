@@ -33,7 +33,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	
 	public BaseTransformer<InputType, OutputType> transformer;
 	
-	public Iterable<Map.Entry<InputType, OutputType>> items;
+	public Iterable<? extends Map.Entry<InputType, OutputType>> items;
 	
 	protected Matrix sourceOrigin;	
 	protected Matrix sourceScale; 	
@@ -46,7 +46,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	protected Matrix targetMax;	
 	
 	protected BaseTransformLearner(BaseTransformer<InputType, OutputType> transformer, 
-			Iterable<Map.Entry<InputType, OutputType>> pointsPairList) {
+			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		this.transformer = transformer;
 		inputSize = transformer.getInputSize();
 		outputSize = transformer.getOutputSize();

@@ -138,7 +138,7 @@ public class Matrix {
 		for (int j = 0; j < sizeY; j++) {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
-					result.append(" ");
+					result.append("\t");
 				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(m[i][j]) } ));
 //				result.append(m[i][j]);
 			}
