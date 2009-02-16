@@ -27,6 +27,7 @@ public class TestRotationAdjust {
 		
 		public Matrix coefs;
 		public double calcF;
+		public Statistics stat;
 	}
 	
 	public static class MyImagePoint {
@@ -374,9 +375,15 @@ public class TestRotationAdjust {
 		}
 	}
 	
-	public static void calculateDiscrepancy(List<MyPointPair> pointPairs, ImageToWorldTransformer tr) {
+	public static void calculateDiscrepancy(List<MyCamera> images, 
+			List<MyPointPair> pointPairs, ImageToWorldTransformer tr) {
 		MyImagePoint p1 = new MyImagePoint();
 		MyImagePoint p2 = new MyImagePoint();
+		
+		for (MyCamera image : images) {
+			image.stat = new Statistics();
+			image.stat.start();
+		}
 		
 		Statistics stat = new Statistics();
 		stat.start();
@@ -384,15 +391,29 @@ public class TestRotationAdjust {
 			tr.transform(pair.srcPoint, p1);
 			tr.transform(pair.destPoint, p2);
 			pair.myDiscrepancy = Math.sqrt(
-				Math.pow(p1.x - p2.x, 2) +
-				Math.pow(p1.y - p2.y, 2)  
-//				Math.pow(p1.z - p2.z, 2)
+				Math.pow(p1.y*p2.z - p2.y*p1.z, 2) +	
+				Math.pow(p1.x*p2.z - p2.x*p1.z, 2) +	
+				Math.pow(p1.x*p2.y - p2.x*p1.y, 2)	
 				);
+//			pair.myDiscrepancy = Math.sqrt(
+//				Math.pow(p1.x - p2.x, 2) +
+//				Math.pow(p1.y - p2.y, 2)  
+//				Math.pow(p1.z - p2.z, 2)
+//				);
 			stat.addValue(pair.myDiscrepancy);
+			pair.srcPoint.camera.stat.addValue(pair.myDiscrepancy);
+			pair.destPoint.camera.stat.addValue(pair.myDiscrepancy);
 		}
 		stat.stop();
 		System.out.println("MyDiscrepancy statistics:");
 		System.out.println(stat.toString(Statistics.CStatMinMax));
+
+		for (MyCamera image : images) {
+			image.stat.stop();
+			System.out.println();
+			System.out.println("Image " + image.imageId);
+			System.out.println(image.stat.toString(Statistics.CStatMinMax));
+		}
 	}
 	
 	static double cameraAngles[][] = new double[][] {
@@ -422,7 +443,7 @@ public class TestRotationAdjust {
 			System.out.println(image.coefs.toString());
 			System.out.println();
 		}
-		calculateDiscrepancy(pointPairs, learner.tr);
+		calculateDiscrepancy(cameras, pointPairs, learner.tr);
 		System.out.println("Done.");
 	}
 }
