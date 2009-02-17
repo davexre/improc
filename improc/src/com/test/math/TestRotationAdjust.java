@@ -191,18 +191,27 @@ public class TestRotationAdjust {
 		}
 
 		public void transform(MyImagePoint source, MyImagePoint dest) {
-			dest.x = 
-				source.x * source.camera.coefs.getItem(0, 0) +
-				source.y * source.camera.coefs.getItem(1, 0) +
-				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 0) / averageFocalDistance;
-			dest.y = 
-				source.x * source.camera.coefs.getItem(0, 1) +
-				source.y * source.camera.coefs.getItem(1, 1) +
-				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 1) / averageFocalDistance;
-			dest.z =  averageFocalDistance * (
-				source.x * source.camera.coefs.getItem(0, 2) +
-				source.y * source.camera.coefs.getItem(1, 2) +
-				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 2) / averageFocalDistance);
+//			dest.x = 
+//				source.x * source.camera.coefs.getItem(0, 0) +
+//				source.y * source.camera.coefs.getItem(1, 0) +
+//				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 0) / averageFocalDistance;
+//			dest.y = 
+//				source.x * source.camera.coefs.getItem(0, 1) +
+//				source.y * source.camera.coefs.getItem(1, 1) +
+//				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 1) / averageFocalDistance;
+//			dest.z =  averageFocalDistance * (
+//				source.x * source.camera.coefs.getItem(0, 2) +
+//				source.y * source.camera.coefs.getItem(1, 2) +
+//				source.camera.realFocalDistance * source.camera.coefs.getItem(2, 2) / averageFocalDistance);
+			Matrix s = new Matrix(1, 3);
+			Matrix d = new Matrix(1, 3);
+			s.setItem(0, 0, source.x);
+			s.setItem(0, 1, source.y);
+			s.setItem(0, 2, source.camera.realFocalDistance);
+			source.camera.coefs.mMul(s, d);
+			dest.x = d.getItem(0, 0);
+			dest.y = d.getItem(0, 1);
+			dest.z = d.getItem(0, 2);
 		}
 		
 		ArrayList<MyCamera> images = new ArrayList<MyCamera>();
@@ -251,18 +260,71 @@ public class TestRotationAdjust {
 			coefs.setItem(atIndex + 2, 0, f1);
 		}
 */		
-		private void setCoef(Matrix coefs, int atIndex,
-				int atRow, Matrix source, Matrix dest, double sign) {
-			double d1 = sign * source.getItem(0, 0) * (  
-				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
-			double e1 = sign * source.getItem(0, 1) * (  
-				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
-			double f1 = sign * source.getItem(0, 2) * (  
-				dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2));
+		
+		/**
+		 * Maths:
+		 * КС - Координатна Система
+		 * 
+		 * Ротация на КС на снимка 1 към глобална КС
+		 * M1 = [a1 b1 c1; d1 e1 f1; g1 h1 i1]
+		 * 
+		 * Координати на точка P в КС на снимка 1, f1 - фокусно разстояние на камера 1
+		 * P1 = [X1 Y1 F1]
+		 * 
+		 * Координати на точка P1/P2 в глобална КС
+		 * P'1 = M1 * P1
+		 * P'2 = M2 * P2
+		 * P'1 <> P'2
+		 * 
+		 * Колинеарност на P'1 и P'2 (векторното произведение = 0)
+		 * P'1 x P'2 = 0
+		 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
+		 * fy: P'1(x) * P'2(z) - P'1(z) * P'2(x) = 0
+		 * fz: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
+		 * 
+		 * fx: (d1*X1 + e1*Y1 + f1*F1) * (g2*X2 + h2*Y2 + i2*F2) - (g1*X1 + g1*Y1 + i1*F1) * (d2*X2 + e2*Y2 + f2*F2)
+		 * fy: (a1*X1 + b1*Y1 + c1*F1) * (g2*X2 + h2*Y2 + i2*F2) - (g1*X1 + g1*Y1 + i1*F1) * (a2*X2 + b2*Y2 + c2*F2)
+		 * fz: (a1*X1 + b1*Y1 + c1*F1) * (d2*X2 + e2*Y2 + f2*F2) - (d1*X1 + e1*Y1 + f1*F1) * (a2*X2 + b2*Y2 + c2*F2)
+		 * 
+		 * Частни производни на fx, fy, fz
+		 * d(fx)/d(a1) = 0
+		 * d(fx)/d(b1) = 0
+		 * d(fx)/d(c1) = 0
+		 * 
+		 * d(fx)/d(d1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * d(fx)/d(e1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * d(fx)/d(f1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * 
+		 * d(fx)/d(g1) = -X1 * (d2*X2 + e2*Y2 + f2*F2)
+		 * d(fx)/d(h1) = -Y1 * (d2*X2 + e2*Y2 + f2*F2)
+		 * d(fx)/d(i1) = -F1 * (d2*X2 + e2*Y2 + f2*F2)
+		 *
+		 * d(fx)/d(a2) = 0
+		 * d(fx)/d(b2) = 0
+		 * d(fx)/d(c2) = 0
+		 * 
+		 * d(fx)/d(d2) = -X2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * d(fx)/d(e2) = -Y2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * d(fx)/d(f2) = -F2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * 
+		 * d(fx)/d(g2) = X2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * d(fx)/d(h2) = Y2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * d(fx)/d(i2) = F2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * ...
+		 * d(fx)/d(?) = 0
+		 * 
+		 * 
+		 */
+		
+		private void setCoef(Matrix coefs, int atIndex,	Matrix source, Matrix dest, double sign) {
+			double sum = dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2); 
+			double d1 = sign * source.getItem(0, 0) * sum;
+			double e1 = sign * source.getItem(0, 1) * sum;  
+			double f1 = sign * source.getItem(0, 2) * sum;  
 			
-			coefs.setItem(atIndex + 0, 0, d1);
-			coefs.setItem(atIndex + 1, 0, e1);
-			coefs.setItem(atIndex + 2, 0, f1);
+			coefs.setItem(atIndex + 0, 0, d1 + coefs.getItem(atIndex + 0, 0));
+			coefs.setItem(atIndex + 1, 0, e1 + coefs.getItem(atIndex + 1, 0));
+			coefs.setItem(atIndex + 2, 0, f1 + coefs.getItem(atIndex + 2, 0));
 		}
 		
 		public boolean calculateOne() {
@@ -278,6 +340,7 @@ public class TestRotationAdjust {
 			Matrix p2 = new Matrix(1, 3);
 			Matrix t1 = new Matrix(1, 3);
 			Matrix t2 = new Matrix(1, 3);
+			Matrix inv = new Matrix(3, 3);
 			lsa.clear();
 			for (Map.Entry<MyImagePoint, MyImagePoint> item : items) {
 				if (isBad(item))
@@ -295,28 +358,36 @@ public class TestRotationAdjust {
 				p1.setItem(0, 0, source.x);
 				p1.setItem(0, 1, source.y);
 				p1.setItem(0, 2, source.camera.realFocalDistance); // / tr.averageFocalDistance);
-				source.camera.coefs.mMul(p1, t1);
+//				source.camera.coefs.mMul(p1, t1);
+				source.camera.coefs.copyTo(inv);
+				inv.inverse();
+				inv.mMul(p1, t1);
 				
 				p2.setItem(0, 0, dest.x);
 				p2.setItem(0, 1, dest.y);
 				p2.setItem(0, 2, dest.camera.realFocalDistance); // / tr.averageFocalDistance);
-				dest.camera.coefs.mMul(p2, t2);
+//				dest.camera.coefs.mMul(p2, t2);
+				dest.camera.coefs.copyTo(inv);
+				inv.inverse();
+				inv.mMul(p2, t2);
 				
 				for (int curCoord = 0; curCoord < 3; curCoord++) {
 					int c1 = (curCoord + 1) % 3;
 					int c2 = (curCoord + 2) % 3;
 					
+					// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
+					// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
 					double L = 
 						t1.getItem(0, c1) * t2.getItem(0, c2) -
 						t2.getItem(0, c1) * t1.getItem(0, c2);
 					if (srcIndex >= 0) {
-						setCoef(coefs, srcIndex + c1 * 3, c2, t1, t2,  1.0);
-						setCoef(coefs, srcIndex + c2 * 3, c1, t1, t2, -1.0);
+						setCoef(coefs, srcIndex + c1 * 3, p1, t2,  1.0);
+						setCoef(coefs, srcIndex + c2 * 3, p1, t2, -1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
 					}
 					if (destIndex >= 0) {
-						setCoef(coefs, destIndex + c1 * 3, c2, t2, t1, -1.0);
-						setCoef(coefs, destIndex + c2 * 3, c1, t2, t1,  1.0);
+						setCoef(coefs, destIndex + c1 * 3, p2, t1, -1.0);
+						setCoef(coefs, destIndex + c2 * 3, p2, t1,  1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
 					}
 				}
