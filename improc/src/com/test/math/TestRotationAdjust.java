@@ -270,11 +270,7 @@ public class TestRotationAdjust {
 		 * 
 		 * Координати на проекцията на точка P в КС на снимка 1, 
 		 * f1 - фокусно разстояние на камера 1
-		 * P1 = [X1 Y1 F1]
-		 * 
-		 * Измервания Lk - съответсващи проекции на една и съща точка 
-		 * в две (съседни) снимки m и n
-		 * Lk: Pm <-> Pn
+		 * P1 = [X1; Y1; F1]
 		 * 
 		 * Координати на проекциите на точка P в снимки 1 и 2 
 		 * съответно P1/P2 и трансформиране на точки P1/P2 в глобална КС
@@ -283,7 +279,9 @@ public class TestRotationAdjust {
 		 * P'1 <> P'2
 		 * 
 		 * Колинеарност на P'1 и P'2 (векторното произведение = 0)
-		 * P'1 x P'2 = 0
+		 * F(...) = P'1 x P'2 = 0
+		 * F(...): F[a1, b1,..., i1, a2,..., i?, Pk(Xm), Pk(Ym), Fm, Pk(Xn), Pk(Yn), Fn]
+		 * F(...):
 		 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
 		 * fy: P'1(x) * P'2(z) - P'1(z) * P'2(x) = 0
 		 * fz: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
@@ -292,33 +290,23 @@ public class TestRotationAdjust {
 		 * fy: (a1*X1 + b1*Y1 + c1*F1) * (g2*X2 + h2*Y2 + i2*F2) - (g1*X1 + g1*Y1 + i1*F1) * (a2*X2 + b2*Y2 + c2*F2)
 		 * fz: (a1*X1 + b1*Y1 + c1*F1) * (d2*X2 + e2*Y2 + f2*F2) - (d1*X1 + e1*Y1 + f1*F1) * (a2*X2 + b2*Y2 + c2*F2)
 		 * 
-		 * Частни производни на fx, fy, fz
-		 * A[0] = d(fx)/d(a1) = 0
-		 * A[1] = d(fx)/d(b1) = 0
-		 * A[2] = d(fx)/d(c1) = 0
+		 * Измервания Rk - съответсващи проекции на една и съща точка 
+		 * в две (съседни) снимки m и n
+		 * Rk: Pm <-> Pn
+		 * така за всяко Lk съответстват F(...) функции на M1, M2,...
+		 * F(Lk) = F(M1, M2, ...) 
+		 * F(Lk) = F(a1, b1,..., i1, a2,..., i?)
 		 * 
-		 * A[3] = d(fx)/d(d1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[4] = d(fx)/d(e1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[5] = d(fx)/d(f1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * 
-		 * A[6] = d(fx)/d(g1) = -X1 * (d2*X2 + e2*Y2 + f2*F2)
-		 * A[7] = d(fx)/d(h1) = -Y1 * (d2*X2 + e2*Y2 + f2*F2)
-		 * A[8] = d(fx)/d(i1) = -F1 * (d2*X2 + e2*Y2 + f2*F2)
-		 *
-		 * A[9] = d(fx)/d(a2) = 0
-		 * A[10]= d(fx)/d(b2) = 0
-		 * A[11]= d(fx)/d(c2) = 0
-		 * 
-		 * A[12]= d(fx)/d(d2) = -X2 * (g1*X1 + h1*Y1 + i1*F1)
-		 * A[13]= d(fx)/d(e2) = -Y2 * (g1*X1 + h1*Y1 + i1*F1)
-		 * A[14]= d(fx)/d(f2) = -F2 * (g1*X1 + h1*Y1 + i1*F1)
-		 * 
-		 * A[15]= d(fx)/d(g2) = X2 * (d1*X1 + e1*Y1 + f1*F1)
-		 * A[16]= d(fx)/d(h2) = Y2 * (d1*X1 + e1*Y1 + f1*F1)
-		 * A[17]= d(fx)/d(i2) = F2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * Изравнени стойности (на параметрите на ротация)
+		 * M'1 = [a'1 b'1 c'1; d'1 e'1 f'1; g'1 h'1 i'1]
+		 * a'1 = a1 + δ(a1)
+		 * b'1 = b1 + δ(b1)
 		 * ...
-		 * A[?] = d(fx)/d(?) = 0
-		 * 
+		 * R'k -> изравнена стойност на измерена величина
+		 * Fk(a'1, b'1,..., i'1, a'2,..., i'?) = 0
+		 * Fk(a1+δ(a1),..., i1+δ(i1),..., i?+δ(i?)) = 0
+		 * F(a1,..., i1,..., i?) + δ(a1)*d(F)/d(a1) + δ(b1)*d(F)/d(b1) + ... + δ(i?)*d(F)/d(i?) = 0
+		 *  
 		 * Неизвестни
 		 * U[0] = δ(a1)
 		 * U[1] = δ(b1)
@@ -328,18 +316,59 @@ public class TestRotationAdjust {
 		 * ...
 		 * U[17]= δ(i2)
 		 * ...
+		 * U[?] = δ(?)
 		 * 
-		 * Свободни членове W(Xi), W(Yi), W(Zi) - разлика между 
-		 * приблизителни (първоначални) и измерени стойности
+		 * Частни производни на F(...) или на fx, fy, fz
+		 * A[0][0] = d(fx)/d(a1) = 0
+		 * A[0][1] = d(fx)/d(b1) = 0
+		 * A[0][2] = d(fx)/d(c1) = 0
+		 * 
+		 * A[0][3] = d(fx)/d(d1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * A[0][4] = d(fx)/d(e1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * A[0][5] = d(fx)/d(f1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * 
+		 * A[0][6] = d(fx)/d(g1) = -X1 * (d2*X2 + e2*Y2 + f2*F2)
+		 * A[0][7] = d(fx)/d(h1) = -Y1 * (d2*X2 + e2*Y2 + f2*F2)
+		 * A[0][8] = d(fx)/d(i1) = -F1 * (d2*X2 + e2*Y2 + f2*F2)
+		 *
+		 * A[0][9] = d(fx)/d(a2) = 0
+		 * A[0][10]= d(fx)/d(b2) = 0
+		 * A[0][11]= d(fx)/d(c2) = 0
+		 * 
+		 * A[0][12]= d(fx)/d(d2) = -X2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * A[0][13]= d(fx)/d(e2) = -Y2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * A[0][14]= d(fx)/d(f2) = -F2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * 
+		 * A[0][15]= d(fx)/d(g2) = X2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * A[0][16]= d(fx)/d(h2) = Y2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * A[0][17]= d(fx)/d(i2) = F2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * ...
+		 * A[0][?] = d(fx)/d(?) = 0
+		 * A[1][0] = d(fy)/d(a1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * A[1][1] = d(fy)/d(b1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * A[1][2] = d(fy)/d(c1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * ...
+		 * A[2][?] = d(fz)/d(?) = ...
+		 * 
+		 * Уравнения на поправките v(Xi) v(Yi) v(Fi)
+		 * v(Xi) = fx(a1,..., i1,..., i?) + δ(a1)*d(F)/d(a1) + δ(b1)*d(F)/d(b1) + ... + δ(i?)*d(F)/d(i?)
+		 *  
+		 * v(Xi) = fx(a1,..., i1,..., i?) + U[0]*A[0][0] + U[1]A[0][1] + ... + U[?]*A[0][?] 
+		 * v(Yi) = fy(a1,..., i1,..., i?) + U[0]*A[1][0] + U[1]A[1][1] + ... + U[?]*A[1][?] 
+		 * v(Fi) = fz(a1,..., i1,..., i?) + U[0]*A[2][0] + U[1]A[2][1] + ... + U[?]*A[2][?] 
+		 * 
+		 * V = F(a1,..., i?) + U * A
+		 * V = [v(X1); v(Y1); v(F1); ...; v(Xi); v(Yi); v(Fi)]
+		 * 
+		 * Свободни членове Lk(X)(Rk), Lk(Y)(Rk), Lk(Z)(Rk)
+		 * Lk(Xi) = fx(a1,..., i1,..., i?, Xm, Ym, Fm, Xn, Yn, Zn)
+		 * 
+		 * 
+		 * 
 		 * M(?) = [a? b? c?; d? e? f?; g? h? i?] -> приблизителни са a?, b?,...i?
-		 * M'(?) = [a'? b'? c'?; d'? e'? f'?; g'? h'? i'?] -> 
-		 * 
-		 * приблизителни са a'?, b'?,...i'?
+		 * M'(?) = [a'? b'? c'?; d'? e'? f'?; g'? h'? i'?] -> изравнени са a'?, b'?,...i'? 
 		 * 
 		 * 
-		 * Уравнения на поправките v(Xi) v(Yi) v(Zi)
-		 * 
-		 * v(Xi) = 
 		 */
 		
 		private void setCoef(Matrix coefs, int atIndex,	Matrix source, Matrix dest, double sign) {
@@ -384,18 +413,12 @@ public class TestRotationAdjust {
 				p1.setItem(0, 0, source.x);
 				p1.setItem(0, 1, source.y);
 				p1.setItem(0, 2, source.camera.realFocalDistance); // / tr.averageFocalDistance);
-//				source.camera.coefs.mMul(p1, t1);
-				source.camera.coefs.copyTo(inv);
-				inv.inverse();
-				inv.mMul(p1, t1);
+				source.camera.coefs.mMul(p1, t1);
 				
 				p2.setItem(0, 0, dest.x);
 				p2.setItem(0, 1, dest.y);
 				p2.setItem(0, 2, dest.camera.realFocalDistance); // / tr.averageFocalDistance);
-//				dest.camera.coefs.mMul(p2, t2);
-				dest.camera.coefs.copyTo(inv);
-				inv.inverse();
-				inv.mMul(p2, t2);
+				dest.camera.coefs.mMul(p2, t2);
 				
 				for (int curCoord = 0; curCoord < 3; curCoord++) {
 					int c1 = (curCoord + 1) % 3;
@@ -427,17 +450,17 @@ public class TestRotationAdjust {
 			for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 				MyCamera image = tr.images.get(curImage);
 				int index = curImage * 9;
-				image.coefs.setItem(0, 0, u.getItem(0, index + 0));
-				image.coefs.setItem(1, 0, u.getItem(0, index + 1));
-				image.coefs.setItem(2, 0, u.getItem(0, index + 2));
+				image.coefs.setItem(0, 0, u.getItem(0, index + 0) + image.coefs.getItem(0, 0));
+				image.coefs.setItem(1, 0, u.getItem(0, index + 1) + image.coefs.getItem(1, 0));
+				image.coefs.setItem(2, 0, u.getItem(0, index + 2) + image.coefs.getItem(2, 0));
 
-				image.coefs.setItem(0, 1, u.getItem(0, index + 3));
-				image.coefs.setItem(1, 1, u.getItem(0, index + 4));
-				image.coefs.setItem(2, 1, u.getItem(0, index + 5));
+				image.coefs.setItem(0, 1, u.getItem(0, index + 3) + image.coefs.getItem(0, 1));
+				image.coefs.setItem(1, 1, u.getItem(0, index + 4) + image.coefs.getItem(1, 1));
+				image.coefs.setItem(2, 1, u.getItem(0, index + 5) + image.coefs.getItem(2, 1));
 
-				image.coefs.setItem(0, 2, u.getItem(0, index + 6));
-				image.coefs.setItem(1, 2, u.getItem(0, index + 7));
-				image.coefs.setItem(2, 2, u.getItem(0, index + 8));
+				image.coefs.setItem(0, 2, u.getItem(0, index + 6) + image.coefs.getItem(0, 2));
+				image.coefs.setItem(1, 2, u.getItem(0, index + 7) + image.coefs.getItem(1, 2));
+				image.coefs.setItem(2, 2, u.getItem(0, index + 8) + image.coefs.getItem(2, 2));
 			}
 			
 			return true;
