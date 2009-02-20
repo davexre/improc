@@ -9,6 +9,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.transform.BaseTransformLearner;
 import com.slavi.math.transform.BaseTransformer;
 
@@ -57,9 +58,9 @@ public class TestRotationAdjust {
 	
 	public static List<MyPoint3D> generateRealPoints() {
 		ArrayList<MyPoint3D> result = new ArrayList<MyPoint3D>();
-		for (int x = 0; x < 10; x++)
-			for (int y = 0; y < 10; y++)
-				for (int z = 0; z < 10; z++) {
+		for (int x = 0; x < 3; x++)
+			for (int y = 0; y < 2; y++)
+				for (int z = 0; z < 2; z++) {
 					MyPoint3D p = new MyPoint3D();
 					p.p.setItem(0, 0, x);
 					p.p.setItem(0, 1, y);
@@ -67,6 +68,63 @@ public class TestRotationAdjust {
 					result.add(p);
 				}					
 		return result;
+	}
+	
+	public static Matrix makeAngles(double rx, double ry, double rz) {
+		double sa = Math.sin(rx);
+		double ca = Math.cos(rx);
+
+		double sb = Math.sin(ry);
+		double cb = Math.cos(ry);
+
+		double sc = Math.sin(rz);
+		double cc = Math.cos(rz);
+
+		Matrix mx = new Matrix(3, 3);
+		mx.setItem(0, 0, ca);
+		mx.setItem(1, 0, -sa);
+		mx.setItem(2, 0, 0);
+		mx.setItem(0, 1, sa);
+		mx.setItem(1, 1, ca);
+		mx.setItem(2, 1, 0);
+		mx.setItem(0, 2, 0);
+		mx.setItem(1, 2, 0);
+		mx.setItem(2, 2, 1);
+		mx.printM("MX");
+		
+		Matrix my = new Matrix(3, 3);
+		my.setItem(0, 0, cb);
+		my.setItem(1, 0, 0);
+		my.setItem(2, 0, -sb);
+		my.setItem(0, 1, 0);
+		my.setItem(1, 1, 1);
+		my.setItem(2, 1, 0);
+		my.setItem(0, 2, sb);
+		my.setItem(1, 2, 0);
+		my.setItem(2, 2, cb);
+		my.printM("MY");
+
+		Matrix mz = new Matrix(3, 3);
+		mz.setItem(0, 0, 1);
+		mz.setItem(1, 0, 0);
+		mz.setItem(2, 0, 0);
+		mz.setItem(0, 1, 0);
+		mz.setItem(1, 1, cc);
+		mz.setItem(2, 1, -sc);
+		mz.setItem(0, 2, 0);
+		mz.setItem(1, 2, sc);
+		mz.setItem(2, 2, -cc);
+		mz.printM("MZ");
+
+		Matrix m = new Matrix(3, 3); 
+		mx.mMul(my, m);
+		m.mMul(mz, mx);
+		
+		System.out.println("M=");
+		System.out.println(m.toString());
+		mx.printM("M");
+		
+		return mx;
 	}
 	
 	public static List<MyCamera> generateCameras(MyPoint3D cameraOrigin, double cameraAngles[][]) {
@@ -77,8 +135,11 @@ public class TestRotationAdjust {
 			c.imageId = imageId++;
 			c.realOrigin = cameraOrigin;
 			c.realRot = MathUtil.makeAngles(i[0], i[1], i[2], false);
+			System.out.println("M'");
+			System.out.println(c.realRot.toString());
+			c.realRot = makeAngles(i[0], i[1], i[2]);
 			c.angles = i;
-			c.realFocalDistance = 1000; //i[3];
+			c.realFocalDistance = i[3];
 			c.coefs = c.realRot.makeCopy();
 			result.add(c);
 		}		
@@ -269,8 +330,8 @@ public class TestRotationAdjust {
 		 * M1 = [a1 b1 c1; d1 e1 f1; g1 h1 i1]
 		 * 
 		 * Координати на проекцията на точка P в КС на снимка 1, 
-		 * f1 - фокусно разстояние на камера 1
-		 * P1 = [X1; Y1; F1]
+		 * Z1 - фокусно разстояние на камера 1
+		 * P1 = [X1; Y1; Z1]
 		 * 
 		 * Координати на проекциите на точка P в снимки 1 и 2 
 		 * съответно P1/P2 и трансформиране на точки P1/P2 в глобална КС
@@ -286,9 +347,9 @@ public class TestRotationAdjust {
 		 * fy: P'1(x) * P'2(z) - P'1(z) * P'2(x) = 0
 		 * fz: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
 		 * 
-		 * fx: (d1*X1 + e1*Y1 + f1*F1) * (g2*X2 + h2*Y2 + i2*F2) - (g1*X1 + g1*Y1 + i1*F1) * (d2*X2 + e2*Y2 + f2*F2)
-		 * fy: (a1*X1 + b1*Y1 + c1*F1) * (g2*X2 + h2*Y2 + i2*F2) - (g1*X1 + g1*Y1 + i1*F1) * (a2*X2 + b2*Y2 + c2*F2)
-		 * fz: (a1*X1 + b1*Y1 + c1*F1) * (d2*X2 + e2*Y2 + f2*F2) - (d1*X1 + e1*Y1 + f1*F1) * (a2*X2 + b2*Y2 + c2*F2)
+		 * fx: (d1*X1 + e1*Y1 + f1*Z1) * (g2*X2 + h2*Y2 + i2*Z2) - (g1*X1 + g1*Y1 + i1*Z1) * (d2*X2 + e2*Y2 + f2*Z2)
+		 * fy: (a1*X1 + b1*Y1 + c1*Z1) * (g2*X2 + h2*Y2 + i2*Z2) - (g1*X1 + g1*Y1 + i1*Z1) * (a2*X2 + b2*Y2 + c2*Z2)
+		 * fz: (a1*X1 + b1*Y1 + c1*Z1) * (d2*X2 + e2*Y2 + f2*Z2) - (d1*X1 + e1*Y1 + f1*Z1) * (a2*X2 + b2*Y2 + c2*Z2)
 		 * 
 		 * Измервания Rk - съответсващи проекции на една и съща точка 
 		 * в две (съседни) снимки m и n
@@ -323,34 +384,55 @@ public class TestRotationAdjust {
 		 * A[0][1] = d(fx)/d(b1) = 0
 		 * A[0][2] = d(fx)/d(c1) = 0
 		 * 
-		 * A[0][3] = d(fx)/d(d1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[0][4] = d(fx)/d(e1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[0][5] = d(fx)/d(f1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * A[0][3] = d(fx)/d(d1) = X1 * (g2*X2 + h2*Y2 + i2*Z2)  = X1 * P'2(z)
+		 * A[0][4] = d(fx)/d(e1) = Y1 * (g2*X2 + h2*Y2 + i2*Z2)  = Y1 * P'2(z)
+		 * A[0][5] = d(fx)/d(f1) = Z1 * (g2*X2 + h2*Y2 + i2*Z2)  = Z1 * P'2(z)
 		 * 
-		 * A[0][6] = d(fx)/d(g1) = -X1 * (d2*X2 + e2*Y2 + f2*F2)
-		 * A[0][7] = d(fx)/d(h1) = -Y1 * (d2*X2 + e2*Y2 + f2*F2)
-		 * A[0][8] = d(fx)/d(i1) = -F1 * (d2*X2 + e2*Y2 + f2*F2)
+		 * A[0][6] = d(fx)/d(g1) = -X1 * (d2*X2 + e2*Y2 + f2*Z2) = -X1 * P'2(y)
+		 * A[0][7] = d(fx)/d(h1) = -Y1 * (d2*X2 + e2*Y2 + f2*Z2) = -Y1 * P'2(y)
+		 * A[0][8] = d(fx)/d(i1) = -Z1 * (d2*X2 + e2*Y2 + f2*Z2) = -Z1 * P'2(y)
 		 *
 		 * A[0][9] = d(fx)/d(a2) = 0
 		 * A[0][10]= d(fx)/d(b2) = 0
 		 * A[0][11]= d(fx)/d(c2) = 0
 		 * 
-		 * A[0][12]= d(fx)/d(d2) = -X2 * (g1*X1 + h1*Y1 + i1*F1)
-		 * A[0][13]= d(fx)/d(e2) = -Y2 * (g1*X1 + h1*Y1 + i1*F1)
-		 * A[0][14]= d(fx)/d(f2) = -F2 * (g1*X1 + h1*Y1 + i1*F1)
+		 * A[0][12]= d(fx)/d(d2) = -X2 * (g1*X1 + h1*Y1 + i1*Z1) = -P'1(z) * X2
+		 * A[0][13]= d(fx)/d(e2) = -Y2 * (g1*X1 + h1*Y1 + i1*Z1) = -P'1(z) * Y2
+		 * A[0][14]= d(fx)/d(f2) = -Z2 * (g1*X1 + h1*Y1 + i1*Z1) = -P'1(z) * Z2
 		 * 
-		 * A[0][15]= d(fx)/d(g2) = X2 * (d1*X1 + e1*Y1 + f1*F1)
-		 * A[0][16]= d(fx)/d(h2) = Y2 * (d1*X1 + e1*Y1 + f1*F1)
-		 * A[0][17]= d(fx)/d(i2) = F2 * (d1*X1 + e1*Y1 + f1*F1)
+		 * A[0][15]= d(fx)/d(g2) = X2 * (d1*X1 + e1*Y1 + f1*Z1)  = P'1(y) * X2
+		 * A[0][16]= d(fx)/d(h2) = Y2 * (d1*X1 + e1*Y1 + f1*Z1)  = P'1(y) * Y2
+		 * A[0][17]= d(fx)/d(i2) = Z2 * (d1*X1 + e1*Y1 + f1*Z1)  = P'1(y) * Z2
 		 * ...
 		 * A[0][?] = d(fx)/d(?) = 0
-		 * A[1][0] = d(fy)/d(a1) = X1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[1][1] = d(fy)/d(b1) = Y1 * (g2*X2 + h2*Y2 + i2*F2)
-		 * A[1][2] = d(fy)/d(c1) = F1 * (g2*X2 + h2*Y2 + i2*F2)
+		 * 
+		 * A[1][0] = d(fy)/d(a1) = X1 * (g2*X2 + h2*Y2 + i2*Z2)  = X1 * P'2(z)
+		 * A[1][1] = d(fy)/d(b1) = Y1 * (g2*X2 + h2*Y2 + i2*Z2)  = Y1 * P'2(z)
+		 * A[1][2] = d(fy)/d(c1) = F1 * (g2*X2 + h2*Y2 + i2*Z2)  = Z1 * P'2(z)
+		 * 
+		 * A[1][3] = d(fy)/d(d1) = 0
+		 * A[1][4] = d(fy)/d(e1) = 0
+		 * A[1][5] = d(fy)/d(f1) = 0
+		 * 
+		 * A[1][6] = d(fy)/d(g1) = -X1 * (a2*X2 + b2*Y2 + c2*Z2) = -X1 * P'2(x)
+		 * A[1][7] = d(fy)/d(h1) = -Y1 * (a2*X2 + b2*Y2 + c2*Z2) = -Y1 * P'2(x)
+		 * A[1][8] = d(fy)/d(i1) = -F1 * (a2*X2 + b2*Y2 + c2*Z2) = -Z1 * P'2(x)
+		 * 
+		 * A[1][9] = d(fy)/d(a2) = -X2 * (g1*X1 + g1*Y1 + i1*Z1) = -P'1(z) * X2
+		 * A[1][10]= d(fy)/d(b2) = -Y2 * (g1*X1 + g1*Y1 + i1*Z1) = -P'1(z) * Y2
+		 * A[1][11]= d(fy)/d(c2) = -F2 * (g1*X1 + g1*Y1 + i1*Z1) = -P'1(z) * Z2
+		 * 
+		 * A[1][12]= d(fy)/d(d2) = 0
+		 * A[1][13]= d(fy)/d(e2) = 0
+		 * A[1][14]= d(fy)/d(f2) = 0
+		 * 
+		 * A[1][15]= d(fy)/d(g2) = X2 * (a1*X1 + b1*Y1 + c1*Z1)  = P'1(z) * X2
+		 * A[1][16]= d(fy)/d(h2) = Y2 * (a1*X1 + b1*Y1 + c1*Z1)  = P'1(z) * Y2
+		 * A[1][17]= d(fy)/d(i2) = F2 * (a1*X1 + b1*Y1 + c1*Z1)  = P'1(z) * Z2
 		 * ...
 		 * A[2][?] = d(fz)/d(?) = ...
 		 * 
-		 * Уравнения на поправките v(Xi) v(Yi) v(Fi)
+		 * Уравнения на поправките v(Xi) v(Yi) v(Zi)
 		 * v(Xi) = fx(a1,..., i1,..., i?) + δ(a1)*d(F)/d(a1) + δ(b1)*d(F)/d(b1) + ... + δ(i?)*d(F)/d(i?)
 		 *  
 		 * v(Xi) = fx(a1,..., i1,..., i?) + U[0]*A[0][0] + U[1]A[0][1] + ... + U[?]*A[0][?] 
@@ -358,10 +440,10 @@ public class TestRotationAdjust {
 		 * v(Fi) = fz(a1,..., i1,..., i?) + U[0]*A[2][0] + U[1]A[2][1] + ... + U[?]*A[2][?] 
 		 * 
 		 * V = F(a1,..., i?) + U * A
-		 * V = [v(X1); v(Y1); v(F1); ...; v(Xi); v(Yi); v(Fi)]
+		 * V = [v(X1); v(Y1); v(Z1); ...; v(Xi); v(Yi); v(Zi)]
 		 * 
 		 * Свободни членове Lk(X)(Rk), Lk(Y)(Rk), Lk(Z)(Rk)
-		 * Lk(Xi) = fx(a1,..., i1,..., i?, Xm, Ym, Fm, Xn, Yn, Zn)
+		 * Lk(Xi) = fx(a1,..., i1,..., i?, Xm, Ym, Zm, Xn, Yn, Zn)
 		 * 
 		 * 
 		 * 
@@ -371,7 +453,13 @@ public class TestRotationAdjust {
 		 * 
 		 */
 		
-		private void setCoef(Matrix coefs, int atIndex,	Matrix source, Matrix dest, double sign) {
+		private void setCoef(Matrix coefs, int atIndex,	Matrix source, double transformedCoord) {
+			coefs.setItem(atIndex + 0, 0, source.getItem(0, 0) * transformedCoord);
+			coefs.setItem(atIndex + 1, 0, source.getItem(0, 1) * transformedCoord);
+			coefs.setItem(atIndex + 2, 0, source.getItem(0, 2) * transformedCoord);
+		}
+
+/*		private void setCoef(Matrix coefs, int atIndex,	Matrix source, Matrix dest, double sign) {
 			double sum = dest.getItem(0, 0) + dest.getItem(0, 1) + dest.getItem(0, 2); 
 			double d1 = sign * source.getItem(0, 0) * sum;
 			double e1 = sign * source.getItem(0, 1) * sum;  
@@ -380,13 +468,13 @@ public class TestRotationAdjust {
 			coefs.setItem(atIndex + 0, 0, d1 + coefs.getItem(atIndex + 0, 0));
 			coefs.setItem(atIndex + 1, 0, e1 + coefs.getItem(atIndex + 1, 0));
 			coefs.setItem(atIndex + 2, 0, f1 + coefs.getItem(atIndex + 2, 0));
-		}
+		}*/
 		
 		public boolean calculateOne() {
 			int goodCount = computeWeights();
 			if (goodCount < lsa.getRequiredPoints())
 				return false;
-			Matrix coefs = new Matrix(transformer.getNumberOfCoefsPerCoordinate(), 1);			
+			Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
 			tr.originImage.coefs.makeE();
 			tr.averageFocalDistance = tr.originImage.realFocalDistance;
@@ -421,15 +509,38 @@ public class TestRotationAdjust {
 				dest.camera.coefs.mMul(p2, t2);
 				
 				for (int curCoord = 0; curCoord < 3; curCoord++) {
-					int c1 = (curCoord + 1) % 3;
-					int c2 = (curCoord + 2) % 3;
-					
+					int c1;
+					int c2;
+					switch (curCoord) {
+					case 0: c1 = 1; c2 = 2; break;
+					case 1: c1 = 0; c2 = 2; break;
+					case 2: 
+					default:
+							c1 = 0; c2 = 1; break;
+					}
 					// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
 					// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
 					double L = 
 						t1.getItem(0, c1) * t2.getItem(0, c2) -
-						t2.getItem(0, c1) * t1.getItem(0, c2);
+						t1.getItem(0, c2) * t2.getItem(0, c1);
+					/*
+					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
+					 * fy: P'1(x) * P'2(z) - P'1(z) * P'2(x) = 0
+					 * fz: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
+					 * 
+					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
+					 */
 					if (srcIndex >= 0) {
+						setCoef(coefs, srcIndex + c1 * 3, p1,  t2.getItem(0, c2));
+						setCoef(coefs, srcIndex + c2 * 3, p1, -t2.getItem(0, c1));
+					}
+					if (destIndex >= 0) {
+						setCoef(coefs, destIndex + c1 * 3, p2, -t1.getItem(0, c1));
+						setCoef(coefs, destIndex + c2 * 3, p2,  t1.getItem(0, c2));
+					}
+					lsa.addMeasurement(coefs, computedWeight, L, 0);
+					
+/*					if (srcIndex >= 0) {
 						setCoef(coefs, srcIndex + c1 * 3, p1, t2,  1.0);
 						setCoef(coefs, srcIndex + c2 * 3, p1, t2, -1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
@@ -438,7 +549,7 @@ public class TestRotationAdjust {
 						setCoef(coefs, destIndex + c1 * 3, p2, t1, -1.0);
 						setCoef(coefs, destIndex + c2 * 3, p2, t1,  1.0);
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
-					}
+					}*/
 				}
 			}
 			
@@ -446,7 +557,10 @@ public class TestRotationAdjust {
 				return false;
 
 			// Build transformer
-			Matrix u = lsa.getUnknown(); 
+			Matrix u = lsa.getUnknown();
+			System.out.println("U=");
+			System.out.println(u.toString());
+
 			for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 				MyCamera image = tr.images.get(curImage);
 				int index = curImage * 9;
@@ -538,8 +652,9 @@ public class TestRotationAdjust {
 	
 	static double cameraAngles[][] = new double[][] {
 		// rx, ry, rz, f
-		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{-20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
+//		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
+		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
+		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 //		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
