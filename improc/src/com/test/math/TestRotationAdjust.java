@@ -66,57 +66,54 @@ public class TestRotationAdjust {
 				}					
 		return result;
 	}
-	
-	public static Matrix makeAngles(double rx, double ry, double rz) {
+
+	/**
+	 * Return a rotation matrix R=mx*my*mz 
+	 */
+	public static Matrix makeAnglesXYZ(double rx, double ry, double rz) {
+		/*
+		 *  mx            my            mz
+		 *  1   0   0     cb  0  sb     cc -sc  0
+		 *  0  ca -sa      0  1  0      sc  cc  0
+		 *  0  sa  ca    -sb  0  cb      0   0  1
+		 */
 		double sa = Math.sin(rx);
 		double ca = Math.cos(rx);
-
+		
 		double sb = Math.sin(ry);
 		double cb = Math.cos(ry);
 
 		double sc = Math.sin(rz);
 		double cc = Math.cos(rz);
 
-		Matrix mx = new Matrix(3, 3);
-		mx.setItem(0, 0, ca);
-		mx.setItem(1, 0, -sa);
-		mx.setItem(2, 0, 0);
-		mx.setItem(0, 1, sa);
-		mx.setItem(1, 1, ca);
-		mx.setItem(2, 1, 0);
-		mx.setItem(0, 2, 0);
-		mx.setItem(1, 2, 0);
-		mx.setItem(2, 2, 1);
-		
-		Matrix my = new Matrix(3, 3);
-		my.setItem(0, 0, cb);
-		my.setItem(1, 0, 0);
-		my.setItem(2, 0, -sb);
-		my.setItem(0, 1, 0);
-		my.setItem(1, 1, 1);
-		my.setItem(2, 1, 0);
-		my.setItem(0, 2, sb);
-		my.setItem(1, 2, 0);
-		my.setItem(2, 2, cb);
-
-		Matrix mz = new Matrix(3, 3);
-		mz.setItem(0, 0, 1);
-		mz.setItem(1, 0, 0);
-		mz.setItem(2, 0, 0);
-		mz.setItem(0, 1, 0);
-		mz.setItem(1, 1, cc);
-		mz.setItem(2, 1, -sc);
-		mz.setItem(0, 2, 0);
-		mz.setItem(1, 2, sc);
-		mz.setItem(2, 2, cc);
-
-		Matrix m = new Matrix(3, 3); 
-		mx.mMul(my, m);
-		m.mMul(mz, mx);
-		
-		return mx;
+		/*
+		 * mx*my
+		 * cb				0				-sb
+		 * -sa*sb			ca				-sa*cb
+		 * ca*sb			sa				ca*cb
+		 * 
+		 * (mx*my)*mz
+		 * cc*cb			-cb*sc			-sb
+		 * ca*sc-sa*sb*cc	ca*cc+sa*sb*sc	-sa*cb
+		 * sa*sc+ca*sb*cc	sa*cc-ca*sb*sc	ca*cb
+		 */
+		Matrix r = new Matrix(3, 3);
+		r.setItem(0, 0, cc*cb);
+		r.setItem(1, 0, -cb*sc);
+		r.setItem(2, 0, -sb);
+		r.setItem(0, 1, ca*sc-sa*sb*cc);
+		r.setItem(1, 1, ca*cc+sa*sb*sc);
+		r.setItem(2, 1, -sa*cb);
+		r.setItem(0, 2, sa*sc+ca*sb*cc);
+		r.setItem(1, 2, sa*cc-ca*sb*sc);
+		r.setItem(2, 2, ca*cb);
+		return r;
 	}
 
+	public static void main(String[] args) {
+		makeAnglesXYZ(2, 3, 4);
+	}
+	
 	public static MyCamera[] generateCameras(MyPoint3D cameraOrigin, double cameraAngles[][]) {
 		MyCamera[] result = new MyCamera[cameraAngles.length];
 		int imageId = 1;
@@ -125,7 +122,7 @@ public class TestRotationAdjust {
 			MyCamera c = new MyCamera();
 			c.imageId = imageId++;
 			c.realOrigin = cameraOrigin;
-			c.real2camera = makeAngles(data[0], data[1], data[2]);
+			c.real2camera = makeAnglesXYZ(data[0], data[1], data[2]);
 			c.angles = data;
 			c.realFocalDistance = data[3];
 			c.camera2real = c.real2camera.makeCopy();
@@ -470,7 +467,7 @@ public class TestRotationAdjust {
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		List<MyPoint3D> realPoints = generateRealPoints();
 		
 		MyPoint3D cameraOrigin = new MyPoint3D();
