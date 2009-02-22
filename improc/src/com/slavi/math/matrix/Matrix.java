@@ -99,9 +99,9 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(m[i][j]) } ));
+				result.append(String.format(Locale.US, "%1$10.4f\t",new Object[] { new Double(m[i][j]) } ));
 			}
-			result.append(";");
+			result.append("");
 		}
 		return result.toString();
 	}

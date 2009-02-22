@@ -279,10 +279,10 @@ public class TestRotationAdjust {
 			this.lsa = new LeastSquaresAdjust(transformer.getNumberOfCoefsPerCoordinate(), 1);		
 		}
 
-		private void setCoef(Matrix coefs, int atIndex,	Matrix source, double transformedCoord) {
-			coefs.setItem(atIndex + 0, 0, source.getItem(0, 0) * transformedCoord);
-			coefs.setItem(atIndex + 1, 0, source.getItem(0, 1) * transformedCoord);
-			coefs.setItem(atIndex + 2, 0, source.getItem(0, 2) * transformedCoord);
+		private void setCoef(Matrix coefs, int atIndex,	MyImagePoint p, double transformedCoord) {
+			coefs.setItem(atIndex + 0, 0, p.x * transformedCoord);
+			coefs.setItem(atIndex + 1, 0, p.y * transformedCoord);
+			coefs.setItem(atIndex + 2, 0, p.camera.realFocalDistance * transformedCoord);
 		}
 
 		public boolean calculateOne() {
@@ -294,13 +294,12 @@ public class TestRotationAdjust {
 			tr.originImage.camera2real.makeE();
 			tr.averageFocalDistance = tr.originImage.realFocalDistance;
 			
-			Matrix p1 = new Matrix(1, 3);
-			Matrix p2 = new Matrix(1, 3);
 			Matrix t1 = new Matrix(1, 3);
 			Matrix t2 = new Matrix(1, 3);
 			MyImagePoint tmp1 = new MyImagePoint();
 			MyImagePoint tmp2 = new MyImagePoint();
 			lsa.clear();
+			System.out.println("COEFS=");
 			for (Map.Entry<MyImagePoint, MyImagePoint> item : items) {
 				if (isBad(item))
 					continue;
@@ -347,17 +346,20 @@ public class TestRotationAdjust {
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
 					if (srcIndex >= 0) {
-						setCoef(coefs, srcIndex + c1 * 3, p1,  t2.getItem(0, c2));
-						setCoef(coefs, srcIndex + c2 * 3, p1, -t2.getItem(0, c1));
+						setCoef(coefs, srcIndex + c1 * 3, source,  t2.getItem(0, c2));
+						setCoef(coefs, srcIndex + c2 * 3, source, -t2.getItem(0, c1));
 					}
 					if (destIndex >= 0) {
-						setCoef(coefs, destIndex + c1 * 3, p2, -t1.getItem(0, c1));
-						setCoef(coefs, destIndex + c2 * 3, p2,  t1.getItem(0, c2));
+						setCoef(coefs, destIndex + c1 * 3, dest, -t1.getItem(0, c1));
+						setCoef(coefs, destIndex + c2 * 3, dest,  t1.getItem(0, c2));
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
+					System.out.println(coefs.toOneLineString());
 				}
 			}
-			
+
+			System.out.println("NM=");
+			System.out.println(lsa.getNm());
 			if (!lsa.calculate()) 
 				return false;
 
@@ -464,7 +466,7 @@ public class TestRotationAdjust {
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
-//		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
+		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
 
@@ -480,7 +482,10 @@ public class TestRotationAdjust {
 		List<MyPointPair> pointPairs = generatePointPairs(cameras, realPoints);
 		
 		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
-		learner.calculateOne();
+		if (!learner.calculateOne()) {
+			System.out.println("FAILED");
+			return;
+		}
 		
 		for (MyCamera image : cameras) {
 			System.out.println("Image " + image.imageId);
