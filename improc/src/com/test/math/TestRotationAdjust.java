@@ -298,6 +298,8 @@ public class TestRotationAdjust {
 			Matrix p2 = new Matrix(1, 3);
 			Matrix t1 = new Matrix(1, 3);
 			Matrix t2 = new Matrix(1, 3);
+			MyImagePoint tmp1 = new MyImagePoint();
+			MyImagePoint tmp2 = new MyImagePoint();
 			lsa.clear();
 			for (Map.Entry<MyImagePoint, MyImagePoint> item : items) {
 				if (isBad(item))
@@ -312,15 +314,15 @@ public class TestRotationAdjust {
 				
 				coefs.make0();
 				
-				p1.setItem(0, 0, source.x);
-				p1.setItem(0, 1, source.y);
-				p1.setItem(0, 2, source.camera.realFocalDistance); // / tr.averageFocalDistance);
-				source.camera.camera2real.mMul(p1, t1);
-				
-				p2.setItem(0, 0, dest.x);
-				p2.setItem(0, 1, dest.y);
-				p2.setItem(0, 2, dest.camera.realFocalDistance); // / tr.averageFocalDistance);
-				dest.camera.camera2real.mMul(p2, t2);
+				tr.transform(source, tmp1);
+				t1.setItem(0, 0, tmp1.x);
+				t1.setItem(0, 1, tmp1.y);
+				t1.setItem(0, 2, tmp1.z);
+
+				tr.transform(dest, tmp2);
+				t2.setItem(0, 0, tmp2.x);
+				t2.setItem(0, 1, tmp2.y);
+				t2.setItem(0, 2, tmp2.z);
 				
 				for (int curCoord = 0; curCoord < 3; curCoord++) {
 					int c1;
@@ -353,17 +355,6 @@ public class TestRotationAdjust {
 						setCoef(coefs, destIndex + c2 * 3, p2,  t1.getItem(0, c2));
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
-					
-/*					if (srcIndex >= 0) {
-						setCoef(coefs, srcIndex + c1 * 3, p1, t2,  1.0);
-						setCoef(coefs, srcIndex + c2 * 3, p1, t2, -1.0);
-						lsa.addMeasurement(coefs, computedWeight, L, 0);
-					}
-					if (destIndex >= 0) {
-						setCoef(coefs, destIndex + c1 * 3, p2, t1, -1.0);
-						setCoef(coefs, destIndex + c2 * 3, p2, t1,  1.0);
-						lsa.addMeasurement(coefs, computedWeight, L, 0);
-					}*/
 				}
 			}
 			
