@@ -47,7 +47,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		}
 		
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
-			scalePointList.add(scalePoint);
+			scalePointList.items.add(scalePoint);
 		}		
 	}
 	
@@ -88,7 +88,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				result.add(scalePoint);
+				result.items.add(scalePoint);
 			}		
 		};
 		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
@@ -157,44 +157,4 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		result = KeyPointList.fromTextStream(fin, rootImagesDir);
 		return result;
 	}
-	
-	/*
-	public static KeyPointList loadAutoPanoFile(String finName) throws JDOMException, IOException {
-		KeyPointList result = new KeyPointList();
-		Element root = XMLHelper.readXML(new File(finName));
-		result.imageFileStamp = new FileStamp(root.getChildText("ImageFile"));
-		result.imageSizeX = Integer.parseInt(root.getChildText("XDim"));
-		result.imageSizeY = Integer.parseInt(root.getChildText("YDim"));
-		
-		java.util.List kpl = root.getChild("Arr").getChildren("KeypointN");
-		
-		for (int counter = 0; counter < kpl.size(); counter++) {
-			Element key = (Element)kpl.get(counter);
-			KeyPoint sp = new KeyPoint();
-			sp.doubleX = Double.parseDouble(key.getChildText("X"));
-			sp.doubleY = Double.parseDouble(key.getChildText("Y"));
-			sp.imgX = (int)sp.doubleX;
-			sp.imgY = (int)sp.doubleY;
-			sp.adjS = 0;
-			sp.degree = Double.parseDouble(key.getChildText("Orientation"));
-			sp.level = Integer.parseInt(key.getChildText("Level"));
-			sp.kpScale = Double.parseDouble(key.getChildText("Scale"));
-			
-			List descr = key.getChild("Descriptor").getChildren("int");
-			for (int i = 0; i < KeyPoint.descriptorSize; i++) {
-				for (int j = 0; j < KeyPoint.descriptorSize; j++) {
-					for (int k = 0; k < KeyPoint.numDirections; k++) {
-						int index = 
-							i * KeyPoint.descriptorSize * KeyPoint.numDirections +
-							j * KeyPoint.numDirections + k;
-						sp.setItem(i, j, k, Byte.parseByte(
-							((Element)descr.get(index)).getText()));
-					}
-				}
-			}
-			result.kdtree.add(sp);
-		}
-		return result;
-	}
-	*/
 }

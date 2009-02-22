@@ -3,7 +3,7 @@ package com.slavi.improc;
 import java.util.StringTokenizer;
 
 public class PanoPair {
-	public double sx, sy, tx, ty, discrepancy, weight;
+	public double sx, sy, tx, ty, discrepancy;
 	public double distance1, distance2;
 	
 	public PanoPair() {}
@@ -13,10 +13,9 @@ public class PanoPair {
 		sy = kpp.sourceSP.doubleY;
 		tx = kpp.targetSP.doubleX;
 		ty = kpp.targetSP.doubleY;
-		discrepancy = kpp.getDiscrepancy();
+		discrepancy = kpp.discrepancy;
 		distance1 = kpp.distanceToNearest;
 		distance2 = kpp.distanceToNearest2;
-		weight = kpp.getWeight();
 	}
 	
 	public static PanoPair fromString(String s) {
@@ -27,7 +26,6 @@ public class PanoPair {
 		result.tx = Double.parseDouble(st.nextToken());
 		result.ty = Double.parseDouble(st.nextToken());
 		result.discrepancy = Double.parseDouble(st.nextToken());
-		result.weight = Double.parseDouble(st.nextToken());
 		return result;
 	}
 	
@@ -37,7 +35,6 @@ public class PanoPair {
 			Double.toString(sy) + "\t" +
 			Double.toString(tx) + "\t" +
 			Double.toString(ty) + "\t" +
-			Double.toString(discrepancy) + "\t" +
-			Double.toString(weight);
+			Double.toString(discrepancy);
 	}
 }

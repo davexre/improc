@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+import com.slavi.math.matrix.Matrix;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
-import com.slavi.util.tree.KDTree;
 
-public class KeyPointList extends KDTree<KeyPoint> {
+public class KeyPointList {
 	public static final String fileHeader = "KeyPoint file version 1.2";
+	
+	public final ArrayList<KeyPoint> items = new ArrayList<KeyPoint>();
 	
 	public FileStamp imageFileStamp = null;
 	
@@ -20,57 +22,49 @@ public class KeyPointList extends KDTree<KeyPoint> {
 
 	public int imageSizeY;
 	
-	public KeyPointList() {
-		super(KeyPoint.featureVectorLinearSize, false);
+	public Matrix toWorld;
+	
+	public int getFocalDistance() {
+		return Math.max(imageSizeX, imageSizeY);
 	}
 
-	public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {
-		return fromNode != toNode;
-	}
-
-	public double getValue(KeyPoint node, int dimensionIndex) {
-		return node.getValue(dimensionIndex);
-	}
-	
-	public void add(KeyPoint item) {
-		item.keyPointList = this;
-		super.add(item);
-	}
-	
 	public static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
 		r.imageFileStamp = FileStamp.fromString(fin.readLine(), rootImagesDir);
 		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
 		r.imageSizeX = Integer.parseInt(st.nextToken());
 		r.imageSizeY = Integer.parseInt(st.nextToken());
-		new KeyPointListSaver(r).fromTextStream(r, fin);
+		while (fin.ready()) {
+			String str = fin.readLine().trim();
+			if ((str.length() > 0) && (str.charAt(0) != '#')) {
+				r.items.add(KeyPoint.fromString(str));
+			}
+		}
 		return r;
 	}
 
 	public void toTextStream(PrintWriter fou) {
 		fou.println(imageFileStamp.toString());
 		fou.println(imageSizeX + "\t" + imageSizeY);
-		new KeyPointListSaver(this).toTextStream(this, fou);
+		for (KeyPoint item : items)
+			fou.println(item.toString());
 	}
 
 	public HashMap<Integer, KeyPoint> makeMap() {
-		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(getSize());
-		for (KeyPoint i : this) {
+		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(items.size());
+		for (KeyPoint i : items) {
 			result.put(i.id, i);
 		}
 		return result;
 	}
 	
 	public void compareToList(KeyPointList dest) {
-		ArrayList<KeyPoint> points = toList();
-		ArrayList<KeyPoint> destPoints = dest.toList();
-		
 		int matchedCount1 = 0;
-		for (int i = points.size() - 1; i >= 0; i--) {
-			KeyPoint sp1 = points.get(i);
+		for (int i = items.size() - 1; i >= 0; i--) {
+			KeyPoint sp1 = items.get(i);
 			boolean matchingFound = false;
-			for (int j = destPoints.size() - 1; j >= 0; j--) {
-				KeyPoint sp2 = destPoints.get(j);
+			for (int j = dest.items.size() - 1; j >= 0; j--) {
+				KeyPoint sp2 = dest.items.get(j);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount1++;
@@ -82,11 +76,11 @@ public class KeyPointList extends KDTree<KeyPoint> {
 		}
 
 		int matchedCount2 = 0;
-		for (int j = destPoints.size() - 1; j >= 0; j--) {
-			KeyPoint sp2 = destPoints.get(j);
+		for (int j = dest.items.size() - 1; j >= 0; j--) {
+			KeyPoint sp2 = dest.items.get(j);
 			boolean matchingFound = false;
-			for (int i = points.size() - 1; i >= 0; i--) {
-				KeyPoint sp1 = points.get(i);
+			for (int i = items.size() - 1; i >= 0; i--) {
+				KeyPoint sp1 = items.get(i);
 				if (sp1.equals(sp2)) {
 					matchingFound = true;
 					matchedCount2++;
@@ -97,7 +91,7 @@ public class KeyPointList extends KDTree<KeyPoint> {
 				System.out.println("Point No " + j + " from 2-nd list has no match in 1-st list");
 		}
 		
-		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + points.size());
-		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + destPoints.size());
+		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + items.size());
+		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + dest.items.size());
 	}
 }

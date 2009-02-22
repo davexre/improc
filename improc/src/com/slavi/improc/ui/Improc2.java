@@ -1,14 +1,11 @@
 package com.slavi.improc.ui;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 
-import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
-import com.slavi.util.Const;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -37,18 +34,13 @@ public class Improc2 {
 		System.out.println("Tree depth         : " + bigTree.getTreeDepth());
 		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());
 		
-//		System.out.println("---------- Find image pairs in BIG tree");
-//		SwtUtl.openWaitDialog("Find image pairs in BIG tree", 
-//				new FindImagePairsInBigTree(bigTree), 
-//				bigTree.getSize());
-
 		System.out.println("---------- Generating key point pairs from BIG tree");
 		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
 				new GenerateKeyPointPairsFromBigTree(bigTree),
 				images.size() - 1);
 		images = null;
 		bigTree = null;
-
+/*
 		System.out.println("---------- Keypoint pairs results");
 		for (KeyPointPairList l : kppl) {
 			System.out.println(Integer.toString(l.items.size()) + "\t" + 
@@ -73,7 +65,7 @@ public class Improc2 {
 			}
 		}		
 		out.close();
-		
+*/
 		
 		System.out.println("---------- Generating pano pairs from key point pairs");
 		PanoList panoList = SwtUtil.openWaitDialog("Generating pano pairs from key point pairs", 
@@ -85,10 +77,6 @@ public class Improc2 {
 			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
 					ppl.sourceImage + "\t" + ppl.targetImage);
 		}
-		
-//		System.out.println("---------- Generating panorama (PTO) files");
-//		SwtUtil.openWaitDialog("Generating panorama (PTO) files", 
-//				new GeneratePanoramaFiles(panoList, keyPointFileRoot), panoList.items.size());
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 

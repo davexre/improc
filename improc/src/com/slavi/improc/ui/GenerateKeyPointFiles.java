@@ -32,9 +32,8 @@ public class GenerateKeyPointFiles implements Callable<Void> {
 			String statusMessage = (i + 1) + "/" + images.size() + " " + fileName;
 			System.out.print(statusMessage);
 			SwtUtil.activeWaitDialogSetStatus(statusMessage, i);
-//			KeyPointList.updateKeyPointFileIfNecessary(imagesRoot, keyPointFileRoot, new File(fileName));
 			KeyPointList kpl = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(fileName));
-			System.out.println(" (" + kpl.getSize() + " key points)");
+			System.out.println(" (" + kpl.items.size() + " key points)");
 		}
 		return null;
 	}

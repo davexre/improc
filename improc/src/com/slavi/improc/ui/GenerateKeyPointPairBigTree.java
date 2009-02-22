@@ -48,7 +48,7 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 				System.out.println(statusMessage);
 				SwtUtil.activeWaitDialogSetStatus(statusMessage, bigTree.keyPointLists.size() - 1);
 			}
-			for (KeyPoint kp : l) {
+			for (KeyPoint kp : l.items) {
 				bigTree.add(kp);
 			}
 			return null;
@@ -82,12 +82,6 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 			exec.shutdownNow();
 		}
 
-//		SwtUtl.activeWaitDialogSetStatus("Balancing the tree", 0);
-//		System.out.println("Tree size        : " + result.getSize());
-//		System.out.println("Tree depth before: " + result.getTreeDepth());
-//		result.balanceIfNeeded();
-//		System.out.println("Tree depth after : " + result.getTreeDepth());
-		
 		return result;
 	}
 }

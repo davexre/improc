@@ -17,15 +17,15 @@ public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, Ke
 	}
 
 	public double getDiscrepancy(Entry<KeyPoint, KeyPoint> item) {
-		return ((KeyPointPair) item).getDiscrepancy();
+		return ((KeyPointPair) item).discrepancy;
 	}
 
 	public double getWeight(Entry<KeyPoint, KeyPoint> item) {
 		double result;
 		if (useWeight)
-			result = ((KeyPointPair) item).getWeight();
+			result = 1.0;
 		else {
-			result = Math.abs(((KeyPointPair) item).getDiscrepancy());
+			result = Math.abs(((KeyPointPair) item).discrepancy);
 			if (result < 1.0)
 				result = 1.0;
 			result = 1.0 / result;
@@ -34,14 +34,14 @@ public class PanoPairTransformLerner extends AffineTransformLearner<KeyPoint, Ke
 	}
 
 	public boolean isBad(Entry<KeyPoint, KeyPoint> item) {
-		return ((KeyPointPair) item).isBad();
+		return ((KeyPointPair) item).bad;
 	}
 
 	public void setBad(Entry<KeyPoint, KeyPoint> item, boolean bad) {
-		((KeyPointPair) item).setBad(bad);
+		((KeyPointPair) item).bad = bad;
 	}
 
 	public void setDiscrepancy(Entry<KeyPoint, KeyPoint> item, double discrepancy) {
-		((KeyPointPair) item).setDiscrepancy(discrepancy);
+		((KeyPointPair) item).discrepancy = discrepancy;
 	}
 }

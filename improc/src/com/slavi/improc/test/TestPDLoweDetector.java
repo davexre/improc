@@ -21,7 +21,7 @@ public class TestPDLoweDetector {
 		}
 
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
-			spl.add(scalePoint);
+			spl.items.add(scalePoint);
 		}
 	}
 	

@@ -56,7 +56,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			String strImageId = Integer.toString(imageId);
 			
 			int totalPairCount = 0;
-			for (KeyPoint kp : image) {
+			for (KeyPoint kp : image.items) {
 				if (Thread.interrupted())
 					throw new InterruptedException();
 				

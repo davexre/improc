@@ -11,26 +11,26 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public KeyPoint targetSP;
 	
 	public double angle;
+	
 	public double d1;
 	
 	// Distance to nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest;
 	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest2;
+	
+	public double discrepancy;
 
-	public double overallFitness;	// TODO: obsolete !?!
+	public double weight;
 	
-	// targetReused = true means this pair is suspicious, posibly bad
-	public boolean targetReused;	// TODO: obsolete !?!
-	
+	public boolean bad;
+
 	public KeyPointPair() {
 		super();
 		sourceSP = null;
 		targetSP = null;
 		distanceToNearest = 0;
 		distanceToNearest2 = 0;
-		overallFitness = 0;
-		targetReused = false;
 	}
 	
 	public KeyPointPair(KeyPoint sourceSP, KeyPoint targetSP, double distanceToNearest, double distanceToNearest2) {
@@ -38,12 +38,6 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 		this.targetSP = targetSP;
 		this.distanceToNearest = distanceToNearest;
 		this.distanceToNearest2 = distanceToNearest2;
-		double d = distanceToNearest2 - distanceToNearest;
-		if (d > 0)
-			this.overallFitness = distanceToNearest / d;
-		else
-			this.overallFitness = Double.MAX_VALUE;
-		this.targetReused = false;
 	}
 
 	public int getUnmatchingCount() {
@@ -87,44 +81,6 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 				KeyPoint.fromString(st.nextToken()), d1, d2);
 	}	
 	
-	double discrepancy;
-	public double getDiscrepancy() {
-		return discrepancy;
-	}
-
-	public double getSourceCoord(int coordIndex) {
-		switch (coordIndex) {
-			case 0: return sourceSP.doubleX;
-			case 1: return sourceSP.doubleY;
-			default: throw new IllegalArgumentException("Index out of range [0..1]");
-		}
-	}
-
-	public double getTargetCoord(int coordIndex) {
-		switch (coordIndex) {
-			case 0: return targetSP.doubleX;
-			case 1: return targetSP.doubleY;
-			default: throw new IllegalArgumentException("Index out of range [0..1]");
-		}
-	}
-
-	public double getWeight() {
-		return 1.0;
-	}
-
-	boolean bad;
-	public boolean isBad() {
-		return bad;
-	}
-
-	public void setBad(boolean bad) {
-		this.bad = bad;
-	}
-
-	public void setDiscrepancy(double discrepancy) {
-		this.discrepancy = discrepancy;
-	}
-
 	public KeyPoint getKey() {
 		return sourceSP;
 	}

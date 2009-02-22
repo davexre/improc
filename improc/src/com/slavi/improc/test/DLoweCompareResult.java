@@ -40,7 +40,7 @@ public class DLoweCompareResult {
 		DLoweDetector d = new DLoweDetector();
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				result.add(scalePoint);
+				result.items.add(scalePoint);
 			}		
 		};
 		d.hook = hook;
@@ -59,7 +59,7 @@ public class DLoweCompareResult {
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				result.add(scalePoint);
+				result.items.add(scalePoint);
 			}		
 		};
 		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
@@ -163,8 +163,8 @@ public class DLoweCompareResult {
 //		if (kp1.kdtree.getSize() != kp2.kdtree.getSize())
 //			return false;
 		
-		ArrayList<KeyPoint> p1 = kp1.toList();
-		ArrayList<KeyPoint> p2 = kp2.toList();
+		ArrayList<KeyPoint> p1 = kp1.items;
+		ArrayList<KeyPoint> p2 = kp2.items;
 
 //		int count = 0;
 //		for (DWindowedImage i : directionsPAR) {
@@ -228,8 +228,8 @@ public class DLoweCompareResult {
 	}
 	
 	public static boolean compare2(KeyPointList kp1, KeyPointList kp2) {
-		ArrayList<KeyPoint> p1 = kp1.toList();
-		ArrayList<KeyPoint> p2 = kp2.toList();
+		ArrayList<KeyPoint> p1 = kp1.items;
+		ArrayList<KeyPoint> p2 = kp2.items;
 
 		for (int i = p1.size() - 1; i >= 0; i--) {
 			KeyPoint sp1 = p1.get(i);
@@ -258,27 +258,13 @@ public class DLoweCompareResult {
 
 	public static void makeMap(KeyPointList kp, String fouName) throws IOException {
 		PDImageMapBuffer buf = new PDImageMapBuffer(new Rectangle(kp.imageSizeX, kp.imageSizeY));
-		for (KeyPoint sp : kp) {
+		for (KeyPoint sp : kp.items) {
 			if (sp.imgScale != 1)
 				continue;
 //			System.out.println("qqqq");
 			buf.setPixel((int)sp.doubleX, (int)sp.doubleY, 1.0);
 		}
 		DWindowedImageUtils.toImageFile(buf, fouName);
-	}
-	
-	static void doIt3(String fileName) throws Exception {
-//		KeyPointList kp1 = makeWithOldDetector(fileName);
-		KeyPointList kp1 = makeWithParallelDetector(fileName);
-		KeyPointList kt = new KeyPointList();
-		for (KeyPoint k : kp1) {
-			KeyPoint kp = kt.findMatching(k);
-			if (kp == null) {
-				kt.add(kp);
-			} else {
-				System.out.println("Duplicated " + kp.id);
-			}
-		}
 	}
 	
 	static void doIt(String fileName) throws IOException, InterruptedException, ExecutionException {
@@ -305,8 +291,8 @@ public class DLoweCompareResult {
 //			System.out.println(kp.imgScale + "\t" + kp.imgX + "\t" + kp.imgY + "\t" + kp.doubleX + "\t" + kp.doubleY);
 //		}
 		
-		ArrayList<KeyPoint> l1 = kp1.toList();
-		ArrayList<KeyPoint> l2 = kp2.toList();
+		ArrayList<KeyPoint> l1 = kp1.items;
+		ArrayList<KeyPoint> l2 = kp2.items;
 		Comparator<KeyPoint> c = new Comparator<KeyPoint>() {
 			public int compare(KeyPoint o1, KeyPoint o2) {
 				int result;
