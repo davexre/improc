@@ -82,7 +82,7 @@ public class RotationXYZ {
 		r.setItem(0, 2, sa*cc-ca*sb*sc);
 		r.setItem(1, 2, -sa*sc-ca*sb*cc);
 		r.setItem(2, 2, 0);
-		return null;
+		return r;
 	}
 	
 	public static Matrix make_dF_dY(double rx, double ry, double rz) {
@@ -116,7 +116,7 @@ public class RotationXYZ {
 		r.setItem(0, 2, ca*cb*cc);
 		r.setItem(1, 2, -ca*cb*sc);
 		r.setItem(2, 2, -ca*sb);
-		return null;
+		return r;
 	}
 	
 	public static Matrix make_dF_dX(double rx, double ry, double rz) {
@@ -150,6 +150,6 @@ public class RotationXYZ {
 		r.setItem(0, 2, ca*sc-sa*sb*cc);
 		r.setItem(1, 2, ca*cc+sa*sb*sc);
 		r.setItem(2, 2, -sa*cb);
-		return null;
+		return r;
 	}
 }
