@@ -32,11 +32,11 @@ public class Utils {
 			MyCamera c = new MyCamera();
 			c.cameraId = cameraId++;
 			c.realOrigin = cameraOrigin;
-			c.real2camera = RotationXYZ.makeAngles(data[0], data[1], data[2]);
 			c.angles = data;
 			c.realFocalDistance = data[3];
-			c.camera2real = c.real2camera.makeCopy();
-			c.camera2real.inverse();
+			c.camera2real = RotationXYZ.makeAngles(data[0], data[1], data[2]);
+			c.real2camera = c.camera2real.makeCopy();
+			c.real2camera.inverse();
 			c.rx = data[0];
 			c.ry = data[1];
 			c.rz = data[2];

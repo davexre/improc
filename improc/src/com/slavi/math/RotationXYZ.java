@@ -152,4 +152,83 @@ public class RotationXYZ {
 		r.setItem(2, 2, -sa*cb);
 		return r;
 	}
+/*	
+	public static void main(String[] args) {
+		double rx = 1;
+		double ry = 2;
+		double rz = 3;
+		
+		double sa = Math.sin(rx);
+		double ca = Math.cos(rx);
+		
+		double sb = Math.sin(ry);
+		double cb = Math.cos(ry);
+
+		double sc = Math.sin(rz);
+		double cc = Math.cos(rz);
+
+		Matrix m = make_dF_dZ(rx, ry, rz);
+		Matrix x = new Matrix(3, 3);
+		Matrix y = new Matrix(3, 3);
+		Matrix z = new Matrix(3, 3);
+		Matrix tmp1 = new Matrix(3, 3);
+		Matrix tmp2 = new Matrix(3, 3);
+		
+		x.setItem(0, 0, 1);
+		x.setItem(1, 0, 0);
+		x.setItem(2, 0, 0);
+		x.setItem(0, 1, 0);
+		x.setItem(1, 1, ca);
+		x.setItem(2, 1, -sa);
+		x.setItem(0, 2, 0);
+		x.setItem(1, 2, sa);
+		x.setItem(2, 2, ca);
+		
+		y.setItem(0, 0, cb);
+		y.setItem(1, 0, 0);
+		y.setItem(2, 0, -sb);
+		y.setItem(0, 1, 0);
+		y.setItem(1, 1, 1);
+		y.setItem(2, 1, 0);
+		y.setItem(0, 2, sb);
+		y.setItem(1, 2, 0);
+		y.setItem(2, 2, cb);
+
+		// make_dF_dY
+//		y.setItem(0, 0, -sb);
+//		y.setItem(1, 0, 0);
+//		y.setItem(2, 0, -cb);
+//		y.setItem(0, 1, 0);
+//		y.setItem(1, 1, 0);
+//		y.setItem(2, 1, 0);
+//		y.setItem(0, 2, cb);
+//		y.setItem(1, 2, 0);
+//		y.setItem(2, 2, -sb);
+		
+//		z.setItem(0, 0, cc);
+//		z.setItem(1, 0, -sc);
+//		z.setItem(2, 0, 0);
+//		z.setItem(0, 1, sc);
+//		z.setItem(1, 1, cc);
+//		z.setItem(2, 1, 0);
+//		z.setItem(0, 2, 0);
+//		z.setItem(1, 2, 0);
+//		z.setItem(2, 2, 1);
+		
+		// make_dF_dZ
+		z.setItem(0, 0, -sc);
+		z.setItem(1, 0, -cc);
+		z.setItem(2, 0, 0);
+		z.setItem(0, 1, cc);
+		z.setItem(1, 1, -sc);
+		z.setItem(2, 1, 0);
+		z.setItem(0, 2, 0);
+		z.setItem(1, 2, 0);
+		z.setItem(2, 2, 0);
+		
+		x.mMul(y, tmp1);
+		tmp1.mMul(z, tmp2);
+		tmp2.mSub(m, tmp1);
+		tmp1.printM("tmp1");
+	}*/
 }

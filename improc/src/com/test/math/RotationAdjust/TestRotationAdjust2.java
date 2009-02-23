@@ -348,6 +348,14 @@ public class TestRotationAdjust2 {
 		MyCamera cameras[] = Utils.generateCameras(cameraOrigin, cameraAngles);
 		
 		List<MyPointPair> pointPairs = Utils.generatePointPairs(cameras, realPoints);
+	
+		int count = 1;
+		for (MyCamera camera : cameras) {
+			camera.rx = count / 10;
+			camera.ry = (count + 1) /10;
+			camera.rz = (count + 2) / 10;
+			count++;
+		}
 		
 		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
 		if (!learner.calculateOne()) {
