@@ -109,6 +109,9 @@ public class Utils {
 			tr.transform(pair.srcPoint, p1);
 			tr.transform(pair.destPoint, p2);
 
+			System.out.println(
+					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
+					p2.x + "\t" + p2.y + "\t" + p2.z);
 			///////////////
 			pair.myDiscrepancy = Math.sqrt(
 				Math.pow(p1.y*p2.z - p2.y*p1.z, 2) +	
