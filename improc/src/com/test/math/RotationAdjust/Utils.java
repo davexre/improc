@@ -13,7 +13,7 @@ public class Utils {
 	public static List<MyPoint3D> generateRealPoints() {
 		ArrayList<MyPoint3D> result = new ArrayList<MyPoint3D>();
 		for (int x = 0; x < 3; x++)
-			for (int y = 0; y < 2; y++)
+			for (int y = 0; y < 3; y++)
 				for (int z = 0; z < 2; z++) {
 					MyPoint3D p = new MyPoint3D();
 					p.p.setItem(0, 0, x);
@@ -91,21 +91,9 @@ public class Utils {
 		MyImagePoint p1 = new MyImagePoint();
 		MyImagePoint p2 = new MyImagePoint();
 		
-		for (MyCamera camera : cameras) {
-			camera.stat = new Statistics();
-			camera.stat.start();
-		}
-		
 		Statistics stat = new Statistics();
 		stat.start();
 		for (MyPointPair pair : pointPairs) {
-/*			p1.x = pair.srcPoint.x;
-			p1.y = pair.srcPoint.y;
-			p1.z = pair.srcPoint.camera.realFocalDistance;
-			p2.x = pair.destPoint.x;
-			p2.y = pair.destPoint.y;
-			p2.z = pair.destPoint.camera.realFocalDistance;
-*/			
 			tr.transform(pair.srcPoint, p1);
 			tr.transform(pair.destPoint, p2);
 
@@ -114,24 +102,19 @@ public class Utils {
 					p2.x + "\t" + p2.y + "\t" + p2.z);
 			///////////////
 			pair.myDiscrepancy = Math.sqrt(
-				Math.pow(p1.y*p2.z - p2.y*p1.z, 2) +	
-				Math.pow(p1.x*p2.z - p2.x*p1.z, 2) +	
-				Math.pow(p1.x*p2.y - p2.x*p1.y, 2)	
+				Math.pow(p1.y*p2.z - p1.z*p2.y, 2) +	
+				Math.pow(p1.x*p2.z - p1.z*p2.x, 2) +	
+				Math.pow(p1.x*p2.y - p1.y*p2.x, 2)	
 				);
 			stat.addValue(pair.myDiscrepancy);
-			pair.srcPoint.camera.stat.addValue(pair.myDiscrepancy);
-			pair.destPoint.camera.stat.addValue(pair.myDiscrepancy);
 		}
 		stat.stop();
 		System.out.println("MyDiscrepancy statistics:");
 		System.out.println(stat.toString(Statistics.CStatMinMax));
-
-		for (MyCamera camera : cameras) {
-			camera.stat.stop();
-			System.out.println();
-			System.out.println("Camera " + camera.cameraId);
-			System.out.println(camera.stat.toString(Statistics.CStatMinMax));
-		}
+//
+//		for (MyCamera camera : cameras) {
+//			System.out.println();
+//			System.out.println("Camera " + camera.cameraId);
+//		}
 	}
-	
 }

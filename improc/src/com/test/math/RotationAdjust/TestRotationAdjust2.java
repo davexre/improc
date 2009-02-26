@@ -170,7 +170,6 @@ public class TestRotationAdjust2 {
 			MyImagePoint PW1 = new MyImagePoint();
 			MyImagePoint PW2 = new MyImagePoint();
 			lsa.clear();
-			System.out.println("COEFS=");
 			for (Map.Entry<MyImagePoint, MyImagePoint> item : items) {
 				if (isBad(item))
 					continue;
@@ -241,7 +240,6 @@ public class TestRotationAdjust2 {
 					coefs.setItem(destIndex + 2, 0, PW1.y * dPW2dZ2.getItem(0, 2) - PW1.z * dPW2dZ2.getItem(0, 2));
 				}
 				lsa.addMeasurement(coefs, computedWeight, L, 0);
-				System.out.println(coefs.toOneLineString());
 				// dfy
 				coefs.make0();
 				L = PW1.x * PW2.z - PW1.z * PW2.x;
@@ -256,7 +254,6 @@ public class TestRotationAdjust2 {
 					coefs.setItem(destIndex + 2, 0, PW1.x * dPW2dZ2.getItem(0, 2) - PW1.z * dPW2dZ2.getItem(0, 0));
 				}
 				lsa.addMeasurement(coefs, computedWeight, L, 0);
-				System.out.println(coefs.toOneLineString());
 				coefs.make0();
 				// dfz
 				L = PW1.x * PW2.y - PW1.y * PW2.x;
@@ -271,11 +268,8 @@ public class TestRotationAdjust2 {
 					coefs.setItem(destIndex + 2, 0, PW1.x * dPW2dZ2.getItem(0, 1) - PW1.y * dPW2dZ2.getItem(0, 0));
 				}
 				lsa.addMeasurement(coefs, computedWeight, L, 0);
-				System.out.println(coefs.toOneLineString());
 			}
 
-			System.out.println("NM=");
-			System.out.println(lsa.getNm());
 			if (!lsa.calculate()) 
 				return false;
 
@@ -288,13 +282,12 @@ public class TestRotationAdjust2 {
 				MyCamera camera = tr.cameras[curCamera];
 				System.out.println("Camera " + camera.cameraId);
 				int index = curCamera * 3;
+				System.out.println("OLD Camera " + camera.cameraId + " rx=" + camera.rx + " ry=" + camera.ry + " rz=" + camera.rz);
 				camera.rx += u.getItem(0, index + 0);
 				camera.ry += u.getItem(0, index + 1);
 				camera.rz += u.getItem(0, index + 2);
-				camera.camera2real.printM("OLD");
 				buildCamera2RealMatrix(camera);
-				camera.camera2real.printM("NEW");
-				System.out.println("Camera " + camera.cameraId + " rx=" + camera.rx + " ry=" + camera.ry + " rz=" + camera.rz);
+				System.out.println("NEW Camera " + camera.cameraId + " rx=" + camera.rx + " ry=" + camera.ry + " rz=" + camera.rz);
 			}
 			
 			return true;

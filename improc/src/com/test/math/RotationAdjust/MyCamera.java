@@ -1,6 +1,5 @@
 package com.test.math.RotationAdjust;
 
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MyCamera {
@@ -13,5 +12,4 @@ public class MyCamera {
 	public Matrix camera2real;
 	public double rx, ry, rz, scaleXY, scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
-	public Statistics stat;
 }
