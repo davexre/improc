@@ -1,5 +1,6 @@
 package com.slavi.improc;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import com.slavi.math.adjust.LeastSquaresAdjust;
@@ -24,16 +25,15 @@ public class ImageToWorld {
 			this.images = tmp.toArray(new KeyPointList[0]);
 			
 			this.originImage.toWorld = new Matrix(3, 3);
+			this.originImage.toWorld.makeE();
+			this.originImage.imageId = -1;
+			
+			int count = 0;
 			for (KeyPointList image : images) {
 				image.toWorld = new Matrix(3, 3);
+				image.toWorld.makeE();
+				image.imageId = count++;
 			}
-		}
-		
-		public int indexOf(KeyPointList image) {
-			for (int i = 0; i < images.length; i++)
-				if (images[i] == image)
-					return i;
-			return -1;
 		}
 		
 		public int getInputSize() {
@@ -88,6 +88,9 @@ public class ImageToWorld {
 			}
 		}
 	
+		/**
+		 * This is a toWorld() function
+		 */
 		public void transform(KeyPoint source, Point3D dest) {
 			dest.x =
 				source.doubleX * source.keyPointList.toWorld.getItem(0, 0) +
@@ -103,12 +106,27 @@ public class ImageToWorld {
 				source.keyPointList.getFocalDistance() * source.keyPointList.toWorld.getItem(2, 2);
 		}
 	
-		public void fromWorld() {
-			
+		public void toWorld(Point2D.Double source, KeyPointList sourceImage, Point3D dest) {
+			dest.x =
+				source.x * sourceImage.toWorld.getItem(0, 0) +
+				source.y * sourceImage.toWorld.getItem(1, 0) +
+				sourceImage.getFocalDistance() * sourceImage.toWorld.getItem(2, 0);
+			dest.y =
+				source.x * sourceImage.toWorld.getItem(0, 1) +
+				source.y * sourceImage.toWorld.getItem(1, 1) +
+				sourceImage.getFocalDistance() * sourceImage.toWorld.getItem(2, 1);
+			dest.z =
+				source.x * sourceImage.toWorld.getItem(0, 2) +
+				source.y * sourceImage.toWorld.getItem(1, 2) +
+				sourceImage.getFocalDistance() * sourceImage.toWorld.getItem(2, 2);
+		}
+		
+		public void fromWorld(Point2D.Double source, KeyPointList sourceImage, Point2D.Double dest) {
+
 		}
 	}
 	
-	public static class ImageToWorldTransformLearner { //extends BaseTransformLearner<KeyPoint, Point3D> {
+	public static class ImageToWorldTransformLearner {
 
 		ImageToWorldTransformer tr;
 		
@@ -164,33 +182,31 @@ public class ImageToWorld {
 			}
 		}
 		
-		private void setCoef(Matrix coefs, int atIndex,	Matrix source, double transformedCoord) {
-			coefs.setItem(atIndex + 0, 0, source.getItem(0, 0) * transformedCoord);
-			coefs.setItem(atIndex + 1, 0, source.getItem(0, 1) * transformedCoord);
-			coefs.setItem(atIndex + 2, 0, source.getItem(0, 2) * transformedCoord);
+		private void setCoef(Matrix coefs, int atIndex,	KeyPoint source, double transformedCoord) {
+			coefs.setItem(atIndex + 0, 0, source.doubleX * transformedCoord);
+			coefs.setItem(atIndex + 1, 0, source.doubleY * transformedCoord);
+			coefs.setItem(atIndex + 2, 0, source.keyPointList.getFocalDistance() * transformedCoord);
 		}
 
-		public boolean calculateOne() {
+		public boolean calculateDiscrepancy() {
 			int goodCount = computeWeights();
 			if (goodCount < lsa.getRequiredPoints())
 				return false;
-			Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
-			tr.originImage.toWorld.makeE();
-			
-			Matrix p1 = new Matrix(1, 3);
-			Matrix p2 = new Matrix(1, 3);
+			Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 			Point3D t1 = new Point3D();
 			Point3D t2 = new Point3D();
+			tr.originImage.toWorld.makeE();
 			lsa.clear();
+
 			for (KeyPointPairList pairList : pointsPairList) {
 				for (KeyPointPair item : pairList.items.values()) {
 					if (isBad(item))
 						continue;
 					
 					double computedWeight = getComputedWeight(item);
-					int srcIndex = tr.indexOf(item.sourceSP.keyPointList) * 9;
-					int destIndex = tr.indexOf(item.targetSP.keyPointList) * 9;
+					int srcIndex = item.sourceSP.keyPointList.imageId * 9;
+					int destIndex = item.targetSP.keyPointList.imageId * 9;
 					
 					coefs.make0();
 					tr.transform(item.sourceSP, t1);
@@ -206,6 +222,7 @@ public class ImageToWorld {
 						default:
 								c1 = 0; c2 = 1; break;
 						}
+						coefs.make0();
 						// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
 						// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
 						double L = 
@@ -219,18 +236,21 @@ public class ImageToWorld {
 						 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 						 */
 						if (srcIndex >= 0) {
-							setCoef(coefs, srcIndex + c1 * 3, p1,  getCoord(t2, c2));
-							setCoef(coefs, srcIndex + c2 * 3, p1, -getCoord(t2, c1));
+							setCoef(coefs, srcIndex + c1 * 3, item.sourceSP,  getCoord(t2, c2));
+							setCoef(coefs, srcIndex + c2 * 3, item.sourceSP, -getCoord(t2, c1));
 						}
 						if (destIndex >= 0) {
-							setCoef(coefs, destIndex + c1 * 3, p2, -getCoord(t1, c1));
-							setCoef(coefs, destIndex + c2 * 3, p2,  getCoord(t1, c2));
+							setCoef(coefs, destIndex + c1 * 3, item.targetSP, -getCoord(t1, c1));
+							setCoef(coefs, destIndex + c2 * 3, item.targetSP,  getCoord(t1, c2));
 						}
 						lsa.addMeasurement(coefs, computedWeight, L, 0);
 					}
 				}
 			}
-			
+			return true;
+		}
+		
+		public boolean calculateParameters() {
 			if (!lsa.calculate()) 
 				return false;
 
@@ -239,25 +259,30 @@ public class ImageToWorld {
 			for (int curImage = 0; curImage < tr.images.length; curImage++) {
 				KeyPointList image = tr.images[curImage];
 				int index = curImage * 9;
-				image.toWorld.setItem(0, 0, u.getItem(0, index + 0) + image.toWorld.getItem(0, 0));
-				image.toWorld.setItem(1, 0, u.getItem(0, index + 1) + image.toWorld.getItem(1, 0));
-				image.toWorld.setItem(2, 0, u.getItem(0, index + 2) + image.toWorld.getItem(2, 0));
-
-				image.toWorld.setItem(0, 1, u.getItem(0, index + 3) + image.toWorld.getItem(0, 1));
-				image.toWorld.setItem(1, 1, u.getItem(0, index + 4) + image.toWorld.getItem(1, 1));
-				image.toWorld.setItem(2, 1, u.getItem(0, index + 5) + image.toWorld.getItem(2, 1));
-
-				image.toWorld.setItem(0, 2, u.getItem(0, index + 6) + image.toWorld.getItem(0, 2));
-				image.toWorld.setItem(1, 2, u.getItem(0, index + 7) + image.toWorld.getItem(1, 2));
-				image.toWorld.setItem(2, 2, u.getItem(0, index + 8) + image.toWorld.getItem(2, 2));
+				image.toWorld.setItem(0, 0, image.toWorld.getItem(0, 0) - u.getItem(0, index + 0));
+				image.toWorld.setItem(1, 0, image.toWorld.getItem(1, 0) - u.getItem(0, index + 1));
+				image.toWorld.setItem(2, 0, image.toWorld.getItem(2, 0) - u.getItem(0, index + 2));
+				image.toWorld.setItem(0, 1, image.toWorld.getItem(0, 1) - u.getItem(0, index + 3));
+				image.toWorld.setItem(1, 1, image.toWorld.getItem(1, 1) - u.getItem(0, index + 4));
+				image.toWorld.setItem(2, 1, image.toWorld.getItem(2, 1) - u.getItem(0, index + 5));
+				image.toWorld.setItem(0, 2, image.toWorld.getItem(0, 2) - u.getItem(0, index + 6));
+				image.toWorld.setItem(1, 2, image.toWorld.getItem(1, 2) - u.getItem(0, index + 7));
+				image.toWorld.setItem(2, 2, image.toWorld.getItem(2, 2) - u.getItem(0, index + 8));
 			}
 			return true;
 		}
-
-		public double getDiscrepancy(KeyPointPair item) {
-			return item.discrepancy;
+		
+		public boolean calculateOne() {
+			if (calculateDiscrepancy())
+				if (calculateParameters()) 
+					return true;
+			return false;
 		}
 
+		public double getMedianSquareError() {
+			return lsa.getMedianSquareError();
+		}
+		
 		public double getWeight(KeyPointPair item) {
 			return item.weight;
 		}
@@ -274,5 +299,4 @@ public class ImageToWorld {
 			item.discrepancy = discrepancy;
 		}
 	}
-	
 }

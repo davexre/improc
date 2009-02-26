@@ -36,11 +36,6 @@ public class LeastSquaresAdjust {
 	private double sumLL;
 
 	/**
-	 * Ср.кв.гр.на измерване с тежест единица sqrt([PLL]/(n-u))
-	 */
-	private double medianSquareError;
-
-	/**
 	 * "Смисълът" на параметрите numCoefsPerCoordinate и numCoordinates е "намаляване" на
 	 * размера на нормалната матрица при повтарящи се коефициенти например: Ако
 	 * матрицата на уравненията на поправките е:<br>
@@ -88,7 +83,6 @@ public class LeastSquaresAdjust {
 		sumPLL = 0;
 		sumP = 0;
 		sumLL = 0;
-		medianSquareError = 0;
 	}
 
 	public int getRequiredMeasurements() {
@@ -106,11 +100,6 @@ public class LeastSquaresAdjust {
 	public boolean calculate() {
 		if (!canCalculate())
 			return false;
-		if (measurementCount == getRequiredMeasurements())
-			medianSquareError = 0;
-		else
-			medianSquareError = Math.sqrt(sumPLL / (measurementCount - numCoefsPerCoordinate));
-
 		if (!nm.inverse())
 			return false;
 		unknown.make0();
@@ -147,8 +136,12 @@ public class LeastSquaresAdjust {
 		return measurementCount;
 	}
 
+	/**
+	 * Ср.кв.гр.на измерване с тежест единица sqrt([PLL]/(n-u))
+	 */
 	public double getMedianSquareError() {
-		return medianSquareError;
+		return measurementCount == getRequiredMeasurements() ? 0.0 : 
+			Math.sqrt(sumPLL / (measurementCount - numCoefsPerCoordinate));
 	}
 
 	public SymmetricMatrix getNm() {
@@ -187,7 +180,7 @@ public class LeastSquaresAdjust {
 		b.append("sumPLL                = " + Double.toString(sumPLL) + "\n");
 		b.append("sumP                  = " + Double.toString(sumP) + "\n");
 		b.append("sumLL                 = " + Double.toString(sumLL) + "\n");
-		b.append("medianSquareError     = " + Double.toString(medianSquareError) + "\n");
+		b.append("medianSquareError     = " + Double.toString(getMedianSquareError()) + "\n");
 		b.append("Normal matrix\n");
 		b.append(nm.toString());
 		b.append("APL\n");

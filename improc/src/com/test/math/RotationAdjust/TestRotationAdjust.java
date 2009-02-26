@@ -64,22 +64,20 @@ public class TestRotationAdjust {
 			dest.x = 
 				source.x * source.camera.camera2real.getItem(0, 0) +
 				source.y * source.camera.camera2real.getItem(1, 0) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 0); // / averageFocalDistance;
+				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 0);
 			dest.y = 
 				source.x * source.camera.camera2real.getItem(0, 1) +
 				source.y * source.camera.camera2real.getItem(1, 1) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 1); // / averageFocalDistance;
-			dest.z = //(1.0/ originCamera.realFocalDistance) * (
+				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 1);
+			dest.z =
 				source.x * source.camera.camera2real.getItem(0, 2) +
 				source.y * source.camera.camera2real.getItem(1, 2) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 2); // / averageFocalDistance);
+				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 2);
 		}
 		
 		MyCamera[] cameras;
 		
 		MyCamera originCamera;
-		
-		double averageFocalDistance;
 		
 		public int indexOf(MyCamera camera) {
 			for (int i = 0; i < cameras.length; i++)
@@ -120,18 +118,13 @@ public class TestRotationAdjust {
 			coefs.setItem(atIndex + 2, 0, p.camera.realFocalDistance * transformedCoord);
 		}
 
-		public boolean calculateOne() {
+		public boolean calculateDiscrepancy() {
 			int goodCount = computeWeights();
 			if (goodCount < lsa.getRequiredPoints())
 				return false;
 			Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
 			tr.originCamera.camera2real.makeE();
-			for (MyCamera camera : tr.cameras) {
-				camera.real2camera.copyTo(camera.camera2real);
-			}
-			
-			tr.averageFocalDistance = tr.originCamera.realFocalDistance;
 			
 			Matrix t1 = new Matrix(1, 3);
 			Matrix t2 = new Matrix(1, 3);
@@ -149,7 +142,6 @@ public class TestRotationAdjust {
 				int srcIndex = tr.indexOf(source.camera) * 9;
 				int destIndex = tr.indexOf(dest.camera) * 9;
 				
-				coefs.make0();
 				
 				tr.transform(source, tmp1);
 				t1.setItem(0, 0, tmp1.x);
@@ -171,6 +163,8 @@ public class TestRotationAdjust {
 					default:
 							c1 = 0; c2 = 1; break;
 					}
+
+					coefs.make0();
 					// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
 					// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
 					double L = 
@@ -194,7 +188,10 @@ public class TestRotationAdjust {
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
 			}
-
+			return true;
+		}
+		
+		public boolean calculateParameters() {
 			if (!lsa.calculate()) 
 				return false;
 
@@ -206,20 +203,24 @@ public class TestRotationAdjust {
 			for (int curCamera = 0; curCamera < tr.cameras.length; curCamera++) {
 				MyCamera camera = tr.cameras[curCamera];
 				int index = curCamera * 9;
-				camera.camera2real.setItem(0, 0, u.getItem(0, index + 0) + camera.camera2real.getItem(0, 0));
-				camera.camera2real.setItem(1, 0, u.getItem(0, index + 1) + camera.camera2real.getItem(1, 0));
-				camera.camera2real.setItem(2, 0, u.getItem(0, index + 2) + camera.camera2real.getItem(2, 0));
-
-				camera.camera2real.setItem(0, 1, u.getItem(0, index + 3) + camera.camera2real.getItem(0, 1));
-				camera.camera2real.setItem(1, 1, u.getItem(0, index + 4) + camera.camera2real.getItem(1, 1));
-				camera.camera2real.setItem(2, 1, u.getItem(0, index + 5) + camera.camera2real.getItem(2, 1));
-
-				camera.camera2real.setItem(0, 2, u.getItem(0, index + 6) + camera.camera2real.getItem(0, 2));
-				camera.camera2real.setItem(1, 2, u.getItem(0, index + 7) + camera.camera2real.getItem(1, 2));
-				camera.camera2real.setItem(2, 2, u.getItem(0, index + 8) + camera.camera2real.getItem(2, 2));
+				camera.camera2real.setItem(0, 0, camera.camera2real.getItem(0, 0) - u.getItem(0, index + 0));
+				camera.camera2real.setItem(1, 0, camera.camera2real.getItem(1, 0) - u.getItem(0, index + 1));
+				camera.camera2real.setItem(2, 0, camera.camera2real.getItem(2, 0) - u.getItem(0, index + 2));
+				camera.camera2real.setItem(0, 1, camera.camera2real.getItem(0, 1) - u.getItem(0, index + 3));
+				camera.camera2real.setItem(1, 1, camera.camera2real.getItem(1, 1) - u.getItem(0, index + 4));
+				camera.camera2real.setItem(2, 1, camera.camera2real.getItem(2, 1) - u.getItem(0, index + 5));
+				camera.camera2real.setItem(0, 2, camera.camera2real.getItem(0, 2) - u.getItem(0, index + 6));
+				camera.camera2real.setItem(1, 2, camera.camera2real.getItem(1, 2) - u.getItem(0, index + 7));
+				camera.camera2real.setItem(2, 2, camera.camera2real.getItem(2, 2) - u.getItem(0, index + 8));
 			}
-			
 			return true;
+		}
+		
+		public boolean calculateOne() {
+			if (calculateDiscrepancy())
+				if (calculateParameters()) 
+					return true;
+			return false;
 		}
 
 		public MyImagePoint createTemporaryTargetObject() {
@@ -249,82 +250,18 @@ public class TestRotationAdjust {
 		public void setDiscrepancy(Map.Entry<MyImagePoint, MyImagePoint> item, double discrepancy) {
 			((MyPointPair) item).discrepancy = discrepancy;
 		}
-	}
-	
-	public static ImageToWorldTransformer calcPrims(MyCamera originCamera, MyCamera[] cameras,
-			Iterable<MyPointPair> pointsPairList) {
-		ImageToWorldTransformer tr = new ImageToWorldTransformer(originCamera, cameras);
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(9, 1);
-		Matrix coefs = new Matrix(9, 1);
-		double L;
-		for (MyPointPair pair : pointsPairList) {
-			MyImagePoint src = pair.srcPoint;
-			MyImagePoint dest = pair.destPoint;
-			if (dest.camera == originCamera) {
-				MyImagePoint tmp = src;
-				src = dest;
-				dest = tmp;
-			}
-			if (src.camera != originCamera)
-				throw new RuntimeException("???");
-			
-			coefs.make0();
-			L = src.y * dest.camera.realFocalDistance - src.camera.realFocalDistance * dest.y;
-			coefs.setItem(3, 0, -src.camera.realFocalDistance * dest.x);
-			coefs.setItem(4, 0, -src.camera.realFocalDistance * dest.y);
-			coefs.setItem(5, 0, -src.camera.realFocalDistance * dest.camera.realFocalDistance);
-			coefs.setItem(6, 0, src.y * dest.x);
-			coefs.setItem(7, 0, src.y * dest.y);
-			coefs.setItem(8, 0, src.y * dest.camera.realFocalDistance);
-			lsa.addMeasurement(coefs, 1.0, L, 0);
-			
-			coefs.make0();
-			L = src.x * dest.camera.realFocalDistance - src.camera.realFocalDistance * dest.x;
-			coefs.setItem(0, 0, -src.camera.realFocalDistance * dest.x);
-			coefs.setItem(1, 0, -src.camera.realFocalDistance * dest.y);
-			coefs.setItem(2, 0, -src.camera.realFocalDistance * dest.camera.realFocalDistance);
-			coefs.setItem(6, 0, src.x * dest.x);
-			coefs.setItem(7, 0, src.x * dest.y);
-			coefs.setItem(8, 0, src.x * dest.camera.realFocalDistance);
-			lsa.addMeasurement(coefs, 1.0, L, 0);
-			
-			coefs.make0();
-			L = src.x * dest.y - src.y * dest.x;
-			coefs.setItem(0, 0, -src.y * dest.x);
-			coefs.setItem(1, 0, -src.y * dest.y);
-			coefs.setItem(2, 0, -src.y * dest.camera.realFocalDistance);
-			coefs.setItem(3, 0, src.x * dest.x);
-			coefs.setItem(4, 0, src.x * dest.y);
-			coefs.setItem(5, 0, src.x * dest.camera.realFocalDistance);
-			lsa.addMeasurement(coefs, 1.0, L, 0);
+
+		public double getMedianSquareError() {
+			return lsa.getMedianSquareError();
 		}
-		
-		if (!(lsa.calculate())) 
-			throw new RuntimeException();
-		Matrix u = lsa.getUnknown();
-		u.printM("U");
-		MyCamera cam = tr.cameras[0];
-		cam.camera2real.printM("BEFORE");
-		cam.camera2real.setItem(0, 0, u.getItem(0, 0));
-		cam.camera2real.setItem(1, 0, u.getItem(0, 1));
-		cam.camera2real.setItem(2, 0, u.getItem(0, 2));
-		cam.camera2real.setItem(0, 1, u.getItem(0, 3));
-		cam.camera2real.setItem(1, 1, u.getItem(0, 4));
-		cam.camera2real.setItem(2, 1, u.getItem(0, 5));
-		cam.camera2real.setItem(0, 2, u.getItem(0, 6));
-		cam.camera2real.setItem(1, 2, u.getItem(0, 7));
-		cam.camera2real.setItem(2, 2, u.getItem(0, 8));
-		cam.camera2real.printM("AFTER");
-		
-		return tr;
 	}
-	
 	
 	static double cameraAngles[][] = new double[][] {
 		// rx, ry, rz, f
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
+		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
+		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 12},
 //		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
@@ -339,21 +276,49 @@ public class TestRotationAdjust {
 		MyCamera cameras[] = Utils.generateCameras(cameraOrigin, cameraAngles);
 		
 		List<MyPointPair> pointPairs = Utils.generatePointPairs(cameras, realPoints);
+
+		for (MyCamera camera : cameras) {
+			camera.camera2real.makeE();
+		}
 		
-//		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
-//		if (!learner.calculateOne()) {
-//			System.out.println("FAILED");
-//			return;
-//		}
+		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
+		boolean failed = true;
+		if (learner.calculateDiscrepancy()) {
+			for (int iter = 0; iter < 20; iter++) {
+				if (!learner.calculateParameters())
+					break;
+				if (!learner.calculateDiscrepancy())
+					break;
+				double mse = learner.getMedianSquareError();
+				System.out.println("MSE=" + mse);
+				if (mse < 0.03) {
+					failed = false;
+					break;
+				}
+			}
+		}
+		if (failed) {
+			System.out.println("FAILED");
+			return;
+		}
 	
-		ImageToWorldTransformer tr = calcPrims(cameras[0], cameras, pointPairs);
+//		ImageToWorldTransformer tr = calcPrims(cameras[0], cameras, pointPairs);
 		for (MyCamera camera : cameras) {
 			System.out.println("Camera " + camera.cameraId);
 			System.out.println(camera.camera2real.toString());
 			System.out.println();
 		}
-		Utils.calculateDiscrepancy(cameras, pointPairs, tr);
-//		Utils.calculateDiscrepancy(cameras, pointPairs, learner.tr);
+//		Utils.calculateDiscrepancy(cameras, pointPairs, tr);
+		Utils.calculateDiscrepancy(cameras, pointPairs, learner.tr);
+		Matrix m = learner.tr.cameras[0].camera2real;
+		Matrix mInv = m.makeCopy();
+		mInv.inverse();
+		Matrix mTr = new Matrix();
+		m.transpose(mTr);
+		m.printM("m");
+		mInv.printM("mInv");
+		mTr.printM("mTr");
+		
 		System.out.println(pointPairs.size());
 		System.out.println("Done.");
 	}

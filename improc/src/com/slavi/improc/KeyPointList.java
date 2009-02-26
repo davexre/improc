@@ -24,6 +24,8 @@ public class KeyPointList {
 	
 	public Matrix toWorld;
 	
+	public int imageId;
+	
 	public int getFocalDistance() {
 		return Math.max(imageSizeX, imageSizeY);
 	}
