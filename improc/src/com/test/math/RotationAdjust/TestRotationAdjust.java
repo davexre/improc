@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.BaseTransformLearner;
@@ -182,9 +183,61 @@ public class TestRotationAdjust {
 						setCoef(coefs, destIndex + c2 * 3, pp1,  getImageCoord(dest, c2));
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
+
+				}
+				if (srcIndex >= 0) {
+					// sum(X*X)=1
+					addSumXX(coefs, source.camera, srcIndex);
+					addSumYY(coefs, source.camera, srcIndex);
+				}
+				if (destIndex >= 0) {
+					addSumXX(coefs, dest.camera, destIndex);
+					addSumYY(coefs, dest.camera, destIndex);
 				}
 			}
 			return true;
+		}
+		
+		private void addSumXX(Matrix coefs, MyCamera camera, int cameraIndex) {
+			if (cameraIndex < 0)
+				return;
+			for (int i = 0; i < 3; i++) {
+				coefs.make0();
+				double L = 0;
+				for (int j = 0; j < 3; j++) {
+					double d = camera.camera2real.getItem(i, j);
+					L += Math.pow(d, 2.0);
+					coefs.setItem(cameraIndex + j * 3 + i, 0, 2.0 * d);
+				}
+				lsa.addMeasurement(coefs, 1.0, L - 1.0, 0);
+			}
+			for (int j = 0; j < 3; j++) {
+				coefs.make0();
+				double L = 0;
+				for (int i = 0; i < 3; i++) {
+					double d = camera.camera2real.getItem(i, j);
+					L += Math.pow(d, 2.0);
+					coefs.setItem(cameraIndex + j * 3 + i, 0, 2.0 * d);
+				}
+				lsa.addMeasurement(coefs, 1.0, L - 1.0, 0);
+			}
+		}
+		
+		private void addSumYY(Matrix coefs, MyCamera camera, int cameraIndex) {
+			if (cameraIndex < 0)
+				return;
+			for (int i = 0; i < 3; i++) {
+				coefs.make0();
+				double L = 0;
+				for (int j = 0; j < 3; j++) {
+					int i1 = (i + 1) % 3;
+					double d = camera.camera2real.getItem(i, j);
+					double d1 = camera.camera2real.getItem(i1, j);
+					L += d * d1;
+					coefs.setItem(cameraIndex + j * 3 + i, 0, d1);
+				}
+				lsa.addMeasurement(coefs, 1.0, L, 0);
+			}
 		}
 		
 		public boolean calculateParameters() {
@@ -195,11 +248,13 @@ public class TestRotationAdjust {
 			Matrix u = lsa.getUnknown();
 			System.out.println("U=");
 			System.out.println(u.toString());
-//			u.rMul(-1.0);
+			u.rMul(-1.0);
 
 			for (int curCamera = 0; curCamera < tr.cameras.length; curCamera++) {
 				MyCamera camera = tr.cameras[curCamera];
 				int index = curCamera * 9;
+				System.out.println("BEFORE");
+				RotationXYZ.dumpTestForRotationMatrix(camera.camera2real);
 				camera.camera2real.setItem(0, 0, camera.camera2real.getItem(0, 0) + u.getItem(0, index + 0));
 				camera.camera2real.setItem(1, 0, camera.camera2real.getItem(1, 0) + u.getItem(0, index + 1));
 				camera.camera2real.setItem(2, 0, camera.camera2real.getItem(2, 0) + u.getItem(0, index + 2));
@@ -209,6 +264,8 @@ public class TestRotationAdjust {
 				camera.camera2real.setItem(0, 2, camera.camera2real.getItem(0, 2) + u.getItem(0, index + 6));
 				camera.camera2real.setItem(1, 2, camera.camera2real.getItem(1, 2) + u.getItem(0, index + 7));
 				camera.camera2real.setItem(2, 2, camera.camera2real.getItem(2, 2) + u.getItem(0, index + 8));
+				System.out.println("AFTER");
+				RotationXYZ.dumpTestForRotationMatrix(camera.camera2real);
 			}
 			return true;
 		}
@@ -257,7 +314,7 @@ public class TestRotationAdjust {
 		// rx, ry, rz, f
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
+		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
 //		{-20 * MathUtil.deg2rad,  10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 12},
 //		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},

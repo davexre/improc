@@ -152,6 +152,49 @@ public class RotationXYZ {
 		r.setItem(2, 2, -sa*cb);
 		return r;
 	}
+	
+	public static void dumpTestForRotationMatrix(Matrix m) {
+		Matrix sumX = new Matrix(3, 1);
+		for (int i = 0; i<3; i++)
+			sumX.setItem(i, 0, 
+				Math.pow(m.getItem(0, i), 2) + 
+				Math.pow(m.getItem(1, i), 2) + 
+				Math.pow(m.getItem(2, i), 2));
+		sumX.printM("sum(X*X)=1");
+
+		Matrix sumY = new Matrix(1, 3);
+		for (int i = 0; i<3; i++)
+			sumY.setItem(0, i, 
+				Math.pow(m.getItem(i, 0), 2) + 
+				Math.pow(m.getItem(i, 1), 2) + 
+				Math.pow(m.getItem(i, 2), 2));
+		sumY.printM("sum(Y*Y)=1");
+
+		Matrix sum = new Matrix(3, 1);
+		for (int i = 0; i < 3; i++) {
+			int i1 = (i + 1) % 3;
+			sum.setItem(i, 0,   
+				m.getItem(0, i) * m.getItem(0, i1) +
+				m.getItem(1, i) * m.getItem(1, i1) +
+				m.getItem(2, i) * m.getItem(2, i1));
+		}
+		sum.printM("sum(X1*X2)=0");
+
+		Matrix sum2 = new Matrix(1, 3);
+		for (int i = 0; i < 3; i++) {
+			int i1 = (i + 1) % 3;
+			sum2.setItem(0, i,   
+				m.getItem(i, 0) * m.getItem(i1, 0) +
+				m.getItem(i, 1) * m.getItem(i1, 1) +
+				m.getItem(i, 2) * m.getItem(i1, 2));
+		}
+		sum2.printM("sum(Y1*Y2)=0");
+	}
+	
+	public static void main(String[] args) {
+		Matrix m = makeAngles(10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad);
+		dumpTestForRotationMatrix(m);
+	}
 /*	
 	public static void main(String[] args) {
 		double rx = 1;
