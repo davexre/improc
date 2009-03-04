@@ -185,7 +185,7 @@ public class TestRotationAdjust {
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 
 				}
-				if (srcIndex >= 0) {
+/*				if (srcIndex >= 0) {
 					// sum(X*X)=1
 					addSumXX(coefs, source.camera, srcIndex);
 					addSumYY(coefs, source.camera, srcIndex);
@@ -193,7 +193,7 @@ public class TestRotationAdjust {
 				if (destIndex >= 0) {
 					addSumXX(coefs, dest.camera, destIndex);
 					addSumYY(coefs, dest.camera, destIndex);
-				}
+				}*/
 			}
 			return true;
 		}
@@ -248,7 +248,7 @@ public class TestRotationAdjust {
 			Matrix u = lsa.getUnknown();
 			System.out.println("U=");
 			System.out.println(u.toString());
-			u.rMul(-1.0);
+//			u.rMul(-1.0);
 
 			for (int curCamera = 0; curCamera < tr.cameras.length; curCamera++) {
 				MyCamera camera = tr.cameras[curCamera];
@@ -324,9 +324,9 @@ public class TestRotationAdjust {
 		List<MyPoint3D> realPoints = Utils.generateRealPoints();
 		
 		MyPoint3D cameraOrigin = new MyPoint3D();
-		cameraOrigin.p.setItem(0, 0, -5);
-		cameraOrigin.p.setItem(0, 1, -5);
-		cameraOrigin.p.setItem(0, 2, -5);
+		cameraOrigin.p.setItem(0, 0, 2);
+		cameraOrigin.p.setItem(0, 1, 2);
+		cameraOrigin.p.setItem(0, 2, -50);
 		MyCamera cameras[] = Utils.generateCameras(cameraOrigin, cameraAngles);
 		
 		List<MyPointPair> pointPairs = Utils.generatePointPairs(cameras, realPoints);
@@ -363,7 +363,7 @@ public class TestRotationAdjust {
 			System.out.println(camera.camera2real.toString());
 			System.out.println();
 		}
-		Utils.calculateDiscrepancy(cameras, pointPairs, learner.tr);
+		Utils.calculateDiscrepancy(pointPairs, learner.tr);
 //		Matrix m = learner.tr.cameras[0].camera2real;
 //		Matrix mInv = m.makeCopy();
 //		mInv.inverse();

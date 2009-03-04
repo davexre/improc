@@ -34,9 +34,9 @@ public class Utils {
 			c.realOrigin = cameraOrigin;
 			c.angles = data;
 			c.realFocalDistance = data[3];
-			c.camera2real = RotationXYZ.makeAngles(data[0], data[1], data[2]);
-			c.real2camera = c.camera2real.makeCopy();
-			c.real2camera.inverse();
+			c.real2camera = RotationXYZ.makeAngles(data[0], data[1], data[2]);
+			c.camera2real = c.real2camera.makeCopy();
+			c.camera2real.inverse();
 			c.rx = data[0];
 			c.ry = data[1];
 			c.rz = data[2];
@@ -61,7 +61,7 @@ public class Utils {
 				p.p.mSub(src.realOrigin.p, tmp1);
 				src.real2camera.mMul(tmp1, tmp2);
 				double z = tmp2.getItem(0, 2);
-				if (z <= 0.0)
+				if (z <= src.realFocalDistance)
 					continue;
 				double scale = src.realFocalDistance / z;
 				pp.srcPoint = new MyImagePoint();
@@ -72,7 +72,7 @@ public class Utils {
 				p.p.mSub(dest.realOrigin.p, tmp1);
 				dest.real2camera.mMul(tmp1, tmp2);
 				z = tmp2.getItem(0, 2);
-				if (z <= 0.0)
+				if (z <= dest.realFocalDistance)
 					continue;
 				scale = dest.realFocalDistance / z;
 				pp.destPoint = new MyImagePoint();
@@ -86,7 +86,7 @@ public class Utils {
 		return result;
 	}
 	
-	public static void calculateDiscrepancy(MyCamera[] cameras, 
+	public static void calculateDiscrepancy(
 			List<MyPointPair> pointPairs, BaseTransformer<MyImagePoint, MyImagePoint> tr) {
 		MyImagePoint p1 = new MyImagePoint();
 		MyImagePoint p2 = new MyImagePoint();
@@ -111,10 +111,5 @@ public class Utils {
 		stat.stop();
 		System.out.println("MyDiscrepancy statistics:");
 		System.out.println(stat.toString(Statistics.CStatMinMax));
-//
-//		for (MyCamera camera : cameras) {
-//			System.out.println();
-//			System.out.println("Camera " + camera.cameraId);
-//		}
 	}
 }

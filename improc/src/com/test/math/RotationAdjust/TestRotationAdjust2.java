@@ -361,7 +361,7 @@ public class TestRotationAdjust2 {
 			System.out.println(camera.camera2real.toString());
 			System.out.println();
 		}
-		Utils.calculateDiscrepancy(cameras, pointPairs, learner.tr);
+		Utils.calculateDiscrepancy(pointPairs, learner.tr);
 		System.out.println(pointPairs.size());
 		System.out.println("Done.");
 	}
