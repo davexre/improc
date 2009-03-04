@@ -13,7 +13,7 @@ public class Utils {
 	public static List<MyPoint3D> generateRealPoints() {
 		ArrayList<MyPoint3D> result = new ArrayList<MyPoint3D>();
 		for (int x = 0; x < 3; x++)
-			for (int y = 0; y < 3; y++)
+			for (int y = 0; y < 2; y++)
 				for (int z = 0; z < 2; z++) {
 					MyPoint3D p = new MyPoint3D();
 					p.p.setItem(0, 0, x);
@@ -34,9 +34,9 @@ public class Utils {
 			c.realOrigin = cameraOrigin;
 			c.angles = data;
 			c.realFocalDistance = data[3];
-			c.real2camera = RotationXYZ.makeAngles(data[0], data[1], data[2]);
-			c.camera2real = c.real2camera.makeCopy();
-			c.camera2real.inverse();
+			c.camera2real = RotationXYZ.makeAngles(data[0], data[1], data[2]);
+			c.real2camera = c.camera2real.makeCopy();
+			c.real2camera.inverse();
 			c.rx = data[0];
 			c.ry = data[1];
 			c.rz = data[2];
@@ -45,7 +45,7 @@ public class Utils {
 		return result;
 	}
 	
-	public static List<MyPointPair> generatePointPairs(MyCamera cameras[], List<MyPoint3D> realPoints) {
+	public static ArrayList<MyPointPair> generatePointPairs(MyCamera cameras[], List<MyPoint3D> realPoints) {
 		ArrayList<MyPointPair> result = new ArrayList<MyPointPair>();
 		Matrix tmp1 = new Matrix(1, 3);
 		Matrix tmp2 = new Matrix(1, 3);
@@ -97,10 +97,10 @@ public class Utils {
 			tr.transform(pair.srcPoint, p1);
 			tr.transform(pair.destPoint, p2);
 
-			System.out.println(
-					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
-					p2.x + "\t" + p2.y + "\t" + p2.z);
-			///////////////
+//			System.out.println(
+//					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
+//					p2.x + "\t" + p2.y + "\t" + p2.z);
+
 			pair.myDiscrepancy = Math.sqrt(
 				Math.pow(p1.y*p2.z - p1.z*p2.y, 2) +	
 				Math.pow(p1.x*p2.z - p1.z*p2.x, 2) +	

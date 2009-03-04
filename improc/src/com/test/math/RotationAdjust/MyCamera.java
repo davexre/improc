@@ -10,6 +10,6 @@ public class MyCamera {
 	public double realFocalDistance;
 	
 	public Matrix camera2real;
-	public double rx, ry, rz, scaleXY, scaleZ;
+	public double rx, ry, rz, scale, scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
 }
