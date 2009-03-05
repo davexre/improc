@@ -138,9 +138,6 @@ public class TestRotationAdjust2 {
 			Matrix P1 = new Matrix(1, 3);
 			Matrix P2 = new Matrix(1, 3);
 			
-			Matrix t1 = new Matrix(1, 3);
-			Matrix t2 = new Matrix(1, 3);
-			
 			Matrix dPW1dX1 = new Matrix(1, 3);
 			Matrix dPW1dY1 = new Matrix(1, 3);
 			Matrix dPW1dZ1 = new Matrix(1, 3);
@@ -175,14 +172,15 @@ public class TestRotationAdjust2 {
 				
 				double L;
 				tr.transform(source, PW1);
-				t1.setItem(0, 0, PW1.x);
-				t1.setItem(0, 1, PW1.y);
-				t1.setItem(0, 2, PW1.z);
-
 				tr.transform(dest, PW2);
-				t2.setItem(0, 0, PW2.x);
-				t2.setItem(0, 1, PW2.y);
-				t2.setItem(0, 2, PW2.z);
+
+				source.camera.dMdX.mMul(P1, dPW1dX1);
+				source.camera.dMdY.mMul(P1, dPW1dY1);
+				source.camera.dMdZ.mMul(P1, dPW1dZ1);
+				
+				dest.camera.dMdX.mMul(P2, dPW2dX2);
+				dest.camera.dMdY.mMul(P2, dPW2dY2);
+				dest.camera.dMdZ.mMul(P2, dPW2dZ2);
 
 				/*
 						P'1 = M1 * P1
@@ -198,13 +196,6 @@ public class TestRotationAdjust2 {
 						
 						dF/dX1 = (dP'1/dX1
 				 */
-				source.camera.dMdX.mMul(P1, dPW1dX1);
-				source.camera.dMdY.mMul(P1, dPW1dY1);
-				source.camera.dMdZ.mMul(P1, dPW1dZ1);
-				
-				dest.camera.dMdX.mMul(P2, dPW2dX2);
-				dest.camera.dMdY.mMul(P2, dPW2dY2);
-				dest.camera.dMdZ.mMul(P2, dPW2dZ2);
 
 				// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
 				// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
@@ -353,6 +344,7 @@ public class TestRotationAdjust2 {
 			camera.rx = 0.0;
 			camera.ry = 0.0;
 			camera.rz = 0.0;
+			camera.realFocalDistance *= 10;
 		}
 	
 		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);

@@ -124,7 +124,7 @@ public class TestRotationAdjust3 {
 			tr.originCamera.rx = 0;
 			tr.originCamera.ry = 0;
 			tr.originCamera.rz = 0;
-			tr.originCamera.scaleZ = 1;
+			tr.originCamera.scaleZ = 10;
 			buildCamera2RealMatrix(tr.originCamera);
 
 			for (MyCamera camera : tr.cameras) {
@@ -133,9 +133,6 @@ public class TestRotationAdjust3 {
 			
 			Matrix P1 = new Matrix(1, 3);
 			Matrix P2 = new Matrix(1, 3);
-			
-			Matrix t1 = new Matrix(1, 3);
-			Matrix t2 = new Matrix(1, 3);
 			
 			Matrix dPW1dX1 = new Matrix(1, 3);
 			Matrix dPW1dY1 = new Matrix(1, 3);
@@ -160,25 +157,28 @@ public class TestRotationAdjust3 {
 				int destIndex = tr.indexOf(dest.camera) * 4;
 				
 				coefs.make0();
+				double L;
+
+				tr.transform(source, PW1);
+				tr.transform(dest, PW2);
 				
 				P1.setItem(0, 0, source.x);
 				P1.setItem(0, 1, source.y);
 				P1.setItem(0, 2, source.camera.scaleZ);
+//				P1.setItem(0, 2, 1.0);
 				
 				P2.setItem(0, 0, dest.x);
 				P2.setItem(0, 1, dest.y);
 				P2.setItem(0, 2, dest.camera.scaleZ);
+//				P2.setItem(0, 2, 1.0);
 				
-				double L;
-				tr.transform(source, PW1);
-				t1.setItem(0, 0, PW1.x);
-				t1.setItem(0, 1, PW1.y);
-				t1.setItem(0, 2, PW1.z);
-
-				tr.transform(dest, PW2);
-				t2.setItem(0, 0, PW2.x);
-				t2.setItem(0, 1, PW2.y);
-				t2.setItem(0, 2, PW2.z);
+				source.camera.dMdX.mMul(P1, dPW1dX1);
+				source.camera.dMdY.mMul(P1, dPW1dY1);
+				source.camera.dMdZ.mMul(P1, dPW1dZ1);
+				
+				dest.camera.dMdX.mMul(P2, dPW2dX2);
+				dest.camera.dMdY.mMul(P2, dPW2dY2);
+				dest.camera.dMdZ.mMul(P2, dPW2dZ2);
 
 				/*
 						P'1 = M1 * P1
@@ -194,13 +194,6 @@ public class TestRotationAdjust3 {
 						
 						dF/dX1 = (dP'1/dX1
 				 */
-				source.camera.dMdX.mMul(P1, dPW1dX1);
-				source.camera.dMdY.mMul(P1, dPW1dY1);
-				source.camera.dMdZ.mMul(P1, dPW1dZ1);
-				
-				dest.camera.dMdX.mMul(P2, dPW2dX2);
-				dest.camera.dMdY.mMul(P2, dPW2dY2);
-				dest.camera.dMdZ.mMul(P2, dPW2dZ2);
 
 				// L(x) = (d1*x1 + e1*y1 + f1*z1) * (g2*x2 + h2*y2 + i2*z2) - (d2*x2 + e2*y2 + f2*z2) * (g1*x1 + h1*y1 + i1*z1)
 				// d(L(x))/d(d1) = x1 * (g2*x2 + h2*y2 + i2*z2)
@@ -272,10 +265,16 @@ public class TestRotationAdjust3 {
 				int index = curCamera * 3;
 				System.out.println("OLD/NEW Camera");
 				printCameraAngles(camera);
-				camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0)) - Math.PI;
-				camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1)) - Math.PI;
-				camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2)) - Math.PI;
 				camera.scaleZ += u.getItem(0, index + 3);
+				if (camera.scaleZ < 0) {
+					camera.rx = MathUtil.fixAngle2PI(Math.PI + camera.rx + u.getItem(0, index + 0)) - Math.PI;
+					camera.ry = MathUtil.fixAngle2PI(Math.PI + camera.ry + u.getItem(0, index + 1)) - Math.PI;
+					camera.scaleZ = -camera.scaleZ;
+				} else {
+					camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0)) - Math.PI;
+					camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1)) - Math.PI;
+				}
+				camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2)) - Math.PI;
 				buildCamera2RealMatrix(camera);
 				printCameraAngles(camera);
 			}
@@ -336,7 +335,7 @@ public class TestRotationAdjust3 {
 		// rx, ry, rz, f
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
+		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 10},
 //		{-20 * MathUtil.deg2rad, 10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
 //		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
@@ -358,8 +357,7 @@ public class TestRotationAdjust3 {
 			camera.rx = 0.0;
 			camera.ry = 0.0;
 			camera.rz = 0.0;
-			camera.scale = 1.0;
-			camera.scaleZ = 1.0;
+			camera.scaleZ = 10;
 		}
 	
 		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
