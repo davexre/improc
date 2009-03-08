@@ -3,8 +3,10 @@ package com.slavi.improc;
 import java.util.StringTokenizer;
 
 public class PanoPair {
+	public PanoPairList list = null;
 	public double sx, sy, tx, ty, discrepancy;
 	public double distance1, distance2;
+	public boolean bad;
 	
 	public PanoPair() {}
 	

@@ -15,6 +15,14 @@ public class MathUtil {
 
 	public static final double grad2rad = Math.PI / 200;
 
+	public static String d20(double d) {
+		return String.format(Locale.US, "%1$1.20f", d);
+	}
+	
+	public static String d4(double d) {
+		return String.format(Locale.US, "%1$10.4f", d);
+	}
+	
 	public static String rad2radStr(double angle) {
 		return String.format(Locale.US, "%+9.7f rad", angle);
 	}
@@ -35,14 +43,22 @@ public class MathUtil {
 	}
 	
 	/**
-	 * Returns the specified angle in the range 0..2*pi 
+	 * Returns the specified angle in the range [0..2*pi)
 	 */
 	public static double fixAngle2PI(double angle) {
 		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
 	}
+
+	/**
+	 * Returns the specified angle in the range (-pi..pi] 
+	 */
+	public static double fixAngleMPI_PI(double angle) {
+		angle += Math.PI;
+		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI) - Math.PI;
+	}
 	
 	/**
-	 * Returns the specified angle in the range 0..pi 
+	 * Returns the specified angle in the range [0..pi)
 	 */
 	public static double fixAnglePI(double angle) {
 		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);

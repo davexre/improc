@@ -3,6 +3,7 @@ package com.test.math.RotationAdjust;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -10,15 +11,15 @@ import com.slavi.math.transform.BaseTransformer;
 
 public class Utils {
 
-	public static List<MyPoint3D> generateRealPoints() {
+	public static List<MyPoint3D> generateRealPoints(double scale) {
 		ArrayList<MyPoint3D> result = new ArrayList<MyPoint3D>();
 		for (int x = 0; x < 3; x++)
 			for (int y = 0; y < 2; y++)
 				for (int z = 0; z < 2; z++) {
 					MyPoint3D p = new MyPoint3D();
-					p.p.setItem(0, 0, x);
-					p.p.setItem(0, 1, y);
-					p.p.setItem(0, 2, z);
+					p.p.setItem(0, 0, x * scale);
+					p.p.setItem(0, 1, y * scale);
+					p.p.setItem(0, 2, z * scale);
 					result.add(p);
 				}					
 		return result;
@@ -43,6 +44,16 @@ public class Utils {
 			result[i] = c;
 		}		
 		return result;
+	}
+	
+	public static void dumpPoints(ArrayList<MyPointPair> points) {
+		for (MyPointPair p : points) {
+			System.out.println(
+					MathUtil.d4(p.srcPoint.x) + "\t" +
+					MathUtil.d4(p.srcPoint.y) + "\t" +
+					MathUtil.d4(p.destPoint.x) + "\t" +
+					MathUtil.d4(p.destPoint.y));
+		}		
 	}
 	
 	public static ArrayList<MyPointPair> generatePointPairs(MyCamera cameras[], List<MyPoint3D> realPoints) {
@@ -93,13 +104,14 @@ public class Utils {
 		
 		Statistics stat = new Statistics();
 		stat.start();
+		System.out.println("*** Source - Target");
 		for (MyPointPair pair : pointPairs) {
 			tr.transform(pair.srcPoint, p1);
 			tr.transform(pair.destPoint, p2);
 
-//			System.out.println(
-//					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
-//					p2.x + "\t" + p2.y + "\t" + p2.z);
+			System.out.println(
+					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
+					p2.x + "\t" + p2.y + "\t" + p2.z);
 
 			pair.myDiscrepancy = Math.sqrt(
 				Math.pow(p1.y*p2.z - p1.z*p2.y, 2) +	

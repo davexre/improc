@@ -2,7 +2,21 @@ package com.slavi.improc.pano;
 
 import java.awt.geom.Rectangle2D;
 
+import com.slavi.math.matrix.Matrix;
+
 public class ImageData {
+	
+	// My adjust 2
+	public Matrix camera2real;
+	public double rx, ry, rz;
+	public double scaleZ;
+	public Matrix dMdX, dMdY, dMdZ;
+	// My adjust 2
+
+	
+	
+	
+	
 	public static enum ImageFormat {
 		Rectilinear,
 		Panorama,

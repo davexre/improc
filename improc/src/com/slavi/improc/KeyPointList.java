@@ -26,6 +26,14 @@ public class KeyPointList {
 	
 	public int imageId;
 	
+	// My adjust
+	public Matrix camera2real;
+	public double rx, ry, rz;
+	public double scaleZ;
+	public Matrix dMdX, dMdY, dMdZ;
+	// My adjust
+
+	
 	public int getFocalDistance() {
 		return Math.max(imageSizeX, imageSizeY);
 	}
@@ -39,7 +47,9 @@ public class KeyPointList {
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {
-				r.items.add(KeyPoint.fromString(str));
+				KeyPoint kp = KeyPoint.fromString(str);
+				kp.keyPointList = r;
+				r.items.add(kp);
 			}
 		}
 		return r;

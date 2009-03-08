@@ -326,7 +326,7 @@ public class TestRotationAdjust {
 	};
 
 	public static void main(String[] args) {
-		List<MyPoint3D> realPoints = Utils.generateRealPoints();
+		List<MyPoint3D> realPoints = Utils.generateRealPoints(1.0);
 		
 		MyPoint3D cameraOrigin = new MyPoint3D();
 		cameraOrigin.p.setItem(0, 0, 2);

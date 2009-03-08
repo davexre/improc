@@ -6,6 +6,8 @@ import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
+import com.slavi.improc.myadjust.MyAdjustTask;
+import com.slavi.improc.myadjust.MyAdjustTask2;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -40,6 +42,12 @@ public class Improc2 {
 				images.size() - 1);
 		images = null;
 		bigTree = null;
+/*
+		System.out.println("---------- Executing MyAdjust");
+		SwtUtil.openWaitDialog("Executing MyAdjust", 
+				new MyAdjustTask(kppl), 1);
+*/
+		
 /*
 		System.out.println("---------- Keypoint pairs results");
 		for (KeyPointPairList l : kppl) {
@@ -77,6 +85,10 @@ public class Improc2 {
 			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
 					ppl.sourceImage + "\t" + ppl.targetImage);
 		}
+		
+		System.out.println("---------- Executing MyAdjust");
+		SwtUtil.openWaitDialog("Executing MyAdjust", 
+				new MyAdjustTask2(panoList), 1);
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 

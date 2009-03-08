@@ -77,6 +77,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			pair.discrepancy = kpp.discrepancy;
 			pair.distance1 = kpp.distanceToNearest;
 			pair.distance2 = kpp.distanceToNearest2;
+			pair.list = ppl;
 			
 			synchronized(ppl) {
 				ppl.items.add(pair);

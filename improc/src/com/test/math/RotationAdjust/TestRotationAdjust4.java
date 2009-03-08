@@ -10,15 +10,16 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.BaseTransformer;
 
-public class TestRotationAdjust2 {
+public class TestRotationAdjust4 {
 	
 	public static class ImageToWorldTransformer extends BaseTransformer<MyImagePoint, MyImagePoint> {
 		public int getInputSize() {
 			return 2;
 		}
+		
 
 		public int getNumberOfCoefsPerCoordinate() {
-			return cameras.length * 3;
+			return cameras.length * 4 + 1;
 		}
 
 		public int getOutputSize() {
@@ -65,15 +66,15 @@ public class TestRotationAdjust2 {
 			dest.x = 
 				source.x * source.camera.camera2real.getItem(0, 0) +
 				source.y * source.camera.camera2real.getItem(1, 0) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 0);
+				source.camera.scaleZ * source.camera.camera2real.getItem(2, 0);
 			dest.y = 
 				source.x * source.camera.camera2real.getItem(0, 1) +
 				source.y * source.camera.camera2real.getItem(1, 1) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 1);
-			dest.z =
+				source.camera.scaleZ * source.camera.camera2real.getItem(2, 1);
+			dest.z = 
 				source.x * source.camera.camera2real.getItem(0, 2) +
 				source.y * source.camera.camera2real.getItem(1, 2) +
-				source.camera.realFocalDistance * source.camera.camera2real.getItem(2, 2);
+				source.camera.scaleZ * source.camera.camera2real.getItem(2, 2);
 		}
 		
 		MyCamera[] cameras;
@@ -100,7 +101,7 @@ public class TestRotationAdjust2 {
 		}
 	}
 	
-	public static class ImageToWorldTransformLearner { //extends BaseTransformLearner<MyImagePoint, MyImagePoint> {
+	public static class ImageToWorldTransformLearner { 
 
 		ImageToWorldTransformer tr;
 		
@@ -131,6 +132,7 @@ public class TestRotationAdjust2 {
 			throw new RuntimeException();
 		}
 		
+		final double scaleScaleZ = 1;
 		public boolean calculateDiscrepancy() {
 //			int goodCount = computeWeights();
 //			if (goodCount < lsa.getRequiredPoints())
@@ -142,12 +144,9 @@ public class TestRotationAdjust2 {
 			tr.originCamera.rz = 0;
 			buildCamera2RealMatrix(tr.originCamera);
 
-			int counter = 1;
 			for (MyCamera camera : tr.cameras) {
 				buildCamera2RealMatrix(camera);
-				counter++;
-			}			
-			
+			}
 			
 			Matrix P1 = new Matrix(1, 3);
 			Matrix P2 = new Matrix(1, 3);
@@ -171,22 +170,24 @@ public class TestRotationAdjust2 {
 				MyImagePoint source = item.getKey();
 				MyImagePoint dest = item.getValue();
 				
-				int srcIndex = tr.indexOf(source.camera) * 3;
-				int destIndex = tr.indexOf(dest.camera) * 3;
+				int srcIndex = tr.indexOf(source.camera) * 4 + 1;
+				int destIndex = tr.indexOf(dest.camera) * 4 + 1;
 				
 				coefs.make0();
+
+				tr.transform(source, PW1);
+				tr.transform(dest, PW2);
 				
 				P1.setItem(0, 0, source.x);
 				P1.setItem(0, 1, source.y);
-				P1.setItem(0, 2, source.camera.realFocalDistance);
-
+				P1.setItem(0, 2, source.camera.scaleZ);
+//				P1.setItem(0, 2, 1.0);
+				
 				P2.setItem(0, 0, dest.x);
 				P2.setItem(0, 1, dest.y);
-				P2.setItem(0, 2, dest.camera.realFocalDistance);
+				P2.setItem(0, 2, dest.camera.scaleZ);
+//				P2.setItem(0, 2, 1.0);
 				
-				tr.transform(source, PW1);
-				tr.transform(dest, PW2);
-
 				source.camera.dMdX.mMul(P1, dPW1dX1);
 				source.camera.dMdY.mMul(P1, dPW1dY1);
 				source.camera.dMdZ.mMul(P1, dPW1dZ1);
@@ -195,7 +196,7 @@ public class TestRotationAdjust2 {
 				dest.camera.dMdY.mMul(P2, dPW2dY2);
 				dest.camera.dMdZ.mMul(P2, dPW2dZ2);
 
-				for (int c1 = 0; c1 < 3; c1++) { // c1=1..2 -> use fx & fy
+				for (int c1 = 0; c1 < 3; c1++) {
 					int c2 = (c1 + 1) % 3;
 					coefs.make0();
 					double L = 
@@ -211,12 +212,32 @@ public class TestRotationAdjust2 {
 					if (srcIndex >= 0) {
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  getTransformedCoord(PW2, c2));
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -getTransformedCoord(PW2, c1));
+						coefs.setItem(srcIndex + 3, 0, (
+								source.camera.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
+								source.camera.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)) * scaleScaleZ);
+					} else {
+						coefs.setItem(0, 0, (
+								source.camera.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
+								source.camera.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)) * scaleScaleZ);
 					}
 					if (destIndex >= 0) {
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -getTransformedCoord(PW1, c2));
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  getTransformedCoord(PW1, c1));
+						coefs.setItem(destIndex + 3, 0, (
+								getTransformedCoord(PW1, c1) * dest.camera.camera2real.getItem(2, c2) - 
+								getTransformedCoord(PW1, c2) * dest.camera.camera2real.getItem(2, c1)) * scaleScaleZ);
+					} else {
+						coefs.setItem(0, 0, (
+								getTransformedCoord(PW1, c1) * dest.camera.camera2real.getItem(2, c2) - 
+								getTransformedCoord(PW1, c2) * dest.camera.camera2real.getItem(2, c1)) * scaleScaleZ);
 					}
-//					System.out.println(MathUtil.d4(L) + "\t" + coefs.toOneLineString());
+					String name = "";
+					switch (c1) {
+					case 0: name = "xy"; break;
+					case 1: name = "yz"; break;
+					case 2: name = "xz"; break;
+					}
+//					System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
 			}
@@ -233,14 +254,36 @@ public class TestRotationAdjust2 {
 			System.out.println(u.toString());
 			u.rMul(-1.0);
 
+			tr.originCamera.scaleZ = (tr.originCamera.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
 			for (int curCamera = 0; curCamera < tr.cameras.length; curCamera++) {
 				MyCamera camera = tr.cameras[curCamera];
-				int index = curCamera * 3;
+				int index = curCamera * 4 + 1;
 				System.out.println("OLD/NEW Camera");
 				printCameraAngles(camera);
+
+				camera.scaleZ = (camera.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
 				camera.rx = MathUtil.fixAngleMPI_PI(camera.rx + u.getItem(0, index + 0));
 				camera.ry = MathUtil.fixAngleMPI_PI(camera.ry + u.getItem(0, index + 1));
 				camera.rz = MathUtil.fixAngleMPI_PI(camera.rz + u.getItem(0, index + 2));
+				
+/*				
+				camera.scaleZ = Math.abs(camera.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
+				camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0));
+				camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1));
+				camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2));
+*/				
+/*				
+				camera.scaleZ += u.getItem(0, index + 3) / scaleScaleZ;
+				if (camera.scaleZ < 0) {
+					camera.rx = MathUtil.fixAngle2PI(Math.PI + camera.rx + u.getItem(0, index + 0));
+					camera.ry = MathUtil.fixAngle2PI(Math.PI + camera.ry + u.getItem(0, index + 1));
+					camera.scaleZ = -camera.scaleZ;
+				} else {
+					camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0));
+					camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1));
+				}
+				camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2));
+*/
 				buildCamera2RealMatrix(camera);
 				printCameraAngles(camera);
 			}
@@ -290,6 +333,7 @@ public class TestRotationAdjust2 {
 	
 	public static void printCameraAngles(MyCamera camera) {
 		System.out.println("Camera ID " + camera.cameraId + 
+				"\tscaleZ=" + (camera.scaleZ) + 
 				"\trx=" + (camera.rx * MathUtil.rad2deg) + 
 				"\try=" + (camera.ry * MathUtil.rad2deg) + 
 				"\trz=" + (camera.rz * MathUtil.rad2deg) 
@@ -300,13 +344,13 @@ public class TestRotationAdjust2 {
 		// rx, ry, rz, f
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
 		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{ 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-//		{-20 * MathUtil.deg2rad, 10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
-//		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
+		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
+		{-20 * MathUtil.deg2rad, 10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
+		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
 	};
 
 	public static void main(String[] args) {
-		List<MyPoint3D> realPoints = Utils.generateRealPoints(1.0);
+		List<MyPoint3D> realPoints = Utils.generateRealPoints(1000.0);
 		
 		MyPoint3D cameraOrigin = new MyPoint3D();
 		cameraOrigin.p.setItem(0, 0, 2);
@@ -318,18 +362,21 @@ public class TestRotationAdjust2 {
 		System.out.println("Point pairs " + pointPairs.size());
 		Utils.dumpPoints(pointPairs);
 		
-		for (MyCamera camera : cameras) {
+		for (int i = 0; i < cameras.length; i++) {
+			MyCamera camera = cameras[i];
+			camera.scaleZ = camera.realFocalDistance;
 			printCameraAngles(camera);
-			camera.rx = 0.0;
-			camera.ry = 0.0;
-			camera.rz = 0.0;
-			camera.realFocalDistance = 5;
+			camera.rx = 0;
+			camera.ry = 0;
+			camera.rz = 0;
+			camera.scaleZ = 9.0;
+//			camera.scaleZ = camera.realFocalDistance;
 		}
 	
 		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
 		boolean failed = true;
 		if (learner.calculateDiscrepancy()) {
-			for (int iter = 0; iter < 10; iter++) {
+			for (int iter = 0; iter < 50; iter++) {
 				if (!learner.calculateParameters())
 					break;
 				if (!learner.calculateDiscrepancy())
