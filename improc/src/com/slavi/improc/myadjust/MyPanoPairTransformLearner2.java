@@ -290,8 +290,9 @@ public class MyPanoPairTransformLearner2 {
 				);
 	}
 
-	public static final int maxIterations = 7;
+	public static final int maxIterations = 20;
 	public boolean calculate() {
+		printCameraAngles(tr.origin);
 		boolean failed = true;
 		if (calculateDiscrepancy()) {
 			for (int iter = 0; iter < maxIterations; iter++) {

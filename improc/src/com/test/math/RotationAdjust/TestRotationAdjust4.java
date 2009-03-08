@@ -132,7 +132,7 @@ public class TestRotationAdjust4 {
 			throw new RuntimeException();
 		}
 		
-		final double scaleScaleZ = 1;
+		final double scaleScaleZ = 1.0;
 		public boolean calculateDiscrepancy() {
 //			int goodCount = computeWeights();
 //			if (goodCount < lsa.getRequiredPoints())

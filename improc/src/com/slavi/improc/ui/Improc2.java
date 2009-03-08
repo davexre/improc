@@ -86,10 +86,10 @@ public class Improc2 {
 					ppl.sourceImage + "\t" + ppl.targetImage);
 		}
 		
-		System.out.println("---------- Executing MyAdjust");
+/*		System.out.println("---------- Executing MyAdjust");
 		SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask2(panoList), 1);
-		
+*/		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
