@@ -17,6 +17,7 @@ import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.PanoPairTransformLerner;
+import com.slavi.improc.PanoPairTransformer;
 import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
@@ -142,6 +143,10 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 //			panoList.addItem(result);
 			int count = processed.incrementAndGet();
 			SwtUtil.activeWaitDialogSetStatus(null, count);
+			
+			System.out.println("Affine coefs=");
+			System.out.println(((PanoPairTransformer)(atl.transformer)).affineCoefs);
+			
 			return null;
 		}
 	}

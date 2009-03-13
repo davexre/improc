@@ -91,6 +91,8 @@ public class Utils {
 				pp.destPoint.x = tmp2.getItem(0, 0) * scale;
 				pp.destPoint.y = tmp2.getItem(0, 1) * scale;
 
+				pp.discrepancy = 1.0;
+				
 				result.add(pp);
 			}
 		}

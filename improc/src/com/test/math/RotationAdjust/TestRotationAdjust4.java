@@ -1,12 +1,17 @@
 package com.test.math.RotationAdjust;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.BaseTransformer;
 
@@ -132,11 +137,40 @@ public class TestRotationAdjust4 {
 			throw new RuntimeException();
 		}
 		
+		private double oneOverSumWeights = 1.0;
+		/**
+		 * 
+		 * @return Number of point pairs NOT marked as bad.
+		 */
+		protected int computeWeights() {
+			int goodCount = 0;
+			double sumWeight = 0;
+			for (MyPointPair item : items) {
+				if (isBad(item))
+					continue;
+				double weight = getWeight(item); 
+				if (weight < 0)
+					throw new IllegalArgumentException("Negative weight received.");
+				goodCount++;
+				sumWeight += weight;
+			}
+			if (sumWeight == 0.0) {
+				oneOverSumWeights = 1.0 / goodCount;
+			} else {
+				oneOverSumWeights = 1.0 / sumWeight;
+			}
+			return goodCount;
+		}
+		
+		public double getComputedWeight(MyPointPair item) {
+			return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
+		}
+
 		final double scaleScaleZ = 1.0;
 		public boolean calculateDiscrepancy() {
-//			int goodCount = computeWeights();
-//			if (goodCount < lsa.getRequiredPoints())
-//				return false;
+			int goodCount = computeWeights();
+			if (goodCount < lsa.getRequiredPoints())
+				return false;
 			Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
 			tr.originCamera.rx = 0;
@@ -159,34 +193,43 @@ public class TestRotationAdjust4 {
 			Matrix dPW2dY2 = new Matrix(1, 3);
 			Matrix dPW2dZ2 = new Matrix(1, 3);
 
+			MyImagePoint source1 = new MyImagePoint();
+			MyImagePoint dest1 = new MyImagePoint();
+			
 			MyImagePoint PW1 = new MyImagePoint();
 			MyImagePoint PW2 = new MyImagePoint();
 			lsa.clear();
-			for (Map.Entry<MyImagePoint, MyImagePoint> item : items) {
+			for (MyPointPair item : items) {
 				if (isBad(item))
 					continue;
 				
-				double computedWeight = 1.0; //getComputedWeight(item);
+				double computedWeight = getComputedWeight(item);
 				MyImagePoint source = item.getKey();
 				MyImagePoint dest = item.getValue();
+				
+				source1.camera = source.camera;
+				source1.x = (source.x - source.camera.originX) * source.camera.scale;
+				source1.y = (source.y - source.camera.originY) * source.camera.scale;
+				
+				dest1.camera = dest.camera;
+				dest1.x = (dest.x - dest.camera.originX) * dest.camera.scale;
+				dest1.y = (dest.y - dest.camera.originY) * dest.camera.scale;
 				
 				int srcIndex = tr.indexOf(source.camera) * 4 + 1;
 				int destIndex = tr.indexOf(dest.camera) * 4 + 1;
 				
 				coefs.make0();
 
-				tr.transform(source, PW1);
-				tr.transform(dest, PW2);
+				tr.transform(source1, PW1);
+				tr.transform(dest1, PW2);
 				
-				P1.setItem(0, 0, source.x);
-				P1.setItem(0, 1, source.y);
-				P1.setItem(0, 2, source.camera.scaleZ);
-//				P1.setItem(0, 2, 1.0);
+				P1.setItem(0, 0, source1.x);
+				P1.setItem(0, 1, source1.y);
+				P1.setItem(0, 2, source1.camera.scaleZ);
 				
-				P2.setItem(0, 0, dest.x);
-				P2.setItem(0, 1, dest.y);
-				P2.setItem(0, 2, dest.camera.scaleZ);
-//				P2.setItem(0, 2, 1.0);
+				P2.setItem(0, 0, dest1.x);
+				P2.setItem(0, 1, dest1.y);
+				P2.setItem(0, 2, dest1.camera.scaleZ);
 				
 				source.camera.dMdX.mMul(P1, dPW1dX1);
 				source.camera.dMdY.mMul(P1, dPW1dY1);
@@ -254,7 +297,11 @@ public class TestRotationAdjust4 {
 			System.out.println(u.toString());
 			u.rMul(-1.0);
 
+			System.out.println("OLD/NEW Camera");
+			printCameraAngles(tr.originCamera);
 			tr.originCamera.scaleZ = (tr.originCamera.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
+			buildCamera2RealMatrix(tr.originCamera);
+			printCameraAngles(tr.originCamera);
 			for (int curCamera = 0; curCamera < tr.cameras.length; curCamera++) {
 				MyCamera camera = tr.cameras[curCamera];
 				int index = curCamera * 4 + 1;
@@ -343,37 +390,157 @@ public class TestRotationAdjust4 {
 	static double cameraAngles[][] = new double[][] {
 		// rx, ry, rz, f
 //		{ 20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 10},
-		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 12},
-		{-20 * MathUtil.deg2rad, 10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 10},
-		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 11},
+		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 4000},
+		{-20 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 4500},
+		{-20 * MathUtil.deg2rad, 10 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 4200},
+		{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,-20 * MathUtil.deg2rad, 3800},
 	};
 
-	public static void main(String[] args) {
-		List<MyPoint3D> realPoints = Utils.generateRealPoints(1000.0);
+	static Data readTestData() throws Exception {
+		MyPoint3D origin = new MyPoint3D();
+		
+		double cameraAngles[][] = new double[][] {
+			// rx, ry, rz, f
+			{  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 2000},
+			{ 20 * MathUtil.deg2rad,  0 * MathUtil.deg2rad,  0 * MathUtil.deg2rad, 2500},
+		};
+		
+		Data data = new Data();
+		data.cameras = Utils.generateCameras(origin, cameraAngles);
+		for (MyCamera camera : data.cameras) {
+			camera.imageSizeX = 2272;
+			camera.imageSizeY = 1712;
+			camera.originX = camera.imageSizeX / 2.0;
+			camera.originY = camera.imageSizeY / 2.0;
+			camera.scale = 1.0 / Math.max(camera.imageSizeX, camera.imageSizeY);
+			camera.scaleZ = 1.0 / (2.0 * Math.tan(MathUtil.deg2rad * (20)));  
+		}
+		data.pointPairs = new ArrayList<MyPointPair>();
+		
+		InputStream is = TestRotationAdjust4.class.getResourceAsStream("TestData.txt");
+		BufferedReader in = new BufferedReader(new InputStreamReader(is));
+		in.readLine();
+		while (in.ready()) {
+			String line = in.readLine();
+			if (line.equals(""))
+				break;
+			StringTokenizer st = new StringTokenizer(line);
+			MyPointPair pair = new MyPointPair();
+			pair.srcPoint = new MyImagePoint();
+			pair.destPoint = new MyImagePoint();
+			pair.srcPoint.camera = data.cameras[0];
+			pair.destPoint.camera = data.cameras[1];
+			
+			pair.srcPoint.x = Double.parseDouble(st.nextToken());
+			pair.srcPoint.y = Double.parseDouble(st.nextToken());
+			pair.destPoint.x = Double.parseDouble(st.nextToken());
+			pair.destPoint.y = Double.parseDouble(st.nextToken());
+
+			pair.discrepancy = Double.parseDouble(st.nextToken());
+			pair.weight = pair.discrepancy < 1 ? 1 : 1 / pair.discrepancy;
+			
+			data.pointPairs.add(pair);
+		}
+		is.close();
+		return data;
+	}
+	
+	public static class Data {
+		MyCamera cameras[];
+		ArrayList<MyPointPair> pointPairs;
+	}
+	
+	public static Data generateData() {
+		Data data = new Data();
+		List<MyPoint3D> realPoints = Utils.generateRealPoints(3000.0);
 		
 		MyPoint3D cameraOrigin = new MyPoint3D();
-		cameraOrigin.p.setItem(0, 0, 2);
-		cameraOrigin.p.setItem(0, 1, 2);
-		cameraOrigin.p.setItem(0, 2, -50);
-		MyCamera cameras[] = Utils.generateCameras(cameraOrigin, cameraAngles);
+		cameraOrigin.p.setItem(0, 0, 2000);
+		cameraOrigin.p.setItem(0, 1, 2000);
+		cameraOrigin.p.setItem(0, 2, -5000);
+		data.cameras = Utils.generateCameras(cameraOrigin, cameraAngles);
 		
-		ArrayList<MyPointPair> pointPairs = Utils.generatePointPairs(cameras, realPoints);
-		System.out.println("Point pairs " + pointPairs.size());
-		Utils.dumpPoints(pointPairs);
+		data.pointPairs = Utils.generatePointPairs(data.cameras, realPoints);
+		return data;
+	}
+
+	public static void transform2(MyImagePoint source, MyImagePoint dest) {
+/*		double x = source.x - source.camera.originX;
+		double y = source.y - source.camera.originY;
+		double z = source.camera.scaleZ / source.camera.scale;
+*/
 		
-		for (int i = 0; i < cameras.length; i++) {
-			MyCamera camera = cameras[i];
+		double x = (source.x - source.camera.originX) * source.camera.scale;
+		double y = (source.y - source.camera.originY) * source.camera.scale;
+		double z = source.camera.scaleZ;
+
+		dest.x = 1000 * (
+			x * source.camera.camera2real.getItem(0, 0) +
+			y * source.camera.camera2real.getItem(1, 0) +
+			z * source.camera.camera2real.getItem(2, 0));
+		dest.y = 1000 * (
+			x * source.camera.camera2real.getItem(0, 1) +
+			y * source.camera.camera2real.getItem(1, 1) +
+			z * source.camera.camera2real.getItem(2, 1));
+		dest.z = 1000 * (
+			x * source.camera.camera2real.getItem(0, 2) +
+			y * source.camera.camera2real.getItem(1, 2) +
+			z * source.camera.camera2real.getItem(2, 2));
+	}
+	
+	public static void calculateDiscrepancy(
+			List<MyPointPair> pointPairs, BaseTransformer<MyImagePoint, MyImagePoint> tr) {
+		MyImagePoint p1 = new MyImagePoint();
+		MyImagePoint p2 = new MyImagePoint();
+		
+		Statistics stat = new Statistics();
+		stat.start();
+//		System.out.println("*** Source - Target");
+		for (MyPointPair pair : pointPairs) {
+			transform2(pair.srcPoint, p1);
+			transform2(pair.destPoint, p2);
+
+//			System.out.println(
+//					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
+//					p2.x + "\t" + p2.y + "\t" + p2.z);
+/*
+			pair.myDiscrepancy = Math.sqrt(
+				Math.pow(p1.y*p2.z - p1.z*p2.y, 2) +	
+				Math.pow(p1.x*p2.z - p1.z*p2.x, 2) +	
+				Math.pow(p1.x*p2.y - p1.y*p2.x, 2)	
+				);*/
+//			pair.myDiscrepancy = Math.max(Math.max(
+//					Math.abs(p1.y*p2.z - p1.z*p2.y), 
+//					Math.abs(p1.x*p2.z - p1.z*p2.x)), 
+//					Math.abs(p1.x*p2.y - p1.y*p2.x));
+			pair.myDiscrepancy = Math.abs(p1.y/p1.z - p2.y/p2.z);
+//			pair.myDiscrepancy = Math.abs(p1.y*p2.z - p1.z*p2.y);
+			stat.addValue(pair.myDiscrepancy);
+		}
+		stat.stop();
+		System.out.println("MyDiscrepancy statistics:");
+		System.out.println(stat.toString(Statistics.CStatMinMax));
+	}
+	
+	public static void main(String[] args) throws Exception {
+//		Data data = generateData();
+		Data data = readTestData();
+		
+		System.out.println("Point pairs " + data.pointPairs.size());
+		Utils.dumpPoints(data.pointPairs);
+		
+		for (int i = 0; i < data.cameras.length; i++) {
+			MyCamera camera = data.cameras[i];
 			camera.scaleZ = camera.realFocalDistance;
 			printCameraAngles(camera);
 			camera.rx = 0;
 			camera.ry = 0;
 			camera.rz = 0;
-			camera.scaleZ = 9.0;
+			camera.scaleZ = 3;
 //			camera.scaleZ = camera.realFocalDistance;
 		}
 	
-		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(cameras[0], cameras, pointPairs);
+		ImageToWorldTransformLearner learner = new ImageToWorldTransformLearner(data.cameras[0], data.cameras, data.pointPairs);
 		boolean failed = true;
 		if (learner.calculateDiscrepancy()) {
 			for (int iter = 0; iter < 50; iter++) {
@@ -382,7 +549,7 @@ public class TestRotationAdjust4 {
 				if (!learner.calculateDiscrepancy())
 					break;
 				double mse = learner.getMedianSquareError();
-				System.out.println("MSE=" + mse);
+				System.out.println("ITER=" + iter + " MSE=" + mse);
 //				learner.tr.cameras[0].camera2real.printM("A");
 				if (mse < 0.01) {
 					failed = false;
@@ -390,17 +557,41 @@ public class TestRotationAdjust4 {
 				}
 			}
 		}
-		if (failed) {
-			System.out.println("FAILED");
-//			return;
-		}
 		
-		System.out.println("FINAL");
-		for (MyCamera camera : cameras) {
-			printCameraAngles(camera);
+		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
+/*
+		for (MyCamera camera : data.cameras) {
+			camera.scaleZ /= camera.scale;
+			camera.scale = 1.0;
+		}		
+		
+		failed = true;
+		
+		if (learner.calculateDiscrepancy()) {
+			for (int iter = 0; iter < 50; iter++) {
+				if (!learner.calculateParameters())
+					break;
+				if (!learner.calculateDiscrepancy())
+					break;
+				double mse = learner.getMedianSquareError();
+				System.out.println("ITER=" + iter + " MSE=" + mse);
+//				learner.tr.cameras[0].camera2real.printM("A");
+				if (mse < 0.01) {
+					failed = false;
+					break;
+				}
+			}
 		}
-		Utils.calculateDiscrepancy(pointPairs, learner.tr);
-		System.out.println(pointPairs.size());
+
+		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
+		*/
+		System.out.println("FINAL");
+		for (MyCamera camera : data.cameras) {
+			printCameraAngles(camera);
+			System.out.println(1/camera.scale);
+		}
+		calculateDiscrepancy(data.pointPairs, learner.tr);
+		System.out.println(data.pointPairs.size());
 		System.out.println("Done.");
 	}
 }

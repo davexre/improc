@@ -13,4 +13,7 @@ public class MyCamera {
 	public double rx, ry, rz, scale;
 	public double scaleZ = 1.0;
 	public Matrix dMdX, dMdY, dMdZ;
+	
+	public int imageSizeX, imageSizeY;
+	public double originX, originY;
 }

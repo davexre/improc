@@ -48,14 +48,18 @@ public class MyPanoPairTransformLearner2 {
 		}
 		ArrayList<ImageData> images = new ArrayList<ImageData>(imagesMap.values());
 		
-		final double defaultCameraFieldOfView = 42; // degrees
+		final double defaultCameraFieldOfView = 40; // degrees
 		final double defaultCameraFOV_to_ScaleZ = 1.0 / 
 				(2.0 * Math.tan(MathUtil.deg2rad * (defaultCameraFieldOfView / 2.0)));  
 		for (ImageData image : images) {
 			image.rx = 0.0;
 			image.ry = 0.0;
 			image.rz = 0.0;
-			image.scaleZ = Math.max(image.width, image.height) * defaultCameraFOV_to_ScaleZ;
+			image.cameraOriginX = image.width / 2.0;
+			image.cameraOriginY = image.height / 2.0;
+			image.maxWidthHeight = Math.max(image.width, image.height);
+			image.cameraScale = 1.0 / image.maxWidthHeight;
+			image.scaleZ = image.maxWidthHeight * image.cameraScale * defaultCameraFOV_to_ScaleZ;
 			buildCamera2RealMatrix(image);
 		}
 		ImageData origin = images.remove(0);
@@ -87,6 +91,8 @@ public class MyPanoPairTransformLearner2 {
 		image.dMdY = RotationXYZ.make_dF_dY(image.rx, image.ry, image.rz);
 		image.dMdZ = RotationXYZ.make_dF_dZ(image.rx, image.ry, image.rz);
 	}
+	
+	boolean printDetails = false;
 	
 	public boolean calculateDiscrepancy() {
 //		int goodCount = computeWeights();
@@ -125,14 +131,17 @@ public class MyPanoPairTransformLearner2 {
 			for (PanoPair item : pairList.items) {
 				if (isBad(item))
 					continue;
+				if (pointCounter > 50)
+					break;
 				pointCounter++;
 				
+				
 				double computedWeight = 1.0; //getComputedWeight(item);
-				source.x = item.sx;
-				source.y = item.sy;
+				source.x = (item.sx - pairList.source.cameraOriginX) * pairList.source.cameraScale;
+				source.y = (item.sy - pairList.source.cameraOriginY) * pairList.source.cameraScale;
 				source.z = 0;
-				dest.x = item.tx;
-				dest.y = item.ty;
+				dest.x = (item.tx - pairList.target.cameraOriginX) * pairList.target.cameraScale;
+				dest.y = (item.ty - pairList.target.cameraOriginY) * pairList.target.cameraScale;
 				dest.z = 0;
 				
 				int srcIndex = tr.images.indexOf(pairList.source) * 4 + 1;
@@ -143,13 +152,13 @@ public class MyPanoPairTransformLearner2 {
 				tr.transformToOrigin(source, pairList.source, PW1);
 				tr.transformToOrigin(dest, pairList.target, PW2);
 				
-				P1.setItem(0, 0, item.sx);
-				P1.setItem(0, 1, item.sy);
+				P1.setItem(0, 0, source.x);
+				P1.setItem(0, 1, source.y);
 				P1.setItem(0, 2, pairList.source.scaleZ);
 	//			P1.setItem(0, 2, 1.0);
 				
-				P2.setItem(0, 0, item.tx);
-				P2.setItem(0, 1, item.ty);
+				P2.setItem(0, 0, dest.x);
+				P2.setItem(0, 1, dest.y);
 				P2.setItem(0, 2, pairList.target.scaleZ);
 	//			P2.setItem(0, 2, 1.0);
 				
@@ -202,7 +211,8 @@ public class MyPanoPairTransformLearner2 {
 					case 1: name = "yz"; break;
 					case 2: name = "xz"; break;
 					}
-					if (pointCounter < 5)
+//					if (pointCounter < 5)
+					if (printDetails)
 						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
@@ -221,7 +231,9 @@ public class MyPanoPairTransformLearner2 {
 		System.out.println(u.toString());
 		u.rMul(-1.0);
 
+		System.out.println("OLD/NEW Camera");
 		tr.origin.scaleZ = (tr.origin.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
+		printCameraAngles(tr.origin);
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 			ImageData image = tr.images.get(curImage);
 			int index = curImage * 4 + 1;
@@ -290,7 +302,7 @@ public class MyPanoPairTransformLearner2 {
 				);
 	}
 
-	public static final int maxIterations = 20;
+	public static final int maxIterations = 10;
 	public boolean calculate() {
 		printCameraAngles(tr.origin);
 		boolean failed = true;
@@ -301,13 +313,42 @@ public class MyPanoPairTransformLearner2 {
 				if (!calculateDiscrepancy())
 					break;
 				double mse = getMedianSquareError();
-				System.out.println("MSE=" + mse);
+				System.out.println("Iter=" + iter + " MSE=" + mse);
 				if (mse < 0.01) {
 					failed = false;
-					break;
+//					break;
 				}
 			}
 		}
+		tr.origin.scaleZ /= tr.origin.cameraScale;
+		tr.origin.cameraScale = 1.0;
+		for (ImageData image : tr.images) {
+			image.scaleZ /= image.cameraScale;
+			image.cameraScale = 1.0;
+		}
+
+		if (calculateDiscrepancy()) {
+			for (int iter = 0; iter < maxIterations; iter++) {
+				if (!calculateParameters())
+					break;
+				if (!calculateDiscrepancy())
+					break;
+				double mse = getMedianSquareError();
+				System.out.println("Iter=" + iter + " MSE=" + mse);
+				if (mse < 0.01) {
+					failed = false;
+//					break;
+				}
+			}
+		}
+		printDetails = true;
+
+		System.out.println("Descripancy with scale = 1.0 is " + calculateDiscrepancy());
+		System.out.println("Calculated parameters result is " + calculateParameters());
+		System.out.println("Descripancy with scale = 1.0 is " + calculateDiscrepancy());
+		double mse = getMedianSquareError();
+		System.out.println("MSE=" + mse);
+		
 		if (failed) {
 			System.out.println("FAILED");
 		}

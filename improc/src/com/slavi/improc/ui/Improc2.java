@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
+import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
-import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyAdjustTask2;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -84,12 +84,24 @@ public class Improc2 {
 		for (PanoPairList ppl : panoList.items) {
 			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
 					ppl.sourceImage + "\t" + ppl.targetImage);
+			for (PanoPair pp : ppl.items) {
+				System.out.println(
+						Double.toString(pp.sx) + "\t" +
+						Double.toString(pp.sy) + "\t" +
+						Double.toString(pp.tx) + "\t" +
+						Double.toString(pp.ty) + "\t" +
+						Double.toString(pp.discrepancy) + "\t" +
+						Double.toString(pp.distance1) + "\t" +
+						Double.toString(pp.distance2)
+						);
+			}
+			System.out.println("--------------");
 		}
 		
-/*		System.out.println("---------- Executing MyAdjust");
+		System.out.println("---------- Executing MyAdjust");
 		SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask2(panoList), 1);
-*/		
+		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
