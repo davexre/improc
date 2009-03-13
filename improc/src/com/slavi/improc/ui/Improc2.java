@@ -84,7 +84,7 @@ public class Improc2 {
 		for (PanoPairList ppl : panoList.items) {
 			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
 					ppl.sourceImage + "\t" + ppl.targetImage);
-			for (PanoPair pp : ppl.items) {
+/*			for (PanoPair pp : ppl.items) {
 				System.out.println(
 						Double.toString(pp.sx) + "\t" +
 						Double.toString(pp.sy) + "\t" +
@@ -95,7 +95,7 @@ public class Improc2 {
 						Double.toString(pp.distance2)
 						);
 			}
-			System.out.println("--------------");
+			System.out.println("--------------");*/
 		}
 		
 		System.out.println("---------- Executing MyAdjust");

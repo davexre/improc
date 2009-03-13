@@ -2,16 +2,14 @@ package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
-import com.slavi.improc.KeyPoint;
-import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.pano.ImageData;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MyPanoPairTransformLearner2 {
@@ -57,9 +55,8 @@ public class MyPanoPairTransformLearner2 {
 			image.rz = 0.0;
 			image.cameraOriginX = image.width / 2.0;
 			image.cameraOriginY = image.height / 2.0;
-			image.maxWidthHeight = Math.max(image.width, image.height);
-			image.cameraScale = 1.0 / image.maxWidthHeight;
-			image.scaleZ = image.maxWidthHeight * image.cameraScale * defaultCameraFOV_to_ScaleZ;
+			image.cameraScale = 1.0 / Math.max(image.width, image.height);
+			image.scaleZ = defaultCameraFOV_to_ScaleZ;
 			buildCamera2RealMatrix(image);
 		}
 		ImageData origin = images.remove(0);
@@ -83,8 +80,42 @@ public class MyPanoPairTransformLearner2 {
 		throw new IllegalArgumentException();
 	}
 
-	final double scaleScaleZ = 1;
+	private double oneOverSumWeights = 1.0;
+	/**
+	 * 
+	 * @return Number of point pairs NOT marked as bad.
+	 */
+	protected int computeWeights() {
+		int goodCount = 0;
+		double sumWeight = 0;
+		for (PanoPairList pairList : pairsLists) {
+			for (PanoPair item : pairList.items) {
+				if (isBad(item))
+					continue;
+				double weight = getWeight(item); 
+				if (weight < 0)
+					throw new IllegalArgumentException("Negative weight received.");
+				goodCount++;
+				sumWeight += weight;
+			}
+		}
+		if (sumWeight == 0.0) {
+			oneOverSumWeights = 1.0 / goodCount;
+		} else {
+			oneOverSumWeights = 1.0 / sumWeight;
+		}
+		return goodCount;
+	}
+	
+	public double getComputedWeight(PanoPair item) {
+		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
+	}
 
+	
+	
+	
+	
+	final double scaleScaleZ = 1;
 	public static void buildCamera2RealMatrix(ImageData image) {
 		image.camera2real = RotationXYZ.makeAngles(image.rx, image.ry, image.rz);
 		image.dMdX = RotationXYZ.make_dF_dX(image.rx, image.ry, image.rz);
@@ -95,16 +126,15 @@ public class MyPanoPairTransformLearner2 {
 	boolean printDetails = false;
 	
 	public boolean calculateDiscrepancy() {
-//		int goodCount = computeWeights();
-//		if (goodCount < lsa.getRequiredPoints())
-//			return false;
+		int goodCount = computeWeights();
+		if (goodCount < lsa.getRequiredPoints())
+			return false;
 		Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
 		tr.origin.rx = 0;
 		tr.origin.ry = 0;
 		tr.origin.rz = 0;
 		buildCamera2RealMatrix(tr.origin);
-
 		for (ImageData image : tr.images) {
 			buildCamera2RealMatrix(image);
 		}
@@ -131,12 +161,9 @@ public class MyPanoPairTransformLearner2 {
 			for (PanoPair item : pairList.items) {
 				if (isBad(item))
 					continue;
-				if (pointCounter > 50)
-					break;
 				pointCounter++;
 				
-				
-				double computedWeight = 1.0; //getComputedWeight(item);
+				double computedWeight = getComputedWeight(item);
 				source.x = (item.sx - pairList.source.cameraOriginX) * pairList.source.cameraScale;
 				source.y = (item.sy - pairList.source.cameraOriginY) * pairList.source.cameraScale;
 				source.z = 0;
@@ -155,12 +182,10 @@ public class MyPanoPairTransformLearner2 {
 				P1.setItem(0, 0, source.x);
 				P1.setItem(0, 1, source.y);
 				P1.setItem(0, 2, pairList.source.scaleZ);
-	//			P1.setItem(0, 2, 1.0);
 				
 				P2.setItem(0, 0, dest.x);
 				P2.setItem(0, 1, dest.y);
 				P2.setItem(0, 2, pairList.target.scaleZ);
-	//			P2.setItem(0, 2, 1.0);
 				
 				pairList.source.dMdX.mMul(P1, dPW1dX1);
 				pairList.source.dMdY.mMul(P1, dPW1dY1);
@@ -212,7 +237,7 @@ public class MyPanoPairTransformLearner2 {
 					case 2: name = "xz"; break;
 					}
 //					if (pointCounter < 5)
-					if (printDetails)
+//					if (printDetails)
 						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
@@ -233,11 +258,11 @@ public class MyPanoPairTransformLearner2 {
 
 		System.out.println("OLD/NEW Camera");
 		tr.origin.scaleZ = (tr.origin.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
+		buildCamera2RealMatrix(tr.origin);
 		printCameraAngles(tr.origin);
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 			ImageData image = tr.images.get(curImage);
 			int index = curImage * 4 + 1;
-			System.out.println("OLD/NEW Camera");
 
 			image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
 			image.rx = MathUtil.fixAngleMPI_PI(image.rx + u.getItem(0, index + 0));
@@ -269,24 +294,25 @@ public class MyPanoPairTransformLearner2 {
 		return true;
 	}
 
-	public double getDiscrepancy(Map.Entry<KeyPoint, KeyPoint> item) {
-		return ((KeyPointPair) item).discrepancy;
+	public double getDiscrepancy(PanoPair item) {
+		return item.discrepancy;
 	}
 
-	public double getWeight(Map.Entry<KeyPoint, KeyPoint> item) {
-		return ((KeyPointPair) item).weight;
+	public double getWeight(PanoPair item) {
+//		return item.weight;
+		return item.discrepancy < 1 ? 1 : 1 / item.discrepancy;
 	}
 
 	public boolean isBad(PanoPair item) {
 		return item.bad;
 	}
 
-	public void setBad(Map.Entry<KeyPoint, KeyPoint> item, boolean bad) {
-		((KeyPointPair) item).bad = bad;
+	public void setBad(PanoPair item, boolean bad) {
+		item.bad = bad;
 	}
 
-	public void setDiscrepancy(Map.Entry<KeyPoint, KeyPoint> item, double discrepancy) {
-		((KeyPointPair) item).discrepancy = discrepancy;
+	public void setDiscrepancy(PanoPair item, double discrepancy) {
+		item.discrepancy = discrepancy;
 	}
 
 	public double getMedianSquareError() {
@@ -296,6 +322,7 @@ public class MyPanoPairTransformLearner2 {
 	public static void printCameraAngles(ImageData image) {
 		System.out.println("Image ID " + image.name + 
 				"\tscaleZ=" + (image.scaleZ) + 
+				"\tscale=" + (1/image.cameraScale) + 
 				"\trx=" + (image.rx * MathUtil.rad2deg) + 
 				"\try=" + (image.ry * MathUtil.rad2deg) + 
 				"\trz=" + (image.rz * MathUtil.rad2deg) 
@@ -303,8 +330,45 @@ public class MyPanoPairTransformLearner2 {
 	}
 
 	public static final int maxIterations = 10;
+	
+	private void check() {
+		MyPoint3D PW1 = new MyPoint3D();
+		MyPoint3D PW2 = new MyPoint3D();
+
+		MyPoint3D source = new MyPoint3D();
+		MyPoint3D dest = new MyPoint3D();
+
+		Statistics stat = new Statistics();
+		stat.start();
+
+		for (PanoPairList pairList : pairsLists) {
+			for (PanoPair item : pairList.items) {
+				if (isBad(item))
+					continue;
+				source.x = (item.sx - pairList.source.cameraOriginX) * pairList.source.cameraScale;
+				source.y = (item.sy - pairList.source.cameraOriginY) * pairList.source.cameraScale;
+				source.z = 0;
+				dest.x = (item.tx - pairList.target.cameraOriginX) * pairList.target.cameraScale;
+				dest.y = (item.ty - pairList.target.cameraOriginY) * pairList.target.cameraScale;
+				dest.z = 0;
+				
+				tr.transformToOrigin(source, pairList.source, PW1);
+				tr.transformToOrigin(dest, pairList.target, PW2);
+
+				double myDiscrepancy = MathUtil.rad2deg * Math.sqrt(
+						Math.pow(Math.atan2(PW1.x, PW1.z) - Math.atan2(PW2.x, PW2.z), 2) + 
+						Math.pow(Math.atan2(PW1.y, PW1.z) - Math.atan2(PW2.y, PW2.z), 2)  
+//						Math.pow(Math.atan2(PW1.x, PW1.y) - Math.atan2(PW2.x, PW2.y), 2)
+						); 
+				stat.addValue(myDiscrepancy);
+			}
+		}
+		stat.stop();
+		System.out.println("MyDiscrepancy statistics:");
+		System.out.println(stat.toString(Statistics.CStatMinMax));
+	}
+	
 	public boolean calculate() {
-		printCameraAngles(tr.origin);
 		boolean failed = true;
 		if (calculateDiscrepancy()) {
 			for (int iter = 0; iter < maxIterations; iter++) {
@@ -316,42 +380,19 @@ public class MyPanoPairTransformLearner2 {
 				System.out.println("Iter=" + iter + " MSE=" + mse);
 				if (mse < 0.01) {
 					failed = false;
-//					break;
+					break;
 				}
 			}
 		}
-		tr.origin.scaleZ /= tr.origin.cameraScale;
-		tr.origin.cameraScale = 1.0;
+		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
+
+		printCameraAngles(tr.origin);
 		for (ImageData image : tr.images) {
-			image.scaleZ /= image.cameraScale;
-			image.cameraScale = 1.0;
+			printCameraAngles(image);
 		}
-
-		if (calculateDiscrepancy()) {
-			for (int iter = 0; iter < maxIterations; iter++) {
-				if (!calculateParameters())
-					break;
-				if (!calculateDiscrepancy())
-					break;
-				double mse = getMedianSquareError();
-				System.out.println("Iter=" + iter + " MSE=" + mse);
-				if (mse < 0.01) {
-					failed = false;
-//					break;
-				}
-			}
-		}
-		printDetails = true;
-
-		System.out.println("Descripancy with scale = 1.0 is " + calculateDiscrepancy());
-		System.out.println("Calculated parameters result is " + calculateParameters());
-		System.out.println("Descripancy with scale = 1.0 is " + calculateDiscrepancy());
-		double mse = getMedianSquareError();
-		System.out.println("MSE=" + mse);
 		
-		if (failed) {
-			System.out.println("FAILED");
-		}
+		check();
+
 		return !failed;
 	}
 }

@@ -29,6 +29,7 @@ public class KeyPointList {
 	// My adjust
 	public Matrix camera2real;
 	public double rx, ry, rz;
+	public double cameraOriginX, cameraOriginY, maxWidthHeight, cameraScale; 
 	public double scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
 	// My adjust

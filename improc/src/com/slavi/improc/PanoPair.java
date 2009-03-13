@@ -7,6 +7,7 @@ public class PanoPair {
 	public double sx, sy, tx, ty, discrepancy;
 	public double distance1, distance2;
 	public boolean bad;
+	public double weight;
 	
 	public PanoPair() {}
 	

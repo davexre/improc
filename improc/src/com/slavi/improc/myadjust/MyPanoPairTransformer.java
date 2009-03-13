@@ -68,17 +68,21 @@ public class MyPanoPairTransformer extends BaseTransformer<KeyPoint, MyPoint3D> 
 	}
 
 	public void transform(KeyPoint source, MyPoint3D dest) {
+		throw new RuntimeException("not implemented");
+	}
+	
+	public void transform(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
 		dest.x = 
-			source.doubleX * source.keyPointList.camera2real.getItem(0, 0) +
-			source.doubleY * source.keyPointList.camera2real.getItem(1, 0) +
-			source.keyPointList.scaleZ * source.keyPointList.camera2real.getItem(2, 0);
+			source.doubleX * srcImage.camera2real.getItem(0, 0) +
+			source.doubleY * srcImage.camera2real.getItem(1, 0) +
+			srcImage.scaleZ * srcImage.camera2real.getItem(2, 0);
 		dest.y = 
-			source.doubleX * source.keyPointList.camera2real.getItem(0, 1) +
-			source.doubleY * source.keyPointList.camera2real.getItem(1, 1) +
-			source.keyPointList.scaleZ * source.keyPointList.camera2real.getItem(2, 1);
+			source.doubleX * srcImage.camera2real.getItem(0, 1) +
+			source.doubleY * srcImage.camera2real.getItem(1, 1) +
+			srcImage.scaleZ * srcImage.camera2real.getItem(2, 1);
 		dest.z = 
-			source.doubleX * source.keyPointList.camera2real.getItem(0, 2) +
-			source.doubleY * source.keyPointList.camera2real.getItem(1, 2) +
-			source.keyPointList.scaleZ * source.keyPointList.camera2real.getItem(2, 2);
+			source.doubleX * srcImage.camera2real.getItem(0, 2) +
+			source.doubleY * srcImage.camera2real.getItem(1, 2) +
+			srcImage.scaleZ * srcImage.camera2real.getItem(2, 2);
 	}
 }

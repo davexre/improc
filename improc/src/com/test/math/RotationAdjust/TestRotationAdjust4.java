@@ -470,19 +470,19 @@ public class TestRotationAdjust4 {
 		double z = source.camera.scaleZ / source.camera.scale;
 */
 		
-		double x = (source.x - source.camera.originX) * source.camera.scale;
-		double y = (source.y - source.camera.originY) * source.camera.scale;
-		double z = source.camera.scaleZ;
+		double x = (source.x - source.camera.originX);
+		double y = (source.y - source.camera.originY);
+		double z = source.camera.scaleZ / source.camera.scale;
 
-		dest.x = 1000 * (
+		dest.x = 1 * (
 			x * source.camera.camera2real.getItem(0, 0) +
 			y * source.camera.camera2real.getItem(1, 0) +
 			z * source.camera.camera2real.getItem(2, 0));
-		dest.y = 1000 * (
+		dest.y = 1 * (
 			x * source.camera.camera2real.getItem(0, 1) +
 			y * source.camera.camera2real.getItem(1, 1) +
 			z * source.camera.camera2real.getItem(2, 1));
-		dest.z = 1000 * (
+		dest.z = 1 * (
 			x * source.camera.camera2real.getItem(0, 2) +
 			y * source.camera.camera2real.getItem(1, 2) +
 			z * source.camera.camera2real.getItem(2, 2));
@@ -503,18 +503,27 @@ public class TestRotationAdjust4 {
 //			System.out.println(
 //					p1.x + "\t" + p1.y + "\t" + p1.z + "\t" + 
 //					p2.x + "\t" + p2.y + "\t" + p2.z);
-/*
-			pair.myDiscrepancy = Math.sqrt(
+
+/*			pair.myDiscrepancy = Math.sqrt(
 				Math.pow(p1.y*p2.z - p1.z*p2.y, 2) +	
 				Math.pow(p1.x*p2.z - p1.z*p2.x, 2) +	
 				Math.pow(p1.x*p2.y - p1.y*p2.x, 2)	
 				);*/
-//			pair.myDiscrepancy = Math.max(Math.max(
-//					Math.abs(p1.y*p2.z - p1.z*p2.y), 
-//					Math.abs(p1.x*p2.z - p1.z*p2.x)), 
-//					Math.abs(p1.x*p2.y - p1.y*p2.x));
-			pair.myDiscrepancy = Math.abs(p1.y/p1.z - p2.y/p2.z);
+			
+/*			pair.myDiscrepancy = Math.max(Math.max(
+					Math.abs(p1.y*p2.z - p1.z*p2.y), 
+					Math.abs(p1.x*p2.z - p1.z*p2.x)), 
+					Math.abs(p1.x*p2.y - p1.y*p2.x));*/
+					
+//			pair.myDiscrepancy = Math.abs(p1.y/p1.z - p2.y/p2.z);
 //			pair.myDiscrepancy = Math.abs(p1.y*p2.z - p1.z*p2.y);
+			
+			pair.myDiscrepancy = MathUtil.rad2deg * Math.sqrt(
+				Math.pow(Math.atan2(p1.x, p1.z) - Math.atan2(p2.x, p2.z), 2) + 
+				Math.pow(Math.atan2(p1.y, p1.z) - Math.atan2(p2.y, p2.z), 2)  
+//				Math.pow(Math.atan2(p1.x, p1.y) - Math.atan2(p2.x, p2.y), 2)
+				); 
+				
 			stat.addValue(pair.myDiscrepancy);
 		}
 		stat.stop();
@@ -531,12 +540,12 @@ public class TestRotationAdjust4 {
 		
 		for (int i = 0; i < data.cameras.length; i++) {
 			MyCamera camera = data.cameras[i];
-			camera.scaleZ = camera.realFocalDistance;
+//			camera.scaleZ = camera.realFocalDistance;
 			printCameraAngles(camera);
 			camera.rx = 0;
 			camera.ry = 0;
 			camera.rz = 0;
-			camera.scaleZ = 3;
+//			camera.scaleZ = 3;
 //			camera.scaleZ = camera.realFocalDistance;
 		}
 	

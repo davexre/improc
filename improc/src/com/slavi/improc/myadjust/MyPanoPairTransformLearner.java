@@ -7,9 +7,12 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.PanoPair;
+import com.slavi.improc.PanoPairList;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MyPanoPairTransformLearner {
@@ -29,14 +32,17 @@ public class MyPanoPairTransformLearner {
 			if (!images.contains(i.target))
 				images.add(i.target);
 		}
-		final double defaultCameraFieldOfView = 42; // degrees
+		final double defaultCameraFieldOfView = 40; // degrees
 		final double defaultCameraFOV_to_ScaleZ = 1.0 / 
 				(2.0 * Math.tan(MathUtil.deg2rad * (defaultCameraFieldOfView / 2.0)));  
 		for (KeyPointList image : images) {
 			image.rx = 0.0;
 			image.ry = 0.0;
 			image.rz = 0.0;
-			image.scaleZ = Math.max(image.imageSizeX, image.imageSizeY) * defaultCameraFOV_to_ScaleZ;
+			image.cameraOriginX = image.imageSizeX / 2.0;
+			image.cameraOriginY = image.imageSizeY / 2.0;
+			image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
+			image.scaleZ = defaultCameraFOV_to_ScaleZ;
 			buildCamera2RealMatrix(image);
 		}
 		KeyPointList origin = images.remove(0);
@@ -60,8 +66,39 @@ public class MyPanoPairTransformLearner {
 		throw new IllegalArgumentException();
 	}
 
-	final double scaleScaleZ = 1;
+	private double oneOverSumWeights = 1.0;
+	/**
+	 * 
+	 * @return Number of point pairs NOT marked as bad.
+	 */
+	protected int computeWeights() {
+		int goodCount = 0;
+		double sumWeight = 0;
+		for (KeyPointPairList pairList : keyPointPairLists) {
+			for (KeyPointPair item : pairList.items.values()) {
+				if (isBad(item))
+					continue;
+				double weight = getWeight(item); 
+				if (weight < 0)
+					throw new IllegalArgumentException("Negative weight received.");
+				goodCount++;
+				sumWeight += weight;
+			}
+		}
+		if (sumWeight == 0.0) {
+			oneOverSumWeights = 1.0 / goodCount;
+		} else {
+			oneOverSumWeights = 1.0 / sumWeight;
+		}
+		return goodCount;
+	}
+	
+	public double getComputedWeight(Map.Entry<KeyPoint, KeyPoint> item) {
+		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
+	}
 
+
+	final double scaleScaleZ = 1;
 	public static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = RotationXYZ.makeAngles(image.rx, image.ry, image.rz);
 		image.dMdX = RotationXYZ.make_dF_dX(image.rx, image.ry, image.rz);
@@ -96,34 +133,42 @@ public class MyPanoPairTransformLearner {
 
 		MyPoint3D PW1 = new MyPoint3D();
 		MyPoint3D PW2 = new MyPoint3D();
+		
+		KeyPoint source1 = new KeyPoint();
+		KeyPoint dest1= new KeyPoint();
 		lsa.clear();
 		int pointCounter = 0;
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items.values()) {
 				if (!isBad(item))
-					pointCounter++;
+					continue;
+				pointCounter++;
 				
-				double computedWeight = 1.0; //getComputedWeight(item);
+				double computedWeight = getComputedWeight(item);
 				KeyPoint source = item.getKey();
 				KeyPoint dest = item.getValue();
+				
+				source1.doubleX = (source.doubleX - pairList.source.cameraOriginX) * pairList.source.cameraScale;
+				source1.doubleY = (source.doubleY - pairList.source.cameraOriginY) * pairList.source.cameraScale;
+
+				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
+				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
 				
 				int srcIndex = tr.images.indexOf(source.keyPointList) * 4 + 1;
 				int destIndex = tr.images.indexOf(dest.keyPointList) * 4 + 1;
 				
 				coefs.make0();
 	
-				tr.transform(source, PW1);
-				tr.transform(dest, PW2);
+				tr.transform(source, pairList.source, PW1);
+				tr.transform(dest, pairList.target, PW2);
 				
-				P1.setItem(0, 0, source.doubleX);
-				P1.setItem(0, 1, source.doubleY);
-				P1.setItem(0, 2, source.keyPointList.scaleZ);
-	//			P1.setItem(0, 2, 1.0);
+				P1.setItem(0, 0, source1.doubleX);
+				P1.setItem(0, 1, source1.doubleY);
+				P1.setItem(0, 2, pairList.source.scaleZ);
 				
-				P2.setItem(0, 0, dest.doubleX);
-				P2.setItem(0, 1, dest.doubleY);
-				P2.setItem(0, 2, dest.keyPointList.scaleZ);
-	//			P2.setItem(0, 2, 1.0);
+				P2.setItem(0, 0, dest1.doubleX);
+				P2.setItem(0, 1, dest1.doubleY);
+				P2.setItem(0, 2, pairList.target.scaleZ);
 				
 				source.keyPointList.dMdX.mMul(P1, dPW1dX1);
 				source.keyPointList.dMdY.mMul(P1, dPW1dY1);
@@ -133,17 +178,12 @@ public class MyPanoPairTransformLearner {
 				dest.keyPointList.dMdY.mMul(P2, dPW2dY2);
 				dest.keyPointList.dMdZ.mMul(P2, dPW2dZ2);
 	
-				item.discrepancy = 0.0;
 				for (int c1 = 0; c1 < 3; c1++) {
 					int c2 = (c1 + 1) % 3;
 					coefs.make0();
 					double L = 
 						getTransformedCoord(PW1, c1) * getTransformedCoord(PW2, c2) -
 						getTransformedCoord(PW1, c2) * getTransformedCoord(PW2, c1);
-					item.discrepancy += L*L;
-					if (isBad(item))
-						continue;
-					
 					/*
 					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
 					 * fy: P'1(z) * P'2(x) - P'1(x) * P'2(z) = 0
@@ -179,45 +219,13 @@ public class MyPanoPairTransformLearner {
 					case 1: name = "yz"; break;
 					case 2: name = "xz"; break;
 					}
-					if (pointCounter < 10)
+//					if (pointCounter < 10)
 						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
-				item.discrepancy = Math.sqrt(item.discrepancy);
 			}
 		}
 		return true;
-	}
-
-	private double oneOverSumWeights = 1.0;
-	/**
-	 * 
-	 * @return Number of point pairs NOT marked as bad.
-	 */
-	protected int computeWeights() {
-		int goodCount = 0;
-		double sumWeight = 0;
-		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (Map.Entry<KeyPoint, KeyPoint> item : pairList.items.values()) {
-				if (isBad(item))
-					continue;
-				double weight = getWeight(item); 
-				if (weight < 0)
-					throw new IllegalArgumentException("Negative weight received.");
-				goodCount++;
-				sumWeight += weight;
-			}
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / goodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
-		}
-		return goodCount;
-	}
-	
-	public double getComputedWeight(Map.Entry<KeyPoint, KeyPoint> item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
 	}
 
 	public boolean calculateParameters() {
@@ -230,11 +238,13 @@ public class MyPanoPairTransformLearner {
 		System.out.println(u.toString());
 		u.rMul(-1.0);
 
+		System.out.println("OLD/NEW Camera");
 		tr.origin.scaleZ = (tr.origin.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
+		buildCamera2RealMatrix(tr.origin);
+		printCameraAngles(tr.origin);
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 			KeyPointList image = tr.images.get(curImage);
 			int index = curImage * 4 + 1;
-			System.out.println("OLD/NEW Camera");
 
 			image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
 			image.rx = MathUtil.fixAngleMPI_PI(image.rx + u.getItem(0, index + 0));
@@ -310,7 +320,45 @@ public class MyPanoPairTransformLearner {
 				);
 	}
 
-	public static final int maxIterations = 7;
+	public static final int maxIterations = 10;
+	
+	private void check() {
+		MyPoint3D PW1 = new MyPoint3D();
+		MyPoint3D PW2 = new MyPoint3D();
+
+		KeyPoint source1 = new KeyPoint();
+		KeyPoint dest1 = new KeyPoint();
+
+		Statistics stat = new Statistics();
+		stat.start();
+
+		for (KeyPointPairList pairList : keyPointPairLists) {
+			for (KeyPointPair item : pairList.items.values()) {
+				if (isBad(item))
+					continue;
+				KeyPoint source = item.getKey();
+				KeyPoint dest = item.getValue();
+
+				source1.doubleX = (source.doubleX - pairList.source.cameraOriginX) * pairList.source.cameraScale;
+				source1.doubleY = (source.doubleY - pairList.source.cameraOriginY) * pairList.source.cameraScale;
+				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
+				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
+				
+				tr.transform(source1, pairList.source, PW1);
+				tr.transform(dest1, pairList.target, PW2);
+
+				double myDiscrepancy = MathUtil.rad2deg * Math.sqrt(
+						Math.pow(Math.atan2(PW1.x, PW1.z) - Math.atan2(PW2.x, PW2.z), 2) + 
+						Math.pow(Math.atan2(PW1.y, PW1.z) - Math.atan2(PW2.y, PW2.z), 2)  
+//						Math.pow(Math.atan2(PW1.x, PW1.y) - Math.atan2(PW2.x, PW2.y), 2)
+						); 
+				stat.addValue(myDiscrepancy);
+			}
+		}
+		stat.stop();
+		System.out.println("MyDiscrepancy statistics:");
+		System.out.println(stat.toString(Statistics.CStatMinMax));
+	}
 	
 	public boolean calculate() {
 		boolean failed = true;
@@ -321,24 +369,30 @@ public class MyPanoPairTransformLearner {
 				if (!calculateDiscrepancy())
 					break;
 				double mse = getMedianSquareError();
-				System.out.println("MSE=" + mse);
+				System.out.println("Iter=" + iter + " MSE=" + mse);
 				if (mse < 0.01) {
 					failed = false;
 					break;
 				}
-				if (iter >= 2) {
-					double maxDescripancy = mse * 2.0;
-					for (KeyPointPairList i : keyPointPairLists) {
-						i.leaveGoodElements(maxDescripancy);
-					}
-				}
-				if (!calculateDiscrepancy())
-					break;
+//				if (iter >= 2) {
+//					double maxDescripancy = mse * 2.0;
+//					for (KeyPointPairList i : keyPointPairLists) {
+//						i.leaveGoodElements(maxDescripancy);
+//					}
+//				}
+//				if (!calculateDiscrepancy())
+//					break;
 			}
 		}
-		if (failed) {
-			System.out.println("FAILED");
+		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
+
+		printCameraAngles(tr.origin);
+		for (KeyPointList image : tr.images) {
+			printCameraAngles(image);
 		}
+		
+		check();
+
 		return !failed;
 	}
 }
