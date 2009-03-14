@@ -8,6 +8,8 @@ import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyAdjustTask2;
+import com.slavi.improc.myadjust.MyGeneratePanoramas;
+import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -44,8 +46,11 @@ public class Improc2 {
 		bigTree = null;
 
 		System.out.println("---------- Executing MyAdjust");
-		SwtUtil.openWaitDialog("Executing MyAdjust", 
+		MyPanoPairTransformer3 tr = SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask(kppl), 1);
+		System.out.println("---------- Generating panorama images");
+		SwtUtil.openWaitDialog("Generating panorama images", 
+				new MyGeneratePanoramas(tr, keyPointFileRoot), -1);
 
 		
 /*
@@ -75,7 +80,7 @@ public class Improc2 {
 		out.close();
 */
 		
-		System.out.println("---------- Generating pano pairs from key point pairs");
+/*		System.out.println("---------- Generating pano pairs from key point pairs");
 		PanoList panoList = SwtUtil.openWaitDialog("Generating pano pairs from key point pairs", 
 				new GeneratePanoPairFromBigTree(kppl),
 				kppl.size() - 1);
@@ -84,6 +89,8 @@ public class Improc2 {
 		for (PanoPairList ppl : panoList.items) {
 			System.out.println(Integer.toString(ppl.items.size()) + "\t" + 
 					ppl.sourceImage + "\t" + ppl.targetImage);
+*/					
+					
 /*			for (PanoPair pp : ppl.items) {
 				System.out.println(
 						Double.toString(pp.sx) + "\t" +
@@ -95,8 +102,9 @@ public class Improc2 {
 						Double.toString(pp.distance2)
 						);
 			}
-			System.out.println("--------------");*/
-		}
+			System.out.println("--------------");
+*/
+/*		}
 		
 		System.out.println("---------- Executing MyAdjust");
 		SwtUtil.openWaitDialog("Executing MyAdjust", 
@@ -105,7 +113,7 @@ public class Improc2 {
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
-
+*/
 		System.out.println("Done.");
 	}
 	

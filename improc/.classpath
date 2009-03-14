@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry path="src" kind="src"/>
-	<classpathentry path="org.eclipse.jdt.launching.JRE_CONTAINER" kind="con"/>
-	<classpathentry path="lib/jdom.jar" kind="lib"/>
-	<classpathentry path="/org.eclipse.swt" exported="true" kind="src"/>
-	<classpathentry sourcepath="C:/prg/jar/junit-4.4/junit-4.4-src.jar" path="C:/prg/jar/junit-4.4/junit-4.4.jar" kind="lib">
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/jdom.jar"/>
+	<classpathentry kind="lib" path="C:/prg/jar/junit-4.4/junit-4.4.jar" sourcepath="C:/prg/jar/junit-4.4/junit-4.4-src.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/prg/jar/junit-4.4/javadoc/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry path="bin" kind="output"/>
+	<classpathentry kind="lib" path="C:/prg/jar/swt-3.2.2/swt.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

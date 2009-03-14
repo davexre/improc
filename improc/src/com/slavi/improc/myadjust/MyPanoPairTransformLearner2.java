@@ -238,7 +238,7 @@ public class MyPanoPairTransformLearner2 {
 					}
 //					if (pointCounter < 5)
 //					if (printDetails)
-						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
+//						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
 			}

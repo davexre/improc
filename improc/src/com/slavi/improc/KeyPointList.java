@@ -1,5 +1,6 @@
 package com.slavi.improc;
 
+import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,6 +33,8 @@ public class KeyPointList {
 	public double cameraOriginX, cameraOriginY, maxWidthHeight, cameraScale; 
 	public double scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
+	
+	public Point2D.Double tl, tr, bl, br;
 	// My adjust
 
 	

@@ -337,18 +337,18 @@ public class MyPanoPairTransformLearner3 {
 				KeyPoint source = item.getKey();
 				KeyPoint dest = item.getValue();
 				
-				tr.transform(source, pairList.source, PW1);
-				tr.transform(dest, pairList.target, PW2);
+				MyPanoPairTransformer3.transform(source.doubleX, source.doubleY, pairList.source, PW1);
+				MyPanoPairTransformer3.transform(dest.doubleX, dest.doubleY, pairList.target, PW2);
 
-				double dx = MathUtil.fixAnglePI(PW1.x - PW2.x);
-				double dy = MathUtil.fixAnglePI(PW1.y - PW2.y);
+				double dx = MathUtil.fixAnglePI(Math.abs(PW1.x - PW2.x));
+				double dy = MathUtil.fixAnglePI(Math.abs(PW1.y - PW2.y));
 				item.discrepancy = Math.sqrt(dx*dx + dy*dy);
 //				if (pointCount < 10)
 //					System.out.println(pointCount + "\t" + MathUtil.d4(dx) + "\t" + MathUtil.d4(dy) + "\t" + MathUtil.d4(item.discrepancy));
 				if (!isBad(item)) {
 					goodPointCount++;
 					result += item.discrepancy;
-					stat.addValue(MathUtil.rad2deg * item.discrepancy);
+					stat.addValue(item.discrepancy);
 				}
 			}
 		}
