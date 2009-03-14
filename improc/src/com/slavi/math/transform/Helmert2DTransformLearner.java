@@ -81,6 +81,7 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 		tr.d = u.getItem(0, 3) * aTargetScale - targetOrigin.getItem(1, 0) + 
 				tr.b * sourceOrigin.getItem(0, 0) - tr.a * sourceOrigin.getItem(1, 0); 
 		
+		computeDiscrepancies();
 		return isAdjusted();
 	}
 }

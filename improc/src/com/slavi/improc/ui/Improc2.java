@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
-import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
+import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyAdjustTask2;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -42,11 +42,11 @@ public class Improc2 {
 				images.size() - 1);
 		images = null;
 		bigTree = null;
-/*
+
 		System.out.println("---------- Executing MyAdjust");
 		SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask(kppl), 1);
-*/
+
 		
 /*
 		System.out.println("---------- Keypoint pairs results");

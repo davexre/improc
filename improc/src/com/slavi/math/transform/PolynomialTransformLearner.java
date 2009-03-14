@@ -103,6 +103,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 		u.copyTo(tr.polynomCoefs);
 		sourceOrigin.copyTo(tr.sourceOrigin);
 		
+		computeDiscrepancies();
 		return isAdjusted();
 	}
 }

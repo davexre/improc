@@ -81,6 +81,7 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 				u.getItem(i, inputSize) * targetScale.getItem(i, 0)); 
 		}
 
+		computeDiscrepancies();
 		return isAdjusted();
 	}
 }

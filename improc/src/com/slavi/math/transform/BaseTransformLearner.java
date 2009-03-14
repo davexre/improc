@@ -163,9 +163,31 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		}
 	}
 	
-	protected boolean isAdjusted() {
-		Statistics stat = new Statistics();
+	/**
+	 * Computes the maximum absolute difference between each 
+	 * target point and the transformed source point.
+	 * The formula is:
+	 * result[i,0] = Max(Abs(items(k).target[i,0] - transformer.transform(items(k).source)[i,0])) 
+	 */
+	public Matrix computeTransformedTargetDelta(boolean ignoreBad) {
+		Matrix result = new Matrix(outputSize, 1);
+		OutputType sourceTransformed = createTemporaryTargetObject();
+		result.make0();
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item) && ignoreBad)
+				continue;
+			InputType source = item.getKey();
+			transformer.transform(source, sourceTransformed);
+			for (int i = outputSize - 1; i >= 0; i--) {
+				double d = transformer.getTargetCoord(item.getValue(), i) - transformer.getTargetCoord(sourceTransformed, i);
+				if (d > result.getItem(i, 0))
+					result.setItem(i, 0, d);
+			}
+		}
+		return result;
+	}	
 
+	protected void computeDiscrepancies() {
 		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Determine correctness of source data (items array)
 		for (Map.Entry<InputType, OutputType> item : items) {
@@ -180,7 +202,11 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			}
 			setDiscrepancy(item, Math.sqrt(sum2));
 		}
-		
+	}
+	
+	protected boolean isAdjusted() {
+		Statistics stat = new Statistics();
+
 		boolean iterationHasBad = false;
 		for (int k = 0; k < 3; k++) {
 			stat.start();
@@ -229,28 +255,4 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 //			item.setWeight(item.getDiscrepancy() >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.getDiscrepancy());
 //		}
 //	}
-	
-	/**
-	 * Computes the maximum absolute difference between each 
-	 * target point and the transformed source point.
-	 * The formula is:
-	 * result[i,0] = Max(Abs(items(k).target[i,0] - transformer.transform(items(k).source)[i,0])) 
-	 */
-	public Matrix computeTransformedTargetDelta(boolean ignoreBad) {
-		Matrix result = new Matrix(outputSize, 1);
-		OutputType sourceTransformed = createTemporaryTargetObject();
-		result.make0();
-		for (Map.Entry<InputType, OutputType> item : items) {
-			if (isBad(item) && ignoreBad)
-				continue;
-			InputType source = item.getKey();
-			transformer.transform(source, sourceTransformed);
-			for (int i = outputSize - 1; i >= 0; i--) {
-				double d = transformer.getTargetCoord(item.getValue(), i) - transformer.getTargetCoord(sourceTransformed, i);
-				if (d > result.getItem(i, 0))
-					result.setItem(i, 0, d);
-			}
-		}
-		return result;
-	}	
 }

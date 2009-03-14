@@ -118,15 +118,15 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 //			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 			
-			double maxDescripancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.005; // 0.5% of the size
-			if (maxDescripancy < 1.5)
-				maxDescripancy = 1.5;
-			kppl.leaveGoodElements(maxDescripancy);
+			double maxDiscrepancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.005; // 0.5% of the size
+			if (maxDiscrepancy < 1.5)
+				maxDiscrepancy = 1.5;
+			kppl.leaveGoodElements(maxDiscrepancy);
 //			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 
 			for (KeyPointPair pp : kppl.items.values()) {
-				if (pp.discrepancy <= maxDescripancy) {
+				if (pp.discrepancy <= maxDiscrepancy) {
 //				if (!pp.isBad()) {
 //					result.items.add(new PanoPair(pp));
 					addPair(pp);
