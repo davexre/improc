@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.slavi.util.Marker;
 import com.slavi.util.tree.KDTree;
+import com.slavi.util.tree.KDTree.NearestNeighbours;
 
 public class TestKDTree {
 	
@@ -22,10 +23,13 @@ public class TestKDTree {
 		}
 	}
 	
+	static int idCounter = 10000;
 	public static class MyKDData {
+		public int id;
 		public double value[];
 		
 		public MyKDData(double value[]) {
+			id = idCounter++; 
 			this.value = new double[value.length];
 			for (int i = value.length - 1; i >= 0; i--)
 				this.value[i] = value[i];
@@ -39,7 +43,7 @@ public class TestKDTree {
 				buf.append(value[i]);
 				prefix = ", ";
 			}
-			return buf.toString();
+			return id + " " + buf.toString();
 		}
 	}
 	
@@ -109,7 +113,7 @@ public class TestKDTree {
 		System.out.println("Max used steps=" + maxUsedSearchSteps);
 	}
 	
-	public static void main2(String[] args) {
+	public static void main(String[] args) {
 		int dimensions = 10;
 		int itemsPerDimension = 3;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
@@ -120,17 +124,28 @@ public class TestKDTree {
 		Marker.mark();
 		System.out.println("Tree size : " + tree.getSize());
 		System.out.println("Tree depth: " + tree.getTreeDepth());
-		tree.balance();
+//		tree.balance();
 		System.out.println("Tree size : " + tree.getSize());
 		System.out.println("Tree depth: " + tree.getTreeDepth());
 		Marker.release();
-		MyKDData item = items.get(3);
+		MyKDData item = items.get(items.size() - 1);
 		System.out.println("Item to find:");
 		System.out.println(item);
 		System.out.println(tree.contains(item));
+		int makSearchSteps = 1; //tree.getTreeDepth() / 2;
+		for (MyKDData i : items) {
+			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(i, 2, makSearchSteps);
+			if (i != nn.getItem(0)) {
+				System.out.println("NOT FOUND " + i + "|" + nn.getItem(0));
+			}				
+		}
+		NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(item, 3, makSearchSteps);
+		System.out.println("Neares neighbours:");
+		for (int i = 0; i < nn.size(); i++)
+			System.out.println(nn.getItem(i));
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main2(String[] args) throws Exception {
 		int dimensions = 3;
 		int itemsPerDimension = 1;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);

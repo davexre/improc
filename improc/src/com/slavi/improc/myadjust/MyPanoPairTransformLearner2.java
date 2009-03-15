@@ -1,11 +1,10 @@
 package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
+import com.slavi.improc.KeyPointList;
 import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
-import com.slavi.improc.pano.ImageData;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
@@ -22,44 +21,28 @@ public class MyPanoPairTransformLearner2 {
 	
 	public MyPanoPairTransformLearner2(ArrayList<PanoPairList> pairsLists) {
 		this.pairsLists = pairsLists;
-		HashMap<String, ImageData> imagesMap = new HashMap<String, ImageData>();
+		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
 		for (PanoPairList i : pairsLists) {
-			ImageData image = imagesMap.get(i.sourceImage);
-			if (image == null) {
-				image = new ImageData();
-				image.name = i.sourceImage;
-				image.width = i.sourceImageSizeX;
-				image.height = i.sourceImageSizeY;
-				imagesMap.put(image.name, image);
-			}
-			i.source = image;
-
-			image = imagesMap.get(i.targetImage);
-			if (image == null) {
-				image = new ImageData();
-				image.name = i.targetImage;
-				image.width = i.targetImageSizeX;
-				image.height = i.targetImageSizeY;
-				imagesMap.put(image.name, image);
-			}
-			i.target = image;
+			if (!images.contains(i.source))
+				images.add(i.source);
+			if (!images.contains(i.target))
+				images.add(i.target);
 		}
-		ArrayList<ImageData> images = new ArrayList<ImageData>(imagesMap.values());
 		
 		final double defaultCameraFieldOfView = 40; // degrees
 		final double defaultCameraFOV_to_ScaleZ = 1.0 / 
 				(2.0 * Math.tan(MathUtil.deg2rad * (defaultCameraFieldOfView / 2.0)));  
-		for (ImageData image : images) {
+		for (KeyPointList image : images) {
 			image.rx = 0.0;
 			image.ry = 0.0;
 			image.rz = 0.0;
-			image.cameraOriginX = image.width / 2.0;
-			image.cameraOriginY = image.height / 2.0;
-			image.cameraScale = 1.0 / Math.max(image.width, image.height);
+			image.cameraOriginX = image.imageSizeX / 2.0;
+			image.cameraOriginY = image.imageSizeY / 2.0;
+			image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
 			image.scaleZ = defaultCameraFOV_to_ScaleZ;
 			buildCamera2RealMatrix(image);
 		}
-		ImageData origin = images.remove(0);
+		KeyPointList origin = images.remove(0);
 		tr = new MyPanoPairTransformer2(origin, images);
 		this.lsa = new LeastSquaresAdjust(tr.getNumberOfCoefsPerCoordinate(), 1);		
 	}
@@ -116,7 +99,7 @@ public class MyPanoPairTransformLearner2 {
 	
 	
 	final double scaleScaleZ = 1;
-	public static void buildCamera2RealMatrix(ImageData image) {
+	public static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = RotationXYZ.makeAngles(image.rx, image.ry, image.rz);
 		image.dMdX = RotationXYZ.make_dF_dX(image.rx, image.ry, image.rz);
 		image.dMdY = RotationXYZ.make_dF_dY(image.rx, image.ry, image.rz);
@@ -135,7 +118,7 @@ public class MyPanoPairTransformLearner2 {
 		tr.origin.ry = 0;
 		tr.origin.rz = 0;
 		buildCamera2RealMatrix(tr.origin);
-		for (ImageData image : tr.images) {
+		for (KeyPointList image : tr.images) {
 			buildCamera2RealMatrix(image);
 		}
 		
@@ -261,7 +244,7 @@ public class MyPanoPairTransformLearner2 {
 		buildCamera2RealMatrix(tr.origin);
 		printCameraAngles(tr.origin);
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
-			ImageData image = tr.images.get(curImage);
+			KeyPointList image = tr.images.get(curImage);
 			int index = curImage * 4 + 1;
 
 			image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
@@ -319,8 +302,8 @@ public class MyPanoPairTransformLearner2 {
 		return lsa.getMedianSquareError();
 	}
 
-	public static void printCameraAngles(ImageData image) {
-		System.out.println("Image ID " + image.name + 
+	public static void printCameraAngles(KeyPointList image) {
+		System.out.println("Image ID " + image.imageFileStamp.getFile().getName() + 
 				"\tscaleZ=" + (image.scaleZ) + 
 				"\tscale=" + (1/image.cameraScale) + 
 				"\trx=" + (image.rx * MathUtil.rad2deg) + 
@@ -387,7 +370,7 @@ public class MyPanoPairTransformLearner2 {
 		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
 
 		printCameraAngles(tr.origin);
-		for (ImageData image : tr.images) {
+		for (KeyPointList image : tr.images) {
 			printCameraAngles(image);
 		}
 		

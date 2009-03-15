@@ -61,6 +61,8 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 				ppl = panoPairLists.get(id);
 				if (ppl == null) {
 					ppl = new PanoPairList();
+					ppl.source = sourceSP.keyPointList;
+					ppl.target = targetSP.keyPointList;
 					ppl.sourceImage = kppl.source.imageFileStamp.getFile().getAbsolutePath();
 					ppl.targetImage = kppl.target.imageFileStamp.getFile().getAbsolutePath();
 					ppl.sourceImageSizeX = kppl.source.imageSizeX;

@@ -2,17 +2,17 @@ package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 
+import com.slavi.improc.KeyPointList;
 import com.slavi.improc.PanoPair;
-import com.slavi.improc.pano.ImageData;
 import com.slavi.math.transform.BaseTransformer;
 
 public class MyPanoPairTransformer2 extends BaseTransformer<PanoPair, MyPoint3D> {
 
-	ArrayList<ImageData> images;
+	public ArrayList<KeyPointList> images;
 	
-	ImageData origin;
+	public KeyPointList origin;
 	
-	public MyPanoPairTransformer2(ImageData origin, ArrayList<ImageData> images) {
+	public MyPanoPairTransformer2(KeyPointList origin, ArrayList<KeyPointList> images) {
 		this.images = images;
 		this.origin = origin;
 	}
@@ -71,7 +71,7 @@ public class MyPanoPairTransformer2 extends BaseTransformer<PanoPair, MyPoint3D>
 		throw new RuntimeException("No implemented");
 	}
 	
-	public void transformToOrigin(MyPoint3D source, ImageData srcImage, MyPoint3D dest) {
+	public void transformToOrigin(MyPoint3D source, KeyPointList srcImage, MyPoint3D dest) {
 		dest.x = 
 			source.x * srcImage.camera2real.getItem(0, 0) +
 			source.y * srcImage.camera2real.getItem(1, 0) +

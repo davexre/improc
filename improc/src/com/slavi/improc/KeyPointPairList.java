@@ -22,4 +22,12 @@ public class KeyPointPairList {
 			sp.bad = sp.discrepancy > maxDiscrepancy;
 		}
 	}
+	
+	public int getGoodCount() {
+		int result = 0;
+		for (KeyPointPair i : items.values())
+			if (!i.bad)
+				result++;
+		return result;
+	}
 }

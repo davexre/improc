@@ -52,7 +52,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 		public Void call() throws Exception {
 //			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
 			int searchSteps = tree.getTreeDepth() / 2;
-			int imageId = image.hashCode();
+			int imageId = image.imageFileStamp.getFile().getAbsoluteFile().hashCode();
 			String strImageId = Integer.toString(imageId);
 			
 			int totalPairCount = 0;
@@ -61,6 +61,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 					throw new InterruptedException();
 				
 				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
+//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
 				if (nnlst.size() < 2)
 					continue;
 //				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {

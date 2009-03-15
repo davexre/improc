@@ -5,14 +5,13 @@ import java.util.ArrayList;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.math.MathUtil;
 import com.slavi.math.transform.BaseTransformer;
 
 public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Double> {
 
-	ArrayList<KeyPointList> images;
+	public ArrayList<KeyPointList> images;
 	
-	KeyPointList origin;
+	public KeyPointList origin;
 	
 	public MyPanoPairTransformer3(KeyPointList origin, ArrayList<KeyPointList> images) {
 		this.images = images;
@@ -91,35 +90,6 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 		
 		dest.x = Math.atan2(x, z);
 		dest.y = Math.atan2(y, z);
-	}
-	
-	public static void main(String[] args) {
-		KeyPointList image = new KeyPointList();
-		image.imageSizeX = 2272;
-		image.imageSizeY = 1712;
-		image.rx = 0;
-		image.ry = 0;
-		image.rz = 0;
-		final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
-		final double defaultCameraFOV_to_ScaleZ = 1.0 / 
-				(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));  
-		image.cameraOriginX = image.imageSizeX / 2.0;
-		image.cameraOriginY = image.imageSizeY / 2.0;
-		image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
-		image.scaleZ = defaultCameraFOV_to_ScaleZ;
-		MyPanoPairTransformLearner3.buildCamera2RealMatrix(image);
-		Point2D.Double dest = new Point2D.Double();
-
-		int i, j;
-		i = image.imageSizeX;
-		j = image.imageSizeY;
-		transform(i, j, image, dest);
-		System.out.println(dest);
-
-		i = 0;
-		j = 0;
-		transform(i, j, image, dest);
-		System.out.println(dest);
 	}
 	
 	public void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {

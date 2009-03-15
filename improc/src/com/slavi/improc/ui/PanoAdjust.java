@@ -199,11 +199,11 @@ public class PanoAdjust implements LMDifFcn {
 	double distControlPoint(Point2D.Double p0, Point2D.Double p1, PanoPairList panoList, PanoPair cp, ImageData image, boolean isSphere) {
 		p0.x = cp.sx - (double) panoList.sourceImageSizeX / 2.0 + 0.5;
 		p0.y = cp.sy - (double) panoList.sourceImageSizeY / 2.0 + 0.5;
-		makeInvParams(p0, panoList.source, image, 0);
+		makeInvParams(p0, panoList.sourceImageData, image, 0);
 
 		p1.x = cp.tx - (double) panoList.targetImageSizeX / 2.0 + 0.5;
 		p1.y = cp.ty - (double) panoList.targetImageSizeY / 2.0 + 0.5;
-		makeInvParams(p1, panoList.target, image, 0);
+		makeInvParams(p1, panoList.targetImageData, image, 0);
 
 		if (isSphere) {
 			p0.x = p0.x * MathUtil.deg2rad; 
@@ -847,8 +847,8 @@ public class PanoAdjust implements LMDifFcn {
 		numControlPoints = 0;
 		for (PanoPairList panoList : panoChain) {
 			numControlPoints += panoList.items.size();
-			panoList.source = addImage(panoList.sourceImage, panoList.sourceImageSizeX, panoList.sourceImageSizeY);
-			panoList.target = addImage(panoList.targetImage, panoList.targetImageSizeX, panoList.targetImageSizeY);
+			panoList.sourceImageData = addImage(panoList.sourceImage, panoList.sourceImageSizeX, panoList.sourceImageSizeY);
+			panoList.targetImageData = addImage(panoList.targetImage, panoList.targetImageSizeX, panoList.targetImageSizeY);
 		}
 		numParam = countVariablesToOptimize() * images.size();
 		pano = new ImageData();

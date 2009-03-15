@@ -4,6 +4,40 @@ import com.slavi.math.matrix.Matrix;
 
 public class RotationXYZ {
 	/**
+	 * Transforms coordinates in source coordinate system into target coord system.
+	 * To obtain a rotation matrix use {@link #makeAngles(double, double, double)}.
+	 * The transformation is done as:
+	 * <code>
+	 * P = [x; y; z]
+	 * DEST = ROT * P
+	 * </code>
+	 */
+	public static void transformForward(Matrix rot,
+			double x, double y, double z, double dest[]) {
+		dest[0] = x * rot.getItem(0, 0) + y * rot.getItem(1, 0) + z * rot.getItem(2, 0);
+		dest[1] = x * rot.getItem(0, 1) + y * rot.getItem(1, 1) + z * rot.getItem(2, 1);
+		dest[2] = x * rot.getItem(0, 2) + y * rot.getItem(1, 2) + z * rot.getItem(2, 2);
+	}
+	
+	/**
+	 * Transforms coordinates in target coordinate system into source coord system.
+	 * To obtain a rotation matrix use {@link #makeAngles(double, double, double)}.
+	 * The transformation is done as:
+	 * <code>
+	 * Since:
+	 * Inverse(ROT) = Transpose(ROT)
+	 * P1 = [x; y; z]
+	 * DEST = Transpose(ROT) * P1
+	 * </code>
+	 */
+	public static void transformBackword(Matrix rot,
+			double x, double y, double z, double dest[]) {
+		dest[0] = x * rot.getItem(0, 0) + y * rot.getItem(0, 1) + z * rot.getItem(0, 2);
+		dest[1] = x * rot.getItem(1, 0) + y * rot.getItem(1, 1) + z * rot.getItem(0, 2);
+		dest[2] = x * rot.getItem(2, 0) + y * rot.getItem(2, 1) + z * rot.getItem(2, 2);
+	}
+	
+	/**
 	 * Return a rotation matrix R=mx*my*mz 
 	 */
 	public static Matrix makeAngles(double rx, double ry, double rz) {
@@ -193,8 +227,17 @@ public class RotationXYZ {
 	
 	public static void main(String[] args) {
 		Matrix m = makeAngles(10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad);
-		dumpTestForRotationMatrix(m);
+		m.printM("M");
+		Matrix mi = m.makeCopy();
+		mi.inverse();
+		Matrix mt = m.makeCopy();
+		m.transpose(mt);
+		mt.mSub(mi, m);
+		mt.printM("MT");
+		m.printM("MT-MI");
+//		dumpTestForRotationMatrix(m);
 	}
+
 /*	
 	public static void main(String[] args) {
 		double rx = 1;

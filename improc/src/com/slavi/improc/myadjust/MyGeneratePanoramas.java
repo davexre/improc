@@ -2,30 +2,30 @@ package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
 import com.slavi.improc.KeyPointList;
+import com.slavi.improc.KeyPointPair;
+import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.OutputImage;
 import com.slavi.math.MathUtil;
-import com.slavi.util.Const;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class MyGeneratePanoramas implements Callable<Void> {
 
-	MyPanoPairTransformer3 tr;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
 	ArrayList<KeyPointList> images;
+	ArrayList<KeyPointPairList> pairLists;
 	
-	public MyGeneratePanoramas(MyPanoPairTransformer3 tr, AbsoluteToRelativePathMaker keyPointPairFileRoot) {
+	public MyGeneratePanoramas(ArrayList<KeyPointList> images,
+			ArrayList<KeyPointPairList> pairLists,
+			AbsoluteToRelativePathMaker keyPointPairFileRoot) {
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
-		this.tr = tr;
-		images = new ArrayList<KeyPointList>();
-		images.add(tr.origin);
-		MyPanoPairTransformLearner3.buildCamera2RealMatrix(tr.origin);
-//		images.addAll(tr.images);
+		this.pairLists = pairLists;
+		this.images = images;
 	}
 	
 	void calcExt(Point2D.Double p) {
@@ -63,7 +63,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	}
 	
 	public Void call() throws Exception {
-		String fouName = Const.tempDir + "/temp.png";
 		calcExtents();
 		int imgX = 1000;
 		int imgY = (int)((max.y - min.y) * imgX / (max.x - min.x));
@@ -72,10 +71,12 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		System.out.println("MAX: " + MathUtil.d4(max.x) + "\t" + MathUtil.d4(max.y));
 		System.out.println("WH : " + imgX + "\t" + imgY);
 		
-		BufferedImage bi = new BufferedImage(imgX, imgY, BufferedImage.TYPE_INT_RGB);
+		OutputImage oi = new OutputImage(imgX, imgY);
 		
 		Point2D.Double d = new Point2D.Double();
-		for (KeyPointList image : images) {
+		for (int index = 0; index < images.size(); index++) {
+//		for (int index = images.size() - 1; index >= 0; index--) {
+			KeyPointList image = images.get(index);
 			BufferedImage im = ImageIO.read(image.imageFileStamp.getFile());
 			for (int i = 0; i < im.getWidth(); i++)
 				for (int j = 0; j < im.getHeight(); j++) {
@@ -89,14 +90,43 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					int ox = (int)d.x;
 					int oy = (int)d.y;
 					
-					if (
-						(ox < 0) || (ox >= imgX) ||
-						(oy < 0) || (oy >= imgY))
-						continue;
-					bi.setRGB(ox, oy, im.getRGB(i, j));
+					oi.setRGB(ox, oy, im.getRGB(i, j));
 				}
-		}		
-		ImageIO.write(bi, "png", new File(fouName));
+		}
+		
+		// Pin pairs
+		for (KeyPointPairList pairList : pairLists) {
+			for (KeyPointPair pair : pairList.items.values()) {
+				if (!pair.bad) {
+					MyPanoPairTransformer3.transform(
+							pair.sourceSP.doubleX, pair.sourceSP.doubleY, 
+							pair.sourceSP.keyPointList, d);
+					d.x -= min.x;
+					d.y -= min.y;
+					
+					d.x *= imgX / (max.x - min.x);
+					d.y *= imgY / (max.y - min.y);
+					
+					int x1 = (int)d.x;
+					int y1 = (int)d.y;
+					
+					MyPanoPairTransformer3.transform(
+							pair.targetSP.doubleX, pair.targetSP.doubleY, 
+							pair.targetSP.keyPointList, d);
+					d.x -= min.x;
+					d.y -= min.y;
+					
+					d.x *= imgX / (max.x - min.x);
+					d.y *= imgY / (max.y - min.y);
+					
+					int x2 = (int)d.x;
+					int y2 = (int)d.y;
+
+					oi.pinPair(x1, y1, x2, y2);
+				}
+			}
+		}
+		oi.close();
 		return null;
 	}
 }

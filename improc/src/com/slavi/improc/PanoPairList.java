@@ -21,9 +21,12 @@ public class PanoPairList {
 	
 	public int targetImageSizeY; 
 	
-	public ImageData source;
+	public KeyPointList source;
 	
-	public ImageData target;
+	public KeyPointList target;
+	
+	public ImageData sourceImageData;
+	public ImageData targetImageData;
 	
 	public PanoPairList() {
 		items = new ArrayList<PanoPair>();

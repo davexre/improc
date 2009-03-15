@@ -5,19 +5,6 @@ import java.awt.geom.Rectangle2D;
 import com.slavi.math.matrix.Matrix;
 
 public class ImageData {
-	
-	// My adjust 2
-	public Matrix camera2real;
-	public double cameraOriginX, cameraOriginY, maxWidthHeight, cameraScale; 
-	public double rx, ry, rz;
-	public double scaleZ;
-	public Matrix dMdX, dMdY, dMdZ;
-	// My adjust 2
-
-	
-	
-	
-	
 	public static enum ImageFormat {
 		Rectilinear,
 		Panorama,
