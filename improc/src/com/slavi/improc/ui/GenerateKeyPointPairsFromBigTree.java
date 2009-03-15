@@ -56,6 +56,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			String strImageId = Integer.toString(imageId);
 			
 			int totalPairCount = 0;
+			int duplicatedCount = 0;
 			for (KeyPoint kp : image.items) {
 				if (Thread.interrupted())
 					throw new InterruptedException();
@@ -90,6 +91,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 						totalPairCount++;
 						kppl.items.put(pair.sourceSP, pair);
 					} else if (pair.distanceToNearest > nnlst.getDistanceToTarget(0)) {
+						duplicatedCount++;
 						pair.targetSP = kpT;
 						pair.distanceToNearest = nnlst.getDistanceToTarget(0);
 						pair.distanceToNearest2 = nnlst.getDistanceToTarget(1);
@@ -100,6 +102,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			SwtUtil.activeWaitDialogSetStatus("Processing " + 
 					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
 			System.out.println(image.imageFileStamp.getFile().getAbsolutePath() + " (" + totalPairCount + ")");
+			System.out.println("DUPLICATED COUNT = " + duplicatedCount);
 			return null;
 		}
 	}

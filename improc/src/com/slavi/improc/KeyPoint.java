@@ -116,6 +116,19 @@ public class KeyPoint {
 		return r;
 	}
 
+	public boolean equalsFeatureVector(KeyPoint sp) {
+		for (int k = 0; k < numDirections; k++) {
+			for (int j = 0; j < descriptorSize; j++) {
+				for (int i = 0; i < descriptorSize; i++) {
+					if (sp.featureVector[i][j][k] != 
+						featureVector[i][j][k])
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	public boolean equals(Object o) {
 		int multiply = 10000;
 		if (!(o instanceof KeyPoint))
@@ -130,16 +143,7 @@ public class KeyPoint {
 			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
 			((int)(sp.doubleY * multiply) != (int)(doubleY * multiply)) )
 			return false;
-		for (int k = 0; k < numDirections; k++) {
-			for (int j = 0; j < descriptorSize; j++) {
-				for (int i = 0; i < descriptorSize; i++) {
-					if (sp.featureVector[i][j][k] != 
-						featureVector[i][j][k])
-						return false;
-				}
-			}
-		}
-		return true;
+		return equalsFeatureVector(sp);
 	}
 
 	public static final int linearFeatureVectorDimension = descriptorSize * descriptorSize * numDirections;

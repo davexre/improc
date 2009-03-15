@@ -3,6 +3,7 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairBigTree;
@@ -11,7 +12,9 @@ import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
+import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.MyPanoPairTransformer3;
+import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -46,6 +49,17 @@ public class Improc2 {
 				images.size() - 1);
 //		images = null;
 		bigTree = null;
+		
+		for (KeyPointPairList l : kppl) {
+			for (KeyPointPair p : l.items.values())
+				System.out.println(
+						MathUtil.d4(p.distanceToNearest) + "\t" + 
+						MathUtil.d4(p.distanceToNearest2) + "\t" + 
+						MathUtil.d4(MyPanoPairTransformLearner3.getWeight(p)));
+		}
+		
+		if (true) 
+			return;
 		
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 		for (KeyPointPairList l : kppl) {

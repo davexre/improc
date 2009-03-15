@@ -279,7 +279,7 @@ public class MyPanoPairTransformLearner3 {
 		return ((KeyPointPair) item).discrepancy;
 	}
 
-	public double getWeight(Map.Entry<KeyPoint, KeyPoint> item) {
+	public static double getWeight(Map.Entry<KeyPoint, KeyPoint> item) {
 		KeyPointPair kp = (KeyPointPair) item;
 		int nonzero = Math.min(kp.sourceSP.getNumberOfNonZero(), kp.targetSP.getNumberOfNonZero());
 		if (nonzero == 0)
