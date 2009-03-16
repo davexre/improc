@@ -73,15 +73,15 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				String pairId;
 				KeyPoint kpS, kpT;
 				
-				if (imageId > destImageId) {
+//				if (imageId > destImageId) {
 					pairId = strImageId + "-" + Integer.toString(destImageId);
 					kpS = kp;
 					kpT = kp2;
-				} else {
-					pairId = Integer.toString(destImageId) + "-" + strImageId;
-					kpS = kp2;
-					kpT = kp;
-				}
+//				} else {
+//					pairId = Integer.toString(destImageId) + "-" + strImageId;
+//					kpS = kp2;
+//					kpT = kp;
+//				}
 				
 				KeyPointPairList kppl = getKeyPointPairList(pairId, kpS.keyPointList, kpT.keyPointList);
 				synchronized (kppl) {

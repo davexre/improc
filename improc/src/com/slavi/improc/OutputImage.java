@@ -43,6 +43,7 @@ public class OutputImage {
 			nextColor = 0;
 		return result;
 	}
+	
 	public void setRGB(int x, int y, int rgb) {
 		if (
 			(x < 0) || (x >= bi.getWidth()) ||
@@ -51,6 +52,14 @@ public class OutputImage {
 		bi.setRGB(x, y, rgb);
 	}
 	
+	public int getRGB(int x, int y) {
+		if (
+			(x < 0) || (x >= bi.getWidth()) ||
+			(y < 0) || (y >= bi.getHeight()))
+			return -1;
+		return bi.getRGB(x, y);
+	}
+
 	public void drawCross(int atX, int atY, int color) {
 		for (int i = 0; i < 5; i++) {
 			setRGB(atX - 2 + i, atY, color);

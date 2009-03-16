@@ -726,6 +726,7 @@ public class PanoAdjust implements LMDifFcn {
 		double panoX = pano.width / 2.0 - 0.5;
 		double panoY = pano.height / 2.0 - 0.5;
 
+		int imageCount = 0;
 		for (ImageData image : images.values()) {
 			int x1 = (int) image.extentInPano.x;
 			int x2 = (int) (image.extentInPano.width + image.extentInPano.x);
@@ -736,7 +737,7 @@ public class PanoAdjust implements LMDifFcn {
 			double imageX = image.width / 2.0 - 0.5;
 			double imageY = image.height / 2.0 - 0.5;
 			
-			for (int j = y1; j <= y2; j++)
+			for (int j = y1; j <= y2; j++) {
 				for (int i = x1; i <= x2; i++) {
 					p.x = i - panoX; 
 					p.y = j - panoY;
@@ -744,8 +745,19 @@ public class PanoAdjust implements LMDifFcn {
 					p.x += imageX;
 					p.y += imageY;
 					int color = safeGetPixel(im, (int) p.x, (int) p.y);
+					if (color < 0)
+						continue;
+					color = ( 
+						((color >> 16) & 0xff) + 
+						((color >>  8) & 0xff) + 
+						((color      ) & 0xff)) / 3;
+					color = color << (imageCount * 8);
+					int col2 = safeGetPixel(bi, i, j);
+					color = color | (col2 & (~(0xff << (imageCount * 8))));
 					safeSetPixel(bi, i, j, color);
 				}
+			}
+			imageCount = (imageCount + 1) % 3;
 		}
 		panoCounter++;
 		String fouName = Const.tempDir + "/temp" + panoCounter + ".png"; 

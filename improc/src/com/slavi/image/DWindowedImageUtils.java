@@ -10,6 +10,15 @@ import javax.imageio.ImageIO;
 import com.slavi.math.adjust.Statistics;
 
 public class DWindowedImageUtils {
+	
+	public static int getGrayColor(int rgb) {
+		int color = ( 
+			((rgb >> 16) & 0xff) + 
+			((rgb >>  8) & 0xff) + 
+			((rgb      ) & 0xff)) / 3;
+		return color | (color << 8) | (color << 16); 
+	}
+	
 	/**
 	 * Returns a string containing the min, max and sum of all pixels in the image. 
 	 */

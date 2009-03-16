@@ -1,19 +1,16 @@
 package com.slavi.improc.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
-import com.slavi.improc.myadjust.MyAdjustTask;
+import com.slavi.improc.myadjust.MyAdjustTask2;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
-import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -131,7 +128,9 @@ public class Improc2 {
 			for (KeyPointPair p : l.items.values()) {
 				System.out.println(
 						p.bad + "\t" +
-						MathUtil.d4(p.weight) + "\t" +
+						p.sourceSP.getNumberOfNonZero() + "\t" +
+						p.targetSP.getNumberOfNonZero() + "\t" +
+						p.getUnmatchingCount() + "\t" +
 						MathUtil.d4(p.discrepancy) + "\t" +
 						MathUtil.d4(p.distanceToNearest) + "\t" +
 						MathUtil.d4(p.distanceToNearest2) + "\t" +
@@ -152,21 +151,21 @@ public class Improc2 {
 		imagesKPL.add(tr.origin);
 		imagesKPL.addAll(tr.images);
 */		
-/*		
+		
 		System.out.println("---------- Executing MyAdjust");
 		ArrayList<KeyPointList> imagesKPL = SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask2(panoList), 1);
-*/
-/*
+
+
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new MyGeneratePanoramas(imagesKPL, kppl, keyPointFileRoot), -1);
-*/		
-
+		
+/*
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
-
+*/
 		System.out.println("Done.");
 	}
 	

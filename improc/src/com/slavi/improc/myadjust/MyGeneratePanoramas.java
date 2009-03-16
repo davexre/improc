@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
+import com.slavi.image.DWindowedImageUtils;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
@@ -78,6 +79,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 //		for (int index = images.size() - 1; index >= 0; index--) {
 			KeyPointList image = images.get(index);
 			BufferedImage im = ImageIO.read(image.imageFileStamp.getFile());
+			int imageColorMask = 0xff << ((index % 3) * 8);
+			
 			for (int i = 0; i < im.getWidth(); i++)
 				for (int j = 0; j < im.getHeight(); j++) {
 					MyPanoPairTransformer3.transform(i, j, image, d);
@@ -89,8 +92,11 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					
 					int ox = (int)d.x;
 					int oy = (int)d.y;
-					
-					oi.setRGB(ox, oy, im.getRGB(i, j));
+					int color = im.getRGB(i, j);
+					color = DWindowedImageUtils.getGrayColor(color);
+					int col2 = oi.getRGB(ox, oy);
+					color = (color & imageColorMask) | (col2 & (~imageColorMask));
+					oi.setRGB(ox, oy, color);
 				}
 		}
 		

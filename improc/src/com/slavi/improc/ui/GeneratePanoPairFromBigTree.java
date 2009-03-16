@@ -18,6 +18,7 @@ import com.slavi.improc.PanoPair;
 import com.slavi.improc.PanoPairList;
 import com.slavi.improc.PanoPairTransformLerner;
 import com.slavi.improc.PanoPairTransformer;
+import com.slavi.math.MathUtil;
 import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
@@ -121,6 +122,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 			checkInterrupted(); atl.calculateOne();
 			
 			double maxDiscrepancy = Math.min(kppl.target.imageSizeX, kppl.target.imageSizeY) * 0.005; // 0.5% of the size
+			System.out.println("Max discrepancy for pano pair adjust = " + MathUtil.d4(maxDiscrepancy));
 			if (maxDiscrepancy < 1.5)
 				maxDiscrepancy = 1.5;
 			kppl.leaveGoodElements(maxDiscrepancy);
