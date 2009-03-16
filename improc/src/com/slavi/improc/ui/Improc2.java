@@ -47,9 +47,10 @@ public class Improc2 {
 		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
 				new GenerateKeyPointPairsFromBigTree(bigTree),
 				images.size() - 1);
-//		images = null;
+		images = null;
 		bigTree = null;
 		
+/*
 		for (KeyPointPairList l : kppl) {
 			for (KeyPointPair p : l.items.values())
 				System.out.println(
@@ -60,48 +61,7 @@ public class Improc2 {
 		
 		if (true) 
 			return;
-		
-		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
-		for (KeyPointPairList l : kppl) {
-			for (KeyPointPair p : l.items.values()) {
-				int sid = p.sourceSP.id;
-				int tid = p.targetSP.id;
-				map.put(sid, tid);
-				map.put(tid, sid);
-			}
-		}
-		
-		System.out.println("---------- Generating key point BIG tree");
-		bigTree = SwtUtil.openWaitDialog("Generating key point BIG tree", 
-				new GenerateKeyPointPairBigTree(images, imagesRoot, keyPointFileRoot), 
-				images.size() - 1);
-		System.out.println("Tree size  : " + bigTree.getSize());
-		System.out.println("Tree depth : " + bigTree.getTreeDepth());
-		System.out.println("Tree size          : " + bigTree.getSize());
-		System.out.println("Tree depth         : " + bigTree.getTreeDepth());
-		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());
-		
-		System.out.println("---------- Generating key point pairs from BIG tree");
-		kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
-				new GenerateKeyPointPairsFromBigTree(bigTree),
-				images.size() - 1);
-		
-		for (KeyPointPairList l : kppl) {
-			for (KeyPointPair p : l.items.values()) {
-				int sid = p.sourceSP.id;
-				int tid = p.targetSP.id;
-				Integer oldtid = map.get(sid);
-				if (tid != oldtid)
-					System.out.println(tid + "\t" + oldtid);
-			}
-		}
-		
-		if (map != null)
-			return;
-		
-		
-		
-		
+*/		
 		
 /*
 		System.out.println("---------- Executing MyAdjust");
@@ -165,28 +125,48 @@ public class Improc2 {
 //			}
 //			System.out.println("--------------");
 		}
-
+		
+		
+		for (KeyPointPairList l : kppl) {
+			for (KeyPointPair p : l.items.values()) {
+				System.out.println(
+						p.bad + "\t" +
+						MathUtil.d4(p.weight) + "\t" +
+						MathUtil.d4(p.discrepancy) + "\t" +
+						MathUtil.d4(p.distanceToNearest) + "\t" +
+						MathUtil.d4(p.distanceToNearest2) + "\t" +
+						MathUtil.d4(MyPanoPairTransformLearner3.getWeight(p))
+						);
+			}
+		}
+		
+//		if (true)
+//			return;
+//		
+		
+/*
 		System.out.println("---------- Executing MyAdjust");
 		MyPanoPairTransformer3 tr = SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask(kppl), 1);
 		ArrayList<KeyPointList> imagesKPL = new ArrayList<KeyPointList>();
 		imagesKPL.add(tr.origin);
 		imagesKPL.addAll(tr.images);
-		
+*/		
 /*		
 		System.out.println("---------- Executing MyAdjust");
 		ArrayList<KeyPointList> imagesKPL = SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask2(panoList), 1);
 */
+/*
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new MyGeneratePanoramas(imagesKPL, kppl, keyPointFileRoot), -1);
-		
-/*		
+*/		
+
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new GeneratePanoramas(panoList, keyPointFileRoot), panoList.items.size());
-*/
+
 		System.out.println("Done.");
 	}
 	
