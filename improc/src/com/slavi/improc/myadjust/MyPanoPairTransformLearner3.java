@@ -389,10 +389,14 @@ public class MyPanoPairTransformLearner3 {
 		boolean adjusted = true;
 		if (iterationHasBad)
 			adjusted = false;
+		double maxDiscrepancy = stat.getAvgValue();
+		if (maxDiscrepancy < 0.01)
+			maxDiscrepancy = stat.getJ_End();
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items.values()) {
 				boolean oldIsBad = isBad(item);
-				boolean curIsBad = stat.isBad(getDiscrepancy(item));
+				double discrepancy = getDiscrepancy(item);
+				boolean curIsBad = discrepancy > maxDiscrepancy; //stat.isBad(discrepancy);
 				if (oldIsBad != curIsBad) {
 					setBad(item, curIsBad);
 					adjusted = false;

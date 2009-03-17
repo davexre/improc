@@ -34,7 +34,7 @@ public class KeyPointList {
 	public double scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
 	
-	public Point2D.Double tl, tr, bl, br;
+	public Point2D.Double tl, tr, bl, br, min, max;
 	// My adjust
 
 	

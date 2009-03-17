@@ -3,12 +3,13 @@ package com.slavi.improc;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 import com.slavi.util.Const;
 
-public class OutputImage {
+public class SafeImage {
 
 	static int imageCounter = 0;
 	
@@ -26,17 +27,20 @@ public class OutputImage {
 	
 	BufferedImage bi;
 	
-	public OutputImage(int sizeX, int sizeY) {
+	public SafeImage(int sizeX, int sizeY) {
 		bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
 	}
 	
-	public void close() throws IOException {
+	public SafeImage(InputStream image) throws IOException {
+		bi = ImageIO.read(image);
+	}
+	
+	public void save() throws IOException {
 		String fname = Const.tempDir + "/temp" + (++imageCounter) + ".png";
 		ImageIO.write(bi, "png", new File(fname));
 		bi = null;
 	}
-	
-	
+		
 	public int getNextColor() {
 		int result = colors[nextColor++];
 		if (nextColor >= colors.length)

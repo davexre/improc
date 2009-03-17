@@ -8,9 +8,10 @@ import com.slavi.improc.KeyPointPairBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.PanoList;
 import com.slavi.improc.PanoPairList;
-import com.slavi.improc.myadjust.MyAdjustTask2;
+import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
+import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -46,28 +47,21 @@ public class Improc2 {
 				images.size() - 1);
 		images = null;
 		bigTree = null;
-		
-/*
+
+
 		for (KeyPointPairList l : kppl) {
-			for (KeyPointPair p : l.items.values())
-				System.out.println(
-						MathUtil.d4(p.distanceToNearest) + "\t" + 
-						MathUtil.d4(p.distanceToNearest2) + "\t" + 
-						MathUtil.d4(MyPanoPairTransformLearner3.getWeight(p)));
+			for (KeyPointPair p : l.items.values()) {
+//				System.out.println(
+//						MathUtil.d4(p.distanceToNearest) + "\t" + 
+//						MathUtil.d4(p.distanceToNearest2) + "\t" + 
+//						MathUtil.d4(MyPanoPairTransformLearner3.getWeight(p)));
+				p.bad = p.distanceToNearest > 1000;
+			}
 		}
 		
-		if (true) 
+/*		if (true) 
 			return;
 */		
-		
-/*
-		System.out.println("---------- Executing MyAdjust");
-		MyPanoPairTransformer3 tr = SwtUtil.openWaitDialog("Executing MyAdjust", 
-				new MyAdjustTask(kppl), 1);
-		ArrayList<KeyPointList> imagesKPL = new ArrayList<KeyPointList>();
-		imagesKPL.add(tr.origin);
-//		imagesKPL.addAll(tr.images);
-*/
 		
 		System.out.println("---------- Keypoint pairs results");
 		for (KeyPointPairList l : kppl) {
@@ -98,7 +92,7 @@ public class Improc2 {
 		}		
 		out.close();
 */
-
+/*
 		System.out.println("---------- Generating pano pairs from key point pairs");
 		PanoList panoList = SwtUtil.openWaitDialog("Generating pano pairs from key point pairs", 
 				new GeneratePanoPairFromBigTree(kppl),
@@ -122,6 +116,24 @@ public class Improc2 {
 //			}
 //			System.out.println("--------------");
 		}
+*/		
+		
+		System.out.println("---------- Executing MyAdjust");
+		MyPanoPairTransformer3 tr = SwtUtil.openWaitDialog("Executing MyAdjust", 
+				new MyAdjustTask(kppl), 1);
+		ArrayList<KeyPointList> imagesKPL = new ArrayList<KeyPointList>();
+		imagesKPL.add(tr.origin);
+		imagesKPL.addAll(tr.images);
+//		KeyPointList a = imagesKPL.get(0); 
+//		a.rx = 0;
+//		a.ry = 0;
+//		a.rz = 0;
+//		a.cameraOriginX = a.imageSizeX / 2.0;
+//		a.cameraOriginY = a.imageSizeY / 2.0;
+//		a.scaleZ = 1.0;
+//		a.cameraScale = 1.0 / a.imageSizeX;
+//		MyPanoPairTransformLearner3.buildCamera2RealMatrix(a);
+
 		
 		
 		for (KeyPointPairList l : kppl) {
@@ -151,11 +163,11 @@ public class Improc2 {
 		imagesKPL.add(tr.origin);
 		imagesKPL.addAll(tr.images);
 */		
-		
+/*		
 		System.out.println("---------- Executing MyAdjust");
 		ArrayList<KeyPointList> imagesKPL = SwtUtil.openWaitDialog("Executing MyAdjust", 
 				new MyAdjustTask2(panoList), 1);
-
+*/
 
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 

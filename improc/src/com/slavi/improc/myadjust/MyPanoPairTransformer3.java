@@ -91,6 +91,28 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 		dest.x = Math.atan2(x, z);
 		dest.y = Math.atan2(y, z);
 	}
+
+	public static void transformBackward(double rx, double ry, KeyPointList srcImage, Point2D.Double dest) {
+		double sz = srcImage.scaleZ;
+		double sx = Math.tan(rx) * sz;
+		double sy = Math.tan(ry) * sz;
+		
+		double x = 
+			sx * srcImage.camera2real.getItem(0, 0) +
+			sy * srcImage.camera2real.getItem(0, 1) +
+			sz * srcImage.camera2real.getItem(0, 2);
+		double y = 
+			sx * srcImage.camera2real.getItem(1, 0) +
+			sy * srcImage.camera2real.getItem(1, 1) +
+			sz * srcImage.camera2real.getItem(1, 2);
+		double z = 
+			sx * srcImage.camera2real.getItem(2, 0) +
+			sy * srcImage.camera2real.getItem(2, 1) +
+			sz * srcImage.camera2real.getItem(2, 2);
+		
+		dest.x = (x / srcImage.cameraScale) + srcImage.cameraOriginX;
+		dest.y = (y / srcImage.cameraScale) + srcImage.cameraOriginY;
+	}
 	
 	public void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
 		double sx = (source.doubleX - srcImage.cameraOriginX) * srcImage.cameraScale;
