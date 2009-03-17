@@ -61,7 +61,7 @@ public class SafeImage {
 			(x < 0) || (x >= bi.getWidth()) ||
 			(y < 0) || (y >= bi.getHeight()))
 			return -1;
-		return bi.getRGB(x, y);
+		return bi.getRGB(x, y) & 0x00FFFFFF;
 	}
 
 	public void drawCross(int atX, int atY, int color) {

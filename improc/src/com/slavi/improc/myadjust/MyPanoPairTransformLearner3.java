@@ -92,7 +92,7 @@ public class MyPanoPairTransformLearner3 {
 		return goodCount;
 	}
 	
-	public double getComputedWeight(Map.Entry<KeyPoint, KeyPoint> item) {
+	public double getComputedWeight(KeyPointPair item) {
 		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
 	}
 
@@ -153,8 +153,8 @@ public class MyPanoPairTransformLearner3 {
 				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
 				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
 				
-				int srcIndex = tr.images.indexOf(source.keyPointList) * 4 + 1;
-				int destIndex = tr.images.indexOf(dest.keyPointList) * 4 + 1;
+				int srcIndex = tr.images.indexOf(source.keyPointList) * 4;
+				int destIndex = tr.images.indexOf(dest.keyPointList) * 4;
 				
 				coefs.make0();
 	
@@ -196,10 +196,6 @@ public class MyPanoPairTransformLearner3 {
 						coefs.setItem(srcIndex + 3, 0, (
 								source.keyPointList.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
 								source.keyPointList.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)) * scaleScaleZ);
-					} else {
-						coefs.setItem(0, 0, (
-								source.keyPointList.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
-								source.keyPointList.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)) * scaleScaleZ);
 					}
 					if (destIndex >= 0) {
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -getTransformedCoord(PW1, c2));
@@ -207,19 +203,7 @@ public class MyPanoPairTransformLearner3 {
 						coefs.setItem(destIndex + 3, 0, (
 								getTransformedCoord(PW1, c1) * dest.keyPointList.camera2real.getItem(2, c2) - 
 								getTransformedCoord(PW1, c2) * dest.keyPointList.camera2real.getItem(2, c1)) * scaleScaleZ);
-					} else {
-						coefs.setItem(0, 0, (
-								getTransformedCoord(PW1, c1) * dest.keyPointList.camera2real.getItem(2, c2) - 
-								getTransformedCoord(PW1, c2) * dest.keyPointList.camera2real.getItem(2, c1)) * scaleScaleZ);
 					}
-					String name = "";
-					switch (c1) {
-					case 0: name = "xy"; break;
-					case 1: name = "yz"; break;
-					case 2: name = "xz"; break;
-					}
-//					if (pointCounter < 5)
-//						System.out.println(name + "\t" + MathUtil.d4(L) + "\t" + coefs.toOneLineString());
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
 			}
@@ -237,13 +221,9 @@ public class MyPanoPairTransformLearner3 {
 		System.out.println(u.toString());
 		u.rMul(-1.0);
 
-		System.out.println("OLD/NEW Camera");
-		tr.origin.scaleZ = (tr.origin.scaleZ + u.getItem(0, 0)) / scaleScaleZ;
-		buildCamera2RealMatrix(tr.origin);
-		printCameraAngles(tr.origin);
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 			KeyPointList image = tr.images.get(curImage);
-			int index = curImage * 4 + 1;
+			int index = curImage * 4;
 
 			image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
 			image.rx = MathUtil.fixAngleMPI_PI(image.rx + u.getItem(0, index + 0));
@@ -279,7 +259,11 @@ public class MyPanoPairTransformLearner3 {
 		return ((KeyPointPair) item).discrepancy;
 	}
 
-	public static double getWeight(Map.Entry<KeyPoint, KeyPoint> item) {
+	public static double getWeight(KeyPointPair item) {
+		return item.weight;
+	}
+	
+	public static double getWeight2(Map.Entry<KeyPoint, KeyPoint> item) {
 		KeyPointPair kp = (KeyPointPair) item;
 		int nonzero = Math.min(kp.sourceSP.getNumberOfNonZero(), kp.targetSP.getNumberOfNonZero());
 		if (nonzero == 0)
@@ -338,11 +322,12 @@ public class MyPanoPairTransformLearner3 {
 				KeyPoint dest = item.getValue();
 				
 				MyPanoPairTransformer3.transform(source.doubleX, source.doubleY, pairList.source, PW1);
-				MyPanoPairTransformer3.transform(dest.doubleX, dest.doubleY, pairList.target, PW2);
+				MyPanoPairTransformer3.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
 
-				double dx = MathUtil.fixAnglePI(Math.abs(PW1.x - PW2.x));
-				double dy = MathUtil.fixAnglePI(Math.abs(PW1.y - PW2.y));
+				double dx = dest.doubleX - PW2.x;
+				double dy = dest.doubleY - PW2.y;
 				item.discrepancy = Math.sqrt(dx*dx + dy*dy);
+				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
 //				if (pointCount < 10)
 //					System.out.println(pointCount + "\t" + MathUtil.d4(dx) + "\t" + MathUtil.d4(dy) + "\t" + MathUtil.d4(item.discrepancy));
 				if (!isBad(item)) {
@@ -355,7 +340,7 @@ public class MyPanoPairTransformLearner3 {
 		stat.stop();
 		System.out.println("MyDiscrepancy statistics:");
 		System.out.println(stat.toString(Statistics.CStatMinMax));
-		return goodPointCount == 0 ? Double.MAX_VALUE : result / goodPointCount;
+		return goodPointCount == 0 ? Double.POSITIVE_INFINITY : result / goodPointCount;
 	}
 	
 	protected boolean isAdjusted() {
@@ -390,7 +375,7 @@ public class MyPanoPairTransformLearner3 {
 		if (iterationHasBad)
 			adjusted = false;
 		double maxDiscrepancy = stat.getAvgValue();
-		if (maxDiscrepancy < 0.01)
+		if (maxDiscrepancy < 1)
 			maxDiscrepancy = stat.getJ_End();
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items.values()) {
@@ -419,7 +404,7 @@ public class MyPanoPairTransformLearner3 {
 				System.out.println("Iter=" + iter + " MSE1=" + mse1 + " MSE2=" + mse2);
 //				adjusted = true;
 				adjusted = isAdjusted();
-				if (adjusted && mse1 < 0.01) {
+				if (adjusted && mse2 < 2) {
 					failed = false;
 					break;
 				}
@@ -434,8 +419,6 @@ public class MyPanoPairTransformLearner3 {
 			printCameraAngles(image);
 		}
 		
-		computeDiscrepancies();
-
 		return !failed;
 	}
 }

@@ -2,8 +2,6 @@ package com.slavi.improc.pano;
 
 import java.awt.geom.Rectangle2D;
 
-import com.slavi.math.matrix.Matrix;
-
 public class ImageData {
 	public static enum ImageFormat {
 		Rectilinear,

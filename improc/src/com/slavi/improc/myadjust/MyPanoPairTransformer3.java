@@ -27,7 +27,7 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 	}
 
 	public int getNumberOfCoefsPerCoordinate() {
-		return images.size() * 4 + 1;
+		return images.size() * 4;
 	}
 
 	public double getSourceCoord(KeyPoint item, int coordIndex) {
@@ -93,7 +93,7 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 	}
 
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, Point2D.Double dest) {
-		double sz = srcImage.scaleZ;
+		double sz = 1.0;
 		double sx = Math.tan(rx) * sz;
 		double sy = Math.tan(ry) * sz;
 		
@@ -109,6 +109,9 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 			sx * srcImage.camera2real.getItem(2, 0) +
 			sy * srcImage.camera2real.getItem(2, 1) +
 			sz * srcImage.camera2real.getItem(2, 2);
+		
+		x = srcImage.scaleZ * (x / z);
+		y = srcImage.scaleZ * (y / z);
 		
 		dest.x = (x / srcImage.cameraScale) + srcImage.cameraOriginX;
 		dest.y = (y / srcImage.cameraScale) + srcImage.cameraOriginY;

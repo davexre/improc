@@ -1,12 +1,9 @@
 package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
-
-import javax.imageio.ImageIO;
 
 import com.slavi.image.DWindowedImageUtils;
 import com.slavi.improc.KeyPointList;
@@ -88,7 +85,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			transformWorldToCamera(i.tl.x, i.tl.y, i, i.tl);
 			transformWorldToCamera(i.tr.x, i.tr.y, i, i.tr);
 			transformWorldToCamera(i.bl.x, i.bl.y, i, i.bl);
-			transformWorldToCamera(i.br.x, i.br.y, i, i.bl);
+			transformWorldToCamera(i.br.x, i.br.y, i, i.br);
 			System.out.println(i.bl);
 		}
 	}
@@ -142,10 +139,19 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			}
 		}
 		
+		Point2D.Double tmp = new Point2D.Double();
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
 			for (KeyPointPair pair : pairList.items.values()) {
 				if (!pair.bad) {
+					MyPanoPairTransformer3.transform(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pair.sourceSP.keyPointList, d);
+					MyPanoPairTransformer3.transformBackward(d.x, d.y, pair.targetSP.keyPointList, tmp);
+					
+					double dx = pair.targetSP.doubleX - tmp.x;  
+					double dy = pair.targetSP.doubleY - tmp.y;
+					double dis = Math.sqrt(dx*dx + dy*dy);
+					System.out.println(MathUtil.d4(pair.discrepancy) + "\t" + MathUtil.d4(dis));
+					
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pair.sourceSP.keyPointList, d);
 					int x1 = (int)d.x;
 					int y1 = (int)d.y;
