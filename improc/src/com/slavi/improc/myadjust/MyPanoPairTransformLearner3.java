@@ -97,7 +97,7 @@ public class MyPanoPairTransformLearner3 {
 	}
 
 
-	final double scaleScaleZ = 1;
+	final double scaleScaleZ = 3;
 	public static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = RotationXYZ.makeAngles(image.rx, image.ry, image.rz);
 		image.dMdX = RotationXYZ.make_dF_dX(image.rx, image.ry, image.rz);
@@ -107,7 +107,7 @@ public class MyPanoPairTransformLearner3 {
 	
 	public boolean calculateDiscrepancy() {
 		int goodCount = computeWeights();
-		if (goodCount < lsa.getRequiredPoints())
+		if (goodCount < lsa.getRequiredMeasurements())
 			return false;
 		Matrix coefs = new Matrix(tr.getNumberOfCoefsPerCoordinate(), 1);			
 
@@ -315,25 +315,22 @@ public class MyPanoPairTransformLearner3 {
 		int pointCount = 0;
 		int goodPointCount = 0;
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair item : pairList.items.values()) {
+			for (KeyPointPair pair : pairList.items.values()) {
 				pointCount++;
 				// Compute for all points, so no item.isBad check
-				KeyPoint source = item.getKey();
-				KeyPoint dest = item.getValue();
-				
-				MyPanoPairTransformer3.transform(source.doubleX, source.doubleY, pairList.source, PW1);
+				MyPanoPairTransformer3.transform(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, PW1);
 				MyPanoPairTransformer3.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
 
-				double dx = dest.doubleX - PW2.x;
-				double dy = dest.doubleY - PW2.y;
-				item.discrepancy = Math.sqrt(dx*dx + dy*dy);
-				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
+				double dx = pair.targetSP.doubleX - PW2.x;
+				double dy = pair.targetSP.doubleY - PW2.y;
+				pair.discrepancy = Math.sqrt(dx*dx + dy*dy);
+				pair.weight = pair.discrepancy < 1 ? 1.0 : 1.0 / pair.discrepancy;
 //				if (pointCount < 10)
 //					System.out.println(pointCount + "\t" + MathUtil.d4(dx) + "\t" + MathUtil.d4(dy) + "\t" + MathUtil.d4(item.discrepancy));
-				if (!isBad(item)) {
+				if (!isBad(pair)) {
 					goodPointCount++;
-					result += item.discrepancy;
-					stat.addValue(item.discrepancy);
+					result += pair.discrepancy;
+					stat.addValue(pair.discrepancy);
 				}
 			}
 		}
@@ -345,38 +342,22 @@ public class MyPanoPairTransformLearner3 {
 	
 	protected boolean isAdjusted() {
 		Statistics stat = new Statistics();
-
-		boolean iterationHasBad = false;
-		for (int k = 0; k < 3; k++) {
-			stat.start();
-			for (KeyPointPairList pairList : keyPointPairLists) {
-				for (KeyPointPair item : pairList.items.values()) {
-					if (!isBad(item)) {
-						stat.addValue(getDiscrepancy(item), getWeight(item));
-					}
+		stat.start();
+		for (KeyPointPairList pairList : keyPointPairLists) {
+			for (KeyPointPair item : pairList.items.values()) {
+				if (!isBad(item)) {
+					stat.addValue(getDiscrepancy(item), getWeight(item));
 				}
 			}
-			stat.stop();
-			iterationHasBad = false;
-			for (KeyPointPairList pairList : keyPointPairLists) {
-				for (KeyPointPair item : pairList.items.values()) {
-					if ((!isBad(item)) && stat.isBad(getDiscrepancy(item))) {
-						iterationHasBad = true;
-						break;
-					}
-				}
-			}
-			if (!iterationHasBad)
-				break;
 		}
-		System.out.println("ADJUSTED statistics is: ");
-		System.out.println(stat.toString(Statistics.CStatAll));
+		stat.stop();
+
+//		System.out.println("ADJUSTED statistics is: ");
+//		System.out.println(stat.toString(Statistics.CStatAll));
 		boolean adjusted = true;
-		if (iterationHasBad)
-			adjusted = false;
 		double maxDiscrepancy = stat.getAvgValue();
-		if (maxDiscrepancy < 1)
-			maxDiscrepancy = stat.getJ_End();
+		if (maxDiscrepancy < 5)
+			maxDiscrepancy = 5; //stat.getJ_End();
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items.values()) {
 				boolean oldIsBad = isBad(item);
@@ -394,22 +375,19 @@ public class MyPanoPairTransformLearner3 {
 	public boolean calculate() {
 		boolean failed = true;
 		boolean adjusted = false;
-		if (calculateDiscrepancy()) {
-			for (int iter = 0; iter < maxIterations; iter++) {
-				adjusted = false;
-				if (!calculateParameters())
-					break;
-				double mse1 = getMedianSquareError();
-				double mse2 = computeDiscrepancies(); 
-				System.out.println("Iter=" + iter + " MSE1=" + mse1 + " MSE2=" + mse2);
-//				adjusted = true;
-				adjusted = isAdjusted();
-				if (adjusted && mse2 < 2) {
-					failed = false;
-					break;
-				}
-				if (!calculateDiscrepancy())
-					break;
+		for (int iter = 0; iter < maxIterations; iter++) {
+			adjusted = false;
+			if (!calculateDiscrepancy())
+				break;
+			if (!calculateParameters())
+				break;
+			double mse1 = getMedianSquareError();
+			double mse2 = computeDiscrepancies(); 
+			System.out.println("Iter=" + iter + " MSE1=" + mse1 + " MSE2=" + mse2);
+			adjusted = isAdjusted();
+			if (adjusted && mse2 < 2) {
+				failed = false;
+				break;
 			}
 		}
 		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 

@@ -208,7 +208,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		Statistics stat = new Statistics();
 
 		boolean iterationHasBad = false;
-		for (int k = 0; k < 3; k++) {
+		for (int k = 0; k < 3; k++) { // TODO: This loop seems to be obsolete
 			stat.start();
 			for (Map.Entry<InputType, OutputType> item : items) {
 				if (!isBad(item)) {
@@ -232,7 +232,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
 			boolean curIsBad = stat.isBad(getDiscrepancy(item));
-			if (oldIsBad == curIsBad) {
+			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
 				adjusted = false;
 			}

@@ -139,23 +139,17 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			}
 		}
 		
-		Point2D.Double tmp = new Point2D.Double();
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
+			System.out.println("Pair " + 
+					pairList.source.imageFileStamp.getFile().getName() + "\t" +
+					pairList.target.imageFileStamp.getFile().getName());
 			for (KeyPointPair pair : pairList.items.values()) {
 				if (!pair.bad) {
-					MyPanoPairTransformer3.transform(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pair.sourceSP.keyPointList, d);
-					MyPanoPairTransformer3.transformBackward(d.x, d.y, pair.targetSP.keyPointList, tmp);
-					
-					double dx = pair.targetSP.doubleX - tmp.x;  
-					double dy = pair.targetSP.doubleY - tmp.y;
-					double dis = Math.sqrt(dx*dx + dy*dy);
-					System.out.println(MathUtil.d4(pair.discrepancy) + "\t" + MathUtil.d4(dis));
-					
-					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pair.sourceSP.keyPointList, d);
+					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
 					int x1 = (int)d.x;
 					int y1 = (int)d.y;
-					transformCameraToWorld(pair.targetSP.doubleX, pair.targetSP.doubleY, pair.targetSP.keyPointList, d);
+					transformCameraToWorld(pair.targetSP.doubleX, pair.targetSP.doubleY, pairList.target, d);
 					int x2 = (int)d.x;
 					int y2 = (int)d.y;
 					oi.pinPair(x1, y1, x2, y2);
