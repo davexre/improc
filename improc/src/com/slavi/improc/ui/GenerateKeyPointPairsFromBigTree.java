@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
-import com.slavi.improc.KeyPointPairBigTree;
+import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.tree.KDTree;
@@ -20,7 +20,7 @@ import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyPointPairList>> {
 
-	KeyPointPairBigTree tree;
+	KeyPointBigTree tree;
 	
 	AbsoluteToRelativePathMaker rootKeyPointFileDir;
 
@@ -107,7 +107,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 		}
 	}
 	
-	public GenerateKeyPointPairsFromBigTree(KeyPointPairBigTree tree) {
+	public GenerateKeyPointPairsFromBigTree(KeyPointBigTree tree) {
 		this.tree = tree;
 	}
 

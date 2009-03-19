@@ -53,8 +53,8 @@ public class ImagePixelInterpolation {
 	public static int getInterpolatedColor(BufferedImage ii, double x, double y) {
 		int ix = (int) x;
 		int iy = (int) y;
-		double dx = x - ix;
-		double dy = y - iy;
+//		double dx = x - ix;
+//		double dy = y - iy;
 		
 		
 		

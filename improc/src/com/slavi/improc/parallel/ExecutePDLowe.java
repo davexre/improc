@@ -5,10 +5,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 
-import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
-import com.slavi.improc.singletreaded.DLoweDetector.Hook;
+import com.slavi.improc.old.singletreaded.DLoweDetector.Hook;
+import com.slavi.improc.old.test.DImageWrapper;
 import com.slavi.util.concurrent.SteppedParallelTask;
 
 public class ExecutePDLowe implements SteppedParallelTask<Void> {

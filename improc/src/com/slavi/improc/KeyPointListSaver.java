@@ -11,11 +11,9 @@ import java.util.concurrent.Future;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
+import com.slavi.improc.old.singletreaded.DLoweDetector.Hook;
 import com.slavi.improc.parallel.ExecutePDLowe;
 import com.slavi.improc.parallel.ExecutionProfile;
-import com.slavi.improc.singletreaded.DImageMap;
-import com.slavi.improc.singletreaded.DLoweDetector;
-import com.slavi.improc.singletreaded.DLoweDetector.Hook;
 import com.slavi.io.txt.TXTKDTree;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
@@ -39,7 +37,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		return node.toString();
 	}
 
-	private static class ListenerImpl implements Hook {
+	public static class ListenerImpl implements Hook {
 		public KeyPointList scalePointList;
 		
 		public ListenerImpl(KeyPointList spl) {
@@ -64,17 +62,6 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		return new File(Util.chageFileExtension(
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image, false)), "spf"));
-	}
-	
-	public static KeyPointList buildKeyPointFileSingleThreaded(File image) throws Exception {
-		DImageMap img = new DImageMap(image);
-		KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.getSizeX();
-		result.imageSizeY = img.getSizeY();
-		DLoweDetector d = new DLoweDetector();
-		d.hook = new ListenerImpl(result);
-		d.DetectFeatures(img, 3, 32);
-		return result;
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded(File image) throws Exception {

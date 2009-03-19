@@ -22,11 +22,11 @@ public abstract class BaseTransformer<InputType, OutputType> {
 	 * Transforms the source rectangle vertices into the destination 
 	 * coordinate system and returns the extent of the transformed vertices.  
 	 */
-	public void transformExtent(InputType srcMin, InputType srcMax, OutputType destMin, OutputType destMax) {
+/*	public void transformExtent(InputType srcMin, InputType srcMax, OutputType destMin, OutputType destMax) {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
 		
-/*
+
 		Matrix s = new Matrix(2, 1);
 		Matrix d = new Matrix(2, 1);
 		double minX, minY, maxX, maxY, t;
@@ -70,6 +70,7 @@ public abstract class BaseTransformer<InputType, OutputType> {
 		dest.x = minX;
 		dest.y = minY;
 		dest.width = maxX - minX;
-		dest.height = maxY - minY;*/
+		dest.height = maxY - minY;
 	}
+*/
 }

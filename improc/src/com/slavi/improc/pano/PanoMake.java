@@ -54,7 +54,7 @@ public class PanoMake {
 		double sw2 = image.width / 2.0 - 0.5;
 		double sh2 = image.height / 2.0 - 0.5;
 		Point2D.Double p = new Point2D.Double();
-		BufferedImage bimage = ImageIO.read(new File(image.name));
+//		BufferedImage bimage = ImageIO.read(new File(image.name));
 		
 		for (int y = pano.height - 1; y >= 0; y--) {
 			double y_d = (double) y - h2;
@@ -81,7 +81,7 @@ public class PanoMake {
 				p.x -= xc;
 				p.y -= yc;
 				
-				int color = bimage.getRGB(xc, yc);
+//				int color = bimage.getRGB(xc, yc);
 			}
 		}
 	}
@@ -89,7 +89,7 @@ public class PanoMake {
 	public static void makePano(AlignInfo ainfo) throws IOException {
 		BufferedImage bi = new BufferedImage(ainfo.pano.width, ainfo.pano.height, BufferedImage.TYPE_INT_RGB);
 		Point2D.Double p = new Point2D.Double();
-		Point2D.Double p2 = new Point2D.Double();
+//		Point2D.Double p2 = new Point2D.Double();
 		
 		double srcX = ainfo.pano.width / 2.0 - 0.5;
 		double srcY = ainfo.pano.height / 2.0 - 0.5;

@@ -1,108 +1,23 @@
-package com.slavi.improc.parallel;
+package com.slavi.improc.old.singletreaded;
 
-import java.awt.Rectangle;
-import java.util.concurrent.Callable;
+import java.io.IOException;
 
-import com.slavi.image.DWindowedImage;
-import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
-import com.slavi.improc.old.singletreaded.DLoweDetector.Hook;
-import com.slavi.improc.old.test.DImageWrapper;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
+import com.slavi.util.Const;
 
-public class PDLoweDetector implements Callable<Void> {
+/**
+ * @author Slavian Petrov
+ */
+public class DLoweDetector {
 
+	public static interface Hook {
+		public void keyPointCreated(KeyPoint scalePoint);
+	}
+	
 	public Hook hook = null;
-
-	public static final int defaultScaleSpaceLevels = 3;
-
-	DWindowedImage src;
 	
-	DWindowedImage nextLevelBlurredImage;
-
-	int scale;
-
-	int scaleSpaceLevels;
-
-	Rectangle dloweExtent;
-	
-	public PDLoweDetector(DWindowedImage src, Rectangle dloweExtent, DWindowedImage nextLevelBlurredImage, int scale, int scaleSpaceLevels) {
-		this.src = src;
-		this.scale = scale;
-		this.scaleSpaceLevels = scaleSpaceLevels;
-		this.dloweExtent = dloweExtent;
-		Rectangle r = new Rectangle();
-//		r.x = (src.minX() + 1) >> 1;
-//		r.y = (src.minY() + 1) >> 1;
-//		r.width = (src.maxX() >> 1) - r.x + 1;
-//		r.height = (src.maxY() >> 1) - r.y + 1;
-		r.x = (dloweExtent.x + 1) >> 1;
-		r.y = (dloweExtent.y + 1) >> 1;
-		r.width = ((dloweExtent.x + dloweExtent.width - 1) >> 1) - r.x + 1;
-		r.height = ((dloweExtent.y + dloweExtent.height - 1) >> 1) - r.y + 1;
-		if (r.x + r.width - 1 > nextLevelBlurredImage.maxX())
-			r.width = nextLevelBlurredImage.maxX() - r.x + 1;
-		if (r.y + r.height - 1 > nextLevelBlurredImage.maxY())
-			r.height = nextLevelBlurredImage.maxY() - r.y + 1;
-		
-		if ((r.width == 0) || (r.height == 0))
-			this.nextLevelBlurredImage = null; 	// TODO: Ugly hack
-		else
-			this.nextLevelBlurredImage = new DImageWrapper(nextLevelBlurredImage, r);
-	}
-	
-	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
-		return sigma * Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula!!!
-	}
-	
-	public static Rectangle getNeededSourceExtent(Rectangle dest) {
-		return getNeededSourceExtent(dest, defaultScaleSpaceLevels);
-	}
-
-	public static Rectangle getNeededSourceExtent(Rectangle dest, int scaleSpaceLevels) {
-		double sigma = initialSigma;
-		double sigmas[] = new double[scaleSpaceLevels + 2];
-		for (int aLevel = -2, i = 0; aLevel < scaleSpaceLevels; aLevel++, i++) {
-			sigmas[i] = sigma = getNextSigma(sigma, scaleSpaceLevels);
-		}
-
-		Rectangle tmp = dest;
-		for (int i = sigmas.length - 1; i >= 0; i--) {
-			tmp = PFastGaussianFilter.getNeededSourceExtent(tmp, sigmas[i]);
-		}
-		return tmp;
-	}
-
-	public static Rectangle getEffectiveTargetExtent(Rectangle source) {
-		return getEffectiveTargetExtent(source, defaultScaleSpaceLevels);
-	}
-	
-	public static Rectangle getEffectiveTargetExtent(Rectangle source, int scaleSpaceLevels) {
-		double sigma = initialSigma;
-		double sigmas[] = new double[scaleSpaceLevels + 2];
-		for (int aLevel = -2, i = 0; aLevel < scaleSpaceLevels; aLevel++, i++) {
-			sigmas[i] = sigma = getNextSigma(sigma, scaleSpaceLevels);
-		}
-
-		Rectangle tmp = source;
-		for (int i = 0; i < sigmas.length; i++) {
-			tmp = PFastGaussianFilter.getEffectiveTargetExtent(tmp, sigmas[i]);
-		}
-		return tmp;
-	}
-	
-	void computeDOG(DWindowedImage blured1, DWindowedImage blured2, DWindowedImage destDOG) {
-		int minX = destDOG.minX();
-		int maxX = destDOG.maxX();
-		int minY = destDOG.minY();
-		int maxY = destDOG.maxY();
-
-		for (int i = minX; i <= maxX; i++)
-			for (int j = minY; j <= maxY; j++)
-				destDOG.setPixel(i, j, blured2.getPixel(i, j) - blured1.getPixel(i, j));
-	}
-
 	/**
 	 * Minimum absolute DoG value of a pixel to be allowed as minimum/maximum
 	 * peak. This control how much general non-differing areas, such as the sky
@@ -151,7 +66,7 @@ public class PDLoweDetector implements Callable<Void> {
 	 */
 	public static final int relocationMaximum = 4;
 
-	private boolean isLocalExtrema(DWindowedImage[] DOGs, int atX, int atY) {
+	private boolean isLocalExtrema(DImageMap[] DOGs, int atX, int atY) {
 		double curPixel = DOGs[1].getPixel(atX, atY);
 		if (Math.abs(curPixel) < dogThreshold)
 			return false;
@@ -159,7 +74,7 @@ public class PDLoweDetector implements Callable<Void> {
 		boolean isMaximum = true;
 		boolean isMinimum = true;
 		for (int k = 2; k >= 0; k--) {
-			DWindowedImage im = DOGs[k];
+			DImageMap im = DOGs[k];
 			if (isMinimum) {
 				if (
 					(im.getPixel(atX + 1, atY + 1) <= curPixel) ||
@@ -191,8 +106,8 @@ public class PDLoweDetector implements Callable<Void> {
 		}
 		return isMinimum || isMaximum;
 	}
-	
-	private boolean isTooEdgeLike(DWindowedImage aDOG, int atX, int atY) {
+
+	private boolean isTooEdgeLike(DImageMap aDOG, int atX, int atY) {
 		double D_xx, D_yy, D_xy;
 		// Calculate the Hessian H elements [ D_xx, D_xy ; D_xy , D_yy ]
 		D_xx = aDOG.getPixel(atX + 1, atY) + aDOG.getPixel(atX - 1, atY) - 
@@ -215,16 +130,12 @@ public class PDLoweDetector implements Callable<Void> {
 		// (DetH * r1sq))
 		return (TrHsq / DetH) >= (r1sq / maximumEdgeRatio);
 	}
-	
-	protected boolean localizeIsWeak(DWindowedImage[] DOGs, int x, int y,
+
+	protected boolean localizeIsWeak(DImageMap[] DOGs, int x, int y,
 			KeyPoint sp) {
-		DWindowedImage below = DOGs[0];
-		DWindowedImage current = DOGs[1];
-		DWindowedImage above = DOGs[2];
-		int minX = current.minX(); 
-		int maxX = current.maxX(); 
-		int minY = current.minY(); 
-		int maxY = current.maxY(); 
+		DImageMap below = DOGs[0];
+		DImageMap current = DOGs[1];
+		DImageMap above = DOGs[2];
 
 		SymmetricMatrix h = new SymmetricMatrix(3);
 		Matrix adj = new Matrix(1, 3);
@@ -234,8 +145,8 @@ public class PDLoweDetector implements Callable<Void> {
 		while (adjustments-- > 0) {
 			// When the localization hits some problem, i.e. while moving the
 			// point a border is reached, then skip this point.
-			if ((x <= minX) || (x >= maxX) || 
-				(y <= minY) || (y >= maxY))
+			if ((x < 1) || (x > current.getSizeX() - 2) || 
+				(y < 1) || (y > current.getSizeY() - 2))
 				return true;
 
 			h.setItem(0, 0, below.getPixel(x, y) - 
@@ -297,13 +208,75 @@ public class PDLoweDetector implements Callable<Void> {
 		}
 		return true;
 	}
+
+	/* wrong, wrong, wrong
+	public void createDescriptor2(KeyPoint sp, DImageMap magnitude,
+			DImageMap direction) {
+
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					featureVector[i][j][k] = 0;
+		
+		double considerScaleFactor = 2.0 * sp.kpScale;
+		double sigma2Sq = 2.0 * Math.pow(KeyPoint.descriptorSize / 2.0, 2.0);
+		double sizeInPixels05 = (KeyPoint.descriptorSize - 1) * considerScaleFactor / 2.0;
+		int sizeInPixels = (int)(sizeInPixels05 * 2.0);
+		double cosD = Math.cos(sp.degree);
+		double sinD = Math.sin(sp.degree);		
+		
+		for (int i = 0; i < sizeInPixels; i++) {
+			double translatedX = i - sizeInPixels05;
+//			double translatedXSq = Math.pow(translatedX, 2.0);
+			for (int j = 0; j < sizeInPixels; j++) {
+				double translatedY = j - sizeInPixels05;
+				double xR = (translatedX * cosD - translatedY * sinD) / considerScaleFactor;
+				double yR = (translatedX * sinD + translatedY * cosD) / considerScaleFactor;
+				
+				int imgX = (int)(sp.doubleX + translatedX * cosD - translatedY * sinD);
+				int imgY = (int)(sp.doubleY + translatedX * sinD + translatedY * cosD);
+				if ((imgX < 0) || (imgY < 0) || (imgX >= magnitude.sizeX) || (imgY >= magnitude.sizeY))
+					continue;
+				
+				int indxX = (int)(i / considerScaleFactor);
+				int indxY = (int)(j / considerScaleFactor);
+				int indxOrientation = (int) ((direction.getPixel(imgX, imgY) - sp.degree + 
+						2.0 * Math.PI) * KeyPoint.numDirections / (2.0 * Math.PI)) % KeyPoint.numDirections;
+				double weightX = indxX - i / considerScaleFactor;
+				double weightY = indxY - j / considerScaleFactor;
+				//double weightGauss = Math.exp (-(translatedXSq + Math.pow(translatedY, 2.0)) / sigma2Sq);
+				double weightGauss = Math.exp (-(Math.pow(xR, 2.0) + Math.pow(yR, 2.0)) / sigma2Sq);
+				
+				double value = magnitude.getPixel(imgX, imgY); 
+				sp.setItem(indxX, indxY, indxOrientation, 
+						sp.getItem(indxX, indxY, indxOrientation) +
+						weightX * weightY * weightGauss * value);
+			}
+		}
+		// Normalize and hicap the feature vector, as recommended on page
+		// 16 in Lowe03.
+		// Straight normalization
+		
+		// TODO: Optimize me!
+		sp.normalize();
+		sp.hiCap(0.2);
+		sp.normalize();
+
+		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0 ; k < KeyPoint.numDirections; k++)
+					sp.setItem(i, j, k, (int)(255.0 * sp.getItem(i, j, k)));
+
+		sp.doubleX *= sp.imgScale;
+		sp.doubleY *= sp.imgScale;
+		sp.kpScale *= sp.imgScale;
+	}
+	*/
 	
-	public void createDescriptor(KeyPoint sp, DWindowedImage magnitude, DWindowedImage direction) {
-		double[][][] featureVector = new double[KeyPoint.descriptorSize][KeyPoint.descriptorSize][KeyPoint.numDirections];
-		int minX = magnitude.minX(); 
-		int maxX = magnitude.maxX(); 
-		int minY = magnitude.minY(); 
-		int maxY = magnitude.maxY(); 
+	private double[][][] featureVector = new double[KeyPoint.descriptorSize][KeyPoint.descriptorSize][KeyPoint.numDirections];
+	
+	public void createDescriptor(KeyPoint sp, DImageMap magnitude,
+			DImageMap direction) {
 
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
@@ -338,8 +311,8 @@ public class PDLoweDetector implements Callable<Void> {
 
 				int currentX = (int) (x + sp.doubleX + 0.5);
 				int currentY = (int) (y + sp.doubleY + 0.5);
-				if (currentX < minX || currentX > maxX ||
-					currentY < minY || currentY > maxY)
+				if (currentX < 1 || currentX >= (magnitude.getSizeX() - 1) ||
+					currentY < 1 || currentY >= (magnitude.getSizeY() - 1))
 					continue;
 				
 				// Weight the magnitude relative to the center of the
@@ -467,8 +440,8 @@ public class PDLoweDetector implements Callable<Void> {
 		sp.kpScale *= sp.imgScale;
 	}
 	
-	private void GenerateKeypointSingle(double sigma, DWindowedImage magnitude,
-			DWindowedImage direction, KeyPoint sp, int scaleSpaceLevels) {
+	private void GenerateKeypointSingle(double sigma, DImageMap magnitude,
+			DImageMap direction, KeyPoint sp, int scaleSpaceLevels) {
 		// The relative estimated keypoint scale. The actual absolute keypoint
 		// scale to the original image is yielded by the product of imgScale.
 		// But as we operate in the current octave, the size relative to the
@@ -488,10 +461,10 @@ public class PDLoweDetector implements Callable<Void> {
 		// As the point may lie near the border, build the rectangle
 		// coordinates we can still reach, minus the border pixels, for which
 		// we do not have gradient information available.
-		int xMin = Math.max(sp.imgX - radius, direction.minX());
-		int xMax = Math.min(sp.imgX + radius, direction.maxX());
-		int yMin = Math.max(sp.imgY - radius, direction.minY());
-		int yMax = Math.min(sp.imgY + radius, direction.maxY());
+		int xMin = Math.max(sp.imgX - radius, 1);
+		int xMax = Math.min(sp.imgX + radius, magnitude.getSizeX() - 1);
+		int yMin = Math.max(sp.imgY - radius, 1);
+		int yMax = Math.min(sp.imgY + radius, magnitude.getSizeY() - 1);
 
 		// Precompute 1D gaussian divisor (2 \sigma^2) in:
 		// G(r) = e^{-\frac{r^2}{2 \sigma^2}}
@@ -622,19 +595,20 @@ public class PDLoweDetector implements Callable<Void> {
 			}
 		}
 	}
+
+	private DImageMap lastBlured1Img = null;
 	
-	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, int scale, int scaleSpaceLevels, double sigma) {
+	String workDir = "D:/Temp/t1/";
+
+	private void DetectFeaturesInSingleDOG(DImageMap[] DOGs, DImageMap magnitude, DImageMap direction, int dogLevel, double scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
 		// Border pixels are skipped
 
-		DWindowedImage tmpDOG = DOGs[0];
-		int minX = tmpDOG.minX();
-		int maxX = tmpDOG.maxX();
-		int minY = tmpDOG.minY();
-		int maxY = tmpDOG.maxY();
-
-		for (int i = minX + 1; i < maxX; i++) {
-			for (int j = minY + 1; j < maxY; j++) {
+		int sizeX = DOGs[0].getSizeX();
+		int sizeY = DOGs[0].getSizeY();
+		
+		for (int i = sizeX - 2; i >= 1; i--) {
+			for (int j = sizeY - 2; j >= 1; j--) {
 				// Detect if DOGs[1].pixel[i][j] is a local extrema. Compare
 				// this pixel to all its neighbour pixels.
 				if (!isLocalExtrema(DOGs, i, j))
@@ -656,7 +630,7 @@ public class PDLoweDetector implements Callable<Void> {
 				localizeIsWeakCount++;
 
 				// Ok. We have located a keypoint.
-				tempKeyPoint.dogLevel = aLevel+1;
+				tempKeyPoint.dogLevel = dogLevel+1;
 				tempKeyPoint.imgScale = scale;
 
 				GenerateKeypointSingle(sigma, magnitude, direction, tempKeyPoint, scaleSpaceLevels);
@@ -668,114 +642,104 @@ public class PDLoweDetector implements Callable<Void> {
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
 	
-	void DetectFeaturesInSingleLevel() {
-		double sigma = initialSigma;
-		Rectangle srcExtent = src.getExtent();
-
-		PDImageMapBuffer blurred0 = new PDImageMapBuffer(srcExtent);
-		PDImageMapBuffer blurred1 = new PDImageMapBuffer(srcExtent);
-		PDImageMapBuffer blurred2 = new PDImageMapBuffer(srcExtent);
-		PDImageMapBuffer magnitude = new PDImageMapBuffer(srcExtent);
-		PDImageMapBuffer direction = new PDImageMapBuffer(srcExtent);
-
-		Rectangle dogExtent = new Rectangle(dloweExtent.x - 1, dloweExtent.y - 1, dloweExtent.width + 2, dloweExtent.height + 2);
-		dogExtent = dogExtent.intersection(srcExtent);
-		
-		PDImageMapBuffer[] DOGs = new PDImageMapBuffer[3];
-		for (int i = DOGs.length - 1; i >= 0; i--)
-			DOGs[i] = new PDImageMapBuffer(dogExtent);
+	public void DetectFeaturesInSingleLevel(DImageMap theImage, double scale,
+			int scaleSpaceLevels) {
 
 		isLocalExtremaCount = 0;
 		isTooEdgeLikeCount = 0;
 		localizeIsWeakCount = 0;
+		
+		double sigma = initialSigma;
+		DImageMap blured0 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+		DImageMap blured1 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+		DImageMap blured2 = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+		DImageMap magnitude = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+		DImageMap direction = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 
-		PFastGaussianFilter.applyFilter(src, blurred1, sigma);
-		computeDOG(src, blurred1, DOGs[1]);
-		sigma = getNextSigma(sigma, scaleSpaceLevels);
+		DImageMap[] DOGs = new DImageMap[3];
+		for (int i = DOGs.length - 1; i >= 0; i--)
+			DOGs[i] = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 
-		PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
-		computeDOG(blurred1, blurred2, DOGs[2]);
-		sigma = getNextSigma(sigma, scaleSpaceLevels);
+		theImage.copyTo(blured2);
 
-		int dogcount = 0;
-		for (int aLevel = 0; aLevel < scaleSpaceLevels; aLevel++) {
-			// Shift blurred
-			PDImageMapBuffer tmpimap = blurred0;
-			blurred0 = blurred1;
-			blurred1 = blurred2;
-			blurred2 = tmpimap;
-			// Shift DOGs
-			tmpimap = DOGs[0];
+//		int dogcount = 0;
+		for (int dogLevel = -2; dogLevel < scaleSpaceLevels; dogLevel++) {
+			DImageMap tmpImageMap;
+			tmpImageMap = blured0;
+			blured0 = blured1;
+			lastBlured1Img = blured1 = blured2;
+			blured2 = tmpImageMap;
+
+			DGaussianFilter gf = new DGaussianFilter(sigma);
+			gf.applyGaussianFilter(blured1, blured2);
+//			gf.applyGaussianFilterOriginal(blured1, blured2);
+			
+			sigma *= Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula !!!
+
+			tmpImageMap = DOGs[0];
 			DOGs[0] = DOGs[1];
 			DOGs[1] = DOGs[2];
-			DOGs[2] = tmpimap;
+			DOGs[2] = tmpImageMap;
+			for (int i = tmpImageMap.getSizeX() - 1; i >= 0; i--)
+				for (int j = tmpImageMap.getSizeY() - 1; j >= 0; j--)
+					tmpImageMap.setPixel(i, j, blured2.getPixel(i, j)
+							- blured1.getPixel(i, j));
+			// Compute gradient magnitude and direction plane
+			blured0.computeMagnitude(magnitude);
+			blured0.computeDirection(direction);
+			if (dogLevel < 0)
+				continue;
+//			try {
+//				tmpImageMap.toImageFile(Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "d.png");
+//				magnitude.toImageFile(Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "d.png");
+//				direction.toImageFile(Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "d.png");
+//				dogcount++;
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 
-			PComputeMagnitude.computeMagnitude(blurred0, magnitude);
-			PComputeDirection.computeDirection(blurred0, direction);
+			DImageMap temp = new DImageMap(1, 1);
+			magnitude.copyTo(temp);
 			
-			// Compute next DOG
-			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
-			computeDOG(blurred1, blurred2, DOGs[2]);
-//			DWindowedImageUtils.toImageFile(DOGs[2], Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "p.png");
-//			DWindowedImageUtils.toImageFile(magnitude, Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "p.png");
-//			DWindowedImageUtils.toImageFile(direction, Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "p.png");
-			dogcount++;
-			sigma = getNextSigma(sigma, scaleSpaceLevels);
-
-			// detect
-			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
-		}
-
-		if (nextLevelBlurredImage != null)
-			for (int j = nextLevelBlurredImage.minY(); j <= nextLevelBlurredImage.maxY(); j++) {
-				for (int i = nextLevelBlurredImage.minX(); i <= nextLevelBlurredImage.maxX(); i++) {
-					nextLevelBlurredImage.setPixel(i, j, blurred1.getPixel(i << 1, j << 1));
-				}
-			}
-		
-/*		int minX = dloweExtent.x;
-		int minY = dloweExtent.y;
-		int maxX = dloweExtent.x + dloweExtent.width - 1;
-		int maxY = dloweExtent.y + dloweExtent.height - 1;
-		
-		if ((minX & 0x01) != 0)
-			minX++;
-		if ((minY & 0x01) != 0)
-			minY++;
-		
-		for (int j = minY; j <= maxY; j += 2) {
-			for (int i = minX; i <= maxX; i += 2) {
-				try {
-					nextLevelBlurredImage.setPixel(i >> 1, j >> 1, blurred1.getPixel(i, j));
-				} catch (Exception e) {
-					e.printStackTrace(System.out);
-					System.out.println("ERROR");
-					System.out.println("DEST EXTENT = " + nextLevelBlurredImage.getExtent());
-					System.out.println("SRC EXTENT  = " + blurred1.getExtent());
-					System.out.println("minX = " + minX);
-					System.out.println("maxX = " + maxX);
-					System.out.println("minY = " + minY);
-					System.out.println("maxY = " + maxY);
-				}
-			}
-		}*/
+			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, dogLevel, scale, scaleSpaceLevels, sigma);
+		} // end of for aLevel
 	}
 	
-	public Void call() throws Exception {
-		DetectFeaturesInSingleLevel();
-		return null;
-	}
+	public static DImageMap firstLastBlurredImage = null;
+	
+	public void DetectFeatures(DImageMap theImage, int scaleSpaceLevels,
+			int minimumRequiredPixelsize) {
+		// ??? more initializers
+		int scale = 1;
+		DImageMap curImage = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+//		DGaussianFilter gf = new DGaussianFilter(1.5);
+//		gf.applyGaussianFilter(theImage, curImage);
+		theImage.copyTo(curImage);
 
-	public String toString() {
-		Rectangle srcExtent = src.getExtent();
-		StringBuilder r = new StringBuilder();
-		r.append("Source X,Y                :"); r.append(srcExtent.x); r.append(","); r.append(srcExtent.y);
-		r.append("\nSource width, height      :"); r.append(srcExtent.width); r.append(","); r.append(srcExtent.height);
-		r.append("\nDestination X,Y           :"); r.append(dloweExtent.x); r.append(","); r.append(dloweExtent.y);
-		r.append("\nDestination width, height :"); r.append(dloweExtent.width); r.append(","); r.append(dloweExtent.height);
-		r.append("\nScale                     :"); r.append(scale);
-		if (srcExtent.isEmpty() || dloweExtent.isEmpty())
-			throw new RuntimeException("zxc");
-		return r.toString();
+		while (curImage != null) {
+			try {
+				curImage.toImageFile(Const.workDir + "/dlowe_nextlevel_" + scale + "d.png");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			DetectFeaturesInSingleLevel(curImage, scale, scaleSpaceLevels);
+			// Next scale down level
+		
+			if (curImage.getSizeX() / 2 > minimumRequiredPixelsize) { 
+				DImageMap tmpImage = new DImageMap(curImage.getSizeX() / 2, curImage.getSizeY() / 2); 
+				curImage = lastBlured1Img;
+				if (firstLastBlurredImage == null) {
+					firstLastBlurredImage = new DImageMap(1, 1); 
+					lastBlured1Img.copyTo(firstLastBlurredImage);
+				}
+				
+				curImage.scaleHalf(tmpImage); 
+				curImage = tmpImage; 
+				scale *= 2; 
+			} else { 
+				curImage = null; 
+			}
+		}
 	}
 }

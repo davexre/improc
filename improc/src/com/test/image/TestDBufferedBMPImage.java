@@ -3,18 +3,19 @@ package com.test.image;
 import java.io.File;
 
 import com.slavi.image.DWindowedBMPImage;
-import com.slavi.improc.singletreaded.DImageMap;
+import com.slavi.image.DWindowedImage;
+import com.slavi.image.PDImageMapBuffer;
 import com.slavi.util.Const;
 
 public class TestDBufferedBMPImage {
 	public static void main(String[] args) throws Exception {
 		String fname = Const.smallImage;
 		String fou = Const.tempDir + "/output.bmp";
-		DImageMap im = new DImageMap(new File(fname));
-		DWindowedBMPImage out = DWindowedBMPImage.create(new File(fou), im.getSizeX(), im.getSizeY());
+		DWindowedImage im = new PDImageMapBuffer(new File(fname));
+		DWindowedBMPImage out = DWindowedBMPImage.create(new File(fou), im.maxX() + 1, im.maxY() + 1);
 		try {
-			for (int j = im.getSizeY() - 1; j >= 0; j--) {
-				for (int i = im.getSizeX() - 1; i >= 0; i--) {
+			for (int j = im.maxY(); j >= im.minX(); j--) {
+				for (int i = im.maxX(); i >= im.minY(); i--) {
 					double v = im.getPixel(i, j);
 					out.setPixel(i, j, v);
 				}

@@ -11,11 +11,11 @@ import java.util.concurrent.Future;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
-import com.slavi.improc.KeyPointPairBigTree;
+import com.slavi.improc.KeyPointBigTree;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.ui.SwtUtil;
 
-public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree> {
+public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 
 	List<String> images;
 	AbsoluteToRelativePathMaker imagesRoot;
@@ -33,9 +33,9 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 
 		String image;
 		
-		KeyPointPairBigTree bigTree;
+		KeyPointBigTree bigTree;
 		
-		public ProcessOne(KeyPointPairBigTree bigTree, String image) {
+		public ProcessOne(KeyPointBigTree bigTree, String image) {
 			this.bigTree = bigTree;
 			this.image = image;
 		}
@@ -55,10 +55,10 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointPairBigTree
 		}
 	}
 	
-	public KeyPointPairBigTree call() throws Exception {
+	public KeyPointBigTree call() throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		final KeyPointPairBigTree result = new KeyPointPairBigTree();
+		final KeyPointBigTree result = new KeyPointBigTree();
 
 		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
 		try {

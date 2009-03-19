@@ -560,7 +560,8 @@ public class AlignInfo {
 					if (t.length() <= 0)
 						continue;
 					if ("t".equals(t)) {
-						int type = Integer.parseInt(tokenizer.nextToken());
+//						int type = Integer.parseInt(tokenizer.nextToken());
+						tokenizer.nextToken();
 						// ignore type. use always r -> optimize by distance
 //						switch (type) {
 //						case 1: cp.type = OptimizeType.x; break;

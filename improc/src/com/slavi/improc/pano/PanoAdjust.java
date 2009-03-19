@@ -202,7 +202,7 @@ public class PanoAdjust implements LMDifFcn {
 		double rad2 = srcImg.radial_params[colorIndex][2];
 		double rad3 = srcImg.radial_params[colorIndex][3];
 		double rad4 = srcImg.radial_params[colorIndex][4];
-		double rad5 = rad4;
+//		double rad5 = rad4;
 
 		// Correction mode is always radial
 		rad4 = ( (double)( srcImg.width < srcImg.height ? srcImg.width : srcImg.height) ) / 2.0;

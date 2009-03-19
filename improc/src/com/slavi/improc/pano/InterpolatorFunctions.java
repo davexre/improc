@@ -102,7 +102,7 @@ public class InterpolatorFunctions {
 		a[1] = cubic01(x);
 		a[0] = cubic12(x + 1.0);
 	}
-
+/*
 	static void poly3(double x, double y, int color, byte rgb[]) {
 		int ndim = 4;
 		int SamplesPerPixel = 3;
@@ -127,7 +127,7 @@ public class InterpolatorFunctions {
 		}
 		
 	}
-	
+*/	
 	public static class Box extends Interpolator{
 		public Box() {
 			super(0.5);
