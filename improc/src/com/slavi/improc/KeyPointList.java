@@ -23,18 +23,14 @@ public class KeyPointList {
 
 	public int imageSizeY;
 	
-	public Matrix toWorld;
-	
-	public int imageId;
-	
 	// My adjust
 	public Matrix camera2real;
 	public double rx, ry, rz;
-	public double cameraOriginX, cameraOriginY, maxWidthHeight, cameraScale; 
+	public double cameraOriginX, cameraOriginY, cameraScale; 
 	public double scaleZ;
 	public Matrix dMdX, dMdY, dMdZ;
 	
-	public Point2D.Double tl, tr, bl, br, min, max;
+	public Point2D.Double min, max;
 	// My adjust
 
 	

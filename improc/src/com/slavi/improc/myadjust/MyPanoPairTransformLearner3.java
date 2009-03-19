@@ -153,8 +153,8 @@ public class MyPanoPairTransformLearner3 {
 				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
 				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
 				
-				int srcIndex = tr.images.indexOf(source.keyPointList) * 4;
-				int destIndex = tr.images.indexOf(dest.keyPointList) * 4;
+				int srcIndex = tr.images.indexOf(pairList.source) * 4;
+				int destIndex = tr.images.indexOf(pairList.target) * 4;
 				
 				coefs.make0();
 	
@@ -294,8 +294,8 @@ public class MyPanoPairTransformLearner3 {
 	}
 
 	public static void printCameraAngles(KeyPointList image) {
-		System.out.println("Image ID " + image.imageId + 
-				"\tscaleZ=" + (image.scaleZ) + 
+		System.out.println( 
+				"scaleZ=" + (image.scaleZ) + 
 				"\trx=" + (image.rx * MathUtil.rad2deg) + 
 				"\try=" + (image.ry * MathUtil.rad2deg) + 
 				"\trz=" + (image.rz * MathUtil.rad2deg) 

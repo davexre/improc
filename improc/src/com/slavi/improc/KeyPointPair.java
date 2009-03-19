@@ -10,10 +10,6 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	
 	public KeyPoint targetSP;
 	
-	public double angle;
-	
-	public double d1;
-	
 	// Distance to nearest KeyPoint as reported by nearestNeighbourhood
 	public double distanceToNearest;
 	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
@@ -91,6 +87,5 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 
 	public KeyPoint setValue(KeyPoint value) {
 		throw new RuntimeException("Method not allowed");
-		//return targetSP = value;
 	}
 }

@@ -47,21 +47,16 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		sizeAngle.x = Double.NEGATIVE_INFINITY;
 		sizeAngle.y = Double.NEGATIVE_INFINITY;
 		
+		Point2D.Double tmp = new Point2D.Double();
 		for (KeyPointList i : images) {
-			i.tl = new Point2D.Double();
-			i.tr = new Point2D.Double();
-			i.bl = new Point2D.Double();
-			i.br = new Point2D.Double();
-			
-			MyPanoPairTransformer3.transform(0, 0, i, i.tl);
-			MyPanoPairTransformer3.transform(0, i.imageSizeY - 1, i, i.tr);
-			MyPanoPairTransformer3.transform(i.imageSizeX - 1, 0, i, i.bl);
-			MyPanoPairTransformer3.transform(i.imageSizeX - 1, i.imageSizeY - 1, i, i.br);
-			
-			calcExt(i.tl, minAngle, sizeAngle);
-			calcExt(i.tr, minAngle, sizeAngle);
-			calcExt(i.bl, minAngle, sizeAngle);
-			calcExt(i.br, minAngle, sizeAngle);
+			MyPanoPairTransformer3.transform(0, 0, i, tmp);
+			calcExt(tmp, minAngle, sizeAngle);
+			MyPanoPairTransformer3.transform(0, i.imageSizeY - 1, i, tmp);
+			calcExt(tmp, minAngle, sizeAngle);
+			MyPanoPairTransformer3.transform(i.imageSizeX - 1, 0, i, tmp);
+			calcExt(tmp, minAngle, sizeAngle);
+			MyPanoPairTransformer3.transform(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
+			calcExt(tmp, minAngle, sizeAngle);
 		}
 		sizeAngle.x -= minAngle.x;
 		sizeAngle.y -= minAngle.y;
@@ -72,21 +67,14 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			i.min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 			i.max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-			transformCameraToWorld(0, 0, i, i.tl);
-			transformCameraToWorld(0, i.imageSizeY - 1, i, i.tr);
-			transformCameraToWorld(i.imageSizeX - 1, 0, i, i.bl);
-			transformCameraToWorld(i.imageSizeX - 1, i.imageSizeY - 1, i, i.br);
-			
-			calcExt(i.tl, i.min, i.max);
-			calcExt(i.tr, i.min, i.max);
-			calcExt(i.bl, i.min, i.max);
-			calcExt(i.br, i.min, i.max);
-			
-			transformWorldToCamera(i.tl.x, i.tl.y, i, i.tl);
-			transformWorldToCamera(i.tr.x, i.tr.y, i, i.tr);
-			transformWorldToCamera(i.bl.x, i.bl.y, i, i.bl);
-			transformWorldToCamera(i.br.x, i.br.y, i, i.br);
-			System.out.println(i.bl);
+			transformCameraToWorld(0, 0, i, tmp);
+			calcExt(tmp, i.min, i.max);
+			transformCameraToWorld(0, i.imageSizeY - 1, i, tmp);
+			calcExt(tmp, i.min, i.max);
+			transformCameraToWorld(i.imageSizeX - 1, 0, i, tmp);
+			calcExt(tmp, i.min, i.max);
+			transformCameraToWorld(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
+			calcExt(tmp, i.min, i.max);
 		}
 	}
 	
