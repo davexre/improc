@@ -108,15 +108,14 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	public Void call() throws Exception {
 		calcExtents();
 		
-		System.out.println("MIN:  " + MathUtil.d4(minAngle.x) + "\t" + MathUtil.d4(minAngle.y));
-		System.out.println("SIZE: " + MathUtil.d4(sizeAngle.x) + "\t" + MathUtil.d4(sizeAngle.y));
-		System.out.println("WH :  " + outputImageSizeX + "\t" + outputImageSizeY);
+		System.out.println("MIN Angle X,Y:  " + MathUtil.d4(minAngle.x) + "\t" + MathUtil.d4(minAngle.y));
+		System.out.println("SIZE angle X,Y: " + MathUtil.d4(sizeAngle.x) + "\t" + MathUtil.d4(sizeAngle.y));
+		System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 		
 		SafeImage oi = new SafeImage(outputImageSizeX, outputImageSizeY);
 		
 		Point2D.Double d = new Point2D.Double();
 		for (int index = 0; index < images.size(); index++) {
-//		for (int index = images.size() - 1; index >= 0; index--) {
 			KeyPointList image = images.get(index);
 			SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
 			int imageColorMask = 0xff << ((index % 3) * 8);
@@ -141,9 +140,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
-			System.out.println("Pair " + 
-					pairList.source.imageFileStamp.getFile().getName() + "\t" +
-					pairList.target.imageFileStamp.getFile().getName());
 			for (KeyPointPair pair : pairList.items.values()) {
 				if (!pair.bad) {
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);

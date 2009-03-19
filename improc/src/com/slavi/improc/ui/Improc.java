@@ -12,7 +12,6 @@ import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 import com.slavi.math.MathUtil;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -57,7 +56,7 @@ public class Improc {
 //				p.weight = 1.0 / (unmatching + 1);
 //				p.bad = unmatching > 10;
 
-				p.weight = p.distanceToNearest < 1 ? 1.0 : 1.0 / p.distanceToNearest;
+				p.weight = p.distanceToNearest < 1 ? 1.0 : 10 / p.distanceToNearest;
 //				p.weight = p.weight < 1 ? 1 : 1/p.weight;
 //				p.bad = p.distanceToNearest > 1000;
 //				p.bad = p.distanceToNearest > maxDist;
@@ -68,15 +67,16 @@ public class Improc {
 			learner.calculateOne();
 			learner.calculateOne();
 			l.leaveGoodElements(200);
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 2; i++) {
 				res = learner.calculateOne();
 				if (res) {
 					break;
 				}
 			}
-			System.out.println(res + "\t" + l.getGoodCount() + "\t" +
+			System.out.println(l.getGoodCount() + "/" + l.items.size() + "\t" +
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
 					l.target.imageFileStamp.getFile().getName() + "\t");
+
 		}
 		
 /*		if (true) 
@@ -112,7 +112,7 @@ public class Improc {
 		ArrayList<KeyPointList> imagesKPL = new ArrayList<KeyPointList>();
 		imagesKPL.add(tr.origin);
 		imagesKPL.addAll(tr.images);
-		
+/*		
 		for (KeyPointPairList l : kppl) {
 			for (KeyPointPair p : l.items.values()) {
 				System.out.println(
@@ -127,7 +127,7 @@ public class Improc {
 						);
 			}
 		}
-		
+*/		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new MyGeneratePanoramas(imagesKPL, kppl, keyPointFileRoot), -1);

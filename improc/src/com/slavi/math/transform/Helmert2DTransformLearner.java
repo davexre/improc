@@ -30,7 +30,7 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 		int goodCount = computeWeights();
 
 		if (goodCount < lsa.getRequiredPoints())
-			throw new ArithmeticException("Not enough good points");
+			return false;
 
 		computeScaleAndOrigin();
 		double aSourceScale = Math.max(sourceScale.getItem(0, 0), sourceScale.getItem(1, 0));
