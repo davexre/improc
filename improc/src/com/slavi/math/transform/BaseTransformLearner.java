@@ -239,20 +239,4 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		}
 		return adjusted;
 	}
-
-//	private static final double MAX_WEIGHT = 100.0;
-//	private static final double MAX_WEIGHT_INVERTED = 1.0 / MAX_WEIGHT;
-//	/**
-//	 * Re-computes the weight of <b>all</b> points using the inverted distance
-//	 * (discrepancy) between transformed source and target points. 
-//	 * The formula is:
-//	 * MAX_WEIGHT = 100
-//	 * discrepancy = Sqrt(Sum(Pow(target[i] - tramsformer.transform(source[i]))))
-//	 * weight = discrepancy >= (1/MAX_WEIGHT) ? MAX_WEIGHT : 1/discrepancy 
-//	 */
-//	public void recomputeWeights() {
-//		for (PointsPair item : items) {
-//			item.setWeight(item.getDiscrepancy() >= MAX_WEIGHT_INVERTED ? MAX_WEIGHT : 1.0 / item.getDiscrepancy());
-//		}
-//	}
 }
