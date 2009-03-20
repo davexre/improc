@@ -19,6 +19,43 @@ import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
 
 public class Improc {
+	
+	public void calcRotationsUsingHelmert(
+			KeyPointHelmertTransformer tr,
+			KeyPointPairList kppl) {
+		double scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
+		double angle = Math.acos(tr.a / scale);
+
+		double f = kppl.source.scaleZ * scale;
+		double f1f1 = f * f + tr.c * tr.c;
+		double f1 = Math.sqrt(f1f1);
+		double f2 = Math.sqrt(f1f1 + tr.d * tr.d);
+		/////????????????????????
+		kppl.source.rx = Math.atan2(tr.c, f);
+		kppl.source.ry = Math.atan2(tr.d, f1);
+		kppl.source.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+	}
+
+	public void calcRotationsUsingHelmertParams(
+			double a, double b, double c, double d,
+			double sourceCameraFocalDistance) {
+		double scale = Math.sqrt(a * a + b * b);
+		double angle = Math.acos(a / scale);
+		double f = sourceCameraFocalDistance;
+		
+		double f1f1 = f * f + c * c;
+		double f1 = Math.sqrt(f1f1);
+		double f2 = Math.sqrt(f1f1 + d * d);
+		
+		double rx = Math.atan2(c, f);
+		double ry = Math.atan2(d, f1);
+		double rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+	}
+	
+	
+	
+	
+	
 	public void doTheJob() throws Exception {
 		Settings settings = Settings.getSettings();
 		if (settings == null)
