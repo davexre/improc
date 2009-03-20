@@ -1,5 +1,6 @@
 package com.slavi.improc.ui;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import com.slavi.improc.KeyPointList;
@@ -7,9 +8,12 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.KeyPointHelmertTransformLearner;
+import com.slavi.improc.myadjust.KeyPointHelmertTransformer;
 import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
+import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.MyPanoPairTransformer3;
+import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -36,6 +40,16 @@ public class Improc {
 		System.out.println("Tree size          : " + bigTree.getSize());
 		System.out.println("Tree depth         : " + bigTree.getTreeDepth());
 		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());
+		
+		for (KeyPointList image : bigTree.keyPointLists) {
+			image.rx = 0.0;
+			image.ry = 0.0;
+			image.rz = 0.0;
+			image.cameraOriginX = image.imageSizeX / 2.0;
+			image.cameraOriginY = image.imageSizeY / 2.0;
+			image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
+			image.scaleZ = MyPanoPairTransformLearner3.defaultCameraFOV_to_ScaleZ;
+		}		
 		
 		System.out.println("---------- Generating key point pairs from BIG tree");
 		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
@@ -71,9 +85,21 @@ public class Improc {
 					break;
 				}
 			}
+			
+			KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
+			double scale = MathUtil.hypot(tr.a, tr.b);
+			double rz = scale == 0 ? Double.NaN : Math.acos(tr.a / scale);
+			double rx = Math.atan2(tr.d * l.source.cameraScale, l.source.scaleZ); 
+			double ry = Math.atan2(tr.c * l.source.cameraScale, l.source.scaleZ); 
+			
 			System.out.println(l.getGoodCount() + "/" + l.items.size() + "\t" +
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
-					l.target.imageFileStamp.getFile().getName() + "\t");
+					l.target.imageFileStamp.getFile().getName() + "\t" +
+					MathUtil.d4(scale) + "\t" +
+					MathUtil.d4(rx * MathUtil.rad2deg) + "\t" +
+					MathUtil.d4(ry * MathUtil.rad2deg) + "\t" +
+					MathUtil.d4(rz * MathUtil.rad2deg) + "\t"
+					);
 
 		}
 		

@@ -125,7 +125,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 				}
 			}
 		}
-		
+
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
 			for (KeyPointPair pair : pairList.items.values()) {

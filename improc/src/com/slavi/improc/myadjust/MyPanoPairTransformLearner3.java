@@ -22,6 +22,10 @@ public class MyPanoPairTransformLearner3 {
 
 	ArrayList<KeyPointPairList> keyPointPairLists;
 	
+	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
+	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
+			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));
+	
 	public MyPanoPairTransformLearner3(ArrayList<KeyPointPairList> keyPointPairLists) {
 		this.keyPointPairLists = keyPointPairLists;
 		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
@@ -31,9 +35,6 @@ public class MyPanoPairTransformLearner3 {
 			if (!images.contains(i.target))
 				images.add(i.target);
 		}
-		final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
-		final double defaultCameraFOV_to_ScaleZ = 1.0 / 
-				(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));  
 		for (KeyPointList image : images) {
 			image.rx = 0.0;
 			image.ry = 0.0;
@@ -294,8 +295,8 @@ public class MyPanoPairTransformLearner3 {
 	}
 
 	public static void printCameraAngles(KeyPointList image) {
-		System.out.println( 
-				"scaleZ=" + (image.scaleZ) + 
+		System.out.println(image.imageFileStamp.getFile().getName() + 
+				"\tscaleZ=" + (image.scaleZ) + 
 				"\trx=" + (image.rx * MathUtil.rad2deg) + 
 				"\try=" + (image.ry * MathUtil.rad2deg) + 
 				"\trz=" + (image.rz * MathUtil.rad2deg) 
