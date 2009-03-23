@@ -1,11 +1,10 @@
 package com.slavi.improc.ui;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
-import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.KeyPointHelmertTransformLearner;
 import com.slavi.improc.myadjust.KeyPointHelmertTransformer;
@@ -27,12 +26,12 @@ public class Improc {
 		double angle = Math.acos(tr.a / scale);
 
 		double f = kppl.source.scaleZ * scale;
-		double f1f1 = f * f + tr.c * tr.c;
+		double f1f1 = f * f + (tr.c * kppl.source.cameraScale) * (tr.c * kppl.source.cameraScale);
 		double f1 = Math.sqrt(f1f1);
-		double f2 = Math.sqrt(f1f1 + tr.d * tr.d);
+		double f2 = Math.sqrt(f1f1 + (tr.d * kppl.source.cameraScale) * (tr.d * kppl.source.cameraScale));
 		/////????????????????????
-		kppl.source.rx = Math.atan2(tr.c, f);
-		kppl.source.ry = Math.atan2(tr.d, f1);
+		kppl.source.rx = Math.atan2(tr.c * kppl.source.cameraScale, f);
+		kppl.source.ry = Math.atan2(tr.d * kppl.source.cameraScale, f1);
 		kppl.source.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 
@@ -129,6 +128,7 @@ public class Improc {
 			double rx = Math.atan2(tr.d * l.source.cameraScale, l.source.scaleZ); 
 			double ry = Math.atan2(tr.c * l.source.cameraScale, l.source.scaleZ); 
 			
+			calcRotationsUsingHelmert(tr, l);
 			System.out.println(l.getGoodCount() + "/" + l.items.size() + "\t" +
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
 					l.target.imageFileStamp.getFile().getName() + "\t" +
@@ -137,7 +137,6 @@ public class Improc {
 					MathUtil.d4(ry * MathUtil.rad2deg) + "\t" +
 					MathUtil.d4(rz * MathUtil.rad2deg) + "\t"
 					);
-
 		}
 		
 /*		if (true) 
