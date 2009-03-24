@@ -13,6 +13,11 @@ public class KeyPointPairList {
 
 	public KeyPointList target = null;
 
+	//////////////////////////// myAdjust
+	public double rx, ry, rz; // source->target angles of rotation
+	public double scale;	
+	//////////////////////////// myAdjust
+	
 	public KeyPointPairList() {
 	}
 

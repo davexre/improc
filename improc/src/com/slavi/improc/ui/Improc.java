@@ -19,20 +19,20 @@ import com.slavi.util.ui.SwtUtil;
 
 public class Improc {
 	
-	public void calcRotationsUsingHelmert(
+	public static void calcRotationsUsingHelmert(
 			KeyPointHelmertTransformer tr,
 			KeyPointPairList kppl) {
-		double scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
-		double angle = Math.acos(tr.a / scale);
+		kppl.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
+		double angle = Math.acos(tr.a / kppl.scale);
 
-		double f = kppl.source.scaleZ * scale;
+		double f = kppl.source.scaleZ * kppl.scale;
 		double f1f1 = f * f + (tr.c * kppl.source.cameraScale) * (tr.c * kppl.source.cameraScale);
 		double f1 = Math.sqrt(f1f1);
 		double f2 = Math.sqrt(f1f1 + (tr.d * kppl.source.cameraScale) * (tr.d * kppl.source.cameraScale));
-		/////????????????????????
-		kppl.source.rx = Math.atan2(tr.c * kppl.source.cameraScale, f);
-		kppl.source.ry = Math.atan2(tr.d * kppl.source.cameraScale, f1);
-		kppl.source.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+
+		kppl.rx = Math.atan2(tr.c * kppl.source.cameraScale, f);
+		kppl.ry = Math.atan2(tr.d * kppl.source.cameraScale, f1);
+		kppl.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 
 	public void calcRotationsUsingHelmertParams(
@@ -127,16 +127,21 @@ public class Improc {
 			double rz = scale == 0 ? Double.NaN : Math.acos(tr.a / scale);
 			double rx = Math.atan2(tr.d * l.source.cameraScale, l.source.scaleZ); 
 			double ry = Math.atan2(tr.c * l.source.cameraScale, l.source.scaleZ); 
-			
+
 			calcRotationsUsingHelmert(tr, l);
 			System.out.println(l.getGoodCount() + "/" + l.items.size() + "\t" +
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
-					l.target.imageFileStamp.getFile().getName() + "\t" +
-					MathUtil.d4(scale) + "\t" +
-					MathUtil.d4(rx * MathUtil.rad2deg) + "\t" +
+					l.target.imageFileStamp.getFile().getName() + "\tScale=" +
+					MathUtil.d4(l.scale) + "\t" +
+					MathUtil.d4(scale) + "\tRX=" +
+					MathUtil.d4(l.rx * MathUtil.rad2deg) + "\t" +
+					MathUtil.d4(rx * MathUtil.rad2deg) + "\tRY=" +
+					MathUtil.d4(l.ry * MathUtil.rad2deg) + "\t" +
 					MathUtil.d4(ry * MathUtil.rad2deg) + "\t" +
+					MathUtil.d4(l.rz * MathUtil.rad2deg) + "\tRZ=" +
 					MathUtil.d4(rz * MathUtil.rad2deg) + "\t"
 					);
+
 		}
 		
 /*		if (true) 
