@@ -75,7 +75,7 @@ public class MyPanoPairTransformLearner3 {
 		int goodCount = 0;
 		double sumWeight = 0;
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair item : pairList.items.values()) {
+			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
 				double weight = getWeight(item); 
@@ -139,7 +139,7 @@ public class MyPanoPairTransformLearner3 {
 		lsa.clear();
 		int pointCounter = 0;
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair item : pairList.items.values()) {
+			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
 				pointCounter++;
@@ -316,7 +316,7 @@ public class MyPanoPairTransformLearner3 {
 		int pointCount = 0;
 		int goodPointCount = 0;
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair pair : pairList.items.values()) {
+			for (KeyPointPair pair : pairList.items) {
 				pointCount++;
 				// Compute for all points, so no item.isBad check
 				MyPanoPairTransformer3.transform(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, PW1);
@@ -345,7 +345,7 @@ public class MyPanoPairTransformLearner3 {
 		Statistics stat = new Statistics();
 		stat.start();
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair item : pairList.items.values()) {
+			for (KeyPointPair item : pairList.items) {
 				if (!isBad(item)) {
 					stat.addValue(getDiscrepancy(item), getWeight(item));
 				}
@@ -360,7 +360,7 @@ public class MyPanoPairTransformLearner3 {
 		if (maxDiscrepancy < 5)
 			maxDiscrepancy = 5; //stat.getJ_End();
 		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair item : pairList.items.values()) {
+			for (KeyPointPair item : pairList.items) {
 				boolean oldIsBad = isBad(item);
 				double discrepancy = getDiscrepancy(item);
 				boolean curIsBad = discrepancy > maxDiscrepancy; //stat.isBad(discrepancy);

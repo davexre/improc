@@ -24,6 +24,7 @@ public class KeyPointList {
 	public int imageSizeY;
 	
 	// My adjust
+	public int imageId = -1;
 	public Matrix camera2real;
 	public double rx, ry, rz;
 	public double cameraOriginX, cameraOriginY, cameraScale; 

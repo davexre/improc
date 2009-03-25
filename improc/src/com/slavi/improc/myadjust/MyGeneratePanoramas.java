@@ -128,7 +128,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
-			for (KeyPointPair pair : pairList.items.values()) {
+			for (KeyPointPair pair : pairList.items) {
 				if (!pair.bad) {
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
 					int x1 = (int)d.x;

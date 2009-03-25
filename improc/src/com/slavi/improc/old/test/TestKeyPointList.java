@@ -1,6 +1,8 @@
 package com.slavi.improc.old.test;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
@@ -32,11 +34,18 @@ public class TestKeyPointList {
 		KeyPointList l1 = buildKeyPointFileSingleThreaded(image);
 		Marker.release();
 		Marker.mark("Multithreaded");
-		KeyPointList l2 = KeyPointListSaver.buildKeyPointFileMultiThreaded(image);
-		Marker.release();
-		
-		System.out.println("----------------------- Comparing -----------------");
-		l1.compareToList(l2);
+		Runtime runtime = Runtime.getRuntime();
+		int numberOfProcessors = runtime.availableProcessors();
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
+		try {
+			KeyPointList l2 = KeyPointListSaver.buildKeyPointFileMultiThreaded(exec, image);
+			Marker.release();
+			
+			System.out.println("----------------------- Comparing -----------------");
+			l1.compareToList(l2);
+		} finally {
+			exec.shutdown();
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -44,21 +53,28 @@ public class TestKeyPointList {
 		String kpRoot = "C:/Users/S/ImageProcess/work/";
 		String images[] = {"HPIM0336.JPG", "HPIM0337.JPG"};
 		
-		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(imagesRootStr);
-		AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(kpRoot);
-		KeyPointList l1 = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(imagesRootStr + images[0]));
-		KeyPointList l2 = KeyPointListSaver.readKeyPointFile(imagesRoot, keyPointFileRoot, new File(imagesRootStr + images[1]));
-		
-		int equalsCount = 0;
-		for (KeyPoint p2 : l2.items) {
-			for (KeyPoint p1 : l1.items) {
-				if (p1 == p2)
-					continue;
-				if (p1.equalsFeatureVector(p2)) {
-					equalsCount++;
-				}
-			}			
+		Runtime runtime = Runtime.getRuntime();
+		int numberOfProcessors = runtime.availableProcessors();
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
+		try {
+			AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(imagesRootStr);
+			AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(kpRoot);
+			KeyPointList l1 = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(imagesRootStr + images[0]));
+			KeyPointList l2 = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(imagesRootStr + images[1]));
+			
+			int equalsCount = 0;
+			for (KeyPoint p2 : l2.items) {
+				for (KeyPoint p1 : l1.items) {
+					if (p1 == p2)
+						continue;
+					if (p1.equalsFeatureVector(p2)) {
+						equalsCount++;
+					}
+				}			
+			}
+			System.out.println(equalsCount);
+		} finally {
+			exec.shutdown();
 		}
-		System.out.println(equalsCount);
 	}
 }

@@ -1,35 +1,61 @@
 package com.slavi.improc.myadjust;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
 
-public class ValidateKeyPointPairList implements Callable<Void> {
+public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
 
-	KeyPointPairList kppl;
+	ExecutorService exec;
 	
-	public ValidateKeyPointPairList(KeyPointPairList kppl) {
+	ArrayList<KeyPointPairList> kppl;
+	
+	public ValidateKeyPointPairList(ExecutorService exec, ArrayList<KeyPointPairList> kppl) {
+		this.exec = exec;
 		this.kppl = kppl;
 	}
 	
 	public static void calcRotationsUsingHelmert(
 			KeyPointHelmertTransformer tr,
-			KeyPointPairList kppl) {
-		kppl.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
-		double angle = Math.acos(tr.a / kppl.scale);
+			KeyPointPairList pairList) {
+		pairList.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
+		double angle = Math.acos(tr.a / pairList.scale);
 
-		double f = kppl.scale * kppl.source.scaleZ;
-		double c = tr.c * kppl.source.cameraScale;
-		double d = tr.d * kppl.source.cameraScale;
+		double f = pairList.scale * pairList.source.scaleZ;
+		double c = tr.c * pairList.source.cameraScale;
+		double d = tr.d * pairList.source.cameraScale;
+		double f1f1 = f * f + d * d;
+		double f1 = Math.sqrt(f1f1);
+		double f2 = Math.sqrt(f1f1 + c * c);
+
+		pairList.rx = Math.atan2(d, f);
+		pairList.ry = Math.atan2(c, f1);
+		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+	}
+
+	public static void calcRotationsUsingHelmertWRONG(
+			KeyPointHelmertTransformer tr,
+			KeyPointPairList pairList) {
+		pairList.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
+		double angle = Math.acos(tr.a / pairList.scale);
+
+		double f = pairList.scale * pairList.source.scaleZ;
+		double c = tr.c * pairList.source.cameraScale;
+		double d = tr.d * pairList.source.cameraScale;
 		double f1f1 = f * f + c * c;
 		double f1 = Math.sqrt(f1f1);
 		double f2 = Math.sqrt(f1f1 + d * d);
 
-		kppl.rx = Math.atan2(c, f);
-		kppl.ry = Math.atan2(d, f1);
-		kppl.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+		pairList.rx = Math.atan2(c, f);
+		pairList.ry = Math.atan2(d, f1);
+		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 
 /*	public void calcRotationsUsingHelmertParams(
@@ -48,15 +74,17 @@ public class ValidateKeyPointPairList implements Callable<Void> {
 		double rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 */
-	public Void call() throws Exception {
-		for (KeyPointPair pair : kppl.items.values()) {
+
+	public static boolean validateKeyPointPairList(KeyPointPairList pairList) {
+		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 10 / pair.distanceToNearest;
 		}		
-		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(kppl.items.values());
+
+		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
 		boolean res = false;
 		learner.calculateOne();
 		learner.calculateOne();
-		kppl.leaveGoodElements(200);
+		pairList.leaveGoodElements(200);
 		for (int i = 0; i < 2; i++) {
 			res = learner.calculateOne();
 			if (res) {
@@ -65,17 +93,56 @@ public class ValidateKeyPointPairList implements Callable<Void> {
 		}
 		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
-		calcRotationsUsingHelmert(tr, kppl);
+		calcRotationsUsingHelmert(tr, pairList);
 		
-		System.out.println(kppl.getGoodCount() + "/" + kppl.items.size() + "\t" +
-				kppl.source.imageFileStamp.getFile().getName() + "\t" + 
-				kppl.target.imageFileStamp.getFile().getName() + "\t" +
-				MathUtil.d4(kppl.scale) + "\t" +
-				MathUtil.d4(kppl.rx * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(kppl.ry * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(kppl.rz * MathUtil.rad2deg) + "\t"
+		int goodCount = pairList.getGoodCount();
+		System.out.println(goodCount + "/" + pairList.items.size() + "\t" +
+				pairList.source.imageFileStamp.getFile().getName() + "\t" + 
+				pairList.target.imageFileStamp.getFile().getName() + "\t" +
+				MathUtil.d4(pairList.scale) + "\t" +
+				MathUtil.d4(pairList.rx * MathUtil.rad2deg) + "\t" +
+				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
+				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
 				);
-
-		return null;
+		if (goodCount < 10) {
+			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
+		}
+		return goodCount < 10;
+	}
+	
+	private class ProcessOne implements Callable<Boolean> {
+		KeyPointPairList pairList;
+		
+		public ProcessOne(KeyPointPairList pairList) {
+			this.pairList = pairList;
+		}
+		
+		public Boolean call() throws Exception {
+			return validateKeyPointPairList(pairList);
+		}
+	}
+	
+	public ArrayList<KeyPointPairList> call() throws Exception {
+		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
+		
+		HashMap<KeyPointPairList, Future<Boolean>> tasks = new HashMap<KeyPointPairList, Future<Boolean>>(kppl.size());
+		for (KeyPointPairList pairList : kppl) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			Future<Boolean> f = exec.submit(new ProcessOne(pairList));
+			tasks.put(pairList, f);
+		}
+	
+		for (Map.Entry<KeyPointPairList, Future<Boolean>> item : tasks.entrySet()) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			boolean res = item.getValue().get();
+			if (!res) {
+				result.add(item.getKey());
+			}
+		}
+		return result;
 	}
 }

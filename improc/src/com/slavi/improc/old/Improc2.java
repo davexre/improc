@@ -1,6 +1,8 @@
 package com.slavi.improc.old;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
@@ -21,7 +23,7 @@ import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
 
 public class Improc2 {
-	public void doTheJob() throws Exception {
+	public void doTheJob(ExecutorService exec) throws Exception {
 		Settings settings = Settings.getSettings();
 		if (settings == null)
 			return;
@@ -32,11 +34,11 @@ public class Improc2 {
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath("*.jpg"), true, true);
 		ArrayList<String> images = SwtUtil.openWaitDialog("Searching for images", new EnumerateImageFiles(imagesIterator), -1);
 		SwtUtil.openWaitDialog("Generating key point files", 
-				new GenerateKeyPointFiles(images, imagesRoot, keyPointFileRoot), images.size() - 1);
+				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 		
 		System.out.println("---------- Generating key point BIG tree");
 		KeyPointBigTree bigTree = SwtUtil.openWaitDialog("Generating key point BIG tree", 
-				new GenerateKeyPointPairBigTree(images, imagesRoot, keyPointFileRoot), 
+				new GenerateKeyPointPairBigTree(exec, images, imagesRoot, keyPointFileRoot), 
 				images.size() - 1);
 		System.out.println("Tree size  : " + bigTree.getSize());
 		System.out.println("Tree depth : " + bigTree.getTreeDepth());
@@ -46,14 +48,14 @@ public class Improc2 {
 		
 		System.out.println("---------- Generating key point pairs from BIG tree");
 		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
-				new GenerateKeyPointPairsFromBigTree(bigTree),
+				new GenerateKeyPointPairsFromBigTree(exec, bigTree),
 				images.size() - 1);
 		images = null;
 		bigTree = null;
 
 
 		for (KeyPointPairList l : kppl) {
-			for (KeyPointPair p : l.items.values()) {
+			for (KeyPointPair p : l.items) {
 //				System.out.println(
 //						MathUtil.d4(p.distanceToNearest) + "\t" + 
 //						MathUtil.d4(p.distanceToNearest2) + "\t" + 
@@ -81,7 +83,7 @@ public class Improc2 {
 		for (KeyPointPairList l : kppl) {
 			String sourceFile = l.source.imageFileStamp.getFile().getName();
 			String targetFile = l.target.imageFileStamp.getFile().getName();
-			for (KeyPointPair p : l.items.values()) {
+			for (KeyPointPair p : l.items) {
 				out.println(
 						Double.toString(p.distanceToNearest) + "\t" +
 						Double.toString(p.distanceToNearest2) + "\t" +
@@ -140,7 +142,7 @@ public class Improc2 {
 		
 		
 		for (KeyPointPairList l : kppl) {
-			for (KeyPointPair p : l.items.values()) {
+			for (KeyPointPair p : l.items) {
 				System.out.println(
 						p.bad + "\t" +
 						p.sourceSP.getNumberOfNonZero() + "\t" +
@@ -185,7 +187,15 @@ public class Improc2 {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		Improc2 application = new Improc2();
-		application.doTheJob();
+		Runtime runtime = Runtime.getRuntime();
+		int numberOfProcessors = runtime.availableProcessors();
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
+
+		try {
+			Improc2 application = new Improc2();
+			application.doTheJob(exec);
+		} finally {
+			exec.shutdown();
+		}
 	}
 }

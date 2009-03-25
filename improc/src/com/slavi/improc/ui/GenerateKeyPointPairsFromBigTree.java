@@ -5,14 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPoint;
+import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
-import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.tree.KDTree;
@@ -20,6 +19,8 @@ import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyPointPairList>> {
 
+	ExecutorService exec;
+	
 	KeyPointBigTree tree;
 	
 	AbsoluteToRelativePathMaker rootKeyPointFileDir;
@@ -52,11 +53,9 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 		public Void call() throws Exception {
 //			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
 			int searchSteps = tree.getTreeDepth() / 2;
-			int imageId = image.imageFileStamp.getFile().getAbsoluteFile().hashCode();
-			String strImageId = Integer.toString(imageId);
+			String strImageId = Integer.toString(image.imageId);
 			
 			int totalPairCount = 0;
-			int duplicatedCount = 0;
 			for (KeyPoint kp : image.items) {
 				if (Thread.interrupted())
 					throw new InterruptedException();
@@ -69,71 +68,55 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 //					continue;
 //				}
 				KeyPoint kp2 = nnlst.getItem(0);
-				int destImageId = kp2.keyPointList.hashCode();
 				String pairId;
 				KeyPoint kpS, kpT;
-				
-//				if (imageId > destImageId) {
-					pairId = strImageId + "-" + Integer.toString(destImageId);
+				if (image.imageId > kp2.keyPointList.imageId) {
+					pairId = strImageId + "-" + Integer.toString(kp2.keyPointList.imageId);
 					kpS = kp;
 					kpT = kp2;
-//				} else {
-//					pairId = Integer.toString(destImageId) + "-" + strImageId;
-//					kpS = kp2;
-//					kpT = kp;
-//				}
+				} else {
+					pairId = Integer.toString(kp2.keyPointList.imageId) + "-" + strImageId;
+					kpS = kp2;
+					kpT = kp;
+				}
 				
 				KeyPointPairList kppl = getKeyPointPairList(pairId, kpS.keyPointList, kpT.keyPointList);
+				KeyPointPair pair = new KeyPointPair(kpS, kpT, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));						
+				totalPairCount++;
 				synchronized (kppl) {
-					KeyPointPair pair = kppl.items.get(kpS);
-					if (pair == null) {
-						pair = new KeyPointPair(kpS, kpT, nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));						
-						totalPairCount++;
-						kppl.items.put(pair.sourceSP, pair);
-					} else if (pair.distanceToNearest > nnlst.getDistanceToTarget(0)) {
-						duplicatedCount++;
-						pair.targetSP = kpT;
-						pair.distanceToNearest = nnlst.getDistanceToTarget(0);
-						pair.distanceToNearest2 = nnlst.getDistanceToTarget(1);
-					}
+					kppl.items.add(pair);
 				}
 			}
 			int count = processed.incrementAndGet();
 			SwtUtil.activeWaitDialogSetStatus("Processing " + 
 					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
 			System.out.println(image.imageFileStamp.getFile().getAbsolutePath() + " (" + totalPairCount + ")");
-			System.out.println("DUPLICATED COUNT = " + duplicatedCount);
 			return null;
 		}
 	}
 	
-	public GenerateKeyPointPairsFromBigTree(KeyPointBigTree tree) {
+	public GenerateKeyPointPairsFromBigTree(
+			ExecutorService exec,
+			KeyPointBigTree tree) {
+		this.exec = exec;
 		this.tree = tree;
 	}
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
-		Runtime runtime = Runtime.getRuntime();
-		int numberOfProcessors = runtime.availableProcessors();
-
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
-		try {
-			ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
-			for (KeyPointList k : tree.keyPointLists) {
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-				Future<?> f = exec.submit(new ProcessOneImage(k));
-				tasks.add(f);
+		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
+		for (KeyPointList k : tree.keyPointLists) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
 			}
+			Future<?> f = exec.submit(new ProcessOneImage(k));
+			tasks.add(f);
+		}
 
-			for (Future<?> task : tasks) {
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-				task.get();
+		for (Future<?> task : tasks) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
 			}
-		} finally {
-			exec.shutdownNow();
+			task.get();
 		}
 
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();

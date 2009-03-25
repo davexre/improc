@@ -1,13 +1,12 @@
 package com.slavi.improc;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class KeyPointPairList {
 	/**
 	 * Mapping between source points and KeyPointPairs
 	 */
-	public final HashMap<KeyPoint, KeyPointPair> items = new HashMap<KeyPoint, KeyPointPair>();
+	public final ArrayList<KeyPointPair> items = new ArrayList<KeyPointPair>();
 	
 	public KeyPointList source = null;
 
@@ -24,14 +23,14 @@ public class KeyPointPairList {
 	// TODO: OK up to here
 
 	public void leaveGoodElements(double maxDiscrepancy) {
-		for (KeyPointPair sp : items.values()) {
+		for (KeyPointPair sp : items) {
 			sp.bad = sp.discrepancy > maxDiscrepancy;
 		}
 	}
 	
 	public int getGoodCount() {
 		int result = 0;
-		for (KeyPointPair i : items.values())
+		for (KeyPointPair i : items)
 			if (!i.bad)
 				result++;
 		return result;

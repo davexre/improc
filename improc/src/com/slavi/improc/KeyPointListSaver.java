@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.slavi.image.DWindowedImage;
@@ -50,10 +49,11 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 	
 	public static void updateKeyPointFileIfNecessary(
+			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws Exception {
-		doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
+		doUpdateKeyPointFileIfNecessary(exec, rootImagesDir, rootKeyPointFileDir, image);
 	}
 	
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
@@ -64,7 +64,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 				rootImagesDir.getRelativePath(image, false)), "spf"));
 	}
 	
-	public static KeyPointList buildKeyPointFileMultiThreaded(File image) throws Exception {
+	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
 		DWindowedImage img = new PDImageMapBuffer(image);
 		final KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.maxX() + 1;
@@ -81,7 +81,6 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
 		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
 
-		ExecutorService exec = Executors.newFixedThreadPool(profile.parallelTasks);
 		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, profile.parallelTasks, execPDLowe).start();
 		try {
 			ft.get();
@@ -92,6 +91,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 	
 	private static KeyPointList doUpdateKeyPointFileIfNecessary(
+			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws Exception {
@@ -114,7 +114,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		}
 		
 //		KeyPointList result = buildKeyPointFileSingleThreaded(image);
-		KeyPointList result = buildKeyPointFileMultiThreaded(image);
+		KeyPointList result = buildKeyPointFileMultiThreaded(exec, image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
@@ -131,10 +131,11 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 	
 	public static KeyPointList readKeyPointFile(
+			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws Exception {
-		KeyPointList result = doUpdateKeyPointFileIfNecessary(rootImagesDir, rootKeyPointFileDir, image);
+		KeyPointList result = doUpdateKeyPointFileIfNecessary(exec, rootImagesDir, rootKeyPointFileDir, image);
 		if (result != null)
 			return result;
 

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +17,8 @@ import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 
+	ExecutorService exec;
+	
 	ArrayList<KeyPointPairList> keyPointPairLists = new ArrayList<KeyPointPairList>();
 	
 	PanoList panoList = new PanoList();
@@ -94,7 +95,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 //			}
 //			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values());
 
-			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items.values()) {
+			PanoPairTransformLerner atl = new PanoPairTransformLerner(kppl.items) {
 				public double getWeight(Entry<KeyPoint, KeyPoint> item) {
 					KeyPointPair kp = (KeyPointPair) item;
 					int nonzero = Math.min(kp.sourceSP.getNumberOfNonZero(), kp.targetSP.getNumberOfNonZero());
@@ -124,7 +125,7 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 //			checkInterrupted(); atl.calculateOne();
 			checkInterrupted(); atl.calculateOne();
 
-			for (KeyPointPair pp : kppl.items.values()) {
+			for (KeyPointPair pp : kppl.items) {
 				if (pp.discrepancy <= maxDiscrepancy) {
 //				if (!pp.isBad()) {
 //					result.items.add(new PanoPair(pp));
@@ -150,34 +151,29 @@ public class GeneratePanoPairFromBigTree implements Callable<PanoList>{
 		}
 	}
 	
-	public GeneratePanoPairFromBigTree(ArrayList<KeyPointPairList> keyPointPairLists) {
+	public GeneratePanoPairFromBigTree(
+			ExecutorService exec,
+			ArrayList<KeyPointPairList> keyPointPairLists) {
+		this.exec = exec;
 		this.keyPointPairLists = keyPointPairLists;
 	}
 	
 	public PanoList call() throws Exception {
-		Runtime runtime = Runtime.getRuntime();
-		int numberOfProcessors = runtime.availableProcessors();
-
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors);
-		try {
-			ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(keyPointPairLists.size());
-			for (KeyPointPairList k : keyPointPairLists) {
-				if (k.items.size() < 5) // TODO: Move it somewhere else?!? 
-					continue;
-				Future<?> task = exec.submit(new ProcessOneKeyPointPairList(k));
-				tasks.add(task);
-			}
-			keyPointPairLists = null;
-			for (Future<?> task : tasks) {
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-				task.get();
-			}
-			tasks.clear();
-		} finally {
-			exec.shutdownNow();
+		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(keyPointPairLists.size());
+		for (KeyPointPairList k : keyPointPairLists) {
+			if (k.items.size() < 5) // TODO: Move it somewhere else?!? 
+				continue;
+			Future<?> task = exec.submit(new ProcessOneKeyPointPairList(k));
+			tasks.add(task);
 		}
+		keyPointPairLists = null;
+		for (Future<?> task : tasks) {
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			task.get();
+		}
+		tasks.clear();
 		panoList.items.addAll(panoPairLists.values());
 		return panoList;
 	}
