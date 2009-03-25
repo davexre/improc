@@ -20,13 +20,15 @@ public class ValidateKeyPointPairList implements Callable<Void> {
 		kppl.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
 		double angle = Math.acos(tr.a / kppl.scale);
 
-		double f = kppl.source.scaleZ * kppl.scale;
-		double f1f1 = f * f + tr.c * tr.c;
+		double f = kppl.scale * kppl.source.scaleZ;
+		double c = tr.c * kppl.source.cameraScale;
+		double d = tr.d * kppl.source.cameraScale;
+		double f1f1 = f * f + c * c;
 		double f1 = Math.sqrt(f1f1);
-		double f2 = Math.sqrt(f1f1 + tr.d * tr.d);
+		double f2 = Math.sqrt(f1f1 + d * d);
 
-		kppl.rx = Math.atan2(tr.c, f);
-		kppl.ry = Math.atan2(tr.d, f1);
+		kppl.rx = Math.atan2(c, f);
+		kppl.ry = Math.atan2(d, f1);
 		kppl.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 

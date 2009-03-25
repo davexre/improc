@@ -12,48 +12,13 @@ import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.MyPanoPairTransformer3;
+import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.math.MathUtil;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
 
 public class Improc {
-	
-	public static void calcRotationsUsingHelmert(
-			KeyPointHelmertTransformer tr,
-			KeyPointPairList kppl) {
-		kppl.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
-		double angle = Math.acos(tr.a / kppl.scale);
-
-		double f = kppl.source.scaleZ * kppl.scale;
-		double f1f1 = f * f + (tr.c * kppl.source.cameraScale) * (tr.c * kppl.source.cameraScale);
-		double f1 = Math.sqrt(f1f1);
-		double f2 = Math.sqrt(f1f1 + (tr.d * kppl.source.cameraScale) * (tr.d * kppl.source.cameraScale));
-
-		kppl.rx = Math.atan2(tr.c * kppl.source.cameraScale, f);
-		kppl.ry = Math.atan2(tr.d * kppl.source.cameraScale, f1);
-		kppl.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
-	}
-
-	public void calcRotationsUsingHelmertParams(
-			double a, double b, double c, double d,
-			double sourceCameraFocalDistance) {
-		double scale = Math.sqrt(a * a + b * b);
-		double angle = Math.acos(a / scale);
-		double f = sourceCameraFocalDistance;
-		
-		double f1f1 = f * f + c * c;
-		double f1 = Math.sqrt(f1f1);
-		double f2 = Math.sqrt(f1f1 + d * d);
-		
-		double rx = Math.atan2(c, f);
-		double ry = Math.atan2(d, f1);
-		double rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
-	}
-	
-	
-	
-	
 	
 	public void doTheJob() throws Exception {
 		Settings settings = Settings.getSettings();
@@ -128,7 +93,7 @@ public class Improc {
 			double rx = Math.atan2(tr.d * l.source.cameraScale, l.source.scaleZ); 
 			double ry = Math.atan2(tr.c * l.source.cameraScale, l.source.scaleZ); 
 
-			calcRotationsUsingHelmert(tr, l);
+			ValidateKeyPointPairList.calcRotationsUsingHelmert(tr, l);
 			System.out.println(l.getGoodCount() + "/" + l.items.size() + "\t" +
 					l.source.imageFileStamp.getFile().getName() + "\t" + 
 					l.target.imageFileStamp.getFile().getName() + "\tScale=" +

@@ -43,9 +43,9 @@ public class RotationXYZ {
 	public static Matrix makeAngles(double rx, double ry, double rz) {
 		/*
 		 *  mx            my            mz
-		 *  1   0   0     cb  0  sb     cc -sc  0
+		 *  1   0   0     cb  0 -sb     cc -sc  0
 		 *  0  ca -sa      0  1  0      sc  cc  0
-		 *  0  sa  ca    -sb  0  cb      0   0  1
+		 *  0  sa  ca     sb  0  cb      0   0  1
 		 */
 		double sa = Math.sin(rx);
 		double ca = Math.cos(rx);
@@ -79,6 +79,76 @@ public class RotationXYZ {
 		r.setItem(2, 2, ca*cb);
 		return r;
 	}
+
+	/**
+	 * Extracts the rotation angles that constructed the rotation matrix M.
+	 * The angles are returned in the angles array as 
+	 * angles[0] = rx,
+	 * angles[1] = ry,
+	 * angles[2] = rz
+	 */
+	public static void getRotationAngles(Matrix m, double[] angles) {
+		/*
+		 * (mx*my)*mz
+		 * cc*cb			-cb*sc			-sb
+		 * ca*sc-sa*sb*cc	ca*cc+sa*sb*sc	-sa*cb
+		 * sa*sc+ca*sb*cc	sa*cc-ca*sb*sc	ca*cb
+		 */
+		angles[0] = Math.atan2(-m.getItem(2, 1), m.getItem(2, 2));
+		angles[1] = Math.asin(-m.getItem(2, 0));
+		angles[2] = Math.atan2(-m.getItem(1, 0), m.getItem(0, 0));
+	}	
+
+	/**
+	 * Extracts the rotation angles that constructed the REVERSE rotation matrix M.
+	 * The angles are returned in the angles array as 
+	 * angles[0] = rx,
+	 * angles[1] = ry,
+	 * angles[2] = rz
+	 */
+	public static void getRotationAnglesBackword(Matrix m, double[] angles) {
+		/*
+		 * M_foreward = (mx*my)*mz
+		 * cc*cb			-cb*sc			-sb
+		 * ca*sc-sa*sb*cc	ca*cc+sa*sb*sc	-sa*cb
+		 * sa*sc+ca*sb*cc	sa*cc-ca*sb*sc	ca*cb
+		 * 
+		 * M_backword = Transpose(M_foreward)
+		 */
+		angles[0] = Math.atan2(-m.getItem(1, 2), m.getItem(2, 2));
+		angles[1] = Math.asin(-m.getItem(0, 2));
+		angles[2] = Math.atan2(-m.getItem(0, 1), m.getItem(0, 0));
+	}	
+	
+	/**
+	 * Computes the REVERSE rotation angles that constructed the REVERSE rotation matrix M.
+	 * The angles are returned in the angles array as 
+	 * angles[0] = rx,
+	 * angles[1] = ry,
+	 * angles[2] = rz
+	 */
+	public static void getRotationAnglesBackword(double rx, double ry, double rz, double[] angles) {
+		/*
+		 * M_foreward = (mx*my)*mz
+		 * cc*cb			-cb*sc			-sb
+		 * ca*sc-sa*sb*cc	ca*cc+sa*sb*sc	-sa*cb
+		 * sa*sc+ca*sb*cc	sa*cc-ca*sb*sc	ca*cb
+		 * 
+		 * M_backword = Transpose(M_foreward)
+		 */
+		double sa = Math.sin(rx);
+		double ca = Math.cos(rx);
+		
+		double sb = Math.sin(ry);
+		double cb = Math.cos(ry);
+
+		double sc = Math.sin(rz);
+		double cc = Math.cos(rz);
+
+		angles[0] = Math.atan2(ca*sb*sc-sa*cc, ca*cb);
+		angles[1] = Math.asin(-(sa*sc+ca*sb*cc));
+		angles[2] = Math.atan2(sa*sb*cc-ca*sc, cc*cb);
+	}	
 
 	/*
 	 * (sinX)' = cosX
@@ -226,12 +296,39 @@ public class RotationXYZ {
 	}
 	
 	public static void main(String[] args) {
-		Matrix m = makeAngles(10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad);
+		double angles[] = {10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad};
+		
+		Matrix m = makeAngles(angles[0], angles[1], angles[2]);
 		m.printM("M");
+		double a[] = new double[3];
+		getRotationAngles(m, a);
+		System.out.println(
+				MathUtil.d4(a[0]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[1]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[2]*MathUtil.rad2deg));
+		
 		Matrix mi = m.makeCopy();
 		mi.inverse();
 		Matrix mt = m.makeCopy();
 		m.transpose(mt);
+		getRotationAnglesBackword(mt, a);
+		System.out.println(
+				MathUtil.d4(a[0]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[1]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[2]*MathUtil.rad2deg));
+		
+		getRotationAngles(mt, a);
+		System.out.println(
+				MathUtil.d4(a[0]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[1]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[2]*MathUtil.rad2deg));
+
+		getRotationAnglesBackword(angles[0], angles[1], angles[2], a);
+		System.out.println(
+				MathUtil.d4(a[0]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[1]*MathUtil.rad2deg) + "\t" + 
+				MathUtil.d4(a[2]*MathUtil.rad2deg));
+
 		mt.mSub(mi, m);
 		mt.printM("MT");
 		m.printM("MT-MI");
