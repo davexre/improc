@@ -22,27 +22,16 @@ public class MyPanoPairTransformLearner3 {
 
 	ArrayList<KeyPointPairList> keyPointPairLists;
 	
-	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
-	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
-			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));
-	
 	public MyPanoPairTransformLearner3(ArrayList<KeyPointPairList> keyPointPairLists) {
 		this.keyPointPairLists = keyPointPairLists;
 		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
 		for (KeyPointPairList i : keyPointPairLists) {
-			if (!images.contains(i.source))
-				images.add(i.source);
 			if (!images.contains(i.target))
 				images.add(i.target);
+			if (!images.contains(i.source))
+				images.add(i.source);
 		}
 		for (KeyPointList image : images) {
-			image.rx = 0.0;
-			image.ry = 0.0;
-			image.rz = 0.0;
-			image.cameraOriginX = image.imageSizeX / 2.0;
-			image.cameraOriginY = image.imageSizeY / 2.0;
-			image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
-			image.scaleZ = defaultCameraFOV_to_ScaleZ;
 			buildCamera2RealMatrix(image);
 		}
 		KeyPointList origin = images.remove(0);
@@ -54,10 +43,6 @@ public class MyPanoPairTransformLearner3 {
 		tr.origin.rx = 0.0;
 		tr.origin.ry = 0.0;
 		tr.origin.rz = 0.0;
-		tr.origin.cameraOriginX = tr.origin.imageSizeX / 2.0;
-		tr.origin.cameraOriginY = tr.origin.imageSizeY / 2.0;
-		tr.origin.cameraScale = 1.0 / Math.max(tr.origin.imageSizeX, tr.origin.imageSizeY);
-		tr.origin.scaleZ = defaultCameraFOV_to_ScaleZ;
 		
 		ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(tr.images);
 		int curImageIndex = todo.size() - 1;
@@ -100,6 +85,7 @@ public class MyPanoPairTransformLearner3 {
 		
 		if (todo.size() > 0) 
 			throw new Exception("Failed calculating the prims");
+		System.out.println("The prims are:");
 		printCameraAngles(tr.origin);
 		for (KeyPointList i : tr.images)
 			printCameraAngles(i);

@@ -36,8 +36,6 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 		double aSourceScale = Math.max(sourceScale.getItem(0, 0), sourceScale.getItem(1, 0));
 		double aTargetScale = Math.max(targetScale.getItem(0, 0), targetScale.getItem(1, 0));
 				
-		aSourceScale = 1.0;
-		aTargetScale = 1.0;
 		sourceOrigin.make0();
 		targetOrigin.make0();
 		

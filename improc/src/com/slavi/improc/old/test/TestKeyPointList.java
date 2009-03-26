@@ -20,6 +20,10 @@ public class TestKeyPointList {
 		KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.getSizeX();
 		result.imageSizeY = img.getSizeY();
+		result.cameraOriginX = result.imageSizeX / 2.0;
+		result.cameraOriginY = result.imageSizeY / 2.0;
+		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);
+		result.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		DLoweDetector d = new DLoweDetector();
 		d.hook = new ListenerImpl(result);
 		d.DetectFeatures(img, 3, 32);

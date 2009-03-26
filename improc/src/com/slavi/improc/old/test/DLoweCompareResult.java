@@ -36,6 +36,10 @@ public class DLoweCompareResult {
 		final KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.getSizeX();
 		result.imageSizeY = img.getSizeY();
+		result.cameraOriginX = result.imageSizeX / 2.0;
+		result.cameraOriginY = result.imageSizeY / 2.0;
+		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);
+		result.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 
 		DLoweDetector d = new DLoweDetector();
 		Hook hook = new Hook() {
@@ -56,6 +60,10 @@ public class DLoweCompareResult {
 		final KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.maxX() + 1;
 		result.imageSizeY = img.maxY() + 1;
+		result.cameraOriginX = result.imageSizeX / 2.0;
+		result.cameraOriginY = result.imageSizeY / 2.0;
+		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);
+		result.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {

@@ -187,7 +187,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		return result;
 	}	
 
-	protected void computeDiscrepancies() {
+	public void computeDiscrepancies() {
 		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Determine correctness of source data (items array)
 		for (Map.Entry<InputType, OutputType> item : items) {
@@ -204,37 +204,30 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		}
 	}
 	
-	protected boolean isAdjusted() {
+	public double computeAllowedDiscrepancy() {
 		Statistics stat = new Statistics();
-
-		boolean iterationHasBad = false;
-		for (int k = 0; k < 3; k++) { // TODO: This loop seems to be obsolete
-			stat.start();
-			for (Map.Entry<InputType, OutputType> item : items) {
-				if (!isBad(item)) {
-					stat.addValue(getDiscrepancy(item), getWeight(item));
-				}
+		stat.start();
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (!isBad(item)) {
+				stat.addValue(getDiscrepancy(item), getWeight(item));
 			}
-			stat.stop();
-			iterationHasBad = false;
-			for (Map.Entry<InputType, OutputType> item : items) {
-				if ((!isBad(item)) && stat.isBad(getDiscrepancy(item))) {
-					iterationHasBad = true;
-					break;
-				}
-			}
-			if (!iterationHasBad)
-				break;
 		}
+		stat.stop();
+		System.out.println("Allowed discrepancy statistics:\n" + stat.toString(Statistics.CStatAll));
+		return stat.getAvgValue();
+	}
+	
+	protected boolean isAdjusted() {
+		double maxDiscripancy = computeAllowedDiscrepancy();
+
 		boolean adjusted = true;
-		if (iterationHasBad)
-			adjusted = false;
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
-			boolean curIsBad = stat.isBad(getDiscrepancy(item));
+			boolean curIsBad = getDiscrepancy(item) > maxDiscripancy;
 			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
-				adjusted = false;
+				if (curIsBad)
+					adjusted = false;
 			}
 		}
 		return adjusted;

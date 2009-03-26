@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
@@ -25,18 +26,25 @@ public class KeyPointList {
 	
 	// My adjust
 	public int imageId = -1;
+	public double rx = 0.0, ry = 0.0, rz = 0.0;
+
 	public Matrix camera2real;
-	public double rx, ry, rz;
+	public Matrix dMdX, dMdY, dMdZ;
+	public Point2D.Double min, max;
+	
 	public double cameraOriginX, cameraOriginY, cameraScale; 
 	public double scaleZ;
-	public Matrix dMdX, dMdY, dMdZ;
-	
-	public Point2D.Double min, max;
 	// My adjust
 
+	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
+	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
+			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));
 	
 	public int getFocalDistance() {
 		return Math.max(imageSizeX, imageSizeY);
+	}
+	
+	public KeyPointList() {
 	}
 
 	public static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
@@ -45,6 +53,10 @@ public class KeyPointList {
 		StringTokenizer st = new StringTokenizer(fin.readLine(), "\t");
 		r.imageSizeX = Integer.parseInt(st.nextToken());
 		r.imageSizeY = Integer.parseInt(st.nextToken());
+		r.cameraOriginX = r.imageSizeX / 2.0;
+		r.cameraOriginY = r.imageSizeY / 2.0;
+		r.cameraScale = 1.0 / Math.max(r.imageSizeX, r.imageSizeY);
+		r.scaleZ = defaultCameraFOV_to_ScaleZ;
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {

@@ -5,10 +5,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.slavi.improc.KeyPointBigTree;
-import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
-import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -37,16 +35,6 @@ public class Improc {
 		System.out.println("Tree size          : " + bigTree.getSize());
 		System.out.println("Tree depth         : " + bigTree.getTreeDepth());
 		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());
-		
-		for (KeyPointList image : bigTree.keyPointLists) {
-			image.rx = 0.0;
-			image.ry = 0.0;
-			image.rz = 0.0;
-			image.cameraOriginX = image.imageSizeX / 2.0;
-			image.cameraOriginY = image.imageSizeY / 2.0;
-			image.cameraScale = 1.0 / Math.max(image.imageSizeX, image.imageSizeY);
-			image.scaleZ = MyPanoPairTransformLearner3.defaultCameraFOV_to_ScaleZ;
-		}		
 		
 		System.out.println("---------- Generating key point pairs from BIG tree");
 		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 

@@ -41,7 +41,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		double f2 = Math.sqrt(f1f1 + c * c);
 
 		pairList.rx = Math.atan2(d, f);
-		pairList.ry = -Math.atan2(c, f1);
+		pairList.ry = Math.atan2(c, f1);
 		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 
@@ -99,15 +99,17 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
 		boolean res = false;
-		learner.calculateOne();
-		learner.calculateOne();
-		pairList.leaveGoodElements(200);
-		for (int i = 0; i < 2; i++) {
+//		pairList.leaveGoodElements(200);
+		for (int i = 0; i < 20; i++) {
+			System.out.println("*** ITERATION " + i);
 			res = learner.calculateOne();
+			System.out.println(res);
 			if (res) {
 				break;
 			}
 		}
+		double discrepancy = learner.computeAllowedDiscrepancy();
+		System.out.println("Max allowed discrepancy = " + discrepancy);
 		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		calcRotationsUsingHelmert(tr, pairList);
@@ -122,6 +124,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
 				);
 		System.out.println(tr.toString());
+		System.exit(0);
 		if (goodCount < 10) {
 			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
 		}
