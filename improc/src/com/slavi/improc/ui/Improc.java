@@ -7,10 +7,8 @@ import java.util.concurrent.Executors;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.MyAdjustTask;
-import com.slavi.improc.myadjust.MyGeneratePanoramas;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
-import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -57,54 +55,19 @@ public class Improc {
 		images = null;
 		bigTree = null;
 
-//		for (KeyPointPairList l : kppl) {
-//			for (KeyPointPair p : l.items.values()) {
-//				System.out.println(
-//						MathUtil.d4(p.distanceToNearest) + "\t" + 
-//						MathUtil.d4(p.distanceToNearest2) + "\t" + 
-//						MathUtil.d4(MyPanoPairTransformLearner3.getWeight(p)));
-//				int unmatching = p.getUnmatchingCount();
-//				p.weight = 1.0 / (unmatching + 1);
-//				p.bad = unmatching > 10;
-
-//				p.weight = p.distanceToNearest < 1 ? 1.0 : 10 / p.distanceToNearest;
-//				p.weight = p.weight < 1 ? 1 : 1/p.weight;
-//				p.bad = p.distanceToNearest > 1000;
-//				p.bad = p.distanceToNearest > maxDist;
-//			}
-//		}		
-
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog("Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
 				-1);
 		kppl = null;
+
 /*		if (true) 
 			return;
 */		
 		
-		System.out.println("---------- Executing MyAdjust");
-		MyPanoPairTransformer3 tr = SwtUtil.openWaitDialog("Executing MyAdjust", 
-				new MyAdjustTask(validkppl), 1);
-		
-		System.out.println("---------- Keypoint pairs results");
-		for (KeyPointPairList l : validkppl) {
-			int goodCount = l.getGoodCount();
-			System.out.println(Integer.toString(goodCount) + "/" + Integer.toString(l.items.size()) + "\t" + 
-					l.source.imageFileStamp.getFile().getName() + "\t" + 
-					l.target.imageFileStamp.getFile().getName());
-			if (goodCount < 10) {
-				System.out.println("NOT ENOUGH GOOD POINT PAIRS");
-			}				
-		}
-		
-		ArrayList<KeyPointList> imagesKPL = new ArrayList<KeyPointList>();
-		imagesKPL.add(tr.origin);
-		imagesKPL.addAll(tr.images);
-
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
-				new MyGeneratePanoramas(imagesKPL, validkppl, keyPointFileRoot), -1);
+				new CalculatePanoramaParams(validkppl, keyPointFileRoot), -1);
 		
 		System.out.println("Done.");
 	}

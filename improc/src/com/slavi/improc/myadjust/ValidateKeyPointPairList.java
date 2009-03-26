@@ -25,8 +25,13 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 	public static void calcRotationsUsingHelmert(
 			KeyPointHelmertTransformer tr,
 			KeyPointPairList pairList) {
-		pairList.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
-		double angle = Math.acos(tr.a / pairList.scale);
+		double params[] = new double[2];
+		tr.getParams(params);
+		pairList.scale = params[0];
+		double angle = params[1];
+
+//		pairList.scale = Math.sqrt(tr.a * tr.a + tr.b * tr.b);
+//		double angle = Math.acos(tr.a / pairList.scale);
 
 		double f = pairList.scale * pairList.source.scaleZ;
 		double c = tr.c * pairList.source.cameraScale;
@@ -36,7 +41,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		double f2 = Math.sqrt(f1f1 + c * c);
 
 		pairList.rx = Math.atan2(d, f);
-		pairList.ry = Math.atan2(c, f1);
+		pairList.ry = -Math.atan2(c, f1);
 		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
 	}
 
@@ -78,6 +83,18 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) {
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 10 / pair.distanceToNearest;
+//			System.out.println(
+//					MathUtil.d4(pair.distanceToNearest) + "\t" + 
+//					MathUtil.d4(pair.distanceToNearest2) + "\t" + 
+//					MathUtil.d4(MyPanoPairTransformLearner3.getWeight(pair)));
+//			int unmatching = pair.getUnmatchingCount();
+//			pair.weight = 1.0 / (unmatching + 1);
+//			pair.bad = unmatching > 10;
+//
+//			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 10 / pair.distanceToNearest;
+//			pair.weight = pair.weight < 1 ? 1 : 1/pair.weight;
+//			pair.bad = pair.distanceToNearest > 1000;
+//			pair.bad = pair.distanceToNearest > maxDist;
 		}		
 
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
@@ -104,6 +121,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
 				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
 				);
+		System.out.println(tr.toString());
 		if (goodCount < 10) {
 			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
 		}

@@ -50,6 +50,62 @@ public class MyPanoPairTransformLearner3 {
 		this.lsa = new LeastSquaresAdjust(tr.getNumberOfCoefsPerCoordinate(), 1);		
 	}
 
+	public void calculatePrims() throws Exception {
+		tr.origin.rx = 0.0;
+		tr.origin.ry = 0.0;
+		tr.origin.rz = 0.0;
+		tr.origin.cameraOriginX = tr.origin.imageSizeX / 2.0;
+		tr.origin.cameraOriginY = tr.origin.imageSizeY / 2.0;
+		tr.origin.cameraScale = 1.0 / Math.max(tr.origin.imageSizeX, tr.origin.imageSizeY);
+		tr.origin.scaleZ = defaultCameraFOV_to_ScaleZ;
+		
+		ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(tr.images);
+		int curImageIndex = todo.size() - 1;
+		while (curImageIndex >= 0) {
+			KeyPointList curImage = todo.get(curImageIndex);
+			for (KeyPointPairList pairList : keyPointPairLists) {
+				if (curImage == pairList.source) {
+					if (todo.contains(pairList.target)) 
+						continue;
+					double angles[] = new double[3];
+					Matrix sourceToTarget = RotationXYZ.makeAngles(pairList.rx, pairList.ry, pairList.rz);
+					Matrix targetToWorld = RotationXYZ.makeAngles(pairList.target.rx, pairList.target.ry, pairList.target.rz);
+					Matrix sourceToWorld = new Matrix(3, 3);
+					targetToWorld.mMul(sourceToTarget, sourceToWorld);
+					RotationXYZ.getRotationAngles(sourceToWorld, angles);
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
+					curImage.rz = angles[2];
+					todo.remove(curImageIndex);
+					curImageIndex = todo.size();
+				} else if (curImage == pairList.target) {
+					if (todo.contains(pairList.source)) 
+						continue;
+					double angles[] = new double[3];
+					RotationXYZ.getRotationAnglesBackword(pairList.rx, pairList.ry, pairList.rz, angles);
+					Matrix targetToSource = RotationXYZ.makeAngles(angles[0], angles[1], angles[2]);
+					Matrix sourceToWorld = RotationXYZ.makeAngles(pairList.source.rx, pairList.source.ry, pairList.source.rz);
+					Matrix targetToWorld = new Matrix(3, 3);
+					sourceToWorld.mMul(targetToSource, targetToWorld);
+					RotationXYZ.getRotationAngles(targetToWorld, angles);
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
+					curImage.rz = angles[2];
+					todo.remove(curImageIndex);
+					curImageIndex = todo.size();
+				}
+			}
+			curImageIndex--;
+		}
+		
+		if (todo.size() > 0) 
+			throw new Exception("Failed calculating the prims");
+		printCameraAngles(tr.origin);
+		for (KeyPointList i : tr.images)
+			printCameraAngles(i);
+	}
+	
+	
 	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
 			int atIndex, int c1, double transformedCoord) {
 		coef.setItem(atIndex + 0, 0, dPWdX.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 0, 0));
@@ -296,10 +352,10 @@ public class MyPanoPairTransformLearner3 {
 
 	public static void printCameraAngles(KeyPointList image) {
 		System.out.println(image.imageFileStamp.getFile().getName() + 
-				"\tscaleZ=" + (image.scaleZ) + 
-				"\trx=" + (image.rx * MathUtil.rad2deg) + 
-				"\try=" + (image.ry * MathUtil.rad2deg) + 
-				"\trz=" + (image.rz * MathUtil.rad2deg) 
+				"\tscaleZ=" + MathUtil.d4(image.scaleZ) + 
+				"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
+				"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
+				"\trz=" + MathUtil.d4(image.rz * MathUtil.rad2deg) 
 				);
 	}
 

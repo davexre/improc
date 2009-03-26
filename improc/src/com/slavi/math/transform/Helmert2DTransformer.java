@@ -1,7 +1,5 @@
 package com.slavi.math.transform;
 
-import java.awt.geom.Point2D;
-
 import com.slavi.math.MathUtil;
 
 /**
@@ -41,13 +39,22 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 
 	/**
 	 * Extraxts the scale and angle parameters of the current 
-	 * transformation coefficients. In the scale parameter is
-	 * returned in params.x and the angle (0..pi) is returned
-	 * in params.y.
+	 * transformation coefficients. The scale parameter is
+	 * returned in params[0] and the angle (0..pi) is returned
+	 * in params[1].
 	 */
-	public void getParams(Point2D.Double params) {
-		params.x = MathUtil.hypot(a, b);
-		params.y = params.x == 0 ? Double.NaN : Math.acos(a / params.x); 
+	public void getParams(double params[]) {
+		params[0] = MathUtil.hypot(a, b);
+		double ca = Math.acos(params[0] == 0 ? 1.0 : a / params[0]);
+		double sa = Math.asin(params[0] == 0 ? 0.0 : b / params[0]);
+		if (ca <= MathUtil.PIover2) {
+			params[1] = sa; 
+		} else {
+			if (sa >= 0)
+				params[1] = ca;
+			else
+				params[1] = -ca;
+		}
 	}
 	
 	/**

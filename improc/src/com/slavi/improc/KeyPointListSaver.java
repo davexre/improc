@@ -82,11 +82,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
 
 		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, profile.parallelTasks, execPDLowe).start();
-		try {
-			ft.get();
-		} finally {
-			exec.shutdown();
-		}		
+		ft.get();
 		return result;
 	}
 	

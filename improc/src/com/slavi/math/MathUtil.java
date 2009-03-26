@@ -6,6 +6,7 @@ import com.slavi.math.matrix.Matrix;
 
 public class MathUtil {
 	public static double C2PI = Math.PI * 2.0;
+	public static double PIover2 = Math.PI / 2.0;
 
 	public static final double deg2rad = Math.PI / 180;
 	
