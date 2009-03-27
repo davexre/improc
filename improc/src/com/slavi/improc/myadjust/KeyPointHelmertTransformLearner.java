@@ -8,6 +8,8 @@ import com.slavi.math.transform.Helmert2DTransformLearner;
 
 public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<KeyPoint, KeyPoint>{
 
+	public double discrepancyThreshold = 5; // value is in pixels
+	
 	public KeyPointHelmertTransformLearner(Iterable<KeyPointPair> pointsPairList) {
 		super(new KeyPointHelmertTransformer(), pointsPairList);
 	}
@@ -35,4 +37,15 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<K
 	public void setDiscrepancy(Entry<KeyPoint, KeyPoint> item, double discrepancy) {
 		((KeyPointPair)item).discrepancy = discrepancy;
 	}
+	
+	public double getMinAllowedDiscrepancy() {
+		return 0;
+	}
+	
+	public double getMaxAllowedDiscrepancy() {
+		double result = discrepancyStatistics.getAvgValue();
+		if (result < discrepancyThreshold)
+			result = discrepancyThreshold;
+		return result;
+	}	
 }

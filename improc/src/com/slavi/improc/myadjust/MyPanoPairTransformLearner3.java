@@ -16,7 +16,7 @@ import com.slavi.math.matrix.Matrix;
 
 public class MyPanoPairTransformLearner3 {
 
-	MyPanoPairTransformer3 tr;
+	public MyPanoPairTransformer3 tr;
 	
 	LeastSquaresAdjust lsa;
 
@@ -58,11 +58,12 @@ public class MyPanoPairTransformLearner3 {
 					Matrix sourceToWorld = new Matrix(3, 3);
 					targetToWorld.mMul(sourceToTarget, sourceToWorld);
 					RotationXYZ.getRotationAngles(sourceToWorld, angles);
-					curImage.rx = angles[0];
-					curImage.ry = angles[1];
+					curImage.rx = -angles[0];
+					curImage.ry = -angles[1];
 					curImage.rz = angles[2];
 					todo.remove(curImageIndex);
 					curImageIndex = todo.size();
+					break;
 				} else if (curImage == pairList.target) {
 					if (todo.contains(pairList.source)) 
 						continue;
@@ -73,11 +74,12 @@ public class MyPanoPairTransformLearner3 {
 					Matrix targetToWorld = new Matrix(3, 3);
 					sourceToWorld.mMul(targetToSource, targetToWorld);
 					RotationXYZ.getRotationAngles(targetToWorld, angles);
-					curImage.rx = angles[0];
-					curImage.ry = angles[1];
+					curImage.rx = -angles[0];
+					curImage.ry = -angles[1];
 					curImage.rz = angles[2];
 					todo.remove(curImageIndex);
 					curImageIndex = todo.size();
+					break;
 				}
 			}
 			curImageIndex--;
@@ -86,9 +88,7 @@ public class MyPanoPairTransformLearner3 {
 		if (todo.size() > 0) 
 			throw new Exception("Failed calculating the prims");
 		System.out.println("The prims are:");
-		printCameraAngles(tr.origin);
-		for (KeyPointList i : tr.images)
-			printCameraAngles(i);
+		dumpDebug();
 	}
 	
 	
@@ -148,7 +148,7 @@ public class MyPanoPairTransformLearner3 {
 		image.dMdZ = RotationXYZ.make_dF_dZ(image.rx, image.ry, image.rz);
 	}
 	
-	public boolean calculateDiscrepancy() {
+	public boolean calculateNormalEquations() {
 		int goodCount = computeWeights();
 		if (goodCount < lsa.getRequiredMeasurements())
 			return false;
@@ -254,14 +254,14 @@ public class MyPanoPairTransformLearner3 {
 		return true;
 	}
 
-	public boolean calculateParameters() {
+	public boolean calculateUnknowns() {
 		if (!lsa.calculate()) 
 			return false;
 
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-		System.out.println("U=");
-		System.out.println(u.toString());
+//		System.out.println("U=");
+//		System.out.println(u.toString());
 		u.rMul(-1.0);
 
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
@@ -292,7 +292,7 @@ public class MyPanoPairTransformLearner3 {
 			camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2));
 */
 			buildCamera2RealMatrix(image);
-			printCameraAngles(image);
+//			printCameraAngles(image);
 		}
 		
 		return true;
@@ -347,99 +347,108 @@ public class MyPanoPairTransformLearner3 {
 
 	public static final int maxIterations = 10;
 	
-	private double computeDiscrepancies() {
-		double result = 0.0;
+	Statistics discrepancyStatistics = new Statistics();
+	private void computeDiscrepancies() {
 		Point2D.Double PW1 = new Point2D.Double();
 		Point2D.Double PW2 = new Point2D.Double();
 
-		Statistics stat = new Statistics();
-		stat.start();
-
-		int pointCount = 0;
-		int goodPointCount = 0;
-		for (KeyPointPairList pairList : keyPointPairLists) {
-			for (KeyPointPair pair : pairList.items) {
-				pointCount++;
-				// Compute for all points, so no item.isBad check
-				MyPanoPairTransformer3.transform(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, PW1);
-				MyPanoPairTransformer3.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
-
-				double dx = pair.targetSP.doubleX - PW2.x;
-				double dy = pair.targetSP.doubleY - PW2.y;
-				pair.discrepancy = Math.sqrt(dx*dx + dy*dy);
-				pair.weight = pair.discrepancy < 1 ? 1.0 : 1.0 / pair.discrepancy;
-//				if (pointCount < 10)
-//					System.out.println(pointCount + "\t" + MathUtil.d4(dx) + "\t" + MathUtil.d4(dy) + "\t" + MathUtil.d4(item.discrepancy));
-				if (!isBad(pair)) {
-					goodPointCount++;
-					result += pair.discrepancy;
-					stat.addValue(pair.discrepancy);
-				}
-			}
-		}
-		stat.stop();
-		System.out.println("MyDiscrepancy statistics:");
-		System.out.println(stat.toString(Statistics.CStatMinMax));
-		return goodPointCount == 0 ? Double.POSITIVE_INFINITY : result / goodPointCount;
-	}
-	
-	protected boolean isAdjusted() {
-		Statistics stat = new Statistics();
-		stat.start();
+		discrepancyStatistics.start();
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items) {
+				// Compute for all points, so no item.isBad check
+				MyPanoPairTransformer3.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				MyPanoPairTransformer3.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
+
+				double dx = item.targetSP.doubleX - PW2.x;
+				double dy = item.targetSP.doubleY - PW2.y;
+				setDiscrepancy(item, Math.sqrt(dx*dx + dy*dy));
 				if (!isBad(item)) {
-					stat.addValue(getDiscrepancy(item), getWeight(item));
+					discrepancyStatistics.addValue(item.discrepancy, getWeight(item));
 				}
+				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
 			}
 		}
-		stat.stop();
+		discrepancyStatistics.stop();
+	}
+	
+	public double getMinAllowedDiscrepancy() {
+		return 0;
+	}
+	
+	public double discrepancyThreshold = 5;
+	
+	public double getMaxAllowedDiscrepancy() {
+		double result = discrepancyStatistics.getAvgValue();
+		if (result < discrepancyThreshold)
+			result = discrepancyThreshold;
+		return result;
+	}
 
-//		System.out.println("ADJUSTED statistics is: ");
-//		System.out.println(stat.toString(Statistics.CStatAll));
+	protected boolean isAdjusted() {
+		double minDiscripancy = getMinAllowedDiscrepancy();
+		double maxDiscripancy = getMaxAllowedDiscrepancy();
+
 		boolean adjusted = true;
-		double maxDiscrepancy = stat.getAvgValue();
-		if (maxDiscrepancy < 5)
-			maxDiscrepancy = 5; //stat.getJ_End();
 		for (KeyPointPairList pairList : keyPointPairLists) {
 			for (KeyPointPair item : pairList.items) {
 				boolean oldIsBad = isBad(item);
 				double discrepancy = getDiscrepancy(item);
-				boolean curIsBad = discrepancy > maxDiscrepancy; //stat.isBad(discrepancy);
+				boolean curIsBad = (discrepancy < minDiscripancy) || (discrepancy > maxDiscripancy);
 				if (oldIsBad != curIsBad) {
 					setBad(item, curIsBad);
-					adjusted = false;
+					if (curIsBad)
+						adjusted = false;
 				}
 			}
 		}
 		return adjusted;
 	}
+
+	private void dumpDebug() {
+		printCameraAngles(tr.origin);
+		for (KeyPointList image : tr.images)
+			printCameraAngles(image);
+		
+		for (KeyPointPairList pairList : keyPointPairLists) {
+			int goodCount = pairList.getGoodCount();
+			System.out.println(goodCount + "/" + pairList.items.size() + "\t" +
+				pairList.source.imageFileStamp.getFile().getName() + "\t" + 
+				pairList.target.imageFileStamp.getFile().getName() + "\t" +
+				MathUtil.d4(pairList.scale) + "\t" +
+				MathUtil.d4(pairList.rx * MathUtil.rad2deg) + "\t" +
+				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
+				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
+				);
+		}
+	}
+	
 	
 	public boolean calculate() {
-		boolean failed = true;
 		boolean adjusted = false;
 		for (int iter = 0; iter < maxIterations; iter++) {
-			adjusted = false;
-			if (!calculateDiscrepancy())
+			if (!calculateNormalEquations())
 				break;
-			if (!calculateParameters())
+			if (!calculateUnknowns())
 				break;
 			double mse1 = getMedianSquareError();
-			double mse2 = computeDiscrepancies(); 
-			System.out.println("Iter=" + iter + " MSE1=" + mse1 + " MSE2=" + mse2);
+			computeDiscrepancies();
 			adjusted = isAdjusted();
-			if (adjusted && mse2 < 2) {
-				failed = false;
+			System.out.println();
+			System.out.println("Iter=" + iter + " MSE1=" + mse1);
+			System.out.println("MyDiscrepancy statistics:");
+			System.out.println(discrepancyStatistics.toString(Statistics.CStatMinMax));
+			dumpDebug();
+			if (adjusted) {
 				break;
 			}
 		}
-		System.out.println(failed ? "\n\n*** FAILED\n\n" : "\n\n*** SUCESS\n\n"); 
+		System.out.println(adjusted ? "\n\n*** SUCESS\n\n" : "\n\n*** FAILED\n\n"); 
 
 		printCameraAngles(tr.origin);
 		for (KeyPointList image : tr.images) {
 			printCameraAngles(image);
 		}
 		
-		return !failed;
+		return true;
 	}
 }

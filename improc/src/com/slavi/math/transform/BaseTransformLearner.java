@@ -45,6 +45,8 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	protected Matrix targetMin;	
 	protected Matrix targetMax;	
 	
+	public final Statistics discrepancyStatistics;
+	
 	protected BaseTransformLearner(BaseTransformer<InputType, OutputType> transformer, 
 			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		this.transformer = transformer;
@@ -61,6 +63,8 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		this.targetScale = new Matrix(outputSize, 1);
 		this.targetMin = new Matrix(outputSize, 1);
 		this.targetMax = new Matrix(outputSize, 1);
+		
+		this.discrepancyStatistics = new Statistics();
 	}
 	
 	public abstract boolean calculateOne();
@@ -189,6 +193,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 
 	public void computeDiscrepancies() {
 		OutputType sourceTransformed = createTemporaryTargetObject();
+		discrepancyStatistics.start();
 		// Determine correctness of source data (items array)
 		for (Map.Entry<InputType, OutputType> item : items) {
 			// Compute for all points, so no item.isBad check
@@ -201,29 +206,30 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 				sum2 += d * d;
 			}
 			setDiscrepancy(item, Math.sqrt(sum2));
-		}
-	}
-	
-	public double computeAllowedDiscrepancy() {
-		Statistics stat = new Statistics();
-		stat.start();
-		for (Map.Entry<InputType, OutputType> item : items) {
 			if (!isBad(item)) {
-				stat.addValue(getDiscrepancy(item), getWeight(item));
+				discrepancyStatistics.addValue(getDiscrepancy(item), getWeight(item));
 			}
 		}
-		stat.stop();
-		System.out.println("Allowed discrepancy statistics:\n" + stat.toString(Statistics.CStatAll));
-		return stat.getAvgValue();
+		discrepancyStatistics.stop();
+	}
+	
+	public double getMinAllowedDiscrepancy() {
+		return discrepancyStatistics.getJ_Start();
+	}
+	
+	public double getMaxAllowedDiscrepancy() {
+		return discrepancyStatistics.getJ_End();
 	}
 	
 	protected boolean isAdjusted() {
-		double maxDiscripancy = computeAllowedDiscrepancy();
+		double minDiscripancy = getMinAllowedDiscrepancy();
+		double maxDiscripancy = getMaxAllowedDiscrepancy();
 
 		boolean adjusted = true;
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
-			boolean curIsBad = getDiscrepancy(item) > maxDiscripancy;
+			double discrepancy = getDiscrepancy(item);
+			boolean curIsBad = (discrepancy < minDiscripancy) || (discrepancy > maxDiscripancy);
 			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
 				if (curIsBad)

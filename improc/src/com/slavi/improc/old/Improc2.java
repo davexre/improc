@@ -8,7 +8,6 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.MyAdjustTask;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
 import com.slavi.improc.myadjust.MyPanoPairTransformer3;

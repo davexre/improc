@@ -1,9 +1,11 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.old;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.myadjust.MyPanoPairTransformLearner3;
+import com.slavi.improc.myadjust.MyPanoPairTransformer3;
 
 public class MyAdjustTask implements Callable<MyPanoPairTransformer3> {
 

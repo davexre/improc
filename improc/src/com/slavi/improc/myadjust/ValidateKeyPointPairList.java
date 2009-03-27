@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
 
@@ -82,7 +83,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) {
 		for (KeyPointPair pair : pairList.items) {
-			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 10 / pair.distanceToNearest;
+			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 1 / pair.distanceToNearest;
 //			System.out.println(
 //					MathUtil.d4(pair.distanceToNearest) + "\t" + 
 //					MathUtil.d4(pair.distanceToNearest2) + "\t" + 
@@ -99,17 +100,19 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
 		boolean res = false;
-//		pairList.leaveGoodElements(200);
 		for (int i = 0; i < 20; i++) {
-			System.out.println("*** ITERATION " + i);
 			res = learner.calculateOne();
-			System.out.println(res);
+//			System.out.println("*** ITERATION " + i + " " + pairList.getGoodCount() + "/" + pairList.items.size() + " discr=" + learner.getMaxAllowedDiscrepancy());
+//			System.out.println(learner.discrepancyStatistics.toString(Statistics.CStatMinMax));
+//			System.out.println(res);
 			if (res) {
 				break;
 			}
 		}
-		double discrepancy = learner.computeAllowedDiscrepancy();
-		System.out.println("Max allowed discrepancy = " + discrepancy);
+		if (!res)
+			return false;
+//		double discrepancy = learner.getMaxAllowedDiscrepancy();
+//		System.out.println("Max allowed discrepancy = " + discrepancy);
 		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		calcRotationsUsingHelmert(tr, pairList);
@@ -123,8 +126,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
 				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
 				);
-		System.out.println(tr.toString());
-		System.exit(0);
 		if (goodCount < 10) {
 			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
 		}
