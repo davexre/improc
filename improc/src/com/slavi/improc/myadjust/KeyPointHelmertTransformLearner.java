@@ -47,5 +47,5 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<K
 		if (result < discrepancyThreshold)
 			result = discrepancyThreshold;
 		return result;
-	}	
+	}
 }

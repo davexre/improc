@@ -26,10 +26,10 @@ public class MyPanoPairTransformLearner3 {
 		this.keyPointPairLists = keyPointPairLists;
 		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
 		for (KeyPointPairList i : keyPointPairLists) {
-			if (!images.contains(i.target))
-				images.add(i.target);
 			if (!images.contains(i.source))
 				images.add(i.source);
+			if (!images.contains(i.target))
+				images.add(i.target);
 		}
 		for (KeyPointList image : images) {
 			buildCamera2RealMatrix(image);
@@ -54,9 +54,10 @@ public class MyPanoPairTransformLearner3 {
 						continue;
 					double angles[] = new double[3];
 					Matrix sourceToTarget = RotationXYZ.makeAngles(pairList.rx, pairList.ry, pairList.rz);
-					Matrix targetToWorld = RotationXYZ.makeAngles(pairList.target.rx, pairList.target.ry, pairList.target.rz);
+					Matrix targetToWorld = RotationXYZ.makeAngles(-pairList.target.rx, -pairList.target.ry, pairList.target.rz);
 					Matrix sourceToWorld = new Matrix(3, 3);
-					targetToWorld.mMul(sourceToTarget, sourceToWorld);
+//					targetToWorld.mMul(sourceToTarget, sourceToWorld);
+					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					RotationXYZ.getRotationAngles(sourceToWorld, angles);
 					curImage.rx = -angles[0];
 					curImage.ry = -angles[1];
@@ -69,10 +70,11 @@ public class MyPanoPairTransformLearner3 {
 						continue;
 					double angles[] = new double[3];
 					RotationXYZ.getRotationAnglesBackword(pairList.rx, pairList.ry, pairList.rz, angles);
-					Matrix targetToSource = RotationXYZ.makeAngles(angles[0], angles[1], angles[2]);
+					Matrix targetToSource = RotationXYZ.makeAngles(-angles[0], -angles[1], angles[2]);
 					Matrix sourceToWorld = RotationXYZ.makeAngles(pairList.source.rx, pairList.source.ry, pairList.source.rz);
 					Matrix targetToWorld = new Matrix(3, 3);
-					sourceToWorld.mMul(targetToSource, targetToWorld);
+//					sourceToWorld.mMul(targetToSource, targetToWorld);
+					targetToSource.mMul(sourceToWorld, targetToWorld);
 					RotationXYZ.getRotationAngles(targetToWorld, angles);
 					curImage.rx = -angles[0];
 					curImage.ry = -angles[1];
@@ -384,7 +386,7 @@ public class MyPanoPairTransformLearner3 {
 		return result;
 	}
 
-	protected boolean isAdjusted() {
+	protected boolean isAdjustedOLD() {
 		double minDiscripancy = getMinAllowedDiscrepancy();
 		double maxDiscripancy = getMaxAllowedDiscrepancy();
 
@@ -401,6 +403,51 @@ public class MyPanoPairTransformLearner3 {
 				}
 			}
 		}
+		return adjusted;
+	}
+
+	protected boolean isAdjusted() {
+		double minDiscripancy = 0;
+
+		Point2D.Double PW1 = new Point2D.Double();
+		Point2D.Double PW2 = new Point2D.Double();
+
+		boolean adjusted = true;
+		discrepancyStatistics.start();
+		Statistics stat = new Statistics();
+		for (KeyPointPairList pairList : keyPointPairLists) {
+			stat.start();
+			for (KeyPointPair item : pairList.items) {
+				// Compute for all points, so no item.isBad check
+				MyPanoPairTransformer3.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				MyPanoPairTransformer3.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
+
+				double dx = item.targetSP.doubleX - PW2.x;
+				double dy = item.targetSP.doubleY - PW2.y;
+				setDiscrepancy(item, Math.sqrt(dx*dx + dy*dy));
+				if (!isBad(item)) {
+					discrepancyStatistics.addValue(item.discrepancy, getWeight(item));
+					stat.addValue(item.discrepancy, getWeight(item));
+				}
+//				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
+			}
+			stat.stop();
+			double maxDiscripancy = discrepancyStatistics.getAvgValue();
+			if (maxDiscripancy < discrepancyThreshold)
+				maxDiscripancy = discrepancyThreshold;
+
+			for (KeyPointPair item : pairList.items) {
+				boolean oldIsBad = isBad(item);
+				double discrepancy = getDiscrepancy(item);
+				boolean curIsBad = (discrepancy < minDiscripancy) || (discrepancy > maxDiscripancy);
+				if (oldIsBad != curIsBad) {
+					setBad(item, curIsBad);
+					if (curIsBad)
+						adjusted = false;
+				}
+			}
+		}
+		discrepancyStatistics.stop();
 		return adjusted;
 	}
 

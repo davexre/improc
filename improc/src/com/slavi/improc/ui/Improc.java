@@ -49,9 +49,9 @@ public class Improc {
 				-1);
 		kppl = null;
 
-/*		if (true) 
-			return;
-*/		
+//		if (true) 
+//			return;
+		
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
