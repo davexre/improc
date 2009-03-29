@@ -76,8 +76,8 @@ public class MyPanoPairTransformLearner3 {
 //					sourceToWorld.mMul(targetToSource, targetToWorld);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
 					RotationXYZ.getRotationAngles(targetToWorld, angles);
-					curImage.rx = -angles[0];
-					curImage.ry = -angles[1];
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
 					curImage.rz = angles[2];
 					todo.remove(curImageIndex);
 					curImageIndex = todo.size();
@@ -347,8 +347,6 @@ public class MyPanoPairTransformLearner3 {
 				);
 	}
 
-	public static final int maxIterations = 10;
-	
 	Statistics discrepancyStatistics = new Statistics();
 	private void computeDiscrepancies() {
 		Point2D.Double PW1 = new Point2D.Double();
@@ -367,7 +365,7 @@ public class MyPanoPairTransformLearner3 {
 				if (!isBad(item)) {
 					discrepancyStatistics.addValue(item.discrepancy, getWeight(item));
 				}
-				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
+//				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
 			}
 		}
 		discrepancyStatistics.stop();
@@ -432,7 +430,7 @@ public class MyPanoPairTransformLearner3 {
 //				item.weight = item.discrepancy < 1 ? 1.0 : 1.0 / item.discrepancy;
 			}
 			stat.stop();
-			double maxDiscripancy = discrepancyStatistics.getAvgValue();
+			double maxDiscripancy = stat.getAvgValue();
 			if (maxDiscripancy < discrepancyThreshold)
 				maxDiscripancy = discrepancyThreshold;
 
@@ -446,6 +444,12 @@ public class MyPanoPairTransformLearner3 {
 						adjusted = false;
 				}
 			}
+			int goodCount = pairList.getGoodCount();
+			System.out.println(goodCount + "/" + pairList.items.size() + "\t" +
+				pairList.source.imageFileStamp.getFile().getName() + "\t" + 
+				pairList.target.imageFileStamp.getFile().getName() + "\t" +
+				MathUtil.d4(maxDiscripancy)
+				);
 		}
 		discrepancyStatistics.stop();
 		return adjusted;
@@ -469,6 +473,8 @@ public class MyPanoPairTransformLearner3 {
 		}
 	}
 	
+	
+	public static final int maxIterations = 20;
 	
 	public boolean calculate() {
 		boolean adjusted = false;

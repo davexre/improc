@@ -1,8 +1,11 @@
 package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
@@ -52,10 +55,10 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		for (int i = 0; i < 20; i++) {
 			res = learner.calculateOne();
 			goodCount = pairList.getGoodCount();
-			System.out.println("ITERATION " + i + 
-					" " + pairList.getGoodCount() + "/" + pairList.items.size() + 
-					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
-					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));
+//			System.out.println("ITERATION " + i + 
+//					" " + pairList.getGoodCount() + "/" + pairList.items.size() + 
+//					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
+//					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));
 //			System.out.println(learner.discrepancyStatistics.toString(Statistics.CStatMinMax));
 //			System.out.println(res);
 			if (res || (goodCount < minRequredGoodPointPairs)) {
@@ -64,8 +67,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		if ((!res) || (goodCount < minRequredGoodPointPairs))
 			return false;
-		double discrepancy = learner.getMaxAllowedDiscrepancy();
-		System.out.println("Max allowed discrepancy = " + discrepancy);
+//		double discrepancy = learner.getMaxAllowedDiscrepancy();
+//		System.out.println("Max allowed discrepancy = " + discrepancy);
 
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
@@ -103,7 +106,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		if (goodCount < minRequredGoodPointPairs) {
 			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
 		}
-		return goodCount < minRequredGoodPointPairs;
+		return goodCount >= minRequredGoodPointPairs;
 	}
 	
 	private class ProcessOne implements Callable<Boolean> {
@@ -120,7 +123,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 	
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
-/*		
+
 		HashMap<KeyPointPairList, Future<Boolean>> tasks = new HashMap<KeyPointPairList, Future<Boolean>>(kppl.size());
 		for (KeyPointPairList pairList : kppl) {
 			if (Thread.interrupted()) {
@@ -135,12 +138,12 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				throw new InterruptedException();
 			}
 			boolean res = item.getValue().get();
-			if (!res) {
+			if (res) {
 				result.add(item.getKey());
 			}
-		}*/
+		}
 		
-		for (KeyPointPairList pairList : kppl) {
+/*		for (KeyPointPairList pairList : kppl) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
 			}
@@ -149,7 +152,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			if (!res) {
 				result.add(pairList);
 			}
-		}
+		}*/
 		return result;
 	}
 }
