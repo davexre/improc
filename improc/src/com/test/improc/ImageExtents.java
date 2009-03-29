@@ -99,12 +99,35 @@ public class ImageExtents {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main1(String[] args) throws Exception {
 		ImageExtents imex = new ImageExtents();
 		ArrayList<AngleSegment> as = imex.read();
 		imex.calc(as);
 //		for (AngleSegment s : as) {
 //			System.out.println(s);
 //		}
+	}
+	
+	static final double PiOver4 = Math.PI / 4.0;
+	/**
+	 * Returns the specified angle in the range [-pi/4..pi/4) 
+	 */
+	public static double fixAnglePI4(double angle) {
+		angle += PiOver4;
+		return Math.abs(angle - Math.floor(angle / MathUtil.PIover2) * MathUtil.PIover2) - PiOver4;
+	}
+	
+	static void test(double angle) {
+		System.out.println(MathUtil.d4(angle) + "\t" + MathUtil.d4(fixAnglePI4(angle * MathUtil.deg2rad) * MathUtil.rad2deg));
+	}
+	
+	public static void main(String[] args) {
+//		double angle = -400;
+//		while (angle <= 400) {
+//			test(angle);
+//			angle += 20;
+//		}
+		test(45);
+		
 	}
 }
