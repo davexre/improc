@@ -69,16 +69,19 @@ public class ImageRot {
 		
 		x = Math.atan2(x, z);
 		y = Math.atan2(y, z);
-		final double pi2 = Math.PI / 2.0; 
-		if (y > pi2) { 
-			y = Math.PI - y;
-			x += Math.PI;
-		}
-		if (y < -pi2) { 
-			y = - Math.PI - y;
-			x += Math.PI;
-		}
-		x = MathUtil.fixAngleMPI_PI(x);
+//		final double pi2 = Math.PI / 2.0; 
+//		if (y > pi2) { 
+//			y = Math.PI - y;
+//			x += Math.PI;
+//		}
+//		if (y < -pi2) { 
+//			y = - Math.PI - y;
+//			x += Math.PI;
+//		}
+//		x = MathUtil.fixAngleMPI_PI(x);
+//		if (x > Math.PI)
+//			x -= 2*Math.PI;
+		
 		dest.x = x;
 		dest.y = y;
 	}
@@ -125,6 +128,8 @@ public class ImageRot {
 		
 		while (fin.ready()) {
 			str = fin.readLine();
+			if (str.equals(""))
+				break;
 			st = new StringTokenizer(str);
 			Image img = new Image();
 			img.sizeX = sizeX;
@@ -134,9 +139,9 @@ public class ImageRot {
 			img.cameraScale = cameraScale;
 
 			img.scaleZ = Double.parseDouble(st.nextToken());
-			img.rx = Double.parseDouble(st.nextToken());
-			img.ry = Double.parseDouble(st.nextToken());
-			img.rz = Double.parseDouble(st.nextToken());
+			img.rx = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
+			img.ry = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
+			img.rz = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.camera2real = RotationXYZ.makeAngles(img.rx, img.ry, img.rz);
 			
 			img.tl = new Point2D.Double();
@@ -260,8 +265,8 @@ public class ImageRot {
 	int outsize = 1000;
 	
 	public void worldToProj(double rx, double ry, Point2D.Double dest) {
-		dest.x = rx * outsize / (4.0 * Math.PI) + outsize / 2.0;
-		dest.y = ry * outsize / (4.0 * Math.PI) + outsize / 2.0;
+		dest.x = rx * outsize / (2.0 * Math.PI) + outsize / 2.0;
+		dest.y = ry * outsize / (2.0 * Math.PI) + outsize / 2.0;
 	}
 	
 	public void projToWorld(double sx, double sy, Point2D.Double dest) {
@@ -299,13 +304,32 @@ public class ImageRot {
 			int atX4 = (int) dest.x;
 			int atY4 = (int) dest.y;
 			img.drawCross(atX4, atY4, color);
-				
-			gr.setColor(new Color(color));
 
-			gr.drawLine(atX1, atY1, atX2, atY2);
-			gr.drawLine(atX4, atY4, atX2, atY2);
-			gr.drawLine(atX1, atY1, atX3, atY3);
-			gr.drawLine(atX4, atY4, atX3, atY3);
+			for (int i = 0; i < image.sizeX; i++) {
+				imageToWorld(i, 0, image, dest);
+				worldToProj(dest.x, dest.y, dest);
+				img.setRGB((int) dest.x, (int) dest.y, color); 
+
+				imageToWorld(i, image.sizeY-1, image, dest);
+				worldToProj(dest.x, dest.y, dest);
+				img.setRGB((int) dest.x, (int) dest.y, color); 
+			}
+				
+			for (int j = 0; j < image.sizeY; j++) {
+				imageToWorld(0, j, image, dest);
+				worldToProj(dest.x, dest.y, dest);
+				img.setRGB((int) dest.x, (int) dest.y, color); 
+
+				imageToWorld(image.sizeX-1, j, image, dest);
+				worldToProj(dest.x, dest.y, dest);
+				img.setRGB((int) dest.x, (int) dest.y, color); 
+			}
+			
+//			gr.setColor(new Color(color));
+//			gr.drawLine(atX1, atY1, atX2, atY2);
+//			gr.drawLine(atX4, atY4, atX2, atY2);
+//			gr.drawLine(atX1, atY1, atX3, atY3);
+//			gr.drawLine(atX4, atY4, atX3, atY3);
 		}
 		
 		double a = learner.tr.a;
