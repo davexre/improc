@@ -66,7 +66,8 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 			coefs.setItem(3, 0, 1.0);
 			lsa.addMeasurement(coefs, computedWeight, L, 0);
 		}
-		lsa.calculate();
+		if (!lsa.calculate())
+			return false;
 
 		// Build transformer
 		Helmert2DTransformer<InputType, OutputType> tr = (Helmert2DTransformer<InputType, OutputType>)transformer;

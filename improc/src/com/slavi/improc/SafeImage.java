@@ -25,7 +25,7 @@ public class SafeImage {
 
 	int nextColor = 0;
 	
-	BufferedImage bi;
+	public BufferedImage bi;
 	
 	public SafeImage(int sizeX, int sizeY) {
 		bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);

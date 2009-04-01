@@ -74,7 +74,8 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 				lsa.addMeasurement(coefs, computedWeight, L, i);
 			}
 		}
-		lsa.calculate();
+		if (!lsa.calculate())
+			return false;
 
 		// Build transformer
 		Matrix u = lsa.getUnknown();
