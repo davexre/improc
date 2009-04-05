@@ -11,8 +11,20 @@ public class KeyPointBigTree extends ConcurrentKDTree<KeyPoint> {
 		super(KeyPoint.featureVectorLinearSize, false);
 	}
 
+	static final double persentMaxDiscrepancy = 0.20;
+	static final int maxAbsoluteDiscrepancyPerCoordinate = (int)(256 * persentMaxDiscrepancy);
+	
 	public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {
-		return fromNode.keyPointList != toNode.keyPointList;
+		if (fromNode.keyPointList == toNode.keyPointList)
+			return false;
+		for (int i = 0; i < KeyPoint.descriptorSize; i++)
+			for (int j = 0; j < KeyPoint.descriptorSize; j++)
+				for (int k = 0; k < KeyPoint.numDirections; k++) {
+					int d = fromNode.featureVector[i][j][k] - toNode.featureVector[i][j][k];
+					if (Math.abs(d) > maxAbsoluteDiscrepancyPerCoordinate)
+						return false;
+				}
+		return true;
 	}
 
 	public double getValue(KeyPoint node, int dimensionIndex) {

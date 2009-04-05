@@ -55,10 +55,10 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		for (int i = 0; i < 20; i++) {
 			res = learner.calculateOne();
 			goodCount = pairList.getGoodCount();
-//			System.out.println("ITERATION " + i + 
-//					" " + pairList.getGoodCount() + "/" + pairList.items.size() + 
-//					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
-//					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));
+			System.out.println("ITERATION " + i + 
+					" " + goodCount + "/" + pairList.items.size() + 
+					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
+					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));
 //			System.out.println(learner.discrepancyStatistics.toString(Statistics.CStatMinMax));
 //			System.out.println(res);
 			if (res || (goodCount < minRequredGoodPointPairs)) {
@@ -142,8 +142,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				result.add(item.getKey());
 			}
 		}
-		
-/*		for (KeyPointPairList pairList : kppl) {
+/*		
+		for (KeyPointPairList pairList : kppl) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
 			}

@@ -1,6 +1,5 @@
 package com.test.improc;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
@@ -225,6 +224,71 @@ public class ImageRot {
 		public ImageRotationTransformLearer(ArrayList<Image> images) {
 			this.images = images;
 			tr = new ImageRotationTransformer();
+		}
+
+		
+		public void transformTwo(java.awt.geom.Point2D.Double source, java.awt.geom.Point2D.Double dest) {
+			double sb = Math.sin(tr.b);
+			double cb = Math.cos(tr.b);
+
+			double sa = Math.sin(source.x - tr.a);
+			double ca = Math.cos(source.x - tr.a);
+			
+			double sy = Math.sin(source.y);
+			double cy = Math.cos(source.y);
+			
+			double e = Math.asin(sy*cb - cy*sb*sa);
+			double ce = Math.cos(e);
+			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
+			dest.x = source.x - tr.a > 0 ? af : -af;
+			dest.y = e;
+		}
+		
+		public boolean calculateTwo() {
+			LeastSquaresAdjust lsa = new LeastSquaresAdjust(2, 1);
+			
+			double sb = Math.sin(tr.b);
+			double cb = Math.cos(tr.b);
+			
+			Matrix coefs = new Matrix(2, 1);
+			for (Image image : images) {
+				for (int point = 0; point < 4; point++) {
+					Point2D.Double src = null;
+					switch (point) { 
+					case 0: src = image.tl; break;
+					case 1: src = image.tr; break;
+					case 2: src = image.bl; break;
+					case 3: src = image.br; break;
+					}
+
+					double sa = Math.sin(src.x - tr.a);
+					double ca = Math.cos(src.x - tr.a);
+					
+					double sy = Math.sin(src.y);
+					double cy = Math.cos(src.y);
+					
+					double dFdA = -sy*sb - cy*cb*sa;
+					double dFdB = cy*sb*ca;
+					double F0 = sy*cb - cy*sb*sa;
+					
+					coefs.setItem(0, 0, dFdA);
+					coefs.setItem(1, 0, dFdB);
+					lsa.addMeasurement(coefs, 1.0, F0, 0);
+				}
+			}
+			if (!lsa.calculate())
+				return false;
+
+			// Build transformer
+			Matrix u = lsa.getUnknown(); 
+			u.printM("U");
+			tr.a = MathUtil.fixAngleMPI_PI(tr.a - u.getItem(0, 0));
+			tr.b = MathUtil.fixAngleMPI_PI(tr.b - u.getItem(0, 1));
+			
+			System.out.println(
+					"A=" + MathUtil.d4(tr.a*MathUtil.rad2deg) + 
+					"\tB=" + MathUtil.d4(tr.b*MathUtil.rad2deg));
+			return true;
 		}
 		
 		public boolean calculateOne() {

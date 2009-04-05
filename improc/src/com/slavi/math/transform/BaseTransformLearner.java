@@ -224,7 +224,6 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	protected boolean isAdjusted() {
 		double minDiscripancy = getMinAllowedDiscrepancy();
 		double maxDiscripancy = getMaxAllowedDiscrepancy();
-
 		boolean adjusted = true;
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);

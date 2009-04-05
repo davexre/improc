@@ -137,7 +137,15 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					int x2 = (int)d.x;
 					int y2 = (int)d.y;
 					oi.pinPair(x1, y1, x2, y2);
+					
 				}
+				// dump statistic info for pairs
+//				System.out.println(
+//						MathUtil.d4(pair.discrepancy) + "\t" +	
+//						MathUtil.d4(pair.distanceToNearest) + "\t" +	
+//						MathUtil.d4(pair.distanceToNearest2) + "\t" +	
+//						MathUtil.d4(pair.getMaxDifference()) + "\t"	
+//				);
 			}
 		}
 		oi.save();
