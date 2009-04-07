@@ -227,20 +227,20 @@ public class ImageRot {
 		}
 
 		
-		public void transformTwo(java.awt.geom.Point2D.Double source, java.awt.geom.Point2D.Double dest) {
+		public void transformTwo(double sourceX, double sourceY, Point2D.Double dest) {
 			double sb = Math.sin(tr.b);
 			double cb = Math.cos(tr.b);
 
-			double sa = Math.sin(source.x - tr.a);
-			double ca = Math.cos(source.x - tr.a);
+			double sa = Math.sin(sourceX - tr.a);
+			double ca = Math.cos(sourceX - tr.a);
 			
-			double sy = Math.sin(source.y);
-			double cy = Math.cos(source.y);
+			double sy = Math.sin(sourceY);
+			double cy = Math.cos(sourceY);
 			
 			double e = Math.asin(sy*cb - cy*sb*sa);
 			double ce = Math.cos(e);
 			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
-			dest.x = source.x - tr.a > 0 ? af : -af;
+			dest.x = sourceX - tr.a > 0 ? af : -af;
 			dest.y = e;
 		}
 		
@@ -282,8 +282,8 @@ public class ImageRot {
 			// Build transformer
 			Matrix u = lsa.getUnknown(); 
 			u.printM("U");
-			tr.a = MathUtil.fixAngleMPI_PI(tr.a - u.getItem(0, 0));
-			tr.b = MathUtil.fixAngleMPI_PI(tr.b - u.getItem(0, 1));
+			tr.a = MathUtil.fixAngleMPI_PI(tr.a + u.getItem(0, 0));
+			tr.b = MathUtil.fixAngleMPI_PI(tr.b + u.getItem(0, 1));
 			
 			System.out.println(
 					"A=" + MathUtil.d4(tr.a*MathUtil.rad2deg) + 
@@ -329,62 +329,82 @@ public class ImageRot {
 	int outsize = 1000;
 	
 	public void worldToProj(double rx, double ry, Point2D.Double dest) {
+		ry = MathUtil.fixAngleMPI_PI(ry);
+		if (ry > MathUtil.PIover2) {
+			ry = Math.PI - ry;
+			rx += Math.PI;
+		}
+		if (ry < -MathUtil.PIover2) {
+			ry = ry - Math.PI;
+			rx += Math.PI;
+		}
+		rx = MathUtil.fixAngleMPI_PI(rx);
+		
 		dest.x = rx * outsize / (2.0 * Math.PI) + outsize / 2.0;
-		dest.y = ry * outsize / (2.0 * Math.PI) + outsize / 2.0;
+		dest.y = ry * outsize / (4.0 * Math.PI) + outsize / 4.0;
 	}
 	
 	public void projToWorld(double sx, double sy, Point2D.Double dest) {
-		dest.x = (sx - outsize / 2.0) * (4.0 * Math.PI) / outsize;
-		dest.y = (sy - outsize / 2.0) * (4.0 * Math.PI) / outsize;
+//		dest.x = (sx - outsize / 2.0) * (4.0 * Math.PI) / outsize;
+//		dest.y = (sy - outsize / 2.0) * (4.0 * Math.PI) / outsize;
 	}	
 	
 	public void doIt() throws Exception {
 		data = read();
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
-		boolean res = learner.calculateOne();
-		System.out.println("RESULT is " + res);
+		learner.tr.a = 0 * MathUtil.deg2rad;
+		learner.tr.b = 90 * MathUtil.deg2rad;
+//		boolean res = learner.calculateTwo();
+//		System.out.println("RESULT is " + res);
 		
-		SafeImage img = new SafeImage(outsize, outsize);
-		Graphics2D gr = img.bi.createGraphics();
+		SafeImage img = new SafeImage(outsize, outsize / 2);
 		Point2D.Double dest = new Point2D.Double();
 		for (Image image : data) {
 			int color = img.getNextColor();
-			worldToProj(image.tl.x, image.tl.y, dest);
+			learner.transformTwo(image.tl.x, image.tl.y, dest);
+			worldToProj(dest.x, dest.y, dest);
 			int atX1 = (int) dest.x;
 			int atY1 = (int) dest.y;
 			img.drawCross(atX1, atY1, color);
 			
-			worldToProj(image.tr.x, image.tr.y, dest);
+			learner.transformTwo(image.tr.x, image.tr.y, dest);
+			worldToProj(dest.x, dest.y, dest);
 			int atX2 = (int) dest.x;
 			int atY2 = (int) dest.y;
 			img.drawCross(atX2, atY2, color);
 			
-			worldToProj(image.bl.x, image.bl.y, dest);
+			learner.transformTwo(image.bl.x, image.bl.y, dest);
+			worldToProj(dest.x, dest.y, dest);
 			int atX3 = (int) dest.x;
 			int atY3 = (int) dest.y;
 			img.drawCross(atX3, atY3, color);
 			
-			worldToProj(image.br.x, image.br.y, dest);
+			learner.transformTwo(image.br.x, image.br.y, dest);
+			worldToProj(dest.x, dest.y, dest);
 			int atX4 = (int) dest.x;
 			int atY4 = (int) dest.y;
 			img.drawCross(atX4, atY4, color);
 
 			for (int i = 0; i < image.sizeX; i++) {
 				imageToWorld(i, 0, image, dest);
+				learner.transformTwo(dest.x, dest.y, dest);
 				worldToProj(dest.x, dest.y, dest);
 				img.setRGB((int) dest.x, (int) dest.y, color); 
 
 				imageToWorld(i, image.sizeY-1, image, dest);
+				learner.transformTwo(dest.x, dest.y, dest);
 				worldToProj(dest.x, dest.y, dest);
 				img.setRGB((int) dest.x, (int) dest.y, color); 
 			}
 				
 			for (int j = 0; j < image.sizeY; j++) {
 				imageToWorld(0, j, image, dest);
+				learner.transformTwo(dest.x, dest.y, dest);
 				worldToProj(dest.x, dest.y, dest);
 				img.setRGB((int) dest.x, (int) dest.y, color); 
 
 				imageToWorld(image.sizeX-1, j, image, dest);
+				learner.transformTwo(dest.x, dest.y, dest);
 				worldToProj(dest.x, dest.y, dest);
 				img.setRGB((int) dest.x, (int) dest.y, color); 
 			}
@@ -396,12 +416,14 @@ public class ImageRot {
 //			gr.drawLine(atX4, atY4, atX3, atY3);
 		}
 		
-		double a = learner.tr.a;
-		double c = learner.tr.c;
-		
-		for (int x = -outsize/2; x < outsize/2; x++) {
-			int y = (int) (a * x + c);
-			img.setRGB(x + outsize/2, y + outsize/2, 0xffffff);
+		for (int i = -1000; i < 1000; i++) {
+			double x = i * Math.PI / 1000;
+			learner.transformTwo(x, 0.0, dest);
+			worldToProj(dest.x, dest.y, dest);
+//			worldToProj(x, 0, dest);
+			int atX = (int) dest.x;
+			int atY = (int) dest.y;
+			img.setRGB(atX, atY, 0xffffff);
 		}
 		img.save();
 	}
