@@ -27,16 +27,22 @@ public class SafeImage {
 	
 	public BufferedImage bi;
 	
+	public final int sizeX, sizeY;
+	
 	public SafeImage(int sizeX, int sizeY) {
+		this.sizeX = sizeX;
+		this.sizeY = sizeY;
 		bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
 	}
 	
 	public SafeImage(InputStream image) throws IOException {
 		bi = ImageIO.read(image);
+		sizeX = bi.getWidth();
+		sizeY = bi.getHeight();
 	}
 	
 	public void save() throws IOException {
-		String fname = Const.tempDir + "/temp" + (++imageCounter) + ".png";
+		String fname = Const.workDir + "/temp" + (++imageCounter) + ".png";
 		ImageIO.write(bi, "png", new File(fname));
 		bi = null;
 	}
