@@ -16,6 +16,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import com.slavi.math.MathUtil;
+
 // Referenced classes of package mp:
 //            MapPoint, PjMapProjection, Borderline
 
@@ -1573,7 +1575,7 @@ public class MapProjection extends Canvas
 
     private double getNewY(MapPoint mappoint)
     {
-        double d = Math.sin(mappoint.y * 0.017453277777777776D) * Math.sin(newp.y * 0.017453277777777776D) + Math.cos(mappoint.y * 0.017453277777777776D) * Math.cos(newp.y * 0.017453277777777776D) * Math.cos((mappoint.x - newp.x) * 0.017453277777777776D);
+        double d = Math.sin(mappoint.y * MathUtil.deg2rad) * Math.sin(newp.y * MathUtil.deg2rad) + Math.cos(mappoint.y * MathUtil.deg2rad) * Math.cos(newp.y * MathUtil.deg2rad) * Math.cos((mappoint.x - newp.x) * MathUtil.deg2rad);
         double d1;
         if(d >= 1.0D)
             d1 = 0.0D;
@@ -1603,12 +1605,12 @@ public class MapProjection extends Canvas
     {
         double d = 0.0D;
         if(mappoint.y == 0.0D)
-            return adjustCenter(mappoint1.x, mappoint.x) * 0.017453277777777776D;
+            return adjustCenter(mappoint1.x, mappoint.x) * MathUtil.deg2rad;
         double d1 = (Math.PI/2) - getNewY(mappoint1);
         if(d1 != 0.0D)
         {
-            double d2 = (Math.sin((mappoint1.x - newp.x) * 0.017453277777777776D) * Math.cos(mappoint1.y * 0.017453277777777776D)) / Math.sin(d1);
-            double d3 = (Math.cos(newp.y * 0.017453277777777776D) * Math.sin(mappoint1.y * 0.017453277777777776D) - Math.sin(newp.y * 0.017453277777777776D) * Math.cos(mappoint1.y * 0.017453277777777776D) * Math.cos((mappoint1.x - newp.x) * 0.017453277777777776D)) / Math.sin(d1);
+            double d2 = (Math.sin((mappoint1.x - newp.x) * MathUtil.deg2rad) * Math.cos(mappoint1.y * MathUtil.deg2rad)) / Math.sin(d1);
+            double d3 = (Math.cos(newp.y * MathUtil.deg2rad) * Math.sin(mappoint1.y * MathUtil.deg2rad) - Math.sin(newp.y * MathUtil.deg2rad) * Math.cos(mappoint1.y * MathUtil.deg2rad) * Math.cos((mappoint1.x - newp.x) * MathUtil.deg2rad)) / Math.sin(d1);
             if(d3 != 0.0D)
                 d = Math.atan(d2 / d3);
             else
@@ -1620,10 +1622,10 @@ public class MapProjection extends Canvas
             if(d3 < 0.0D)
                 d += Math.PI;
             if(d > Math.PI)
-                d -= 6.2831799999999998D;
+                d -= (Math.PI*2);
             else
             if(d < -Math.PI)
-                d += 6.2831799999999998D;
+                d += (Math.PI*2);
         } else
         {
             d = 0.0D;
@@ -1667,14 +1669,14 @@ public class MapProjection extends Canvas
 
     public void getOblique()
     {
-        double d = MP_dObliqY * 0.017453277777777776D;
+        double d = MP_dObliqY * MathUtil.deg2rad;
         double d1 = Math.cos(d) * Math.sin(new_y) - Math.sin(d) * Math.cos(new_y) * Math.sin(new_x);
         double d2 = Math.sin(d) * Math.sin(new_y) + Math.cos(d) * Math.cos(new_y) * Math.sin(new_x);
         double d3 = Math.atan2(Math.cos(new_y) * Math.cos(new_x), d1) - (Math.PI/2);
         if(d3 < -Math.PI)
-            d3 += 6.2831799999999998D;
+            d3 += (Math.PI*2);
         if(d3 > Math.PI)
-            d3 -= 6.2831799999999998D;
+            d3 -= (Math.PI*2);
         double d4 = Math.asin(d2);
         new_x = d3;
         new_y = d4;
@@ -1877,8 +1879,8 @@ public class MapProjection extends Canvas
     private boolean MP_Albers(MapPoint mappoint)
     {
         PJInit(mappoint);
-        lat = MP_dSp1 * 0.017453277777777776D;
-        double d = MP_dSp2 * 0.017453277777777776D;
+        lat = MP_dSp1 * MathUtil.deg2rad;
+        double d = MP_dSp2 * MathUtil.deg2rad;
         double d1 = (Math.sin(lat) + Math.sin(d)) / 2D;
         if(lat + d != 0.0D)
         {
@@ -2061,8 +2063,8 @@ public class MapProjection extends Canvas
     {
         double d = 30D;
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(d * 0.017453277777777776D);
-        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(d * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(d * MathUtil.deg2rad);
+        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(d * MathUtil.deg2rad);
         return true;
     }
 
@@ -2086,7 +2088,7 @@ public class MapProjection extends Canvas
 
     private boolean MP_Bonne(MapPoint mappoint)
     {
-        lat = MP_dSp1 * 0.017453277777777776D;
+        lat = MP_dSp1 * MathUtil.deg2rad;
         PJInit(mappoint);
         if(Math.sin(lat) != 0.0D)
         {
@@ -2110,16 +2112,16 @@ public class MapProjection extends Canvas
     {
         double d = 30D;
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(d * 0.017453277777777776D);
-        mappoint.y = (1.0D + Math.cos(d * 0.017453277777777776D)) * radius * Math.tan(new_y / 2D);
+        mappoint.x = radius * new_x * Math.cos(d * MathUtil.deg2rad);
+        mappoint.y = (1.0D + Math.cos(d * MathUtil.deg2rad)) * radius * Math.tan(new_y / 2D);
         return true;
     }
 
     private boolean MP_Braun(MapPoint mappoint)
     {
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
-        mappoint.y = (1.0D + Math.cos(MP_dSp1 * 0.017453277777777776D)) * radius * Math.tan(new_y / 2D);
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
+        mappoint.y = (1.0D + Math.cos(MP_dSp1 * MathUtil.deg2rad)) * radius * Math.tan(new_y / 2D);
         return true;
     }
 
@@ -2137,8 +2139,8 @@ public class MapProjection extends Canvas
     private boolean MP_CylindricalCentral(MapPoint mappoint)
     {
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
-        mappoint.y = radius * Math.cos(MP_dSp1 * 0.017453277777777776D) * Math.tan(new_y);
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
+        mappoint.y = radius * Math.cos(MP_dSp1 * MathUtil.deg2rad) * Math.tan(new_y);
         return true;
     }
 
@@ -2157,8 +2159,8 @@ public class MapProjection extends Canvas
     private boolean MP_ConicEquidistant(MapPoint mappoint)
     {
         PJInit(mappoint);
-        lat = MP_dSp1 * 0.017453277777777776D;
-        double d = MP_dSp2 * 0.017453277777777776D;
+        lat = MP_dSp1 * MathUtil.deg2rad;
+        double d = MP_dSp2 * MathUtil.deg2rad;
         double d1 = Math.cos(lat);
         double d2 = Math.cos(d);
         if(d == -lat)
@@ -2196,11 +2198,11 @@ public class MapProjection extends Canvas
         if(new_x == 0.0D)
         {
             mappoint.x = 0.0D;
-            mappoint.y = radius * (Math.sin(new_y) - Math.cos(new_y) * Math.tan(MP_dSp1 * 0.017453277777777776D));
+            mappoint.y = radius * (Math.sin(new_y) - Math.cos(new_y) * Math.tan(MP_dSp1 * MathUtil.deg2rad));
         } else
         {
             mappoint.x = radius * new_x;
-            mappoint.y = (radius * new_x * (Math.sin(new_y) * Math.cos(new_x) - Math.cos(new_y) * Math.tan(MP_dSp1 * 0.017453277777777776D))) / Math.sin(new_x);
+            mappoint.y = (radius * new_x * (Math.sin(new_y) * Math.cos(new_x) - Math.cos(new_y) * Math.tan(MP_dSp1 * MathUtil.deg2rad))) / Math.sin(new_x);
         }
         return true;
     }
@@ -2218,14 +2220,14 @@ public class MapProjection extends Canvas
     {
         PJInit(mappoint);
         mappoint.y = radius * new_y;
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
         return true;
     }
 
     private boolean MP_CylindricalOrthographic(MapPoint mappoint)
     {
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
         mappoint.y = radius * Math.sin(new_y);
         return true;
     }
@@ -2234,8 +2236,8 @@ public class MapProjection extends Canvas
     {
         PJInit(mappoint);
         double d = radius * (MP_dDistance - 1.0D);
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
-        mappoint.y = (radius * Math.sin(new_y) * (d + radius * (1.0D + Math.cos(MP_dSp1 * 0.017453277777777776D)))) / (d + radius * (1.0D + Math.cos(new_y)));
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
+        mappoint.y = (radius * Math.sin(new_y) * (d + radius * (1.0D + Math.cos(MP_dSp1 * MathUtil.deg2rad)))) / (d + radius * (1.0D + Math.cos(new_y)));
         return true;
     }
 
@@ -2270,11 +2272,11 @@ public class MapProjection extends Canvas
         PJInit(mappoint);
         if(new_y >= 0.0D)
         {
-            mappoint.y = 2D * radius * d - Math.sqrt(4D * radius * d * radius * d - 6.2831799999999998D * radius * radius * Math.sin(new_y));
+            mappoint.y = 2D * radius * d - Math.sqrt(4D * radius * d * radius * d - (Math.PI*2) * radius * radius * Math.sin(new_y));
             mappoint.x = (new_x * (2D * radius * d - mappoint.y)) / Math.PI;
         } else
         {
-            mappoint.y = -(2D * radius * d - Math.sqrt(4D * radius * d * radius * d - 6.2831799999999998D * radius * radius * Math.sin(-new_y)));
+            mappoint.y = -(2D * radius * d - Math.sqrt(4D * radius * d * radius * d - (Math.PI*2) * radius * radius * Math.sin(-new_y)));
             mappoint.x = (new_x * (2D * radius * d + mappoint.y)) / Math.PI;
         }
         return true;
@@ -2399,8 +2401,8 @@ public class MapProjection extends Canvas
     {
         double d = 45D;
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(d * 0.017453277777777776D);
-        mappoint.y = (1.0D + Math.cos(d * 0.017453277777777776D)) * radius * Math.tan(new_y / 2D);
+        mappoint.x = radius * new_x * Math.cos(d * MathUtil.deg2rad);
+        mappoint.y = (1.0D + Math.cos(d * MathUtil.deg2rad)) * radius * Math.tan(new_y / 2D);
         return true;
     }
 
@@ -2479,14 +2481,14 @@ public class MapProjection extends Canvas
     {
         PJInit(mappoint);
         double d = 2D;
-        if(Math.sin(new_y) == 1.0D || Math.sin(MP_dSp1 * 0.017453277777777776D) == 1.0D)
+        if(Math.sin(new_y) == 1.0D || Math.sin(MP_dSp1 * MathUtil.deg2rad) == 1.0D)
         {
             mappoint.x = 0.0D;
             mappoint.y = new_y > 0.0D ? 2D * radius : -2D * radius;
         } else
         {
-            double d1 = 1.0D + Math.sin(MP_dSp1 * 0.017453277777777776D);
-            double d2 = 1.0D - Math.sin(MP_dSp1 * 0.017453277777777776D);
+            double d1 = 1.0D + Math.sin(MP_dSp1 * MathUtil.deg2rad);
+            double d2 = 1.0D - Math.sin(MP_dSp1 * MathUtil.deg2rad);
             double d3 = 1.0D + Math.sin(new_y);
             double d4 = 1.0D - Math.sin(new_y);
             double d5 = Math.pow(d1 / d2, 1.0D / (2D * d));
@@ -2528,8 +2530,8 @@ public class MapProjection extends Canvas
         if(MP_dSp2 <= -90D)
             MP_dSp2 = -89D;
         PJInit(mappoint);
-        lat = MP_dSp1 * 0.017453277777777776D;
-        double d2 = MP_dSp2 * 0.017453277777777776D;
+        lat = MP_dSp1 * MathUtil.deg2rad;
+        double d2 = MP_dSp2 * MathUtil.deg2rad;
         double d3 = ((Math.PI/2) - new_y) / 2D;
         double d4 = ((Math.PI/2) - lat) / 2D;
         double d5 = Math.tan(d3);
@@ -2541,7 +2543,7 @@ public class MapProjection extends Canvas
             if(new_y > -1.4137154999999999D && new_y < 1.4137154999999999D)
             {
                 mappoint.x = radius * new_x;
-                mappoint.y = radius * Math.log(Math.tan(0.78539749999999997D + new_y / 2D));
+                mappoint.y = radius * Math.log(Math.tan((Math.PI/4) + new_y / 2D));
             } else
             {
                 MP_dSp1 = d;
@@ -2617,17 +2619,17 @@ public class MapProjection extends Canvas
     private boolean MP_LambertConicEqualArea(MapPoint mappoint)
     {
         PJInit(mappoint);
-        lat = MP_dSp1 * 0.017453277777777776D;
+        lat = MP_dSp1 * MathUtil.deg2rad;
         double d;
         double d1;
         if(lat < 0.0D)
         {
-            d = -(0.78539749999999997D + new_y / 2D);
-            d1 = -(0.78539749999999997D + lat / 2D);
+            d = -((Math.PI/4) + new_y / 2D);
+            d1 = -((Math.PI/4) + lat / 2D);
         } else
         {
-            d = 0.78539749999999997D - new_y / 2D;
-            d1 = 0.78539749999999997D - lat / 2D;
+            d = (Math.PI/4) - new_y / 2D;
+            d1 = (Math.PI/4) - lat / 2D;
         }
         double d2 = Math.sin(d);
         double d3 = Math.cos(d1);
@@ -2647,8 +2649,8 @@ public class MapProjection extends Canvas
     private boolean MP_LambertCylindricalEqualArea(MapPoint mappoint)
     {
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
-        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(MP_dSp1 * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
+        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(MP_dSp1 * MathUtil.deg2rad);
         return true;
     }
 
@@ -2701,20 +2703,20 @@ public class MapProjection extends Canvas
     private boolean MP_Loximuthal(MapPoint mappoint)
     {
         PJInit(mappoint);
-        mappoint.y = radius * (new_y - MP_dSp1 * 0.017453277777777776D);
-        if(new_y == MP_dSp1 * 0.017453277777777776D)
+        mappoint.y = radius * (new_y - MP_dSp1 * MathUtil.deg2rad);
+        if(new_y == MP_dSp1 * MathUtil.deg2rad)
         {
-            mappoint.x = radius * new_x * Math.cos(MP_dSp1 * 0.017453277777777776D);
+            mappoint.x = radius * new_x * Math.cos(MP_dSp1 * MathUtil.deg2rad);
         } else
         {
-            double d = Math.tan(0.78539749999999997D + new_y / 2D);
-            double d1 = Math.tan(0.78539749999999997D + (MP_dSp1 * 0.017453277777777776D) / 2D);
+            double d = Math.tan((Math.PI/4) + new_y / 2D);
+            double d1 = Math.tan((Math.PI/4) + (MP_dSp1 * MathUtil.deg2rad) / 2D);
             if(d1 == 0.0D)
                 return false;
             double d2 = Math.log(d / d1);
             if(d2 == 0.0D)
                 return false;
-            mappoint.x = (radius * new_x * (new_y - MP_dSp1 * 0.017453277777777776D)) / d2;
+            mappoint.x = (radius * new_x * (new_y - MP_dSp1 * MathUtil.deg2rad)) / d2;
         }
         return true;
     }
@@ -2736,7 +2738,7 @@ public class MapProjection extends Canvas
         if(new_y > -1.483528611111111D && new_y < 1.483528611111111D)
         {
             mappoint.x = radius * new_x;
-            mappoint.y = radius * Math.log(Math.tan(0.78539749999999997D + new_y / 2D));
+            mappoint.y = radius * Math.log(Math.tan((Math.PI/4) + new_y / 2D));
         } else
         {
             return false;
@@ -2749,7 +2751,7 @@ public class MapProjection extends Canvas
         double d = 1.25D;
         PJInit(mappoint);
         mappoint.x = radius * new_x;
-        mappoint.y = radius * d * Math.log(Math.tan(0.78539749999999997D + new_y / (2D * d)));
+        mappoint.y = radius * d * Math.log(Math.tan((Math.PI/4) + new_y / (2D * d)));
         return true;
     }
 
@@ -2758,7 +2760,7 @@ public class MapProjection extends Canvas
         double d = 1.5D;
         PJInit(mappoint);
         mappoint.x = radius * new_x;
-        mappoint.y = radius * d * Math.log(Math.tan(0.78539749999999997D + new_y / (2D * d)));
+        mappoint.y = radius * d * Math.log(Math.tan((Math.PI/4) + new_y / (2D * d)));
         return true;
     }
 
@@ -2919,17 +2921,17 @@ public class MapProjection extends Canvas
                 mappoint.x = 0.0D;
             } else
             {
-                if(Math.sin(new_x + 0.78539749999999997D) * Math.cos(new_x + 0.78539749999999997D) >= 0.0D)
+                if(Math.sin(new_x + (Math.PI/4)) * Math.cos(new_x + (Math.PI/4)) >= 0.0D)
                     mappoint.x = radius * (1.0D / Math.sqrt(1.0D - 0.5D * d9)) * d13;
                 else
-                if(Math.sin(new_x + 0.78539749999999997D) >= 0.0D)
+                if(Math.sin(new_x + (Math.PI/4)) >= 0.0D)
                     mappoint.x = d16 - radius * (1.0D / Math.sqrt(1.0D - 0.5D * d9)) * d13;
                 else
                     mappoint.x = -d16 - radius * (1.0D / Math.sqrt(1.0D - 0.5D * d9)) * d13;
-                if(Math.sin(new_x + 0.78539749999999997D) * Math.cos(new_x + 0.78539749999999997D) < 0.0D)
+                if(Math.sin(new_x + (Math.PI/4)) * Math.cos(new_x + (Math.PI/4)) < 0.0D)
                     mappoint.y = radius * (1.0D / Math.sqrt(1.0D - 0.5D * d11)) * d15;
                 else
-                if(Math.sin(new_x + 0.78539749999999997D) >= 0.0D)
+                if(Math.sin(new_x + (Math.PI/4)) >= 0.0D)
                     mappoint.y = -d16 - radius * (1.0D / Math.sqrt(1.0D - 0.5D * d11)) * d15;
                 else
                     mappoint.y = d16 - radius * (1.0D / Math.sqrt(1.0D - 0.5D * d11)) * d15;
@@ -2960,8 +2962,8 @@ public class MapProjection extends Canvas
     {
         double d = 45D;
         PJInit(mappoint);
-        mappoint.x = radius * new_x * Math.cos(d * 0.017453277777777776D);
-        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(d * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(d * MathUtil.deg2rad);
+        mappoint.y = (radius * Math.sin(new_y)) / Math.cos(d * MathUtil.deg2rad);
         return true;
     }
 
@@ -2970,7 +2972,7 @@ public class MapProjection extends Canvas
         double d = 0.0D;
         PJInit(mappoint);
         mappoint.y = radius * new_y;
-        mappoint.x = radius * new_x * Math.cos(d * 0.017453277777777776D);
+        mappoint.x = radius * new_x * Math.cos(d * MathUtil.deg2rad);
         return true;
     }
 

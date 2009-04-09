@@ -176,8 +176,8 @@ public class ImageRot {
 				ry = ry - Math.PI;
 				rx += Math.PI;
 			}
-			rx = MathUtil.fixAngleMPI_PI(rx - a);
-			
+			rx = rx - a;
+
 			double sb = Math.sin(b);
 			double cb = Math.cos(b);
 
@@ -190,10 +190,10 @@ public class ImageRot {
 			double e = Math.asin(sy*cb - cy*sb*sa);
 			double ce = Math.cos(e);
 			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
-			if (rx > 0)
+			if (MathUtil.fixAngleMPI_PI(rx) >= 0)
 				dest.x = af;
 			else 
-				dest.x = MathUtil.fixAngleMPI_PI(Math.PI - af);
+				dest.x = Math.PI - af;
 			dest.y = e;
 		}
 		
@@ -255,13 +255,15 @@ public class ImageRot {
 			ry = ry - Math.PI;
 			rx += Math.PI;
 		}
-		rx = MathUtil.fixAngleMPI_PI(rx);
+		rx = MathUtil.fixAngleMPI_PI(rx) + Math.PI;
+		ry = ry + MathUtil.PIover2;
 		
-		int sizeX = targetImg.sizeX - 15;
-		int sizeY = targetImg.sizeY - 15;
+		int offset = 7;
+		int sizeX = targetImg.sizeX - offset*2;
+		int sizeY = targetImg.sizeY - offset*2;
 		
-		dest.x = rx * sizeX / (2*Math.PI) + targetImg.sizeX / 2.0;
-		dest.y = ry * sizeY / Math.PI + targetImg.sizeY / 2.0;
+		dest.x = offset + rx * sizeX / (MathUtil.C2PI);
+		dest.y = offset + ry * sizeY / Math.PI;
 	}
 	
 //	public void projToWorld(double sx, double sy, Point2D.Double dest) {
@@ -275,7 +277,7 @@ public class ImageRot {
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 0 * MathUtil.deg2rad;
-		learner.b = 90 * MathUtil.deg2rad;
+		learner.b = 0 * MathUtil.deg2rad;
 //		boolean res = learner.calculateTwo();
 //		System.out.println("RESULT is " + res);
 		
@@ -348,15 +350,13 @@ public class ImageRot {
 		int scaleX = img.sizeX * 3;
 		int scaleY = img.sizeY * 3;
 
-		int colorX = 0xffffff;
-		int colorY = 0xffff00;
-
 		Statistics st = new Statistics();
 		st.start();
 		Point2D.Double dest = new Point2D.Double();
 		// draw meridians
 		for (int i = numDivisionsX; i >= 0; i--) {
 			double x = i * 2 * Math.PI / numDivisionsX;
+			int colorX = x == 0 ? 0xff0000 : 0xffffff;
 			for (int j = scaleY; j >= 0; j--) {
 				double y = j * Math.PI / scaleY - MathUtil.PIover2;
 				dest.x = x;
@@ -372,6 +372,7 @@ public class ImageRot {
 		// draw parallels
 		for (int j = numDivisionsY; j >= 0; j--) {
 			double y = j * Math.PI / numDivisionsY - MathUtil.PIover2;
+			int colorY = y == 0 ? 0xff0000 : 0xffff00;
 			for (int i = scaleX; i >= 0; i--) {
 				double x = i * 2 * Math.PI / scaleX;
 				dest.x = x;
@@ -380,6 +381,17 @@ public class ImageRot {
 				worldToProj(dest.x, dest.y, img, dest);
 				img.setRGB((int) dest.x, (int) dest.y, colorY);
 			}
+		}
+
+		int colorDiag = 0x0000ff;
+		for (int i = scaleX / 2 ; i >= 0; i--) {
+			double x = i * 2 * Math.PI / scaleX;
+			double y = i * Math.PI / scaleX;
+			dest.x = x;
+			dest.y = y;
+			learner.transformTwo(dest.x, dest.y, dest);
+			worldToProj(dest.x, dest.y, img, dest);
+			img.setRGB((int) dest.x, (int) dest.y, colorDiag);
 		}
 	}
 	
