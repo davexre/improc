@@ -23,7 +23,7 @@ public interface SteppedParallelTask<V> {
 	 * Invoked upon an exception in some of the sub-tasks. The method MUST BE
 	 * thread safe, i.e. may be invoked multiple time from different threads. 
 	 */
-	void onError(Callable<V> task, Exception e);
+	void onError(Callable<V> task, Throwable e);
 	
 	/**
 	 * Invoked upon an successful execution of a sub-task. The method MUST BE

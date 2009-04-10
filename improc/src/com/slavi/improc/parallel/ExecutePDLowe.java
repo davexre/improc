@@ -126,7 +126,7 @@ public class ExecutePDLowe implements SteppedParallelTask<Void> {
 		return result;
 	}
 
-	public void onError(Callable<Void> task, Exception e) {
+	public void onError(Callable<Void> task, Throwable e) {
 	}
 
 	public void onFinally() throws Exception {

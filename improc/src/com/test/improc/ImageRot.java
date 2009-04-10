@@ -166,6 +166,38 @@ public class ImageRot {
 			this.images = images;
 		}
 		
+		public void transformTwo1(double rx, double ry, Point2D.Double dest) {
+			ry = MathUtil.fixAngleMPI_PI(ry);
+			if (ry > MathUtil.PIover2) {
+				ry = Math.PI - ry;
+				rx += Math.PI;
+			}
+			if (ry < -MathUtil.PIover2) {
+				ry = ry - Math.PI;
+				rx += Math.PI;
+			}
+			rx = rx - a;
+
+			double sb = Math.sin(b);
+			double cb = Math.cos(b);
+
+			double sa = Math.sin(rx);
+			double ca = Math.cos(rx);
+			
+			double sy = Math.sin(ry);
+			double cy = Math.cos(ry);
+			
+			double e = Math.asin(sy*cb - cy*sb*sa);
+//			double ce = Math.cos(e);
+			double af = Math.atan2(sa, ca*cb);
+//			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
+//			if (MathUtil.fixAngleMPI_PI(rx) >= 0)
+				dest.x = af;
+//			else 
+//				dest.x = Math.PI - af;
+			dest.y = e;
+		}
+		
 		public void transformTwo(double rx, double ry, Point2D.Double dest) {
 			ry = MathUtil.fixAngleMPI_PI(ry);
 			if (ry > MathUtil.PIover2) {
@@ -277,7 +309,7 @@ public class ImageRot {
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 0 * MathUtil.deg2rad;
-		learner.b = 0 * MathUtil.deg2rad;
+		learner.b = 50 * MathUtil.deg2rad;
 //		boolean res = learner.calculateTwo();
 //		System.out.println("RESULT is " + res);
 		

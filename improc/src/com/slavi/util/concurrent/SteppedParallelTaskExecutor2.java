@@ -1,5 +1,6 @@
 package com.slavi.util.concurrent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.Callable;
@@ -9,20 +10,22 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SteppedParallelTaskExecutor<V> {
+public class SteppedParallelTaskExecutor2<V> {
 	
 	ExecutorService exec;
-	int maxParallelTasks;
 	SteppedParallelTask<V> task;
 
 	Object lock = new Object();
 	volatile boolean finished = false;
 	volatile boolean taskCanceled = false;
-	Exception taskException = null;
-	HashMap<SubtaskWrapper, Future<Void>> subtasksSubmitted = new HashMap<SubtaskWrapper, Future<Void>>();
-	Queue<Callable<V>> subtasksToDo;
+	Throwable taskException = null;
+	int runningTasks;
+	ArrayList<Callable<V>> subtasksToDo = new ArrayList<Callable<V>>();
 	
-	public SteppedParallelTaskExecutor(ExecutorService exec, int maxParallelTasks, SteppedParallelTask<V> task) {
+	HashMap<SubtaskWrapper, Future<Void>> subtasksSubmitted = new HashMap<SubtaskWrapper, Future<Void>>();
+	int maxParallelTasks;
+	
+	public SteppedParallelTaskExecutor2(ExecutorService exec, int maxParallelTasks, SteppedParallelTask<V> task) {
 		if (maxParallelTasks < 1)
 			maxParallelTasks = 1;
 		this.exec = exec;
@@ -38,60 +41,28 @@ public class SteppedParallelTaskExecutor<V> {
 		}
 		
 		public Void call() {
-			Exception e = null;
-			try {
-				synchronized (lock) {
-					if (taskCanceled) {
-						subtasksSubmitted.remove(this);
-						if (subtasksSubmitted.isEmpty())
-							internalFinish();
-						return null;
-					}
-				}
-				V subtaskResult = subtask.call();
-				task.onSubtaskFinished(subtask, subtaskResult);
-				
-				Callable<V> nextSubtask = null;
-				boolean finishedAllSubtasks = false;
-				synchronized (lock) {	
-					if (subtasksToDo != null)
-						nextSubtask = subtasksToDo.poll();
-					subtasksSubmitted.remove(this);
-					if (nextSubtask == null) {
-						if (subtasksSubmitted.isEmpty()) {
-							finishedAllSubtasks = true;
-						}
-					}
-				}
-				
-				if (nextSubtask != null) {
-					if (!taskCanceled) {
-						SubtaskWrapper subtaskWrapper = new SubtaskWrapper(nextSubtask);
-						Future<Void> f = exec.submit(subtaskWrapper);
-						subtasksSubmitted.put(subtaskWrapper, f);
-					}
-				} else if (finishedAllSubtasks) {
-					makeSubtasks();
-				}
-			} catch (Exception ex) {
-				e = ex;
-			}
-			if (e != null) {
-				internalCancelTask(true);
-				boolean shouldFinish;
-				synchronized (lock) {
-					if (taskException == null) // If more than one tasks throws an exception keep the first thrown one. 
-						taskException = e;
-					subtasksSubmitted.remove(this);
-					shouldFinish = subtasksSubmitted.isEmpty();
-				}
+			if (!taskCanceled) {
 				try {
-					task.onError(subtask, e);
-				} catch (Exception ignoreThis) {
+					V result = subtask.call();
+					task.onSubtaskFinished(subtask, result);
+				} catch (Throwable t) {
+					synchronized (lock) {
+						if (taskException == null)
+							taskException = t;
+						internalCancelTask(true);
+					}
+					try {
+						task.onError(subtask, t); 
+					} catch (Throwable t2) {
+					}
 				}
-				if (shouldFinish) {
-					internalFinish();
-				}
+			}
+			int curRunning;
+			synchronized (lock) {
+				curRunning = --runningTasks;
+			}
+			if (curRunning == 0) {
+				makeSubtasks();
 			}
 			return null;
 		}
@@ -119,6 +90,8 @@ public class SteppedParallelTaskExecutor<V> {
 					lock.notifyAll();
 				}
 			}
+		} else {
+			System.err.println("Shit happens");
 		}
 	}
 	
@@ -128,28 +101,39 @@ public class SteppedParallelTaskExecutor<V> {
 			return;
 		}
 		synchronized(lock) {
-			if (!finished) {
-				try {
-					subtasksToDo = task.getNextStepTasks();
-				} catch (Exception e) {
-					taskCanceled = true;
-					if (taskException == null) // If more than one tasks throws an exception keep the first thrown one. 
-						taskException = e;
-					internalFinish();
+			if (finished) 
+				return;
+			try {
+				subtasksToDo.clear();
+				subtasksSubmitted.clear();
+				Queue<Callable<V>> todo = task.getNextStepTasks();
+				if (todo != null) {
+					subtasksToDo.addAll(todo);
 				}
-				if ((subtasksToDo == null) || (subtasksToDo.peek() == null)) {
-					internalFinish();
-					return;
-				}
-				int i = 0;
-				while (i < maxParallelTasks) {
-					Callable<V> subtask = subtasksToDo.poll();
-					if (subtask == null)
-						break;
-					SubtaskWrapper subtaskWrapper = new SubtaskWrapper(subtask);
-					Future<Void> f = exec.submit(subtaskWrapper);
+				runningTasks = subtasksToDo.size();
+			} catch (Exception e) {
+				taskCanceled = true;
+				if (taskException == null) // If more than one tasks throws an exception keep the first thrown one. 
+					taskException = e;
+				internalFinish();
+				return;
+			}
+			if (runningTasks == 0) {
+				internalFinish();
+				return;
+			}
+		}
+		for (int i = 0; i < subtasksToDo.size(); i++) {
+			Callable<V> subtask = subtasksToDo.get(i);
+			SubtaskWrapper subtaskWrapper = new SubtaskWrapper(subtask);
+			try {
+				Future<Void> f = exec.submit(subtaskWrapper);
+				synchronized(lock) {
 					subtasksSubmitted.put(subtaskWrapper, f);
 				}
+			} catch (Exception e) {
+				internalCancelTask(true); 
+				break;
 			}
 		}
 	}
@@ -218,13 +202,14 @@ public class SteppedParallelTaskExecutor<V> {
 	public Future<Void> start() {
 		try {
 			task.onPrepare();
+			makeSubtasks();
 		} catch (Exception e) {
 			synchronized (lock) {
+				finished = true;
 				taskCanceled = true;
-				taskException = e;					
+				taskException = e;
 			}
 		}
-		makeSubtasks();
 		return new InternalFuture();
 	}
 }

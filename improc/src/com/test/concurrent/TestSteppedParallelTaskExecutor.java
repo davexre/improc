@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.slavi.util.concurrent.SteppedParallelTask;
-import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
+import com.slavi.util.concurrent.SteppedParallelTaskExecutor2;
 
 public class TestSteppedParallelTaskExecutor {
 	static final int MaxJobsPerTask = 3;
@@ -30,11 +30,11 @@ public class TestSteppedParallelTaskExecutor {
 			}
 			
 			public Void call() throws Exception {
-				System.out.println("Started job   " + id + " (" + Thread.currentThread().getId() + ")");
+				System.out.println("Started task   " + id + " (" + Thread.currentThread().getId() + ")");
 				Thread.sleep(500);
 //				if (id == 5)
 //					throw new Exception("InternalJob.call");
-				System.out.println("Finished job  " + id + " (" + Thread.currentThread().getId() + ")");
+				System.out.println("Finished task  " + id + " (" + Thread.currentThread().getId() + ")");
 				return null;
 			}
 		}
@@ -53,17 +53,21 @@ public class TestSteppedParallelTaskExecutor {
 			Queue<Callable<Void>> result = new LinkedList<Callable<Void>>();
 			for (int i = 0; i < MaxJobsPerTask; i++) {
 				result.add(new InternalJob(jobCount++));
+//				if (jobCount == 5)
+//					throw new RuntimeException("getNextStepTasks");
 			}
 			return result;
 		}
 
-		public void onError(Callable<Void> task, Exception e) {
+		public void onError(Callable<Void> task, Throwable e) {
 			System.out.println("ONERROR: " + e);
 //			throw new RuntimeException("onError");
 		}
 
 		public void onSubtaskFinished(Callable<Void> task, Void result) {
-//			throw new RuntimeException("onJobFinished");
+			System.out.println("on subtask finished " + ((InternalJob)task).id + " (" + Thread.currentThread().getId() + ")");
+//			if (((InternalJob)task).id == 5)
+//				throw new RuntimeException("onJobFinished");
 		}
 
 		public void onFinally() {
@@ -77,22 +81,21 @@ public class TestSteppedParallelTaskExecutor {
 		}
 	}
 	
-	
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		ExecutorService exec;
+//		exec = new FakeThreadExecutor();
 //		exec = Executors.newSingleThreadExecutor();
 		exec = Executors.newFixedThreadPool(2);
 		System.out.println("Creating main task" + " (" + Thread.currentThread().getId() + ")");
 		MySteppedParallelTask task = new MySteppedParallelTask(3);
-		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, 2, task).start();
+		System.out.println("Submitted main task" + " (" + Thread.currentThread().getId() + ")");
+		Future<Void> ft = new SteppedParallelTaskExecutor2<Void>(exec, 2, task).start();
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 		}
-		System.out.println("Submitted main task" + " (" + Thread.currentThread().getId() + ")");
 		try {
-			//ft.cancel(true);
-			exec.shutdown();
+			ft.cancel(true);
 			ft.get();
 			System.out.println("Got answer from main task" + " (" + Thread.currentThread().getId() + ")");
 		} finally {
