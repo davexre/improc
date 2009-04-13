@@ -13,6 +13,7 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.tree.KDTree;
 import com.slavi.util.ui.SwtUtil;
@@ -60,8 +61,9 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				if (Thread.interrupted())
 					throw new InterruptedException();
 				
-				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
-//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
+//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMy(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate);
+//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
+				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
 				if (nnlst.size() < 2)
 					continue;
 //				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
@@ -104,6 +106,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
+		Marker.mark("\n\n***************");
 		for (KeyPointList k : tree.keyPointLists) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
@@ -118,7 +121,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			}
 			task.get();
 		}
-
+		Marker.release();
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 		for (KeyPointPairList k : keyPointPairLists.values()) {
 			result.add(k);
