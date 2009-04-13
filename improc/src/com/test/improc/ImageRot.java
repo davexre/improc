@@ -10,7 +10,6 @@ import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 /*
@@ -65,8 +64,9 @@ public class ImageRot {
 			sy * srcImage.camera2real.getItem(1, 2) +
 			sz * srcImage.camera2real.getItem(2, 2);
 		
+		double d = Math.sqrt(x*x + z*z); 
 		x = Math.atan2(x, z);
-		y = Math.atan2(y, z);
+		y = Math.atan2(y, d);
 //		final double pi2 = Math.PI / 2.0; 
 //		if (y > pi2) { 
 //			y = Math.PI - y;
@@ -109,6 +109,58 @@ public class ImageRot {
 		dest.y = (y / srcImage.cameraScale) + srcImage.cameraOriginY;
 	}
 	
+	public void dumpPoint(Point2D.Double p) {
+		System.out.println(
+				MathUtil.d4(MathUtil.rad2deg * p.x) + "\t" +
+				MathUtil.d4(MathUtil.rad2deg * p.y) + "\t");
+	}
+	
+	ArrayList<Image> generate() {
+		ArrayList<Image> result = new ArrayList<Image>();
+		
+		int sizeX = 2272;
+		int sizeY = 1712;
+		double cameraScale = 1.0 / Math.max(sizeX, sizeY);
+		int maxI = 4;
+		for (int i = 0; i < maxI; i++) {
+			Image img = new Image();
+			img.sizeX = sizeX;
+			img.sizeY = sizeY;
+			img.cameraOriginX = sizeX / 2.0;
+			img.cameraOriginY = sizeY / 2.0;
+			img.cameraScale = cameraScale;
+
+			img.scaleZ = 0.5 / Math.tan(MathUtil.deg2rad * 40 / 2);
+			img.ry = 2.0 * i * Math.PI / maxI;
+			img.rx = 0 * MathUtil.deg2rad;
+			img.rz = 0 * MathUtil.deg2rad;
+			img.camera2real = RotationXYZ.makeAngles(img.rx, img.ry, img.rz);
+			
+			img.tl = new Point2D.Double();
+			img.tr = new Point2D.Double();
+			img.bl = new Point2D.Double();
+			img.br = new Point2D.Double();
+			
+			imageToWorld(0, 0, img, img.tl);
+			imageToWorld(sizeX-1, 0, img, img.tr);
+			imageToWorld(0, sizeY-1, img, img.bl);
+			imageToWorld(sizeX-1, sizeY-1, img, img.br);
+
+			dumpPoint(img.tl);
+			dumpPoint(img.tr);
+			dumpPoint(img.bl);
+			dumpPoint(img.br);
+			
+			System.out.println(
+					MathUtil.d4(MathUtil.rad2deg * (MathUtil.fixAnglePI(img.tl.x - img.br.x))) + "\t" +
+					MathUtil.d4(MathUtil.rad2deg * (MathUtil.fixAnglePI(img.tl.y - img.br.y))));
+			System.out.println();
+			
+			result.add(img);
+		}
+		
+		return result;
+	}
 	
 	ArrayList<Image> read() throws Exception {
 		BufferedReader fin = new BufferedReader(
@@ -199,6 +251,23 @@ public class ImageRot {
 		}
 		
 		public void transformTwo(double rx, double ry, Point2D.Double dest) {
+			rx = rx - a;
+			double sb = Math.sin(rx);
+			double cb = Math.cos(rx);
+			
+			double sg = Math.sin(b);
+			double cg = Math.cos(b);
+
+			double sy = Math.sin(ry);
+			double cy = Math.cos(ry);
+			
+			double e = Math.asin(sy*cg - cy*sg*sb);
+			double af = Math.atan2(sy*sg + cy*cg*sb, cy*cb);
+			dest.x = af;
+			dest.y = e;
+		}
+
+		public void transformTwoOLD(double rx, double ry, Point2D.Double dest) {
 			ry = MathUtil.fixAngleMPI_PI(ry);
 			if (ry > MathUtil.PIover2) {
 				ry = Math.PI - ry;
@@ -305,37 +374,46 @@ public class ImageRot {
 	
 	public void doIt() throws Exception {
 		ArrayList<Image> data = read();
+//		ArrayList<Image> data = generate();
 		int outsizeX = 1500;
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 0 * MathUtil.deg2rad;
-		learner.b = 50 * MathUtil.deg2rad;
-//		boolean res = learner.calculateTwo();
-//		System.out.println("RESULT is " + res);
+		learner.b = 10 * MathUtil.deg2rad;
+		boolean res = learner.calculateTwo();
+		System.out.println("RESULT is " + res);
 		
 		SafeImage img = new SafeImage(outsizeX, outsizeY);
-/*		Point2D.Double dest = new Point2D.Double();
+		Point2D.Double dest = new Point2D.Double();
 		for (Image image : data) {
 			int color = img.getNextColor();
-			learner.transformTwo(image.tl.x, image.tl.y, dest);
+			dest.x = image.tl.x;
+			dest.y = image.tl.y;
+			learner.transformTwo(dest.x, dest.y, dest);
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX1 = (int) dest.x;
 			int atY1 = (int) dest.y;
 			img.drawCross(atX1, atY1, color);
 			
-			learner.transformTwo(image.tr.x, image.tr.y, dest);
+			dest.x = image.tr.x;
+			dest.y = image.tr.y;
+			learner.transformTwo(dest.x, dest.y, dest);
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX2 = (int) dest.x;
 			int atY2 = (int) dest.y;
 			img.drawCross(atX2, atY2, color);
 			
-			learner.transformTwo(image.bl.x, image.bl.y, dest);
+			dest.x = image.bl.x;
+			dest.y = image.bl.y;
+			learner.transformTwo(dest.x, dest.y, dest);
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX3 = (int) dest.x;
 			int atY3 = (int) dest.y;
 			img.drawCross(atX3, atY3, color);
 			
-			learner.transformTwo(image.br.x, image.br.y, dest);
+			dest.x = image.br.x;
+			dest.y = image.br.y;
+			learner.transformTwo(dest.x, dest.y, dest);
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX4 = (int) dest.x;
 			int atY4 = (int) dest.y;
@@ -365,7 +443,7 @@ public class ImageRot {
 				img.setRGB((int) dest.x, (int) dest.y, color); 
 			}
 		}
-*/
+
 		drawWorldMesh(img, learner);
 		
 		int crossColor = 0xffff00;
@@ -382,8 +460,6 @@ public class ImageRot {
 		int scaleX = img.sizeX * 3;
 		int scaleY = img.sizeY * 3;
 
-		Statistics st = new Statistics();
-		st.start();
 		Point2D.Double dest = new Point2D.Double();
 		// draw meridians
 		for (int i = numDivisionsX; i >= 0; i--) {
@@ -394,13 +470,10 @@ public class ImageRot {
 				dest.x = x;
 				dest.y = y;
 				learner.transformTwo(dest.x, dest.y, dest);
-				st.addValue(dest.x);
 				worldToProj(dest.x, dest.y, img, dest);
 				img.setRGB((int) dest.x, (int) dest.y, colorX);
 			}
 		}
-		st.stop();
-		System.out.println(st);
 		// draw parallels
 		for (int j = numDivisionsY; j >= 0; j--) {
 			double y = j * Math.PI / numDivisionsY - MathUtil.PIover2;
@@ -417,7 +490,7 @@ public class ImageRot {
 
 		int colorDiag = 0x0000ff;
 		for (int i = scaleX / 2 ; i >= 0; i--) {
-			double x = i * 2 * Math.PI / scaleX;
+			double x = i * 4 * Math.PI / scaleX;
 			double y = i * Math.PI / scaleX;
 			dest.x = x;
 			dest.y = y;

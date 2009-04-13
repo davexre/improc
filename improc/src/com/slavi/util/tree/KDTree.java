@@ -653,4 +653,77 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public boolean getIgnoreDuplicates() {
 		return ignoreDuplicates;
 	}
+	
+
+	////////////////////////////////////////////////////////////////////////////////////
+	
+	public NearestNeighbours<E> getNearestNeighboursMy(E target, int maxNeighbours, double maxDistancePerCoordinate) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+		result.searchSteps = -1;
+		nearestSegmentMy(result, target, root, 0, Math.abs(maxDistancePerCoordinate));
+		return result;
+	}
+	
+	private void nearestSegmentMy(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension, double maxDistancePerCoordinate) {
+		if (curNode == null) 
+			return;
+		nearest.usedSearchSteps++;
+
+		if (canFindDistanceBetween(target, curNode.data))
+			nearest.add(curNode.data, getDistanceSquared(target, curNode.data));
+		double curNodeValue = getValue(curNode.data, dimension);
+		double targetValue = getValue(target, dimension);
+		//// TODO: more to go here
+		
+		int nextDimension = (dimension + 1) % dimensions;
+
+		if (targetValue < curNodeValue) {
+			// Prepare and check the "nearer" hyper rectangle
+			double tmp = nearest.hr[dimension][1];
+			nearest.hr[dimension][1] = curNodeValue;
+			nearestSegment(nearest, target, curNode.left, nextDimension);
+			nearest.hr[dimension][1] = tmp;
+
+			if (nearest.searchSteps != 0) {
+				if (nearest.searchSteps > 0)
+					nearest.searchSteps--;
+				// Prepare the "further" hyper rectangle
+				tmp = nearest.hr[dimension][0];
+				nearest.hr[dimension][0] = curNodeValue;
+				// Check the "further" hyper rectangle:
+				//   if capacity is not reached OR
+				//   if distance from target to "further" hyper rectangle is smaller 
+				//      than the maximum of the currently found neighbours
+				if ((nearest.size() < nearest.getCapacity()) ||
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegment(nearest, target, curNode.right, nextDimension);
+				// Restore the hyper rectangle
+				nearest.hr[dimension][0] = tmp;
+			}
+		} else {
+			// Prepare and check the "nearer" hyper rectangle
+			double tmp = nearest.hr[dimension][0];
+			nearest.hr[dimension][0] = curNodeValue;			
+			nearestSegment(nearest, target, curNode.right, nextDimension);
+			nearest.hr[dimension][0] = tmp;
+
+			if (nearest.searchSteps != 0) {
+				if (nearest.searchSteps > 0)
+					nearest.searchSteps--;
+				// Prepare the "further" hyper rectangle
+				tmp = nearest.hr[dimension][1];
+				nearest.hr[dimension][1] = curNodeValue;
+				// Check the "further" hyper rectangle:
+				//   if capacity is not reached OR
+				//   if distance from target to "further" hyper rectangle is smaller 
+				//      than the maximum of the currently found neighbours
+				if ((nearest.size() < nearest.getCapacity()) ||
+						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					nearestSegment(nearest, target, curNode.left, nextDimension);
+				// Restore the hyper rectangle
+				nearest.hr[dimension][1] = tmp;
+			}
+		}
+	}
+
 }
