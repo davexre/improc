@@ -664,6 +664,13 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return result;
 	}
 	
+	public NearestNeighbours<E> getNearestNeighboursMyBBF(E target, int maxNeighbours, double maxDistancePerCoordinate, int maxSearchSteps) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+		result.searchSteps = maxSearchSteps;
+		nearestSegmentMy(result, target, root, 0, Math.abs(maxDistancePerCoordinate));
+		return result;
+	}
+	
 	private void nearestSegmentMy(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension, double maxDistancePerCoordinate) {
 		if (curNode == null) 
 			return;
@@ -682,7 +689,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			// Prepare and check the "nearer" hyper rectangle
 			double tmp = nearest.hr[dimension][1];
 			nearest.hr[dimension][1] = curNodeValue;
-			nearestSegment(nearest, target, curNode.left, nextDimension);
+			nearestSegmentMy(nearest, target, curNode.left, nextDimension, maxDistancePerCoordinate);
 			nearest.hr[dimension][1] = tmp;
 
 			if (targetValue + maxDistancePerCoordinate >= curNodeValue) {
@@ -698,7 +705,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 					//      than the maximum of the currently found neighbours
 					if ((nearest.size() < nearest.getCapacity()) ||
 							(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-						nearestSegment(nearest, target, curNode.right, nextDimension);
+						nearestSegmentMy(nearest, target, curNode.right, nextDimension, maxDistancePerCoordinate);
 					// Restore the hyper rectangle
 					nearest.hr[dimension][0] = tmp;
 				}
@@ -707,7 +714,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			// Prepare and check the "nearer" hyper rectangle
 			double tmp = nearest.hr[dimension][0];
 			nearest.hr[dimension][0] = curNodeValue;			
-			nearestSegment(nearest, target, curNode.right, nextDimension);
+			nearestSegmentMy(nearest, target, curNode.right, nextDimension, maxDistancePerCoordinate);
 			nearest.hr[dimension][0] = tmp;
 
 			if (targetValue - maxDistancePerCoordinate <= curNodeValue) {
@@ -723,7 +730,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 					//      than the maximum of the currently found neighbours
 					if ((nearest.size() < nearest.getCapacity()) ||
 							(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
-						nearestSegment(nearest, target, curNode.left, nextDimension);
+						nearestSegmentMy(nearest, target, curNode.left, nextDimension, maxDistancePerCoordinate);
 					// Restore the hyper rectangle
 					nearest.hr[dimension][1] = tmp;
 				}

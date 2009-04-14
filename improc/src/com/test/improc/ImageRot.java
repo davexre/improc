@@ -218,38 +218,6 @@ public class ImageRot {
 			this.images = images;
 		}
 		
-		public void transformTwo1(double rx, double ry, Point2D.Double dest) {
-			ry = MathUtil.fixAngleMPI_PI(ry);
-			if (ry > MathUtil.PIover2) {
-				ry = Math.PI - ry;
-				rx += Math.PI;
-			}
-			if (ry < -MathUtil.PIover2) {
-				ry = ry - Math.PI;
-				rx += Math.PI;
-			}
-			rx = rx - a;
-
-			double sb = Math.sin(b);
-			double cb = Math.cos(b);
-
-			double sa = Math.sin(rx);
-			double ca = Math.cos(rx);
-			
-			double sy = Math.sin(ry);
-			double cy = Math.cos(ry);
-			
-			double e = Math.asin(sy*cb - cy*sb*sa);
-//			double ce = Math.cos(e);
-			double af = Math.atan2(sa, ca*cb);
-//			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
-//			if (MathUtil.fixAngleMPI_PI(rx) >= 0)
-				dest.x = af;
-//			else 
-//				dest.x = Math.PI - af;
-			dest.y = e;
-		}
-		
 		public void transformTwo(double rx, double ry, Point2D.Double dest) {
 			rx = rx - a;
 			double sb = Math.sin(rx);
@@ -266,43 +234,12 @@ public class ImageRot {
 			dest.x = af;
 			dest.y = e;
 		}
-
-		public void transformTwoOLD(double rx, double ry, Point2D.Double dest) {
-			ry = MathUtil.fixAngleMPI_PI(ry);
-			if (ry > MathUtil.PIover2) {
-				ry = Math.PI - ry;
-				rx += Math.PI;
-			}
-			if (ry < -MathUtil.PIover2) {
-				ry = ry - Math.PI;
-				rx += Math.PI;
-			}
-			rx = rx - a;
-
-			double sb = Math.sin(b);
-			double cb = Math.cos(b);
-
-			double sa = Math.sin(rx);
-			double ca = Math.cos(rx);
-			
-			double sy = Math.sin(ry);
-			double cy = Math.cos(ry);
-			
-			double e = Math.asin(sy*cb - cy*sb*sa);
-			double ce = Math.cos(e);
-			double af = ce == 0.0 ? 0 : Math.asin(cy*ca/ce);
-			if (MathUtil.fixAngleMPI_PI(rx) >= 0)
-				dest.x = af;
-			else 
-				dest.x = Math.PI - af;
-			dest.y = e;
-		}
 		
 		public boolean calculateTwo() {
 			LeastSquaresAdjust lsa = new LeastSquaresAdjust(2, 1);
 			
-			double sb = Math.sin(b);
-			double cb = Math.cos(b);
+			double sg = Math.sin(b);
+			double cg = Math.cos(b);
 			
 			Matrix coefs = new Matrix(2, 1);
 			for (Image image : images) {
@@ -315,15 +252,15 @@ public class ImageRot {
 					case 3: src = image.br; break;
 					}
 
-					double sa = Math.sin(src.x - a);
-					double ca = Math.cos(src.x - a);
+					double sb = Math.sin(src.x - a);
+					double cb = Math.cos(src.x - a);
 					
 					double sy = Math.sin(src.y);
 					double cy = Math.cos(src.y);
 					
-					double dFdA = -sy*sb - cy*cb*sa;
-					double dFdB = cy*sb*ca;
-					double F0 = sy*cb - cy*sb*sa;
+					double dFdA = -cy*sg*cb;
+					double dFdB = -sy*sg - cy*cg*sb;
+					double F0 = sy*cg - cy*sg*sb;
 					
 					coefs.setItem(0, 0, dFdA);
 					coefs.setItem(1, 0, dFdB);
@@ -333,11 +270,17 @@ public class ImageRot {
 			if (!lsa.calculate())
 				return false;
 
+			System.out.println(
+					"A=" + MathUtil.d4(a*MathUtil.rad2deg) + 
+					"\tB=" + MathUtil.d4(b*MathUtil.rad2deg));
 			// Build transformer
 			Matrix u = lsa.getUnknown(); 
 			u.printM("U");
+			u.rMul(-1);
 			a = MathUtil.fixAngleMPI_PI(a + u.getItem(0, 0));
 			b = MathUtil.fixAngleMPI_PI(b + u.getItem(0, 1));
+//			a = a + u.getItem(0, 0);
+//			b = b + u.getItem(0, 1);
 			
 			System.out.println(
 					"A=" + MathUtil.d4(a*MathUtil.rad2deg) + 
@@ -378,9 +321,14 @@ public class ImageRot {
 		int outsizeX = 1500;
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
-		learner.a = 0 * MathUtil.deg2rad;
-		learner.b = 10 * MathUtil.deg2rad;
+		learner.a = 1 * MathUtil.deg2rad;
+		learner.b = 179 * MathUtil.deg2rad;
 		boolean res = learner.calculateTwo();
+		res &= learner.calculateTwo();
+		res &= learner.calculateTwo();
+		res &= learner.calculateTwo();
+		res &= learner.calculateTwo();
+		res &= learner.calculateTwo();
 		System.out.println("RESULT is " + res);
 		
 		SafeImage img = new SafeImage(outsizeX, outsizeY);

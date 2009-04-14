@@ -3,6 +3,7 @@ package com.test.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Marker;
 import com.slavi.util.tree.KDTree;
 import com.slavi.util.tree.KDTree.NearestNeighbours;
@@ -48,6 +49,8 @@ public class TestKDTree {
 	}
 	
 	protected static void generateItems(ArrayList<MyKDData> items, double[] value, int dimension, int itemsPerDimension) {
+		if (idCounter - 10000 > 5000)
+			return;
 		if (dimension < 0) {
 			items.add(new MyKDData(value));
 		} else {
@@ -113,9 +116,14 @@ public class TestKDTree {
 		System.out.println("Max used steps=" + maxUsedSearchSteps);
 	}
 	
+	public KDTree.NearestNeighbours<MyKDData> findNearest(MyKDTree tree, MyKDData item) {
+		int maxSearchSteps = tree.getTreeDepth() / 2;
+		return tree.getNearestNeighboursBBF(item, 2, maxSearchSteps);
+	}
+	
 	public static void main(String[] args) {
-		int dimensions = 10;
-		int itemsPerDimension = 3;
+		int dimensions = 128;
+		int itemsPerDimension = 2;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
 		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
 		MyKDTree tree = new MyKDTree(dimensions, items);
@@ -132,14 +140,21 @@ public class TestKDTree {
 		System.out.println("Item to find:");
 		System.out.println(item);
 		System.out.println(tree.contains(item));
-		int makSearchSteps = 1; //tree.getTreeDepth() / 2;
+		int maxSearchSteps = 1; //tree.getTreeDepth() / 2;
+		Statistics stat = new Statistics();
+		stat.start();
 		for (MyKDData i : items) {
-			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(i, 2, makSearchSteps);
+			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMy(i, 2, 1);
+//			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMyBBF(i, 2, 1, maxSearchSteps);
+//			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(i, 2, maxSearchSteps);
+			stat.addValue(nn.getUsedSearchSteps());
 			if (i != nn.getItem(0)) {
 				System.out.println("NOT FOUND " + i + "|" + nn.getItem(0));
 			}				
 		}
-		NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(item, 3, makSearchSteps);
+		stat.stop();
+		System.out.println(stat);
+		NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMy(item, 3, 5);
 		System.out.println("Neares neighbours:");
 		for (int i = 0; i < nn.size(); i++)
 			System.out.println(nn.getItem(i));

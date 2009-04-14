@@ -61,9 +61,9 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				if (Thread.interrupted())
 					throw new InterruptedException();
 				
-//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMy(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate);
-//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
-				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
+//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMyBBF(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps);
+				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
+//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
 				if (nnlst.size() < 2)
 					continue;
 //				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {

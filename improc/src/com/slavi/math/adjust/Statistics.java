@@ -1,5 +1,7 @@
 package com.slavi.math.adjust;
 
+import java.util.Locale;
+
 
 /**
  * Формулите са взети от "Теория на математическата обработка на геодезическите
@@ -31,15 +33,14 @@ public class Statistics {
 	public static final int CStatMD       = 0x0020;
 	// Съобщение 'There is(are) bad values'
 	public static final int CStatErrors   = 0x0040;
-	// Таблица с всички стойности. Лошите стойности са
-    // винаги маркирани като лоши, независимо от
-    // флага CStatErrors. Има значение само за
-    // TStatistics, но не и за TStatisticsLT.
-	public static final int CStatDetails  = 0x0080;
 	
-	public static final int CStatAll      = 0x007f;
+	public static final int CStatAll      = CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatErrors;
 	
-	public static final int CStatDefault = CStatAll; // CStatJ | CStatAE | CStatErrors;
+	public static final int CStatShort    = CStatJ | CStatMinMax | CStatErrors;
+
+	public static final int CStatDetail   = CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatErrors;
+	
+	public static final int CStatDefault  = CStatDetail;
 
     /**
 	 * Доверителна вероятност, стр.53, стойности близки до 1, но по-малки
@@ -268,41 +269,41 @@ public class Statistics {
     
     public String toString(int style) {
     	StringBuilder b = new StringBuilder();
-    	b.append(String.format(
+    	b.append(String.format(Locale.US,
 			"Average           = %.4f\n" +
 			"Count             = %d\n" +
 			"B                 = %.4f",
 			new Object[] { new Double(this.getAvgValue()), new Integer(this.getItemsCount()), new Double(this.B) } ));
     	if ((style & CStatJ) != 0)
-			b.append(String.format("\n" +
+			b.append(String.format(Locale.US, "\n" +
 				"J start           = %.4f\n" +
 				"J end             = %.4f", 
 				new Object[] { new Double(this.J_Start), new Double(this.J_End) } ));
     	if ((style & CStatAE) != 0)
-    		b.append(String.format("\n" +
+    		b.append(String.format(Locale.US, "\n" +
 				"A                 = %.4f\n" +
 				"E                 = %.4f", 
 				new Object[] { new Double(this.A), new Double(this.E) } ));
     	if ((style & CStatMinMax) != 0)
-    		b.append(String.format("\n" +
+    		b.append(String.format(Locale.US, "\n" +
 				"min               = %.4f\n" +
 				"max               = %.4f", 
 				new Object[] { new Double(this.MinX), new Double(this.MaxX) } ));
     	if ((style & CStatAbs) != 0)
-    		b.append(String.format("\n" +
+    		b.append(String.format(Locale.US, "\n" +
 				"min(abs(X))       = %.4f\n" +
 				"max(abs(X))       = %.4f", 
 				new Object[] { new Double(this.AbsMinX), new Double(this.AbsMaxX) } ));
     	if ((style & CStatDelta) != 0)
-    		b.append(String.format("\n" +
+    		b.append(String.format(Locale.US, "\n" +
 				"max-min           = %.4f", 
 				new Object[] { new Double(this.MaxX - this.MinX) } ));
     	if ((style & CStatMD) != 0) {
 	    	for (int i = 2; i <= 4; i++)
-	    		b.append(String.format("\nM[%d]              = %.4f", 
+	    		b.append(String.format(Locale.US, "\nM[%d]              = %.4f", 
 	    				new Object[] { new Integer(i), new Double(getM(i)) } ));
 	    	for (int i = 2; i <= 4; i++)
-	    		b.append(String.format("\nD[%d]              = %.4f", 
+	    		b.append(String.format(Locale.US, "\nD[%d]              = %.4f", 
 	    				new Object[] { new Integer(i), new Double(getD(i)) } ));
     	}
     	if (((style & CStatErrors) != 0) && hasBadValues()) 
