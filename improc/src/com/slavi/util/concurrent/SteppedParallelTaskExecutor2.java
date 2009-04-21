@@ -20,6 +20,7 @@ public class SteppedParallelTaskExecutor2<V> {
 	volatile boolean taskCanceled = false;
 	Throwable taskException = null;
 	int runningTasks;
+	int finishedTasks;
 	ArrayList<Callable<V>> subtasksToDo = new ArrayList<Callable<V>>();
 	
 	HashMap<SubtaskWrapper, Future<Void>> subtasksSubmitted = new HashMap<SubtaskWrapper, Future<Void>>();
@@ -39,8 +40,21 @@ public class SteppedParallelTaskExecutor2<V> {
 		public SubtaskWrapper(Callable<V> subtask) {
 			this.subtask = subtask;
 		}
-		
+
 		public Void call() {
+			System.out.println("entered call");
+			internal_call();
+			System.out.println("exit call");
+			return null;
+		}
+		
+		public Void internal_call() {
+			synchronized (lock) {
+				if (taskCanceled) {
+					return null;
+				}
+				runningTasks++;
+			}			
 			if (!taskCanceled) {
 				try {
 					V result = subtask.call();
@@ -57,11 +71,18 @@ public class SteppedParallelTaskExecutor2<V> {
 					}
 				}
 			}
-			int curRunning;
+			boolean invokeMakeSubtasks;
 			synchronized (lock) {
-				curRunning = --runningTasks;
+				runningTasks--;
+				finishedTasks++;
+				if (taskCanceled) {
+					if (runningTasks == 0)
+						internalFinish();
+					return null;
+				}
+				invokeMakeSubtasks = finishedTasks == subtasksToDo.size();
 			}
-			if (curRunning == 0) {
+			if (invokeMakeSubtasks) {
 				makeSubtasks();
 			}
 			return null;
@@ -69,6 +90,7 @@ public class SteppedParallelTaskExecutor2<V> {
 	}
 	
 	void internalFinish() {
+		System.out.println("internal finish");
 		boolean shouldNotify = false;
 		synchronized (lock) {
 			if (!finished) {
@@ -96,21 +118,30 @@ public class SteppedParallelTaskExecutor2<V> {
 	}
 	
 	void makeSubtasks() {
+		System.out.println("enter makeSubtasks");
+		makeSubtasks_internal();
+		System.out.println("exit  makeSubtasks");
+	}
+	
+	void makeSubtasks_internal() {
 		if (taskCanceled) {
 			internalFinish();
 			return;
 		}
 		synchronized(lock) {
-			if (finished) 
+			if (finished) {
+				internalFinish();
 				return;
+			}
 			try {
+				finishedTasks = 0;
+				runningTasks = 0;
 				subtasksToDo.clear();
 				subtasksSubmitted.clear();
 				Queue<Callable<V>> todo = task.getNextStepTasks();
 				if (todo != null) {
 					subtasksToDo.addAll(todo);
 				}
-				runningTasks = subtasksToDo.size();
 			} catch (Exception e) {
 				taskCanceled = true;
 				if (taskException == null) // If more than one tasks throws an exception keep the first thrown one. 
@@ -118,7 +149,7 @@ public class SteppedParallelTaskExecutor2<V> {
 				internalFinish();
 				return;
 			}
-			if (runningTasks == 0) {
+			if (subtasksToDo.size() == 0) {
 				internalFinish();
 				return;
 			}
@@ -145,6 +176,8 @@ public class SteppedParallelTaskExecutor2<V> {
 				for (Future<Void> f : subtasksSubmitted.values()) {
 					f.cancel(mayInterrupt);
 				}
+				if (runningTasks == 0)
+					lock.notifyAll();
 			}
 		}
 	}

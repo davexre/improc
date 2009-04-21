@@ -46,8 +46,10 @@ public class TestSteppedParallelTaskExecutor {
 		}
 		
 		public synchronized Queue<Callable<Void>> getNextStepTasks() {
-			if (curStep >= numSteps)
+			if (curStep >= numSteps) {
+				System.out.println("getNextStepTasks no more tasks");
 				return null;
+			}
 			curStep++;
 			System.out.println("STEP " + curStep);
 			Queue<Callable<Void>> result = new LinkedList<Callable<Void>>();
@@ -56,11 +58,13 @@ public class TestSteppedParallelTaskExecutor {
 //				if (jobCount == 5)
 //					throw new RuntimeException("getNextStepTasks");
 			}
+			System.out.println("getNextStepTasks HAS more tasks");
 			return result;
 		}
 
-		public void onError(Callable<Void> task, Throwable e) {
-			System.out.println("ONERROR: " + e);
+		public synchronized void onError(Callable<Void> task, Throwable e) {
+			System.out.println("ONERROR: ");
+			e.printStackTrace(System.out);
 //			throw new RuntimeException("onError");
 		}
 
@@ -84,8 +88,8 @@ public class TestSteppedParallelTaskExecutor {
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
 		ExecutorService exec;
 //		exec = new FakeThreadExecutor();
-//		exec = Executors.newSingleThreadExecutor();
-		exec = Executors.newFixedThreadPool(2);
+		exec = Executors.newSingleThreadExecutor();
+//		exec = Executors.newFixedThreadPool(2);
 		System.out.println("Creating main task" + " (" + Thread.currentThread().getId() + ")");
 		MySteppedParallelTask task = new MySteppedParallelTask(3);
 		System.out.println("Submitted main task" + " (" + Thread.currentThread().getId() + ")");
@@ -95,7 +99,7 @@ public class TestSteppedParallelTaskExecutor {
 		} catch (InterruptedException e) {
 		}
 		try {
-			ft.cancel(true);
+//			ft.cancel(true);
 			ft.get();
 			System.out.println("Got answer from main task" + " (" + Thread.currentThread().getId() + ")");
 		} finally {
