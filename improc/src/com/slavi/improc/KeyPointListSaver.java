@@ -59,7 +59,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) {
-		return new File(Util.chageFileExtension(
+		return new File(Util.changeFileExtension(
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image, false)), "spf"));
 	}

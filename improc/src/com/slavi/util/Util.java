@@ -1,8 +1,15 @@
 package com.slavi.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Formatter;
 import java.util.Locale;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * This class contains utility static methods for general purpose.  
@@ -74,7 +81,7 @@ public class Util {
 	/**
 	 * Replaces the extension of fileName with the newExtension.
 	 * <p>
-	 * ex:
+	 * Example:
 	 * <p>
 	 * <table border=1>
 	 * <tr><th>fileName</th><th>newExtension</th><th>result</th></tr>
@@ -82,14 +89,15 @@ public class Util {
 	 * <tr><td>c:\temp\somefile.log</td><td>&nbsp;</td><td>c:\temp\somefile.</td></tr>
 	 * <tr><td>c:\temp\somefile</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
 	 * <tr><td>c:\temp.tmp\somefile.log</td><td>txt</td><td>c:\temp.tmp\somefile.txt</td></tr>
-	 * <tr><td><b>c:\temp.tmp\somefile</b></td><td><b>txt</b></td><td><b>c:\temp.txt</b></td></tr>
+	 * <tr><td><b>c:\temp.tmp\somefile</b></td><td><b>txt</b></td><td><b>c:\temp.tmp\somefile.txt</b></td></tr>
 	 * </table>
 	 */
-	public static String chageFileExtension(String fileName, String newExtension) {
-		int lastIndex = fileName.lastIndexOf(".");
-		if (lastIndex < 0)
-			return fileName + "." + newExtension;
-		return fileName.substring(0, lastIndex) + "." + newExtension; 
+	public static String changeFileExtension(String fileName, String newExtension) {
+		int lastPath = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
+		int lastIndex = fileName.lastIndexOf('.');
+		if ((lastPath > lastIndex) || (lastIndex < 0))
+			return fileName + '.' + newExtension;
+		return fileName.substring(0, lastIndex) + '.' + newExtension; 
 	}
 
 	/**
@@ -409,5 +417,53 @@ public class Util {
 		}
 		
 		return b.toString();
+	}
+
+	/**
+	 * Replaces a set of files in a zip file in one zip copy operation.
+	 * If zipfin = null then a new zip file is generated in zipfou.
+	 */
+	public static void replaceFilesInZip(InputStream zipfin, OutputStream zipfou, Map<String, InputStream> filesToReplace) throws IOException {
+		byte buf[] = new byte[1024];
+		ZipInputStream zin = null;
+		ZipOutputStream zou = new ZipOutputStream(zipfou);
+		try {
+			if (zipfin != null) {
+				zin = new ZipInputStream(zipfin);
+				ZipEntry entryIn = null;
+				while ((entryIn = zin.getNextEntry()) != null) {
+					if (!filesToReplace.containsKey(entryIn.getName())) {
+						ZipEntry entryOut = (ZipEntry) entryIn.clone();
+						entryOut.setCompressedSize(-1);
+						zou.putNextEntry(entryOut);
+						while (zin.available() > 0) {
+							int len = zin.read(buf);
+							if (len > 0)
+								zou.write(buf, 0, len);
+						}
+						zou.closeEntry();
+					}
+				}
+				zin.close();
+				zin = null;
+			}
+	        for (Map.Entry item : filesToReplace.entrySet()) {
+				ZipEntry entryOut = new ZipEntry((String) item.getKey());
+				entryOut.setCompressedSize(-1);
+				zou.putNextEntry(entryOut);
+				InputStream itemfin = (InputStream) item.getValue();
+				itemfin.reset();
+				while (itemfin.available() > 0) {
+					int len = itemfin.read(buf);
+					if (len > 0)
+						zou.write(buf, 0, len);
+				}
+				zou.closeEntry();
+			}
+		} finally {
+			if (zin != null)
+				zin.close();
+			zou.close();
+		}
 	}
 }
