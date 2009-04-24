@@ -189,8 +189,8 @@ public class ImageRot {
 			img.cameraScale = cameraScale;
 
 			img.scaleZ = Double.parseDouble(st.nextToken());
-			img.rx = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.ry = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
+			img.rx = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.rz = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.camera2real = RotationXYZ.makeAngles(img.rx, img.ry, img.rz);
 			
@@ -322,13 +322,10 @@ public class ImageRot {
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 1 * MathUtil.deg2rad;
-		learner.b = 179 * MathUtil.deg2rad;
+		learner.b = 1 * MathUtil.deg2rad;
 		boolean res = learner.calculateTwo();
-		res &= learner.calculateTwo();
-		res &= learner.calculateTwo();
-		res &= learner.calculateTwo();
-		res &= learner.calculateTwo();
-		res &= learner.calculateTwo();
+		for (int i = 0; i < 10; i++)
+			res &= learner.calculateTwo();
 		System.out.println("RESULT is " + res);
 		
 		SafeImage img = new SafeImage(outsizeX, outsizeY);

@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.slavi.util.ParseArgs;
-
 public class TestParseArgs {
 	public static void main(String[] args) throws IOException {
 //		String str = "\"qqq=\"asd qw\\eqwe\\\"zxc rty.fgh\" zzz";
@@ -16,7 +14,7 @@ public class TestParseArgs {
 //		String expr = "(\"((\\\\\")|[^\"(\\\\\")])+\")|(\\w++)";
 
 		BufferedReader fin = new BufferedReader(new InputStreamReader(
-				ParseArgs.class.getResourceAsStream("TestParseArgs.txt")));
+				TestParseArgs.class.getResourceAsStream("TestParseArgs.txt")));
 		String expr = fin.readLine();
 		String str = fin.readLine();
 		fin.close();
