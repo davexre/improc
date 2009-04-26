@@ -65,8 +65,12 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				break;
 			}
 		}
-		if ((!res) || (goodCount < minRequredGoodPointPairs))
+		if ((!res) || (goodCount < minRequredGoodPointPairs)) {
+			System.out.println("FAILED " + goodCount + "/" + pairList.items.size() + "\t" +
+					pairList.source.imageFileStamp.getFile().getName() + "\t" + 
+					pairList.target.imageFileStamp.getFile().getName());
 			return false;
+		}
 //		double discrepancy = learner.getMaxAllowedDiscrepancy();
 //		System.out.println("Max allowed discrepancy = " + discrepancy);
 

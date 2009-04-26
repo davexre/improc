@@ -448,11 +448,11 @@ public class Util {
 				zin.close();
 				zin = null;
 			}
-	        for (Map.Entry item : filesToReplace.entrySet()) {
-				ZipEntry entryOut = new ZipEntry((String) item.getKey());
+	        for (Map.Entry<String, InputStream> item : filesToReplace.entrySet()) {
+				ZipEntry entryOut = new ZipEntry(item.getKey());
 				entryOut.setCompressedSize(-1);
 				zou.putNextEntry(entryOut);
-				InputStream itemfin = (InputStream) item.getValue();
+				InputStream itemfin = item.getValue();
 				itemfin.reset();
 				while (itemfin.available() > 0) {
 					int len = itemfin.read(buf);

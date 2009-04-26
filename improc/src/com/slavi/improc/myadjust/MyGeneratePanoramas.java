@@ -225,7 +225,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	}
 
 	boolean useImageColorMasks = false;
-	int outputImageSizeX = 5000;
+	int outputImageSizeX = 1000;
 	int outputImageSizeY;
 	
 	public Void call() throws Exception {
