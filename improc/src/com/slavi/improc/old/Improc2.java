@@ -175,7 +175,7 @@ public class Improc2 {
 
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
-				new MyGeneratePanoramas(imagesKPL, kppl, keyPointFileRoot), -1);
+				new MyGeneratePanoramas(exec, imagesKPL, kppl, keyPointFileRoot), -1);
 		
 /*
 		System.out.println("---------- Generating panorama images");

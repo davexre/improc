@@ -55,7 +55,7 @@ public class Improc {
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog("Generating panorama images", 
-				new CalculatePanoramaParams(validkppl, keyPointFileRoot), -1);
+				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot), -1);
 		
 		System.out.println("Done.");
 	}

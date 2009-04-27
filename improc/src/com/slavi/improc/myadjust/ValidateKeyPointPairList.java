@@ -55,12 +55,10 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		for (int i = 0; i < 20; i++) {
 			res = learner.calculateOne();
 			goodCount = pairList.getGoodCount();
-			System.out.println("ITERATION " + i + 
+/*			System.out.println("ITERATION " + i + 
 					" " + goodCount + "/" + pairList.items.size() + 
 					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
-					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));
-//			System.out.println(learner.discrepancyStatistics.toString(Statistics.CStatMinMax));
-//			System.out.println(res);
+					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));*/
 			if (res || (goodCount < minRequredGoodPointPairs)) {
 				break;
 			}
@@ -71,8 +69,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 					pairList.target.imageFileStamp.getFile().getName());
 			return false;
 		}
-//		double discrepancy = learner.getMaxAllowedDiscrepancy();
-//		System.out.println("Max allowed discrepancy = " + discrepancy);
 
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
@@ -89,28 +85,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
 				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
 				);
-/*
-		ArrayList<KeyPointPairList> dummy = new ArrayList<KeyPointPairList>();
-		dummy.add(pairList);
-		MyPanoPairTransformLearner3 learner3 = new MyPanoPairTransformLearner3(dummy);
-		learner3.calculatePrims();
-		boolean success = learner3.calculate();
-		System.out.println(success);
-		
-		goodCount = pairList.getGoodCount();
-		System.out.println(goodCount + "/" + pairList.items.size() + "\t" +
-				pairList.source.imageFileStamp.getFile().getName() + "\t" + 
-				pairList.target.imageFileStamp.getFile().getName() + "\t" +
-				MathUtil.d4(pairList.scale) + "\t" +
-				MathUtil.d4(pairList.rx * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
-				);
-*/
-		if (goodCount < minRequredGoodPointPairs) {
-			System.out.println("NOT ENOUGH GOOD POINT PAIRS");
-		}
-		return goodCount >= minRequredGoodPointPairs;
+		return true;
 	}
 	
 	private class ProcessOne implements Callable<Boolean> {
@@ -146,17 +121,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				result.add(item.getKey());
 			}
 		}
-/*		
-		for (KeyPointPairList pairList : kppl) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			ProcessOne task = new ProcessOne(pairList);
-			boolean res = task.call();
-			if (!res) {
-				result.add(pairList);
-			}
-		}*/
 		return result;
 	}
 }

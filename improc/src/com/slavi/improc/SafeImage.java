@@ -23,9 +23,9 @@ public class SafeImage {
 		0x00ff9600
 	};
 
-	int nextColor = 0;
+	protected int nextColor = 0;
 	
-	public BufferedImage bi;
+	protected BufferedImage bi;
 	
 	public final int sizeX, sizeY;
 	
@@ -41,20 +41,20 @@ public class SafeImage {
 		sizeY = bi.getHeight();
 	}
 	
-	public void save() throws IOException {
+	public synchronized void save() throws IOException {
 		String fname = Const.workDir + "/temp" + (++imageCounter) + ".png";
 		ImageIO.write(bi, "png", new File(fname));
 		bi = null;
 	}
 		
-	public int getNextColor() {
+	public synchronized int getNextColor() {
 		int result = colors[nextColor++];
 		if (nextColor >= colors.length)
 			nextColor = 0;
 		return result;
 	}
 	
-	public void setRGB(int x, int y, int rgb) {
+	public synchronized void setRGB(int x, int y, int rgb) {
 		if (
 			(x < 0) || (x >= bi.getWidth()) ||
 			(y < 0) || (y >= bi.getHeight()))
@@ -62,7 +62,7 @@ public class SafeImage {
 		bi.setRGB(x, y, rgb);
 	}
 	
-	public int getRGB(int x, int y) {
+	public synchronized int getRGB(int x, int y) {
 		if (
 			(x < 0) || (x >= bi.getWidth()) ||
 			(y < 0) || (y >= bi.getHeight()))
@@ -70,21 +70,21 @@ public class SafeImage {
 		return bi.getRGB(x, y) & 0x00FFFFFF;
 	}
 
-	public void drawCross(int atX, int atY, int color) {
+	public synchronized void drawCross(int atX, int atY, int color) {
 		for (int i = 0; i < 5; i++) {
 			setRGB(atX - 2 + i, atY, color);
 			setRGB(atX, atY - 2 + i, color);
 		}
 	}
 	
-	public void drawX(int atX, int atY, int color) {
+	public synchronized void drawX(int atX, int atY, int color) {
 		for (int i = 0; i < 5; i++) {
 			setRGB(atX - 2 + i, atY - 2 + i, color);
 			setRGB(atX - 2 + i, atY + 2 - i, color);
 		}		
 	}
 	
-	public void pinPair(int x1, int y1, int x2, int y2) {
+	public synchronized void pinPair(int x1, int y1, int x2, int y2) {
 		int color = getNextColor();
 		drawCross(x1, y1, color);
 		drawX(x2, y2, color);

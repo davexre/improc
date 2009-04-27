@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairList;
@@ -9,12 +10,14 @@ import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class CalculatePanoramaParams implements Callable<Void> {
 
+	ExecutorService exec;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
 	ArrayList<KeyPointPairList> kppl;
 	
-	public CalculatePanoramaParams(
+	public CalculatePanoramaParams(ExecutorService exec,
 			ArrayList<KeyPointPairList> kppl,
 			AbsoluteToRelativePathMaker keyPointPairFileRoot) {
+		this.exec = exec;
 		this.kppl = kppl;
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
 	}
@@ -90,7 +93,7 @@ public class CalculatePanoramaParams implements Callable<Void> {
 			learner.calculatePrims();
 			boolean success = learner.calculate();
 //			if (success) {
-				MyGeneratePanoramas gen = new MyGeneratePanoramas(images, chain, keyPointPairFileRoot);
+				MyGeneratePanoramas gen = new MyGeneratePanoramas(exec, images, chain, keyPointPairFileRoot);
 				gen.call();
 //			}
 			System.out.println("Adjust panorama " + (success ? "SUCCESS" : "FAILED"));
