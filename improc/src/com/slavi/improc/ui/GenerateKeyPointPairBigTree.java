@@ -55,7 +55,8 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 				SwtUtil.activeWaitDialogSetStatus(statusMessage, bigTree.keyPointLists.size() - 1);
 			}
 			for (KeyPoint kp : l.items) {
-				bigTree.add(kp);
+//				if (kp.dogLevel == 2)
+					bigTree.add(kp);
 			}
 			return null;
 		}

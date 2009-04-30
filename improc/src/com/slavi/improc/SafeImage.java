@@ -70,23 +70,37 @@ public class SafeImage {
 		return bi.getRGB(x, y) & 0x00FFFFFF;
 	}
 
-	public synchronized void drawCross(int atX, int atY, int color) {
-		for (int i = 0; i < 5; i++) {
-			setRGB(atX - 2 + i, atY, color);
-			setRGB(atX, atY - 2 + i, color);
+	static final int pinMarkerSize = 5;
+	
+	public synchronized void drawCross(int atX, int atY, int color, int color2) {
+		for (int i = 0; i < pinMarkerSize; i++) {
+			setRGB(atX - pinMarkerSize/2 + i, atY, color);
+			setRGB(atX, atY - pinMarkerSize/2 + i, color);
 		}
+		if (color2 < 0)
+			return;
+		setRGB(atX - pinMarkerSize/2 - 1, atY, color2);
+		setRGB(atX + pinMarkerSize/2 + 1, atY, color2);
+		setRGB(atX, atY - pinMarkerSize/2 - 1, color2);
+		setRGB(atX, atY + pinMarkerSize/2 + 1, color2);
 	}
 	
-	public synchronized void drawX(int atX, int atY, int color) {
-		for (int i = 0; i < 5; i++) {
-			setRGB(atX - 2 + i, atY - 2 + i, color);
-			setRGB(atX - 2 + i, atY + 2 - i, color);
+	public synchronized void drawX(int atX, int atY, int color, int color2) {
+		for (int i = 0; i < pinMarkerSize; i++) {
+			setRGB(atX - pinMarkerSize/2 + i, atY - pinMarkerSize/2 + i, color);
+			setRGB(atX - pinMarkerSize/2 + i, atY + pinMarkerSize/2 - i, color);
 		}		
+		if (color2 < 0)
+			return;
+		setRGB(atX - pinMarkerSize/2 - 1, atY - pinMarkerSize/2 - 1, color2);
+		setRGB(atX - pinMarkerSize/2 - 1, atY + pinMarkerSize/2 + 1, color2);
+		setRGB(atX + pinMarkerSize/2 + 1, atY - pinMarkerSize/2 - 1, color2);
+		setRGB(atX + pinMarkerSize/2 + 1, atY + pinMarkerSize/2 + 1, color2);
 	}
 	
-	public synchronized void pinPair(int x1, int y1, int x2, int y2) {
+	public synchronized void pinPair(int x1, int y1, int x2, int y2, int imgCrossColor, int imgXColor) {
 		int color = getNextColor();
-		drawCross(x1, y1, color);
-		drawX(x2, y2, color);
+		drawCross(x1, y1, color, imgCrossColor);
+		drawX(x2, y2, color, imgXColor);
 	}
 }

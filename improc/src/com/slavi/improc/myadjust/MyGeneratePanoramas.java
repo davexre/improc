@@ -2,6 +2,8 @@ package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
+import com.slavi.util.Const;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
@@ -193,6 +196,11 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		Point2D.Double d = new Point2D.Double();
 		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
+			int colorCross = images.indexOf(pairList.source) % 3;
+			int colorX = images.indexOf(pairList.target) % 3;
+			colorCross = colorCross < 0 ? -1 : 255 << (8 * colorCross);
+			colorX = colorX < 0 ? -1 : 255 << (8 * colorX);			
+			
 			for (KeyPointPair pair : pairList.items) {
 				if (!pair.bad) {
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
@@ -201,8 +209,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					transformCameraToWorld(pair.targetSP.doubleX, pair.targetSP.doubleY, pairList.target, d);
 					int x2 = (int)d.x;
 					int y2 = (int)d.y;
-					oi.pinPair(x1, y1, x2, y2);
-					
+					oi.pinPair(x1, y1, x2, y2, colorCross, colorX);
 				}
 				// dump statistic info for pairs
 //				System.out.println(
@@ -225,6 +232,46 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			return 255;
 		return (int) color;
 	}
+	
+	void dumpPointData() throws Exception {
+		PrintStream fou = new PrintStream(Const.workDir + "/pointData.txt");
+		fou.println(
+				"Source\t" +
+				"Target\t" +
+				"Bad\t" +
+				"Discrepancy\t" +
+				
+				"SdogLevel\t" +
+				"SimgScale\t" +
+				"SkpScale\t" +
+				"SadjS\t" + 
+
+				"TdogLevel\t" +
+				"TimgScale\t" +
+				"TkpScale\t" +
+				"TadjS");
+		for (KeyPointPairList pairList : pairLists) {
+			for (KeyPointPair pair : pairList.items) {
+				fou.println(
+					pair.sourceSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
+					pair.targetSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
+					pair.bad + "\t" +
+					MathUtil.d4(pair.discrepancy) + "\t" +
+					
+					pair.sourceSP.dogLevel + "\t" +
+					pair.sourceSP.imgScale + "\t" +
+					pair.sourceSP.kpScale + "\t" +
+					pair.sourceSP.adjS + "\t" +
+					
+					pair.targetSP.dogLevel + "\t" +
+					pair.targetSP.imgScale + "\t" +
+					pair.targetSP.kpScale + "\t" +
+					pair.targetSP.adjS);
+			}
+		}
+		fou.close();
+	}
+	
 	
 	public Void call() throws Exception {
 		Marker.mark("Generate panorama");
@@ -267,6 +314,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		}
 		oi.save();
 		Marker.release();
+		dumpPointData();
 		return null;
 	}
 }

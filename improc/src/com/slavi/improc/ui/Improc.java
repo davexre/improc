@@ -8,6 +8,7 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
+import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -18,6 +19,8 @@ public class Improc {
 		Settings settings = Settings.getSettings();
 		if (settings == null)
 			return;
+		Marker.mark("Image Processing");
+
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);
 		AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(settings.keyPointFileRootStr);
 		
@@ -57,6 +60,7 @@ public class Improc {
 		SwtUtil.openWaitDialog("Generating panorama images", 
 				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot), -1);
 		
+		Marker.release();
 		System.out.println("Done.");
 	}
 	

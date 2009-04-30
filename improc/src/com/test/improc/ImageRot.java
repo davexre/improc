@@ -338,7 +338,7 @@ public class ImageRot {
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX1 = (int) dest.x;
 			int atY1 = (int) dest.y;
-			img.drawCross(atX1, atY1, color);
+			img.drawCross(atX1, atY1, color, -1);
 			
 			dest.x = image.tr.x;
 			dest.y = image.tr.y;
@@ -346,7 +346,7 @@ public class ImageRot {
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX2 = (int) dest.x;
 			int atY2 = (int) dest.y;
-			img.drawCross(atX2, atY2, color);
+			img.drawCross(atX2, atY2, color, -1);
 			
 			dest.x = image.bl.x;
 			dest.y = image.bl.y;
@@ -354,7 +354,7 @@ public class ImageRot {
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX3 = (int) dest.x;
 			int atY3 = (int) dest.y;
-			img.drawCross(atX3, atY3, color);
+			img.drawCross(atX3, atY3, color, -1);
 			
 			dest.x = image.br.x;
 			dest.y = image.br.y;
@@ -362,7 +362,7 @@ public class ImageRot {
 			worldToProj(dest.x, dest.y, img, dest);
 			int atX4 = (int) dest.x;
 			int atY4 = (int) dest.y;
-			img.drawCross(atX4, atY4, color);
+			img.drawCross(atX4, atY4, color, -1);
 
 			for (int i = 0; i < image.sizeX; i++) {
 				imageToWorld(i, 0, image, dest);
@@ -392,10 +392,10 @@ public class ImageRot {
 		drawWorldMesh(img, learner);
 		
 		int crossColor = 0xffff00;
-		img.drawCross(0, 0, crossColor);
-		img.drawCross(0, outsizeY - 1, crossColor);
-		img.drawCross(outsizeX - 1, 0, crossColor);
-		img.drawCross(outsizeX - 1, outsizeY - 1, crossColor);
+		img.drawCross(0, 0, crossColor, -1);
+		img.drawCross(0, outsizeY - 1, crossColor, -1);
+		img.drawCross(outsizeX - 1, 0, crossColor, -1);
+		img.drawCross(outsizeX - 1, outsizeY - 1, crossColor, -1);
 		img.save();
 	}
 
