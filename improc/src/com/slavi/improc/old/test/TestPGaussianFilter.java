@@ -39,8 +39,6 @@ public class TestPGaussianFilter {
 		Marker.release();
 		dest1.toImageFile(fouName1);
 
-		dest = new DImageMap(src.getSizeX(), src.getSizeY());
-
 		ExecutorService exec = Executors.newFixedThreadPool(6);
 		
 		Rectangle srcExt = src.getExtent();

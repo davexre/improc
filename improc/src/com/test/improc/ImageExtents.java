@@ -34,7 +34,7 @@ public class ImageExtents {
 				new InputStreamReader(getClass().getResourceAsStream("ImageExtents.txt")));
 		while (fin.ready()) {
 			String str = fin.readLine();
-			if (str.equals(""))
+			if ((str == null) || (str.equals("")))
 				break;
 			StringTokenizer st = new StringTokenizer(str);
 			double angle = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;

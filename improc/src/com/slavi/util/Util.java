@@ -27,15 +27,18 @@ public class Util {
 		final String[][] texts = { { " day ", " days " },
 				{ " hour ", " hours " }, { " minute ", " minutes " },
 				{ " second", " seconds" } };
-		String s = new String("");
+		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < 3; i++) {
 			long tmp = millis / divisors[i];
 			millis %= divisors[i];
-			if (tmp > 0)
-				s += Long.toString(tmp) + texts[i][tmp == 1 ? 0 : 1];
+			if (tmp > 0) {
+				s.append(Long.toString(tmp));
+				s.append(texts[i][tmp == 1 ? 0 : 1]);
+			}
 		}
-		return s + String.format(Locale.US, "%1$.3f", new Object[] { new Double((double) (millis) / divisors[3]) } )
-				+ texts[3][1];
+		s.append(String.format(Locale.US, "%1$.3f", new Object[] { new Double((double) (millis) / divisors[3]) } ));
+		s.append(texts[3][1]);
+		return s.toString();
 	}
 
 	/**

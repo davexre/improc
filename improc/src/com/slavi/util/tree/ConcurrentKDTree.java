@@ -17,8 +17,11 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 	
 	public void clear() {
 		lock.writeLock().lock();
-		super.clear();
-		lock.writeLock().unlock();
+		try {
+			super.clear();
+		} finally {
+			lock.writeLock().unlock();
+		}
 	}
 
 	public ArrayList<E> toList() {

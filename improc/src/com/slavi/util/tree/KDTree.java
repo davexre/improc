@@ -13,8 +13,6 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public abstract double getValue(E node, int dimensionIndex);
 
 	public static class NearestNeighbours<E>{
-		// TODO: Fix this warning
-		@SuppressWarnings("unchecked")
 		NearestNeighbours(E target, int maxCapacity, int dimensions) {
 			this.target = target;
 			distancesToTarget = new double[maxCapacity];
@@ -42,7 +40,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		
 		E[] items;
 		
-		volatile int m_size;
+		int m_size;
 		
 		public int size() {
 			return m_size;

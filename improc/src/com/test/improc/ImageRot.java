@@ -178,7 +178,7 @@ public class ImageRot {
 		
 		while (fin.ready()) {
 			str = fin.readLine();
-			if (str.equals(""))
+			if ((str == null) || (str.equals("")))
 				break;
 			st = new StringTokenizer(str);
 			Image img = new Image();

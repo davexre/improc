@@ -48,15 +48,23 @@ public class TestKDTree {
 		}
 	}
 	
-	protected static void generateItems(ArrayList<MyKDData> items, double[] value, int dimension, int itemsPerDimension) {
-		if (idCounter - 10000 > 5000)
+	protected static void generateItems(ArrayList<MyKDData> items, int dimensions, int itemsToGenerate) {
+		double[] value = new double[dimensions];
+		int itemsPerDimension = (int) Math.ceil(Math.pow(itemsToGenerate, 1.0 / dimensions));
+		itemsPerDimension = Math.max(itemsPerDimension, 1);
+		idCounter = 10000;
+		recursiveGenerateItems(items, value, dimensions - 1, itemsPerDimension, itemsToGenerate);
+	}
+	
+	protected static void recursiveGenerateItems(ArrayList<MyKDData> items, double[] value, int dimension, int itemsPerDimension, int itemsToGenerate) {
+		if (items.size() >= itemsToGenerate)
 			return;
 		if (dimension < 0) {
 			items.add(new MyKDData(value));
 		} else {
 			for (int i = itemsPerDimension - 1; i >= 0; i--) {
 				value[dimension] = i;
-				generateItems(items, value, dimension - 1, itemsPerDimension);
+				recursiveGenerateItems(items, value, dimension - 1, itemsPerDimension, itemsToGenerate);
 			}
 		}
 	}
@@ -85,10 +93,10 @@ public class TestKDTree {
 	
 	public static void main2() {
 		int dimensions = 2;
-		int itemsPerDimension = 5;
+		int itemsToGenerate = 10;
 		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
-		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
-//		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+		generateItems(items, dimensions, itemsToGenerate);
+//		generateItems(items, dimensions, itemsToGenerate);
 
 		printNodesList(items);
 		
@@ -123,9 +131,9 @@ public class TestKDTree {
 	
 	public static void main(String[] args) {
 		int dimensions = 128;
-		int itemsPerDimension = 2;
-		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
-		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+		int itemsToGenerate = 3000;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
+		generateItems(items, dimensions, itemsToGenerate);
 		MyKDTree tree = new MyKDTree(dimensions, items);
 //		printNodesList(items);
 //		printNode(tree.getRoot(), 0);
@@ -140,13 +148,14 @@ public class TestKDTree {
 		System.out.println("Item to find:");
 		System.out.println(item);
 		System.out.println(tree.contains(item));
-		int maxSearchSteps = 1; //tree.getTreeDepth() / 2;
+		int maxSearchSteps = 2 * itemsToGenerate; //tree.getTreeDepth() / 2;
 		Statistics stat = new Statistics();
 		stat.start();
 		for (MyKDData i : items) {
-			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMy(i, 2, 1);
+//			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMy(i, 2, 1);
 //			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMyBBF(i, 2, 1, maxSearchSteps);
-//			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(i, 2, maxSearchSteps);
+			NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursBBF(i, 2, maxSearchSteps);
+//			NearestNeighbours<MyKDData> nn = tree.getNearestNeighbours(i, 2);
 			stat.addValue(nn.getUsedSearchSteps());
 			if (i != nn.getItem(0)) {
 				System.out.println("NOT FOUND " + i + "|" + nn.getItem(0));
@@ -162,9 +171,9 @@ public class TestKDTree {
 	
 	public static void main2(String[] args) throws Exception {
 		int dimensions = 3;
-		int itemsPerDimension = 1;
-		ArrayList<MyKDData> items = new ArrayList<MyKDData>(dimensions * itemsPerDimension);
-		generateItems(items, new double[dimensions], dimensions - 1, itemsPerDimension);
+		int itemsToGenerate = 3;
+		ArrayList<MyKDData> items = new ArrayList<MyKDData>();
+		generateItems(items, dimensions, itemsToGenerate);
 		MyKDTree tree = new MyKDTree(dimensions, items);
 		int itemsCount = tree.getSize();
 		if (items.size() != itemsCount)

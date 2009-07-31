@@ -74,7 +74,7 @@ public class ExecutionProfile {
 			(double) memPerParallelTask);
 		tasksForExtent = Math.max(tasksForExtent, result.parallelTasks);
 		int divisionsX = Math.max(1, (int)Math.round(
-				Math.sqrt(tasksForExtent * srcExtent.width / srcExtent.height)));
+				Math.sqrt((double) tasksForExtent * srcExtent.width / (double) srcExtent.height)));
 		int divisionsY = (int)Math.ceil((double)tasksForExtent / divisionsX);
 		
 		result.destWindowSizeX = (int)Math.max(userSpecifiedMinSizeOfTaskWindow, 

@@ -85,7 +85,7 @@ public class TestHelmert2DTransformer {
 		}
 	}
 	
-	public class MyTestHelmert2DTransformLearner extends Helmert2DTransformLearner<Point2D.Double, Point2D.Double> {
+	public static class MyTestHelmert2DTransformLearner extends Helmert2DTransformLearner<Point2D.Double, Point2D.Double> {
 		public MyTestHelmert2DTransformLearner(MyTestHelmert2DTransformer transformer,
 				Iterable<? extends Map.Entry<Point2D.Double, Point2D.Double>> pointsPairList) {
 			super(transformer, pointsPairList);

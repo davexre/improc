@@ -44,7 +44,7 @@ public class CardTemplate {
 
 	int imgY;
 
-	public class TextBox {
+	public static class TextBox {
 		Color color;
 
 		int x;

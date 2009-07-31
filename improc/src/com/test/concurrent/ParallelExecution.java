@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ParallelExecution {
 
-	class SomeLengthyTask implements Runnable {
+	static class SomeLengthyTask implements Runnable {
 		int taskId;
 		
 		public SomeLengthyTask(int taskId) {

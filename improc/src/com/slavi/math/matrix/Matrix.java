@@ -749,7 +749,7 @@ public class Matrix {
 	/**
 	 * Private class used by Matrix.inverse()
 	 */
-	private class XchgRec {
+	private static class XchgRec {
 
 		public int a;
 

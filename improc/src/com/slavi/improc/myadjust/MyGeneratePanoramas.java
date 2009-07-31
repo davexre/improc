@@ -2,7 +2,6 @@ package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 
 	boolean pinPoints = false;
 	boolean useImageColorMasks = false;
+	boolean useImageWithMaxWeight = true;
 	int outputImageSizeX = 5000;
 	int outputImageSizeY;
 	
@@ -131,6 +131,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					int countR = 0;
 					int countG = 0;
 					int countB = 0;
+					int curMaxWeight = 0;
+					int curMaxColor = 0;
 					for (int index = 0; index < images.size(); index++) {
 						KeyPointList image = images.get(index);
 						
@@ -156,35 +158,68 @@ public class MyGeneratePanoramas implements Callable<Void> {
 						int weight = 1 + (int) (precision * (1 - Math.max(dx, dy)));  
 						
 						if (useImageColorMasks) {
-							color = weight * (DWindowedImageUtils.getGrayColor(color) & 0xff);
+							color = DWindowedImageUtils.getGrayColor(color) & 0xff;
 							switch (index % 3) {
 							case 0:
-								colorR += color;
-								countR += weight;
+								if (useImageWithMaxWeight) {
+									if (curMaxWeight < weight) {
+										curMaxWeight = weight;
+										curMaxColor = ((color << 16) & 0xff);
+									}
+								} else {
+									colorR += color;
+									countR += weight;
+								}
 								break;
 							case 1:
-								colorG += color;
-								countG += weight;
+								if (useImageWithMaxWeight) {
+									if (curMaxWeight < weight) {
+										curMaxWeight = weight;
+										curMaxColor = ((color << 8) & 0xff);
+									}
+								} else {
+									colorG += color;
+									countG += weight;
+								}
 								break;
 							default:
-								colorB += color;
-								countB += weight;
+								if (useImageWithMaxWeight) {
+									if (curMaxWeight < weight) {
+										curMaxWeight = weight;
+										curMaxColor = color;
+									}
+								} else {
+									colorB += color;
+									countB += weight;
+								}
 								break;
 							}
 						} else {
-							countR += weight;
-							countG += weight;
-							countB += weight;
-							colorR += weight * ((color >> 16) & 0xff);
-							colorG += weight * ((color >> 8) & 0xff);
-							colorB += weight * (color & 0xff);
+							if (useImageWithMaxWeight) {
+								if (curMaxWeight < weight) {
+									curMaxWeight = weight;
+									curMaxColor = color;
+								}
+							} else {
+								countR += weight;
+								countG += weight;
+								countB += weight;
+								colorR += weight * ((color >> 16) & 0xff);
+								colorG += weight * ((color >> 8) & 0xff);
+								colorB += weight * (color & 0xff);
+							}
 						}
 					}
 
-					int color = 
-						(fixColorValue(colorR, countR) << 16) |
-						(fixColorValue(colorG, countG) << 8) |
-						fixColorValue(colorB, countB);
+					int color = 0;
+					if (useImageWithMaxWeight) {
+						color = curMaxColor;
+					} else {
+						color = 
+							(fixColorValue(colorR, countR) << 16) |
+							(fixColorValue(colorG, countG) << 8) |
+							fixColorValue(colorB, countB);
+					}
 					oi.setRGB(oimgX, oimgY, color);
 				}			
 			}

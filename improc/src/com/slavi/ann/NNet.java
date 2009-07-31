@@ -40,6 +40,7 @@ public class NNet extends NNLayerBase {
 				c = layerClasses[i].getConstructor(int.class, int.class);
 				layers.add(c.newInstance(new Integer(startSize), new Integer(endSize)));
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			if (c == null)
 				throw new IllegalArgumentException(

@@ -45,6 +45,7 @@ public class ListClassesInPackage {
 					}
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 			} finally {
 				if (jarFile != null)
 					try {

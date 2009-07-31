@@ -51,7 +51,7 @@ public class TestStatistics {
 		ArrayList<MyData> items = new ArrayList<MyData>();
 		while (fin.ready()) {
 			String str = fin.readLine();
-			if (str.equals(""))
+			if ((str == null) || (str.equals("")))
 				break;
 			StringTokenizer st = new StringTokenizer(str, "\t");
 			st.nextToken();

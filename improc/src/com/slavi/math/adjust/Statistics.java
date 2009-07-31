@@ -40,7 +40,7 @@ public class Statistics {
 
 	public static final int CStatDetail   = CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatErrors;
 	
-	public static final int CStatDefault  = CStatDetail;
+	public static final int CStatDefault  = CStatShort;
 
     /**
 	 * Доверителна вероятност, стр.53, стойности близки до 1, но по-малки

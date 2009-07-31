@@ -147,8 +147,8 @@ public class AdjAffine {
 		r.imageFile = imageFile;
 		r.extent = new Rectangle2D.Double(0, 0, width, height);
 		r.worldExtent = new Rectangle2D.Double(0, 0, width, height);
-		r.midWX = width / 2;
-		r.midWY = height / 2;
+		r.midWX = width / 2.0;
+		r.midWY = height / 2.0;
 		il.add(r);
 		return r;
 	}

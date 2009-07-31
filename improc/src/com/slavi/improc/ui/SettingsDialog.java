@@ -13,8 +13,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -28,6 +30,10 @@ public class SettingsDialog {
 	Text txtImagesRoot;
 	Text txtKeyPointFileRoot;
 	Text txtKeyPointPairFileRoot;
+	Button btnPinPoints;
+	Button btnUseColorMasks;
+	Button btnUseImageMaxWeight;
+	
 	Button btnCancel;
 	Button btnNext;
 	boolean result;
@@ -53,10 +59,10 @@ public class SettingsDialog {
 		layout= new GridLayout();
 		layout.numColumns = 3;
 		group.setLayout(layout);
-		GridData layoutData = new GridData();
-		layoutData.horizontalAlignment = GridData.FILL;
-		layoutData.grabExcessHorizontalSpace = true;
-		group.setLayoutData(layoutData);
+		GridData shellLayoutData = new GridData();
+		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.grabExcessHorizontalSpace = true;
+		group.setLayoutData(shellLayoutData);
 		
 		Label label;
 		Button button;
@@ -82,7 +88,7 @@ public class SettingsDialog {
 		});
 
 		//////////////
-		
+
 		label = new Label(group, SWT.RIGHT);
 		label.setText("Key point files root folder");
 		txtKeyPointFileRoot = new Text(group, SWT.BORDER);
@@ -115,15 +121,38 @@ public class SettingsDialog {
 			}
 		});
 		
+		//////////////
+		
+		group = new Group(shell, SWT.NONE);
+		group.setText("Rendering options");
+		group.setLayout(new FillLayout(SWT.VERTICAL));
+		shellLayoutData = new GridData();
+		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.grabExcessHorizontalSpace = true;
+		group.setLayoutData(shellLayoutData);
+
+		/////////////
+		
+		btnPinPoints = new Button(group, SWT.CHECK);
+		btnPinPoints.setText("Pin points");
+		
+		btnUseColorMasks = new Button(group, SWT.CHECK);
+		btnUseColorMasks.setText("Use image color masks");
+		
+		btnUseImageMaxWeight = new Button(group, SWT.CHECK);
+		btnUseImageMaxWeight.setText("Use image with max weight");
+		
+		/////////////
+		
 		// Create Buttons
 		Composite composite = new Composite(shell, SWT.NONE);
 		FillLayout btnLayout = new FillLayout(SWT.HORIZONTAL);
 		btnLayout.spacing = 4;
 		composite.setLayout(btnLayout);
 
-		layoutData = new GridData();
-		layoutData.horizontalAlignment = GridData.END;
-		composite.setLayoutData(layoutData);
+		shellLayoutData = new GridData();
+		shellLayoutData.horizontalAlignment = GridData.END;
+		composite.setLayoutData(shellLayoutData);
 		
 		btnCancel = new Button(composite, SWT.PUSH);
 		btnCancel.setText("Cancel");
@@ -142,12 +171,26 @@ public class SettingsDialog {
 					properties.setProperty("ImagesRoot", txtImagesRoot.getText());
 					properties.setProperty("KeyPointFileRoot", txtKeyPointFileRoot.getText());
 					properties.setProperty("KeyPointPairFileRoot", txtKeyPointPairFileRoot.getText());
+					properties.setProperty("PinPoints", btnPinPoints.getSelection() ? "true" : "false");
+					properties.setProperty("UseColorMasks", btnUseColorMasks.getSelection() ? "true" : "false");
+					properties.setProperty("UseImageMaxWeight", btnUseImageMaxWeight.getSelection() ? "true" : "false");
 					shell.close();
 				}
 			}
 		});
 
 		shell.setDefaultButton(btnNext);
+		shell.addListener (SWT.Traverse, new Listener () {
+			public void handleEvent (Event event) {
+				switch (event.detail) {
+					case SWT.TRAVERSE_ESCAPE:
+						shell.close ();
+						event.detail = SWT.TRAVERSE_NONE;
+						event.doit = false;
+						break;
+				}
+			}
+		});
 		shell.pack();
 	}
 	
@@ -171,13 +214,21 @@ public class SettingsDialog {
 	
 	Properties properties;
 	
+	public static boolean getBooleanProperty(Properties properties, String propertyName) {
+		String val = properties.getProperty(propertyName, "false");
+		return !"false".equalsIgnoreCase(val);
+	}
+	
 	public boolean open(Properties properties) {
 		this.properties = properties;
 		String userHomeRoot = System.getProperty("user.home");
 		txtImagesRoot.setText(properties.getProperty("ImagesRoot", userHomeRoot));
 		txtKeyPointFileRoot.setText(properties.getProperty("KeyPointFileRoot", userHomeRoot));
 		txtKeyPointPairFileRoot.setText(properties.getProperty("KeyPointPairFileRoot", userHomeRoot));
-
+		btnPinPoints.setSelection(getBooleanProperty(properties, "PinPoints"));
+		btnUseColorMasks.setSelection(getBooleanProperty(properties, "UseColorMasks"));
+		btnUseImageMaxWeight.setSelection(getBooleanProperty(properties, "UseImageMaxWeight"));
+		
 		result = false;
 		shell.open();
 		Display display = shell.getDisplay();

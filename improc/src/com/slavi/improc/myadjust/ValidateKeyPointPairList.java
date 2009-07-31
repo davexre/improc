@@ -88,7 +88,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		return true;
 	}
 	
-	private class ProcessOne implements Callable<Boolean> {
+	private static class ProcessOne implements Callable<Boolean> {
 		KeyPointPairList pairList;
 		
 		public ProcessOne(KeyPointPairList pairList) {

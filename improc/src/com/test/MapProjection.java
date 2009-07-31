@@ -25,7 +25,7 @@ public class MapProjection extends Canvas
     implements MouseListener, MouseMotionListener, KeyListener
 {
 
-	public class MapPoint
+	public static class MapPoint
 	{
 
 	    public MapPoint()

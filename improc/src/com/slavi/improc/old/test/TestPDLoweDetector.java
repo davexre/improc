@@ -13,7 +13,7 @@ public class TestPDLoweDetector {
 //	static final String finName = "D:/Users/s/kayak/me in the kayak.jpg";
 //	static final String fouName = "D:/temp/test.jpg";
 
-	class DLoweHook implements Hook{
+	static class DLoweHook implements Hook{
 		KeyPointList spl;
 		
 		DLoweHook(KeyPointList spl) {

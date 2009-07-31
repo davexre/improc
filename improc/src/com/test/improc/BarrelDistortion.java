@@ -54,13 +54,11 @@ public class BarrelDistortion {
 		fin.close();
 		SafeImage oi = new SafeImage(img.sizeX, img.sizeY);
 //		BarrelDistroctionFilter f = new BarrelDistroctionFilter(1.1, 0, 0);
-		BarrelDistroctionFilter f = new BarrelDistroctionFilter(1.1, 0.00005, 0, 0);
+		BarrelDistroctionFilter f = new BarrelDistroctionFilter(2, -1.1, 0.5, 0);
 		
 		double centerX = img.sizeX / 2.0;
 		double centerY = img.sizeY / 2.0;
 		double scale = Math.max(centerX, centerY);
-		
-		double k1 = -11110.0000018502;
 		
 		Point2D.Double d = new Point2D.Double();
 		for (int atX = 0; atX < oi.sizeX; atX++) {
@@ -74,11 +72,6 @@ public class BarrelDistortion {
 				cartesianToPolar(d.x, d.y, d);
 				f.apply(d.x, d.y, d);
 				polarToCartesian(d.x, d.y, d);
-//				double r2 = d.x*d.x + d.y*d.y;
-//				r2 *= k1;
-//				r2++;
-//				d.x *= r2; 
-//				d.y *= r2; 
 
 				d.x *= scale;
 				d.y *= scale;

@@ -84,7 +84,7 @@ public class FindFileIterator implements Iterator<File> {
 		fi.recurseDirs = recurseDirs;
 		fi.filesOnly = filesOnly;
 		fi.startDir = f.getParent();
-		if ((fi.startDir == null) || (fi.equals("")))
+		if (fi.startDir == null)
 			fi.startDir = "";
 		fi.patternStr = f.getName();
 		fi.reset();
@@ -105,7 +105,7 @@ public class FindFileIterator implements Iterator<File> {
 		fi.recurseDirs = recurseDirs;
 		fi.filesOnly = filesOnly;
 		fi.startDir = f.getParent();
-		if ((fi.startDir == null) || (fi.equals("")))
+		if ((fi.startDir == null) || (fi.startDir.equals("")))
 			fi.startDir = ".";
 		fi.patternStr = Util.toRegexpStr(f.getName());
 		fi.reset();

@@ -10,11 +10,24 @@ public class Settings {
 
 	public String imagesRootStr;
 	public String keyPointFileRootStr; 
-	public String keyPointPairFileRootStr; 
+	public String keyPointPairFileRootStr;
+	public boolean pinPoints;
+	public boolean useColorMasks;
+	public boolean useImageMaxWeight;
 
 	private Settings() {
 	}
 
+	private static void readProperties(Properties properties, Settings result) {
+		String userHomeRootStr = System.getProperty("user.home");
+		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
+		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
+		result.keyPointPairFileRootStr = properties.getProperty("KeyPointPairFileRoot", userHomeRootStr);
+		result.pinPoints = SettingsDialog.getBooleanProperty(properties, "PinPoints");
+		result.useColorMasks = SettingsDialog.getBooleanProperty(properties, "UseColorMasks");
+		result.useImageMaxWeight = SettingsDialog.getBooleanProperty(properties, "UseImageMaxWeight");
+	}
+	
 	public static Settings getSettings() {
 		Properties properties = new Properties();
 		String userHomeRootStr = System.getProperty("user.home");
@@ -31,9 +44,7 @@ public class Settings {
 			return null;
 		
 		Settings result = new Settings();
-		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
-		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
-		result.keyPointPairFileRootStr = properties.getProperty("KeyPointPairFileRoot", userHomeRootStr);
+		readProperties(properties, result);
 		
 		try {
 			properties.storeToXML(new FileOutputStream(propertiesFile), "Image Process configuration file");
@@ -54,14 +65,17 @@ public class Settings {
 		}
 		
 		Settings result = new Settings();
-		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
-		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
-		result.keyPointPairFileRootStr = properties.getProperty("KeyPointPairFileRoot", userHomeRootStr);
+		readProperties(properties, result);
 		
 		try {
 			properties.storeToXML(new FileOutputStream(propertiesFile), "Image Process configuration file");
 		} catch (Exception e) {
 		}
 		return result;
+	}
+
+	public static void main(String[] args) {
+		Settings.getSettings();
+		System.out.println("Done.");
 	}
 }

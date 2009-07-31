@@ -566,7 +566,7 @@ public class SymmetricMatrix {
 	/**
 	 * Private class used by Matrix.inverse()
 	 */
-	private class XchgRec {
+	private static class XchgRec {
 
 		public int a;
 
@@ -649,7 +649,7 @@ public class SymmetricMatrix {
 		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
 
 		// Средно аритметично.
-		double S = 2 / (sizeM * (sizeM + 1));
+		double S = 2.0 / (sizeM * (sizeM + 1));
 		res.AvgA = 0;
 		res.AvgB = 0;
 		for (int i = m.length - 1; i >= 0; i--) {
