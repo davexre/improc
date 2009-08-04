@@ -109,11 +109,11 @@ public class Marker {
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 		System.out.println("Block \"" + m.id + "\" elapsed " + 
 			Util.getFormatedMilliseconds(now - m.mark) + 
-			", memory used " + Util.getFormatBytes(memoryUsage.getUsed()) + 
+			",\n  memory used " + Util.getFormatBytes(memoryUsage.getUsed()) + 
 			", memory delta " + Util.getFormatBytes(memoryUsage.getUsed() - m.memoryUsed) +
 			(garbageCounterDelta == 0 ? 
-					", garbage collection NOT invoked" : 
-					", garbage collection invoked " + Integer.toString(garbageCounterDelta) + " times")
+					",\n  garbage collection NOT invoked" : 
+					",\n  garbage collection invoked " + Integer.toString(garbageCounterDelta) + " times")
 		);
 	}
 }

@@ -21,6 +21,7 @@ import com.slavi.math.MathUtil;
 // Referenced classes of package mp:
 //            MapPoint, PjMapProjection, Borderline
 
+@SuppressWarnings("all")
 public class MapProjection extends Canvas
     implements MouseListener, MouseMotionListener, KeyListener
 {

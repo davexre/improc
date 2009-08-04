@@ -3,6 +3,7 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
@@ -46,6 +47,8 @@ public class Improc {
 		images = null;
 		bigTree = null;
 
+		System.out.println("Key point pairs lists to be validated: " + kppl.size());
+		
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog("Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
@@ -64,10 +67,19 @@ public class Improc {
 		System.out.println("Done.");
 	}
 	
+	public static class MyThreadFactory implements ThreadFactory {
+		public Thread newThread(Runnable r) {
+			Thread thread = new Thread(r);
+			thread.setPriority(Thread.MIN_PRIORITY);
+			return thread;
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1);
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1,
+				new MyThreadFactory());
 
 		try {
 			Improc application = new Improc();

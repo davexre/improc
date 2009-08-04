@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
@@ -40,10 +39,6 @@ public class KeyPointList {
 	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
 			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));
 	
-	public int getFocalDistance() {
-		return Math.max(imageSizeX, imageSizeY);
-	}
-	
 	public KeyPointList() {
 	}
 
@@ -75,14 +70,6 @@ public class KeyPointList {
 			fou.println(item.toString());
 	}
 
-	public HashMap<Integer, KeyPoint> makeMap() {
-		HashMap<Integer, KeyPoint> result = new HashMap<Integer, KeyPoint>(items.size());
-		for (KeyPoint i : items) {
-			result.put(i.id, i);
-		}
-		return result;
-	}
-	
 	public void compareToList(KeyPointList dest) {
 		int matchedCount1 = 0;
 		for (int i = items.size() - 1; i >= 0; i--) {

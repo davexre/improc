@@ -62,6 +62,7 @@ public class MyPanoPairTransformLearner3 {
 					curImage.rx = -angles[0];
 					curImage.ry = -angles[1];
 					curImage.rz = angles[2];
+					curImage.scaleZ = pairList.source.scaleZ * pairList.scale; 
 					todo.remove(curImageIndex);
 					curImageIndex = todo.size();
 					break;
@@ -79,6 +80,7 @@ public class MyPanoPairTransformLearner3 {
 					curImage.rx = angles[0];
 					curImage.ry = angles[1];
 					curImage.rz = angles[2];
+					curImage.scaleZ = pairList.source.scaleZ / pairList.scale; 
 					todo.remove(curImageIndex);
 					curImageIndex = todo.size();
 					break;
@@ -142,7 +144,7 @@ public class MyPanoPairTransformLearner3 {
 	}
 
 
-	final double scaleScaleZ = 3;
+	final double scaleScaleZ = 1;
 	public static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = RotationXYZ.makeAngles(image.rx, image.ry, image.rz);
 		image.dMdX = RotationXYZ.make_dF_dX(image.rx, image.ry, image.rz);
