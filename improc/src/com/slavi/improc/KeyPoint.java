@@ -7,7 +7,7 @@ public class KeyPoint {
 	
 	public int id = hashCode();
 	
-	public static final int numDirections = 8;
+	public static final int numDirections = 4;
 
 	public static final int descriptorSize = 4;
 

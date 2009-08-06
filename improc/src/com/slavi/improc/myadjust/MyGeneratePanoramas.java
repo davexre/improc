@@ -30,7 +30,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	///////
 	
 	Map<KeyPointList, SafeImage> imageData = new HashMap<KeyPointList, SafeImage>();
-	SafeImage oi;
+	SafeImage outImageColor;
+	SafeImage outImageMask;
 	Point2D.Double minAngle = new Point2D.Double();
 	Point2D.Double sizeAngle = new Point2D.Double();
 
@@ -131,17 +132,31 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		public Void call() throws Exception {
 			Point2D.Double d = new Point2D.Double();
 			for (int oimgY = startRow; oimgY <= endRow; oimgY++) {
-				for (int oimgX = 0; oimgX < oi.sizeX; oimgX++) {
+				for (int oimgX = 0; oimgX < outImageColor.sizeX; oimgX++) {
 					if (Thread.currentThread().isInterrupted())
 						throw new InterruptedException();
 					long colorR = 0;
 					long colorG = 0;
 					long colorB = 0;
+
+					long mcolorR = 0;
+					long mcolorG = 0;
+					long mcolorB = 0;
+					
 					int countR = 0;
 					int countG = 0;
 					int countB = 0;
+
+					int mcountR = 0;
+					int mcountG = 0;
+					int mcountB = 0;
+
 					int curMaxWeight = 0;
 					int curMaxColor = 0;
+
+					int mcurMaxWeight = 0;
+					int mcurMaxColor = 0;
+
 					for (int index = 0; index < images.size(); index++) {
 						KeyPointList image = images.get(index);
 						
@@ -164,72 +179,77 @@ public class MyGeneratePanoramas implements Callable<Void> {
 						double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 						double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
 						int weight = 1 + (int) (precision * (2 - MathUtil.hypot(dx, dy)));  
-//						int weight = 1 + (int) (precision * (1 - Math.max(dx, dy)));  
 						
-						if (useColorMasks) {
-							color = DWindowedImageUtils.getGrayColor(color) & 0xff;
-							switch (index % 3) {
-							case 0:
-								if (useImageMaxWeight) {
-									if (curMaxWeight < weight) {
-										curMaxWeight = weight;
-										curMaxColor = color << 16;
-									}
-								} else {
-									colorR += color;
-									countR += weight;
-								}
-								break;
-							case 1:
-								if (useImageMaxWeight) {
-									if (curMaxWeight < weight) {
-										curMaxWeight = weight;
-										curMaxColor = color << 8;
-									}
-								} else {
-									colorG += color;
-									countG += weight;
-								}
-								break;
-							default:
-								if (useImageMaxWeight) {
-									if (curMaxWeight < weight) {
-										curMaxWeight = weight;
-										curMaxColor = color;
-									}
-								} else {
-									colorB += color;
-									countB += weight;
-								}
-								break;
-							}
-						} else {
+						// Calculate the masked image
+						int grayColor = DWindowedImageUtils.getGrayColor(color) & 0xff;
+						switch (index % 3) {
+						case 0:
 							if (useImageMaxWeight) {
-								if (curMaxWeight < weight) {
-									curMaxWeight = weight;
-									curMaxColor = color;
+								if (mcurMaxWeight < weight) {
+									mcurMaxWeight = weight;
+									mcurMaxColor = grayColor << 16;
 								}
 							} else {
-								countR += weight;
-								countG += weight;
-								countB += weight;
-								colorR += weight * ((color >> 16) & 0xff);
-								colorG += weight * ((color >> 8) & 0xff);
-								colorB += weight * (color & 0xff);
+								mcolorR += grayColor;
+								mcountR += weight;
 							}
+							break;
+						case 1:
+							if (useImageMaxWeight) {
+								if (mcurMaxWeight < weight) {
+									mcurMaxWeight = weight;
+									mcurMaxColor = grayColor << 8;
+								}
+							} else {
+								mcolorG += grayColor;
+								mcountG += weight;
+							}
+							break;
+						default:
+							if (useImageMaxWeight) {
+								if (mcurMaxWeight < weight) {
+									mcurMaxWeight = weight;
+									mcurMaxColor = grayColor;
+								}
+							} else {
+								mcolorB += grayColor;
+								mcountB += weight;
+							}
+							break;
+						}
+						
+						// Calculate the color image
+						if (useImageMaxWeight) {
+							if (curMaxWeight < weight) {
+								curMaxWeight = weight;
+								curMaxColor = color;
+							}
+						} else {
+							countR += weight;
+							countG += weight;
+							countB += weight;
+							colorR += weight * ((color >> 16) & 0xff);
+							colorG += weight * ((color >> 8) & 0xff);
+							colorB += weight * (color & 0xff);
 						}
 					}
 
 					int color = 0;
 					if (useImageMaxWeight) {
-						color = curMaxColor;
+						outImageColor.setRGB(oimgX, oimgY, curMaxColor);
+						outImageMask.setRGB(oimgX, oimgY, mcurMaxColor);
 					} else {
 						color = 
 							(fixColorValue(colorR, countR) << 16) |
 							(fixColorValue(colorG, countG) << 8) |
 							fixColorValue(colorB, countB);
+						outImageColor.setRGB(oimgX, oimgY, color);
+						color = 
+							(fixColorValue(mcolorR, mcountR) << 16) |
+							(fixColorValue(mcolorG, mcountG) << 8) |
+							fixColorValue(mcolorB, mcountB);
+						outImageMask.setRGB(oimgX, oimgY, curMaxColor);
 					}
-					oi.setRGB(oimgX, oimgY, color);
 				}			
 			}
 			return null;
@@ -238,7 +258,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 
 	private void pinPoints(SafeImage oi) {
 		Point2D.Double d = new Point2D.Double();
-		// Pin pairs
 		for (KeyPointPairList pairList : pairLists) {
 			int colorCross = images.indexOf(pairList.source) % 3;
 			int colorX = images.indexOf(pairList.target) % 3;
@@ -255,13 +274,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					int y2 = (int)d.y;
 					oi.pinPair(x1, y1, x2, y2, colorCross, colorX);
 				}
-				// dump statistic info for pairs
-//				System.out.println(
-//						MathUtil.d4(pair.discrepancy) + "\t" +	
-//						MathUtil.d4(pair.distanceToNearest) + "\t" +	
-//						MathUtil.d4(pair.distanceToNearest2) + "\t" +	
-//						MathUtil.d4(pair.getMaxDifference()) + "\t"	
-//				);
 			}
 		}
 	}
@@ -299,6 +311,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 				"Target\t" +
 				"Bad\t" +
 				"Discrepancy\t" +
+				"Distance1\t" +
+				"Distance2\t" +
 				
 				"SdogLevel\t" +
 				"SimgScale\t" +
@@ -316,6 +330,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					pair.targetSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
 					pair.bad + "\t" +
 					MathUtil.d4(pair.discrepancy) + "\t" +
+					MathUtil.d4(pair.distanceToNearest) + "\t" +
+					MathUtil.d4(pair.distanceToNearest2) + "\t" +
 					
 					pair.sourceSP.dogLevel + "\t" +
 					pair.sourceSP.imgScale + "\t" +
@@ -341,7 +357,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		System.out.println("SIZE angle X,Y: " + MathUtil.d4(sizeAngle.x) + "\t" + MathUtil.d4(sizeAngle.y));
 		System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 		
-		oi = new SafeImage(outputImageSizeX, outputImageSizeY);
+		outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
+		outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
 		imageData = new HashMap<KeyPointList, SafeImage>();
 		for (int index = 0; index < images.size(); index++) {
 			KeyPointList image = images.get(index);
@@ -369,11 +386,10 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		for (Future<Void> task : tasks) {
 			task.get();
 		}
-		if (pinPoints) {
-			pinPoints(oi);
-		}
+		pinPoints(outImageMask);
 		String outputFile = outputDir + "/pano" + panoCounter.incrementAndGet();
-		oi.save(outputFile + ".png");
+		outImageColor.save(outputFile + " color.png");
+		outImageMask.save(outputFile + " mask.png");
 		
 		Marker.release();
 		dumpPointData(outputFile + ".txt");
