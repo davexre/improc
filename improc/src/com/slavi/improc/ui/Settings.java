@@ -4,13 +4,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
-
 public class Settings {
 
 	public String imagesRootStr;
 	public String keyPointFileRootStr; 
-	public String keyPointPairFileRootStr;
+	public String outputDirStr;
 	public boolean pinPoints;
 	public boolean useColorMasks;
 	public boolean useImageMaxWeight;
@@ -18,59 +16,76 @@ public class Settings {
 	private Settings() {
 	}
 
-	private static void readProperties(Properties properties, Settings result) {
+	private static boolean getBooleanProperty(Properties properties, String propertyName) {
+		String val = properties.getProperty(propertyName, "false");
+		return !"false".equalsIgnoreCase(val);
+	}
+	
+	private static String getDefaultPropertiesFileName() {
+		return System.getProperty("user.home") + "/ImageProcess.xproperties";
+	}
+	
+	private static Settings readProperties(String propertiesFile) {
+		Properties properties = new Properties();
+		FileInputStream fin = null; 
+		try {
+			fin = new FileInputStream(propertiesFile);
+			properties.loadFromXML(fin);
+		} catch (Exception e) {
+		}
+		try {
+			if (fin != null)
+				fin.close();
+		} catch (Exception e) {
+		}
+
 		String userHomeRootStr = System.getProperty("user.home");
+		Settings result = new Settings();
 		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
 		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
-		result.keyPointPairFileRootStr = properties.getProperty("KeyPointPairFileRoot", userHomeRootStr);
-		result.pinPoints = SettingsDialog.getBooleanProperty(properties, "PinPoints");
-		result.useColorMasks = SettingsDialog.getBooleanProperty(properties, "UseColorMasks");
-		result.useImageMaxWeight = SettingsDialog.getBooleanProperty(properties, "UseImageMaxWeight");
+		result.outputDirStr = properties.getProperty("OutputDir", userHomeRootStr);
+		result.pinPoints = getBooleanProperty(properties, "PinPoints");
+		result.useColorMasks = getBooleanProperty(properties, "UseColorMasks");
+		result.useImageMaxWeight = getBooleanProperty(properties, "UseImageMaxWeight");
+		return result;
+	}
+	
+	private void writeProperties(String propertiesFile) {
+		Properties properties = new Properties();
+
+		properties.setProperty("ImagesRoot", imagesRootStr);
+		properties.setProperty("KeyPointFileRoot", keyPointFileRootStr);
+		properties.setProperty("OutputDir", outputDirStr);
+		properties.setProperty("PinPoints", pinPoints ? "true" : "false");
+		properties.setProperty("UseColorMasks", useColorMasks ? "true" : "false");
+		properties.setProperty("UseImageMaxWeight", useImageMaxWeight ? "true" : "false");
+
+		FileOutputStream fou = null;
+		try {
+			fou = new FileOutputStream(propertiesFile);
+			properties.storeToXML(fou, "Image Process configuration file");
+		} catch (Exception e) {
+		}
+		try {
+			if (fou != null)
+				fou.close();
+		} catch (Exception e) {
+		}
 	}
 	
 	public static Settings getSettings() {
-		Properties properties = new Properties();
-		String userHomeRootStr = System.getProperty("user.home");
-		AbsoluteToRelativePathMaker userHomeRootBase = new AbsoluteToRelativePathMaker(userHomeRootStr);
-
-		String propertiesFile = userHomeRootBase.getFullPath("ImageProcess.xproperties");
-		try {
-			properties.loadFromXML(new FileInputStream(propertiesFile));
-		} catch (Exception e) {
-		}
-
-		SettingsDialog settings = new SettingsDialog(null);
-		if (!settings.open(properties))
+		String propertiesFile = getDefaultPropertiesFileName();
+		Settings result = readProperties(propertiesFile);
+		SettingsDialog settingsDialog = new SettingsDialog(null);
+		if (!settingsDialog.open(result))
 			return null;
-		
-		Settings result = new Settings();
-		readProperties(properties, result);
-		
-		try {
-			properties.storeToXML(new FileOutputStream(propertiesFile), "Image Process configuration file");
-		} catch (Exception e) {
-		}
+		result.writeProperties(propertiesFile);
 		return result;
 	}
 	
 	public static Settings getConstSettings() {
-		Properties properties = new Properties();
-		String userHomeRootStr = System.getProperty("user.home");
-		AbsoluteToRelativePathMaker userHomeRootBase = new AbsoluteToRelativePathMaker(userHomeRootStr);
-
-		String propertiesFile = userHomeRootBase.getFullPath("ImageProcess.xproperties");
-		try {
-			properties.loadFromXML(new FileInputStream(propertiesFile));
-		} catch (Exception e) {
-		}
-		
-		Settings result = new Settings();
-		readProperties(properties, result);
-		
-		try {
-			properties.storeToXML(new FileOutputStream(propertiesFile), "Image Process configuration file");
-		} catch (Exception e) {
-		}
+		String propertiesFile = getDefaultPropertiesFileName();
+		Settings result = readProperties(propertiesFile);
 		return result;
 	}
 

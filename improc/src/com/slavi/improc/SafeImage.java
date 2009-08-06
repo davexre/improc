@@ -41,10 +41,14 @@ public class SafeImage {
 		sizeY = bi.getHeight();
 	}
 	
-	public synchronized void save() throws IOException {
-		String fname = Const.workDir + "/temp" + (++imageCounter) + ".png";
+	public synchronized void save(String fname) throws IOException {
 		ImageIO.write(bi, "png", new File(fname));
 		bi = null;
+	}
+	
+	public synchronized void save() throws IOException {
+		String fname = Const.workDir + "/temp" + (++imageCounter) + ".png";
+		save(fname);
 	}
 		
 	public synchronized int getNextColor() {

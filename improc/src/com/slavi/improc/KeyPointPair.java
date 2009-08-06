@@ -42,8 +42,8 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 			for (int j = 0; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0; k < KeyPoint.numDirections; k++) {
 					if (
-						(sourceSP.featureVector[i][j][k] == 0) ^ 
-						(targetSP.featureVector[i][j][k] == 0)) 
+						(sourceSP.getItem(i, j, k) == 0) ^ 
+						(targetSP.getItem(i, j, k) == 0)) 
 						result++;
 				}
 		return result;
@@ -54,7 +54,7 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 		for (int i = 0; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0; k < KeyPoint.numDirections; k++) {
-					int dif = Math.abs(sourceSP.featureVector[i][j][k] - targetSP.featureVector[i][j][k]);
+					int dif = Math.abs(sourceSP.getItem(i, j, k) - targetSP.getItem(i, j, k));
 					if (result < dif)
 						result = dif;
 				}

@@ -1,7 +1,6 @@
 package com.slavi.improc.ui;
 
 import java.io.File;
-import java.util.Properties;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -11,7 +10,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
@@ -29,7 +27,7 @@ public class SettingsDialog {
 	// Control references
 	Text txtImagesRoot;
 	Text txtKeyPointFileRoot;
-	Text txtKeyPointPairFileRoot;
+	Text txtOutputDir;
 	Button btnPinPoints;
 	Button btnUseColorMasks;
 	Button btnUseImageMaxWeight;
@@ -37,8 +35,6 @@ public class SettingsDialog {
 	Button btnCancel;
 	Button btnNext;
 	boolean result;
-	
-	DirectoryDialog browseForFolderDialog = null;
 	
 	public SettingsDialog(Shell parent) {
 		shell = new Shell(parent, SWT.SHELL_TRIM);
@@ -81,7 +77,7 @@ public class SettingsDialog {
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = SwtUtil.browseForFolder(shell, "Message 1", txtImagesRoot.getText());
+				String result = SwtUtil.browseForFolder(shell, "Images root folder", txtImagesRoot.getText());
 				if (result != null)
 					txtImagesRoot.setText(result); 
 			}
@@ -98,7 +94,7 @@ public class SettingsDialog {
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = SwtUtil.browseForFolder(shell, "Message 2", txtKeyPointFileRoot.getText());
+				String result = SwtUtil.browseForFolder(shell, "Key point files root folder", txtKeyPointFileRoot.getText());
 				if (result != null)
 					txtKeyPointFileRoot.setText(result); 
 			}
@@ -107,17 +103,17 @@ public class SettingsDialog {
 		//////////////
 		
 		label = new Label(group, SWT.RIGHT);
-		label.setText("Key point pair files root folder");
-		txtKeyPointPairFileRoot = new Text(group, SWT.BORDER);
-		txtKeyPointPairFileRoot.setLayoutData(gridData);
+		label.setText("Output files folder");
+		txtOutputDir = new Text(group, SWT.BORDER);
+		txtOutputDir.setLayoutData(gridData);
 		
 		button = new Button(group, SWT.PUSH);
 		button.setText("Browse");
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String result = SwtUtil.browseForFolder(shell, "Message 3", txtKeyPointPairFileRoot.getText());
+				String result = SwtUtil.browseForFolder(shell, "Output files folder", txtOutputDir.getText());
 				if (result != null)
-					txtKeyPointPairFileRoot.setText(result); 
+					txtOutputDir.setText(result); 
 			}
 		});
 		
@@ -125,7 +121,10 @@ public class SettingsDialog {
 		
 		group = new Group(shell, SWT.NONE);
 		group.setText("Rendering options");
-		group.setLayout(new FillLayout(SWT.VERTICAL));
+		GridLayout lay = new GridLayout(1, true);
+		lay.marginLeft = 0;
+		lay.marginTop = 0;
+		group.setLayout(lay);
 		shellLayoutData = new GridData();
 		shellLayoutData.horizontalAlignment = GridData.FILL;
 		shellLayoutData.grabExcessHorizontalSpace = true;
@@ -168,12 +167,12 @@ public class SettingsDialog {
 			public void widgetSelected(SelectionEvent e) {
 				if (validateInput()) {
 					result = true;
-					properties.setProperty("ImagesRoot", txtImagesRoot.getText());
-					properties.setProperty("KeyPointFileRoot", txtKeyPointFileRoot.getText());
-					properties.setProperty("KeyPointPairFileRoot", txtKeyPointPairFileRoot.getText());
-					properties.setProperty("PinPoints", btnPinPoints.getSelection() ? "true" : "false");
-					properties.setProperty("UseColorMasks", btnUseColorMasks.getSelection() ? "true" : "false");
-					properties.setProperty("UseImageMaxWeight", btnUseImageMaxWeight.getSelection() ? "true" : "false");
+					settings.imagesRootStr = txtImagesRoot.getText();
+					settings.keyPointFileRootStr = txtKeyPointFileRoot.getText();
+					settings.outputDirStr = txtOutputDir.getText();
+					settings.pinPoints = btnPinPoints.getSelection();
+					settings.useColorMasks = btnUseColorMasks.getSelection();
+					settings.useImageMaxWeight = btnUseImageMaxWeight.getSelection();
 					shell.close();
 				}
 			}
@@ -204,7 +203,7 @@ public class SettingsDialog {
 		if (!f.isDirectory())
 			return false;
 		
-		f = new File(txtKeyPointPairFileRoot.getText());
+		f = new File(txtOutputDir.getText());
 		f.mkdirs();
 		if (!f.isDirectory())
 			return false;
@@ -212,22 +211,16 @@ public class SettingsDialog {
 		return true;
 	}
 	
-	Properties properties;
+	Settings settings;
 	
-	public static boolean getBooleanProperty(Properties properties, String propertyName) {
-		String val = properties.getProperty(propertyName, "false");
-		return !"false".equalsIgnoreCase(val);
-	}
-	
-	public boolean open(Properties properties) {
-		this.properties = properties;
-		String userHomeRoot = System.getProperty("user.home");
-		txtImagesRoot.setText(properties.getProperty("ImagesRoot", userHomeRoot));
-		txtKeyPointFileRoot.setText(properties.getProperty("KeyPointFileRoot", userHomeRoot));
-		txtKeyPointPairFileRoot.setText(properties.getProperty("KeyPointPairFileRoot", userHomeRoot));
-		btnPinPoints.setSelection(getBooleanProperty(properties, "PinPoints"));
-		btnUseColorMasks.setSelection(getBooleanProperty(properties, "UseColorMasks"));
-		btnUseImageMaxWeight.setSelection(getBooleanProperty(properties, "UseImageMaxWeight"));
+	public boolean open(Settings settings) {
+		this.settings = settings;
+		txtImagesRoot.setText(settings.imagesRootStr);
+		txtKeyPointFileRoot.setText(settings.keyPointFileRootStr);
+		txtOutputDir.setText(settings.outputDirStr);
+		btnPinPoints.setSelection(settings.pinPoints);
+		btnUseColorMasks.setSelection(settings.useColorMasks);
+		btnUseImageMaxWeight.setSelection(settings.useImageMaxWeight);
 		
 		result = false;
 		shell.open();

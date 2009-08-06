@@ -13,13 +13,25 @@ public class CalculatePanoramaParams implements Callable<Void> {
 	ExecutorService exec;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
 	ArrayList<KeyPointPairList> kppl;
+	final String outputDir;
+	final boolean pinPoints;
+	final boolean useColorMasks;
+	final boolean useImageMaxWeight;
 	
 	public CalculatePanoramaParams(ExecutorService exec,
 			ArrayList<KeyPointPairList> kppl,
-			AbsoluteToRelativePathMaker keyPointPairFileRoot) {
+			AbsoluteToRelativePathMaker keyPointPairFileRoot,
+			String outputDir,
+			boolean pinPoints,
+			boolean useColorMasks,
+			boolean useImageMaxWeight) {
 		this.exec = exec;
 		this.kppl = kppl;
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
+		this.outputDir = outputDir;
+		this.pinPoints = pinPoints;
+		this.useColorMasks = useColorMasks;
+		this.useImageMaxWeight = useImageMaxWeight;
 	}
 
 	private void removeBadKeyPointPairLists() {
@@ -93,7 +105,8 @@ public class CalculatePanoramaParams implements Callable<Void> {
 			learner.calculatePrims();
 			boolean success = learner.calculate();
 //			if (success) {
-				MyGeneratePanoramas gen = new MyGeneratePanoramas(exec, images, chain, keyPointPairFileRoot);
+				MyGeneratePanoramas gen = new MyGeneratePanoramas(exec, images, chain, keyPointPairFileRoot,
+						outputDir, pinPoints, useColorMasks, useImageMaxWeight);
 				gen.call();
 //			}
 			System.out.println("Adjust panorama " + (success ? "SUCCESS" : "FAILED"));

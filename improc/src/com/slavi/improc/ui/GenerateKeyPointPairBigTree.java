@@ -55,6 +55,8 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 				SwtUtil.activeWaitDialogSetStatus(statusMessage, bigTree.keyPointLists.size() - 1);
 			}
 			for (KeyPoint kp : l.items) {
+				if (Thread.currentThread().isInterrupted())
+					throw new InterruptedException();
 //				if (kp.dogLevel == 2)
 					bigTree.add(kp);
 			}
@@ -74,12 +76,31 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 			Future<?> f = exec.submit(new ProcessOne(result, image));
 			tasks.add(f);
 		}
-	
-		for (Future<?> task : tasks) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
+
+		try {
+			for (Future<?> task : tasks) {
+				if (Thread.interrupted()) {
+					throw new InterruptedException();
+				}
+				task.get();
 			}
-			task.get();
+		} catch (Exception e) {
+			for (Future<?> task : tasks) {
+				task.cancel(true);
+			}
+			for (Future<?> task : tasks) {
+				try {
+					task.get();
+				} catch (Exception ignoreMe) {
+				}
+			}
+
+			System.out.println("Tree size          : " + result.getSize());
+			System.out.println("Tree depth         : " + result.getTreeDepth());
+			System.out.println("Tree size          : " + result.getSize());
+			System.out.println("Tree depth         : " + result.getTreeDepth());
+			System.out.println("Perfect tree depth : " + result.getPerfectTreeDepth());
+			throw e;
 		}
 
 		return result;

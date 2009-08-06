@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.image.DWindowedImageUtils;
 import com.slavi.improc.KeyPointList;
@@ -16,7 +17,6 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
-import com.slavi.util.Const;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
@@ -34,20 +34,29 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	Point2D.Double minAngle = new Point2D.Double();
 	Point2D.Double sizeAngle = new Point2D.Double();
 
-	boolean pinPoints = false;
-	boolean useImageColorMasks = false;
-	boolean useImageWithMaxWeight = true;
+	final String outputDir;
+	final boolean pinPoints;
+	final boolean useColorMasks;
+	final boolean useImageMaxWeight;
 	int outputImageSizeX = 5000;
 	int outputImageSizeY;
-	
+
 	public MyGeneratePanoramas(ExecutorService exec,
 			ArrayList<KeyPointList> images,
 			ArrayList<KeyPointPairList> pairLists,
-			AbsoluteToRelativePathMaker keyPointPairFileRoot) {
+			AbsoluteToRelativePathMaker keyPointPairFileRoot,
+			String outputDir,
+			boolean pinPoints,
+			boolean useColorMasks,
+			boolean useImageMaxWeight) {
 		this.exec = exec;
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
 		this.pairLists = pairLists;
 		this.images = images;
+		this.outputDir = outputDir;
+		this.pinPoints = pinPoints;
+		this.useColorMasks = useColorMasks;
+		this.useImageMaxWeight = useImageMaxWeight;
 	}
 	
 	static void calcExt(Point2D.Double p, Point2D.Double min, Point2D.Double max) {
@@ -154,17 +163,17 @@ public class MyGeneratePanoramas implements Callable<Void> {
 						double precision = 1000.0;
 						double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 						double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
-//						int weight = 1 + (int) (precision * (1 - MathUtil.hypot(dx, dy)));  
-						int weight = 1 + (int) (precision * (1 - Math.max(dx, dy)));  
+						int weight = 1 + (int) (precision * (2 - MathUtil.hypot(dx, dy)));  
+//						int weight = 1 + (int) (precision * (1 - Math.max(dx, dy)));  
 						
-						if (useImageColorMasks) {
+						if (useColorMasks) {
 							color = DWindowedImageUtils.getGrayColor(color) & 0xff;
 							switch (index % 3) {
 							case 0:
-								if (useImageWithMaxWeight) {
+								if (useImageMaxWeight) {
 									if (curMaxWeight < weight) {
 										curMaxWeight = weight;
-										curMaxColor = ((color << 16) & 0xff);
+										curMaxColor = color << 16;
 									}
 								} else {
 									colorR += color;
@@ -172,10 +181,10 @@ public class MyGeneratePanoramas implements Callable<Void> {
 								}
 								break;
 							case 1:
-								if (useImageWithMaxWeight) {
+								if (useImageMaxWeight) {
 									if (curMaxWeight < weight) {
 										curMaxWeight = weight;
-										curMaxColor = ((color << 8) & 0xff);
+										curMaxColor = color << 8;
 									}
 								} else {
 									colorG += color;
@@ -183,7 +192,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 								}
 								break;
 							default:
-								if (useImageWithMaxWeight) {
+								if (useImageMaxWeight) {
 									if (curMaxWeight < weight) {
 										curMaxWeight = weight;
 										curMaxColor = color;
@@ -195,7 +204,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 								break;
 							}
 						} else {
-							if (useImageWithMaxWeight) {
+							if (useImageMaxWeight) {
 								if (curMaxWeight < weight) {
 									curMaxWeight = weight;
 									curMaxColor = color;
@@ -212,7 +221,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					}
 
 					int color = 0;
-					if (useImageWithMaxWeight) {
+					if (useImageMaxWeight) {
 						color = curMaxColor;
 					} else {
 						color = 
@@ -268,9 +277,24 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		return (int) color;
 	}
 	
-	void dumpPointData() throws Exception {
-		PrintStream fou = new PrintStream(Const.workDir + "/pointData.txt");
-		fou.println(
+	void dumpPointData(String outputFile) throws Exception {
+		PrintStream out = new PrintStream(outputFile);
+		
+		out.println("Image generated from the following images:");
+		for (KeyPointList image : images) {
+			out.println(image.imageFileStamp.getFile().getName() + "\t(" + image.items.size() + ")");
+		}
+		out.println("------------");
+		
+		for (KeyPointPairList pairList : pairLists) {
+			out.println(
+				pairList.source.imageFileStamp.getFile().getName() + "\t" +
+				pairList.target.imageFileStamp.getFile().getName() + "\t" +
+				pairList.items.size());
+		}
+		out.println("------------");
+
+		out.println(
 				"Source\t" +
 				"Target\t" +
 				"Bad\t" +
@@ -287,7 +311,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 				"TadjS");
 		for (KeyPointPairList pairList : pairLists) {
 			for (KeyPointPair pair : pairList.items) {
-				fou.println(
+				out.println(
 					pair.sourceSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
 					pair.targetSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
 					pair.bad + "\t" +
@@ -304,9 +328,10 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					pair.targetSP.adjS);
 			}
 		}
-		fou.close();
+		out.close();
 	}
 	
+	private static final AtomicInteger panoCounter = new AtomicInteger(0);
 	
 	public Void call() throws Exception {
 		Marker.mark("Generate panorama");
@@ -347,9 +372,11 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		if (pinPoints) {
 			pinPoints(oi);
 		}
-		oi.save();
+		String outputFile = outputDir + "/pano" + panoCounter.incrementAndGet();
+		oi.save(outputFile + ".png");
+		
 		Marker.release();
-		dumpPointData();
+		dumpPointData(outputFile + ".txt");
 		return null;
 	}
 }

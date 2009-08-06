@@ -26,6 +26,7 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
+@SuppressWarnings("all")
 public class GenerateImageWithAlpha {
 
 	private static BufferedImage resizeImage(BufferedImage source, int destWidth, int destHeight) {
@@ -170,7 +171,7 @@ public class GenerateImageWithAlpha {
 	}
 
 	
-    public String exportAllImages() {
+	public String exportAllImages() {
     	String outDir = "c:/output/";
     	
 		Connection conn = null; //Db.getConnection();

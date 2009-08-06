@@ -33,14 +33,22 @@ public class KeyPoint {
 
 	public double degree;	// TODO: Obsolete
 	
-	byte[][][] featureVector = new byte[descriptorSize][descriptorSize][numDirections];
+	byte[] featureVector = new byte[featureVectorLinearSize];
 
 	public byte getItem(int atX, int atY, int atOrientation) {
-		return featureVector[atX][atY][atOrientation];
+		if ((atX < 0) || (atX >= descriptorSize) || 
+			(atY < 0) || (atY >= descriptorSize) ||
+			(atOrientation < 0) || (atOrientation >= numDirections))
+			throw new ArrayIndexOutOfBoundsException("X=" + atX + " Y=" + atY + " O=" + atOrientation);
+		return featureVector[((atX * descriptorSize) + atY) * descriptorSize + atOrientation];
 	}
 
 	public void setItem(int atX, int atY, int atOrientation, byte aValue) {
-		featureVector[atX][atY][atOrientation] = aValue;
+		if ((atX < 0) || (atX >= descriptorSize) || 
+			(atY < 0) || (atY >= descriptorSize) ||
+			(atOrientation < 0) || (atOrientation >= numDirections))
+			throw new ArrayIndexOutOfBoundsException("X=" + atX + " Y=" + atY + " O=" + atOrientation);
+		featureVector[((atX * descriptorSize) + atY) * descriptorSize + atOrientation] = aValue;
 	}
 
 	public int getNumberOfNonZero() {
@@ -48,7 +56,7 @@ public class KeyPoint {
 		for (int i = 0; i < descriptorSize; i++)
 			for (int j = 0; j < descriptorSize; j++)
 				for (int k = 0; k < numDirections; k++)
-					if (featureVector[i][j][k] != 0)
+					if (getItem(i, j, k) != 0)
 						result++;
 		return result;
 	}
@@ -82,7 +90,7 @@ public class KeyPoint {
 						first = false;
 					else
 						result.append("\t");
-					result.append(Integer.toString(featureVector[i][j][k]));
+					result.append(Integer.toString(getItem(i, j, k)));
 				}
 			}
 		}
@@ -111,7 +119,7 @@ public class KeyPoint {
 						tmp = Byte.MAX_VALUE;
 					if (tmp < Byte.MIN_VALUE)
 						tmp = Byte.MIN_VALUE;
-					r.featureVector[i][j][k] = (byte)tmp;
+					r.setItem(i, j, k, (byte)tmp);
 				}
 		return r;
 	}
@@ -120,8 +128,7 @@ public class KeyPoint {
 		for (int k = 0; k < numDirections; k++) {
 			for (int j = 0; j < descriptorSize; j++) {
 				for (int i = 0; i < descriptorSize; i++) {
-					if (sp.featureVector[i][j][k] != 
-						featureVector[i][j][k])
+					if (sp.getItem(i, j, k) != getItem(i, j, k))
 						return false;
 				}
 			}
@@ -146,17 +153,11 @@ public class KeyPoint {
 		return equalsFeatureVector(sp);
 	}
 
-	public static final int linearFeatureVectorDimension = descriptorSize * descriptorSize * numDirections;
-	
 	public int getDimensions() {
-		return linearFeatureVectorDimension;
+		return featureVectorLinearSize;
 	}
 
 	public double getValue(int dimensionIndex) {
-		int x = dimensionIndex % descriptorSize;
-		dimensionIndex /= descriptorSize;
-		int y = dimensionIndex % descriptorSize;
-		int o = dimensionIndex / descriptorSize;
-		return featureVector[x][y][o];
+		return featureVector[dimensionIndex];
 	}
 }

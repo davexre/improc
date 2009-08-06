@@ -1,5 +1,6 @@
 package com.test;
 
+@SuppressWarnings("all")
 public class TestPrivateMethodInheritance {
 
 	public static class Base {
