@@ -88,6 +88,9 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			MyPanoPairTransformer3.transform(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
 		}
+//		minAngle.x += Math.PI / 4.0;
+//		sizeAngle.x += Math.PI / 2.0;
+		
 		sizeAngle.x -= minAngle.x;
 		sizeAngle.y -= minAngle.y;
 		outputImageSizeY = (int)(outputImageSizeX * (sizeAngle.y / sizeAngle.x));
@@ -119,6 +122,28 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		dest.y = outputImageSizeY * ((dest.y - minAngle.y) / sizeAngle.y);
 	}
 
+	static final int masks[][] = { // and mask, or mask 
+		{ 0xff0000, 0x000000 },
+		{ 0x00ff00, 0x000000 },
+		{ 0x0000ff, 0x000000 },
+		
+		{ 0xff00ff, 0x000000 },
+		{ 0xffff00, 0x000000 },
+		{ 0x00ffff, 0x000000 },
+		
+		{ 0xff00ff, 0x007f00 },
+		{ 0xffff00, 0x007f00 },
+		{ 0x00ffff, 0x7f0000 },
+
+		{ 0xff0000, 0x007f00 },
+		{ 0x00ff00, 0x00007f },
+		{ 0x0000ff, 0x7f0000 },
+
+		{ 0xff0000, 0x00007f },
+		{ 0x00ff00, 0x7f0000 },
+		{ 0x0000ff, 0x007f00 },
+		
+		}; 
 	private class ParallelRender implements Callable<Void> {
 
 		int startRow;
@@ -182,40 +207,28 @@ public class MyGeneratePanoramas implements Callable<Void> {
 						
 						// Calculate the masked image
 						int grayColor = DWindowedImageUtils.getGrayColor(color) & 0xff;
-						switch (index % 3) {
-						case 0:
-							if (useImageMaxWeight) {
-								if (mcurMaxWeight < weight) {
-									mcurMaxWeight = weight;
-									mcurMaxColor = grayColor << 16;
-								}
-							} else {
+						if (useImageMaxWeight) {
+							if (mcurMaxWeight < weight) {
+								mcurMaxWeight = weight;
+								grayColor = grayColor | (grayColor << 8) | (grayColor << 16);
+								int m[] = masks[index % masks.length];
+								mcurMaxColor = (grayColor & m[0]) | m[1] ;
+							}
+						} else {
+							switch (index % 3) {
+							case 0:
 								mcolorR += grayColor;
 								mcountR += weight;
-							}
-							break;
-						case 1:
-							if (useImageMaxWeight) {
-								if (mcurMaxWeight < weight) {
-									mcurMaxWeight = weight;
-									mcurMaxColor = grayColor << 8;
-								}
-							} else {
+								break;
+							case 1:
 								mcolorG += grayColor;
 								mcountG += weight;
-							}
-							break;
-						default:
-							if (useImageMaxWeight) {
-								if (mcurMaxWeight < weight) {
-									mcurMaxWeight = weight;
-									mcurMaxColor = grayColor;
-								}
-							} else {
+								break;
+							default:
 								mcolorB += grayColor;
-								mcountB += weight;
-							}
+							mcountB += weight;
 							break;
+							}
 						}
 						
 						// Calculate the color image
@@ -259,10 +272,23 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	private void pinPoints(SafeImage oi) {
 		Point2D.Double d = new Point2D.Double();
 		for (KeyPointPairList pairList : pairLists) {
-			int colorCross = images.indexOf(pairList.source) % 3;
-			int colorX = images.indexOf(pairList.target) % 3;
-			colorCross = colorCross < 0 ? -1 : 255 << (8 * colorCross);
-			colorX = colorX < 0 ? -1 : 255 << (8 * colorX);			
+			int colorCross = images.indexOf(pairList.source);
+			int colorX = images.indexOf(pairList.target);
+			
+			if (useImageMaxWeight) {
+				int m[] = masks[colorCross % masks.length];
+				colorCross = (0xffffff & m[0]) | m[1] ;
+				
+				m = masks[colorX % masks.length];
+				colorX = (0xffffff & m[0]) | m[1] ;
+			} else {
+				colorCross = colorCross % 3;
+				colorCross = colorCross < 0 ? -1 : 255 << (8 * colorCross);
+				
+				colorX = colorX % 3;
+				colorX = colorX < 0 ? -1 : 255 << (8 * colorX);			
+			}
+			
 			
 			for (KeyPointPair pair : pairList.items) {
 				if (!pair.bad) {
@@ -353,8 +379,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		Marker.mark("Generate panorama");
 		calcExtents();
 		
-		System.out.println("MIN Angle X,Y:  " + MathUtil.d4(minAngle.x) + "\t" + MathUtil.d4(minAngle.y));
-		System.out.println("SIZE angle X,Y: " + MathUtil.d4(sizeAngle.x) + "\t" + MathUtil.d4(sizeAngle.y));
+		System.out.println("MIN Angle X,Y:  " + MathUtil.d4(MathUtil.rad2deg * minAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * minAngle.y));
+		System.out.println("SIZE angle X,Y: " + MathUtil.d4(MathUtil.rad2deg * sizeAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * sizeAngle.y));
 		System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 		
 		outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
