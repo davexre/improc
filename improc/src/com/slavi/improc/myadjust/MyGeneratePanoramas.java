@@ -39,7 +39,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	final boolean pinPoints;
 	final boolean useColorMasks;
 	final boolean useImageMaxWeight;
-	int outputImageSizeX = 5000;
+	int outputImageSizeX = 3000;
 	int outputImageSizeY;
 
 	public MyGeneratePanoramas(ExecutorService exec,
@@ -122,6 +122,25 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		dest.y = outputImageSizeY * ((dest.y - minAngle.y) / sizeAngle.y);
 	}
 
+	private void drawWorldMesh(SafeImage img) {
+		int numDivisionsX = 24;
+		int numDivisionsY = 8;
+		// draw meridians
+		for (int i = numDivisionsX - 1; i >= 0; i--) {
+			int colorX = i == 0 ? 0xff0000 : 0xffffff;
+			double xd = i * 2 * Math.PI / numDivisionsX - MathUtil.PIover2;
+			int x = (int) (outputImageSizeX * ((xd - minAngle.x) / sizeAngle.x));
+			for (int j = outputImageSizeY - 1; j >= 0; j--) {
+				img.setRGB(x, j, colorX);
+			}
+		}
+		// draw parallels
+		int y = (int) (outputImageSizeY * ((-minAngle.y) / sizeAngle.y));
+		for (int i = img.sizeX - 1; i >= 0; i--) {
+			img.setRGB(i, y, 0x00ff00);
+		}
+	}
+	
 	static final int masks[][] = { // and mask, or mask 
 		{ 0xff0000, 0x000000 },
 		{ 0x00ff00, 0x000000 },
@@ -413,6 +432,9 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			task.get();
 		}
 		pinPoints(outImageMask);
+		drawWorldMesh(outImageMask);
+		drawWorldMesh(outImageColor);
+
 		String outputFile = outputDir + "/pano" + panoCounter.incrementAndGet();
 		outImageColor.save(outputFile + " color.png");
 		outImageMask.save(outputFile + " mask.png");

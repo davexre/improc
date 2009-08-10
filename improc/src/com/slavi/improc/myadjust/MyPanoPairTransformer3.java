@@ -94,6 +94,19 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 	}
 
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, Point2D.Double dest) {
+//		ry = MathUtil.fixAngleMPI_PI(ry);
+//		if ((ry > Math.PI) || (ry < -MathUtil.PIover2)) {
+//			rx += Math.PI;
+//			ry = Math.PI - ry;
+//		}
+//		if (ry > MathUtil.PIover2) {
+//			ry = MathUtil.PIover2 - ry;
+//			rx += Math.PI;
+//		} else if (ry < -MathUtil.PIover2) {
+//			ry = MathUtil.PIover2 + ry;
+//			rx += Math.PI;
+//		}
+		
 		double sz = 1.0;
 		double sx = Math.tan(rx) * sz;
 		double sy = Math.tan(ry) * Math.sqrt(sx*sx + sz*sz);
