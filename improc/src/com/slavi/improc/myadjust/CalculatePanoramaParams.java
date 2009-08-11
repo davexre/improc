@@ -1,6 +1,8 @@
 package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
@@ -96,6 +98,12 @@ public class CalculatePanoramaParams implements Callable<Void> {
 					images.add(pairList.target);
 			}
 
+			Collections.sort(images, new Comparator<KeyPointList>() {
+				public int compare(KeyPointList o1, KeyPointList o2) {
+					return o1.imageFileStamp.getFile().getName().compareTo(o2.imageFileStamp.getFile().getName());
+				}
+			});
+			
 			System.out.println("Found chain: ");
 			for (KeyPointList i : images) {
 				System.out.println("  " + i.imageFileStamp.getFile().getName());

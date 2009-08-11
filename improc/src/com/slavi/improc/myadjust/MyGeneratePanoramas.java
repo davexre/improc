@@ -123,11 +123,21 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	}
 
 	private void drawWorldMesh(SafeImage img) {
-		int numDivisionsX = 24;
+		int cols[] = {
+			// 0		15			30		45			60		75
+			0xff0000, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 
+			// 90		105			120		135			150		165
+			0x00ff00, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff,
+			// 180		195			210		225			240		255
+			0x0000ff, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff,
+			// 270		285			300		315			330		345		360
+			0xffff00, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff
+		};
+		int numDivisionsX = cols.length;
 		int numDivisionsY = 8;
 		// draw meridians
 		for (int i = numDivisionsX - 1; i >= 0; i--) {
-			int colorX = i == 0 ? 0xff0000 : 0xffffff;
+			int colorX = cols[i]; // i == 0 ? 0xff0000 : 0xffffff;
 			double xd = i * 2 * Math.PI / numDivisionsX - MathUtil.PIover2;
 			int x = (int) (outputImageSizeX * ((xd - minAngle.x) / sizeAngle.x));
 			for (int j = outputImageSizeY - 1; j >= 0; j--) {
@@ -349,6 +359,33 @@ public class MyGeneratePanoramas implements Callable<Void> {
 				pairList.target.imageFileStamp.getFile().getName() + "\t" +
 				pairList.items.size());
 		}
+		out.println("------------");
+
+		out.println("minAngle.x=" + minAngle.x * MathUtil.rad2deg);
+		out.println("minAngle.y=" + minAngle.y * MathUtil.rad2deg);
+		out.println("sizeAngle.x=" + sizeAngle.x * MathUtil.rad2deg);
+		out.println("sizeAngle.y=" + sizeAngle.y * MathUtil.rad2deg);
+		out.println("outputImageSizeX=" + outputImageSizeX);
+		out.println("outputImageSizeY=" + outputImageSizeY);
+		for (KeyPointList image : images) {
+			out.println(image.imageFileStamp.getFile().getName() +
+					"\tmin.x=" + image.min.x + 
+					"\tmin.y=" + image.min.y + 
+					"\tmax.x=" + image.max.x + 
+					"\tmax.y=" + image.max.y + 
+					"\tcameraOriginX=" + image.cameraOriginX + 
+					"\tcameraOriginY=" + image.cameraOriginY + 
+					"\tcameraScale=" + image.cameraScale + 
+					"\timageSizeX=" + image.imageSizeX + 
+					"\timageSizeY=" + image.imageSizeY + 
+					"\trx=" + image.rx * MathUtil.rad2deg + 
+					"\try=" + image.ry * MathUtil.rad2deg + 
+					"\trz=" + image.rz * MathUtil.rad2deg + 
+					"\tscaleZ=" + image.scaleZ 
+					);
+			
+		}
+		out.println();
 		out.println("------------");
 
 		out.println(

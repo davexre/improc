@@ -86,6 +86,13 @@ public class MyPanoPairTransformer extends BaseTransformer<KeyPoint, Point2D.Dou
 		transform(source.doubleX, source.doubleY, source.keyPointList, dest);
 	}
 	
+	/**
+	 * Transforms from source image coordinate system into world coord.system.
+	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
+	 * @param dest		The transformed coordinates in radians. Longitude is 
+	 * 					returned in dest.x and is in the range (-pi; pi] and Latitude
+	 * 					is returned in dest.y in the range [-pi/2; pi/2].    
+	 */
 	public static void transform(double sx, double sy, KeyPointList srcImage, Point2D.Double dest) {
 		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
 		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;

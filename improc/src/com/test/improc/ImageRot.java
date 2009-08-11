@@ -65,29 +65,15 @@ public class ImageRot {
 			sz * srcImage.camera2real.getItem(2, 2);
 		
 		double d = Math.sqrt(x*x + z*z); 
-		x = Math.atan2(x, z);
-		y = Math.atan2(y, d);
-//		final double pi2 = Math.PI / 2.0; 
-//		if (y > pi2) { 
-//			y = Math.PI - y;
-//			x += Math.PI;
-//		}
-//		if (y < -pi2) { 
-//			y = - Math.PI - y;
-//			x += Math.PI;
-//		}
-//		x = MathUtil.fixAngleMPI_PI(x);
-//		if (x > Math.PI)
-//			x -= 2*Math.PI;
-		
-		dest.x = x;
-		dest.y = y;
+		dest.x = Math.atan2(x, z);
+		dest.y = Math.atan2(y, d);
 	}
 	
 	public static void worldToImage(double rx, double ry, Image srcImage, Point2D.Double dest) {
-		double sz = 1.0;
-		double sx = Math.tan(rx) * sz;
-		double sy = Math.tan(ry) * sz;
+		double d = Math.cos(ry);
+		double sx = d * Math.sin(rx);
+		double sy = Math.sin(ry);
+		double sz = d * Math.cos(rx);
 		
 		double x = 
 			sx * srcImage.camera2real.getItem(0, 0) +
@@ -324,7 +310,7 @@ public class ImageRot {
 		learner.a = 1 * MathUtil.deg2rad;
 		learner.b = 1 * MathUtil.deg2rad;
 		boolean res = learner.calculateTwo();
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < 20; i++)
 			res &= learner.calculateTwo();
 		System.out.println("RESULT is " + res);
 		
