@@ -470,7 +470,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		}
 		pinPoints(outImageMask);
 		drawWorldMesh(outImageMask);
-		drawWorldMesh(outImageColor);
+//		drawWorldMesh(outImageColor);
 
 		String outputFile = outputDir + "/pano" + panoCounter.incrementAndGet();
 		outImageColor.save(outputFile + " color.png");

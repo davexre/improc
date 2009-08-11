@@ -12,7 +12,6 @@ public class XMLKeyPoint {
 	public static final XMLKeyPoint instance = new XMLKeyPoint();
 
 	public void toXML(KeyPoint item, Element dest) {
-		dest.addContent(XMLHelper.makeAttrEl("id", Integer.toString(item.id)));
 		dest.addContent(XMLHelper.makeAttrEl("imgX", Integer.toString(item.imgX)));
 		dest.addContent(XMLHelper.makeAttrEl("imgY", Integer.toString(item.imgY)));
 		dest.addContent(XMLHelper.makeAttrEl("doubleX", Double.toString(item.doubleX)));
@@ -29,7 +28,6 @@ public class XMLKeyPoint {
 
 	public KeyPoint fromXML(Element source) throws JDOMException {
 		KeyPoint r = new KeyPoint();
-		r.id = Integer.parseInt(XMLHelper.getAttrEl(source, "id"));
 		r.imgX = Integer.parseInt(XMLHelper.getAttrEl(source, "imgX"));
 		r.imgY = Integer.parseInt(XMLHelper.getAttrEl(source, "imgY"));
 		r.doubleX = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleX"));

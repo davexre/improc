@@ -5,8 +5,6 @@ import java.util.StringTokenizer;
 public class KeyPoint {
 	public KeyPointList keyPointList = null;
 	
-	public int id = hashCode();
-	
 	public static final int numDirections = 4;
 
 	public static final int descriptorSize = 4;
@@ -79,8 +77,6 @@ public class KeyPoint {
 		result.append("\t");
 		result.append(Double.toString(degree));
 		result.append("\t");
-		result.append(id);
-		result.append("\t");
 
 		boolean first = true;
 		for (int k = 0; k < numDirections; k++) {
@@ -110,7 +106,6 @@ public class KeyPoint {
 		r.adjS = Double.parseDouble(st.nextToken());
 		r.kpScale = Double.parseDouble(st.nextToken());
 		r.degree = Double.parseDouble(st.nextToken());
-		r.id = Integer.parseInt(st.nextToken());
 		for (int k = 0; k < numDirections; k++) 
 			for (int j = 0; j < descriptorSize; j++) 
 				for (int i = 0; i < descriptorSize; i++) {
