@@ -95,7 +95,7 @@ public class KeyPoint {
 
 	public static KeyPoint fromString(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
-		if (st.countTokens() != 9 + featureVectorLinearSize)
+		if (st.countTokens() != 8 + featureVectorLinearSize)
 			throw new IllegalArgumentException("KeyPoint.fromString: Malformed source string.");
 		KeyPoint r = new KeyPoint();
 		r.imgX = Integer.parseInt(st.nextToken());

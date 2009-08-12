@@ -1,15 +1,13 @@
 package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.util.concurrent.TaskSetExecutor;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
 
@@ -88,39 +86,32 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		return true;
 	}
 	
-	private static class ProcessOne implements Callable<Boolean> {
+	private class ProcessOne implements Callable<Void> {
 		KeyPointPairList pairList;
 		
 		public ProcessOne(KeyPointPairList pairList) {
 			this.pairList = pairList;
 		}
 		
-		public Boolean call() throws Exception {
-			return validateKeyPointPairList(pairList);
+		public Void call() throws Exception {
+			if (validateKeyPointPairList(pairList)) {
+				synchronized (result) {
+					result.add(pairList);
+				}
+			}
+			return null;
 		}
 	}
+
+	ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 	
 	public ArrayList<KeyPointPairList> call() throws Exception {
-		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
-
-		HashMap<KeyPointPairList, Future<Boolean>> tasks = new HashMap<KeyPointPairList, Future<Boolean>>(kppl.size());
+		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 		for (KeyPointPairList pairList : kppl) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			Future<Boolean> f = exec.submit(new ProcessOne(pairList));
-			tasks.put(pairList, f);
+			taskSet.add(new ProcessOne(pairList));
 		}
-	
-		for (Map.Entry<KeyPointPairList, Future<Boolean>> item : tasks.entrySet()) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			boolean res = item.getValue().get();
-			if (res) {
-				result.add(item.getKey());
-			}
-		}
+		taskSet.addFinished();
+		taskSet.get();
 		return result;
 	}
 }

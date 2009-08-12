@@ -1,17 +1,16 @@
 package com.slavi.improc.ui;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
+import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.ui.SwtUtil;
 
@@ -67,42 +66,12 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 	public KeyPointBigTree call() throws Exception {
 		final KeyPointBigTree result = new KeyPointBigTree();
 
-		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(images.size());
-		for (int i = 0; i < images.size(); i++) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			String image = images.get(i);
-			Future<?> f = exec.submit(new ProcessOne(result, image));
-			tasks.add(f);
+		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		for (String image : images) {
+			taskSet.add(new ProcessOne(result, image));
 		}
-
-		try {
-			for (Future<?> task : tasks) {
-				if (Thread.interrupted()) {
-					throw new InterruptedException();
-				}
-				task.get();
-			}
-		} catch (Exception e) {
-			for (Future<?> task : tasks) {
-				task.cancel(true);
-			}
-			for (Future<?> task : tasks) {
-				try {
-					task.get();
-				} catch (Exception ignoreMe) {
-				}
-			}
-
-			System.out.println("Tree size          : " + result.getSize());
-			System.out.println("Tree depth         : " + result.getTreeDepth());
-			System.out.println("Tree size          : " + result.getSize());
-			System.out.println("Tree depth         : " + result.getTreeDepth());
-			System.out.println("Perfect tree depth : " + result.getPerfectTreeDepth());
-			throw e;
-		}
-
+		taskSet.addFinished();
+		taskSet.get();
 		return result;
 	}
 }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPoint;
@@ -13,7 +12,7 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
+import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.tree.KDTree;
 import com.slavi.util.ui.SwtUtil;
 
@@ -23,13 +22,11 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 	
 	KeyPointBigTree tree;
 	
-	AbsoluteToRelativePathMaker rootKeyPointFileDir;
-
 	Map<String, KeyPointPairList> keyPointPairLists = new HashMap<String, KeyPointPairList>();
 
 	AtomicInteger processed = new AtomicInteger(0);
 	
-	public KeyPointPairList getKeyPointPairList(String id, KeyPointList source, KeyPointList target) {
+	KeyPointPairList getKeyPointPairList(String id, KeyPointList source, KeyPointList target) {
 		synchronized (keyPointPairLists) {
 			KeyPointPairList result = keyPointPairLists.get(id);
 			if (result == null) {
@@ -105,23 +102,12 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 	}
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
-		ArrayList<Future<?>> tasks = new ArrayList<Future<?>>(tree.keyPointLists.size());
-//		Marker.mark("\n\n***************");
+		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 		for (KeyPointList k : tree.keyPointLists) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			Future<?> f = exec.submit(new ProcessOneImage(k));
-			tasks.add(f);
+			taskSet.add(new ProcessOneImage(k));
 		}
-
-		for (Future<?> task : tasks) {
-			if (Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			task.get();
-		}
-//		Marker.release();
+		taskSet.addFinished();
+		taskSet.get();
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 		for (KeyPointPairList k : keyPointPairLists.values()) {
 			result.add(k);

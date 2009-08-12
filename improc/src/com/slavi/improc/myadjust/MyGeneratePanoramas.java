@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.image.DWindowedImageUtils;
@@ -18,6 +17,7 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
+import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class MyGeneratePanoramas implements Callable<Void> {
@@ -134,7 +134,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			0xffff00, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff
 		};
 		int numDivisionsX = cols.length;
-		int numDivisionsY = 8;
+//		int numDivisionsY = 8;
 		// draw meridians
 		for (int i = numDivisionsX - 1; i >= 0; i--) {
 			int colorX = cols[i]; // i == 0 ? 0xff0000 : 0xffffff;
@@ -187,8 +187,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			Point2D.Double d = new Point2D.Double();
 			for (int oimgY = startRow; oimgY <= endRow; oimgY++) {
 				for (int oimgX = 0; oimgX < outImageColor.sizeX; oimgX++) {
-					if (Thread.currentThread().isInterrupted())
-						throw new InterruptedException();
 					long colorR = 0;
 					long colorG = 0;
 					long colorB = 0;
@@ -212,6 +210,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					int mcurMaxColor = 0;
 
 					for (int index = 0; index < images.size(); index++) {
+						if (Thread.currentThread().isInterrupted())
+							throw new InterruptedException();
 						KeyPointList image = images.get(index);
 						
 						if (
@@ -457,17 +457,15 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		}
 		
 		int startRow = 0;
-		ArrayList<Future<Void>> tasks = new ArrayList<Future<Void>>();
+		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 		while (startRow < outputImageSizeY) {
 			int endRow = Math.min(startRow + dY - 1, outputImageSizeY - 1);
 			ParallelRender task = new ParallelRender(startRow, endRow);
-			tasks.add(exec.submit(task));
+			taskSet.add(task);
 			startRow = endRow + 1;
 		}
-		
-		for (Future<Void> task : tasks) {
-			task.get();
-		}
+		taskSet.addFinished();
+		taskSet.get();
 		pinPoints(outImageMask);
 		drawWorldMesh(outImageMask);
 //		drawWorldMesh(outImageColor);

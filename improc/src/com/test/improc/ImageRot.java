@@ -309,10 +309,14 @@ public class ImageRot {
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 1 * MathUtil.deg2rad;
 		learner.b = 1 * MathUtil.deg2rad;
-		boolean res = learner.calculateTwo();
-		for (int i = 0; i < 20; i++)
-			res &= learner.calculateTwo();
-		System.out.println("RESULT is " + res);
+
+		learner.a = 0 * MathUtil.deg2rad;
+		learner.b = 0 * MathUtil.deg2rad;
+		
+//		boolean res = learner.calculateTwo();
+//		for (int i = 0; i < 20; i++)
+//			res &= learner.calculateTwo();
+//		System.out.println("RESULT is " + res);
 		
 		SafeImage img = new SafeImage(outsizeX, outsizeY);
 		Point2D.Double dest = new Point2D.Double();
