@@ -33,6 +33,7 @@ public class KeyPointList {
 	
 	public double cameraOriginX, cameraOriginY, cameraScale; 
 	public double scaleZ;
+	public int goodCount;
 	// My adjust
 
 	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;

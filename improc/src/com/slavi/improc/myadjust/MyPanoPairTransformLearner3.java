@@ -56,7 +56,6 @@ public class MyPanoPairTransformLearner3 {
 					Matrix sourceToTarget = RotationXYZ.makeAngles(pairList.rx, pairList.ry, pairList.rz);
 					Matrix targetToWorld = RotationXYZ.makeAngles(-pairList.target.rx, -pairList.target.ry, pairList.target.rz);
 					Matrix sourceToWorld = new Matrix(3, 3);
-//					targetToWorld.mMul(sourceToTarget, sourceToWorld);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					RotationXYZ.getRotationAngles(sourceToWorld, angles);
 					curImage.rx = -angles[0];
@@ -74,7 +73,6 @@ public class MyPanoPairTransformLearner3 {
 					Matrix targetToSource = RotationXYZ.makeAngles(-angles[0], -angles[1], angles[2]);
 					Matrix sourceToWorld = RotationXYZ.makeAngles(pairList.source.rx, pairList.source.ry, pairList.source.rz);
 					Matrix targetToWorld = new Matrix(3, 3);
-//					sourceToWorld.mMul(targetToSource, targetToWorld);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
 					RotationXYZ.getRotationAngles(targetToWorld, angles);
 					curImage.rx = angles[0];
@@ -205,8 +203,8 @@ public class MyPanoPairTransformLearner3 {
 				
 				coefs.make0();
 	
-				tr.transform3D(source, pairList.source, PW1);
-				tr.transform3D(dest, pairList.target, PW2);
+				MyPanoPairTransformer3.transform3D(source, pairList.source, PW1);
+				MyPanoPairTransformer3.transform3D(dest, pairList.target, PW2);
 				
 				P1.setItem(0, 0, source1.doubleX);
 				P1.setItem(0, 1, source1.doubleY);
@@ -264,41 +262,15 @@ public class MyPanoPairTransformLearner3 {
 
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-//		System.out.println("U=");
-//		System.out.println(u.toString());
-		u.rMul(-1.0);
-
 		for (int curImage = 0; curImage < tr.images.size(); curImage++) {
 			KeyPointList image = tr.images.get(curImage);
 			int index = curImage * 4;
-
-			image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
-			image.rx = MathUtil.fixAngleMPI_PI(image.rx + u.getItem(0, index + 0));
-			image.ry = MathUtil.fixAngleMPI_PI(image.ry + u.getItem(0, index + 1));
-			image.rz = MathUtil.fixAngleMPI_PI(image.rz + u.getItem(0, index + 2));
-			
-/*				
-			camera.scaleZ = Math.abs(camera.scaleZ + u.getItem(0, index + 3) / scaleScaleZ);
-			camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0));
-			camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1));
-			camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2));
-*/				
-/*				
-			camera.scaleZ += u.getItem(0, index + 3) / scaleScaleZ;
-			if (camera.scaleZ < 0) {
-				camera.rx = MathUtil.fixAngle2PI(Math.PI + camera.rx + u.getItem(0, index + 0));
-				camera.ry = MathUtil.fixAngle2PI(Math.PI + camera.ry + u.getItem(0, index + 1));
-				camera.scaleZ = -camera.scaleZ;
-			} else {
-				camera.rx = MathUtil.fixAngle2PI(camera.rx + u.getItem(0, index + 0));
-				camera.ry = MathUtil.fixAngle2PI(camera.ry + u.getItem(0, index + 1));
-			}
-			camera.rz = MathUtil.fixAngle2PI(camera.rz + u.getItem(0, index + 2));
-*/
+			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleScaleZ);
+			image.rx = MathUtil.fixAngleMPI_PI(image.rx - u.getItem(0, index + 0));
+			image.ry = MathUtil.fixAngleMPI_PI(image.ry - u.getItem(0, index + 1));
+			image.rz = MathUtil.fixAngleMPI_PI(image.rz - u.getItem(0, index + 2));
 			buildCamera2RealMatrix(image);
-//			printCameraAngles(image);
 		}
-		
 		return true;
 	}
 

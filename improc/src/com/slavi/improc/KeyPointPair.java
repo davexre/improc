@@ -20,6 +20,8 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public double weight;
 	
 	public boolean bad;
+	
+	public boolean panoBad;
 
 	public KeyPointPair() {
 		super();

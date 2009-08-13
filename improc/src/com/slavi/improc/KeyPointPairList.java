@@ -14,7 +14,8 @@ public class KeyPointPairList {
 
 	//////////////////////////// myAdjust
 	public double rx, ry, rz; // source->target angles of rotation
-	public double scale;	
+	public double scale;
+	public double maxDiscrepancy;
 	//////////////////////////// myAdjust
 	
 	public KeyPointPairList() {

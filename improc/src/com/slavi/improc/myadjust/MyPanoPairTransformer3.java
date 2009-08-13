@@ -124,7 +124,7 @@ public class MyPanoPairTransformer3 extends BaseTransformer<KeyPoint, Point2D.Do
 		dest.y = (y / srcImage.cameraScale) + srcImage.cameraOriginY;
 	}
 	
-	public void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
+	public static void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
 		double sx = (source.doubleX - srcImage.cameraOriginX) * srcImage.cameraScale;
 		double sy = (source.doubleY - srcImage.cameraOriginY) * srcImage.cameraScale;
 		double sz = srcImage.scaleZ;
