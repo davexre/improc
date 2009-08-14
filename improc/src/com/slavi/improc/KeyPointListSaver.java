@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
-import com.slavi.improc.old.singletreaded.DLoweDetector.Hook;
+import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.improc.parallel.ExecutePDLowe;
 import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.io.txt.TXTKDTree;
@@ -110,7 +110,6 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		} catch (IOException e) {
 		}
 		
-//		KeyPointList result = buildKeyPointFileSingleThreaded(image);
 		KeyPointList result = buildKeyPointFileMultiThreaded(exec, image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);

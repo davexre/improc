@@ -3,11 +3,12 @@ package com.slavi.improc.myadjust;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.math.MathUtil;
 import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.ui.SwtUtil;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
 
@@ -53,38 +54,27 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		for (int i = 0; i < 20; i++) {
 			res = learner.calculateOne();
 			goodCount = pairList.getGoodCount();
-/*			System.out.println("ITERATION " + i + 
-					" " + goodCount + "/" + pairList.items.size() + 
-					" discr=" + MathUtil.d4(learner.getMaxAllowedDiscrepancy()) + 
-					" maxDiscr=" + MathUtil.d4(learner.discrepancyStatistics.getMaxX()));*/
 			if (res || (goodCount < minRequredGoodPointPairs)) {
 				break;
 			}
 		}
 		if ((!res) || (goodCount < minRequredGoodPointPairs)) {
-			System.out.println("FAILED " + goodCount + "/" + pairList.items.size() + "\t" +
-					pairList.source.imageFileStamp.getFile().getName() + "\t" + 
-					pairList.target.imageFileStamp.getFile().getName());
 			return false;
 		}
-
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
 		}		
-		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		calcRotationsUsingHelmert(tr, pairList);
 
-		System.out.println(goodCount + "/" + pairList.items.size() + "\t" +
-				pairList.source.imageFileStamp.getFile().getName() + "\t" + 
-				pairList.target.imageFileStamp.getFile().getName() + "\t" +
-				MathUtil.d4(pairList.scale) + "\t" +
-				MathUtil.d4(pairList.rx * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(pairList.ry * MathUtil.rad2deg) + "\t" +
-				MathUtil.d4(pairList.rz * MathUtil.rad2deg) + "\t"
-				);
+		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
+				pairList.source.imageFileStamp.getFile().getName(),
+				pairList.target.imageFileStamp.getFile().getName());
+
 		return true;
 	}
+	
+	AtomicInteger processedPairsList = new AtomicInteger(0);
 	
 	private class ProcessOne implements Callable<Void> {
 		KeyPointPairList pairList;
@@ -99,6 +89,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 					result.add(pairList);
 				}
 			}
+			int curCount = processedPairsList.incrementAndGet();
+			String status = "Processing " + Integer.toString(curCount) + "/" + Integer.toString(kppl.size());
+			SwtUtil.activeWaitDialogSetStatus(status, curCount);
 			return null;
 		}
 	}

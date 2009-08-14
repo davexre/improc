@@ -18,12 +18,12 @@ import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class MyGeneratePanoramas implements Callable<Void> {
 
 	ExecutorService exec;	
-	AbsoluteToRelativePathMaker keyPointPairFileRoot;
+	ArrayList<ArrayList<KeyPointPairList>> panos;
+	
 	ArrayList<KeyPointList> images;
 	ArrayList<KeyPointPairList> pairLists;
 
@@ -43,17 +43,13 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	int outputImageSizeY;
 
 	public MyGeneratePanoramas(ExecutorService exec,
-			ArrayList<KeyPointList> images,
-			ArrayList<KeyPointPairList> pairLists,
-			AbsoluteToRelativePathMaker keyPointPairFileRoot,
+			ArrayList<ArrayList<KeyPointPairList>> panos,
 			String outputDir,
 			boolean pinPoints,
 			boolean useColorMasks,
 			boolean useImageMaxWeight) {
 		this.exec = exec;
-		this.keyPointPairFileRoot = keyPointPairFileRoot;
-		this.pairLists = pairLists;
-		this.images = images;
+		this.panos = panos;
 		this.outputDir = outputDir;
 		this.pinPoints = pinPoints;
 		this.useColorMasks = useColorMasks;
@@ -79,13 +75,13 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		
 		Point2D.Double tmp = new Point2D.Double();
 		for (KeyPointList i : images) {
-			MyPanoPairTransformer3.transform(0, 0, i, tmp);
+			MyPanoPairTransformer.transform(0, 0, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformer3.transform(0, i.imageSizeY - 1, i, tmp);
+			MyPanoPairTransformer.transform(0, i.imageSizeY - 1, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformer3.transform(i.imageSizeX - 1, 0, i, tmp);
+			MyPanoPairTransformer.transform(i.imageSizeX - 1, 0, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformer3.transform(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
+			MyPanoPairTransformer.transform(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
 		}
 //		minAngle.x += Math.PI / 4.0;
@@ -113,11 +109,11 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	private void transformWorldToCamera(double x, double y, KeyPointList image, Point2D.Double dest) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
-		MyPanoPairTransformer3.transformBackward(x, y, image, dest);
+		MyPanoPairTransformer.transformBackward(x, y, image, dest);
 	}
 	
 	private void transformCameraToWorld(double x, double y, KeyPointList image, Point2D.Double dest) {
-		MyPanoPairTransformer3.transform(x, y, image, dest);
+		MyPanoPairTransformer.transform(x, y, image, dest);
 		dest.x = outputImageSizeX * ((dest.x - minAngle.x) / sizeAngle.x);
 		dest.y = outputImageSizeY * ((dest.y - minAngle.y) / sizeAngle.y);
 	}
@@ -432,50 +428,67 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	private static final AtomicInteger panoCounter = new AtomicInteger(0);
 	
 	public Void call() throws Exception {
-		Marker.mark("Generate panorama");
-		calcExtents();
-		
-		System.out.println("MIN Angle X,Y:  " + MathUtil.d4(MathUtil.rad2deg * minAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * minAngle.y));
-		System.out.println("SIZE angle X,Y: " + MathUtil.d4(MathUtil.rad2deg * sizeAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * sizeAngle.y));
-		System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
-		
-		outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
-		outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
-		imageData = new HashMap<KeyPointList, SafeImage>();
-		for (int index = 0; index < images.size(); index++) {
-			KeyPointList image = images.get(index);
-			SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
-			imageData.put(image, im);
+		System.out.println("Panoramas found: " + panos.size());
+		images = new ArrayList<KeyPointList>();
+		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
+			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
+			CalculatePanoramaParams.buildImagesList(pano, images);
+			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
+			for (KeyPointList image : images) {
+				System.out.println(image.imageFileStamp.getFile().getName());
+			}
 		}
-		
-		Runtime runtime = Runtime.getRuntime();
-		int numberOfProcessors = runtime.availableProcessors();
 
-		int dY = Math.max(outputImageSizeY / numberOfProcessors, 10);
-		if (outputImageSizeY % numberOfProcessors != 0) {
-			dY++;
-		}
-		
-		int startRow = 0;
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
-		while (startRow < outputImageSizeY) {
-			int endRow = Math.min(startRow + dY - 1, outputImageSizeY - 1);
-			ParallelRender task = new ParallelRender(startRow, endRow);
-			taskSet.add(task);
-			startRow = endRow + 1;
-		}
-		taskSet.addFinished();
-		taskSet.get();
-		pinPoints(outImageMask);
-		drawWorldMesh(outImageMask);
-//		drawWorldMesh(outImageColor);
+		for (ArrayList<KeyPointPairList> pano : panos) {
+			int panoId = panoCounter.incrementAndGet();
+			Marker.mark("Generate panorama " + panoId);
+			images.clear();
+			pairLists = pano;
+			CalculatePanoramaParams.buildImagesList(pairLists, images);
+			calcExtents();
 
-		String outputFile = outputDir + "/pano" + panoCounter.incrementAndGet();
-		outImageColor.save(outputFile + " color.png");
-		outImageMask.save(outputFile + " mask.png");
-		
-		Marker.release();
-		dumpPointData(outputFile + ".txt");
+			System.out.println("MIN Angle X,Y:  " + MathUtil.d4(MathUtil.rad2deg * minAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * minAngle.y));
+			System.out.println("SIZE angle X,Y: " + MathUtil.d4(MathUtil.rad2deg * sizeAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * sizeAngle.y));
+			System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
+
+			outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
+			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
+			imageData = new HashMap<KeyPointList, SafeImage>();
+			for (int index = 0; index < images.size(); index++) {
+				KeyPointList image = images.get(index);
+				SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
+				imageData.put(image, im);
+			}
+			
+			Runtime runtime = Runtime.getRuntime();
+			int numberOfProcessors = runtime.availableProcessors();
+			
+			int dY = Math.max(outputImageSizeY / numberOfProcessors, 10);
+			if (outputImageSizeY % numberOfProcessors != 0) {
+				dY++;
+			}
+			
+			int startRow = 0;
+			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+			while (startRow < outputImageSizeY) {
+				int endRow = Math.min(startRow + dY - 1, outputImageSizeY - 1);
+				ParallelRender task = new ParallelRender(startRow, endRow);
+				taskSet.add(task);
+				startRow = endRow + 1;
+			}
+			taskSet.addFinished();
+			taskSet.get();
+			pinPoints(outImageMask);
+			drawWorldMesh(outImageMask);
+//			drawWorldMesh(outImageColor);
+			
+			String outputFile = outputDir + "/pano" + panoId;
+			outImageColor.save(outputFile + " color.png");
+			outImageMask.save(outputFile + " mask.png");
+			
+			Marker.release();
+			dumpPointData(outputFile + ".txt");
+		}
 		return null;
 	}
 }

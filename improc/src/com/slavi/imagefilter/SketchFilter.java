@@ -18,12 +18,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
-import com.slavi.improc.old.singletreaded.DImageMap;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Const;
 
 public class SketchFilter implements BufferedImageFilter {
-	DImageMap theImage;
+//	DImageMap theImage;
 	
 	int threshold1 = 50;
 	
@@ -54,20 +52,20 @@ public class SketchFilter implements BufferedImageFilter {
 	}
 
 	public void setImage(BufferedImage image) {
-		if (image == null)
-			theImage = null;
-		else
-			theImage = new DImageMap(image);
-		Statistics stat = theImage.calcStatistics();
-		System.out.println(stat);
+//		if (image == null)
+//			theImage = null;
+//		else
+//			theImage = new DImageMap(image);
+//		Statistics stat = theImage.calcStatistics();
+//		System.out.println(stat);
 	}
 	
-	private static final double borderColorValue = 0;
+//	private static final double borderColorValue = 0;
 	
 	public BufferedImage getFilteredImage() {
-		if (theImage == null)
+//		if (theImage == null)
 			return null;
-	
+/*	
 		DImageMap dest = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
 		
 		for (int i = theImage.getSizeX() - 1; i >= 0; i--) {
@@ -97,7 +95,7 @@ public class SketchFilter implements BufferedImageFilter {
 				
 				dest.setPixel(i, j, 1-d);
 			}
-				
+*/				
 /*		for (int i = theImage.getSizeX() - 2; i > 0; i--)
 			for (int j = theImage.getSizeY() - 2; j > 0; j--) {
 				
@@ -111,8 +109,8 @@ public class SketchFilter implements BufferedImageFilter {
 			}
 */
 		
-		BufferedImage r = dest.toImage();
-		return r;
+//		BufferedImage r = dest.toImage();
+//		return r;
 /*		int w = theImage.getSizeX();
 		int h = theImage.getSizeY();
 		BufferedImage r = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

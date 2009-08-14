@@ -1,4 +1,4 @@
-package com.slavi.improc.pano;
+package com.test;
 
 
 public class InterpolatorFunctions {

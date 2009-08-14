@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadFactory;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
@@ -52,18 +53,19 @@ public class Improc {
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog("Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
-				-1);
+				kppl.size() - 1);
 		kppl = null;
 
-//		if (true) 
-//			return;
-		
-		
-		System.out.println("---------- Generating panorama images");
-		SwtUtil.openWaitDialog("Generating panorama images", 
+		System.out.println("---------- Calculating panorama parameters");
+		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog("Calculating panorama parameters", 
 				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		
+		System.out.println("---------- Generating panorama images");
+		SwtUtil.openWaitDialog("Generating panorama images", 
+				new MyGeneratePanoramas(exec, panos, settings.outputDirStr,
+						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+
 		Marker.release();
 		System.out.println("Done.");
 	}

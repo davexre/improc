@@ -6,13 +6,16 @@ import java.util.concurrent.Callable;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
-import com.slavi.improc.old.singletreaded.DLoweDetector.Hook;
-import com.slavi.improc.old.test.DImageWrapper;
+import com.slavi.image.DImageWrapper;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 
 public class PDLoweDetector implements Callable<Void> {
 
+	public static interface Hook {
+		public void keyPointCreated(KeyPoint scalePoint);
+	}
+	
 	public Hook hook = null;
 
 	public static final int defaultScaleSpaceLevels = 3;
