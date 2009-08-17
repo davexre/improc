@@ -58,6 +58,7 @@ public class KeyPointList {
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {
 				KeyPoint kp = KeyPoint.fromString(str);
 				kp.keyPointList = r;
+//				if (kp.dogLevel >= 2)
 				r.items.add(kp);
 			}
 		}

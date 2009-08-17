@@ -388,6 +388,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 				"Source\t" +
 				"Target\t" +
 				"Bad\t" +
+				"PanoBad\t" +
 				"Discrepancy\t" +
 				"Distance1\t" +
 				"Distance2\t" +
@@ -407,6 +408,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 					pair.sourceSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
 					pair.targetSP.keyPointList.imageFileStamp.getFile().getName() + "\t" +
 					pair.bad + "\t" +
+					pair.panoBad + "\t" +
 					MathUtil.d4(pair.discrepancy) + "\t" +
 					MathUtil.d4(pair.distanceToNearest) + "\t" +
 					MathUtil.d4(pair.distanceToNearest2) + "\t" +

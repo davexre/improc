@@ -56,8 +56,7 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 			for (KeyPoint kp : l.items) {
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
-//				if (kp.dogLevel == 2)
-					bigTree.add(kp);
+				bigTree.add(kp);
 			}
 			return null;
 		}

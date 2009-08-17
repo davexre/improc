@@ -88,6 +88,11 @@ public class ImageRot {
 			sy * srcImage.camera2real.getItem(2, 1) +
 			sz * srcImage.camera2real.getItem(2, 2);
 		
+		if (z == 0) {
+			dest.x = Double.NaN;
+			dest.y = Double.NaN;
+			return;
+		}
 		x = srcImage.scaleZ * (x / z);
 		y = srcImage.scaleZ * (y / z);
 		
@@ -196,7 +201,7 @@ public class ImageRot {
 	}
 
 	public static class ImageRotationTransformLearer {
-		public double a, b, c;
+		public double a, b;
 		
 		ArrayList<Image> images;
 		
@@ -205,7 +210,7 @@ public class ImageRot {
 		}
 		
 		public void transformTwo(double rx, double ry, Point2D.Double dest) {
-			rx = rx - a;
+			rx = rx - a; // + Math.PI;
 			double sb = Math.sin(rx);
 			double cb = Math.cos(rx);
 			
@@ -246,7 +251,7 @@ public class ImageRot {
 					
 					double dFdA = -cy*sg*cb;
 					double dFdB = -sy*sg - cy*cg*sb;
-					double F0 = sy*cg - cy*sg*sb;
+					double F0 = sy*cg + cy*sg*sb;
 					
 					coefs.setItem(0, 0, dFdA);
 					coefs.setItem(1, 0, dFdB);
@@ -262,11 +267,8 @@ public class ImageRot {
 			// Build transformer
 			Matrix u = lsa.getUnknown(); 
 			u.printM("U");
-			u.rMul(-1);
-			a = MathUtil.fixAngleMPI_PI(a + u.getItem(0, 0));
-			b = MathUtil.fixAngleMPI_PI(b + u.getItem(0, 1));
-//			a = a + u.getItem(0, 0);
-//			b = b + u.getItem(0, 1);
+			a = MathUtil.fixAngleMPI_PI(a - u.getItem(0, 0));
+			b = MathUtil.fixAngleMPI_PI(b - u.getItem(0, 1));
 			
 			System.out.println(
 					"A=" + MathUtil.d4(a*MathUtil.rad2deg) + 
@@ -308,15 +310,12 @@ public class ImageRot {
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 1 * MathUtil.deg2rad;
-		learner.b = 1 * MathUtil.deg2rad;
+		learner.b = -45 * MathUtil.deg2rad;
 
-		learner.a = 0 * MathUtil.deg2rad;
-		learner.b = 0 * MathUtil.deg2rad;
-		
-//		boolean res = learner.calculateTwo();
-//		for (int i = 0; i < 20; i++)
-//			res &= learner.calculateTwo();
-//		System.out.println("RESULT is " + res);
+		boolean res = learner.calculateTwo();
+		for (int i = 0; i < 20; i++)
+			res &= learner.calculateTwo();
+		System.out.println("RESULT is " + res);
 		
 		SafeImage img = new SafeImage(outsizeX, outsizeY);
 		Point2D.Double dest = new Point2D.Double();
