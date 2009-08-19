@@ -142,12 +142,15 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			while (true) {
 				discrepancyThreshold = 5;
 				copyBadStatus();
+				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
+				ignoredPairLists.addAll(chain);
+				chain = tmp_chain;
 				buildImagesList(chain, images);
 				origin = null;
 				int iter = 0;
 				while (true) {
 					if (origin != null)
-						images.add(origin);
+						images.add(0, origin);
 					computeWeights();
 					boolean chainModified = false; 
 					for (int i = images.size() - 1; i >= 0; i--) {

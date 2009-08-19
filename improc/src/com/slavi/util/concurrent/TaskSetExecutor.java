@@ -19,7 +19,7 @@ import java.util.concurrent.TimeoutException;
  * added the method {@link #addFinished()} must be invoked.   
  */
 public class TaskSetExecutor {
-	private class InternalTaskWrapper implements Callable {
+	private class InternalTaskWrapper implements Callable<Void> {
 		final Object task;
 		InternalTaskWrapper(Object task) {
 			this.task = task;
@@ -34,9 +34,11 @@ public class TaskSetExecutor {
 			try {
 				Object result = null;
 				if (task instanceof Callable) {
-					result = ((Callable) task).call();
-				} else {
+					result = ((Callable<?>) task).call();
+				} else if (task instanceof Runnable){
 					((Runnable) task).run();
+				} else {
+					throw new Exception("Unsupported task type " + task);
 				}
 				onSubtaskFinished(task, result);
 			} catch(Throwable t) {
@@ -67,7 +69,7 @@ public class TaskSetExecutor {
 	public void abort() {
 		synchronized (tasks) {
 			if (!aborted) {
-				for (Future task : tasks) {
+				for (Future<?> task : tasks) {
 					task.cancel(true);
 				}
 			}
@@ -77,16 +79,16 @@ public class TaskSetExecutor {
 	}
 	
 	final ExecutorService exec;
-	final ArrayList<Future> tasks;
+	final ArrayList<Future<?>> tasks;
 	int runningTasks = 0;
 	int finishedTasks = 0; 
 	
 	public TaskSetExecutor(ExecutorService exec) {
 		this.exec = exec;
-		this.tasks = new ArrayList<Future>();
+		this.tasks = new ArrayList<Future<?>>();
 	}
 	
-	public TaskSetExecutor(ExecutorService exec, List tasks) {
+	public TaskSetExecutor(ExecutorService exec, List<?> tasks) {
 		this(exec);
 		for (Object task : tasks)
 			internalAdd(task);
@@ -172,7 +174,7 @@ public class TaskSetExecutor {
 		internalAdd(task);
 	}
 
-	public void add(Callable task) {
+	public void add(Callable<?> task) {
 		internalAdd(task);
 	}
 	

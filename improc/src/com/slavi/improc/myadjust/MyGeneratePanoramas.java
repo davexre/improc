@@ -39,7 +39,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 	final boolean pinPoints;
 	final boolean useColorMasks;
 	final boolean useImageMaxWeight;
-	int outputImageSizeX = 3000;
+	int outputImageSizeX = 5000;
 	int outputImageSizeY;
 
 	public MyGeneratePanoramas(ExecutorService exec,
