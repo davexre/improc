@@ -304,13 +304,13 @@ public class ImageRot {
 //	}	
 	
 	public void doIt() throws Exception {
-		ArrayList<Image> data = read();
-//		ArrayList<Image> data = generate();
+//		ArrayList<Image> data = read();
+		ArrayList<Image> data = generate();
 		int outsizeX = 1500;
 		int outsizeY = outsizeX / 2;
 		ImageRotationTransformLearer learner = new ImageRotationTransformLearer(data);
 		learner.a = 1 * MathUtil.deg2rad;
-		learner.b = -45 * MathUtil.deg2rad;
+		learner.b = 1 * MathUtil.deg2rad;
 
 		boolean res = learner.calculateTwo();
 		for (int i = 0; i < 20; i++)
@@ -432,6 +432,21 @@ public class ImageRot {
 			worldToProj(dest.x, dest.y, img, dest);
 			img.setRGB((int) dest.x, (int) dest.y, colorDiag);
 		}
+	}
+
+	public static double fixAngleMPIOver2_PIOver2(double angle) {
+		angle = MathUtil.fixAngleMPI_PI(angle);
+		if (angle > MathUtil.PIover2)
+			return Math.PI - angle;
+		if (angle < -MathUtil.PIover2)
+			return -(Math.PI + angle);
+		return angle;
+	}
+	public static void main2(String[] args) throws Exception {
+		double d = 195 * MathUtil.deg2rad;
+		double r = fixAngleMPIOver2_PIOver2(d) * MathUtil.rad2deg;  
+//		double r = MathUtil.fixAngleMPI_PI(d) * MathUtil.rad2deg;  
+		System.out.println(r);
 	}
 	
 	public static void main(String[] args) throws Exception {

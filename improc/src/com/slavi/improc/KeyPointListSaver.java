@@ -10,14 +10,14 @@ import java.util.concurrent.Future;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
-import com.slavi.improc.parallel.PDLoweDetector.Hook;
-import com.slavi.improc.parallel.ExecutePDLowe;
 import com.slavi.improc.parallel.ExecutionProfile;
+import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.io.txt.TXTKDTree;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
+import com.test.improc.ExecutePDLowe2;
 
 public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	final KeyPointList keyPointList;
@@ -80,7 +80,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			}		
 		};
 		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
-		ExecutePDLowe execPDLowe = new ExecutePDLowe(img, hook, profile);
+		ExecutePDLowe2 execPDLowe = new ExecutePDLowe2(img, hook);
 
 		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, profile.parallelTasks, execPDLowe).start();
 		ft.get();

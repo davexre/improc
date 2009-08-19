@@ -365,6 +365,18 @@ public class SwtUtil {
 		waitDialogTaskProgress.setTitle(title);
 		waitDialogTaskProgress.setProgressMaximum(maxProgressValue);
 		waitDialogTaskProgress.startTask();
+		waitDialogShell.addListener(SWT.Traverse, new Listener () {
+			public void handleEvent (Event event) {
+				switch (event.detail) {
+					case SWT.TRAVERSE_ESCAPE:
+						waitDialogTaskProgress.abortTask();
+						event.detail = SWT.TRAVERSE_NONE;
+						event.doit = false;
+						break;
+				}
+			}
+		});
+
 		waitDialogShell.open();
 		while (!waitDialogShell.isDisposed()) {
 			if (display.readAndDispatch()) {

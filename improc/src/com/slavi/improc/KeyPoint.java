@@ -65,6 +65,8 @@ public class KeyPoint {
 		result.append("\t");
 		result.append(imgY);
 		result.append("\t");
+		result.append(Double.toString(imgScale));
+		result.append("\t");
 		result.append(Double.toString(doubleX));
 		result.append("\t");
 		result.append(Double.toString(doubleY));
@@ -95,11 +97,12 @@ public class KeyPoint {
 
 	public static KeyPoint fromString(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
-		if (st.countTokens() != 8 + featureVectorLinearSize)
+		if (st.countTokens() != 9 + featureVectorLinearSize)
 			throw new IllegalArgumentException("KeyPoint.fromString: Malformed source string.");
 		KeyPoint r = new KeyPoint();
 		r.imgX = Integer.parseInt(st.nextToken());
 		r.imgY = Integer.parseInt(st.nextToken());
+		r.imgScale = Double.parseDouble(st.nextToken());
 		r.doubleX = Double.parseDouble(st.nextToken());
 		r.doubleY = Double.parseDouble(st.nextToken());
 		r.dogLevel = (int) Double.parseDouble(st.nextToken());
@@ -139,6 +142,7 @@ public class KeyPoint {
 		if (
 			(sp.imgX != imgX) || 
 			(sp.imgY != imgY) || 
+			(sp.imgScale != imgScale) || 
 			(sp.dogLevel != dogLevel) || 
 			((int)(sp.degree * multiply) != (int)(degree * multiply)) ||
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 

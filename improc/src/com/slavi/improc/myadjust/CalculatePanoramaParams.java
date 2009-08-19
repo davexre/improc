@@ -532,8 +532,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			ArrayList<KeyPointPairList> chain = getImageChain(kppl);
 			if (chain.size() == 0)
 				break;
-			if (chain.size() < 2)
-				continue;
 			taskSet.add(new ProcessOne(chain));
 		}
 		taskSet.addFinished();

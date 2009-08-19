@@ -43,6 +43,7 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<K
 	}
 	
 	public double getMaxAllowedDiscrepancy() {
+//		double result = (discrepancyStatistics.getAvgValue() + discrepancyStatistics.getMaxX()) / 2.0;
 		double result = discrepancyStatistics.getAvgValue();
 		if (result < discrepancyThreshold)
 			result = discrepancyThreshold;
