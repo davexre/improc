@@ -136,18 +136,23 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 					}
 				}
 			}
+			copyBadStatus();
 		}
 		
 		public Void call() throws Exception {
+			copyBadStatus();
 			while (true) {
 				discrepancyThreshold = 5;
 				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
 				ignoredPairLists.addAll(chain);
 				chain = tmp_chain;
 				buildImagesList(chain, images);
-				copyBadStatus();
-				origin = null;
+//				copyBadStatus();
 				int iter = 0;
+				if (images.size() > 0) {
+					origin = images.remove(0);
+					calculatePrims();
+				}
 				while (true) {
 					if (origin != null)
 						images.add(0, origin);
@@ -198,7 +203,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	
 					// Adjust
 					origin = images.remove(0);
-					calculatePrims();
+//					calculatePrims();
 					lsa = new LeastSquaresAdjust(images.size() * 4, 1);
 					calculateNormalEquations();
 					// Calculate Unknowns
@@ -215,11 +220,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 					for (int curImage = 0; curImage < images.size(); curImage++) {
 						KeyPointList image = images.get(curImage);
 						int index = curImage * 4;
-						image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
-						image.rx = MathUtil.fixAngleMPI_PI(image.rx - u.getItem(0, index + 0));
-						image.ry = MathUtil.fixAngleMPI_PI(image.ry - u.getItem(0, index + 1));
-						image.rz = MathUtil.fixAngleMPI_PI(image.rz - u.getItem(0, index + 2));
-						buildCamera2RealMatrix(image);
 						System.out.println(image.imageFileStamp.getFile().getName() + 
 								"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
 								"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
@@ -228,8 +228,13 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 								"\tdx=" + MathUtil.d4(u.getItem(0, index + 0) * MathUtil.rad2deg) + 
 								"\tdy=" + MathUtil.d4(u.getItem(0, index + 1) * MathUtil.rad2deg) + 
 								"\tdz=" + MathUtil.d4(u.getItem(0, index + 2) * MathUtil.rad2deg) + 
-								"\tds=" + MathUtil.d4(u.getItem(0, index + 3) * MathUtil.rad2deg) 
+								"\tds=" + MathUtil.d4(u.getItem(0, index + 3)) 
 								);
+						image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
+						image.rx = MathUtil.fixAngleMPI_PI(image.rx - u.getItem(0, index + 0));
+						image.ry = MathUtil.fixAngleMPI_PI(image.ry - u.getItem(0, index + 1));
+						image.rz = MathUtil.fixAngleMPI_PI(image.rz - u.getItem(0, index + 2));
+						buildCamera2RealMatrix(image);
 					}
 					computeDiscrepancies();
 					double maxDiscrepancy = maxDiscrepancyStat.getMaxX();
@@ -238,7 +243,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 					System.out.println("Iteration " + iter + " maxDiscrepancy=" + maxDiscrepancy + " avgMax=" + avgMaxDiscrepancy + " tmp=" + tmpdiscr);
 					boolean isDone = false;
 					if (maxDiscrepancy > discrepancyThreshold) {
-						if (recomputeBad(tmpdiscr)) {
+						if (recomputeBad(maxDiscrepancy)) {
 							isDone = true;
 						}
 					} else {
@@ -510,52 +515,80 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			origin.ry = 0.0;
 			origin.rz = 0.0;
 			origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+			origin.calculatePrimsAtHop = 0;
 			
 			System.out.println("Caclulating prims:");
 			System.out.println(origin.imageFileStamp.getFile().getName());
 			ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(images);
+			for (KeyPointList image : todo)
+				image.calculatePrimsAtHop = -1;
+			
 			int curImageIndex = todo.size() - 1;
+			boolean listModified = false;
 			while (curImageIndex >= 0) {
 				KeyPointList curImage = todo.get(curImageIndex);
+				KeyPointPairList minHopPairList = null;
+				int minHop = Integer.MAX_VALUE;
+				
 				for (KeyPointPairList pairList : chain) {
 					if (curImage == pairList.source) {
-						if (todo.contains(pairList.target)) 
+						if ((pairList.target.calculatePrimsAtHop < 0)) 
 							continue;
+						if ((minHopPairList == null) ||
+							(minHop > pairList.target.calculatePrimsAtHop)) {
+							minHopPairList = pairList;
+							minHop = pairList.target.calculatePrimsAtHop;
+						}
+					} else if (curImage == pairList.target) {
+						if ((pairList.source.calculatePrimsAtHop < 0)) 
+							continue;
+						if ((minHopPairList == null) ||
+							(minHop > pairList.source.calculatePrimsAtHop)) {
+							minHopPairList = pairList;
+							minHop = pairList.source.calculatePrimsAtHop;
+						}
+					}
+				}
+				
+				if (minHopPairList != null) {
+					if (curImage == minHopPairList.source) {
 						double angles[] = new double[3];
-						Matrix sourceToTarget = RotationXYZ.makeAngles(pairList.rx, pairList.ry, pairList.rz);
-						Matrix targetToWorld = RotationXYZ.makeAngles(-pairList.target.rx, -pairList.target.ry, pairList.target.rz);
+						Matrix sourceToTarget = RotationXYZ.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
+						Matrix targetToWorld = RotationXYZ.makeAngles(-minHopPairList.target.rx, -minHopPairList.target.ry, minHopPairList.target.rz);
 						Matrix sourceToWorld = new Matrix(3, 3);
 						sourceToTarget.mMul(targetToWorld, sourceToWorld);
 						RotationXYZ.getRotationAngles(sourceToWorld, angles);
 						curImage.rx = -angles[0];
 						curImage.ry = -angles[1];
 						curImage.rz = angles[2];
-						curImage.scaleZ = pairList.source.scaleZ * pairList.scale; 
-						todo.remove(curImageIndex);
-						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + pairList.target.imageFileStamp.getFile().getName());
-						curImageIndex = todo.size();
-						break;
-					} else if (curImage == pairList.target) {
-						if (todo.contains(pairList.source)) 
-							continue;
+						curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
+					} else { // if (curImage == minHopPairList.target) {
 						double angles[] = new double[3];
-						RotationXYZ.getRotationAnglesBackword(pairList.rx, pairList.ry, pairList.rz, angles);
+						RotationXYZ.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
 						Matrix targetToSource = RotationXYZ.makeAngles(-angles[0], -angles[1], angles[2]);
-						Matrix sourceToWorld = RotationXYZ.makeAngles(pairList.source.rx, pairList.source.ry, pairList.source.rz);
+						Matrix sourceToWorld = RotationXYZ.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
 						Matrix targetToWorld = new Matrix(3, 3);
 						targetToSource.mMul(sourceToWorld, targetToWorld);
 						RotationXYZ.getRotationAngles(targetToWorld, angles);
 						curImage.rx = angles[0];
 						curImage.ry = angles[1];
 						curImage.rz = angles[2];
-						curImage.scaleZ = pairList.source.scaleZ / pairList.scale; 
-						todo.remove(curImageIndex);
-						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + pairList.source.imageFileStamp.getFile().getName());
-						curImageIndex = todo.size();
-						break;
+						curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
 					}
+					curImage.calculatePrimsAtHop = minHop + 1;
+					todo.remove(curImageIndex);
+					curImageIndex = todo.size();
+					listModified = true;
 				}
 				curImageIndex--;
+				if (curImageIndex < 0) {
+					if (!listModified)
+						break;
+					curImageIndex = todo.size() - 1;
+					listModified = false;
+				}
 			}
 			
 			if (todo.size() > 0) 

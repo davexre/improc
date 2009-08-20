@@ -33,6 +33,7 @@ public class KeyPointList {
 	
 	public double cameraOriginX, cameraOriginY, cameraScale; 
 	public double scaleZ;
+	public int calculatePrimsAtHop;
 	public int goodCount;
 	// My adjust
 
