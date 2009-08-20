@@ -73,10 +73,10 @@ public class Settings {
 		}
 	}
 	
-	public static Settings getSettings() {
+	public static Settings getSettings(org.eclipse.swt.widgets.Shell parent) {
 		String propertiesFile = getDefaultPropertiesFileName();
 		Settings result = readProperties(propertiesFile);
-		SettingsDialog settingsDialog = new SettingsDialog(null);
+		SettingsDialog settingsDialog = new SettingsDialog(parent);
 		if (!settingsDialog.open(result))
 			return null;
 		result.writeProperties(propertiesFile);
@@ -90,7 +90,7 @@ public class Settings {
 	}
 
 	public static void main(String[] args) {
-		Settings.getSettings();
+		Settings.getSettings(null);
 		System.out.println("Done.");
 	}
 }

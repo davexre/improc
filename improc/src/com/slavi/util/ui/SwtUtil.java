@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
+import com.slavi.ui.SystemMonitor;
 import com.slavi.ui.TaskProgress;
 
 /**
@@ -157,7 +158,7 @@ public class SwtUtil {
 	/**
 	 * Show an HTML document in a resizable modal dialog box. The dialog box has a "save" button.  
 	 */
-	public static void showHTML(Shell parent, final String message, final String html) {
+	public static void showHTML(final Shell parent, final String message, final String html) {
 		final Shell shell = SwtUtil.makeShell(parent, SWT.DIALOG_TRIM);
 		shell.setText(message);
 		GridLayout layout = new GridLayout();
@@ -240,7 +241,7 @@ public class SwtUtil {
 	 * Displays the standard error dialog box with the specified message.
 	 * @param parent		The owner shell. Can be null.
 	 */
-	public static void msgboxError(Shell parent, String errorMsg) {
+	public static void msgboxError(final Shell parent, final String errorMsg) {
 		Shell shell = makeShell(parent);
 		MessageBox dialog = new MessageBox(shell, SWT.ICON_ERROR);
 		dialog.setText("Error");
@@ -249,7 +250,7 @@ public class SwtUtil {
 		shell.dispose();
 	}
 	
-	public static void msgbox(Shell parent, String message) {
+	public static void msgbox(final Shell parent, final String message) {
 		msgbox(parent, "", message);
 	}
 	
@@ -257,7 +258,7 @@ public class SwtUtil {
 	 * Displays the standard information dialog box with the specified message.
 	 * @param parent		The owner shell. Can be null.
 	 */
-	public static void msgbox(Shell parent, String title, String message) {
+	public static void msgbox(final Shell parent, final String title, final String message) {
 		Shell shell = makeShell(parent);
 		MessageBox dialog = new MessageBox(shell, SWT.ICON_INFORMATION);
 		dialog.setText(title);
@@ -269,7 +270,7 @@ public class SwtUtil {
 	/**
 	 * Returns the BOLD version of the specified font
 	 */
-	public static Font getBoldFont(Font font) {
+	public static Font getBoldFont(final Font font) {
 		FontData fd[] = font.getFontData();
 		if (fd.length > 0) {
 			FontData lastfd = fd[fd.length - 1];
@@ -281,7 +282,7 @@ public class SwtUtil {
 	/**
 	 * Centers the specified shell according to the primary display bounds.  
 	 */
-	public static void centerShell(Shell shell) {
+	public static void centerShell(final Shell shell) {
 		Rectangle displayRect = shell.getDisplay().getBounds();
 		Rectangle shellRect = shell.getBounds();
 		shellRect.x = (displayRect.width - shellRect.width) / 2;
@@ -295,7 +296,7 @@ public class SwtUtil {
 	
 	private static TaskProgress waitDialogTaskProgress = null; 
 
-	static Shell waitDialogShell = null;
+	private static Shell waitDialogShell = null;
 	
 	/**
 	 * Updates the currently open wait dialog's status and progress bar value.
@@ -308,7 +309,7 @@ public class SwtUtil {
 	 *		{@link #openWaitDialog(String, Runnable, int)})
 	 * @see #openWaitDialog(String, Runnable, int)
 	 */
-	public static void activeWaitDialogSetStatus(String status, int taskCompleted) {
+	public static void activeWaitDialogSetStatus(final String status, final int taskCompleted) {
 		if (waitDialogTaskProgress != null)
 			waitDialogTaskProgress.setStatusAndProgressThreadsafe(status, taskCompleted);
 	}
@@ -344,11 +345,11 @@ public class SwtUtil {
 	 * 
 	 * @see #activeWaitDialogSetStatus(String, int)
 	 */
-	public static boolean openWaitDialog(String title, Runnable runnable, int maxProgressValue) {
+	public static boolean openWaitDialog(final Shell parent, final String title, final Runnable runnable, final int maxProgressValue) {
 		if (waitDialogShell != null)
 			return false;
 		
-		waitDialogShell = new Shell(SWT.MIN | SWT.MAX | SWT.RESIZE);
+		waitDialogShell = makeShell(parent, SWT.MIN | SWT.MAX | SWT.RESIZE);
 		waitDialogShell.setLayout(new FillLayout());
 		waitDialogTaskProgress = new TaskProgress(waitDialogShell, 
 				maxProgressValue < 1 ? SWT.INDETERMINATE : SWT.NONE, runnable);
@@ -413,14 +414,84 @@ public class SwtUtil {
 		}
 	}
 	
-	public static <V> V openWaitDialog(final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
+	public static <V> V openWaitDialog(final Shell parent, final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
 		CallableWrapper<V> wrapper = new CallableWrapper<V>(callable);
-		boolean res = openWaitDialog(title, wrapper, maxProgressValue);
+		boolean res = openWaitDialog(parent, title, wrapper, maxProgressValue);
 		if (res && (wrapper.exception == null)) {
 			return wrapper.result;
 		}
 		if (wrapper.exception != null)
 			throw wrapper.exception;
 		throw new InterruptedException("Aborted");
+	}
+	
+	private static Shell memoryMonitorShell = null;
+
+	/**
+	 * Closes safely a shell using the {@link Display#asyncExec(Runnable)}. 
+	 */
+	public static void asyncCloseShell(final Shell shell) {
+		if ((shell == null) || shell.isDisposed())
+			return;
+		Display d = shell.getDisplay();
+		if ((d == null) || d.isDisposed())
+			return;
+		d.asyncExec(new Runnable() {
+			public void run() {
+				if ((shell == null) || shell.isDisposed())
+					return;
+				shell.close();
+			}
+		});
+	}
+	
+	public synchronized static boolean isMemoryMonitorOpened() {
+		if ((memoryMonitorShell == null) || memoryMonitorShell.isDisposed())
+			return false;
+		return memoryMonitorShell.isVisible();
+	}
+	
+	/**
+	 * Closes the previously opened memory monitor dialog.
+	 */
+	public synchronized static void closeMemoryMonitor() {
+		asyncCloseShell(memoryMonitorShell);
+		memoryMonitorShell = null;
+	}
+	
+	/**
+	 * Opens a memory monitor dialog. 
+	 */
+	public synchronized static void openMemoryMonitor(final Shell parent, final boolean closeable) {
+		asyncCloseShell(memoryMonitorShell);
+		memoryMonitorShell = makeShell(parent, closeable ? SWT.TITLE | SWT.CLOSE : SWT.TITLE);
+
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+
+		memoryMonitorShell.setLayout(layout);
+		memoryMonitorShell.setText("System monitor");
+		
+		SystemMonitor sysMon = new SystemMonitor(memoryMonitorShell, SWT.NONE);
+		GridData shellLayoutData = new GridData();
+		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.grabExcessHorizontalSpace = true;
+		sysMon.setLayoutData(shellLayoutData);
+		
+		if (closeable) {
+			memoryMonitorShell.addListener (SWT.Traverse, new Listener () {
+				public void handleEvent (Event event) {
+					switch (event.detail) {
+						case SWT.TRAVERSE_ESCAPE:
+							memoryMonitorShell.close();
+							event.detail = SWT.TRAVERSE_NONE;
+							event.doit = false;
+							break;
+					}
+				}
+			});
+		}
+		memoryMonitorShell.pack();
+		memoryMonitorShell.open();
 	}
 }

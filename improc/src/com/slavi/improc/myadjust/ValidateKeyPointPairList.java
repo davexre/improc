@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.math.MathUtil;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
@@ -69,7 +70,12 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
-				pairList.target.imageFileStamp.getFile().getName());
+				pairList.target.imageFileStamp.getFile().getName() +
+				"\trx=" +MathUtil.d4(pairList.rx * MathUtil.rad2deg) + 
+				"\try=" +MathUtil.d4(pairList.ry * MathUtil.rad2deg) + 
+				"\trz=" + MathUtil.d4(pairList.rz * MathUtil.rad2deg) +
+				"\ts=" + MathUtil.d4(pairList.scale)
+				);
 
 		return true;
 	}

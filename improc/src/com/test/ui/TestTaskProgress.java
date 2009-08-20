@@ -87,7 +87,7 @@ public class TestTaskProgress {
 
 	public static void test2() {
 		dummyJob2 job = new dummyJob2(8);
-		boolean result = SwtUtil.openWaitDialog("Title", job, 8);
+		boolean result = SwtUtil.openWaitDialog(null, "Title", job, 8);
 		System.out.println(result);
 	}
 	
@@ -119,7 +119,7 @@ public class TestTaskProgress {
 	
 	public static void test3() {
 		dummyJob3 job = new dummyJob3(8);
-		boolean result = SwtUtil.openWaitDialog("Base dialog", job, 8);
+		boolean result = SwtUtil.openWaitDialog(null, "Base dialog", job, 8);
 		System.out.println(result);
 	}
 	
@@ -138,7 +138,7 @@ public class TestTaskProgress {
 	public static void testJobThrowingException() {
 		JobThrowingException t = new JobThrowingException();
 		System.out.println("Before starting job");
-		boolean result = SwtUtil.openWaitDialog("Testing", t, 10);
+		boolean result = SwtUtil.openWaitDialog(null, "Testing", t, 10);
 		System.out.println(result);
 	}
 	

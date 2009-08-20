@@ -122,7 +122,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 
 		LeastSquaresAdjust lsa;
 		double discrepancyThreshold;
-		static final int maxIterations = 20;
+		static final int maxIterations = 10;
 		
 		void removeProcessedFromChain() {
 			chain = ignoredPairLists;
@@ -141,21 +141,40 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		public Void call() throws Exception {
 			while (true) {
 				discrepancyThreshold = 5;
-				copyBadStatus();
 				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
 				ignoredPairLists.addAll(chain);
 				chain = tmp_chain;
 				buildImagesList(chain, images);
+				copyBadStatus();
 				origin = null;
 				int iter = 0;
 				while (true) {
 					if (origin != null)
 						images.add(0, origin);
+					origin = null;
+					removeBadKeyPointPairLists();					
 					computeWeights();
-					boolean chainModified = false; 
+					boolean chainModified = false;
+					
+					for (int i = chain.size() - 1; i >= 0; i--) {
+						KeyPointPairList pairList = chain.get(i);
+						int goodCount = 0;
+						for (KeyPointPair pair : pairList.items) {
+							if (!isBad(pair))
+								goodCount++;
+						}
+						if (goodCount < 5) {
+							System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
+									"\t" + pairList.source.imageFileStamp.getFile().getName() +
+									"\t" + pairList.target.imageFileStamp.getFile().getName());
+							ignoredPairLists.add(chain.remove(i));
+							chainModified = true;
+						}
+					}
+					
 					for (int i = images.size() - 1; i >= 0; i--) {
 						KeyPointList image = images.get(i);
-						if (image.goodCount > 5)
+						if (image.goodCount > 10)
 							continue;
 						// Image does not have enough good points. Remove image and image pairs
 						chainModified = true;
@@ -187,6 +206,12 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 						return null;
 					// Build transformer
 					Matrix u = lsa.getUnknown();
+					System.out.println(origin.imageFileStamp.getFile().getName() + 
+							"\trx=" + MathUtil.d4(origin.rx * MathUtil.rad2deg) + 
+							"\try=" + MathUtil.d4(origin.ry * MathUtil.rad2deg) + 
+							"\trz=" + MathUtil.d4(origin.rz * MathUtil.rad2deg) + 
+							"\ts=" + MathUtil.d4(origin.scaleZ)
+							);
 					for (int curImage = 0; curImage < images.size(); curImage++) {
 						KeyPointList image = images.get(curImage);
 						int index = curImage * 4;
@@ -195,6 +220,16 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 						image.ry = MathUtil.fixAngleMPI_PI(image.ry - u.getItem(0, index + 1));
 						image.rz = MathUtil.fixAngleMPI_PI(image.rz - u.getItem(0, index + 2));
 						buildCamera2RealMatrix(image);
+						System.out.println(image.imageFileStamp.getFile().getName() + 
+								"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
+								"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
+								"\trz=" + MathUtil.d4(image.rz * MathUtil.rad2deg) + 
+								"\ts=" + MathUtil.d4(image.scaleZ) +
+								"\tdx=" + MathUtil.d4(u.getItem(0, index + 0) * MathUtil.rad2deg) + 
+								"\tdy=" + MathUtil.d4(u.getItem(0, index + 1) * MathUtil.rad2deg) + 
+								"\tdz=" + MathUtil.d4(u.getItem(0, index + 2) * MathUtil.rad2deg) + 
+								"\tds=" + MathUtil.d4(u.getItem(0, index + 3) * MathUtil.rad2deg) 
+								);
 					}
 					computeDiscrepancies();
 					double maxDiscrepancy = maxDiscrepancyStat.getMaxX();
@@ -260,6 +295,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			Statistics stat = new Statistics();
 			for (KeyPointPairList pairList : chain) {
 				stat.start();
+				int goodCount = 0;
 				for (KeyPointPair item : pairList.items) {
 					// Compute for all points, so no item.isBad check
 					MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
@@ -270,12 +306,19 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 					setDiscrepancy(item, Math.sqrt(dx*dx + dy*dy));
 					if (!isBad(item)) {
 						stat.addValue(item.discrepancy, getWeight(item));
+						goodCount++;
 					}
 				}
 				stat.stop();
 				pairList.maxDiscrepancy = stat.getAvgValue();
 				if (pairList.maxDiscrepancy < discrepancyThreshold)
 					pairList.maxDiscrepancy = discrepancyThreshold;
+				System.out.println(
+						pairList.source.imageFileStamp.getFile().getName() + "\t" +
+						pairList.target.imageFileStamp.getFile().getName() + "\t" +
+						MathUtil.d4(pairList.maxDiscrepancy) + "\t" +
+						goodCount
+						);
 				maxDiscrepancyStat.addValue(pairList.maxDiscrepancy);
 			}
 			maxDiscrepancyStat.stop();
@@ -466,7 +509,10 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			origin.rx = 0.0;
 			origin.ry = 0.0;
 			origin.rz = 0.0;
+			origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 			
+			System.out.println("Caclulating prims:");
+			System.out.println(origin.imageFileStamp.getFile().getName());
 			ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(images);
 			int curImageIndex = todo.size() - 1;
 			while (curImageIndex >= 0) {
@@ -486,6 +532,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 						curImage.rz = angles[2];
 						curImage.scaleZ = pairList.source.scaleZ * pairList.scale; 
 						todo.remove(curImageIndex);
+						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + pairList.target.imageFileStamp.getFile().getName());
 						curImageIndex = todo.size();
 						break;
 					} else if (curImage == pairList.target) {
@@ -503,6 +550,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 						curImage.rz = angles[2];
 						curImage.scaleZ = pairList.source.scaleZ / pairList.scale; 
 						todo.remove(curImageIndex);
+						System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + pairList.source.imageFileStamp.getFile().getName());
 						curImageIndex = todo.size();
 						break;
 					}

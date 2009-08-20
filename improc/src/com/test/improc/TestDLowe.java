@@ -11,7 +11,6 @@ import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
-import com.slavi.improc.parallel.ExecutePDLowe;
 import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.util.concurrent.SteppedParallelTaskExecutor;

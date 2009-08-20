@@ -5,6 +5,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
@@ -17,22 +20,29 @@ import com.slavi.util.ui.SwtUtil;
 
 public class Improc {
 	
+	Shell parent;
+	
 	public void doTheJob(ExecutorService exec) throws Exception {
-		Settings settings = Settings.getSettings();
+		parent = new Shell((Shell) null, SWT.NONE);
+		parent.setBounds(0, 0, 0, 0);
+		parent.open();
+		
+		Settings settings = Settings.getSettings(parent);
 		if (settings == null)
 			return;
+		SwtUtil.openMemoryMonitor(parent, true);
 		Marker.mark("Image Processing");
 
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);
 		AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(settings.keyPointFileRootStr);
 		
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath("*.jpg"), true, true);
-		ArrayList<String> images = SwtUtil.openWaitDialog("Searching for images", new EnumerateImageFiles(imagesIterator), -1);
-		SwtUtil.openWaitDialog("Generating key point files", 
+		ArrayList<String> images = SwtUtil.openWaitDialog(parent, "Searching for images", new EnumerateImageFiles(imagesIterator), -1);
+		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 		
 		System.out.println("---------- Generating key point BIG tree");
-		KeyPointBigTree bigTree = SwtUtil.openWaitDialog("Generating key point BIG tree", 
+		KeyPointBigTree bigTree = SwtUtil.openWaitDialog(parent, "Generating key point BIG tree", 
 				new GenerateKeyPointPairBigTree(exec, images, imagesRoot, keyPointFileRoot), 
 				images.size() - 1);
 		System.out.println("Tree size  : " + bigTree.getSize());
@@ -42,7 +52,7 @@ public class Improc {
 		System.out.println("Perfect tree depth : " + bigTree.getPerfectTreeDepth());
 		
 		System.out.println("---------- Generating key point pairs from BIG tree");
-		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog("Generating key point pairs from BIG tree", 
+		ArrayList<KeyPointPairList> kppl = SwtUtil.openWaitDialog(parent, "Generating key point pairs from BIG tree", 
 				new GenerateKeyPointPairsFromBigTree(exec, bigTree),
 				images.size() - 1);
 		images = null;
@@ -51,18 +61,18 @@ public class Improc {
 		System.out.println("Key point pairs lists to be validated: " + kppl.size());
 		
 		System.out.println("---------- Validating key point pairs");
-		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog("Validating key point pairs", 
+		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog(parent, "Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
 				kppl.size() - 1);
 		kppl = null;
 
 		System.out.println("---------- Calculating panorama parameters");
-		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog("Calculating panorama parameters", 
+		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
 				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		
 		System.out.println("---------- Generating panorama images");
-		SwtUtil.openWaitDialog("Generating panorama images", 
+		SwtUtil.openWaitDialog(parent, "Generating panorama images", 
 				new MyGeneratePanoramas(exec, panos, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 
@@ -84,11 +94,13 @@ public class Improc {
 		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1,
 				new MyThreadFactory());
 
+		Improc application = new Improc();
 		try {
-			Improc application = new Improc();
 			application.doTheJob(exec);
 		} finally {
 			exec.shutdown();
+			application.parent.close();
 		}
+		SwtUtil.closeMemoryMonitor();
 	}
 }

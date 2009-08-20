@@ -59,7 +59,7 @@ public class TestTaskSetExecutor {
 //		exec = new FakeThreadExecutor();
 
 		try {
-			SwtUtil.openWaitDialog("Test", new MyJob(exec), -1);
+			SwtUtil.openWaitDialog(null, "Test", new MyJob(exec), -1);
 		} catch (Throwable t) {
 			t.printStackTrace();
 		} finally {
