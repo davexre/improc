@@ -8,6 +8,13 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -563,4 +570,38 @@ public class Util {
 			}
 		}
 	}
+	
+	private static class BlockingQueuePut implements RejectedExecutionHandler {
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			try {
+				executor.getQueue().put(r);
+			} catch (InterruptedException ie) {
+				throw new RejectedExecutionException(ie);
+			}
+		}
+	}
+
+	/**
+	 * Creates a Blocking thread pool with fixed size.
+	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 */
+	public static ExecutorService newBlockingThreadPoolExecutor(int nThreads) {
+		return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new ArrayBlockingQueue<Runnable>(1),
+                                      new BlockingQueuePut());
+	}
+	
+	/**
+	 * Creates a Blocking thread pool with fixed size.
+	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 */
+	public static ExecutorService newBlockingThreadPoolExecutor(int nThreads, ThreadFactory threadFactory) {
+		return new ThreadPoolExecutor(nThreads, nThreads,
+				0L, TimeUnit.MILLISECONDS,
+				new ArrayBlockingQueue<Runnable>(1),
+				threadFactory,
+				new BlockingQueuePut());
+	}
+	
 }

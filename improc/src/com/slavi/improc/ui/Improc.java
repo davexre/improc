@@ -2,7 +2,6 @@ package com.slavi.improc.ui;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.eclipse.swt.SWT;
@@ -14,6 +13,7 @@ import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.util.Marker;
+import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -91,12 +91,14 @@ public class Improc {
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1,
-				new MyThreadFactory());
+//		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {
 			application.doTheJob(exec);
+		} catch (Throwable t) {
+			System.out.println(t);
 		} finally {
 			exec.shutdown();
 			application.parent.close();

@@ -166,7 +166,13 @@ public class TaskSetExecutor {
 				throw new RejectedExecutionException();
 			if (aborted)
 				return;
-			tasks.add(exec.submit(new InternalTaskWrapper(task)));
+		}
+		Future<Void> future = exec.submit(new InternalTaskWrapper(task));
+		synchronized (tasks) {
+			if (addingFinished || aborted) {
+				future.cancel(true);
+			}
+			tasks.add(future);
 		}
 	}
 	
