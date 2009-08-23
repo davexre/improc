@@ -140,9 +140,10 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		}
 		
 		public Void call() throws Exception {
+			discrepancyThreshold = 5;
+			discrepancyThreshold = (5.0 / 60.0) * MathUtil.deg2rad; // 1 angular minute
 			copyBadStatus();
 			while (true) {
-				discrepancyThreshold = 5;
 				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
 				ignoredPairLists.addAll(chain);
 				chain = tmp_chain;
@@ -240,7 +241,10 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 					double maxDiscrepancy = maxDiscrepancyStat.getMaxX();
 					double avgMaxDiscrepancy = maxDiscrepancyStat.getAvgValue();
 					double tmpdiscr = (maxDiscrepancyStat.getAvgValue() + maxDiscrepancy) / 2.0;
-					System.out.println("Iteration " + iter + " maxDiscrepancy=" + maxDiscrepancy + " avgMax=" + avgMaxDiscrepancy + " tmp=" + tmpdiscr);
+					System.out.println("Iteration " + iter + 
+							" maxDiscrepancy=" + MathUtil.d4(maxDiscrepancy * MathUtil.rad2deg) + 
+							" avgMax=" + MathUtil.d4(avgMaxDiscrepancy * MathUtil.rad2deg) + 
+							" tmp=" + MathUtil.d4(tmpdiscr * MathUtil.rad2deg));
 					boolean isDone = false;
 					if (maxDiscrepancy > discrepancyThreshold) {
 						if (recomputeBad(maxDiscrepancy)) {
@@ -304,6 +308,56 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				for (KeyPointPair item : pairList.items) {
 					// Compute for all points, so no item.isBad check
 					MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+					MyPanoPairTransformer.transform(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+
+					// Find the angular (Great circle) distance between the two points
+					double cosX1 = Math.cos(PW1.x);
+					double sinX1 = Math.sin(PW1.x);
+					double cosX2 = Math.cos(PW2.x);
+					double sinX2 = Math.sin(PW2.x);
+					double cosDY = Math.cos(PW1.y - PW2.y);
+					double sinDY = Math.sin(PW1.y - PW2.y);
+					
+					double tmp1 = cosX2 * sinDY;
+					double tmp2 = cosX1 * sinX2 - sinX1 * cosX2 * cosDY;
+					
+					double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
+					double dy = sinX1 * sinX2 + cosX1 * cosX2 * cosDY;
+					
+					setDiscrepancy(item, Math.atan2(dx, dy));
+					if (!isBad(item)) {
+						stat.addValue(getDiscrepancy(item), getWeight(item));
+						goodCount++;
+					}
+				}
+				stat.stop();
+				pairList.maxDiscrepancy = stat.getAvgValue();
+				if (pairList.maxDiscrepancy < discrepancyThreshold)
+					pairList.maxDiscrepancy = discrepancyThreshold;
+				System.out.println(
+						pairList.source.imageFileStamp.getFile().getName() + "\t" +
+						pairList.target.imageFileStamp.getFile().getName() + "\t" +
+						MathUtil.d4(pairList.maxDiscrepancy * MathUtil.rad2deg) + "\t" +
+						goodCount
+						);
+				maxDiscrepancyStat.addValue(pairList.maxDiscrepancy);
+			}
+			maxDiscrepancyStat.stop();
+			return;
+		}
+		
+		protected void computeDiscrepancies_OLD() {
+			Point2D.Double PW1 = new Point2D.Double();
+			Point2D.Double PW2 = new Point2D.Double();
+
+			maxDiscrepancyStat.start();
+			Statistics stat = new Statistics();
+			for (KeyPointPairList pairList : chain) {
+				stat.start();
+				int goodCount = 0;
+				for (KeyPointPair item : pairList.items) {
+					// Compute for all points, so no item.isBad check
+					MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 					MyPanoPairTransformer.transformBackward(PW1.x, PW1.y, pairList.target, PW2);
 
 					double dx = item.targetSP.doubleX - PW2.x;
@@ -329,7 +383,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			maxDiscrepancyStat.stop();
 			return;
 		}
-		
+
 		void calculateNormalEquations() {
 			Matrix coefs = new Matrix(images.size() * 4, 1);			
 
