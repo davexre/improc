@@ -365,19 +365,19 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		out.println("outputImageSizeY=" + outputImageSizeY);
 		for (KeyPointList image : images) {
 			out.println(image.imageFileStamp.getFile().getName() +
-					"\tmin.x=" + image.min.x + 
-					"\tmin.y=" + image.min.y + 
-					"\tmax.x=" + image.max.x + 
-					"\tmax.y=" + image.max.y + 
-					"\tcameraOriginX=" + image.cameraOriginX + 
-					"\tcameraOriginY=" + image.cameraOriginY + 
-					"\tcameraScale=" + image.cameraScale + 
+					"\tmin.x=" + MathUtil.d4(image.min.x * MathUtil.rad2deg) + 
+					"\tmin.y=" + MathUtil.d4(image.min.y * MathUtil.rad2deg) + 
+					"\tmax.x=" + MathUtil.d4(image.max.x * MathUtil.rad2deg) + 
+					"\tmax.y=" + MathUtil.d4(image.max.y * MathUtil.rad2deg) + 
+					"\tcameraOriginX=" + MathUtil.d4(image.cameraOriginX) + 
+					"\tcameraOriginY=" + MathUtil.d4(image.cameraOriginY) + 
+					"\tcameraScale=" + MathUtil.d4(image.cameraScale) + 
 					"\timageSizeX=" + image.imageSizeX + 
 					"\timageSizeY=" + image.imageSizeY + 
-					"\trx=" + image.rx * MathUtil.rad2deg + 
-					"\try=" + image.ry * MathUtil.rad2deg + 
-					"\trz=" + image.rz * MathUtil.rad2deg + 
-					"\tscaleZ=" + image.scaleZ 
+					"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
+					"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
+					"\trz=" + MathUtil.d4(image.rz * MathUtil.rad2deg) + 
+					"\tscaleZ=" + MathUtil.d4(image.scaleZ)
 					);
 			
 		}

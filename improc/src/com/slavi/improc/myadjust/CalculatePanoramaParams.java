@@ -127,6 +127,8 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		void removeProcessedFromChain() {
 			chain = ignoredPairLists;
 			ignoredPairLists = new ArrayList<KeyPointPairList>();
+			images.add(origin);
+			origin = null;
 			for (int i = images.size() - 1; i >= 0; i--) {
 				KeyPointList image = images.get(i);
 				for (int p = chain.size() - 1; p >= 0; p--) {
