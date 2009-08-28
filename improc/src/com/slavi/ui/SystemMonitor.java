@@ -122,7 +122,7 @@ public class SystemMonitor extends Composite {
 		Label label;
 		
 		GridData gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
+		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.widthHint = 120;
 
@@ -174,7 +174,7 @@ public class SystemMonitor extends Composite {
 		progressBar.setMaximum(100);
 		progressBar.setSelection(0);
 		gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
+		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.horizontalSpan = 2;
 		progressBar.setLayoutData(gridData);

@@ -282,7 +282,7 @@ public class TaskProgress extends Composite {
 		GridData layoutData = new GridData();
 		layoutData.grabExcessHorizontalSpace = true;
 		layoutData.grabExcessVerticalSpace = true;
-		layoutData.horizontalAlignment = GridData.FILL;
+		layoutData.horizontalAlignment = SWT.FILL;
 		layoutData.horizontalSpan = 2;
 		title.setLayoutData(layoutData);
 		title.setFont(SwtUtil.getBoldFont(title.getFont()));
@@ -295,7 +295,7 @@ public class TaskProgress extends Composite {
 		progressBar.setSelection(0);
 		layoutData = new GridData();
 		layoutData.grabExcessHorizontalSpace = true;
-		layoutData.horizontalAlignment = GridData.FILL;
+		layoutData.horizontalAlignment = SWT.FILL;
 		progressBar.setLayoutData(layoutData);
 
 		btnAbort = new Button(this, SWT.PUSH);
@@ -316,7 +316,7 @@ public class TaskProgress extends Composite {
 		taskStatusText.setText("Not started");
 		layoutData.grabExcessHorizontalSpace = true;
 		layoutData.grabExcessVerticalSpace = true;
-		layoutData.horizontalAlignment = GridData.FILL;
+		layoutData.horizontalAlignment = SWT.FILL;
 		layoutData.horizontalSpan = 2;
 		taskStatusText.setLayoutData(layoutData);
 	}

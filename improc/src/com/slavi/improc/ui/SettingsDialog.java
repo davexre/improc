@@ -56,7 +56,7 @@ public class SettingsDialog {
 		layout.numColumns = 3;
 		group.setLayout(layout);
 		GridData shellLayoutData = new GridData();
-		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.horizontalAlignment = SWT.FILL;
 		shellLayoutData.grabExcessHorizontalSpace = true;
 		group.setLayoutData(shellLayoutData);
 		
@@ -64,7 +64,7 @@ public class SettingsDialog {
 		Button button;
 		
 		GridData gridData = new GridData();
-		gridData.horizontalAlignment = GridData.FILL;
+		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.widthHint = 300;
 
@@ -126,7 +126,7 @@ public class SettingsDialog {
 		lay.marginTop = 0;
 		group.setLayout(lay);
 		shellLayoutData = new GridData();
-		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.horizontalAlignment = SWT.FILL;
 		shellLayoutData.grabExcessHorizontalSpace = true;
 		group.setLayoutData(shellLayoutData);
 
@@ -150,7 +150,7 @@ public class SettingsDialog {
 		composite.setLayout(btnLayout);
 
 		shellLayoutData = new GridData();
-		shellLayoutData.horizontalAlignment = GridData.END;
+		shellLayoutData.horizontalAlignment = SWT.END;
 		composite.setLayoutData(shellLayoutData);
 		
 		btnCancel = new Button(composite, SWT.PUSH);

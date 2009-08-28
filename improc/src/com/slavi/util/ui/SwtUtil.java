@@ -215,8 +215,8 @@ public class SwtUtil {
 			browser.setText(html);
 			browser.setSize(600, 450);
 			GridData layoutData = new GridData();
-			layoutData.horizontalAlignment = GridData.FILL;
-			layoutData.verticalAlignment = GridData.FILL;
+			layoutData.horizontalAlignment = SWT.FILL;
+			layoutData.verticalAlignment = SWT.FILL;
 			layoutData.grabExcessHorizontalSpace = true;
 			layoutData.grabExcessVerticalSpace = true;
 			browser.setLayoutData(layoutData);
@@ -474,7 +474,7 @@ public class SwtUtil {
 		
 		SystemMonitor sysMon = new SystemMonitor(memoryMonitorShell, SWT.NONE);
 		GridData shellLayoutData = new GridData();
-		shellLayoutData.horizontalAlignment = GridData.FILL;
+		shellLayoutData.horizontalAlignment = SWT.FILL;
 		shellLayoutData.grabExcessHorizontalSpace = true;
 		sysMon.setLayoutData(shellLayoutData);
 		
