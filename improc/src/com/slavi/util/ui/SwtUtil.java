@@ -494,4 +494,13 @@ public class SwtUtil {
 		memoryMonitorShell.pack();
 		memoryMonitorShell.open();
 	}
+	
+	/**
+	 * Opens a dialog that has the behaviour of the standard SWING JOptionPane dialog.
+	 * <p>
+	 * Returns the selected object or null is the dialog is canceled.
+	 */
+	public static String optionBox(Shell parent, String message, String title, String selectedItem, String... items) {
+		return SwtOptionBox.optionBox(parent, message, title, selectedItem, items);
+	}
 }
