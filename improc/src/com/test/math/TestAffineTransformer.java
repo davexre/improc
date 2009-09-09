@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.AffineTransformer;
+import com.slavi.math.transform.TransformLearnerResult;
 
 public class TestAffineTransformer {
 
@@ -162,9 +163,9 @@ public class TestAffineTransformer {
 		MyTestData pair;
 		learner = new MyTestAffineTransformLearner(points);
 
-		boolean res = learner.calculateOne();
+		TransformLearnerResult res = learner.calculateOne();
 		MyTestAffineTransformer tr = (MyTestAffineTransformer) learner.transformer;
-		System.out.println("Learner adjusted: " + res);
+		System.out.println("Learner adjusted: " + res.isAdjusted());
 		System.out.println(tr.toString());
 		
 		Matrix dest = new Matrix(2, 1);

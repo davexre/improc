@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.PolynomialTransformLearner;
 import com.slavi.math.transform.PolynomialTransformer;
+import com.slavi.math.transform.TransformLearnerResult;
 
 public class TestPolynomialTransformer {
 
@@ -164,16 +165,18 @@ public class TestPolynomialTransformer {
 		learner = new MyTestPolynomialTransformLearner(transformer, points);
 		int maxIterations = 100;
 		int iteration = 0;
-		boolean adjusted = false;
-		while ((iteration++ < maxIterations) && (!adjusted)) {
-			adjusted = learner.calculateOne();
+		TransformLearnerResult res = null;
+		while (iteration++ < maxIterations) {
+			res = learner.calculateOne();
 			int goodCount = 0;
 			for (MyTestData item : points)
 				if (!learner.isBad(item))
 					goodCount++;
 			System.out.println("Iteration " + iteration + " has good " + goodCount + "/" + points.size());
+			if (res.isAdjusted())
+				break;
 		}
-		System.out.println("Learner adjusted: " + adjusted);
+		System.out.println("Learner adjusted: " + res.isAdjusted());
 	}
 		
 	public void testTransformer() {

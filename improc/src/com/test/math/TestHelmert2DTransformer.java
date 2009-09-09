@@ -4,11 +4,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.Helmert2DTransformer;
+import com.slavi.math.transform.TransformLearnerResult;
 
 public class TestHelmert2DTransformer {
 
@@ -17,6 +19,7 @@ public class TestHelmert2DTransformer {
 		Point2D.Double dest = new Point2D.Double();
 		boolean isBad;
 		double discrepancy;
+		boolean originalBad = false;
 
 		public MyTestData() {
 		}
@@ -91,6 +94,11 @@ public class TestHelmert2DTransformer {
 			super(transformer, pointsPairList);
 		}
 
+		public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
+			double avg = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2;
+			return avg < 1.0 ? 1.0 : avg;
+		}
+		
 		public Point2D.Double createTemporaryTargetObject() {
 			return new Point2D.Double();
 		}
@@ -138,44 +146,106 @@ public class TestHelmert2DTransformer {
 		return r;
 	}
 	
-	private void addp(int x, int y) {
+	private MyTestData addp(int x, int y) {
 		Point2D.Double sd = new Point2D.Double(x, y);
 		MyTestData pair = new MyTestData(jTransform, sd);
 		points.add(pair);
+		return pair;
 	}
 	
 	private void generatePoints() {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
-		jTransform.rotate(30 * degreeToRad);
+		jTransform.rotate(90 * degreeToRad);
 		jTransform.scale(123.456, 123.456);
 		jTransform.translate(100.567, 200.123);
 
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
+
+		int maxX = 5;
+		int maxY = 5;
 		
 		points = new ArrayList<MyTestData>();
-		for (int xcounter = 0; xcounter < 5; xcounter++) {
-			for (int ycounter = 0; ycounter < 3; ycounter++) {
+		for (int xcounter = 0; xcounter < maxX; xcounter++) {
+			for (int ycounter = 0; ycounter < maxY; ycounter++) {
 				addp(xcounter, ycounter);
 			}
 		}
+		
+		// add fake data
+		int percentFakeData = 80;
+		int goodPoints = points.size();
+		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
+
+		if (false) {
+			int xcounter = 0;
+			int ycounter = 0;
+			for (int i = 0; i < numberOfFakePoints; i++) {
+				MyTestData d = addp(xcounter, ycounter);
+				d.originalBad = true;
+				d.dest.x += 1000 + i * 10000 / numberOfFakePoints;
+				d.dest.y += 1000 + i * 10000 / numberOfFakePoints;
+				xcounter++;
+				if (xcounter >= maxX) {
+					ycounter++;
+					xcounter = 0;
+				}
+			}
+		} else {
+			Random r = new Random();
+			for (int i = 0; i < numberOfFakePoints; i++) {
+				MyTestData d = addp(r.nextInt(maxX), r.nextInt(maxY));
+				d.originalBad = true;
+				d.dest.x += 1000 + r.nextInt(1000);
+				d.dest.y += 1000 + r.nextInt(1000);
+			}
+		}
+
+/*		MyTestData d = points.get(0);
+		System.out.println(d.src);
+		System.out.println(d.dest);
+*/
+		System.out.println("Good points " + goodPoints);
+		System.out.println("Fake points " + numberOfFakePoints);
+		System.out.println("All  points " + points.size());
 	}
 	
 	public void learn() {
 		MyTestData pair;
 		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), points);
-
-		boolean res = learner.calculateOne();
+		
+		for (int iter = 0; iter < 10; iter++) {
+			System.out.println();
+			System.out.println("**** Iteration " + iter);
+			TransformLearnerResult res = learner.calculateOne();
+			Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) learner.transformer;
+			System.out.println(res);
+			System.out.println(tr.toString());
+			dumpBad();
+			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < 1.0))
+				break;
+		}
 		Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) learner.transformer;
-		System.out.println("Learner adjusted: " + res);
-		System.out.println(tr.toString());
 		
 		Point2D.Double dest = new Point2D.Double();
 		pair = points.get(0);
 		tr.transform(pair.src, dest);
 		System.out.println("" + pair.dest.x + "\t" + pair.dest.y);
 		System.out.println("" + dest.x + "\t" + dest.y);
+	}
+	
+	public void dumpBad() {
+		int badMarkedAsGood = 0;
+		int goodMarkedAsBad = 0; 
+		for (MyTestData d : points) {
+			if (d.originalBad && (!d.isBad))
+				badMarkedAsGood++;
+			if (!d.originalBad && d.isBad)
+				goodMarkedAsBad++;
+		}
+		System.out.println("Bad marked as good: " + badMarkedAsGood);		
+		System.out.println("Good marked as bad: " + goodMarkedAsBad);		
 	}
 	
 	public static void main(String[] args) {
@@ -189,5 +259,6 @@ public class TestHelmert2DTransformer {
 		delta = test.learner.computeTransformedTargetDelta(true);
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
+		test.dumpBad();
 	}
 }

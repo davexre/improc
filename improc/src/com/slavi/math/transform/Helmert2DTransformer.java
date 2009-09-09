@@ -69,9 +69,9 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 	
 	public String toString() {
 		return 
-			"A=" + Double.toString(a) + 
-			"\nB=" + Double.toString(b) + 
-			"\nC=" + Double.toString(c) + 
-			"\nD=" + Double.toString(d); 
+			"A=" + MathUtil.d4(a) + 
+			"\nB=" + MathUtil.d4(b) + 
+			"\nC=" + MathUtil.d4(c) + 
+			"\nD=" + MathUtil.d4(d); 
 	}
 }

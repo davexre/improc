@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.math.transform.Helmert2DTransformLearner;
+import com.slavi.math.transform.TransformLearnerResult;
 
 public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<KeyPoint, KeyPoint>{
 
@@ -38,15 +39,11 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<K
 		((KeyPointPair)item).discrepancy = discrepancy;
 	}
 	
-	public double getMinAllowedDiscrepancy() {
-		return 0;
-	}
-	
-	public double getMaxAllowedDiscrepancy() {
-//		double result = (discrepancyStatistics.getAvgValue() + discrepancyStatistics.getMaxX()) / 2.0;
-		double result = discrepancyStatistics.getAvgValue();
-		if (result < discrepancyThreshold)
-			result = discrepancyThreshold;
-		return result;
+	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
+//		double r = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
+		double r = result.discrepancyStatistics.getAvgValue();
+		if (r < discrepancyThreshold)
+			r = discrepancyThreshold;
+		return r;
 	}
 }

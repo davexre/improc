@@ -2,7 +2,6 @@ package com.slavi.math.transform;
 
 import java.util.Map;
 
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public abstract class BaseTransformLearner<InputType, OutputType> {
@@ -45,8 +44,6 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	protected Matrix targetMin;	
 	protected Matrix targetMax;	
 	
-	public final Statistics discrepancyStatistics;
-	
 	protected BaseTransformLearner(BaseTransformer<InputType, OutputType> transformer, 
 			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		this.transformer = transformer;
@@ -63,11 +60,9 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		this.targetScale = new Matrix(outputSize, 1);
 		this.targetMin = new Matrix(outputSize, 1);
 		this.targetMax = new Matrix(outputSize, 1);
-		
-		this.discrepancyStatistics = new Statistics();
 	}
 	
-	public abstract boolean calculateOne();
+	public abstract TransformLearnerResult calculateOne();
 	
 	public abstract int getRequiredTrainingPoints();
 
@@ -86,24 +81,39 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	 * 
 	 * @return Number of point pairs NOT marked as bad.
 	 */
-	protected int computeWeights() {
-		int goodCount = 0;
+	protected void computeWeights(TransformLearnerResult result) {
+		result.dataCount = 0;
+		result.oldBadCount = 0;
+		result.oldGoodCount = 0;
+		
 		double sumWeight = 0;
 		for (Map.Entry<InputType, OutputType> item : items) {
-			if (isBad(item))
+			result.dataCount++;
+			if (isBad(item)) {
+				result.oldBadCount++;
 				continue;
+			}
 			double weight = getWeight(item); 
 			if (weight < 0)
 				throw new IllegalArgumentException("Negative weight received.");
-			goodCount++;
+			result.oldGoodCount++;
 			sumWeight += weight;
 		}
 		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / goodCount;
+			oneOverSumWeights = 1.0 / result.oldGoodCount;
 		} else {
 			oneOverSumWeights = 1.0 / sumWeight;
 		}
-		return goodCount;
+		return;
+	}
+	
+	public int countGood() {
+		int result = 0;
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (!isBad(item))
+				result++;
+		}
+		return result;
 	}
 	
 	public double getComputedWeight(Map.Entry<InputType, OutputType> item) {
@@ -191,9 +201,9 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		return result;
 	}	
 
-	public void computeDiscrepancies() {
+	public void computeDiscrepancies(TransformLearnerResult result) {
 		OutputType sourceTransformed = createTemporaryTargetObject();
-		discrepancyStatistics.start();
+		result.discrepancyStatistics.start();
 		// Determine correctness of source data (items array)
 		for (Map.Entry<InputType, OutputType> item : items) {
 			// Compute for all points, so no item.isBad check
@@ -207,34 +217,40 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			}
 			setDiscrepancy(item, Math.sqrt(sum2));
 			if (!isBad(item)) {
-				discrepancyStatistics.addValue(getDiscrepancy(item), getWeight(item));
+				result.discrepancyStatistics.addValue(getDiscrepancy(item), getWeight(item));
 			}
 		}
-		discrepancyStatistics.stop();
+		result.discrepancyStatistics.stop();
 	}
 	
-	public double getMinAllowedDiscrepancy() {
-		return discrepancyStatistics.getJ_Start();
+	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
+		return result.discrepancyStatistics.getJ_End();
 	}
 	
-	public double getMaxAllowedDiscrepancy() {
-		return discrepancyStatistics.getJ_End();
-	}
-	
-	protected boolean isAdjusted() {
-		double minDiscripancy = getMinAllowedDiscrepancy();
-		double maxDiscripancy = getMaxAllowedDiscrepancy();
-		boolean adjusted = true;
+	protected void computeBad(TransformLearnerResult result) {
+		result.newBadCount = 0;
+		result.newGoodCount = 0;
+		result.oldGoodNowBad = 0;
+		result.oldBadNowGood = 0;
+		
+		double maxDiscripancy = getMaxAllowedDiscrepancy(result);
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
 			double discrepancy = getDiscrepancy(item);
-			boolean curIsBad = (discrepancy < minDiscripancy) || (discrepancy > maxDiscripancy);
+			boolean curIsBad = discrepancy > maxDiscripancy;
 			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
-				if (curIsBad)
-					adjusted = false;
+				if (curIsBad) {
+					result.oldGoodNowBad++;
+				} else {
+					result.oldBadNowGood++;
+				}
+			}
+			if (curIsBad) {
+				result.newBadCount++;
+			} else {
+				result.newGoodCount++;
 			}
 		}
-		return adjusted;
 	}
 }

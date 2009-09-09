@@ -31,13 +31,16 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
 	 */
-	public boolean calculateOne() {
+	public TransformLearnerResult calculateOne() {
+		TransformLearnerResult result = new TransformLearnerResult();
+		
 		int inputSize = transformer.getInputSize();
 		int outputSize = transformer.getOutputSize();
-		int goodCount = computeWeights();
+		result.minGoodRequired = lsa.getRequiredPoints();
+		computeWeights(result);
 
-		if (goodCount < lsa.getRequiredPoints())
-			return false;
+		if (result.oldGoodCount < result.minGoodRequired)
+			return result;
 
 		computeScaleAndOrigin();
 
@@ -62,7 +65,7 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 			}
 		}
 		if (!lsa.calculate()) 
-			return false;
+			return result;
 
 		// Build transformer
 		AffineTransformer<InputType, OutputType> tr = (AffineTransformer<InputType, OutputType>)transformer;
@@ -81,7 +84,9 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 				u.getItem(i, inputSize) * targetScale.getItem(i, 0)); 
 		}
 
-		computeDiscrepancies();
-		return isAdjusted();
+		computeDiscrepancies(result);
+		computeBad(result);
+		result.adjustFailed = false;
+		return result; 
 	}
 }

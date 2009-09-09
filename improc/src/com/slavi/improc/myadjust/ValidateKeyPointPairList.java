@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
@@ -51,15 +52,15 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
 		int goodCount = 0;
-		boolean res = false;
+		TransformLearnerResult res = null;
 		for (int i = 0; i < 20; i++) {
 			res = learner.calculateOne();
 			goodCount = pairList.getGoodCount();
-			if (res || (goodCount < minRequredGoodPointPairs)) {
+			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;
 			}
 		}
-		if ((!res) || (goodCount < minRequredGoodPointPairs)) {
+		if ((!res.isAdjusted()) || (goodCount < minRequredGoodPointPairs)) {
 			return false;
 		}
 		for (KeyPointPair pair : pairList.items) {

@@ -26,11 +26,13 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
 	 */
-	public boolean calculateOne() {
-		int goodCount = computeWeights();
+	public TransformLearnerResult calculateOne() {
+		TransformLearnerResult result = new TransformLearnerResult();
+		result.minGoodRequired = lsa.getRequiredPoints();
+		computeWeights(result);
 
-		if (goodCount < lsa.getRequiredPoints())
-			return false;
+		if (result.oldGoodCount < result.minGoodRequired)
+			return result;
 
 		computeScaleAndOrigin();
 		double aSourceScale = Math.max(sourceScale.getItem(0, 0), sourceScale.getItem(1, 0));
@@ -67,7 +69,7 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 			lsa.addMeasurement(coefs, computedWeight, L, 0);
 		}
 		if (!lsa.calculate())
-			return false;
+			return result;
 
 		// Build transformer
 		Helmert2DTransformer<InputType, OutputType> tr = (Helmert2DTransformer<InputType, OutputType>)transformer;
@@ -80,7 +82,9 @@ public abstract class Helmert2DTransformLearner<InputType, OutputType> extends B
 		tr.d = u.getItem(0, 3) * aTargetScale - targetOrigin.getItem(1, 0) + 
 				tr.b * sourceOrigin.getItem(0, 0) - tr.a * sourceOrigin.getItem(1, 0); 
 		
-		computeDiscrepancies();
-		return isAdjusted();
+		computeDiscrepancies(result);
+		computeBad(result);
+		result.adjustFailed = false;
+		return result; 
 	}
 }

@@ -34,13 +34,16 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
 	 */
-	public boolean calculateOne() {
+	public TransformLearnerResult calculateOne() {
+		TransformLearnerResult result = new TransformLearnerResult();
+		
 		int inputSize = transformer.getInputSize();
 		int outputSize = transformer.getOutputSize();
-		int goodCount = computeWeights();
-		
-		if (goodCount < lsa.getRequiredPoints())
-			return false;
+		result.minGoodRequired = lsa.getRequiredPoints();
+		computeWeights(result);
+
+		if (result.oldGoodCount < result.minGoodRequired)
+			return result;
 
 		computeScaleAndOrigin();
 
@@ -75,7 +78,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 			}
 		}
 		if (!lsa.calculate())
-			return false;
+			return result;
 
 		// Build transformer
 		Matrix u = lsa.getUnknown();
@@ -104,7 +107,9 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 		u.copyTo(tr.polynomCoefs);
 		sourceOrigin.copyTo(tr.sourceOrigin);
 		
-		computeDiscrepancies();
-		return isAdjusted();
+		computeDiscrepancies(result);
+		computeBad(result);
+		result.adjustFailed = false;
+		return result; 
 	}
 }
