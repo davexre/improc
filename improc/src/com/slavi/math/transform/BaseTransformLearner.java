@@ -29,7 +29,6 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	
 	public final int outputSize;
 	
-	
 	public BaseTransformer<InputType, OutputType> transformer;
 	
 	public Iterable<? extends Map.Entry<InputType, OutputType>> items;
@@ -42,7 +41,9 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	protected Matrix targetOrigin;	
 	protected Matrix targetScale;	
 	protected Matrix targetMin;	
-	protected Matrix targetMax;	
+	protected Matrix targetMax;
+
+	protected int iteration = 0; 
 	
 	protected BaseTransformLearner(BaseTransformer<InputType, OutputType> transformer, 
 			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
@@ -82,6 +83,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	 * @return Number of point pairs NOT marked as bad.
 	 */
 	protected void computeWeights(TransformLearnerResult result) {
+		result.iteration = ++iteration;
 		result.dataCount = 0;
 		result.oldBadCount = 0;
 		result.oldGoodCount = 0;

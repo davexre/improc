@@ -95,8 +95,12 @@ public class TestHelmert2DTransformer {
 		}
 
 		public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
-			double avg = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2;
-			return avg < 1.0 ? 1.0 : avg;
+			double r = result.discrepancyStatistics.getAvgValue();
+			double je = result.discrepancyStatistics.getJ_End();
+			if (je < result.discrepancyStatistics.getMaxX())
+				r = je;
+//			double r = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2;
+			return r < 1.0 ? 1.0 : r;
 		}
 		
 		public Point2D.Double createTemporaryTargetObject() {
@@ -174,7 +178,7 @@ public class TestHelmert2DTransformer {
 		}
 		
 		// add fake data
-		int percentFakeData = 80;
+		int percentFakeData = 50;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
 

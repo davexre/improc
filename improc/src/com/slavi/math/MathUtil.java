@@ -24,6 +24,10 @@ public class MathUtil {
 		return String.format(Locale.US, "%1$10.4f", d);
 	}
 	
+	public static String d2(double d) {
+		return String.format(Locale.US, "%1$1.2f", d);
+	}
+	
 	public static String rad2radStr(double angle) {
 		return String.format(Locale.US, "%+9.7f rad", angle);
 	}

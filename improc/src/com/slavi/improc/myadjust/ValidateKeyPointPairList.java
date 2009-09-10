@@ -53,8 +53,10 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
 		int goodCount = 0;
 		TransformLearnerResult res = null;
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 100; i++) {
 			res = learner.calculateOne();
+			System.out.println("------Validate KeyPointPairList ------------");
+			System.out.println(res);
 			goodCount = pairList.getGoodCount();
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;

@@ -33,9 +33,6 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 	 */
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
-		
-		int inputSize = transformer.getInputSize();
-		int outputSize = transformer.getOutputSize();
 		result.minGoodRequired = lsa.getRequiredPoints();
 		computeWeights(result);
 

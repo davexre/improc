@@ -1,9 +1,12 @@
 package com.slavi.math.transform;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
 
 public class TransformLearnerResult {
 
+	public int iteration = 0;
+	
 	public int dataCount = -1;
 	
 	public int minGoodRequired = -1;
@@ -24,6 +27,10 @@ public class TransformLearnerResult {
 	
 	public final Statistics discrepancyStatistics = new Statistics();
 	
+	public double getGoodDataRatio() {
+		return 100.0 * oldGoodCount / dataCount; 
+	}
+	
 	public boolean isAdjustFailed() {
 		return adjustFailed;
 	}
@@ -38,10 +45,12 @@ public class TransformLearnerResult {
 	
 	public String toString() {
 		String res = 
-				"Data count:                 " + dataCount + 
+				"Iteration:                  " + iteration +
+				"\nData count:                 " + dataCount + 
 				"\nMinimum good required:      " + minGoodRequired +
 				"\nBefore adjust good count:   " + oldGoodCount +
-				"\nBefore adjust bad count:    " + oldBadCount;
+				"\nBefore adjust bad count:    " + oldBadCount +
+				"\nBefore adjust good ratio:   " + MathUtil.d2(getGoodDataRatio()) + "%";
 		if (isAdjustFailed()) {
 			res = "Adjust FAILED\n" + res;
 		} else {

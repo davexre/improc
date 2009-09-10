@@ -36,9 +36,6 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	 */
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
-		
-		int inputSize = transformer.getInputSize();
-		int outputSize = transformer.getOutputSize();
 		result.minGoodRequired = lsa.getRequiredPoints();
 		computeWeights(result);
 
