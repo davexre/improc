@@ -55,8 +55,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		TransformLearnerResult res = null;
 		for (int i = 0; i < 100; i++) {
 			res = learner.calculateOne();
-			System.out.println("------Validate KeyPointPairList ------------");
-			System.out.println(res);
+//			System.out.println("------Validate KeyPointPairList ------------");
+//			System.out.println(res);
 			goodCount = pairList.getGoodCount();
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;

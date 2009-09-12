@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 public class Settings {
 
 	public String imagesRootStr;
@@ -90,7 +93,11 @@ public class Settings {
 	}
 
 	public static void main(String[] args) {
-		Settings.getSettings(null);
+		Shell parent = new Shell((Shell) null, SWT.NONE);
+		parent.setBounds(0, 0, 0, 0);
+		parent.open();
+
+		Settings.getSettings(parent);
 		System.out.println("Done.");
 	}
 }

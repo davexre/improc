@@ -2,6 +2,8 @@ package com.slavi.improc;
 
 import java.util.ArrayList;
 
+import com.slavi.math.transform.TransformLearnerResult;
+
 public class KeyPointPairList {
 	/**
 	 * Mapping between source points and KeyPointPairs
@@ -16,6 +18,7 @@ public class KeyPointPairList {
 	public double rx, ry, rz; // source->target angles of rotation
 	public double scale;
 	public double maxDiscrepancy;
+	public TransformLearnerResult transformResult;
 	//////////////////////////// myAdjust
 	
 	public KeyPointPairList() {

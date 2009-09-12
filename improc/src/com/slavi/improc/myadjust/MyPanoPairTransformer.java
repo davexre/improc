@@ -1,93 +1,12 @@
 package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.math.transform.BaseTransformer;
 
-public class MyPanoPairTransformer extends BaseTransformer<KeyPoint, Point2D.Double> {
+public class MyPanoPairTransformer {
 
-	public ArrayList<KeyPointList> images;
-	
-	public KeyPointList origin;
-	
-	public MyPanoPairTransformer(KeyPointList origin, ArrayList<KeyPointList> images) {
-		this.images = images;
-		this.origin = origin;
-	}
-	
-	public int getInputSize() {
-		return 2;
-	}
-	
-	public int getOutputSize() {
-		return 3;
-	}
-
-	public int getNumberOfCoefsPerCoordinate() {
-		return images.size() * 4;
-	}
-
-	public double getSourceCoord(KeyPoint item, int coordIndex) {
-		switch (coordIndex) {
-		case 0:
-			if (item.keyPointList == null)
-				return item.doubleX;
-			else 
-				return item.doubleX - item.keyPointList.cameraOriginX;
-		case 1: 
-			if (item.keyPointList == null)
-				return item.doubleY;
-			else
-				return item.doubleY - item.keyPointList.cameraOriginY;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
-
-	public double getTargetCoord(Point2D.Double item, int coordIndex) {
-		switch (coordIndex) {
-		case 0: return item.x;
-		case 1: return item.y;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
-
-	public void setSourceCoord(KeyPoint item, int coordIndex, double value) {
-		switch (coordIndex) {
-		case 0: 
-			item.doubleX = value;
-			if (item.keyPointList != null)
-				item.doubleX += item.keyPointList.cameraOriginX; 
-			break;
-		case 1: 
-			item.doubleY = value;
-			if (item.keyPointList != null)
-				item.doubleY += item.keyPointList.cameraOriginY; 
-			break;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
-
-	public void setTargetCoord(Point2D.Double item, int coordIndex, double value) {
-		switch (coordIndex) {
-		case 0: item.x = value; break;
-		case 1: item.y = value; break;
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
-
-	public void transform(KeyPoint source, Point2D.Double dest) {
-		transform(source.doubleX, source.doubleY, source.keyPointList, dest);
-	}
-	
-	///////////////////////////////
-	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)

@@ -235,11 +235,11 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
 		
-		double maxDiscripancy = getMaxAllowedDiscrepancy(result);
+		double maxDiscrepancy = getMaxAllowedDiscrepancy(result);
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
 			double discrepancy = getDiscrepancy(item);
-			boolean curIsBad = discrepancy > maxDiscripancy;
+			boolean curIsBad = discrepancy > maxDiscrepancy;
 			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
 				if (curIsBad) {

@@ -235,9 +235,15 @@ public class MyGeneratePanoramas implements Callable<Void> {
 						if (useImageMaxWeight) {
 							if (mcurMaxWeight < weight) {
 								mcurMaxWeight = weight;
-								grayColor = grayColor | (grayColor << 8) | (grayColor << 16);
 								int m[] = masks[index % masks.length];
-								mcurMaxColor = (grayColor & m[0]) | m[1] ;
+//								grayColor = grayColor | (grayColor << 8) | (grayColor << 16);
+//								mcurMaxColor = (grayColor & m[0]) | m[1] ;
+								
+								double dgc = grayColor / 255.0;
+								mcurMaxColor = 
+									((int)(((m[0] >> 16) & (0xff)) * dgc) << 16) |
+									((int)(((m[0] >> 8) & (0xff)) * dgc) << 8) |
+									((int)(((m[0] >> 0) & (0xff)) * dgc) << 0);								
 							}
 						} else {
 							switch (index % 3) {
@@ -434,7 +440,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		images = new ArrayList<KeyPointList>();
 		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
 			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
-			CalculatePanoramaParams.buildImagesList(pano, images);
+			MyPanoPairTransformLearner.buildImagesList(pano, images);
 			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
 			for (KeyPointList image : images) {
 				System.out.println(image.imageFileStamp.getFile().getName());
@@ -446,7 +452,7 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
-			CalculatePanoramaParams.buildImagesList(pairLists, images);
+			MyPanoPairTransformLearner.buildImagesList(pairLists, images);
 			calcExtents();
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.d4(MathUtil.rad2deg * minAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * minAngle.y));
