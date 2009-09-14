@@ -287,6 +287,8 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		removeBadKeyPointPairLists();
 //		ExecutorService e = Executors.newSingleThreadExecutor();
 		while (kppl.size() > 0) {
+			if (Thread.interrupted())
+				throw new InterruptedException();
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 			while (true) {
 				ArrayList<KeyPointPairList> chain = getImageChain(kppl);

@@ -329,8 +329,16 @@ public class MyPanoPairTransformLearner {
 		result.newGoodCount = 0;
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
+		double maxMaxDiscrepancy = result.discrepancyStatistics.getJ_End();
+		if (maxMaxDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
+			maxMaxDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
+		}
+		if (maxMaxDiscrepancy < discrepancyThreshold)
+			maxMaxDiscrepancy = discrepancyThreshold;
 		
 		for (KeyPointPairList pairList : chain) {
+			if (pairList.maxDiscrepancy > maxMaxDiscrepancy)
+				pairList.maxDiscrepancy = maxMaxDiscrepancy;
 			double maxDiscrepancy = pairList.maxDiscrepancy;
 			pairList.transformResult.newBadCount = 0;
 			pairList.transformResult.newGoodCount = 0;
@@ -359,6 +367,19 @@ public class MyPanoPairTransformLearner {
 					pairList.transformResult.newGoodCount++;
 				}
 			}
+
+			System.out.println(
+					pairList.source.imageFileStamp.getFile().getName() + "\t" +
+					pairList.target.imageFileStamp.getFile().getName() +
+					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
+					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
+					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
+					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
+					"\toldBadNowGood=" + pairList.transformResult.oldBadNowGood +
+					"\toldGoodNowBad=" + pairList.transformResult.oldGoodNowBad +
+					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
+					"\t" + pairList.transformResult.newGoodCount + "/" + pairList.transformResult.dataCount
+					);
 		}
 	}
 	
@@ -400,20 +421,12 @@ public class MyPanoPairTransformLearner {
 			}
 			pairList.transformResult.discrepancyStatistics.stop();
 			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
-			if (pairList.maxDiscrepancy <= pairList.transformResult.discrepancyStatistics.getMaxX()) 
-				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
+			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
+				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
+						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
+			}
 			if (pairList.maxDiscrepancy < discrepancyThreshold)
 				pairList.maxDiscrepancy = discrepancyThreshold;
-			
-			System.out.println(
-					pairList.source.imageFileStamp.getFile().getName() + "\t" +
-					pairList.target.imageFileStamp.getFile().getName() +
-					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
-					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
-					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
-					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
-					"\t" + goodCount + "/" + pairList.items.size()
-					);
 		}
 		result.discrepancyStatistics.stop();
 		return;
@@ -446,7 +459,7 @@ public class MyPanoPairTransformLearner {
 	
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
-		discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		discrepancyThreshold = 50.0 / 60.0; // 5 angular minutes
 
 		removeBadKeyPointPairLists();
 		buildImagesList(chain, images);

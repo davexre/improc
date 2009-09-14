@@ -94,7 +94,7 @@ public class Settings {
 
 	public static void main(String[] args) {
 		Shell parent = new Shell((Shell) null, SWT.NONE);
-		parent.setBounds(0, 0, 0, 0);
+		parent.setBounds(-10, -10, 1, 1);
 		parent.open();
 
 		Settings.getSettings(parent);
