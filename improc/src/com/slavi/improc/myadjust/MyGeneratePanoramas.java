@@ -363,26 +363,26 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		}
 		out.println("------------");
 
-		out.println("minAngle.x=" + minAngle.x * MathUtil.rad2deg);
-		out.println("minAngle.y=" + minAngle.y * MathUtil.rad2deg);
-		out.println("sizeAngle.x=" + sizeAngle.x * MathUtil.rad2deg);
-		out.println("sizeAngle.y=" + sizeAngle.y * MathUtil.rad2deg);
+		out.println("minAngle.x=" + MathUtil.rad2degStr(minAngle.x));
+		out.println("minAngle.y=" + MathUtil.rad2degStr(minAngle.y));
+		out.println("sizeAngle.x=" + MathUtil.rad2degStr(sizeAngle.x));
+		out.println("sizeAngle.y=" + MathUtil.rad2degStr(sizeAngle.y));
 		out.println("outputImageSizeX=" + outputImageSizeX);
 		out.println("outputImageSizeY=" + outputImageSizeY);
 		for (KeyPointList image : images) {
 			out.println(image.imageFileStamp.getFile().getName() +
-					"\tmin.x=" + MathUtil.d4(image.min.x * MathUtil.rad2deg) + 
-					"\tmin.y=" + MathUtil.d4(image.min.y * MathUtil.rad2deg) + 
-					"\tmax.x=" + MathUtil.d4(image.max.x * MathUtil.rad2deg) + 
-					"\tmax.y=" + MathUtil.d4(image.max.y * MathUtil.rad2deg) + 
+					"\tmin.x=" + MathUtil.rad2degStr(image.min.x) + 
+					"\tmin.y=" + MathUtil.rad2degStr(image.min.y) + 
+					"\tmax.x=" + MathUtil.rad2degStr(image.max.x) + 
+					"\tmax.y=" + MathUtil.rad2degStr(image.max.y) + 
 					"\tcameraOriginX=" + MathUtil.d4(image.cameraOriginX) + 
 					"\tcameraOriginY=" + MathUtil.d4(image.cameraOriginY) + 
 					"\tcameraScale=" + MathUtil.d4(image.cameraScale) + 
 					"\timageSizeX=" + image.imageSizeX + 
 					"\timageSizeY=" + image.imageSizeY + 
-					"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
-					"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
-					"\trz=" + MathUtil.d4(image.rz * MathUtil.rad2deg) + 
+					"\trx=" + MathUtil.rad2degStr(image.rx) + 
+					"\try=" + MathUtil.rad2degStr(image.ry) + 
+					"\trz=" + MathUtil.rad2degStr(image.rz) + 
 					"\tscaleZ=" + MathUtil.d4(image.scaleZ)
 					);
 			
@@ -455,8 +455,8 @@ public class MyGeneratePanoramas implements Callable<Void> {
 			MyPanoPairTransformLearner.buildImagesList(pairLists, images);
 			calcExtents();
 
-			System.out.println("MIN Angle X,Y:  " + MathUtil.d4(MathUtil.rad2deg * minAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * minAngle.y));
-			System.out.println("SIZE angle X,Y: " + MathUtil.d4(MathUtil.rad2deg * sizeAngle.x) + "\t" + MathUtil.d4(MathUtil.rad2deg * sizeAngle.y));
+			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));
+			System.out.println("SIZE angle X,Y: " + MathUtil.rad2degStr(sizeAngle.x) + "\t" + MathUtil.rad2degStr(sizeAngle.y));
 			System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 
 			outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);

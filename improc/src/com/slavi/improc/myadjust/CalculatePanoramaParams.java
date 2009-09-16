@@ -3,7 +3,6 @@ package com.slavi.improc.myadjust;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
@@ -99,24 +98,19 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		}
 		
 		static final int maxIterations = 30;
-/*		
-		void removeProcessedFromChain() {
-			chain = ignoredPairLists;
-			ignoredPairLists = new ArrayList<KeyPointPairList>();
-			images.add(origin);
-			origin = null;
-			for (int i = images.size() - 1; i >= 0; i--) {
-				KeyPointList image = images.get(i);
-				for (int p = chain.size() - 1; p >= 0; p--) {
-					KeyPointPairList pairList = chain.get(p);
+		
+		void removeProcessedFromChain(ArrayList<KeyPointPairList>ignoredPairs, ArrayList<KeyPointList>processedImages) {
+			for (int i = processedImages.size() - 1; i >= 0; i--) {
+				KeyPointList image = processedImages.get(i);
+				for (int p = ignoredPairs.size() - 1; p >= 0; p--) {
+					KeyPointPairList pairList = ignoredPairs.get(p);
 					if ((pairList.source == image) || (pairList.target == image)) {
-						chain.remove(p);
+						ignoredPairs.remove(p);
 					}
 				}
 			}
-			copyBadStatus();
 		}
-*/		
+		
 		public Void call() {
 			copyBadStatus(chain);
 			MyPanoPairTransformLearner learner = new MyPanoPairTransformLearner(chain);
@@ -125,13 +119,15 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				System.out.println(result);
 				if (result.isAdjustFailed())
 					break;
-				if (result.isAdjusted() || (result.discrepancyStatistics.getMaxX() < learner.discrepancyThreshold)) {
+				if (/*result.isAdjusted() ||*/ (result.discrepancyStatistics.getMaxX() < learner.discrepancyThreshold)) {
 					synchronized (panos) {
 						panos.add(learner.chain);
 					}
 					break;
 				}
 			}
+			learner.images.add(learner.origin);
+			removeProcessedFromChain(learner.ignoredPairLists, learner.images);
 			synchronized(kppl) {
 				kppl.addAll(learner.ignoredPairLists);
 			}
@@ -282,11 +278,13 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			}
 		}
 	}
-	
+
 	public ArrayList<ArrayList<KeyPointPairList>> call() throws Exception {
 		removeBadKeyPointPairLists();
-//		ExecutorService e = Executors.newSingleThreadExecutor();
-		while (kppl.size() > 0) {
+		int maxAttempts = 1;
+		int curAttempt = 0;
+		while ((kppl.size() > 0) && (curAttempt < maxAttempts)) {
+			curAttempt++;
 			if (Thread.interrupted())
 				throw new InterruptedException();
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
@@ -298,7 +296,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			}
 			taskSet.addFinished();
 			taskSet.get();
-			System.out.println("*********** NEW ATTEMPT ****************");
+			System.out.println("*********** NEW ATTEMPT " + curAttempt + " ****************");
 		}
 		return panos;
 	}	

@@ -28,7 +28,7 @@ public class TransformLearnerResult {
 	public final Statistics discrepancyStatistics = new Statistics();
 	
 	public double getGoodDataRatio() {
-		return 100.0 * oldGoodCount / dataCount; 
+		return dataCount <= 0 ? 0 : 100.0 * oldGoodCount / dataCount; 
 	}
 	
 	public boolean isAdjustFailed() {

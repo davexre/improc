@@ -136,6 +136,7 @@ public class MyPanoPairTransformLearner {
 		origin.rx = 0;
 		origin.ry = 0;
 		origin.rz = 0;
+		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		buildCamera2RealMatrix(origin);
 		for (KeyPointList image : images) {
 			buildCamera2RealMatrix(image);
@@ -375,8 +376,8 @@ public class MyPanoPairTransformLearner {
 					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
 					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
 					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
-					"\toldBadNowGood=" + pairList.transformResult.oldBadNowGood +
-					"\toldGoodNowBad=" + pairList.transformResult.oldGoodNowBad +
+					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
+					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
 					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
 					"\t" + pairList.transformResult.newGoodCount + "/" + pairList.transformResult.dataCount
 					);
@@ -432,7 +433,7 @@ public class MyPanoPairTransformLearner {
 		return;
 	}
 	
-	private void removeBadKeyPointPairLists() {
+	private boolean removeBadKeyPointPairLists() {
 		boolean chainModified = false;
 		for (int i = chain.size() - 1; i >= 0; i--) {
 			KeyPointPairList pairList = chain.get(i);
@@ -441,7 +442,7 @@ public class MyPanoPairTransformLearner {
 				if (!isBad(pair))
 					goodCount++;
 			}
-			if (goodCount < 5) {
+			if (goodCount < 10) {
 				System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
 						"\t" + pairList.source.imageFileStamp.getFile().getName() +
 						"\t" + pairList.target.imageFileStamp.getFile().getName());
@@ -455,19 +456,35 @@ public class MyPanoPairTransformLearner {
 			ignoredPairLists.addAll(chain);
 			chain = tmpChain;
 		}
+		return chainModified;
 	}
 	
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
-		discrepancyThreshold = 50.0 / 60.0; // 5 angular minutes
+		discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
 
-		removeBadKeyPointPairLists();
-		buildImagesList(chain, images);
+		boolean chainModified = removeBadKeyPointPairLists();
+		if (iteration == 0) 
+			chainModified = true;
+		
+		if (chainModified) {
+			ArrayList<KeyPointList> tmp_images = new ArrayList<KeyPointList>();
+			buildImagesList(chain, tmp_images);
+			if (tmp_images.size() != images.size() + 1) {
+				images.clear();
+				images.addAll(tmp_images);
+			} else {
+				chainModified = false;
+			}
+		}
 		computeWeights(result);
 		if (images.size() <= 1)
 			return result;
-		origin = images.remove(0);
-		calculatePrims();
+		if (chainModified) {
+			System.out.println("************* COMPUTE PRIMS");
+			origin = images.remove(0);
+			calculatePrims();
+		}
 
 		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
 		calculateNormalEquations();
@@ -477,22 +494,22 @@ public class MyPanoPairTransformLearner {
 		// Build transformer
 		Matrix u = lsa.getUnknown();
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
-				"\trx=" + MathUtil.d4(origin.rx * MathUtil.rad2deg) + 
-				"\try=" + MathUtil.d4(origin.ry * MathUtil.rad2deg) + 
-				"\trz=" + MathUtil.d4(origin.rz * MathUtil.rad2deg) + 
+				"\trx=" + MathUtil.rad2degStr(origin.rx) + 
+				"\try=" + MathUtil.rad2degStr(origin.ry) + 
+				"\trz=" + MathUtil.rad2degStr(origin.rz) + 
 				"\ts=" + MathUtil.d4(origin.scaleZ)
 				);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
 			int index = curImage * 4;
 			System.out.println(image.imageFileStamp.getFile().getName() + 
-					"\trx=" + MathUtil.d4(image.rx * MathUtil.rad2deg) + 
-					"\try=" + MathUtil.d4(image.ry * MathUtil.rad2deg) + 
-					"\trz=" + MathUtil.d4(image.rz * MathUtil.rad2deg) + 
+					"\trx=" + MathUtil.rad2degStr(image.rx) + 
+					"\try=" + MathUtil.rad2degStr(image.ry) + 
+					"\trz=" + MathUtil.rad2degStr(image.rz) + 
 					"\ts=" + MathUtil.d4(image.scaleZ) +
-					"\tdx=" + MathUtil.d4(u.getItem(0, index + 0) * MathUtil.rad2deg) + 
-					"\tdy=" + MathUtil.d4(u.getItem(0, index + 1) * MathUtil.rad2deg) + 
-					"\tdz=" + MathUtil.d4(u.getItem(0, index + 2) * MathUtil.rad2deg) + 
+					"\tdx=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
+					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
+					"\tdz=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
 					"\tds=" + MathUtil.d4(u.getItem(0, index + 3)) 
 					);
 			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));

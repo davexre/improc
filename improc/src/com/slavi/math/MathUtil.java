@@ -44,7 +44,7 @@ public class MathUtil {
 		angle = Math.abs(angle - gr) * 60;
 		int min = (int) Math.floor(angle);
 		double sec = (angle - min) * 60;
-		return String.format(Locale.US, "%+1.0f°% 2d'% 4.1f\"", gr, min, sec);
+		return String.format(Locale.US, "% 4.0f°%2d'%4.1f\"", gr, min, sec);
 	}
 	
 	/**

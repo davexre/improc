@@ -74,9 +74,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
-				"\trx=" +MathUtil.d4(pairList.rx * MathUtil.rad2deg) + 
-				"\try=" +MathUtil.d4(pairList.ry * MathUtil.rad2deg) + 
-				"\trz=" + MathUtil.d4(pairList.rz * MathUtil.rad2deg) +
+				"\trx=" +MathUtil.rad2degStr(pairList.rx) + 
+				"\try=" +MathUtil.rad2degStr(pairList.ry) + 
+				"\trz=" + MathUtil.rad2degStr(pairList.rz) +
 				"\ts=" + MathUtil.d4(pairList.scale)
 				);
 
