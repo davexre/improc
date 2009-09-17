@@ -450,7 +450,6 @@ public class MyGeneratePanoramas implements Callable<Void> {
 		for (ArrayList<KeyPointPairList> pano : panos) {
 			int panoId = panoCounter.incrementAndGet();
 			Marker.mark("Generate panorama " + panoId);
-			images.clear();
 			pairLists = pano;
 			MyPanoPairTransformLearner.buildImagesList(pairLists, images);
 			calcExtents();
