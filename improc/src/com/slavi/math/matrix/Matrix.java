@@ -14,7 +14,7 @@ public class Matrix {
 	/**
 	 * The elements of the matrix.
 	 */
-	public double m[][];
+	private double m[][];
 
 	/**
 	 * Number of columns
@@ -56,7 +56,7 @@ public class Matrix {
 			return false;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				if (m[i][j] != a.m[i][j])
+				if (getItem(i, j) != a.getItem(i, j))
 					return false;
 		return true;
 	}
@@ -71,7 +71,7 @@ public class Matrix {
 		tolerance = Math.abs(tolerance);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				if (Math.abs(m[i][j] - a.m[i][j]) > tolerance)
+				if (Math.abs(getItem(i, j) - a.getItem(i, j)) > tolerance)
 					return false;
 		return true;
 	}
@@ -84,8 +84,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(m[i][j]) } ));
-				result.append(m[i][j]);
+				//result.append(String.format(Locale.US, "%1$27.19f",new Object[] { new Double(.getItem(i, j]) } ));
+				result.append(getItem(i, j));
 			}
 			result.append(";\n");
 		}
@@ -99,7 +99,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format(Locale.US, "%1$10.4f\t",new Object[] { new Double(m[i][j]) } ));
+				result.append(String.format(Locale.US, "%1$10.4f\t",
+						new Object[] { new Double(getItem(i, j)) } ));
 			}
 			result.append("");
 		}
@@ -135,8 +136,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append("\t");
-				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(m[i][j]) } ));
-//				result.append(m[i][j]);
+				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(getItem(i, j)) } ));
+//				result.append(.getItem(i, j]);
 			}
 			result.append("\n");
 		}
@@ -150,7 +151,7 @@ public class Matrix {
 		for (int j = 0; j < sizeY; j++) {
 			StringTokenizer st = new StringTokenizer(fin.readLine());
 			for (int i = 0; i < sizeX; i++) 
-				m[i][j] = st.hasMoreTokens() ? Double.parseDouble(st.nextToken()) : 0.0;
+				setItem(i, j, st.hasMoreTokens() ? Double.parseDouble(st.nextToken()) : 0.0);
 		}
 	}
 
@@ -219,7 +220,7 @@ public class Matrix {
 	 * aligned by rows, i.e.<br>
 	 * <br>
 	 * <tt>
-	 *       Matrix [4][3]<br>
+	 *       Matrix [4, 3]<br>
 	 *        a b c d<br>
 	 *        e f j h<br>
 	 *        i j k l<br>
@@ -232,14 +233,14 @@ public class Matrix {
 	 * @return The value at the specified position.
 	 */
 	public double getVectorItem(int aIndex) {
-		return m[aIndex % sizeX][aIndex / sizeX];
+		return getItem(aIndex % sizeX, aIndex / sizeX);
 	}
 
 	/**
 	 * @see Matrix#getVectorItem(int)
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
-		m[aIndex % sizeX][aIndex / sizeX] = aValue;
+		setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
 	/**
@@ -258,8 +259,8 @@ public class Matrix {
 			for (int j = second.sizeX - 1; j >= 0; j--) {
 				D = 0;
 				for (int k = sizeX - 1; k >= 0; k--)
-					D += m[k][i] * second.m[j][k];
-				dest.m[j][i] = D;
+					D += getItem(k, i) * second.getItem(j, k);
+				dest.setItem(j, i, D);
 			}
 		}
 	}
@@ -268,7 +269,7 @@ public class Matrix {
 	 * Performs an element by element sum of two matrices of equal size and
 	 * stores the result in dest matrix. If the dest matrix is of incorrect size
 	 * it will be resized to the same size as the source matrix. The formula is:<br>
-	 * <tt>dest[i][j] = this[i][j] + second[i][j]<br>
+	 * <tt>dest[i, j] = this[i, j] + second[i, j]<br>
 	 * </tt>
 	 */
 	public void mSum(Matrix second, Matrix dest) {
@@ -278,7 +279,7 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = m[i][j] + second.m[i][j];
+				dest.setItem(i, j, getItem(i, j) + second.getItem(i, j));
 	}
 
 	/**
@@ -286,7 +287,7 @@ public class Matrix {
 	 * and stores the result in dest matrix. If the dest matrix is of incorrect
 	 * size it will be resized to the same size as the source matrix. The
 	 * formula is:<br>
-	 * <tt>dest[i][j] = this[i][j] - second[i][j]<br>
+	 * <tt>dest[i, j] = this[i, j] - second[i, j]<br>
 	 * </tt>
 	 */
 	public void mSub(Matrix second, Matrix dest) {
@@ -296,12 +297,12 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = m[i][j] - second.m[i][j];
+				dest.setItem(i, j, getItem(i, j) - second.getItem(i, j));
 	}
 
 	/**
 	 * Returns the dot product of the matrix. The formula is:<br>
-	 * <tt>Result = Sum( m[i][j] )<br>
+	 * <tt>Result = Sum( .getItem(i, j] )<br>
 	 * </tt>
 	 */
 	public double dotProduct(Matrix second) {
@@ -311,7 +312,7 @@ public class Matrix {
 		double sum = 0;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				sum += m[i][j];
+				sum += getItem(i, j);
 		return sum;
 	}
 
@@ -320,7 +321,7 @@ public class Matrix {
 	 * size and stores the result in dest matrix. If the dest matrix is of
 	 * incorrect size it will be resized to the same size as the source matrix.
 	 * The formula is:<br>
-	 * <tt>dest[i][j] = this[i][j] * second[i][j]<br>
+	 * <tt>dest[i, j] = this[i, j] * second[i, j]<br>
 	 * </tt>
 	 */
 	public void termMul(Matrix second, Matrix dest) {
@@ -330,14 +331,14 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = m[i][j] * second.m[i][j];
+				dest.setItem(i, j, getItem(i, j) * second.getItem(i, j));
 	}
 
 	/**
 	 * Performs an element by element division of two matrices of equal size and
 	 * stores the result in dest matrix. If the dest matrix is of incorrect size
 	 * it will be resized to the same size as the source matrix. The formula is:<br>
-	 * <tt>dest[i][j] = this[i][j] / second[i][j]<br>
+	 * <tt>dest[i, j] = this[i, j] / second[i, j]<br>
 	 * </tt> <b>Warning:</b><i>If there is an element that is zero, an
 	 * exception will rise <code>java.lang.ArithmeticException</code>.</i>
 	 */
@@ -348,18 +349,18 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = m[i][j] / second.m[i][j];
+				dest.setItem(i, j, getItem(i, j) / second.getItem(i, j));
 	}
 
 	/**
 	 * Multiplies all elements of the matrix with aValue. The formula is:<br>
-	 * <tt>this[i][j] = aValue * this[i][j]<br>
+	 * <tt>this[i, j] = aValue * this[i, j]<br>
 	 * </tt>
 	 */
 	public void rMul(double aValue) {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				m[i][j] *= aValue;
+				setItem(i, j, getItem(i, j) * aValue);
 	}
 
 	/**
@@ -369,7 +370,7 @@ public class Matrix {
 		double D = 0;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				D += m[i][j];
+				D += getItem(i, j);
 		return D;
 	}
 
@@ -380,7 +381,7 @@ public class Matrix {
 		double D = 0;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				D += Math.abs(m[i][j]);
+				D += Math.abs(getItem(i, j));
 		return D;
 	}
 
@@ -390,11 +391,11 @@ public class Matrix {
 	public double max() {
 		if ((sizeX == 0) || (sizeY == 0))
 			return 0;
-		double D = m[0][0];
+		double D = getItem(0, 0);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				if (D < m[i][j])
-					D = m[i][j];
+				if (D < getItem(i, j))
+					D = getItem(i, j);
 		return D;
 	}
 
@@ -413,7 +414,7 @@ public class Matrix {
 		double D = 0;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				double tmp = Math.abs(m[i][j]);
+				double tmp = Math.abs(getItem(i, j));
 				if (D < tmp)
 					D = tmp;
 			}
@@ -426,11 +427,11 @@ public class Matrix {
 	public double min() {
 		if ((sizeX == 0) || (sizeY == 0))
 			return 0;
-		double D = m[0][0];
+		double D = getItem(0, 0);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				if (D > m[i][j])
-					D = m[i][j];
+				if (D > getItem(i, j))
+					D = getItem(i, j);
 		return D;
 	}
 
@@ -517,7 +518,7 @@ public class Matrix {
 	 * Sets the elements of dest matrix to the maximum corresponding elements of
 	 * this and second matrix. If the dest matrix is of incorrect size it will
 	 * be resized. The formula is:<br>
-	 * <tt>dest[i][j] = max( this[i][j] , second[i][j] )<br>
+	 * <tt>dest[i, j] = max( this[i, j] , second[i, j] )<br>
 	 * </tt>
 	 */
 	public void mMax(Matrix second, Matrix dest) {
@@ -527,15 +528,15 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = (m[i][j] > second.m[i][j] ? m[i][j]
-						: second.m[i][j]);
+				dest.setItem(i, j, (getItem(i, j) > second.getItem(i, j) ? getItem(i, j)
+						: second.getItem(i, j)));
 	}
 
 	/**
 	 * Sets the elements of dest matrix to the minimum corresponding elements of
 	 * this and second matrix. If the dest matrix is of incorrect size it will
 	 * be resized. The formula is:<br>
-	 * <tt>dest[i][j] = min( this[i][j] , second[i][j] )<br>
+	 * <tt>dest[i, j] = min( this[i, j] , second[i, j] )<br>
 	 * </tt>
 	 */
 	public void mMin(Matrix second, Matrix dest) {
@@ -545,8 +546,8 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = (m[i][j] < second.m[i][j] ? m[i][j]
-						: second.m[i][j]);
+				dest.setItem(i, j, (getItem(i, j) < second.getItem(i, j) ? getItem(i, j)
+						: second.getItem(i, j)));
 	}
 
 	/**
@@ -557,14 +558,14 @@ public class Matrix {
 		dest.resize(sizeY, sizeX);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[j][i] = m[i][j];
+				dest.setItem(j, i, getItem(i, j));
 	}
 
 	/**
 	 * Normalizes the matrix so that sumAll() returns 1. If normalization is not
 	 * possible, i.e. sumAll() returns 0, the Matrix.make0() is called. The
 	 * formula is:<br>
-	 * <tt>this[i][j] = this[i][j] / sum ( this[i][j] )<br>
+	 * <tt>this[i, j] = this[i, j] / sum ( this[i, j] )<br>
 	 * </tt>
 	 * 
 	 * @return Returns true on success.
@@ -583,17 +584,17 @@ public class Matrix {
 	 * Normalizes the matrix so that all elements are in the range [0..1]. If
 	 * normalization is not possible, i.e. max()-min()=0, the Matrix.make0() is
 	 * called. The formula is:<br>
-	 * <tt>this[i][j] = (this[i][j] - min()) / (max() - min())<br>
+	 * <tt>this[i, j] = (this[i, j] - min()) / (max() - min())<br>
 	 * </tt>
 	 */
 	public void normalize2() {
 		if ((sizeX == 0) || (sizeY == 0))
 			return;
-		double maxVal = m[0][0];
+		double maxVal = getItem(0, 0);
 		double minVal = maxVal;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				double value = m[i][j]; 
+				double value = getItem(i, j); 
 				if (maxVal < value)
 					maxVal = value;
 				if (minVal > value)
@@ -605,7 +606,7 @@ public class Matrix {
 		} else {
 			for (int i = sizeX - 1; i >= 0; i--)
 				for (int j = sizeY - 1; j >= 0; j--) 
-					m[i][j] = (m[i][j] - minVal) / delta;
+					setItem(i, j, (getItem(i, j) - minVal) / delta);
 		}
 	}
 
@@ -628,18 +629,18 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.m[i][j] = m[i][j];
+				dest.setItem(i, j, getItem(i, j));
 	}
 
 	/**
 	 * Makes the identity matrix. The formula is:<br>
-	 * <tt>Result[i][j] = (i == j) ? 1 : 0<br>
+	 * <tt>Result[i, j] = (i == j) ? 1 : 0<br>
 	 * </tt>
 	 */
 	public void makeE() {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				m[i][j] = (i == j) ? 1 : 0;
+				setItem(i, j, (i == j) ? 1.0 : 0.0);
 	}
 
 	/**
@@ -649,7 +650,7 @@ public class Matrix {
 		tolerance = Math.abs(tolerance);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				double d = i == j ? m[i][j] - 1.0 : m[i][j]; 
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j); 
 				if (Math.abs(d) > tolerance)
 					return false;
 			}
@@ -662,7 +663,7 @@ public class Matrix {
 	public void make0() {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				m[i][j] = 0;
+				setItem(i, j, 0.0);
 	}
 	
 	/**
@@ -672,7 +673,7 @@ public class Matrix {
 		tolerance = Math.abs(tolerance);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				if (Math.abs(m[i][j]) > tolerance)
+				if (Math.abs(getItem(i, j)) > tolerance)
 					return false;
 		return true;
 	}
@@ -683,7 +684,7 @@ public class Matrix {
 	public void makeR(double aValue) {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				m[i][j] = aValue;
+				setItem(i, j, aValue);
 	}
 
 	/**
@@ -691,7 +692,7 @@ public class Matrix {
 	 */
 	public void mulX(int atX, double D) {
 		for (int j = sizeY - 1; j >= 0; j--)
-			m[atX][j] *= D;
+			setItem(atX, j, getItem(atX, j) * D);
 	}
 
 	/**
@@ -699,29 +700,29 @@ public class Matrix {
 	 */
 	public void mulY(int atY, double D) {
 		for (int i = sizeX - 1; i >= 0; i--)
-			m[i][atY] *= D;
+			setItem(i, atY, getItem(i, atY) * D);
 	}
 
 	/**
 	 * Sums the elements at column atX1 with the elements at column atX2 and
 	 * stores the result in column atX1. The formula is:<br>
-	 * <tt>this[atX1][j] = this[atX1][j] + this[atX2][j]<br>
+	 * <tt>this[atX1, j] = this[atX1, j] + this[atX2, j]<br>
 	 * </tt>
 	 */
 	public void sumX(int atX1, int atX2) {
 		for (int j = sizeY - 1; j >= 0; j--)
-			m[atX1][j] += m[atX2][j];
+			setItem(atX1, j, getItem(atX1, j) + getItem(atX2, j));
 	}
 
 	/**
 	 * Sums the elements at row atY1 with the elements at row atY2 and stores
 	 * the result in row atY1. The formula is:<br>
-	 * <tt>this[i][atX1] = this[i][atX1] + this[i][atX2]<br>
+	 * <tt>this[i, atX1] = this[i, atX1] + this[i, atX2]<br>
 	 * </tt>
 	 */
 	public void sumY(int atY1, int atY2) {
 		for (int i = sizeX - 1; i >= 0; i--)
-			m[i][atY1] += m[i][atY2];
+			setItem(i, atY1, getItem(i, atY1) + getItem(i, atY2));
 	}
 
 	/**
@@ -729,9 +730,9 @@ public class Matrix {
 	 */
 	public void exchangeX(int atX1, int atX2) {
 		for (int j = sizeY - 1; j >= 0; j--) {
-			double D = m[atX1][j];
-			m[atX1][j] = m[atX2][j];
-			m[atX2][j] = D;
+			double D = getItem(atX1, j);
+			setItem(atX1, j, getItem(atX2, j));
+			setItem(atX2, j, D);
 		}
 	}
 
@@ -740,9 +741,9 @@ public class Matrix {
 	 */
 	public void exchangeY(int atY1, int atY2) {
 		for (int i = sizeX - 1; i >= 0; i--) {
-			double D = m[i][atY1];
-			m[i][atY1] = m[i][atY2];
-			m[i][atY2] = D;
+			double D = getItem(i, atY1);
+			setItem(i, atY1, getItem(i, atY2));
+			setItem(i, atY2, D);
 		}
 	}
 
@@ -777,11 +778,11 @@ public class Matrix {
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 
 		for (int i = 0; i < sizeX; i++) {
-			double A = m[i][i];
+			double A = getItem(i, i);
 			if (A == 0) {
 				int indexI = 0;
 				for (int j = i + 1; j < sizeX; j++)
-					if (m[i][j] != 0) {
+					if (getItem(i, j) != 0) {
 						indexI = j;
 						exchangeX(i, j);
 						xchg.add(new XchgRec(i, j));
@@ -791,32 +792,32 @@ public class Matrix {
 					make0();
 					return false;
 				}
-				A = m[i][i];
+				A = getItem(i, i);
 			}
 
 			for (int j = 0; j < sizeX; j++)
 				if (i != j) {
-					double B = m[j][i] / A;
+					double B = getItem(j, i) / A;
 					for (int k = 0; k < sizeX; k++)
 						if (k != i) {
 							if ((k < i) && (j < i))
-								m[j][k] += B * m[i][k];
+								setItem(j, k, getItem(j, k) + B * getItem(i, k));
 							else
-								m[j][k] -= B * m[i][k];
+								setItem(j, k, getItem(j, k) - B * getItem(i, k));
 						}
 				}
 
 			for (int j = 0; j < sizeX; j++)
 				if (i != j) {
 					if (i > j) {
-						m[i][j] /= -A;
-						m[j][i] /= -A;
+						setItem(i, j, -getItem(i, j) / A);
+						setItem(j, i, -getItem(j, i) / A);
 					} else {
-						m[i][j] /= A;
-						m[j][i] /= A;
+						setItem(i, j, getItem(i, j) / A);
+						setItem(j, i, getItem(j, i) / A);
 					}
 				}
-			m[i][i] = 1 / A;
+			setItem(i, i, 1 / A);
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {
@@ -842,10 +843,10 @@ public class Matrix {
 		Matrix cpy = makeCopy();
 
 		for (int i = 0; i < sizeX; i++) {
-			if (cpy.m[i][i] == 0) {
+			if (cpy.getItem(i, i) == 0) {
 				boolean err = true;
 				for (int a = sizeY - 1; a > i; a--)
-					if (cpy.m[i][a] != 0) {
+					if (cpy.getItem(i, a) != 0) {
 						cpy.sumY(i, a);
 						err = false;
 					}
@@ -853,7 +854,7 @@ public class Matrix {
 					return 0; // 0 -> the matrix has NO determinant
 			}
 
-			D = cpy.m[i][i];
+			D = cpy.getItem(i, i);
 			if (D != 1) {
 				cpy.mulY(i, 1 / D);
 				result /= D;
@@ -861,7 +862,7 @@ public class Matrix {
 
 			for (int a = 0; a < sizeX; a++)
 				if (a != i) {
-					D = m[a][i];
+					D = getItem(a, i);
 					if (D != 0) {
 						cpy.mulY(a, -1 / D);
 						result /= -D;
@@ -894,8 +895,8 @@ public class Matrix {
 		double dA, dB;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				dA = m[i][j] - res.AvgA;
-				dB = second.m[i][j] - res.AvgB;
+				dA = getItem(i, j) - res.AvgA;
+				dB = second.getItem(i, j) - res.AvgB;
 				res.SAA += dA * dA;
 				res.SBB += dB * dB;
 				res.SAB += dA * dB;
@@ -911,7 +912,7 @@ public class Matrix {
 //		System.out.print(toString());
 		for (int j = 0; j < sizeY; j++) {
 			for (int i = 0; i < sizeX; ) {
-				System.out.print(String.format(Locale.US, "%12.8f\t",new Object[] { new Double(m[i][j]) } ));
+				System.out.print(String.format(Locale.US, "%12.8f\t",new Object[] { new Double(getItem(i, j)) } ));
 				i++;
 				if (i % 5 == 0)
 					System.out.println();

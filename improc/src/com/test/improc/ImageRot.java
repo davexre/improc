@@ -125,7 +125,7 @@ public class ImageRot {
 			img.ry = 2.0 * i * Math.PI / maxI;
 			img.rx = 0 * MathUtil.deg2rad;
 			img.rz = 0 * MathUtil.deg2rad;
-			img.camera2real = RotationXYZ.makeAngles(img.rx, img.ry, img.rz);
+			img.camera2real = RotationXYZ.instance.makeAngles(img.rx, img.ry, img.rz);
 			
 			img.tl = new Point2D.Double();
 			img.tr = new Point2D.Double();
@@ -183,7 +183,7 @@ public class ImageRot {
 			img.ry = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.rx = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
 			img.rz = Double.parseDouble(st.nextToken()) * MathUtil.deg2rad;
-			img.camera2real = RotationXYZ.makeAngles(img.rx, img.ry, img.rz);
+			img.camera2real = RotationXYZ.instance.makeAngles(img.rx, img.ry, img.rz);
 			
 			img.tl = new Point2D.Double();
 			img.tr = new Point2D.Double();

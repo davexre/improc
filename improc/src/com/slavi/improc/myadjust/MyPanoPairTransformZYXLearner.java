@@ -1,6 +1,5 @@
 package com.slavi.improc.myadjust;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -10,13 +9,12 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
-import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 
-public class MyPanoPairTransformLearner {
+public class MyPanoPairTransformZYXLearner {
 
 	ArrayList<KeyPointPairList> chain;
 	ArrayList<KeyPointList> images;
@@ -26,7 +24,7 @@ public class MyPanoPairTransformLearner {
 	double discrepancyThreshold;
 	protected int iteration = 0; 
 
-	public MyPanoPairTransformLearner(ArrayList<KeyPointPairList> chain) {
+	public MyPanoPairTransformZYXLearner(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
@@ -88,11 +86,11 @@ public class MyPanoPairTransformLearner {
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
-					Matrix sourceToTarget = RotationXYZ.instance.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
-					Matrix targetToWorld = RotationXYZ.instance.makeAngles(-minHopPairList.target.rx, -minHopPairList.target.ry, minHopPairList.target.rz);
+					Matrix sourceToTarget = MyPanoPairTransformerZYX.rot.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
+					Matrix targetToWorld = MyPanoPairTransformerZYX.rot.makeAngles(-minHopPairList.target.rx, -minHopPairList.target.ry, minHopPairList.target.rz);
 					Matrix sourceToWorld = new Matrix(3, 3);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
-					RotationXYZ.instance.getRotationAngles(sourceToWorld, angles);
+					MyPanoPairTransformerZYX.rot.getRotationAngles(sourceToWorld, angles);
 					curImage.rx = -angles[0];
 					curImage.ry = -angles[1];
 					curImage.rz = angles[2];
@@ -100,12 +98,12 @@ public class MyPanoPairTransformLearner {
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
-					RotationXYZ.instance.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
-					Matrix targetToSource = RotationXYZ.instance.makeAngles(-angles[0], -angles[1], angles[2]);
-					Matrix sourceToWorld = RotationXYZ.instance.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
+					MyPanoPairTransformerZYX.rot.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
+					Matrix targetToSource = MyPanoPairTransformerZYX.rot.makeAngles(-angles[0], -angles[1], angles[2]);
+					Matrix sourceToWorld = MyPanoPairTransformerZYX.rot.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
 					Matrix targetToWorld = new Matrix(3, 3);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
-					RotationXYZ.instance.getRotationAngles(targetToWorld, angles);
+					MyPanoPairTransformerZYX.rot.getRotationAngles(targetToWorld, angles);
 					curImage.rx = angles[0];
 					curImage.ry = angles[1];
 					curImage.rz = angles[2];
@@ -153,8 +151,8 @@ public class MyPanoPairTransformLearner {
 		Matrix dPW2dY2 = new Matrix(1, 3);
 		Matrix dPW2dZ2 = new Matrix(1, 3);
 
-		MyPoint3D PW1 = new MyPoint3D();
-		MyPoint3D PW2 = new MyPoint3D();
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
 		
 		KeyPoint source1 = new KeyPoint();
 		KeyPoint dest1= new KeyPoint();
@@ -181,8 +179,8 @@ public class MyPanoPairTransformLearner {
 				
 				coefs.make0();
 	
-				MyPanoPairTransformer.transform3D(source, pairList.source, PW1);
-				MyPanoPairTransformer.transform3D(dest, pairList.target, PW2);
+				MyPanoPairTransformerZYX.transform3D(source, pairList.source, PW1);
+				MyPanoPairTransformerZYX.transform3D(dest, pairList.target, PW2);
 				
 				P1.setItem(0, 0, source1.doubleX);
 				P1.setItem(0, 1, source1.doubleY);
@@ -203,9 +201,7 @@ public class MyPanoPairTransformLearner {
 				for (int c1 = 0; c1 < 3; c1++) {
 					int c2 = (c1 + 1) % 3;
 					coefs.make0();
-					double L = 
-						getTransformedCoord(PW1, c1) * getTransformedCoord(PW2, c2) -
-						getTransformedCoord(PW1, c2) * getTransformedCoord(PW2, c1);
+					double L = PW1[c1] * PW2[c2] - PW1[c2] * PW2[c1];
 					/*
 					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
 					 * fy: P'1(z) * P'2(x) - P'1(x) * P'2(z) = 0
@@ -214,18 +210,18 @@ public class MyPanoPairTransformLearner {
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
 					if (srcIndex >= 0) {
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  getTransformedCoord(PW2, c2));
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -getTransformedCoord(PW2, c1));
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
 						coefs.setItem(srcIndex + 3, 0, (
-								source.keyPointList.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
-								source.keyPointList.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)));
+								source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
+								source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
 					}
 					if (destIndex >= 0) {
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -getTransformedCoord(PW1, c2));
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  getTransformedCoord(PW1, c1));
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
 						coefs.setItem(destIndex + 3, 0, (
-								getTransformedCoord(PW1, c1) * dest.keyPointList.camera2real.getItem(2, c2) - 
-								getTransformedCoord(PW1, c2) * dest.keyPointList.camera2real.getItem(2, c1)));
+								PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
+								PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
@@ -234,10 +230,10 @@ public class MyPanoPairTransformLearner {
 	}
 	
 	void buildCamera2RealMatrix(KeyPointList image) {
-		image.camera2real = RotationXYZ.instance.makeAngles(image.rx, image.ry, image.rz);
-		image.dMdX = RotationXYZ.instance.make_dF_dX(image.rx, image.ry, image.rz);
-		image.dMdY = RotationXYZ.instance.make_dF_dY(image.rx, image.ry, image.rz);
-		image.dMdZ = RotationXYZ.instance.make_dF_dZ(image.rx, image.ry, image.rz);
+		image.camera2real = MyPanoPairTransformerZYX.rot.makeAngles(image.rx, image.ry, image.rz);
+		image.dMdX = MyPanoPairTransformerZYX.rot.make_dF_dX(image.rx, image.ry, image.rz);
+		image.dMdY = MyPanoPairTransformerZYX.rot.make_dF_dY(image.rx, image.ry, image.rz);
+		image.dMdZ = MyPanoPairTransformerZYX.rot.make_dF_dZ(image.rx, image.ry, image.rz);
 	}
 
 	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
@@ -245,15 +241,6 @@ public class MyPanoPairTransformLearner {
 		coef.setItem(atIndex + 0, 0, dPWdX.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 0, 0));
 		coef.setItem(atIndex + 1, 0, dPWdY.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 1, 0));
 		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
-	}
-	
-	private double getTransformedCoord(MyPoint3D point, int coord) {
-		switch (coord) {
-		case 0: return point.x;
-		case 1: return point.y;
-		case 2: return point.z;
-		}
-		throw new IllegalArgumentException();
 	}
 	
 	public void setDiscrepancy(KeyPointPair item, double discrepancy) {
@@ -385,8 +372,8 @@ public class MyPanoPairTransformLearner {
 	}
 	
 	protected void computeDiscrepancies(TransformLearnerResult result) {
-		Point2D.Double PW1 = new Point2D.Double();
-		Point2D.Double PW2 = new Point2D.Double();
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
 
 		result.discrepancyStatistics.start();
 		for (KeyPointPairList pairList : chain) {
@@ -394,24 +381,9 @@ public class MyPanoPairTransformLearner {
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				MyPanoPairTransformer.transform(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-
-				// Find the angular (Great circle) distance between the two points
-				double cosX1 = Math.cos(PW1.x);
-				double sinX1 = Math.sin(PW1.x);
-				double cosX2 = Math.cos(PW2.x);
-				double sinX2 = Math.sin(PW2.x);
-				double cosDY = Math.cos(PW1.y - PW2.y);
-				double sinDY = Math.sin(PW1.y - PW2.y);
-				
-				double tmp1 = cosX2 * sinDY;
-				double tmp2 = cosX1 * sinX2 - sinX1 * cosX2 * cosDY;
-				
-				double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
-				double dy = sinX1 * sinX2 + cosX1 * cosX2 * cosDY;
-				double discrepancy = Math.atan2(dx, dy) * MathUtil.rad2deg;
-				
+				MyPanoPairTransformerZYX.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				MyPanoPairTransformerZYX.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				double discrepancy = MyPanoPairTransformerZYX.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

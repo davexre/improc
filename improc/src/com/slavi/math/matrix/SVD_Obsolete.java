@@ -27,58 +27,58 @@ public class SVD_Obsolete extends Matrix{
 			g = s = scale = 0.;
 			if (i < getSizeX()) {
 				for (k = i; k < getSizeX(); k++)
-					scale += Math.abs(this.m[k][i]);
+					scale += Math.abs(this.getItem(k, i));
 				if (scale != 0.0) {
 					for (k = i; k < getSizeX(); k++) {
-						this.m[k][i] /= scale;
-						s += this.m[k][i] * this.m[k][i];
+						this.setItem(k, i, this.getItem(k, i) / scale);
+						s += this.getItem(k, i) * this.getItem(k, i);
 					}
-					f = this.m[i][i];
+					f = this.getItem(i, i);
 					g = -MathUtil.SIGN(Math.sqrt(s), f);
 					h = f * g - s;
-					this.m[i][i] = f - g;
+					this.setItem(i, i, f - g);
 					// if (i!=(n-1)) { // CHECK
 					for (j = l; j < getSizeY(); j++) {
 						for (s = 0, k = i; k < getSizeX(); k++)
-							s += this.m[k][i] * this.m[k][j];
+							s += this.getItem(k, i) * this.getItem(k, j);
 						f = s / h;
 						for (k = i; k < getSizeX(); k++)
-							this.m[k][j] += f * this.m[k][i];
+							this.setItem(k, j, this.getItem(k, j) + f * this.getItem(k, i));
 					}
 					// }
 					for (k = i; k < getSizeX(); k++)
-						this.m[k][i] *= scale;
+						this.setItem(k, i, scale * this.getItem(k, i));
 				}
 			}
-			w.m[i][0] = scale * g;
+			w.setItem(i, 0, scale * g);
 			g = s = scale = 0.0;
 			if (i < getSizeX() && i != getSizeY() - 1) { //
 				for (k = l; k < getSizeY(); k++)
-					scale += Math.abs(this.m[i][k]);
+					scale += Math.abs(this.getItem(i, k));
 				if (scale != 0.) {
 					for (k = l; k < getSizeY(); k++) { //
-						this.m[i][k] /= scale;
-						s += this.m[i][k] * this.m[i][k];
+						this.setItem(i, k, this.getItem(i, k) / scale);
+						s += this.getItem(i, k) * this.getItem(i, k);
 					}
-					f = this.m[i][l];
+					f = this.getItem(i, l);
 					g = -MathUtil.SIGN(Math.sqrt(s), f);
 					h = f * g - s;
-					this.m[i][l] = f - g;
+					this.setItem(i, l,  f - g);
 					for (k = l; k < getSizeY(); k++)
-						rv1[k] = this.m[i][k] / h;
+						rv1[k] = this.getItem(i, k) / h;
 					if (i != getSizeX() - 1) { //
 						for (j = l; j < getSizeX(); j++) { //
 							for (s = 0, k = l; k < getSizeY(); k++)
-								s += this.m[j][k] * this.m[i][k];
+								s += this.getItem(j, k) * this.getItem(i, k);
 							for (k = l; k < getSizeY(); k++)
-								this.m[j][k] += s * rv1[k];
+								this.setItem(j, k, this.getItem(j, k) + s * rv1[k]);
 						}
 					}
 					for (k = l; k < getSizeY(); k++)
-						this.m[i][k] *= scale;
+						this.setItem(i, k, this.getItem(i, k) * scale);
 				}
 			} // i<m && i!=n-1
-			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
+			anorm = Math.max(anorm, (Math.abs(w.getItem(i, 0)) + Math.abs(rv1[i])));
 		} // i
 	}	
 	
@@ -102,58 +102,58 @@ public class SVD_Obsolete extends Matrix{
 			g = s = scale = 0.;
 			if (i < getSizeX()) {
 				for (k = i; k < getSizeX(); k++)
-					scale += Math.abs(this.m[k][i]);
+					scale += Math.abs(this.getItem(k, i));
 				if (scale != 0.0) {
 					for (k = i; k < getSizeX(); k++) {
-						this.m[k][i] /= scale;
-						s += this.m[k][i] * this.m[k][i];
+						this.setItem(k, i, this.getItem(k, i) / scale);
+						s += this.getItem(k, i) * this.getItem(k, i);
 					}
-					f = this.m[i][i];
+					f = this.getItem(i, i);
 					g = -MathUtil.SIGN(Math.sqrt(s), f);
 					h = f * g - s;
-					this.m[i][i] = f - g;
+					this.setItem(i, i, f - g);
 					// if (i!=(n-1)) { // CHECK
 					for (j = l; j < getSizeY(); j++) {
 						for (s = 0, k = i; k < getSizeX(); k++)
-							s += this.m[k][i] * this.m[k][j];
+							s += this.getItem(k, i) * this.getItem(k, j);
 						f = s / h;
 						for (k = i; k < getSizeX(); k++)
-							this.m[k][j] += f * this.m[k][i];
+							this.setItem(k, j, this.getItem(k, j) + f * this.getItem(k, i));
 					}
 					// }
 					for (k = i; k < getSizeX(); k++)
-						this.m[k][i] *= scale;
+						this.setItem(k, i, this.getItem(k, i) * scale);
 				}
 			}
-			w.m[i][0] = scale * g;
+			w.setItem(i, 0, scale * g);
 			g = s = scale = 0.0;
 			if (i < getSizeX() && i != getSizeY() - 1) { //
 				for (k = l; k < getSizeY(); k++)
-					scale += Math.abs(this.m[i][k]);
+					scale += Math.abs(this.getItem(i, k));
 				if (scale != 0.) {
 					for (k = l; k < getSizeY(); k++) { //
-						this.m[i][k] /= scale;
-						s += this.m[i][k] * this.m[i][k];
+						this.setItem(i, k, this.getItem(i, k) / scale);
+						s += this.getItem(i, k) * this.getItem(i, k);
 					}
-					f = this.m[i][l];
+					f = this.getItem(i, l);
 					g = -MathUtil.SIGN(Math.sqrt(s), f);
 					h = f * g - s;
-					this.m[i][l] = f - g;
+					this.setItem(i, l, f - g);
 					for (k = l; k < getSizeY(); k++)
-						rv1[k] = this.m[i][k] / h;
+						rv1[k] = this.getItem(i, k) / h;
 					if (i != getSizeX() - 1) { //
 						for (j = l; j < getSizeX(); j++) { //
 							for (s = 0, k = l; k < getSizeY(); k++)
-								s += this.m[j][k] * this.m[i][k];
+								s += this.getItem(j, k) * this.getItem(i, k);
 							for (k = l; k < getSizeY(); k++)
-								this.m[j][k] += s * rv1[k];
+								this.setItem(j, k, this.getItem(j, k) + s * rv1[k]);
 						}
 					}
 					for (k = l; k < getSizeY(); k++)
-						this.m[i][k] *= scale;
+						this.setItem(i, k, this.getItem(i, k) * scale);
 				}
 			} // i<m && i!=n-1
-			anorm = Math.max(anorm, (Math.abs(w.m[i][0]) + Math.abs(rv1[i])));
+			anorm = Math.max(anorm, (Math.abs(w.getItem(i, 0)) + Math.abs(rv1[i])));
 		} // i
 		
 		
@@ -161,19 +161,21 @@ public class SVD_Obsolete extends Matrix{
 			if (i < getSizeY() - 1) { //
 				if (g != 0.) {
 					for (j = l; j < getSizeY(); j++)
-						v.m[j][i] = (this.m[i][j] / this.m[i][l]) / g;
+						v.setItem(j, i, (this.getItem(i, j) / this.getItem(i, l)) / g);
 					for (j = l; j < getSizeY(); j++) {
 						for (s = 0, k = l; k < getSizeY(); k++)
-							s += this.m[i][k] * v.m[k][j];
+							s += this.getItem(i, k) * v.getItem(k, j);
 						for (k = l; k < getSizeY(); k++)
-							v.m[k][j] += s * v.m[k][i];
+							v.setItem(k, j, v.getItem(k, j) + s * v.getItem(k, i));
 					}
 				}
-				for (j = l; j < getSizeY(); j++)
+				for (j = l; j < getSizeY(); j++) {
 					//
-					v.m[i][j] = v.m[j][i] = 0.0;
+					v.setItem(i, j, 0.0);
+					v.setItem(j, i, 0.0);
+				}
 			}
-			v.m[i][i] = 1.0;
+			v.setItem(i, i, 1.0);
 			g = rv1[i];
 			l = i;
 		}
@@ -181,29 +183,29 @@ public class SVD_Obsolete extends Matrix{
 		// for (i = n-1; i>=0; --i) {
 		for (i = Math.min(getSizeX() - 1, getSizeY() - 1); i >= 0; --i) {
 			l = i + 1;
-			g = w.m[i][0];
+			g = w.getItem(i, 0);
 			if (i < getSizeY() - 1) //
 				for (j = l; j < getSizeY(); j++)
 					//
-					this.m[i][j] = 0.0;
+					this.setItem(i, j, 0.0);
 			if (g != 0.) {
 				g = 1. / g;
 				if (i != getSizeY() - 1) {
 					for (j = l; j < getSizeY(); j++) {
 						for (s = 0, k = l; k < getSizeX(); k++)
-							s += this.m[k][i] * this.m[k][j];
-						f = (s / this.m[i][i]) * g;
+							s += this.getItem(k, i) * this.getItem(k, j);
+						f = (s / this.getItem(i, i)) * g;
 						for (k = i; k < getSizeX(); k++)
-							this.m[k][j] += f * this.m[k][i];
+							this.setItem(k, j, this.getItem(k, j) + f * this.getItem(k, i));
 					}
 				}
 				for (j = i; j < getSizeX(); j++)
-					this.m[j][i] *= g;
+					this.setItem(j, i, this.getItem(j, i) * g);
 			} else {
 				for (j = i; j < getSizeX(); j++)
-					this.m[j][i] = 0.0;
+					this.setItem(j, i, 0.0);
 			}
-			this.m[i][i] += 1.0;
+			this.setItem(i, i, this.getItem(i, i) + 1.0);
 		}
 		for (k = getSizeY() - 1; k >= 0; --k) {
 			for (its = 1; its <= 30; ++its) {
@@ -214,7 +216,7 @@ public class SVD_Obsolete extends Matrix{
 						flag = false;
 						break;
 					}
-					if ((Math.abs(w.m[nm][0]) + anorm) == anorm)
+					if ((Math.abs(w.getItem(nm, 0)) + anorm) == anorm)
 						break;
 				}
 				if (flag) {
@@ -225,26 +227,26 @@ public class SVD_Obsolete extends Matrix{
 						rv1[i] = c * rv1[i];
 						if ((Math.abs(f) + anorm) == anorm)
 							break;
-						g = w.m[i][0];
+						g = w.getItem(i, 0);
 						h = MathUtil.hypot(f, g);
-						w.m[i][0] = h;
+						w.setItem(i, 0, h);
 						h = 1.0 / h;
 						c = g * h;
 						s = -f * h;
 						for (j = 0; j < getSizeX(); j++) {
-							y = this.m[j][nm];
-							z = this.m[j][i];
-							this.m[j][nm] = y * c + z * s;
-							this.m[j][i] = z * c - y * s;
+							y = this.getItem(j, nm);
+							z = this.getItem(j, i);
+							this.setItem(j, nm, y * c + z * s);
+							this.setItem(j, i, z * c - y * s);
 						}
 					}
 				} // flag
-				z = w.m[k][0];
+				z = w.getItem(k, 0);
 				if (l == k) {
 					if (z < 0.) {
-						w.m[k][0] = -z;
+						w.setItem(k, 0, -z);
 						for (j = 0; j < getSizeY(); j++)
-							v.m[j][k] = -v.m[j][k];
+							v.setItem(j, k, -v.getItem(j, k));
 					}
 					break;
 				} // l==k
@@ -252,9 +254,9 @@ public class SVD_Obsolete extends Matrix{
 					throw new ArithmeticException("no svd convergence in 50 iterations");
 				// zliberror._assert(its<50, "no svd convergence in 50
 				// iterations");
-				x = w.m[l][0];
+				x = w.getItem(l, 0);
 				nm = k - 1;
-				y = w.m[nm][0];
+				y = w.getItem(nm, 0);
 				g = rv1[nm];
 				h = rv1[k];
 				f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2 * h * y);
@@ -264,7 +266,7 @@ public class SVD_Obsolete extends Matrix{
 				for (j = l; j <= nm; j++) {
 					i = j + 1;
 					g = rv1[i];
-					y = w.m[i][0];
+					y = w.getItem(i, 0);
 					h = s * g;
 					g = c * g;
 					z = MathUtil.hypot(f, h);
@@ -276,13 +278,13 @@ public class SVD_Obsolete extends Matrix{
 					h = y * s;
 					y *= c;
 					for (jj = 0; jj < getSizeY(); jj++) {
-						x = v.m[jj][j];
-						z = v.m[jj][i];
-						v.m[jj][j] = x * c + z * s;
-						v.m[jj][i] = z * c - x * s;
+						x = v.getItem(jj, j);
+						z = v.getItem(jj, i);
+						v.setItem(jj, j, x * c + z * s);
+						v.setItem(jj, i, z * c - x * s);
 					}
 					z = MathUtil.hypot(f, h);
-					w.m[j][0] = z;
+					w.setItem(j, 0, z);
 					if (z != 0.0) {
 						z = 1.0 / z;
 						c = f * z;
@@ -291,18 +293,17 @@ public class SVD_Obsolete extends Matrix{
 					f = c * g + s * y;
 					x = c * y - s * g;
 					for (jj = 0; jj < getSizeX(); ++jj) {
-						y = this.m[jj][j];
-						z = this.m[jj][i];
-						this.m[jj][j] = y * c + z * s;
-						this.m[jj][i] = z * c - y * s;
+						y = this.getItem(jj, j);
+						z = this.getItem(jj, i);
+						this.setItem(jj, j, y * c + z * s);
+						this.setItem(jj, i, z * c - y * s);
 					}
 				} // j<nm
 				rv1[l] = 0.0;
 				rv1[k] = f;
-				w.m[k][0] = x;
+				w.setItem(k, 0, x);
 			} // its
 		} // k
 		// free rv1
 	} // svd
-
 }
