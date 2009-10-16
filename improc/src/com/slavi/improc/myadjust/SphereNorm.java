@@ -25,15 +25,15 @@ public class SphereNorm {
 		p1.setKeyPoint(kpp.sourceSP);
 		p2.setKeyPoint(kpp.targetSP);
 		
-		dDist_dIX1 = calc_dDist_dParam(p1.dRX_dIX, p1.dRY_dIX, p1.dRX_dIX, p1.dRY_dIX);
-		dDist_dIY1 = calc_dDist_dParam(p1.dRX_dIY, p1.dRY_dIY, p1.dRX_dIY, p1.dRY_dIY);
-		dDist_dIZ1 = calc_dDist_dParam(p1.dRX_dIZ, p1.dRY_dIZ, p1.dRX_dIZ, p1.dRY_dIZ);
-		dDist_dIF1 = calc_dDist_dParam(p1.dRX_dIF, p1.dRY_dIF, p1.dRX_dIF, p1.dRY_dIF);
+		dDist_dIX1 = calc_dDist_dParam(p1.dRX_dIX, p1.dRY_dIX, 0, 0);
+		dDist_dIY1 = calc_dDist_dParam(p1.dRX_dIY, p1.dRY_dIY, 0, 0);
+		dDist_dIZ1 = calc_dDist_dParam(p1.dRX_dIZ, p1.dRY_dIZ, 0, 0);
+		dDist_dIF1 = calc_dDist_dParam(p1.dRX_dIF, p1.dRY_dIF, 0, 0);
 
-		dDist_dIX2 = calc_dDist_dParam(p2.dRX_dIX, p2.dRY_dIX, p2.dRX_dIX, p2.dRY_dIX);
-		dDist_dIY2 = calc_dDist_dParam(p2.dRX_dIY, p2.dRY_dIY, p2.dRX_dIY, p2.dRY_dIY);
-		dDist_dIZ2 = calc_dDist_dParam(p2.dRX_dIZ, p2.dRY_dIZ, p2.dRX_dIZ, p2.dRY_dIZ);
-		dDist_dIF2 = calc_dDist_dParam(p2.dRX_dIF, p2.dRY_dIF, p2.dRX_dIF, p2.dRY_dIF);
+		dDist_dIX2 = calc_dDist_dParam(0, 0, p2.dRX_dIX, p2.dRY_dIX);
+		dDist_dIY2 = calc_dDist_dParam(0, 0, p2.dRX_dIY, p2.dRY_dIY);
+		dDist_dIZ2 = calc_dDist_dParam(0, 0, p2.dRX_dIZ, p2.dRY_dIZ);
+		dDist_dIF2 = calc_dDist_dParam(0, 0, p2.dRX_dIF, p2.dRY_dIF);
 	}
 	
 	public static class PointDerivatives {
@@ -162,10 +162,10 @@ public class SphereNorm {
 	}
 	
 	private double calc_dDist_dParam(double dRX1_dP, double dRY1_dP, double dRX2_dP, double dRY2_dP) {
-		double H = p1.ry - p2.ry;
+		double H = p1.rx - p2.rx;
 		double sinH = Math.sin(H);
 		double cosH = Math.cos(H);
-		double dHdP = dRY1_dP - dRY2_dP;
+		double dHdP = dRX1_dP - dRX2_dP;
 		
 		double L = p1.cosRY * p2.cosRY * cosH;
 		double dLdP = -p1.sinRY * p2.cosRY * cosH * dRY1_dP

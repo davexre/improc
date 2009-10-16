@@ -33,7 +33,27 @@ public class UT_SpherePanoTransformer {
 			return;
 		System.out.println(a);
 		System.out.println(b);
+		System.out.flush();
 		throw new RuntimeException("Failed");
+	}
+	
+	void testSpherePanoTransformerRotate() {
+		double rot[] = new double[3];
+		double dest1[] = new double[2];
+		double dest2[] = new double[2];
+		double dest3[] = new double[2];
+		rot[0] = 10 * MathUtil.deg2rad;
+		rot[1] = 20 * MathUtil.deg2rad;
+		rot[2] = 30 * MathUtil.deg2rad;
+		dest1[0] = 40 * MathUtil.deg2rad;
+		dest1[1] = 50 * MathUtil.deg2rad;
+		SpherePanoTransformer.rotateForeward(dest1[0], dest1[1], rot[0], rot[1], rot[2], dest2);
+		SpherePanoTransformer.rotateBackward(dest2[0], dest2[1], rot[0], rot[1], rot[2], dest3);
+		assertEqual(dest1[0], dest3[0]);
+		assertEqual(dest1[1], dest3[1]);
+//		SpherePanoTransformer.rotateBackward(dest2[0], dest2[1], rot[2], rot[1], rot[0], dest3);
+//		assertEqual(dest1[0], dest3[0]);
+//		assertEqual(dest1[1], dest3[1]);
 	}
 	
 	void testSpherePanoTransformer() {
@@ -85,14 +105,15 @@ public class UT_SpherePanoTransformer {
 		p2.doubleX = dest2[0];
 		p2.doubleY = dest2[1];
 
-		double delta = (1.0/precision) * MathUtil.deg2rad;
+		double delta = 0.001 * MathUtil.deg2rad;
+		System.out.println(MathUtil.rad2degStr(delta));
 		kpl2.rx += delta;
 		kpl2.ry += delta;
 		kpl2.rz += delta;
 		
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
 		double dist = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-
+		System.out.println("DIST=" + MathUtil.rad2degStr(dist));
 		kpl1.rx += delta;
 		kpl1.ry += delta;
 		kpl1.rz += delta;
@@ -121,11 +142,14 @@ public class UT_SpherePanoTransformer {
 		dist0 += sn.dDist_dIZ2 * delta;
 		dist0 += sn.dDist_dIF2 * delta;
 		
+		System.out.println(MathUtil.rad2degStr(dist));
+		System.out.println(MathUtil.rad2degStr(dist0));
 		assertEqual(dist, dist0);
 	}
 
 	public static void main(String[] args) {
 		UT_SpherePanoTransformer test = new UT_SpherePanoTransformer();
+		test.testSpherePanoTransformerRotate();
 		test.testSpherePanoTransformer();
 		test.testSphericalDistance();
 		test.testSphereNorm();
