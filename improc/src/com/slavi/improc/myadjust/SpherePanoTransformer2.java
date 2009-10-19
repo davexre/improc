@@ -2,7 +2,7 @@ package com.slavi.improc.myadjust;
 
 import com.slavi.improc.KeyPointList;
 
-public class SpherePanoTransformer {
+public class SpherePanoTransformer2 {
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
@@ -14,8 +14,9 @@ public class SpherePanoTransformer {
 		sx -= srcImage.cameraOriginX;
 		sy -= srcImage.cameraOriginY;
 		// sx => longitude, sy => latitude
-		sy = Math.asin(sy / Math.sqrt(sx * sx + sy * sy + srcImage.scaleZ * srcImage.scaleZ));
-		sx = Math.atan2(sx, srcImage.scaleZ);
+		double f = 1.0 / (2.0 * srcImage.cameraScale * Math.tan(srcImage.scaleZ / 2.0));
+		sy = Math.asin(sy / Math.sqrt(sx * sx + sy * sy + f * f));
+		sx = Math.atan2(sx, f);
 		rotateForeward(sx, sy, srcImage.rx, srcImage.ry, srcImage.rz, dest);
 	}
 	
@@ -34,8 +35,9 @@ public class SpherePanoTransformer {
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
 		rotateBackward(rx, ry, srcImage.rx, srcImage.ry, srcImage.rz, dest);
 		// sx => longitude, sy => latitude
-		dest[1] = srcImage.cameraOriginY + srcImage.scaleZ * Math.tan(dest[1]) / Math.cos(dest[0]);
-		dest[0] = srcImage.cameraOriginX + srcImage.scaleZ * Math.tan(dest[0]);
+		double f = 1.0 / (2.0 * srcImage.cameraScale * Math.tan(srcImage.scaleZ / 2.0));
+		dest[1] = srcImage.cameraOriginY + f * Math.tan(dest[1]) / Math.cos(dest[0]);
+		dest[0] = srcImage.cameraOriginX + f * Math.tan(dest[0]);
 	}
 
 	public static void rotateBackward(double rx, double ry, double IX, double IY, double IZ, double dest[]) {

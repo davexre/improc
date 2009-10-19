@@ -12,7 +12,7 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
-public class SpherePanoTransformLearner {
+public class SpherePanoTransformLearner2 {
 
 	ArrayList<KeyPointPairList> chain;
 	ArrayList<KeyPointList> images;
@@ -22,7 +22,7 @@ public class SpherePanoTransformLearner {
 	double discrepancyThreshold;
 	protected int iteration = 0; 
 
-	public SpherePanoTransformLearner(ArrayList<KeyPointPairList> chain) {
+	public SpherePanoTransformLearner2(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
@@ -85,7 +85,7 @@ public class SpherePanoTransformLearner {
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
 					double dest[] = new double[2];
-					SpherePanoTransformer.rotateBackward(
+					SpherePanoTransformer2.rotateBackward(
 							minHopPairList.target.rx, minHopPairList.target.ry, 
 							minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, dest);
 					curImage.rx = dest[0];
@@ -95,7 +95,7 @@ public class SpherePanoTransformLearner {
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
 					double dest[] = new double[2];
-					SpherePanoTransformer.rotateForeward(
+					SpherePanoTransformer2.rotateForeward(
 							minHopPairList.source.rx, minHopPairList.source.ry, 
 							minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, dest);
 					curImage.rx = dest[0];
@@ -131,7 +131,7 @@ public class SpherePanoTransformLearner {
 		
 		lsa.clear();
 		Matrix coefs = new Matrix(images.size() * 4, 1);			
-		SphereNorm sn = new SphereNorm();
+		SphereNorm2 sn = new SphereNorm2();
 		for (KeyPointPairList pairList : chain) {
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
@@ -298,9 +298,9 @@ public class SpherePanoTransformLearner {
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				SpherePanoTransformer.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				SpherePanoTransformer.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				double discrepancy = SpherePanoTransformer2.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

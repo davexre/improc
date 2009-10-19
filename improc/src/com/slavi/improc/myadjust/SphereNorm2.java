@@ -3,7 +3,7 @@ package com.slavi.improc.myadjust;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
 
-public class SphereNorm {
+public class SphereNorm2 {
 
 	PointDerivatives p1 = new PointDerivatives();
 	PointDerivatives p2 = new PointDerivatives();
@@ -147,15 +147,19 @@ public class SphereNorm {
 			double x1 = kp.doubleX - kp.keyPointList.cameraOriginX;
 			double y1 = kp.doubleY - kp.keyPointList.cameraOriginY;
 			
-			double C = x1 * x1 + y1 * y1 + kp.keyPointList.scaleZ * kp.keyPointList.scaleZ;
-			double dCdIF = 2.0 * kp.keyPointList.scaleZ;
+			double E = Math.tan(kp.keyPointList.scaleZ / 2.0);
+			double dEdIF = 0.5 / (1 + E * E); 
+			double f = 1.0 / (2.0 * kp.keyPointList.cameraScale * E);
+			double dfdIF = - dEdIF / (2.0 * kp.keyPointList.cameraScale * E * E);  
+			double C = x1 * x1 + y1 * y1 + f * f;
+			double dCdIF = 2.0 * f * dfdIF;
 			double B = y1 / Math.sqrt(C);
 			double dBdIF = -0.5 * y1 * Math.pow(C, -3.0/2.0) * dCdIF;
 			sy = Math.asin(B);
 			dSY_dIF = dBdIF / Math.sqrt(1.0 - B * B);
 			
-			double A = x1 / kp.keyPointList.scaleZ;
-			double dAdIF = - x1 / (kp.keyPointList.scaleZ * kp.keyPointList.scaleZ);
+			double A = x1 / f;
+			double dAdIF = - x1 * dfdIF / (f * f);
 			sx = Math.atan(A);
 			dSX_dIF = dAdIF / (1.0 + A * A);
 		}

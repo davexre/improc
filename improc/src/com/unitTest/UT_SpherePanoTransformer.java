@@ -147,6 +147,25 @@ public class UT_SpherePanoTransformer {
 		assertEqual(dist, dist0);
 	}
 
+	void testCalcPrims() {
+		KeyPointList kpl2 = new KeyPointList();
+		kpl2.cameraOriginX = 1100;
+		kpl2.cameraOriginY = 2200;
+		kpl2.scaleZ = 3300;
+		kpl2.rx = 20 * MathUtil.deg2rad;
+		kpl2.ry = 30 * MathUtil.deg2rad;
+		kpl2.rz = 40 * MathUtil.deg2rad;
+		
+		KeyPointList kpl3 = new KeyPointList();
+		kpl3.cameraOriginX = 1010;
+		kpl3.cameraOriginY = 2020;
+		kpl3.scaleZ = 3030;
+		kpl3.rx = 40 * MathUtil.deg2rad;
+		kpl3.ry = 50 * MathUtil.deg2rad;
+		kpl3.rz = 60 * MathUtil.deg2rad;
+
+	}
+	
 	public static void main(String[] args) {
 		UT_SpherePanoTransformer test = new UT_SpherePanoTransformer();
 		test.testSpherePanoTransformerRotate();

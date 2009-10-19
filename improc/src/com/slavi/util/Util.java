@@ -234,6 +234,8 @@ public class Util {
 	 * special symbols like " is replaced by \" and \n by new line etc. 
 	 */
 	public static String cEncode(String s, CENCODE flag, String customSpecialSymbols) {
+		if (s == null)
+			return null;
 		String curSpecialSymbols;
 		switch (flag) {
 			case NoSpace:
@@ -313,6 +315,8 @@ public class Util {
 	 * Decodes a string previously encoded by {@link #cEncode(String)} 
 	 */
 	public static String cDecode(String s) {
+		if (s == null)
+			return null;
 		StringBuilder b = new StringBuilder();
 		int max = s.length();
 		ESCAPE escape = ESCAPE.None;
