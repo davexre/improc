@@ -27,7 +27,7 @@ public class SpherePanoTransformer {
 		double sinSY = Math.sin(sy);
 		double cosSY = Math.cos(sy);
 
-		dest[0] = IZ + Math.atan2(sinDX * cosSY, cosIY * sinSY - cosDX * sinIY * cosSY);
+		dest[0] = IZ + Math.PI - Math.atan2(sinDX * cosSY, cosIY * sinSY - cosDX * sinIY * cosSY);
 		dest[1] = Math.asin(sinIY * sinSY + cosIY * cosSY * cosDX);
 	}
 
@@ -39,7 +39,7 @@ public class SpherePanoTransformer {
 	}
 
 	public static void rotateBackward(double rx, double ry, double IX, double IY, double IZ, double dest[]) {
-		rx -= IZ;
+		rx = IZ + Math.PI - rx;
 		
 		double sinIY = Math.sin(IY);
 		double cosIY = Math.cos(IY);
