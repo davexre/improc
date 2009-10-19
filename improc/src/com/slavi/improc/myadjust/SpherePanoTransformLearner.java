@@ -43,7 +43,7 @@ public class SpherePanoTransformLearner {
 		});
 	}
 
-	void calculatePrims() {
+	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.rx = 0.0;
 		origin.ry = 0.0;
 		origin.rz = 0.0;
@@ -372,7 +372,7 @@ public class SpherePanoTransformLearner {
 		if (chainModified) {
 			System.out.println("************* COMPUTE PRIMS");
 			origin = images.remove(0);
-			calculatePrims();
+			calculatePrims(origin, images, chain);
 		}
 
 		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
