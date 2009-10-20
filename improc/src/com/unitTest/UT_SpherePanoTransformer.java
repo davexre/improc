@@ -1,9 +1,13 @@
 package com.unitTest;
 
+import java.util.ArrayList;
+
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
+import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.SphereNorm;
+import com.slavi.improc.myadjust.SpherePanoTransformLearner;
 import com.slavi.improc.myadjust.SpherePanoTransformer;
 import com.slavi.math.MathUtil;
 
@@ -130,14 +134,14 @@ public class UT_SpherePanoTransformer {
 		p2.doubleY = dest2[1];
 
 		double delta = 0.001 * MathUtil.deg2rad;
-		System.out.println(MathUtil.rad2degStr(delta));
+//		System.out.println(MathUtil.rad2degStr(delta));
 		kpl2.rx += delta;
 		kpl2.ry += delta;
 		kpl2.rz += delta;
 		
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
 		double dist = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-		System.out.println("DIST=" + MathUtil.rad2degStr(dist));
+//		System.out.println("DIST=" + MathUtil.rad2degStr(dist));
 		kpl1.rx += delta;
 		kpl1.ry += delta;
 		kpl1.rz += delta;
@@ -166,28 +170,57 @@ public class UT_SpherePanoTransformer {
 		dist0 += sn.dDist_dIZ2 * delta;
 		dist0 += sn.dDist_dIF2 * delta;
 		
-		System.out.println(MathUtil.rad2degStr(dist));
-		System.out.println(MathUtil.rad2degStr(dist0));
+//		System.out.println(MathUtil.rad2degStr(dist));
+//		System.out.println(MathUtil.rad2degStr(dist0));
 		assertEqual(dist, dist0);
 	}
 
 	void testCalcPrims() {
-		KeyPointList kpl2 = new KeyPointList();
-		kpl2.cameraOriginX = 1100;
-		kpl2.cameraOriginY = 2200;
-		kpl2.scaleZ = 3300;
-		kpl2.rx = 20 * MathUtil.deg2rad;
-		kpl2.ry = 30 * MathUtil.deg2rad;
-		kpl2.rz = 40 * MathUtil.deg2rad;
+		KeyPointList origin = new KeyPointList();
+		origin.cameraOriginX = 1100;
+		origin.cameraOriginY = 2200;
+		origin.imageSizeX = (int) (origin.cameraOriginX * 2);
+		origin.imageSizeY = (int) (origin.cameraOriginY * 2);
+		origin.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
+			Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
+		origin.rx = 0 * MathUtil.deg2rad;
+		origin.ry = 90 * MathUtil.deg2rad;
+		origin.rz = 0 * MathUtil.deg2rad;
 		
-		KeyPointList kpl3 = new KeyPointList();
-		kpl3.cameraOriginX = 1010;
-		kpl3.cameraOriginY = 2020;
-		kpl3.scaleZ = 3030;
-		kpl3.rx = 40 * MathUtil.deg2rad;
-		kpl3.ry = 50 * MathUtil.deg2rad;
-		kpl3.rz = 60 * MathUtil.deg2rad;
+		KeyPointList kpl = new KeyPointList();
+		kpl.cameraOriginX = origin.cameraOriginX;
+		kpl.cameraOriginY = origin.cameraOriginY;
+		kpl.imageSizeX = (int) (kpl.cameraOriginX * 2);
+		kpl.imageSizeY = (int) (kpl.cameraOriginY * 2);
+		kpl.scaleZ = origin.scaleZ;
+		kpl.rx = 0 * MathUtil.deg2rad;
+		kpl.ry = 90 * MathUtil.deg2rad;
+		kpl.rz = 0 * MathUtil.deg2rad;
 
+		double dest1[] = new double[2];
+		double dest2[] = new double[2];
+		
+		SpherePanoTransformer.transformForeward(p1.doubleX, p1.doubleY, origin, dest1);
+		SpherePanoTransformer.transformBackward(dest1[0], dest1[1], kpl, dest2);
+		
+		KeyPointPairList kppl = new KeyPointPairList();
+		kppl.source = origin;
+		kppl.target = kpl;
+		kppl.rx = kpl.rx;
+		kppl.ry = kpl.ry;
+		kppl.rz = kpl.rz;
+		kppl.scale = kpl.scaleZ;
+		
+		ArrayList<KeyPointPairList> chain = new ArrayList<KeyPointPairList>();
+		chain.add(kppl);		
+		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
+		images.add(kpl);
+		
+		SpherePanoTransformLearner.calculatePrims(origin, images, chain);
+		System.out.println(MathUtil.rad2degStr(kpl.rx));
+		System.out.println(MathUtil.rad2degStr(kpl.ry));
+		System.out.println(MathUtil.rad2degStr(kpl.rz));
+		System.out.println(kpl.scaleZ);
 	}
 	
 	public static void main(String[] args) {
@@ -196,6 +229,7 @@ public class UT_SpherePanoTransformer {
 		test.testSpherePanoTransformer();
 		test.testSphericalDistance();
 		test.testSphereNorm();
+		test.testCalcPrims();
 		System.out.println("Done");
 	}
 }
