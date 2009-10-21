@@ -185,7 +185,7 @@ public class UT_SpherePanoTransformer {
 			Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
 		origin.rx = 0 * MathUtil.deg2rad;
 		origin.ry = 90 * MathUtil.deg2rad;
-		origin.rz = 0 * MathUtil.deg2rad;
+		origin.rz = 10 * MathUtil.deg2rad;
 		
 		KeyPointList kpl = new KeyPointList();
 		kpl.cameraOriginX = origin.cameraOriginX;
@@ -194,21 +194,22 @@ public class UT_SpherePanoTransformer {
 		kpl.imageSizeY = (int) (kpl.cameraOriginY * 2);
 		kpl.scaleZ = origin.scaleZ;
 		kpl.rx = 0 * MathUtil.deg2rad;
-		kpl.ry = 90 * MathUtil.deg2rad;
+		kpl.ry = 0 * MathUtil.deg2rad;
 		kpl.rz = 0 * MathUtil.deg2rad;
 
-		double dest1[] = new double[2];
-		double dest2[] = new double[2];
-		
-		SpherePanoTransformer.transformForeward(p1.doubleX, p1.doubleY, origin, dest1);
-		SpherePanoTransformer.transformBackward(dest1[0], dest1[1], kpl, dest2);
+//		double dest1[] = new double[2];
+//		double dest2[] = new double[2];
+//		
+//		SpherePanoTransformer.transformForeward(p1.doubleX, p1.doubleY, origin, dest1);
+//		SpherePanoTransformer.transformBackward(dest1[0], dest1[1], kpl, dest2);
 		
 		KeyPointPairList kppl = new KeyPointPairList();
 		kppl.source = origin;
 		kppl.target = kpl;
-		kppl.rx = kpl.rx;
-		kppl.ry = kpl.ry;
-		kppl.rz = kpl.rz;
+		kppl.rx = 0 * MathUtil.deg2rad;
+		kppl.ry = origin.ry;
+		kppl.rz = origin.rz;
+//		kppl.rz = 0 * MathUtil.deg2rad;
 		kppl.scale = kpl.scaleZ;
 		
 		ArrayList<KeyPointPairList> chain = new ArrayList<KeyPointPairList>();
