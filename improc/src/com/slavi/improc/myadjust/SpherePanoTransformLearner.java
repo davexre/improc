@@ -45,7 +45,7 @@ public class SpherePanoTransformLearner {
 
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.rx = 0.0;
-		origin.ry = 0.0;
+		origin.ry = 90 * MathUtil.deg2rad;
 		origin.rz = 0.0;
 		origin.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
 				Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);

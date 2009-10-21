@@ -16,7 +16,7 @@ public class Dummy {
 		double dest2[] = new double[2];
 
 		dest1[0] = 0 * MathUtil.deg2rad;
-		dest1[1] = 0 * MathUtil.deg2rad;
+		dest1[1] = 10 * MathUtil.deg2rad;
 
 		SpherePanoTransformer.rotateForeward(dest1[0], dest1[1], 0, 80 * MathUtil.deg2rad, 0, dest2);
 		dump(dest1);
