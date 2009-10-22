@@ -46,7 +46,7 @@ public class SpherePanoTransformLearner {
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.rx = 0.0;
 		origin.ry = 90 * MathUtil.deg2rad;
-		origin.rz = 0.0;
+		origin.rz = 180 * MathUtil.deg2rad;
 		origin.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
 				Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
 		origin.calculatePrimsAtHop = 0;
@@ -88,19 +88,19 @@ public class SpherePanoTransformLearner {
 					SpherePanoTransformer.rotateBackward(
 							minHopPairList.target.rx, minHopPairList.target.ry, 
 							minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, dest);
-					curImage.rx = dest[0];
-					curImage.ry = dest[1];
-					curImage.rz = minHopPairList.rz + minHopPairList.source.rz;
+					curImage.rx = MathUtil.fixAngleMPI_PI(dest[0]);
+					curImage.ry = MathUtil.fixAngleMPI_PI(dest[1]);
+					curImage.rz = MathUtil.fixAngleMPI_PI(minHopPairList.rz + minHopPairList.source.rz);
 					curImage.scaleZ = minHopPairList.source.scaleZ * minHopPairList.scale; 
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
 					double dest[] = new double[2];
 					SpherePanoTransformer.rotateForeward(
 							minHopPairList.source.rx, minHopPairList.source.ry, 
-							minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, dest);
-					curImage.rx = dest[0];
-					curImage.ry = dest[1];
-					curImage.rz = minHopPairList.rz - minHopPairList.source.rz;
+							minHopPairList.rx, minHopPairList.ry, 0, dest);
+					curImage.rx = MathUtil.fixAngleMPI_PI(dest[0]);
+					curImage.ry = MathUtil.fixAngleMPI_PI(dest[1]);
+					curImage.rz = MathUtil.fixAngleMPI_PI(Math.PI - (minHopPairList.rz - minHopPairList.source.rz));
 					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
 				}

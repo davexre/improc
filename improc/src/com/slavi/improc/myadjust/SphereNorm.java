@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
+import com.slavi.math.MathUtil;
 
 public class SphereNorm {
 
@@ -129,13 +130,20 @@ public class SphereNorm {
 			double dA_dIY = (dB_dIY * C - B * dC_dIY) / (C*C);
 			double dA_dIF = (dB_dIF * C - B * dC_dIF) / (C*C);
 			
-			rx = kp.keyPointList.rz + Math.PI - Math.atan(A);
+			rx = kp.keyPointList.rz + MathUtil.C2PI - Math.atan(A);
 			tmp = 1 + A * A;
 			dRX_dIX = -dA_dIX / tmp;
 			dRX_dIY = -dA_dIY / tmp;
 			dRX_dIF = -dA_dIF / tmp;
 			dRX_dIZ = 1;
 			
+/*			rx = kp.keyPointList.rz + Math.PI - Math.atan(A);
+			tmp = 1 + A * A;
+			dRX_dIX = -dA_dIX / tmp;
+			dRX_dIY = -dA_dIY / tmp;
+			dRX_dIF = -dA_dIF / tmp;
+			dRX_dIZ = 1;
+*/			
 			// calc commons
 			sinRX = Math.sin(rx);
 			cosRX = Math.cos(rx);
