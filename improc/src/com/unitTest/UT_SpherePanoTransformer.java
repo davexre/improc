@@ -175,12 +175,12 @@ public class UT_SpherePanoTransformer {
 		assertEqual(dist, dist0);
 	}
 
-	void dump(double dest[]) {
+	void dump(String str, double dest[]) {
 		double x = dest[0]; 
 		double y = dest[1];
 		x = MathUtil.fixAngle2PI(x);
 		y = MathUtil.fixAngle2PI(y);
-		System.out.println(MathUtil.rad2degStr(x) + "\t" + MathUtil.rad2degStr(y));
+		System.out.println(str + "\t" + MathUtil.rad2degStr(x) + "\t" + MathUtil.rad2degStr(y));
 	}
 	
 	void testCalcPrims() {
@@ -192,8 +192,8 @@ public class UT_SpherePanoTransformer {
 		origin.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
 			Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
 		origin.rx = 10 * MathUtil.deg2rad;
-		origin.ry = 90 * MathUtil.deg2rad;
-		origin.rz = 180 * MathUtil.deg2rad;
+		origin.ry = 20 * MathUtil.deg2rad;
+		origin.rz = 0 * MathUtil.deg2rad;
 		
 		KeyPointList kpl = new KeyPointList();
 		kpl.cameraOriginX = origin.cameraOriginX;
@@ -206,7 +206,7 @@ public class UT_SpherePanoTransformer {
 		KeyPointPairList kppl = new KeyPointPairList();
 		kppl.source = origin;
 		kppl.target = kpl;
-		kppl.rx = 0 * MathUtil.deg2rad;
+		kppl.rx = 30 * MathUtil.deg2rad;
 		kppl.ry = 20 * MathUtil.deg2rad;
 		kppl.rz = 0 * MathUtil.deg2rad;
 		kppl.scale = kpl.scaleZ;
@@ -217,18 +217,22 @@ public class UT_SpherePanoTransformer {
 		images.add(kpl);
 		
 		double dest[] = new double[2];
+		double dest1[] = new double[2];
 		SpherePanoTransformer.rotateForeward(
 				origin.rx, origin.ry, 
-				kppl.rx, kppl.ry, 0, dest);
-		dump(dest);
-		System.out.println("------");
-		kpl.rz = MathUtil.fixAngleMPI_PI(dest[0]);
+				kppl.rx, kppl.ry, kppl.rz, dest);
+		kpl.rx = MathUtil.fixAngleMPI_PI(dest[0]);
 		kpl.ry = MathUtil.fixAngleMPI_PI(dest[1]);
-		kpl.rx = MathUtil.fixAngleMPI_PI(MathUtil.C2PI - (kppl.rz - origin.rz));
+		kpl.rz = MathUtil.fixAngleMPI_PI(origin.rz);
 		kpl.scaleZ = kppl.source.scaleZ / kppl.scale; 
 //		SpherePanoTransformLearner.calculatePrims(origin, images, chain);
+		dump("world2", dest);
+//		SpherePanoTransformer.rotateBackward(0 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, kpl.rx, kpl.ry, kpl.rz, dest1);
+//		dump(dest1);
+//		SpherePanoTransformer.rotateForeward(dest[0], dest[1], kpl.rx, kpl.ry, kpl.rz, dest1);
+//		dump(dest1);
 
-		
+		System.out.println("------");
 		System.out.println(MathUtil.rad2degStr(kpl.rx));
 		System.out.println(MathUtil.rad2degStr(kpl.ry));
 		System.out.println(MathUtil.rad2degStr(kpl.rz));
@@ -246,9 +250,13 @@ public class UT_SpherePanoTransformer {
 		SpherePanoTransformer.rotateForeward(pOrigin[0], pOrigin[1], kppl.rx, kppl.ry, kppl.rz, pKPL);
 		SpherePanoTransformer.rotateForeward(pKPL[0], pKPL[1], kpl.rx, kpl.ry, kpl.rz, pWorld2);
 		System.out.println("-------");
-		dump(pOrigin);
-		dump(pWorld1);
-		dump(pWorld2);
+//		dump(pOrigin);
+		dump("1", pWorld1);
+//		dump(pKPL);
+		dump("2", pWorld2);
+		pKPL[0] = pWorld2[0] - pWorld1[0];
+		pKPL[1] = pWorld2[1] - pWorld1[1];
+		dump("delta", pKPL);
 	}
 	
 	public static void main(String[] args) {
