@@ -8,6 +8,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.math.RotationZYX;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
@@ -45,8 +46,8 @@ public class SpherePanoTransformLearner {
 
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.rx = 0.0;
-		origin.ry = 90 * MathUtil.deg2rad;
-		origin.rz = 180 * MathUtil.deg2rad;
+		origin.ry = 0 * MathUtil.deg2rad;
+		origin.rz = 0 * MathUtil.deg2rad;
 		origin.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
 				Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
 		origin.calculatePrimsAtHop = 0;
@@ -84,6 +85,32 @@ public class SpherePanoTransformLearner {
 			
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
+					double angles[] = new double[3];
+					Matrix sourceToTarget = RotationZYX.instance.makeAngles(-minHopPairList.rx, -minHopPairList.ry + 90 * MathUtil.deg2rad, -minHopPairList.rz - 0 * MathUtil.deg2rad);
+					Matrix targetToWorld = RotationZYX.instance.makeAngles(minHopPairList.target.rx, minHopPairList.target.ry, minHopPairList.target.rz);
+					Matrix sourceToWorld = new Matrix(3, 3);
+					sourceToTarget.mMul(targetToWorld, sourceToWorld);
+					RotationZYX.instance.getRotationAngles(sourceToWorld, angles);
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
+					curImage.rz = angles[2];
+					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+				} else { // if (curImage == minHopPairList.target) {
+					double angles[] = new double[3];
+					RotationZYX.instance.getRotationAnglesBackword(-minHopPairList.rx, -minHopPairList.ry + 90 * MathUtil.deg2rad, -minHopPairList.rz - 0 * MathUtil.deg2rad, angles);
+					Matrix targetToSource = RotationZYX.instance.makeAngles(angles[0], angles[1], angles[2]);
+					Matrix sourceToWorld = RotationZYX.instance.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
+					Matrix targetToWorld = new Matrix(3, 3);
+					targetToSource.mMul(sourceToWorld, targetToWorld);
+					RotationZYX.instance.getRotationAngles(targetToWorld, angles);
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
+					curImage.rz = angles[2];
+					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+				}
+			
+/*			if (minHopPairList != null) {
+				if (curImage == minHopPairList.source) {
 					double dest[] = new double[2];
 					SpherePanoTransformer.rotateBackward(
 							minHopPairList.target.rx, minHopPairList.target.ry, 
@@ -103,7 +130,7 @@ public class SpherePanoTransformLearner {
 					curImage.rz = MathUtil.fixAngleMPI_PI(Math.PI - (minHopPairList.rz - minHopPairList.source.rz));
 					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
-				}
+				}*/
 				curImage.calculatePrimsAtHop = minHop + 1;
 				todo.remove(curImageIndex);
 				curImageIndex = todo.size();

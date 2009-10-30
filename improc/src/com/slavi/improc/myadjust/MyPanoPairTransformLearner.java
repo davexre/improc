@@ -88,20 +88,20 @@ public class MyPanoPairTransformLearner {
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
-					Matrix sourceToTarget = RotationXYZ.instance.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
-					Matrix targetToWorld = RotationXYZ.instance.makeAngles(-minHopPairList.target.rx, -minHopPairList.target.ry, minHopPairList.target.rz);
+					Matrix sourceToTarget = RotationXYZ.instance.makeAngles(-minHopPairList.rx, -minHopPairList.ry, -minHopPairList.rz);
+					Matrix targetToWorld = RotationXYZ.instance.makeAngles(minHopPairList.target.rx, minHopPairList.target.ry, minHopPairList.target.rz);
 					Matrix sourceToWorld = new Matrix(3, 3);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					RotationXYZ.instance.getRotationAngles(sourceToWorld, angles);
-					curImage.rx = -angles[0];
-					curImage.ry = -angles[1];
+					curImage.rx = angles[0];
+					curImage.ry = angles[1];
 					curImage.rz = angles[2];
 					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
-					RotationXYZ.instance.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
-					Matrix targetToSource = RotationXYZ.instance.makeAngles(-angles[0], -angles[1], angles[2]);
+					RotationXYZ.instance.getRotationAnglesBackword(-minHopPairList.rx, -minHopPairList.ry, -minHopPairList.rz, angles);
+					Matrix targetToSource = RotationXYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix sourceToWorld = RotationXYZ.instance.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
 					Matrix targetToWorld = new Matrix(3, 3);
 					targetToSource.mMul(sourceToWorld, targetToWorld);

@@ -5,14 +5,12 @@ import java.awt.Rectangle;
 public class DImageWrapper implements DWindowedImage {
 
 	DWindowedImage imageBuf;
-	Rectangle imageExtent;
 	Rectangle extent;
 	
 	public DImageWrapper(DWindowedImage image, Rectangle extent) {
 		if (!image.getExtent().contains(extent))
 			throw new IllegalArgumentException("Invalid size\nimage extent is " + image.getExtent() + "\nnew extent is " + extent);
 		this.imageBuf = image;
-		this.imageExtent = image.getExtent();
 		this.extent = extent;
 	}
 	
