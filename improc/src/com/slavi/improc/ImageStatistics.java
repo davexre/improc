@@ -10,9 +10,10 @@ public class ImageStatistics {
 
 	
 	public static void main(String[] args) throws Exception {
-		String fnameBase = "D:\\Users\\S\\Java\\Images\\Image data\\*.jpg";
+		String fnameBase = "D:\\Users\\S\\Java\\Images\\Image data\\20090801 Vodopad Skaklia\\Skaklia 1\\*.jpg";
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(fnameBase, true, true);
 		
+		System.out.println("BR\tR\tG\tB\tfile");
 		while (imagesIterator.hasNext()) {
 			File file = imagesIterator.next();
 			SafeImage im = new SafeImage(new FileInputStream(file));
@@ -43,11 +44,12 @@ public class ImageStatistics {
 			green /= count;
 			blue /= count;
 	
-			System.out.print("BR=\t" + MathUtil.d4(brightness));
-			System.out.print("\tR =\t" + MathUtil.d4(red));
-			System.out.print("\tG =\t" + MathUtil.d4(green));
-			System.out.print("\tB =\t" + MathUtil.d4(blue));
-			System.out.println("\t" + file.getAbsolutePath());
+			System.out.println(
+					MathUtil.d2(brightness) + "\t" +
+					MathUtil.d2(red) + "\t" +
+					MathUtil.d2(green) + "\t" +
+					MathUtil.d2(blue) + "\t" +
+					file.getAbsolutePath());
 		}
 	}
 }

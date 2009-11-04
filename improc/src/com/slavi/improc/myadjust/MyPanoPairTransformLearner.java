@@ -235,9 +235,9 @@ public class MyPanoPairTransformLearner {
 	
 	void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = RotationXYZ.instance.makeAngles(image.rx, image.ry, image.rz);
-		image.dMdX = RotationXYZ.instance.make_dF_dX(image.rx, image.ry, image.rz);
-		image.dMdY = RotationXYZ.instance.make_dF_dY(image.rx, image.ry, image.rz);
-		image.dMdZ = RotationXYZ.instance.make_dF_dZ(image.rx, image.ry, image.rz);
+		image.dMdX = RotationXYZ.instance.make_dF_dR1(image.rx, image.ry, image.rz);
+		image.dMdY = RotationXYZ.instance.make_dF_dR2(image.rx, image.ry, image.rz);
+		image.dMdZ = RotationXYZ.instance.make_dF_dR3(image.rx, image.ry, image.rz);
 	}
 
 	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
@@ -397,21 +397,7 @@ public class MyPanoPairTransformLearner {
 				MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				MyPanoPairTransformer.transform(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 
-				// Find the angular (Great circle) distance between the two points
-				double cosX1 = Math.cos(PW1.x);
-				double sinX1 = Math.sin(PW1.x);
-				double cosX2 = Math.cos(PW2.x);
-				double sinX2 = Math.sin(PW2.x);
-				double cosDY = Math.cos(PW1.y - PW2.y);
-				double sinDY = Math.sin(PW1.y - PW2.y);
-				
-				double tmp1 = cosX2 * sinDY;
-				double tmp2 = cosX1 * sinX2 - sinX1 * cosX2 * cosDY;
-				
-				double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
-				double dy = sinX1 * sinX2 + cosX1 * cosX2 * cosDY;
-				double discrepancy = Math.atan2(dx, dy) * MathUtil.rad2deg;
-				
+				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1.x, PW1.y, PW2.x, PW2.y) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

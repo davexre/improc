@@ -53,24 +53,4 @@ public class SpherePanoTransformer2 {
 		dest[0] = IX + Math.atan2(sinRX * cosRY, cosIY * sinRY - cosRX * sinIY * cosRY);
 		dest[1] = Math.asin(sinIY * sinRY + cosIY * cosRY * cosRX);
 	}
-	
-	/**
-	 * Find the angular (Great circle) distance between the two points on a sphere 
-	 */
-	public static double getSphericalDistance(double rx1, double ry1, double rx2, double ry2) {
-		double cosX1 = Math.cos(rx1);
-		double sinX1 = Math.sin(rx1);
-		double cosX2 = Math.cos(rx2);
-		double sinX2 = Math.sin(rx2);
-		ry2 -= ry1;
-		double cosDY = Math.cos(ry2);
-		double sinDY = Math.sin(ry2);
-		
-		double tmp1 = cosX2 * sinDY;
-		double tmp2 = cosX1 * sinX2 - sinX1 * cosX2 * cosDY;
-		
-		double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
-		double dy = sinX1 * sinX2 + cosX1 * cosX2 * cosDY;
-		return Math.atan2(dx, dy);
-	}
 }

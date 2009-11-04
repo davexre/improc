@@ -4,12 +4,14 @@ import com.slavi.improc.myadjust.MyPanoPairTransformerZYX;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.RotationZYX;
+import com.slavi.math.RotationZYZ;
 import com.slavi.math.matrix.Matrix;
 
 public class UT_RotationZYX {
 
 	RotationXYZ rot1 = RotationXYZ.instance;
-	RotationZYX rot = RotationZYX.instance;
+	RotationZYX rot2 = RotationZYX.instance;
+	RotationZYZ rot = RotationZYZ.instance;
 	
 	double angles[] = { 10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad };
 	double point[] = { 5, 15, 25 };
@@ -78,9 +80,9 @@ public class UT_RotationZYX {
 		double delta = 0.000001 * MathUtil.deg2rad;
 
 		Matrix dF[] = {
-				rot.make_dF_dX(angles[0], angles[1], angles[2]), 
-				rot.make_dF_dY(angles[0], angles[1], angles[2]), 
-				rot.make_dF_dZ(angles[0], angles[1], angles[2])
+				rot.make_dF_dR1(angles[0], angles[1], angles[2]), 
+				rot.make_dF_dR2(angles[0], angles[1], angles[2]), 
+				rot.make_dF_dR3(angles[0], angles[1], angles[2])
 		};
 		
 		for (int dindex = 0; dindex < 3; dindex++) {

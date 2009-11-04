@@ -109,7 +109,7 @@ public class UT_SpherePanoTransformer {
 		assertEqual(d, 180 * MathUtil.deg2rad);
 		
 		rx1 = 179 * MathUtil.deg2rad;
-		ry1 = 90 * MathUtil.deg2rad;
+		ry1 = 0 * MathUtil.deg2rad;
 		d = SpherePanoTransformer.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
 		assertEqual(d, delta);
 	}

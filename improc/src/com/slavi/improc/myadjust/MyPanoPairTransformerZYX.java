@@ -37,26 +37,6 @@ public class MyPanoPairTransformerZYX {
 	}
 	
 	/**
-	 * Find the angular (Great circle) distance between the two points on a sphere 
-	 */
-	public static double getSphericalDistance(double fi1, double psi1, double fi2, double psi2) {
-		double cosX1 = Math.cos(fi1);
-		double sinX1 = Math.sin(fi1);
-		double cosX2 = Math.cos(fi2);
-		double sinX2 = Math.sin(fi2);
-		psi1 -= psi2;
-		double cosDY = Math.cos(psi1);
-		double sinDY = Math.sin(psi1);
-		
-		double tmp1 = cosX2 * sinDY;
-		double tmp2 = cosX1 * sinX2 - sinX1 * cosX2 * cosDY;
-		
-		double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
-		double dy = sinX1 * sinX2 + cosX1 * cosX2 * cosDY;
-		return Math.atan2(dx, dy);
-	}
-	
-	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
 	 * @param dest		The transformed coordinates in radians. Longitude is 

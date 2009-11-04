@@ -74,42 +74,42 @@ public class RotationZYX {
 	public static final RotationZYX instance = new RotationZYX();
 
 	/**
-	 * Return a rotation matrix R=Rz*Ry*Rx
+	 * Return a rotation matrix R=R3*R2*R1
 	 */
-	public Matrix makeAngles(double rx, double ry, double rz) {
+	public Matrix makeAngles(double r1, double r2, double r3) {
 		/*
-		 *  Rx            Ry            Rz
-		 *  1   0   0     cy  0  sy     cz -sz  0
-		 *  0  cx -sx      0  1   0     sz  cz  0
-		 *  0  sx  cx    -sy  0  cy      0   0  1
+		 *  R1            R2            R3
+		 *  1   0   0     c2  0  s2     c3 -s3  0
+		 *  0  c1 -s1      0  1   0     s3  c3  0
+		 *  0  s1  c1    -s2  0  c2      0   0  1
 		 */
-		double sx = Math.sin(rx);
-		double cx = Math.cos(rx);
+		double s1 = Math.sin(r1);
+		double c1 = Math.cos(r1);
 		
-		double sy = Math.sin(ry);
-		double cy = Math.cos(ry);
+		double s2 = Math.sin(r2);
+		double c2 = Math.cos(r2);
 
-		double sz = Math.sin(rz);
-		double cz = Math.cos(rz);
+		double s3 = Math.sin(r3);
+		double c3 = Math.cos(r3);
 
 		/*
-		 * Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 */
 		Matrix r = new Matrix(3, 3);
-		r.setItem(0, 0, cx*cy);
-		r.setItem(1, 0, -sx*cy);
-		r.setItem(2, 0, sy);
+		r.setItem(0, 0, c1*c2);
+		r.setItem(1, 0, -s1*c2);
+		r.setItem(2, 0, s2);
 		
-		r.setItem(0, 1, sx*cz+cx*sy*sz);
-		r.setItem(1, 1, cx*cz-sx*sy*sz);
-		r.setItem(2, 1, -cy*sz);
+		r.setItem(0, 1, s1*c3+c1*s2*s3);
+		r.setItem(1, 1, c1*c3-s1*s2*s3);
+		r.setItem(2, 1, -c2*s3);
 		
-		r.setItem(0, 2, sx*sz-cx*sy*cz);
-		r.setItem(1, 2, cx*sz+sx*sy*cz);
-		r.setItem(2, 2, cy*cz);
+		r.setItem(0, 2, s1*s3-c1*s2*c3);
+		r.setItem(1, 2, c1*s3+s1*s2*c3);
+		r.setItem(2, 2, c2*c3);
 		return r;
 	}
 
@@ -162,16 +162,16 @@ public class RotationZYX {
 	/**
 	 * Extracts the rotation angles that constructed the rotation matrix M.
 	 * The angles are returned in the angles array as 
-	 * angles[0] = rx,
-	 * angles[1] = ry,
-	 * angles[2] = rz
+	 * angles[0] = r1,
+	 * angles[1] = r2,
+	 * angles[2] = r3
 	 */
 	public void getRotationAngles(Matrix m, double[] angles) {
 		/*
-		 * Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 */
 		angles[0] = Math.atan2(-m.getItem(1, 0), m.getItem(0, 0));
 		angles[1] = Math.asin(m.getItem(2, 0));
@@ -181,16 +181,16 @@ public class RotationZYX {
 	/**
 	 * Extracts the rotation angles that constructed the REVERSE rotation matrix M.
 	 * The angles are returned in the angles array as 
-	 * angles[0] = rx,
-	 * angles[1] = ry,
-	 * angles[2] = rz
+	 * angles[0] = r1,
+	 * angles[1] = r2,
+	 * angles[2] = r3
 	 */
 	public void getRotationAnglesBackword(Matrix m, double[] angles) {
 		/*
-		 * M_foreward = Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * M_foreward = R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 * 
 		 * M_backword = Transpose(M_foreward)
 		 */
@@ -202,31 +202,31 @@ public class RotationZYX {
 	/**
 	 * Computes the REVERSE rotation angles that constructed the REVERSE rotation matrix M.
 	 * The angles are returned in the angles array as 
-	 * angles[0] = rx,
-	 * angles[1] = ry,
-	 * angles[2] = rz
+	 * angles[0] = r1,
+	 * angles[1] = r2,
+	 * angles[2] = r3
 	 */
-	public void getRotationAnglesBackword(double rx, double ry, double rz, double[] angles) {
+	public void getRotationAnglesBackword(double r1, double r2, double r3, double[] angles) {
 		/*
-		 * M_foreward = Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * M_foreward = R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 * 
 		 * M_backword = Transpose(M_foreward)
 		 */
-		double sx = Math.sin(rx);
-		double cx = Math.cos(rx);
+		double s1 = Math.sin(r1);
+		double c1 = Math.cos(r1);
 		
-		double sy = Math.sin(ry);
-		double cy = Math.cos(ry);
+		double s2 = Math.sin(r2);
+		double c2 = Math.cos(r2);
 
-		double sz = Math.sin(rz);
-		double cz = Math.cos(rz);
+		double s3 = Math.sin(r3);
+		double c3 = Math.cos(r3);
 
-		angles[0] = Math.atan2(-(sx*cz+cx*sy*sz), cx*cy);
-		angles[1] = Math.asin(sx*sz-cx*sy*cz);
-		angles[2] = Math.atan2(-(cx*sz+sx*sy*cz), cy*cz);
+		angles[0] = Math.atan2(-(s1*c3+c1*s2*s3), c1*c2);
+		angles[1] = Math.asin(s1*s3-c1*s2*c3);
+		angles[2] = Math.atan2(-(c1*s3+s1*s2*c3), c2*c3);
 	}	
 
 	/*
@@ -234,104 +234,104 @@ public class RotationZYX {
 	 * (cosX)' = -sinX
 	 */
 
-	public Matrix make_dF_dZ(double rx, double ry, double rz) {
-		double sx = Math.sin(rx);
-		double cx = Math.cos(rx);
+	public Matrix make_dF_dR3(double r1, double r2, double r3) {
+		double s1 = Math.sin(r1);
+		double c1 = Math.cos(r1);
 		
-		double sy = Math.sin(ry);
-		double cy = Math.cos(ry);
+		double s2 = Math.sin(r2);
+		double c2 = Math.cos(r2);
 
-		double sz = Math.sin(rz);
-		double cz = Math.cos(rz);
+		double s3 = Math.sin(r3);
+		double c3 = Math.cos(r3);
 
 		/*
-		 * Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 *
-		 * dF/d(rz)
+		 * dF/d(r3)
 		 * 0				0				0
-		 * -sx*sz+cx*sy*cz	-cx*sz-sx*sy*cz	-cy*cz
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
+		 * -s1*s3+c1*s2*c3	-c1*s3-s1*s2*c3	-c2*c3
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
 		 */
 		Matrix r = new Matrix(3, 3);
 		r.setItem(0, 0, 0);
 		r.setItem(1, 0, 0);
 		r.setItem(2, 0, 0);
-		r.setItem(0, 1, -sx*sz+cx*sy*cz);
-		r.setItem(1, 1, -cx*sz-sx*sy*cz);
-		r.setItem(2, 1, -cy*cz);
-		r.setItem(0, 2, sx*cz+cx*sy*sz);
-		r.setItem(1, 2, cx*cz-sx*sy*sz);
-		r.setItem(2, 2, -cy*sz);
+		r.setItem(0, 1, -s1*s3+c1*s2*c3);
+		r.setItem(1, 1, -c1*s3-s1*s2*c3);
+		r.setItem(2, 1, -c2*c3);
+		r.setItem(0, 2, s1*c3+c1*s2*s3);
+		r.setItem(1, 2, c1*c3-s1*s2*s3);
+		r.setItem(2, 2, -c2*s3);
 		return r;
 	}
 	
-	public Matrix make_dF_dY(double rx, double ry, double rz) {
-		double sx = Math.sin(rx);
-		double cx = Math.cos(rx);
+	public Matrix make_dF_dR2(double r1, double r2, double r3) {
+		double s1 = Math.sin(r1);
+		double c1 = Math.cos(r1);
 		
-		double sy = Math.sin(ry);
-		double cy = Math.cos(ry);
+		double s2 = Math.sin(r2);
+		double c2 = Math.cos(r2);
 
-		double sz = Math.sin(rz);
-		double cz = Math.cos(rz);
+		double s3 = Math.sin(r3);
+		double c3 = Math.cos(r3);
 
 		/*
-		 * Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 *
-		 * dF/d(ry)
-		 * -cx*sy			sx*sy			cy
-		 * cx*cy*sz			-sx*cy*sz		sy*sz
-		 * -cx*cy*cz		sx*cy*cz		-sy*cz
+		 * dF/d(r2)
+		 * -c1*s2			s1*s2			c2
+		 * c1*c2*s3			-s1*c2*s3		s2*s3
+		 * -c1*c2*c3		s1*c2*c3		-s2*c3
 		 */
 		Matrix r = new Matrix(3, 3);
-		r.setItem(0, 0, -cx*sy);
-		r.setItem(1, 0, sx*sy);
-		r.setItem(2, 0, cy);
-		r.setItem(0, 1, cx*cy*sz);
-		r.setItem(1, 1, -sx*cy*sz);
-		r.setItem(2, 1, sy*sz);
-		r.setItem(0, 2, -cx*cy*cz);
-		r.setItem(1, 2, sx*cy*cz);
-		r.setItem(2, 2, -sy*cz);
+		r.setItem(0, 0, -c1*s2);
+		r.setItem(1, 0, s1*s2);
+		r.setItem(2, 0, c2);
+		r.setItem(0, 1, c1*c2*s3);
+		r.setItem(1, 1, -s1*c2*s3);
+		r.setItem(2, 1, s2*s3);
+		r.setItem(0, 2, -c1*c2*c3);
+		r.setItem(1, 2, s1*c2*c3);
+		r.setItem(2, 2, -s2*c3);
 		return r;
 	}
 	
-	public Matrix make_dF_dX(double rx, double ry, double rz) {
-		double sx = Math.sin(rx);
-		double cx = Math.cos(rx);
+	public Matrix make_dF_dR1(double r1, double r2, double r3) {
+		double s1 = Math.sin(r1);
+		double c1 = Math.cos(r1);
 		
-		double sy = Math.sin(ry);
-		double cy = Math.cos(ry);
+		double s2 = Math.sin(r2);
+		double c2 = Math.cos(r2);
 
-		double sz = Math.sin(rz);
-		double cz = Math.cos(rz);
+		double s3 = Math.sin(r3);
+		double c3 = Math.cos(r3);
 
 		/*
-		 * Rz*Ry*Rx
-		 * cx*cy			-sx*cy			sy
-		 * sx*cz+cx*sy*sz	cx*cz-sx*sy*sz	-cy*sz
-		 * sx*sz-cx*sy*cz	cx*sz+sx*sy*cz	cy*cz
+		 * R3*R2*R1
+		 * c1*c2			-s1*c2			s2
+		 * s1*c3+c1*s2*s3	c1*c3-s1*s2*s3	-c2*s3
+		 * s1*s3-c1*s2*c3	c1*s3+s1*s2*c3	c2*c3
 		 *
-		 * dF/d(rx)
-		 * -sx*cy			-cx*cy			0
-		 * cx*cz-sx*sy*sz	-sx*cz-cx*sy*sz	0
-		 * cx*sz+sx*sy*cz	-sx*sz+cx*sy*cz	0
+		 * dF/d(r1)
+		 * -s1*c2			-c1*c2			0
+		 * c1*c3-s1*s2*s3	-s1*c3-c1*s2*s3	0
+		 * c1*s3+s1*s2*c3	-s1*s3+c1*s2*c3	0
 		 */
 		Matrix r = new Matrix(3, 3);
-		r.setItem(0, 0, -sx*cy);
-		r.setItem(1, 0, -cx*cy);
+		r.setItem(0, 0, -s1*c2);
+		r.setItem(1, 0, -c1*c2);
 		r.setItem(2, 0, 0);
-		r.setItem(0, 1, cx*cz-sx*sy*sz);
-		r.setItem(1, 1, -sx*cz-cx*sy*sz);
+		r.setItem(0, 1, c1*c3-s1*s2*s3);
+		r.setItem(1, 1, -s1*c3-c1*s2*s3);
 		r.setItem(2, 1, 0);
-		r.setItem(0, 2, cx*sz+sx*sy*cz);
-		r.setItem(1, 2, -sx*sz+cx*sy*cz);
+		r.setItem(0, 2, c1*s3+s1*s2*c3);
+		r.setItem(1, 2, -s1*s3+c1*s2*c3);
 		r.setItem(2, 2, 0);
 		return r;
 	}

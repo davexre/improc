@@ -231,9 +231,9 @@ public class MyPanoPairTransformZYXLearner {
 	
 	void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = MyPanoPairTransformerZYX.rot.makeAngles(image.rx, image.ry, image.rz);
-		image.dMdX = MyPanoPairTransformerZYX.rot.make_dF_dX(image.rx, image.ry, image.rz);
-		image.dMdY = MyPanoPairTransformerZYX.rot.make_dF_dY(image.rx, image.ry, image.rz);
-		image.dMdZ = MyPanoPairTransformerZYX.rot.make_dF_dZ(image.rx, image.ry, image.rz);
+		image.dMdX = MyPanoPairTransformerZYX.rot.make_dF_dR1(image.rx, image.ry, image.rz);
+		image.dMdY = MyPanoPairTransformerZYX.rot.make_dF_dR2(image.rx, image.ry, image.rz);
+		image.dMdZ = MyPanoPairTransformerZYX.rot.make_dF_dR3(image.rx, image.ry, image.rz);
 	}
 
 	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
@@ -383,7 +383,8 @@ public class MyPanoPairTransformZYXLearner {
 				// Compute for all points, so no item.isBad check
 				MyPanoPairTransformerZYX.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				MyPanoPairTransformerZYX.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = MyPanoPairTransformerZYX.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				
+				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

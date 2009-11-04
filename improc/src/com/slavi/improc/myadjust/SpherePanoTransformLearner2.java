@@ -300,7 +300,7 @@ public class SpherePanoTransformLearner2 {
 				// Compute for all points, so no item.isBad check
 				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = SpherePanoTransformer2.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);
