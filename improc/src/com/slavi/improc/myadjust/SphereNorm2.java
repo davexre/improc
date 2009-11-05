@@ -81,60 +81,60 @@ public class SphereNorm2 {
 			double cosIY = Math.cos(kp.keyPointList.ry);
 
 			// dRY
-			double H = cosIY * cosSY * cosDSX;
-			double dH_dIX = cosIY * cosSY * sinDSX;
-			double dH_dIY = - sinIY * cosSY * cosDSX;
-			double dH_dIF = - cosIY * (cosSY * sinDSX * dSX_dIF + sinSY * cosDSX * dSY_dIF);
+			double H = sinSY * sinIY * cosDSX;
+			double dH_dIX = sinSY * sinIY * sinDSX;
+			double dH_dIY = sinSY * cosIY * cosDSX;
+			double dH_dIF = cosSY * sinIY * cosDSX * dSY_dIF - sinSY * sinIY * sinDSX * dSX_dIF;
 			
-			double G = sinIY * sinSY;
-			//double dG_dIX = 0;
-			double dG_dIY = cosIY * sinSY;
-			double dG_dIF = sinIY * cosSY * dSY_dIF;
+			double G = cosSY * cosIY;
+			double dG_dIX = 0;
+			double dG_dIY = - cosSY * sinIY;
+			double dG_dIF = - sinSY * cosIY * dSY_dIF;
 			
 			double F = G + H;
-			double dF_dIX = dH_dIX; // + dG_dIX;
-			double dF_dIY = dH_dIY + dG_dIY;
-			double dF_dIF = dH_dIF + dG_dIF;
+			double dF_dIX = dG_dIX + dH_dIX;
+			double dF_dIY = dG_dIY + dH_dIY;
+			double dF_dIF = dG_dIF + dH_dIF;
 			
-			ry = Math.asin(F);
-			double tmp = Math.sqrt(1 - F * F);
+			ry = Math.acos(F);
+			double tmp = - Math.sqrt(1 - F * F);
 			dRY_dIX = dF_dIX / tmp;
 			dRY_dIY = dF_dIY / tmp;
 			dRY_dIF = dF_dIF / tmp;
 			dRY_dIZ = 0;
 
 			// dRX			
-			double E = cosDSX * sinIY * cosSY;
-			double dE_dIX = sinDSX * sinIY * cosSY;
-			double dE_dIY = cosDSX * cosIY * cosSY;
-			double dE_dIF = - sinIY * (sinDSX * cosSY * dSX_dIF + cosDSX * sinSY * dSY_dIF);
+			double E = sinIY * cosSY;
+			double dE_dIX = 0;
+			double dE_dIY = cosIY * cosSY;
+			double dE_dIF = - sinIY * sinSY * dSY_dIF;
 			
-			double D = cosIY * sinSY;
-			//double dD_dIX = 0;
-			double dD_dIY = - sinIY * sinSY;
-			double dD_dIF = cosIY * cosSY * dSY_dIF;
+			double D = cosDSX * cosIY * sinSY;
+			double dD_dIX = sinDSX * cosIY * sinSY;
+			double dD_dIY = - cosDSX * sinIY * sinSY;
+			double dD_dIF = - sinDSX * cosIY * sinSY * dSX_dIF + cosDSX * cosIY * cosSY * dSY_dIF;
 			
 			double C = D - E;
-			double dC_dIX = - dE_dIX; // + dD_dIX;
+			double dC_dIX = dD_dIX - dE_dIX; 
 			double dC_dIY = dD_dIY - dE_dIY;
 			double dC_dIF = dD_dIF - dE_dIF;
 			
-			double B = sinDSX * cosSY;
-			double dB_dIX = - cosDSX * cosSY;
-			double dB_dIY = - sinDSX * sinSY;
-			double dB_dIF = cosDSX * cosSY * dSX_dIF - sinDSX * sinSY * dSY_dIF;
+			double B = sinDSX * sinSY;
+			double dB_dIX = - cosDSX * sinSY;
+			double dB_dIY = 0;
+			double dB_dIF = cosDSX * sinSY * dSX_dIF + sinDSX * cosSY * dSY_dIF;
 			
 			double A = B / C;
 			double dA_dIX = (dB_dIX * C - B * dC_dIX) / (C*C);
 			double dA_dIY = (dB_dIY * C - B * dC_dIY) / (C*C);
 			double dA_dIF = (dB_dIF * C - B * dC_dIF) / (C*C);
 			
-			rx = kp.keyPointList.rz + Math.atan(A);
+			rx = Math.atan(A) - kp.keyPointList.rz;
 			tmp = 1 + A * A;
 			dRX_dIX = dA_dIX / tmp;
 			dRX_dIY = dA_dIY / tmp;
 			dRX_dIF = dA_dIF / tmp;
-			dRX_dIZ = 1;
+			dRX_dIZ = -1;
 			
 			// calc commons
 			sinRX = Math.sin(rx);
@@ -144,71 +144,68 @@ public class SphereNorm2 {
 		}
 		
 		private void calcLocalSphericalCoords() {
-			double x1 = kp.doubleX - kp.keyPointList.cameraOriginX;
-			double y1 = kp.doubleY - kp.keyPointList.cameraOriginY;
+			double tmpx = (kp.doubleX - kp.keyPointList.cameraOriginX) * kp.keyPointList.cameraScale;
+			double tmpy = (kp.doubleY - kp.keyPointList.cameraOriginY) * kp.keyPointList.cameraScale;
 			
-			double E = Math.tan(kp.keyPointList.scaleZ / 2.0);
-			double dEdIF = 0.5 / (1 + E * E); 
-			double f = 1.0 / (2.0 * kp.keyPointList.cameraScale * E);
-			double dfdIF = - dEdIF / (2.0 * kp.keyPointList.cameraScale * E * E);  
-			double C = x1 * x1 + y1 * y1 + f * f;
-			double dCdIF = 2.0 * f * dfdIF;
-			double B = y1 / Math.sqrt(C);
-			double dBdIF = -0.5 * y1 * Math.pow(C, -3.0/2.0) * dCdIF;
-			sy = Math.asin(B);
-			dSY_dIF = dBdIF / Math.sqrt(1.0 - B * B);
+			double B = Math.sqrt(tmpx * tmpx + tmpy * tmpy);
+			double A = B / kp.keyPointList.scaleZ;
+			double dAdIF = - B / (kp.keyPointList.scaleZ * kp.keyPointList.scaleZ) ;
 			
-			double A = x1 / f;
-			double dAdIF = - x1 * dfdIF / (f * f);
-			sx = Math.atan(A);
-			dSX_dIF = dAdIF / (1.0 + A * A);
+			sy = Math.atan(A);
+			dSY_dIF = dAdIF / (1.0 + A * A);
+			
+			sx = Math.atan2(tmpy, tmpx);
+			dSX_dIF = 0.0;
 		}
 	}
 	
 	private double calc_dDist_dParam(double dRX1_dP, double dRY1_dP, double dRX2_dP, double dRY2_dP) {
-		double H = p2.rx - p1.rx;
-		double sinH = Math.sin(H);
-		double cosH = Math.cos(H);
+		double H = p2.rx - p2.rx;
 		double dHdP = dRX2_dP - dRX1_dP;
+		double cosH = Math.cos(H);
+		double sinH = Math.sin(H);
+
+		double L = p1.sinRY * p2.sinRY * cosH;
+		double dLdP =
+			p1.cosRY * p2.sinRY * cosH * dRY1_dP
+			+ p1.sinRY * p2.cosRY * cosH * dRY2_dP
+			- p1.sinRY * p2.sinRY * sinH * dHdP;
 		
-		double L = p1.cosRY * p2.cosRY * cosH;
-		double dLdP = -p1.sinRY * p2.cosRY * cosH * dRY1_dP
-				-p1.cosRY * p2.sinRY * cosH * dRY2_dP
-				-p1.cosRY * p2.cosRY * sinH * dHdP;
-		double K = p1.sinRY * p2.sinRY;
-		double dKdP = p1.cosRY * p2.sinRY * dRY1_dP + p1.sinRY * p2.cosRY * dRY2_dP;
+		double K = p1.cosRY * p2.cosRY;
+		double dKdP = 
+			- p1.sinRY * p2.cosRY * dRY1_dP
+			- p1.cosRY * p2.sinRY * dRY2_dP;
 		
-		double J = p1.sinRY * p2.cosRY * cosH;
-		double dJdP = p1.cosRY * p2.cosRY * cosH * dRY1_dP 
-				-p1.sinRY * p2.sinRY * cosH * dRY2_dP 
-				-p1.sinRY * p2.cosRY * sinH * dHdP;
-		double I = p1.cosRY * p2.sinRY;
-		double dIdP = -p1.sinRY * p2.sinRY * dRY1_dP + p1.cosRY * p2.cosRY * dRY2_dP;
+		double J = p1.cosRY * p2.sinRY * cosH;
+		double dJdP = 
+			- p1.sinRY * p2.sinRY * cosH * dRY1_dP
+			+ p1.cosRY * p2.cosRY * cosH * dRY2_dP
+			- p1.cosRY * p2.sinRY * sinH * dHdP;
+		
+		double I = p1.sinRY * p2.cosRY;
+		double dIdP = p1.cosRY * p2.cosRY * dRY1_dP - p1.sinRY * p2.sinRY * dRY2_dP;
 		
 		double G = I - J;
 		double dGdP = dIdP - dJdP;
+				
+		double F = p2.sinRY * sinH;
+		double dFdP = p2.cosRY * sinH * dRY2_dP + p2.sinRY * cosH * dHdP;
 		
-		double F = p2.cosRY * sinH;
-		double dFdP = -p2.sinRY * sinH * dRY2_dP + p2.cosRY * cosH * dHdP;
 		double E = F * F + G * G;
-		double dEdP = 2 * (F * dFdP + G * dGdP);
+		double dEdP = 2.0 * F * dFdP + 2.0 * G * dGdP;
 		
 		double C = K + L;
-		double dCdP = dKdP + dLdP;
-		double B = Math.sqrt(E);
-		if (B == 0.0) {
-			Dist = 0.0;
-			return 0.0;
-		}
+		double dCdP = K * dKdP + L * dLdP;
 		
-		double dBdP = dEdP / (2 * B);
+		double B = Math.sqrt(E);
+		double dBdP = dEdP / (2.0 * Math.sqrt(E));
 		
 		double A = B / C;
 		double dAdP = (dBdP * C - B * dCdP) / (C * C);
 		
 		Dist = Math.atan(A);
-		double dDistdP = dAdP / (1 + A * A);
-		
+		double dDistdP = dAdP / (1 + A*A);
 		return dDistdP;
 	}
+	
 }

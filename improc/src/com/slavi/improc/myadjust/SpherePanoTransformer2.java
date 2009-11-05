@@ -84,8 +84,8 @@ public class SpherePanoTransformer2 {
 		double tmp1 = sinY2 * sinDX;
 		double tmp2 = sinY1 * cosY2 - cosY1 * sinY2 * cosDX;
 		
-		double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
-		double dy = cosY1 * cosY2 + sinY1 * sinY2 * cosDX;
-		return Math.atan2(dx, dy);
+		double dy = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
+		double dx = cosY1 * cosY2 + sinY1 * sinY2 * cosDX;
+		return Math.atan2(dy, dx);
 	}
 }

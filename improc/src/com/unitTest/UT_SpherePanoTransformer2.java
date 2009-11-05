@@ -7,7 +7,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.SphereNorm2;
-import com.slavi.improc.myadjust.SpherePanoTransformLearner;
+import com.slavi.improc.myadjust.SpherePanoTransformLearner2;
 import com.slavi.improc.myadjust.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 
@@ -231,7 +231,7 @@ public class UT_SpherePanoTransformer2 {
 //		kpl.ry = MathUtil.fixAngleMPI_PI(dest[1]);
 //		kpl.rz = MathUtil.fixAngleMPI_PI(origin.rz);
 //		kpl.scaleZ = kppl.source.scaleZ / kppl.scale; 
-		SpherePanoTransformLearner.calculatePrims(origin, images, chain);
+		SpherePanoTransformLearner2.calculatePrims(origin, images, chain);
 //		dump("world2", dest);
 //		SpherePanoTransformer2.rotateBackward(0 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, kpl.rx, kpl.ry, kpl.rz, dest1);
 //		dump(dest1);
