@@ -1,6 +1,6 @@
 package com.test.improc;
 
-import com.slavi.improc.myadjust.SpherePanoTransformer;
+import com.slavi.improc.myadjust.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 
 public class Dummy {
@@ -15,10 +15,10 @@ public class Dummy {
 		double dest1[] = new double[2];
 		double dest2[] = new double[2];
 
-		dest1[0] = 10 * MathUtil.deg2rad;
-		dest1[1] = 0 * MathUtil.deg2rad;
+		dest1[0] = 190 * MathUtil.deg2rad;
+		dest1[1] = -122 * MathUtil.deg2rad;
 
-		SpherePanoTransformer.rotateForeward(dest1[0], dest1[1], 90 * MathUtil.deg2rad, 10 * MathUtil.deg2rad, -90 * MathUtil.deg2rad, dest2);
+		SpherePanoTransformer2.rotateForeward(dest1[0], dest1[1], 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, dest2);
 		dump(dest1);
 		dump(dest2);
 	}

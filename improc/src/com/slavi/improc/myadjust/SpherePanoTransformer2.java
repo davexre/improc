@@ -11,38 +11,47 @@ public class SpherePanoTransformer2 {
 	 * 					is returned in dest[1] in the range [-pi/2; pi/2].   
 	 */
 	public static void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
-		sx -= srcImage.cameraOriginX;
-		sy -= srcImage.cameraOriginY;
-		// sx => longitude, sy => latitude
-		double f = 1.0 / (2.0 * srcImage.cameraScale * Math.tan(srcImage.scaleZ / 2.0));
-		sy = Math.asin(sy / Math.sqrt(sx * sx + sy * sy + f * f));
-		sx = Math.atan2(sx, f);
-		rotateForeward(sx, sy, srcImage.rx, srcImage.ry, srcImage.rz, dest);
+		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
+		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
+		double f = srcImage.scaleZ;
+		// x => longitude, y => zenith
+		double x = Math.atan2(sy, sx);
+		double r = Math.sqrt(sx * sx + sy * sy);
+		double y = Math.atan2(r, f);
+		rotateForeward(x, y, srcImage.rx, srcImage.ry, srcImage.rz, dest);
 	}
-	
+
+	/**
+	 * sx -> longitude
+	 * sy -> zenith angle (90 - latitude) 
+	 */
 	public static void rotateForeward(double sx, double sy, double IX, double IY, double IZ, double dest[]) {
-		double sinDX = Math.sin(sx - IX);
-		double cosDX = Math.cos(sx - IX);
+		sx -= IX;
+		double sinDX = Math.sin(sx);
+		double cosDX = Math.cos(sx);
 		double sinIY = Math.sin(IY);
 		double cosIY = Math.cos(IY);
 		double sinSY = Math.sin(sy);
 		double cosSY = Math.cos(sy);
 
-		dest[0] = IZ + Math.atan2(sinDX * cosSY, cosIY * sinSY - cosDX * sinIY * cosSY);
-		dest[1] = Math.asin(sinIY * sinSY + cosIY * cosSY * cosDX);
+		dest[0] = Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ;
+		dest[1] = Math.acos(cosSY * cosIY + sinSY * sinIY * cosDX);
 	}
 
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
 		rotateBackward(rx, ry, srcImage.rx, srcImage.ry, srcImage.rz, dest);
-		// sx => longitude, sy => latitude
-		double f = 1.0 / (2.0 * srcImage.cameraScale * Math.tan(srcImage.scaleZ / 2.0));
-		dest[1] = srcImage.cameraOriginY + f * Math.tan(dest[1]) / Math.cos(dest[0]);
-		dest[0] = srcImage.cameraOriginX + f * Math.tan(dest[0]);
+		// x => longitude, y => zenith
+		double r = srcImage.scaleZ * Math.tan(dest[1]);
+		dest[1] = srcImage.cameraOriginY + r * Math.sin(dest[0]) / srcImage.cameraScale;
+		dest[0] = srcImage.cameraOriginX + r * Math.cos(dest[0]) / srcImage.cameraScale;
 	}
 
+	/**
+	 * rx -> longitude
+	 * ry -> zenith angle (90 - latitude) 
+	 */
 	public static void rotateBackward(double rx, double ry, double IX, double IY, double IZ, double dest[]) {
-		rx -= IZ;
-		
+		rx += IZ;
 		double sinIY = Math.sin(IY);
 		double cosIY = Math.cos(IY);
 		double sinRY = Math.sin(ry);
@@ -50,7 +59,33 @@ public class SpherePanoTransformer2 {
 		double sinRX = Math.sin(rx);
 		double cosRX = Math.cos(rx);
 		
-		dest[0] = IX + Math.atan2(sinRX * cosRY, cosIY * sinRY - cosRX * sinIY * cosRY);
-		dest[1] = Math.asin(sinIY * sinRY + cosIY * cosRY * cosRX);
+		dest[0] = IX + Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY);
+		dest[1] = Math.acos(cosRY * cosIY - sinRY * sinIY * cosRX);
+	}
+
+	/**
+	 * Find the angular (Great circle) distance between the two points on a sphere.
+	 * http://en.wikipedia.org/wiki/Great-circle_distance
+	 * 
+	 * x -> longitude
+	 * ry -> zenith angle (90 - latitude) 
+	 */
+	public static double getSphericalDistance(double rx1, double ry1, double rx2, double ry2) {
+		// sin(90-a) = cos(a)
+		// cos(90-a) = sin(a)
+		double cosY1 = Math.cos(ry1);
+		double sinY1 = Math.sin(ry1);
+		double cosY2 = Math.cos(ry2);
+		double sinY2 = Math.sin(ry2);
+		rx2 -= rx1;
+		double cosDX = Math.cos(rx2);
+		double sinDX = Math.sin(rx2);
+		
+		double tmp1 = sinY2 * sinDX;
+		double tmp2 = sinY1 * cosY2 - cosY1 * sinY2 * cosDX;
+		
+		double dx = Math.sqrt(tmp1 * tmp1 + tmp2 * tmp2);
+		double dy = cosY1 * cosY2 + sinY1 * sinY2 * cosDX;
+		return Math.atan2(dx, dy);
 	}
 }
