@@ -5,8 +5,13 @@ import java.util.Locale;
 import com.slavi.math.matrix.Matrix;
 
 public class MathUtil {
-	public static double C2PI = Math.PI * 2.0;
-	public static double PIover2 = Math.PI / 2.0;
+	public static final double eps = calcEps();
+	
+	public static final double epsAngle = calcAngleEps(0);
+	
+	public static final double C2PI = Math.PI * 2.0;
+	
+	public static final double PIover2 = Math.PI / 2.0;
 
 	public static final double deg2rad = Math.PI / 180;
 	
@@ -164,5 +169,37 @@ public class MathUtil {
 			r = 0.0;
 		}
 		return r;
+	}
+	
+	/**
+	 * Calculates the machine precision for trigonometric functions.
+	 * @returns The maximum angle (epsAngle) in radians such that Math.cos(angle) == Math.cos(angle+epsAngle)  
+	 */
+	private static double calcAngleEps(double angle) {
+		double eps = 1.0; // 1 radian
+		double c1 = Math.cos(angle);
+		while(true) {
+			double c2 = Math.cos(angle + eps);
+			if (c1 == c2) {
+				return eps;
+			}
+			eps /= 10.0;
+		}
+	}
+	
+	/**
+	 * Calculates the machine precision.
+	 * @returns The maximum eps such that 1.0 == 1.0 + eps  
+	 */
+	private static double calcEps() {
+		double one = 1.0;
+		double eps = 1.0;
+		while(true) {
+			double onePlusEps = one + eps;
+			if (one == onePlusEps) {
+				return eps;
+			}
+			eps /= 10.0;
+		}
 	}
 }

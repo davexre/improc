@@ -5,6 +5,8 @@ import com.slavi.math.matrix.Matrix;
 public class RotationZYZ {
 	public static final RotationZYZ instance = new RotationZYZ();
 
+	private static final double threshold = Math.cos(MathUtil.epsAngle * 10);
+
 	/**
 	 * Return a rotation matrix R=R1*R2*R3
 	 * 
@@ -95,6 +97,8 @@ public class RotationZYZ {
 	 * angles[0] = rz1,
 	 * angles[1] = ry,
 	 * angles[2] = rz2
+	 * 
+	 * Ideas borrowed from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/
 	 */
 	public void getRotationAngles(Matrix m, double[] angles) {
 		/*
@@ -103,9 +107,36 @@ public class RotationZYZ {
 		 * c3*s1+c1*c2*s3	c1*c3-c2*s1*s3	s2*s3
 		 * -c1*s2			s1*s2			c2
 		 */
-		angles[0] = Math.atan2(m.getItem(1, 2), -m.getItem(0, 2));
-		angles[1] = Math.acos(m.getItem(2, 2));
-		angles[2] = Math.atan2(m.getItem(2, 1), m.getItem(2, 0));
+		if (m.getItem(2, 2) >= threshold) { 
+			/*
+			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * c1	-s1		0
+			 * s1	c1		0
+			 * 0	0		1
+			 * 
+			 */
+			angles[0] = Math.atan2(m.getItem(0, 1), m.getItem(1, 1));
+			angles[1] = 0.0;
+			angles[2] = 0.0;
+		} else if (m.getItem(2, 2) <= -threshold) {
+			/*
+			 * singularity at south pole, i.e. angles[1]=Math.PI; c2=-1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * -c1	s1		0
+			 * s1	c1		0
+			 * 0	0		-1
+			 */
+			angles[0] = Math.atan2(m.getItem(0, 1), m.getItem(1, 1));
+			angles[1] = Math.PI;
+			angles[2] = 0.0;
+		} else {
+			angles[0] = Math.atan2(m.getItem(1, 2), -m.getItem(0, 2));
+			angles[1] = Math.acos(m.getItem(2, 2));
+			angles[2] = Math.atan2(m.getItem(2, 1), m.getItem(2, 0));
+		}
 	}	
 	
 	/**
@@ -124,9 +155,36 @@ public class RotationZYZ {
 
 		 * M_backword = Transpose(M_foreward)
 		 */
-		angles[0] = Math.atan2(m.getItem(2, 1), -m.getItem(2, 0));
-		angles[1] = Math.acos(m.getItem(2, 2));
-		angles[2] = Math.atan2(m.getItem(1, 2), m.getItem(0, 2));
+		if (m.getItem(2, 2) >= threshold) { 
+			/*
+			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * c1	-s1		0
+			 * s1	c1		0
+			 * 0	0		1
+			 * 
+			 */
+			angles[0] = Math.atan2(m.getItem(1, 0), m.getItem(1, 1));
+			angles[1] = 0.0;
+			angles[2] = 0.0;
+		} else if (m.getItem(2, 2) <= -threshold) {
+			/*
+			 * singularity at south pole, i.e. angles[1]=Math.PI; c2=-1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * -c1	s1		0
+			 * s1	c1		0
+			 * 0	0		-1
+			 */
+			angles[0] = Math.atan2(m.getItem(1, 0), m.getItem(1, 1));
+			angles[1] = Math.PI;
+			angles[2] = 0.0;
+		} else {
+			angles[0] = Math.atan2(m.getItem(2, 1), -m.getItem(2, 0));
+			angles[1] = Math.acos(m.getItem(2, 2));
+			angles[2] = Math.atan2(m.getItem(1, 2), m.getItem(0, 2));
+		}
 	}	
 	
 	/**
@@ -154,9 +212,36 @@ public class RotationZYZ {
 		double s3 = Math.sin(rz2);
 		double c3 = Math.cos(rz2);
 
-		angles[0] = Math.atan2(s2*s3, -c3*s2);
-		angles[1] = Math.acos(c2);
-		angles[2] = Math.atan2(s1*s2, -c1*s2);
+		if (c2 >= threshold) {
+			/*
+			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * c1	-s1		0
+			 * s1	c1		0
+			 * 0	0		1
+			 * 
+			 */
+			angles[0] = rz1 + rz2; // Math.atan2(-c2*c3*s1-c1*s3, c1*c3-c2*s1*s3);
+			angles[1] = 0.0;
+			angles[2] = 0.0;
+		} else if (c2 <= -threshold) {
+			/*
+			 * singularity at south pole, i.e. angles[1]=Math.PI; c2=-1; s2=0
+			 * assume angles[2]=0; c3=1; s3=0 
+			 * R1*R2*R3
+			 * -c1	s1		0
+			 * s1	c1		0
+			 * 0	0		-1
+			 */
+			angles[0] = rz1 + rz2; // Math.atan2(-c2*c3*s1-c1*s3, c1*c3-c2*s1*s3);
+			angles[1] = Math.PI;
+			angles[2] = 0.0;
+		} else {
+			angles[0] = Math.atan2(s2*s3, -c3*s2);
+			angles[1] = Math.acos(c2);
+			angles[2] = Math.atan2(s1*s2, -c1*s2);
+		}
 	}	
 
 	/*

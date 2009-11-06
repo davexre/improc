@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.CalculatePanoramaParamsSpherical;
 import com.slavi.improc.myadjust.MyGeneratePanoramas;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.util.Marker;
@@ -67,12 +67,12 @@ public class Improc {
 		kppl = null;
 
 		System.out.println("---------- Calculating panorama parameters");
-//		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-//				new CalculatePanoramaParamsSpherical(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-//						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+				new CalculatePanoramaParamsSpherical(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+//		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+//				new CalculatePanoramaParams(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+//						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog(parent, "Generating panorama images", 

@@ -160,7 +160,7 @@ public class SphereNorm2 {
 	}
 	
 	private double calc_dDist_dParam(double dRX1_dP, double dRY1_dP, double dRX2_dP, double dRY2_dP) {
-		double H = p2.rx - p2.rx;
+		double H = p2.rx - p1.rx;
 		double dHdP = dRX2_dP - dRX1_dP;
 		double cosH = Math.cos(H);
 		double sinH = Math.sin(H);

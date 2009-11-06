@@ -463,10 +463,12 @@ public class Util {
 				zin = null;
 			}
 	        for (Map.Entry<String, InputStream> item : filesToReplace.entrySet()) {
+	        	InputStream itemfin = item.getValue();
+	        	if (itemfin == null)
+	        		continue;
 				ZipEntry entryOut = new ZipEntry(item.getKey());
 				entryOut.setCompressedSize(-1);
 				zou.putNextEntry(entryOut);
-				InputStream itemfin = item.getValue();
 				itemfin.reset();
 				while (itemfin.available() > 0) {
 					int len = itemfin.read(buf);
