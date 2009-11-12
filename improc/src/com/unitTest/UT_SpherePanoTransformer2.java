@@ -136,22 +136,18 @@ public class UT_SpherePanoTransformer2 {
 		p2.doubleX = dest2[0];
 		p2.doubleY = dest2[1];
 
-		double delta = 0.001 * MathUtil.deg2rad;
-//		System.out.println(MathUtil.rad2degStr(delta));
-		kpl2.rx += delta;
-		kpl2.ry += delta;
-		kpl2.rz += delta;
-		
 		SpherePanoTransformer2.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist = SpherePanoTransformer2.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-//		System.out.println("DIST=" + MathUtil.rad2degStr(dist));
+		double dist0 = SpherePanoTransformer2.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		double delta = 0.1 * MathUtil.deg2rad;
 		kpl1.rx += delta;
 		kpl1.ry += delta;
 		kpl1.rz += delta;
+		kpl1.scaleZ += delta;
 
 		kpl2.rx += delta;
 		kpl2.ry += delta;
 		kpl2.rz += delta;
+		kpl2.scaleZ += delta;
 
 		KeyPointPair kpp = new KeyPointPair();
 		kpp.sourceSP = p1;
@@ -162,20 +158,20 @@ public class UT_SpherePanoTransformer2 {
 		
 		SpherePanoTransformer2.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
 		SpherePanoTransformer2.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist0 = SpherePanoTransformer2.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-		dist0 += sn.dDist_dIX1 * delta;
-		dist0 += sn.dDist_dIY1 * delta;
-		dist0 += sn.dDist_dIZ1 * delta;
-		dist0 += sn.dDist_dIF1 * delta;
+		double dist1 = SpherePanoTransformer2.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		dist1 -= sn.dDist_dIX1 * delta;
+		dist1 -= sn.dDist_dIY1 * delta;
+		dist1 -= sn.dDist_dIZ1 * delta;
+		dist1 -= sn.dDist_dIF1 * delta;
 		
-		dist0 += sn.dDist_dIX2 * delta;
-		dist0 += sn.dDist_dIY2 * delta;
-		dist0 += sn.dDist_dIZ2 * delta;
-		dist0 += sn.dDist_dIF2 * delta;
+		dist1 -= sn.dDist_dIX2 * delta;
+		dist1 -= sn.dDist_dIY2 * delta;
+		dist1 -= sn.dDist_dIZ2 * delta;
+		dist1 -= sn.dDist_dIF2 * delta;
 		
-//		System.out.println(MathUtil.rad2degStr(dist));
-//		System.out.println(MathUtil.rad2degStr(dist0));
-		assertEqual(dist, dist0);
+//		System.out.println(MathUtil.d20(dist0));
+//		System.out.println(MathUtil.d20(dist1));
+		assertEqual(dist0, dist1);
 	}
 
 	public static void dump(String str, double x, double y) {
@@ -208,8 +204,6 @@ public class UT_SpherePanoTransformer2 {
 		kpl.imageSizeX = (int) (kpl.cameraOriginX * 2);
 		kpl.imageSizeY = (int) (kpl.cameraOriginY * 2);
 		kpl.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-//		kpl.scaleZ = 0.5 * Math.max(origin.imageSizeX, origin.imageSizeY) * 
-//			Math.tan(0.5 * KeyPointList.defaultCameraFieldOfView);
 
 		KeyPointPairList kppl = new KeyPointPairList();
 		boolean sourceOrigin = false;

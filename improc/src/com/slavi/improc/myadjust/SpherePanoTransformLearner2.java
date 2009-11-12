@@ -371,9 +371,9 @@ public class SpherePanoTransformLearner2 {
 			}
 		}
 		computeWeights(result);
-		if (images.size() <= 1)
-			return result;
 		if (chainModified) {
+			if (images.size() <= 1)
+				return result;
 			System.out.println("************* COMPUTE PRIMS");
 			origin = images.remove(0);
 			calculatePrims(origin, images, chain);

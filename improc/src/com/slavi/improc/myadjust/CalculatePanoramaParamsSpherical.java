@@ -154,6 +154,7 @@ public class CalculatePanoramaParamsSpherical implements Callable<ArrayList<Arra
 		int curAttempt = 0;
 		while ((kppl.size() > 0) && (curAttempt < maxAttempts)) {
 			curAttempt++;
+			System.out.println("*********** ATTEMPT " + curAttempt + " ****************");
 			if (Thread.interrupted())
 				throw new InterruptedException();
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
@@ -165,7 +166,6 @@ public class CalculatePanoramaParamsSpherical implements Callable<ArrayList<Arra
 			}
 			taskSet.addFinished();
 			taskSet.get();
-			System.out.println("*********** NEW ATTEMPT " + curAttempt + " ****************");
 		}
 		return panos;
 	}	

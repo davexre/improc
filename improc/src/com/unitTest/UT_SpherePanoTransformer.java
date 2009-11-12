@@ -133,15 +133,9 @@ public class UT_SpherePanoTransformer {
 		p2.doubleX = dest2[0];
 		p2.doubleY = dest2[1];
 
-		double delta = 0.001 * MathUtil.deg2rad;
-//		System.out.println(MathUtil.rad2degStr(delta));
-		kpl2.rx += delta;
-		kpl2.ry += delta;
-		kpl2.rz += delta;
-		
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-//		System.out.println("DIST=" + MathUtil.rad2degStr(dist));
+		double dist0 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		double delta = 0.1 * MathUtil.deg2rad;
 		kpl1.rx += delta;
 		kpl1.ry += delta;
 		kpl1.rz += delta;
@@ -159,20 +153,20 @@ public class UT_SpherePanoTransformer {
 		
 		SpherePanoTransformer.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist0 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-		dist0 += sn.dDist_dIX1 * delta;
-		dist0 += sn.dDist_dIY1 * delta;
-		dist0 += sn.dDist_dIZ1 * delta;
-		dist0 += sn.dDist_dIF1 * delta;
+		double dist1 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		dist1 -= sn.dDist_dIX1 * delta;
+		dist1 -= sn.dDist_dIY1 * delta;
+		dist1 -= sn.dDist_dIZ1 * delta;
+		dist1 -= sn.dDist_dIF1 * delta;
 		
-		dist0 += sn.dDist_dIX2 * delta;
-		dist0 += sn.dDist_dIY2 * delta;
-		dist0 += sn.dDist_dIZ2 * delta;
-		dist0 += sn.dDist_dIF2 * delta;
+		dist1 -= sn.dDist_dIX2 * delta;
+		dist1 -= sn.dDist_dIY2 * delta;
+		dist1 -= sn.dDist_dIZ2 * delta;
+		dist1 -= sn.dDist_dIF2 * delta;
 		
 //		System.out.println(MathUtil.rad2degStr(dist));
 //		System.out.println(MathUtil.rad2degStr(dist0));
-		assertEqual(dist, dist0);
+		assertEqual(dist0, dist1);
 	}
 
 	void dump(String str, double dest[]) {
@@ -265,7 +259,7 @@ public class UT_SpherePanoTransformer {
 		test.testSpherePanoTransformer();
 		test.testSphericalDistance();
 		test.testSphereNorm();
-		test.testCalcPrims();
+//		test.testCalcPrims();
 		System.out.println("Done");
 	}
 }
