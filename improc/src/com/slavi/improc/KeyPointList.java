@@ -23,10 +23,18 @@ public class KeyPointList {
 
 	public int imageSizeY;
 	
+
+	// Spherical pano adjust
+	public double fov; // Field of view
+	public double sphereRZ1;
+	public double sphereRY;
+	public double sphereRZ2;
+	public Matrix sphereCamera2real;
+	
 	// My adjust
 	public int imageId = -1;
 	public double rx = 0.0, ry = 0.0, rz = 0.0;
-
+	
 	public Matrix camera2real;
 	public Matrix dMdX, dMdY, dMdZ;
 	public Point2D.Double min, max;
@@ -53,6 +61,7 @@ public class KeyPointList {
 		r.cameraOriginX = r.imageSizeX / 2.0;
 		r.cameraOriginY = r.imageSizeY / 2.0;
 		r.cameraScale = 1.0 / Math.max(r.imageSizeX, r.imageSizeY);
+		
 		r.scaleZ = defaultCameraFOV_to_ScaleZ;
 		while (fin.ready()) {
 			String str = fin.readLine().trim();

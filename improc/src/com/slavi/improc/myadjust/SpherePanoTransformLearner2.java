@@ -45,9 +45,9 @@ public class SpherePanoTransformLearner2 {
 	}
 
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
-		origin.rx = 0.0;
-		origin.ry = 0.0;
-		origin.rz = 0.0;
+		origin.sphereRZ1 = 0.0;
+		origin.sphereRY = 0.0;
+		origin.sphereRZ2 = 0.0;
 		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		origin.calculatePrimsAtHop = 0;
 		
@@ -85,26 +85,26 @@ public class SpherePanoTransformLearner2 {
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
-					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
-					Matrix targetToWorld = RotationZYZ.instance.makeAngles(minHopPairList.target.rx, minHopPairList.target.ry, minHopPairList.target.rz);
+					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2);
+					Matrix targetToWorld = RotationZYZ.instance.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
 					targetToWorld.mMul(sourceToTarget, sourceToWorld);
 					RotationZYZ.instance.getRotationAngles(sourceToWorld, angles);
-					curImage.rx = angles[0];
-					curImage.ry = angles[1];
-					curImage.rz = angles[2];
+					curImage.sphereRZ1 = angles[0];
+					curImage.sphereRY = angles[1];
+					curImage.sphereRZ2 = angles[2];
 					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
-					RotationZYZ.instance.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
+					RotationZYZ.instance.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
 					Matrix targetToSource = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
-					Matrix sourceToWorld = RotationZYZ.instance.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
+					Matrix sourceToWorld = RotationZYZ.instance.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);
 					sourceToWorld.mMul(targetToSource, targetToWorld);
 					RotationZYZ.instance.getRotationAngles(targetToWorld, angles);
-					curImage.rx = angles[0];
-					curImage.ry = angles[1];
-					curImage.rz = angles[2];
+					curImage.sphereRZ1 = angles[0];
+					curImage.sphereRY = angles[1];
+					curImage.sphereRZ2 = angles[2];
 					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
 				}
 			
@@ -128,9 +128,9 @@ public class SpherePanoTransformLearner2 {
 
 	double scaleTheZ = 10000;
 	void calculateNormalEquations() {
-		origin.rx = 0;
-		origin.ry = 0;
-		origin.rz = 0;
+		origin.sphereRZ1 = 0;
+		origin.sphereRY = 0;
+		origin.sphereRZ2 = 0;
 		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		
 		lsa.clear();
@@ -388,27 +388,27 @@ public class SpherePanoTransformLearner2 {
 		Matrix u = lsa.getUnknown();
 //		u.printM("Unknowns");
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
-				"\trx=" + MathUtil.rad2degStr(origin.rx) + 
-				"\try=" + MathUtil.rad2degStr(origin.ry) + 
-				"\trz=" + MathUtil.rad2degStr(origin.rz) + 
+				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
+				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
+				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
 				"\ts=" + MathUtil.d4(origin.scaleZ)
 				);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
 			int index = curImage * 4;
 			System.out.println(image.imageFileStamp.getFile().getName() + 
-					"\trx=" + MathUtil.rad2degStr(image.rx) + 
-					"\try=" + MathUtil.rad2degStr(image.ry) + 
-					"\trz=" + MathUtil.rad2degStr(image.rz) + 
+					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
+					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
+					"\trz2=" + MathUtil.rad2degStr(image.sphereRZ2) + 
 					"\ts=" + MathUtil.d4(image.scaleZ) +
-					"\tdx=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
+					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
-					"\tdz=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
+					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
 					"\tds=" + MathUtil.d4(u.getItem(0, index + 3) / scaleTheZ) 
 					);
-			image.rx = MathUtil.fixAngle2PI(image.rx - u.getItem(0, index + 0));
-			image.ry = MathUtil.fixAngle2PI(image.ry - u.getItem(0, index + 1));
-			image.rz = MathUtil.fixAngle2PI(image.rz - u.getItem(0, index + 2));
+			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 - u.getItem(0, index + 0));
+			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY - u.getItem(0, index + 1));
+			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 - u.getItem(0, index + 2));
 			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleTheZ);
 		}
 		computeDiscrepancies(result);

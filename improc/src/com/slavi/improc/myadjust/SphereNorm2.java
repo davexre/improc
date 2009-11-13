@@ -39,9 +39,9 @@ public class SphereNorm2 {
 	public static class PointDerivatives {
 		// IX, IY -> long, lat of North pole of the world spherical coord 
 		// 		system in the local (image) spherical coords system.
-		// IX = kp.keyPointList.rx
-		// IY = kp.keyPointList.ry
-		// IZ = kp.keyPointList.rz (rotation of local coord system around its pole axis)
+		// IX = kp.keyPointList.sphereRZ1
+		// IY = kp.keyPointList.sphereRY
+		// IZ = kp.keyPointList.sphereRZ2 (rotation of local coord system around its pole axis)
 		// IF = kp.keyPointList.scaleZ (focal distance of the image)
 		public KeyPoint kp;
 		
@@ -73,12 +73,12 @@ public class SphereNorm2 {
 		}
 		
 		private void calcWorldSphericalCoords() {
-			double sinDSX = Math.sin(sx - kp.keyPointList.rx);
-			double cosDSX = Math.cos(sx - kp.keyPointList.rx);
+			double sinDSX = Math.sin(sx - kp.keyPointList.sphereRZ1);
+			double cosDSX = Math.cos(sx - kp.keyPointList.sphereRZ1);
 			double sinSY = Math.sin(sy);
 			double cosSY = Math.cos(sy);
-			double sinIY = Math.sin(kp.keyPointList.ry);
-			double cosIY = Math.cos(kp.keyPointList.ry);
+			double sinIY = Math.sin(kp.keyPointList.sphereRY);
+			double cosIY = Math.cos(kp.keyPointList.sphereRY);
 
 			// dRY
 			double H = sinSY * sinIY * cosDSX;
@@ -129,7 +129,7 @@ public class SphereNorm2 {
 			double dA_dIY = (dB_dIY * C - B * dC_dIY) / (C*C);
 			double dA_dIF = (dB_dIF * C - B * dC_dIF) / (C*C);
 			
-			rx = Math.atan(A) - kp.keyPointList.rz;
+			rx = Math.atan(A) - kp.keyPointList.sphereRZ2;
 			tmp = 1 + A * A;
 			dRX_dIX = dA_dIX / tmp;
 			dRX_dIY = dA_dIY / tmp;

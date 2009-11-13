@@ -14,6 +14,11 @@ public class KeyPointPairList {
 
 	public KeyPointList target = null;
 
+	// Spherical pano adjust
+	public double sphereRZ1;
+	public double sphereRY;
+	public double sphereRZ2;
+
 	//////////////////////////// myAdjust
 	public double rx, ry, rz; // source->target angles of rotation
 	public double scale;

@@ -18,15 +18,15 @@ public class SpherePanoTransformer2 {
 		double x = Math.atan2(sy, sx);
 		double r = Math.sqrt(sx * sx + sy * sy);
 		double y = Math.atan2(r, f);
-		rotateForeward(x, y, srcImage.rx, srcImage.ry, srcImage.rz, dest);
+		rotateForeward(x, y, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 	}
 
 	/**
 	 * sx -> longitude
 	 * sy -> zenith angle (90 - latitude) 
 	 */
-	public static void rotateForeward(double sx, double sy, double IX, double IY, double IZ, double dest[]) {
-		sx -= IX;
+	public static void rotateForeward(double sx, double sy, double IZ1, double IY, double IZ2, double dest[]) {
+		sx -= IZ1;
 		double sinDX = Math.sin(sx);
 		double cosDX = Math.cos(sx);
 		double sinIY = Math.sin(IY);
@@ -34,12 +34,12 @@ public class SpherePanoTransformer2 {
 		double sinSY = Math.sin(sy);
 		double cosSY = Math.cos(sy);
 
-		dest[0] = Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ;
+		dest[0] = Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ2;
 		dest[1] = Math.acos(cosSY * cosIY + sinSY * sinIY * cosDX);
 	}
 
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		rotateBackward(rx, ry, srcImage.rx, srcImage.ry, srcImage.rz, dest);
+		rotateBackward(rx, ry, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 		// x => longitude, y => zenith
 		double r = srcImage.scaleZ * Math.tan(dest[1]);
 		dest[1] = srcImage.cameraOriginY + r * Math.sin(dest[0]) / srcImage.cameraScale;
@@ -50,8 +50,8 @@ public class SpherePanoTransformer2 {
 	 * rx -> longitude
 	 * ry -> zenith angle (90 - latitude) 
 	 */
-	public static void rotateBackward(double rx, double ry, double IX, double IY, double IZ, double dest[]) {
-		rx += IZ;
+	public static void rotateBackward(double rx, double ry, double IZ1, double IY, double IZ2, double dest[]) {
+		rx += IZ2;
 		double sinIY = Math.sin(IY);
 		double cosIY = Math.cos(IY);
 		double sinRY = Math.sin(ry);
@@ -59,7 +59,7 @@ public class SpherePanoTransformer2 {
 		double sinRX = Math.sin(rx);
 		double cosRX = Math.cos(rx);
 		
-		dest[0] = IX + Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY);
+		dest[0] = IZ1 + Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY);
 		dest[1] = Math.acos(cosRY * cosIY - sinRY * sinIY * cosRX);
 	}
 
