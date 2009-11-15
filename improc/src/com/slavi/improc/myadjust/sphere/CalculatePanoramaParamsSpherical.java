@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.myadjust.sphere;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -113,7 +113,7 @@ public class CalculatePanoramaParamsSpherical implements Callable<ArrayList<Arra
 		
 		public Void call() {
 			copyBadStatus(chain);
-			SpherePanoTransformLearner2 learner = new SpherePanoTransformLearner2(chain);
+			SpherePanoTransformLearner learner = new SpherePanoTransformLearner(chain);
 			for (int i = 0; i < maxIterations; i++) {
 				TransformLearnerResult result = learner.calculateOne();
 				System.out.println(result);

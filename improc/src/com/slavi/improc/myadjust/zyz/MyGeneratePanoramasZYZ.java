@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.myadjust.zyz;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
@@ -19,7 +19,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
 
-public class MyGeneratePanoramasZYX implements Callable<Void> {
+public class MyGeneratePanoramasZYZ implements Callable<Void> {
 
 	ExecutorService exec;	
 	ArrayList<ArrayList<KeyPointPairList>> panos;
@@ -42,7 +42,7 @@ public class MyGeneratePanoramasZYX implements Callable<Void> {
 	int outputImageSizeX = 5000;
 	int outputImageSizeY;
 
-	public MyGeneratePanoramasZYX(ExecutorService exec,
+	public MyGeneratePanoramasZYZ(ExecutorService exec,
 			ArrayList<ArrayList<KeyPointPairList>> panos,
 			String outputDir,
 			boolean pinPoints,
@@ -75,13 +75,13 @@ public class MyGeneratePanoramasZYX implements Callable<Void> {
 		
 		double tmp[] = new double[3];
 		for (KeyPointList i : images) {
-			MyPanoPairTransformerZYX.transformForeward(0, 0, i, tmp);
+			MyPanoPairTransformerZYZ.transformForeward(0, 0, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYX.transformForeward(0, i.imageSizeY - 1, i, tmp);
+			MyPanoPairTransformerZYZ.transformForeward(0, i.imageSizeY - 1, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYX.transformForeward(i.imageSizeX - 1, 0, i, tmp);
+			MyPanoPairTransformerZYZ.transformForeward(i.imageSizeX - 1, 0, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYX.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
+			MyPanoPairTransformerZYZ.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
 			calcExt(tmp, minAngle, sizeAngle);
 		}
 //		minAngle.x += Math.PI / 4.0;
@@ -109,11 +109,11 @@ public class MyGeneratePanoramasZYX implements Callable<Void> {
 	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
-		MyPanoPairTransformerZYX.transformBackward(x, y, image, dest);
+		MyPanoPairTransformerZYZ.transformBackward(x, y, image, dest);
 	}
 	
 	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
-		MyPanoPairTransformerZYX.transformForeward(x, y, image, dest);
+		MyPanoPairTransformerZYZ.transformForeward(x, y, image, dest);
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
 	}
@@ -440,7 +440,7 @@ public class MyGeneratePanoramasZYX implements Callable<Void> {
 		images = new ArrayList<KeyPointList>();
 		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
 			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
-			MyPanoPairTransformZYXLearner.buildImagesList(pano, images);
+			MyPanoPairTransformZYZLearner.buildImagesList(pano, images);
 			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
 			for (KeyPointList image : images) {
 				System.out.println(image.imageFileStamp.getFile().getName());
@@ -452,7 +452,7 @@ public class MyGeneratePanoramasZYX implements Callable<Void> {
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
-			MyPanoPairTransformZYXLearner.buildImagesList(pairLists, images);
+			MyPanoPairTransformZYZLearner.buildImagesList(pairLists, images);
 			calcExtents();
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));

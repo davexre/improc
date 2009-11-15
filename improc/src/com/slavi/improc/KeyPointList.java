@@ -25,7 +25,7 @@ public class KeyPointList {
 	
 
 	// Spherical pano adjust
-	public double fov; // Field of view
+	public double fov = defaultCameraFieldOfView; // Field of view
 	public double sphereRZ1;
 	public double sphereRY;
 	public double sphereRZ2;

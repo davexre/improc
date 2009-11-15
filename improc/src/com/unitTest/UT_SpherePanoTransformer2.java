@@ -6,9 +6,9 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.SphereNorm2;
-import com.slavi.improc.myadjust.SpherePanoTransformLearner2;
-import com.slavi.improc.myadjust.SpherePanoTransformer2;
+import com.slavi.improc.myadjust.sphere2.SphereNorm2;
+import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
+import com.slavi.improc.myadjust.sphere2.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 

@@ -1,6 +1,6 @@
 package com.unitTest;
 
-import com.slavi.improc.myadjust.MyPanoPairTransformerZYX;
+import com.slavi.improc.myadjust.zyx.MyPanoPairTransformerZYX;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.RotationZYX;

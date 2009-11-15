@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.myadjust.zyx;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;

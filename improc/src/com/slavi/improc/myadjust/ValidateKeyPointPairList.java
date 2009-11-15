@@ -43,6 +43,12 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.rx = Math.atan2(d, f);
 		pairList.ry = Math.atan2(c, f1);
 		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
+		
+		f = Math.tan(pairList.source.fov / 2.0) / (2.0 * pairList.source.cameraScale);
+		double r = Math.sqrt(tr.c * tr.c + tr.d * tr.d);
+		pairList.sphereRZ1 = Math.atan2(tr.d, tr.c);
+		pairList.sphereRY = Math.atan2(r, f);
+		pairList.sphereRZ2 = angle - pairList.sphereRZ1;
 	}
 
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws Exception {
@@ -74,6 +80,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
+				"\tsZ1=" +MathUtil.rad2degStr(pairList.sphereRZ1) + 
+				"\tsY=" +MathUtil.rad2degStr(pairList.sphereRY) + 
+				"\tsZ2=" +MathUtil.rad2degStr(pairList.sphereRZ2) + 
 				"\trx=" +MathUtil.rad2degStr(pairList.rx) + 
 				"\try=" +MathUtil.rad2degStr(pairList.ry) + 
 				"\trz=" + MathUtil.rad2degStr(pairList.rz) +

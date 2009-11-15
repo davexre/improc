@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.myadjust.zyx;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -11,7 +11,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
-public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
+public class CalculatePanoramaParamsZYX implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
 
 	ExecutorService exec;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
@@ -23,7 +23,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	
 	ArrayList<ArrayList<KeyPointPairList>> panos = new ArrayList<ArrayList<KeyPointPairList>>();
 	
-	public CalculatePanoramaParams(ExecutorService exec,
+	public CalculatePanoramaParamsZYX(ExecutorService exec,
 			ArrayList<KeyPointPairList> kppl,
 			AbsoluteToRelativePathMaker keyPointPairFileRoot,
 			String outputDir,
@@ -113,7 +113,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		
 		public Void call() {
 			copyBadStatus(chain);
-			MyPanoPairTransformLearner learner = new MyPanoPairTransformLearner(chain);
+			MyPanoPairTransformZYXLearner learner = new MyPanoPairTransformZYXLearner(chain);
 			for (int i = 0; i < maxIterations; i++) {
 				TransformLearnerResult result = learner.calculateOne();
 				System.out.println(result);

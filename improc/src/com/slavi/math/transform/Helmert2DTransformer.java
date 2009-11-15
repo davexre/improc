@@ -40,21 +40,12 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 	/**
 	 * Extraxts the scale and angle parameters of the current 
 	 * transformation coefficients. The scale parameter is
-	 * returned in params[0] and the angle (0..pi) is returned
+	 * returned in params[0] and the angle [-pi..pi] is returned
 	 * in params[1].
 	 */
 	public void getParams(double params[]) {
 		params[0] = MathUtil.hypot(a, b);
-		double ca = Math.acos(params[0] == 0 ? 1.0 : a / params[0]);
-		double sa = Math.asin(params[0] == 0 ? 0.0 : b / params[0]);
-		if (ca <= MathUtil.PIover2) {
-			params[1] = sa; 
-		} else {
-			if (sa >= 0)
-				params[1] = ca;
-			else
-				params[1] = -ca;
-		}
+		params[1] = Math.atan2(b, a);
 	}
 	
 	/**

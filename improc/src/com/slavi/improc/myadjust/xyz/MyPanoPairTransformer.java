@@ -1,9 +1,10 @@
-package com.slavi.improc.myadjust;
+package com.slavi.improc.myadjust.xyz;
 
 import java.awt.geom.Point2D;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
+import com.slavi.improc.myadjust.MyPoint3D;
 
 public class MyPanoPairTransformer {
 
