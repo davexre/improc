@@ -47,7 +47,7 @@ public class MyPanoPairTransformZYZLearner {
 		});
 	}
 
-	void calculatePrims() {
+	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.sphereRZ1 = 0.0;
 		origin.sphereRY = 0.0;
 		origin.sphereRZ2 = 0.0;
@@ -89,19 +89,18 @@ public class MyPanoPairTransformZYZLearner {
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
 					Matrix sourceToTarget = MyPanoPairTransformerZYZ.rot.makeAngles(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2);
-					Matrix targetToWorld = MyPanoPairTransformerZYZ.rot.makeAngles(-minHopPairList.target.sphereRZ1, -minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
+					Matrix targetToWorld = MyPanoPairTransformerZYZ.rot.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					MyPanoPairTransformerZYZ.rot.getRotationAngles(sourceToWorld, angles);
-					curImage.sphereRZ1 = -angles[0];
-					curImage.sphereRY = -angles[1];
+					curImage.sphereRZ1 = angles[0];
+					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
 					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
-//					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
 					MyPanoPairTransformerZYZ.rot.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
-					Matrix targetToSource = MyPanoPairTransformerZYZ.rot.makeAngles(-angles[0], -angles[1], angles[2]);
+					Matrix targetToSource = MyPanoPairTransformerZYZ.rot.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix sourceToWorld = MyPanoPairTransformerZYZ.rot.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
@@ -110,7 +109,6 @@ public class MyPanoPairTransformZYZLearner {
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
 					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
-//					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
 				}
 				curImage.calculatePrimsAtHop = minHop + 1;
 				todo.remove(curImageIndex);
@@ -458,7 +456,7 @@ public class MyPanoPairTransformZYZLearner {
 				return result;
 			System.out.println("************* COMPUTE PRIMS");
 			origin = images.remove(0);
-			calculatePrims();
+			calculatePrims(origin, images, chain);
 		}
 
 		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
