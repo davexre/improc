@@ -85,7 +85,17 @@ public class Dummy {
 		System.out.println(p3[2]);
 	}
 	
+	void aaa() {
+		double x1 = 20 * MathUtil.deg2rad; 
+		double y1 = 30 * MathUtil.deg2rad; 
+		double x2 = 40 * MathUtil.deg2rad; 
+		double y2 = 50 * MathUtil.deg2rad;
+		double d1 = SpherePanoTransformer2.getSphericalDistance(x1, y1, x2, y2);
+		double d2 = SpherePanoTransformer2.getSphericalDistance(x2, y2, x1, y1);
+		System.out.println(d1 - d2);
+	}
+	
 	public static void main(String[] args) {
-		new Dummy().zxc();
+		new Dummy().aaa();
 	}
 }

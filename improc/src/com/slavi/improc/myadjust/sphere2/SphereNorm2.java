@@ -43,6 +43,20 @@ public class SphereNorm2 {
 		dDist_dIZ2 = calc_dDist_dParam(0, 0, p2.dRX_dIZ, p2.dRY_dIZ);
 		dDist_dIF2 = calc_dDist_dParam(0, 0, p2.dRX_dIF, p2.dRY_dIF);
 		if (Math.abs(dist0 - Dist) > (MathUtil.epsAngle * 10)) {
+			System.out.println("LX1=" + MathUtil.rad2degStr(p1.sx) + "\tLY1=" + MathUtil.rad2degStr(p1.sy));
+			System.out.println("LX2=" + MathUtil.rad2degStr(p2.sx) + "\tLY2=" + MathUtil.rad2degStr(p2.sy));
+			
+			System.out.println(
+					"p1.x=" + MathUtil.rad2degStr(source[0]) + 
+					"\tp1.x1=" + MathUtil.rad2degStr(p1.rx) + 
+					"\tp1.y=" + MathUtil.rad2degStr(source[1]) + 
+					"\tp1.y1=" + MathUtil.rad2degStr(p1.ry) + 
+					"\tp2.x=" + MathUtil.rad2degStr(target[0]) + 
+					"\tp2.x1=" + MathUtil.rad2degStr(p2.rx) + 
+					"\tp2.y=" + MathUtil.rad2degStr(target[1]) + 
+					"\tp2.y1=" + MathUtil.rad2degStr(p2.ry) 
+					);
+			
 			System.out.println(
 					"d=" + MathUtil.rad2degStr(dist0) + "\tDist=" + MathUtil.rad2degStr(Dist) +
 					"\tsX=" + kpp.sourceSP.doubleX + 
@@ -116,7 +130,7 @@ public class SphereNorm2 {
 			double H = sinSY * sinIY * cosDSX;
 			double dH_dIX = sinSY * sinIY * sinDSX;
 			double dH_dIY = sinSY * cosIY * cosDSX;
-			double dH_dIF = cosSY * sinIY * cosDSX * dSY_dIF - sinSY * sinIY * sinDSX * dSX_dIF;
+			double dH_dIF = cosSY * sinIY * cosDSX * dSY_dIF + sinSY * sinIY * sinDSX * dSX_dIF;
 			
 			double G = cosSY * cosIY;
 			double dG_dIX = 0;
@@ -144,7 +158,7 @@ public class SphereNorm2 {
 			double D = cosDSX * cosIY * sinSY;
 			double dD_dIX = sinDSX * cosIY * sinSY;
 			double dD_dIY = - cosDSX * sinIY * sinSY;
-			double dD_dIF = - sinDSX * cosIY * sinSY * dSX_dIF + cosDSX * cosIY * cosSY * dSY_dIF;
+			double dD_dIF = sinDSX * cosIY * sinSY * dSX_dIF + cosDSX * cosIY * cosSY * dSY_dIF;
 			
 			double C = D - E;
 			double dC_dIX = dD_dIX - dE_dIX; 
@@ -154,14 +168,14 @@ public class SphereNorm2 {
 			double B = sinDSX * sinSY;
 			double dB_dIX = - cosDSX * sinSY;
 			double dB_dIY = 0;
-			double dB_dIF = cosDSX * sinSY * dSX_dIF + sinDSX * cosSY * dSY_dIF;
+			double dB_dIF = - cosDSX * sinSY * dSX_dIF + sinDSX * cosSY * dSY_dIF;
 			
 			double A = B / C;
 			double dA_dIX = (dB_dIX * C - B * dC_dIX) / (C*C);
 			double dA_dIY = (dB_dIY * C - B * dC_dIY) / (C*C);
 			double dA_dIF = (dB_dIF * C - B * dC_dIF) / (C*C);
 			
-			rx = Math.atan(A) - kp.keyPointList.sphereRZ2;
+			rx = Math.atan2(B, C) - kp.keyPointList.sphereRZ2;
 			tmp = 1 + A * A;
 			dRX_dIX = dA_dIX / tmp;
 			dRX_dIY = dA_dIY / tmp;
@@ -183,7 +197,7 @@ public class SphereNorm2 {
 			double A = B / kp.keyPointList.scaleZ;
 			double dAdIF = - B / (kp.keyPointList.scaleZ * kp.keyPointList.scaleZ) ;
 			
-			sy = Math.atan(A);
+			sy = Math.atan2(B, kp.keyPointList.scaleZ);
 			dSY_dIF = dAdIF / (1.0 + A * A);
 			
 			sx = Math.atan2(tmpy, tmpx);
@@ -230,12 +244,12 @@ public class SphereNorm2 {
 		double dCdP = K * dKdP + L * dLdP;
 		
 		double B = Math.sqrt(E);
-		double dBdP = dEdP / (2.0 * Math.sqrt(E));
+		double dBdP = dEdP / (2.0 * B);
 		
 		double A = B / C;
 		double dAdP = (dBdP * C - B * dCdP) / (C * C);
 		
-		Dist = Math.atan(A);
+		Dist = Math.atan2(B, C);
 		double dDistdP = dAdP / (1 + A*A);
 		return dDistdP;
 	}
