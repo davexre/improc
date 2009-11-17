@@ -1,6 +1,7 @@
 package com.slavi.improc.ui;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -11,7 +12,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.improc.myadjust.zyz.CalculatePanoramaParamsZYZ;
+import com.slavi.improc.myadjust.sphere2.CalculatePanoramaParamsSpherical2;
 import com.slavi.improc.myadjust.zyz.MyGeneratePanoramasZYZ;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
@@ -38,6 +39,7 @@ public class Improc {
 		
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath("*.jpg"), true, true);
 		ArrayList<String> images = SwtUtil.openWaitDialog(parent, "Searching for images", new EnumerateImageFiles(imagesIterator), -1);
+		Collections.sort(images);
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 		
@@ -67,12 +69,12 @@ public class Improc {
 		kppl = null;
 
 		System.out.println("---------- Calculating panorama parameters");
-//		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-//				new CalculatePanoramaParamsSpherical(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-//						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-				new CalculatePanoramaParamsZYZ(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+				new CalculatePanoramaParamsSpherical2(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+//		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+//				new CalculatePanoramaParamsZYZ(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+//						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog(parent, "Generating panorama images", 

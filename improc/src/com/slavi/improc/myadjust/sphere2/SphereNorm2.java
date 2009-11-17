@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust.sphere2;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
+import com.slavi.math.MathUtil;
 
 public class SphereNorm2 {
 
@@ -9,6 +10,7 @@ public class SphereNorm2 {
 	PointDerivatives p2 = new PointDerivatives();
 
 	public double Dist;
+	public double dist0;
 	
 	// Private derivatives 
 	public double dDist_dIX1;
@@ -22,6 +24,12 @@ public class SphereNorm2 {
 	public double dDist_dIF2;
 	
 	public void setKeyPointPair(KeyPointPair kpp) {
+		double source[] = new double[2];
+		double target[] = new double[2];
+		SpherePanoTransformer2.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, source);
+		SpherePanoTransformer2.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, target);
+		dist0 = SpherePanoTransformer2.getSphericalDistance(source[0], source[1], target[0], target[1]);
+
 		p1.setKeyPoint(kpp.sourceSP);
 		p2.setKeyPoint(kpp.targetSP);
 		
@@ -34,6 +42,30 @@ public class SphereNorm2 {
 		dDist_dIY2 = calc_dDist_dParam(0, 0, p2.dRX_dIY, p2.dRY_dIY);
 		dDist_dIZ2 = calc_dDist_dParam(0, 0, p2.dRX_dIZ, p2.dRY_dIZ);
 		dDist_dIF2 = calc_dDist_dParam(0, 0, p2.dRX_dIF, p2.dRY_dIF);
+		if (Math.abs(dist0 - Dist) > (MathUtil.epsAngle * 10)) {
+			System.out.println(
+					"d=" + MathUtil.rad2degStr(dist0) + "\tDist=" + MathUtil.rad2degStr(Dist) +
+					"\tsX=" + kpp.sourceSP.doubleX + 
+					"\tsY=" + kpp.sourceSP.doubleY + 
+					"\tsCamX=" + kpp.sourceSP.keyPointList.cameraOriginX + 
+					"\tsCamY=" + kpp.sourceSP.keyPointList.cameraOriginY + 
+					"\ttX=" + kpp.targetSP.doubleX + 
+					"\ttY=" + kpp.targetSP.doubleY + 
+					"\ttCamX=" + kpp.targetSP.keyPointList.cameraOriginX + 
+					"\ttCamY=" + kpp.targetSP.keyPointList.cameraOriginY + 
+					"\tsZ1=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRZ1) + 
+					"\tsY=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRY) + 
+					"\tsZ2=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRZ2) + 
+					"\ttZ1=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRZ1) + 
+					"\ttY=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRY) + 
+					"\ttZ2=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRZ2) + 
+					"\tsrcX=" + MathUtil.rad2degStr(source[0]) + 
+					"\tsrcY=" + MathUtil.rad2degStr(source[1]) + 
+					"\ttargX=" + MathUtil.rad2degStr(target[0]) + 
+					"\ttargY=" + MathUtil.rad2degStr(target[1]) 
+					);
+		}
+
 	}
 	
 	public static class PointDerivatives {

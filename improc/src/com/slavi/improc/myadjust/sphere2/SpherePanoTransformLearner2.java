@@ -16,6 +16,8 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner2 {
 
+	static boolean adjustForScale = false;
+	
 	ArrayList<KeyPointPairList> chain;
 	ArrayList<KeyPointList> images;
 	ArrayList<KeyPointPairList> ignoredPairLists;
@@ -86,27 +88,38 @@ public class SpherePanoTransformLearner2 {
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
-					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2);
+					angles[0] = minHopPairList.sphereRZ1;
+					angles[1] = minHopPairList.sphereRY;
+					angles[2] = minHopPairList.sphereRZ2;
+//					RotationZYZ.instance.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
+					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix targetToWorld = RotationZYZ.instance.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
-					targetToWorld.mMul(sourceToTarget, sourceToWorld);
+					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					RotationZYZ.instance.getRotationAngles(sourceToWorld, angles);
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
-					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+					if (adjustForScale) {
+						curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+					}
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
+//					angles[0] = minHopPairList.sphereRZ1;
+//					angles[1] = minHopPairList.sphereRY;
+//					angles[2] = minHopPairList.sphereRZ2;
 					RotationZYZ.instance.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
 					Matrix targetToSource = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix sourceToWorld = RotationZYZ.instance.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);
-					sourceToWorld.mMul(targetToSource, targetToWorld);
+					targetToSource.mMul(sourceToWorld, targetToWorld);
 					RotationZYZ.instance.getRotationAngles(targetToWorld, angles);
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
-					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+					if (adjustForScale) {
+						curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+					}
 				}
 			
 				curImage.calculatePrimsAtHop = minHop + 1;
@@ -135,7 +148,7 @@ public class SpherePanoTransformLearner2 {
 		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		
 		lsa.clear();
-		Matrix coefs = new Matrix(images.size() * 4, 1);			
+		Matrix coefs = new Matrix(images.size() * (adjustForScale ? 4 : 3), 1);			
 		SphereNorm2 sn = new SphereNorm2();
 		for (KeyPointPairList pairList : chain) {
 			for (KeyPointPair item : pairList.items) {
@@ -144,21 +157,25 @@ public class SpherePanoTransformLearner2 {
 				
 				sn.setKeyPointPair(item);
 				double computedWeight = getComputedWeight(item);
-				int srcIndex = images.indexOf(pairList.source) * 4;
-				int destIndex = images.indexOf(pairList.target) * 4;
+				int srcIndex = images.indexOf(pairList.source) * (adjustForScale ? 4 : 3);
+				int destIndex = images.indexOf(pairList.target) * (adjustForScale ? 4 : 3);
 				
 				coefs.make0();
 				if (srcIndex >= 0) {
 					coefs.setItem(srcIndex + 0, 0, sn.dDist_dIX1);
 					coefs.setItem(srcIndex + 1, 0, sn.dDist_dIY1);
 					coefs.setItem(srcIndex + 2, 0, sn.dDist_dIZ1);
-					coefs.setItem(srcIndex + 3, 0, sn.dDist_dIF1 * scaleTheZ);
+					if (adjustForScale) {
+						coefs.setItem(srcIndex + 3, 0, sn.dDist_dIF1 * scaleTheZ);
+					}
 				}
 				if (destIndex >= 0) {
 					coefs.setItem(destIndex + 0, 0, sn.dDist_dIX2);
 					coefs.setItem(destIndex + 1, 0, sn.dDist_dIY2);
 					coefs.setItem(destIndex + 2, 0, sn.dDist_dIZ2);
-					coefs.setItem(destIndex + 3, 0, sn.dDist_dIF2 * scaleTheZ);
+					if (adjustForScale) {
+						coefs.setItem(destIndex + 3, 0, sn.dDist_dIF2 * scaleTheZ);
+					}
 				}
 				lsa.addMeasurement(coefs, computedWeight, sn.Dist, 0);
 			}
@@ -380,7 +397,7 @@ public class SpherePanoTransformLearner2 {
 			calculatePrims(origin, images, chain);
 		}
 
-		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
+		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
 		if (!lsa.calculate()) 
@@ -396,7 +413,7 @@ public class SpherePanoTransformLearner2 {
 				);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
-			int index = curImage * 4;
+			int index = curImage * (adjustForScale ? 4 : 3);
 			System.out.println(image.imageFileStamp.getFile().getName() + 
 					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
 					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
@@ -405,12 +422,14 @@ public class SpherePanoTransformLearner2 {
 					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					"\tds=" + MathUtil.d4(u.getItem(0, index + 3) / scaleTheZ) 
+					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3) / scaleTheZ) : "") 
 					);
 			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 - u.getItem(0, index + 0));
 			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY - u.getItem(0, index + 1));
 			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 - u.getItem(0, index + 2));
-			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleTheZ);
+			if (adjustForScale) {
+				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleTheZ);
+			}
 		}
 		computeDiscrepancies(result);
 		computeBad(result);

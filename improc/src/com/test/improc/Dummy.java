@@ -49,7 +49,43 @@ public class Dummy {
 		dump3(angles2);
 	}
 
+	void zxc() {
+		RotationZYZ rot = RotationZYZ.instance;
+		double p[] = new double[3];
+		double p2[] = new double[3];
+		double p3[] = new double[3];
+		double angles1[] = new double[3];
+		double angles2[] = new double[3];
+		
+		angles1[0] = 10 * MathUtil.deg2rad;
+		angles1[1] = 20 * MathUtil.deg2rad;
+		angles1[2] = 30 * MathUtil.deg2rad;
+		
+		p[0] = 1;
+		p[1] = 0;
+		p[2] = 0;
+		
+		Matrix m = rot.makeAngles(angles1);
+		rot.transformForward(m, p, p2);
+		
+		angles2[0] = Math.atan2(p2[1], p2[0]);
+		double r = Math.sqrt(p2[0] * p2[0] + p2[1] * p2[1]);
+		angles2[1] = Math.atan2(p2[2], r);
+		angles2[2] = -angles2[0];
+		
+		Matrix m2 = rot.makeAngles(angles2);
+		dump3(angles2);
+		rot.getRotationAngles(m2, angles2);
+		dump3(angles2);
+		
+		
+		rot.transformBackward(m2, p2, p3);
+		System.out.println(p3[0]);
+		System.out.println(p3[1]);
+		System.out.println(p3[2]);
+	}
+	
 	public static void main(String[] args) {
-		new Dummy().qwe();
+		new Dummy().zxc();
 	}
 }

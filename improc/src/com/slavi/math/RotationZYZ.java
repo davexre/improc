@@ -2,6 +2,9 @@ package com.slavi.math;
 
 import com.slavi.math.matrix.Matrix;
 
+/**
+ * http://en.wikipedia.org/wiki/Euler_angles 
+ */
 public class RotationZYZ {
 	public static final RotationZYZ instance = new RotationZYZ();
 

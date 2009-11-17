@@ -18,6 +18,8 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class MyPanoPairTransformZYZLearner {
 
+	static boolean adjustForScale = false;
+	
 	ArrayList<KeyPointPairList> chain;
 	ArrayList<KeyPointList> images;
 	ArrayList<KeyPointPairList> ignoredPairLists;
@@ -96,7 +98,9 @@ public class MyPanoPairTransformZYZLearner {
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
-					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+					if (adjustForScale) {
+						curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale;
+					}
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
 					MyPanoPairTransformerZYZ.rot.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
@@ -108,7 +112,9 @@ public class MyPanoPairTransformZYZLearner {
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
-					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+					if (adjustForScale) {
+						curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale;
+					}
 				}
 				curImage.calculatePrimsAtHop = minHop + 1;
 				todo.remove(curImageIndex);
@@ -129,7 +135,7 @@ public class MyPanoPairTransformZYZLearner {
 	}
 
 	void calculateNormalEquations() {
-		Matrix coefs = new Matrix(images.size() * 4, 1);			
+		Matrix coefs = new Matrix(images.size() * (adjustForScale ? 4 : 3), 1);			
 
 		origin.sphereRZ1 = 0;
 		origin.sphereRY = 0;
@@ -174,8 +180,8 @@ public class MyPanoPairTransformZYZLearner {
 				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
 				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
 				
-				int srcIndex = images.indexOf(pairList.source) * 4;
-				int destIndex = images.indexOf(pairList.target) * 4;
+				int srcIndex = images.indexOf(pairList.source) * (adjustForScale ? 4 : 3);
+				int destIndex = images.indexOf(pairList.target) * (adjustForScale ? 4 : 3);
 				
 				coefs.make0();
 	
@@ -212,16 +218,20 @@ public class MyPanoPairTransformZYZLearner {
 					if (srcIndex >= 0) {
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
-						coefs.setItem(srcIndex + 3, 0, (
-								source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
-								source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
+						if (adjustForScale) {
+							coefs.setItem(srcIndex + 3, 0, (
+									source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
+									source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
+						}
 					}
 					if (destIndex >= 0) {
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
-						coefs.setItem(destIndex + 3, 0, (
-								PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
-								PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
+						if (adjustForScale) {
+							coefs.setItem(destIndex + 3, 0, (
+									PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
+									PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
+						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
@@ -459,7 +469,7 @@ public class MyPanoPairTransformZYZLearner {
 			calculatePrims(origin, images, chain);
 		}
 
-		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
+		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
 		if (!lsa.calculate()) 
@@ -474,7 +484,7 @@ public class MyPanoPairTransformZYZLearner {
 				);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
-			int index = curImage * 4;
+			int index = curImage * (adjustForScale ? 4 : 3);
 			System.out.println(image.imageFileStamp.getFile().getName() + 
 					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
 					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
@@ -483,9 +493,11 @@ public class MyPanoPairTransformZYZLearner {
 					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					"\tds=" + MathUtil.d4(u.getItem(0, index + 3)) 
+					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3)) : "") 
 					);
-			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
+			if (adjustForScale) {
+				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
+			}
 			image.sphereRZ1 = MathUtil.fixAngleMPI_PI(image.sphereRZ1 - u.getItem(0, index + 0));
 			image.sphereRY = MathUtil.fixAngleMPI_PI(image.sphereRY - u.getItem(0, index + 1));
 			image.sphereRZ2 = MathUtil.fixAngleMPI_PI(image.sphereRZ2 - u.getItem(0, index + 2));

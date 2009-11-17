@@ -117,9 +117,23 @@ public class UT_SpherePanoTransformer2 {
 	}
 	
 	void testSphereNorm() {
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1136;
+		kpl1.cameraOriginY = 856;
+		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
+		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		kpl1.sphereRZ1 = -178 * MathUtil.deg2rad;
+		kpl1.sphereRY = 30 * MathUtil.deg2rad;
+		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
+		
+		p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = 1881;
+		p1.doubleY = 897;
+		
 		KeyPointList kpl2 = new KeyPointList();
-		kpl2.cameraOriginX = 1100;
-		kpl2.cameraOriginY = 2200;
+		kpl2.cameraOriginX = 1136;
+		kpl2.cameraOriginY = 856;
 		kpl2.cameraScale = 1.0 / (2.0 * Math.max(kpl2.cameraOriginX, kpl2.cameraOriginY));
 		kpl2.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		kpl2.sphereRZ1 = 20 * MathUtil.deg2rad;

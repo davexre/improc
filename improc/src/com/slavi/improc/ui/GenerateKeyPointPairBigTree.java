@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
@@ -20,7 +19,6 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 	List<String> images;
 	AbsoluteToRelativePathMaker imagesRoot;
 	AbsoluteToRelativePathMaker keyPointFileRoot;
-	AtomicInteger imageCounter = new AtomicInteger();
 	
 	public GenerateKeyPointPairBigTree(
 			ExecutorService exec,
@@ -37,16 +35,19 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 
 		String image;
 		
+		int imageId;
+		
 		KeyPointBigTree bigTree;
 		
-		public ProcessOne(KeyPointBigTree bigTree, String image) {
+		public ProcessOne(KeyPointBigTree bigTree, String image, int imageId) {
 			this.bigTree = bigTree;
 			this.image = image;
+			this.imageId = imageId;
 		}
 		
 		public Void call() throws Exception {
 			KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
-			l.imageId = imageCounter.incrementAndGet();
+			l.imageId = imageId;
 			synchronized(bigTree.keyPointLists) {
 				bigTree.keyPointLists.add(l);
 				String statusMessage = (bigTree.keyPointLists.size()) + "/" + images.size() + " " + image;
@@ -66,8 +67,9 @@ public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 		final KeyPointBigTree result = new KeyPointBigTree();
 
 		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
-		for (String image : images) {
-			taskSet.add(new ProcessOne(result, image));
+		for (int imageId = 0; imageId < images.size(); imageId++) {
+			String image = images.get(imageId);
+			taskSet.add(new ProcessOne(result, image, imageId));
 		}
 		taskSet.addFinished();
 		taskSet.get();
