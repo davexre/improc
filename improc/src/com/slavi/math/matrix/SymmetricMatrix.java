@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class SymmetricMatrix {
 
@@ -61,7 +62,7 @@ public class SymmetricMatrix {
 			for (int i = 0; i <= j; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format("%1$5.10f", new Object[] { new Double(getItem(i, j)) } ));
+				result.append(String.format(Locale.US, "%1$5.10f", new Object[] { new Double(getItem(i, j)) } ));
 			}
 			result.append("\n");
 		}

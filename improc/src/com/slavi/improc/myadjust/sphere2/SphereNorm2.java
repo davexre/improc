@@ -22,7 +22,7 @@ public class SphereNorm2 {
 	public double dDist_dIY2;
 	public double dDist_dIZ2;
 	public double dDist_dIF2;
-	
+
 	public void setKeyPointPair(KeyPointPair kpp) {
 		double source[] = new double[2];
 		double target[] = new double[2];
@@ -57,27 +57,7 @@ public class SphereNorm2 {
 					"\tp2.y1=" + MathUtil.rad2degStr(p2.ry) 
 					);
 			
-			System.out.println(
-					"d=" + MathUtil.rad2degStr(dist0) + "\tDist=" + MathUtil.rad2degStr(Dist) +
-					"\tsX=" + kpp.sourceSP.doubleX + 
-					"\tsY=" + kpp.sourceSP.doubleY + 
-					"\tsCamX=" + kpp.sourceSP.keyPointList.cameraOriginX + 
-					"\tsCamY=" + kpp.sourceSP.keyPointList.cameraOriginY + 
-					"\ttX=" + kpp.targetSP.doubleX + 
-					"\ttY=" + kpp.targetSP.doubleY + 
-					"\ttCamX=" + kpp.targetSP.keyPointList.cameraOriginX + 
-					"\ttCamY=" + kpp.targetSP.keyPointList.cameraOriginY + 
-					"\tsZ1=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRZ1) + 
-					"\tsY=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRY) + 
-					"\tsZ2=" + MathUtil.rad2degStr(kpp.sourceSP.keyPointList.sphereRZ2) + 
-					"\ttZ1=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRZ1) + 
-					"\ttY=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRY) + 
-					"\ttZ2=" + MathUtil.rad2degStr(kpp.targetSP.keyPointList.sphereRZ2) + 
-					"\tsrcX=" + MathUtil.rad2degStr(source[0]) + 
-					"\tsrcY=" + MathUtil.rad2degStr(source[1]) + 
-					"\ttargX=" + MathUtil.rad2degStr(target[0]) + 
-					"\ttargY=" + MathUtil.rad2degStr(target[1]) 
-					);
+			System.out.println(toString());
 		}
 
 	}
@@ -253,5 +233,24 @@ public class SphereNorm2 {
 		double dDistdP = dAdP / (1 + A*A);
 		return dDistdP;
 	}
-	
+
+	public String toString() {
+		return 
+		"Dist=" + MathUtil.rad2degStr(Dist) +
+//		"\td=" + MathUtil.rad2degStr(dist0) + 
+		"\tsX=" + p1.kp.doubleX + 
+		"\tsY=" + p1.kp.doubleY + 
+//		"\tsCamX=" + p1.kp.keyPointList.cameraOriginX + 
+//		"\tsCamY=" + p1.kp.keyPointList.cameraOriginY + 
+		"\ttX=" + p2.kp.doubleX + 
+		"\ttY=" + p2.kp.doubleY + 
+//		"\ttCamX=" + p2.kp.keyPointList.cameraOriginX + 
+//		"\ttCamY=" + p2.kp.keyPointList.cameraOriginY + 
+		"\tsZ1=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRZ1) + 
+		"\tsY=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRY) + 
+		"\tsZ2=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRZ2) + 
+		"\ttZ1=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRZ1) + 
+		"\ttY=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRY) + 
+		"\ttZ2=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRZ2);
+	}
 }

@@ -97,9 +97,9 @@ public class SpherePanoTransformLearner2 {
 					Matrix sourceToWorld = new Matrix(3, 3);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
 					RotationZYZ.instance.getRotationAngles(sourceToWorld, angles);
-					curImage.sphereRZ1 = angles[0];
+					curImage.sphereRZ1 = Math.PI - angles[0];
 					curImage.sphereRY = angles[1];
-					curImage.sphereRZ2 = angles[2];
+					curImage.sphereRZ2 = Math.PI - angles[2];
 					if (adjustForScale) {
 						curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
 					}
@@ -114,9 +114,9 @@ public class SpherePanoTransformLearner2 {
 					Matrix targetToWorld = new Matrix(3, 3);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
 					RotationZYZ.instance.getRotationAngles(targetToWorld, angles);
-					curImage.sphereRZ1 = angles[0];
+					curImage.sphereRZ1 = Math.PI - angles[0];
 					curImage.sphereRY = angles[1];
-					curImage.sphereRZ2 = angles[2];
+					curImage.sphereRZ2 = Math.PI - angles[2];
 					if (adjustForScale) {
 						curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
 					}
@@ -277,13 +277,14 @@ public class SpherePanoTransformLearner2 {
 				double discrepancy = getDiscrepancy(item);
 				boolean curIsBad = discrepancy > maxDiscrepancy;
 				if (oldIsBad != curIsBad) {
-					setBad(item, curIsBad);
+//					setBad(item, curIsBad);
 					if (curIsBad) {
+						setBad(item, curIsBad);
 						result.oldGoodNowBad++;
 						pairList.transformResult.oldGoodNowBad++;
 					} else {
-						result.oldBadNowGood++;
-						pairList.transformResult.oldBadNowGood++;
+//						result.oldBadNowGood++;
+//						pairList.transformResult.oldBadNowGood++;
 					}
 				}
 				if (curIsBad) {
@@ -332,11 +333,14 @@ public class SpherePanoTransformLearner2 {
 				}
 			}
 			pairList.transformResult.discrepancyStatistics.stop();
-			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
+			pairList.maxDiscrepancy = 0.8 * Math.min(
+				pairList.transformResult.discrepancyStatistics.getMaxX(),
+				pairList.transformResult.discrepancyStatistics.getJ_End());
+/*			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
 			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
 				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
 						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
-			}
+			}*/
 			if (pairList.maxDiscrepancy < discrepancyThreshold)
 				pairList.maxDiscrepancy = discrepancyThreshold;
 		}
@@ -400,11 +404,22 @@ public class SpherePanoTransformLearner2 {
 		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
+/*		Matrix m1 = lsa.getNm().makeSquareMatrix();
+		Matrix m2 = lsa.getNm().makeSquareMatrix();
+		Matrix m3 = new Matrix();
+		if (!m2.inverse())
+			throw new RuntimeException("failed");
+		m1.printM("M1");
+		System.out.println("DET=" + m1.det());
+		m2.printM("M2");
+		m1.mMul(m2, m3);		
+		m3.printM("M3");
+*/		
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-//		u.printM("Unknowns");
+		u.printM("U");
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 

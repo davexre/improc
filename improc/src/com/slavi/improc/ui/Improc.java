@@ -3,7 +3,6 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import org.eclipse.swt.SWT;
@@ -13,8 +12,11 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.improc.myadjust.sphere2.CalculatePanoramaParamsSpherical2;
+import com.slavi.improc.myadjust.sphere2.MyGeneratePanoramasSphere;
+import com.slavi.improc.myadjust.zyz.CalculatePanoramaParamsZYZ;
 import com.slavi.improc.myadjust.zyz.MyGeneratePanoramasZYZ;
 import com.slavi.util.Marker;
+import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -68,19 +70,27 @@ public class Improc {
 				kppl.size() - 1);
 		kppl = null;
 
-		System.out.println("---------- Calculating panorama parameters");
-		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-				new CalculatePanoramaParamsSpherical2(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-//		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-//				new CalculatePanoramaParamsZYZ(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-//						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-		
-		System.out.println("---------- Generating panorama images");
-		SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-				new MyGeneratePanoramasZYZ(exec, panos, settings.outputDirStr,
-						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-
+		if (true) {
+			System.out.println("---------- Calculating panorama parameters");
+			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+					new CalculatePanoramaParamsSpherical2(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+			
+			System.out.println("---------- Generating panorama images");
+			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
+					new MyGeneratePanoramasSphere(exec, panos, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+		} else {	
+			System.out.println("---------- Calculating panorama parameters");
+			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+					new CalculatePanoramaParamsZYZ(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+			
+			System.out.println("---------- Generating panorama images");
+			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
+					new MyGeneratePanoramasZYZ(exec, panos, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+		}
 		Marker.release();
 		System.out.println("Done.");
 	}
@@ -96,9 +106,9 @@ public class Improc {
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
+//		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
 //		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {

@@ -914,8 +914,8 @@ public class Matrix {
 			for (int i = 0; i < sizeX; ) {
 				System.out.print(String.format(Locale.US, "%12.8f\t",new Object[] { new Double(getItem(i, j)) } ));
 				i++;
-				if (i % 5 == 0)
-					System.out.println();
+//				if (i % 5 == 0)
+//					System.out.println();
 			}
 			System.out.println();
 		}

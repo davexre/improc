@@ -495,12 +495,12 @@ public class MyPanoPairTransformZYZLearner {
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
 					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3)) : "") 
 					);
-			if (adjustForScale) {
-				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
-			}
 			image.sphereRZ1 = MathUtil.fixAngleMPI_PI(image.sphereRZ1 - u.getItem(0, index + 0));
 			image.sphereRY = MathUtil.fixAngleMPI_PI(image.sphereRY - u.getItem(0, index + 1));
 			image.sphereRZ2 = MathUtil.fixAngleMPI_PI(image.sphereRZ2 - u.getItem(0, index + 2));
+			if (adjustForScale) {
+				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
+			}
 			buildCamera2RealMatrix(image);
 		}
 		computeDiscrepancies(result);
