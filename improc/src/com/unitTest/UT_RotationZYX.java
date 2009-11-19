@@ -24,36 +24,17 @@ public class UT_RotationZYX {
 	double tmp5[] = new double[3];
 	double tmp6[] = new double[3];
 	
-	public static void dumpPoint3D(double p[]) {
-		System.out.println(MathUtil.d4(p[0]) + "\t" + MathUtil.d4(p[1]) + "\t" + MathUtil.d4(p[2]));
-	}
-
-	static final double precision = 10000;
-	public static boolean equal(double a, double b) {
-		return (int)(a * precision) == (int)(b * precision);
-	}
-	
-	public static void assertEqualPoint3D(double p1[], double p2[]) {
-		if (equal(p1[0], p2[0]) &&
-			equal(p1[1], p2[1]) &&
-			equal(p1[2], p2[2]))
-			return;
-		dumpPoint3D(p1);
-		dumpPoint3D(p2);
-		throw new RuntimeException("Failed");
-	}
-	
 	void testTransform() {
 		Matrix r = rot.makeAngles(angles);
 		rot.transformForward(r, point[0], point[1], point[2], tmp1);
 		rot.transformBackward(r, tmp1[0], tmp1[1], tmp1[2], tmp2);
-		assertEqualPoint3D(point, tmp2);
+		TestUtils.assertEqual("", point, tmp2);
 	}
 	
 	void testGetRotationAngles() {
 		Matrix r = rot.makeAngles(angles);
 		rot.getRotationAngles(r, tmp1);
-		assertEqualPoint3D(angles, tmp1);
+		TestUtils.assertEqual("", angles, tmp1);
 	}
 	
 	void testGetRotationAnglesBackword() {
@@ -62,10 +43,10 @@ public class UT_RotationZYX {
 		rot.getRotationAnglesBackword(r, tmp2);
 		Matrix back = rot.makeAngles(tmp2);
 		rot.transformForward(back, tmp1[0], tmp1[1], tmp1[2], tmp3);
-		assertEqualPoint3D(point, tmp3);
+		TestUtils.assertEqual("", point, tmp3);
 		
 		rot.getRotationAnglesBackword(angles[0], angles[1], angles[2], tmp3);
-		assertEqualPoint3D(tmp2, tmp3);
+		TestUtils.assertEqual("", tmp2, tmp3);
 		
 		// check identity
 		Matrix tmpM = new Matrix();
@@ -95,14 +76,14 @@ public class UT_RotationZYX {
 			double d2[] = point.clone();
 			d2[dindex] += delta;
 			rot.transformForward(r, d2, tmp3);
-			assertEqualPoint3D(tmp3, tmp2);
+			TestUtils.assertEqual("", tmp3, tmp2);
 		}
 	}
 
 	void testPolar() {
 		MyPanoPairTransformerZYX.cartesianToPolar(point[0], point[1], point[2], tmp1);
 		MyPanoPairTransformerZYX.polarToCartesian(tmp1[0], tmp1[1], tmp1[2], tmp2);
-		assertEqualPoint3D(point, tmp2);
+		TestUtils.assertEqual("", point, tmp2);
 	}
 	
 	public static void main(String[] args) {

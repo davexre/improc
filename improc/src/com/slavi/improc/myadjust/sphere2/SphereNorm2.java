@@ -223,7 +223,7 @@ public class SphereNorm2 {
 		double dCdP = K * dKdP + L * dLdP;
 		
 		double B = Math.sqrt(E);
-		double dBdP = - dEdP / (2.0 * B);  // TODO: CHECK ME!!!
+		double dBdP = dEdP / (2.0 * B);
 		
 		double A = B / C;
 		double dAdP = (dBdP * C - B * dCdP) / (C * C);
