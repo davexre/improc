@@ -59,7 +59,6 @@ public class SphereNorm2 {
 			
 			System.out.println(toString());
 		}
-
 	}
 	
 	public static class PointDerivatives {
@@ -99,8 +98,8 @@ public class SphereNorm2 {
 		}
 		
 		private void calcWorldSphericalCoords() {
-			double sinDSX = Math.sin(sx - kp.keyPointList.sphereRZ1);
-			double cosDSX = Math.cos(sx - kp.keyPointList.sphereRZ1);
+			double sinDSX = Math.sin(sx + kp.keyPointList.sphereRZ1);
+			double cosDSX = Math.cos(sx + kp.keyPointList.sphereRZ1);
 			double sinSY = Math.sin(sy);
 			double cosSY = Math.cos(sy);
 			double sinIY = Math.sin(kp.keyPointList.sphereRY);
@@ -108,9 +107,9 @@ public class SphereNorm2 {
 
 			// dRY
 			double H = sinSY * sinIY * cosDSX;
-			double dH_dIX = sinSY * sinIY * sinDSX;
+			double dH_dIX = - sinSY * sinIY * sinDSX;
 			double dH_dIY = sinSY * cosIY * cosDSX;
-			double dH_dIF = cosSY * sinIY * cosDSX * dSY_dIF + sinSY * sinIY * sinDSX * dSX_dIF;
+			double dH_dIF = cosSY * sinIY * cosDSX * dSY_dIF - sinSY * sinIY * sinDSX * dSX_dIF;
 			
 			double G = cosSY * cosIY;
 			double dG_dIX = 0;
@@ -136,9 +135,9 @@ public class SphereNorm2 {
 			double dE_dIF = - sinIY * sinSY * dSY_dIF;
 			
 			double D = cosDSX * cosIY * sinSY;
-			double dD_dIX = sinDSX * cosIY * sinSY;
+			double dD_dIX = - sinDSX * cosIY * sinSY;
 			double dD_dIY = - cosDSX * sinIY * sinSY;
-			double dD_dIF = sinDSX * cosIY * sinSY * dSX_dIF + cosDSX * cosIY * cosSY * dSY_dIF;
+			double dD_dIF = - sinDSX * cosIY * sinSY * dSX_dIF + cosDSX * cosIY * cosSY * dSY_dIF;
 			
 			double C = D - E;
 			double dC_dIX = dD_dIX - dE_dIX; 
@@ -146,21 +145,21 @@ public class SphereNorm2 {
 			double dC_dIF = dD_dIF - dE_dIF;
 			
 			double B = sinDSX * sinSY;
-			double dB_dIX = - cosDSX * sinSY;
+			double dB_dIX = cosDSX * sinSY;
 			double dB_dIY = 0;
-			double dB_dIF = - cosDSX * sinSY * dSX_dIF + sinDSX * cosSY * dSY_dIF;
+			double dB_dIF = cosDSX * sinSY * dSX_dIF + sinDSX * cosSY * dSY_dIF;
 			
 			double A = B / C;
 			double dA_dIX = (dB_dIX * C - B * dC_dIX) / (C*C);
 			double dA_dIY = (dB_dIY * C - B * dC_dIY) / (C*C);
 			double dA_dIF = (dB_dIF * C - B * dC_dIF) / (C*C);
 			
-			rx = Math.atan2(B, C) - kp.keyPointList.sphereRZ2;
+			rx = Math.atan2(B, C) + kp.keyPointList.sphereRZ2;
 			tmp = 1 + A * A;
 			dRX_dIX = dA_dIX / tmp;
 			dRX_dIY = dA_dIY / tmp;
 			dRX_dIF = dA_dIF / tmp;
-			dRX_dIZ = -1;
+			dRX_dIZ = 1;
 			
 			// calc commons
 			sinRX = Math.sin(rx);
@@ -224,7 +223,7 @@ public class SphereNorm2 {
 		double dCdP = K * dKdP + L * dLdP;
 		
 		double B = Math.sqrt(E);
-		double dBdP = dEdP / (2.0 * B);
+		double dBdP = - dEdP / (2.0 * B);  // TODO: CHECK ME!!!
 		
 		double A = B / C;
 		double dAdP = (dBdP * C - B * dCdP) / (C * C);

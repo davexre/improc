@@ -57,8 +57,8 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 	}
 	
 	static void calcExt(double p[], Point2D.Double min, Point2D.Double max) {
-		double rx = MathUtil.fixAngleMPI_PI(p[0]);
-		double ry = MathUtil.PIover2 - MathUtil.fixAngleMPI_PI(p[1]);
+		double rx = p[0];
+		double ry = p[1];
 		if (rx < min.x) 
 			min.x = rx;
 		if (ry < min.y) 
@@ -79,15 +79,19 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		for (KeyPointList i : images) {
 			SpherePanoTransformer2.transformForeward(0, 0, i, tmp);
 			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
 			SpherePanoTransformer2.transformForeward(0, i.imageSizeY - 1, i, tmp);
 			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
 			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, 0, i, tmp);
 			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
 			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
 			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
 		}
 //		minAngle.x += Math.PI / 4.0;
@@ -96,7 +100,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		sizeAngle.x -= minAngle.x;
 		sizeAngle.y -= minAngle.y;
 		
-		minAngle.x = 0;
+		minAngle.x = -180 * MathUtil.deg2rad;
 		minAngle.y = -90 * MathUtil.deg2rad;
 		sizeAngle.x = 359 * MathUtil.deg2rad;
 		sizeAngle.y = 180 * MathUtil.deg2rad;
@@ -118,7 +122,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		}
 	}
 	
-	double w2w[] = new double[] { 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
+	double w2w[] = new double[] { 0 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, -90 * MathUtil.deg2rad }; 
 //	double w2w[] = new double[] { 180 * MathUtil.deg2rad, 45 * MathUtil.deg2rad, -180 * MathUtil.deg2rad }; 
 	
 	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
@@ -132,9 +136,9 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
 		SpherePanoTransformer2.transformForeward(x, y, image, dest);
 		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
+		dest[1] = MathUtil.PIover2 - dest[1];
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
-		dest[1] = MathUtil.fixAngleMPI_PI(MathUtil.PIover2 - dest[1]);
 	}
 
 	private void drawWorldMesh(SafeImage img) {

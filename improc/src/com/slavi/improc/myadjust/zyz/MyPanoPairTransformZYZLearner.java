@@ -472,10 +472,22 @@ public class MyPanoPairTransformZYZLearner {
 		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
+		Matrix m1 = lsa.getNm().makeSquareMatrix();
+		Matrix m2 = lsa.getNm().makeSquareMatrix();
+		Matrix m3 = new Matrix();
+		if (!m2.inverse())
+			throw new RuntimeException("failed");
+		m1.printM("M1");
+		System.out.println("DET=" + m1.det());
+		m2.printM("M2");
+		m1.mMul(m2, m3);		
+		m3.printM("M3");
+		
 		if (!lsa.calculate()) 
 			return null;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
+		u.printM("U");
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 

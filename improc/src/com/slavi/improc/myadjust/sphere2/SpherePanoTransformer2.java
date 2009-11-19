@@ -1,6 +1,7 @@
 package com.slavi.improc.myadjust.sphere2;
 
 import com.slavi.improc.KeyPointList;
+import com.slavi.math.MathUtil;
 
 public class SpherePanoTransformer2 {
 	/**
@@ -26,7 +27,7 @@ public class SpherePanoTransformer2 {
 	 * sy -> zenith angle (90 - latitude) 
 	 */
 	public static void rotateForeward(double sx, double sy, double IZ1, double IY, double IZ2, double dest[]) {
-		sx -= IZ1;
+		sx += IZ1;
 		double sinDX = Math.sin(sx);
 		double cosDX = Math.cos(sx);
 		double sinIY = Math.sin(IY);
@@ -34,7 +35,7 @@ public class SpherePanoTransformer2 {
 		double sinSY = Math.sin(sy);
 		double cosSY = Math.cos(sy);
 
-		dest[0] = Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ2;
+		dest[0] = MathUtil.fixAngleMPI_PI(Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) + IZ2);
 		dest[1] = Math.acos(cosSY * cosIY + sinSY * sinIY * cosDX);
 	}
 
@@ -51,7 +52,7 @@ public class SpherePanoTransformer2 {
 	 * ry -> zenith angle (90 - latitude) 
 	 */
 	public static void rotateBackward(double rx, double ry, double IZ1, double IY, double IZ2, double dest[]) {
-		rx += IZ2;
+		rx -= IZ2;
 		double sinIY = Math.sin(IY);
 		double cosIY = Math.cos(IY);
 		double sinRY = Math.sin(ry);
@@ -59,7 +60,7 @@ public class SpherePanoTransformer2 {
 		double sinRX = Math.sin(rx);
 		double cosRX = Math.cos(rx);
 		
-		dest[0] = IZ1 + Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY);
+		dest[0] = MathUtil.fixAngleMPI_PI(Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY) - IZ1);
 		dest[1] = Math.acos(cosRY * cosIY - sinRY * sinIY * cosRX);
 	}
 
