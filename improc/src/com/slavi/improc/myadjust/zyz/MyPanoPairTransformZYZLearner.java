@@ -9,7 +9,6 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.sphere.SpherePanoTransformer;
-import com.slavi.improc.myadjust.zyz.CalculatePanoramaParamsZYZ;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
@@ -132,6 +131,28 @@ public class MyPanoPairTransformZYZLearner {
 		
 		if (todo.size() > 0) 
 			throw new RuntimeException("Failed calculating the prims");
+
+/*		origin.sphereRZ1 = 0;
+		origin.sphereRY = 0;
+		origin.sphereRZ2 = 0;
+		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		buildCamera2RealMatrix(origin);
+		for (KeyPointList image : images) {
+			buildCamera2RealMatrix(image);
+		}
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
+		for (KeyPointPairList pairList : chain) {
+			for (KeyPointPair item : pairList.items) {
+				if (item.panoBad)
+					continue;
+				
+				MyPanoPairTransformerZYZ.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				MyPanoPairTransformerZYZ.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]);
+				System.out.println("Dist=" + MathUtil.rad2degStr(discrepancy));
+			}
+		}*/
 	}
 
 	void calculateNormalEquations() {
@@ -239,7 +260,7 @@ public class MyPanoPairTransformZYZLearner {
 		}
 	}
 	
-	void buildCamera2RealMatrix(KeyPointList image) {
+	static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = MyPanoPairTransformerZYZ.rot.makeAngles(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdX = MyPanoPairTransformerZYZ.rot.make_dF_dR1(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdY = MyPanoPairTransformerZYZ.rot.make_dF_dR2(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
@@ -472,7 +493,7 @@ public class MyPanoPairTransformZYZLearner {
 		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		Matrix m1 = lsa.getNm().makeSquareMatrix();
+/*		Matrix m1 = lsa.getNm().makeSquareMatrix();
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();
 		if (!m2.inverse())
@@ -481,13 +502,13 @@ public class MyPanoPairTransformZYZLearner {
 		System.out.println("DET=" + m1.det());
 		m2.printM("M2");
 		m1.mMul(m2, m3);		
-		m3.printM("M3");
+		m3.printM("M3");*/
 		
 		if (!lsa.calculate()) 
 			return null;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-		u.printM("U");
+//		u.printM("U");
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 

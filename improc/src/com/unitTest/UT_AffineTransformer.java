@@ -1,4 +1,4 @@
-package com.test.math;
+package com.unitTest;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -7,12 +7,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.AffineTransformLearner;
 import com.slavi.math.transform.AffineTransformer;
 import com.slavi.math.transform.TransformLearnerResult;
 
-public class TestAffineTransformer {
+public class UT_AffineTransformer {
 
 	public static class MyTestData implements Map.Entry<Point2D.Double, Point2D.Double>{
 		Point2D.Double src = new Point2D.Double();
@@ -118,9 +119,6 @@ public class TestAffineTransformer {
 		}
 	}
 	
-	
-	private static double degreeToRad = Math.PI / 180;
-	
 	private ArrayList<MyTestData> points;
 	
 	AffineTransform jTransform;
@@ -143,13 +141,13 @@ public class TestAffineTransformer {
 	private void generatePoints() {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
-		jTransform.rotate(30 * degreeToRad);
+		jTransform.rotate(30 * MathUtil.deg2rad);
 		jTransform.scale(123.456, 789.123);
 		jTransform.shear(1.234, 2.345);
 		jTransform.translate(100.567, 200.123);
 
-		System.out.println("== The java.awt.geom.AffineTransform is:");
-		dumpAffineTransform(jTransform);
+//		System.out.println("== The java.awt.geom.AffineTransform is:");
+//		dumpAffineTransform(jTransform);
 		
 		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < 2; xcounter++) {
@@ -160,31 +158,18 @@ public class TestAffineTransformer {
 	}
 	
 	public void learn() {
-		MyTestData pair;
 		learner = new MyTestAffineTransformLearner(points);
-
 		TransformLearnerResult res = learner.calculateOne();
-		MyTestAffineTransformer tr = (MyTestAffineTransformer) learner.transformer;
-		System.out.println("Learner adjusted: " + res.isAdjusted());
-		System.out.println(tr.toString());
-		
-		Matrix dest = new Matrix(2, 1);
-		pair = points.get(0);
-		tr.transform(pair.src, pair.dest);
-		System.out.println("" + pair.dest.x + "\t" + pair.dest.y);
-		System.out.println("" + dest.getItem(0,0) + "\t" + dest.getItem(1,0));
+		TestUtils.assertTrue("Learner adjusted", res.isAdjusted());
 	}
 	
 	public static void main(String[] args) {
-		TestAffineTransformer test = new TestAffineTransformer();
+		UT_AffineTransformer test = new UT_AffineTransformer();
 		test.generatePoints();
 		test.learn();
 
-		Matrix delta = test.learner.computeTransformedTargetDelta(false);
-		System.out.println("==== max discrepancy ====");
-		System.out.println(delta.toString());
-		delta = test.learner.computeTransformedTargetDelta(true);
-		System.out.println("==== max discrepancy 2 ====");
-		System.out.println(delta.toString());
+		Matrix delta = test.learner.computeTransformedTargetDelta(true);
+		TestUtils.assertMatrix0("", delta);
+		System.out.println("Done");
 	}
 }

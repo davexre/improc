@@ -4,6 +4,33 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.math.MathUtil;
 
 public class SpherePanoTransformer2 {
+
+	/**
+	 * sx -> longitude
+	 * sy -> zenith angle (90 - latitude)
+	 * r -> radius 
+	 * dest[0] = x
+	 * dest[1] = y
+	 * dest[2] = z
+	 */
+	public static void polarToCartesian(double sx, double sy, double r, double dest[]) {
+		double RsinSY = r * Math.sin(sy);
+		dest[0] = Math.cos(sx) * RsinSY;
+		dest[1] = Math.sin(sx) * RsinSY;
+		dest[2] = r * Math.cos(sy);
+	}
+	
+	/**
+	 * dest[0] = sx -> longitude
+	 * dest[1] = sy -> zenith angle (90 - latitude)
+	 * dest[2] = r -> radius 
+	 */
+	public static void cartesianToPolar(double x, double y, double z, double dest[]) {
+		dest[0] = Math.atan2(y, x);
+		dest[2] = Math.sqrt(x*x + y*y + z*z);
+		dest[1] = dest[2] == 0.0 ? 0.0 : Math.acos(z / dest[2]);
+	}
+	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)

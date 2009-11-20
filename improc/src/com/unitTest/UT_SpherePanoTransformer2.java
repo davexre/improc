@@ -11,6 +11,7 @@ import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
 import com.slavi.improc.myadjust.sphere2.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
+import com.slavi.math.matrix.Matrix;
 
 public class UT_SpherePanoTransformer2 {
 
@@ -66,12 +67,39 @@ public class UT_SpherePanoTransformer2 {
 	}
 	
 	void testSpherePanoTransformer() {
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1001;
+		kpl1.cameraOriginY = 2002;
+		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
+		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		kpl1.sphereRZ1 = 0 * MathUtil.deg2rad;
+		kpl1.sphereRY = 0 * MathUtil.deg2rad;
+		kpl1.sphereRZ2 = 0 * MathUtil.deg2rad;
+
+		KeyPoint p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = p1.keyPointList.cameraOriginX;
+		p1.doubleY = p1.keyPointList.cameraOriginY;
+
 		double dest[] = new double[2];
 		double dest2[] = new double[2];
 		SpherePanoTransformer2.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
 		SpherePanoTransformer2.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqualAngle("", dest2[0], p1.doubleX);
-		TestUtils.assertEqualAngle("", dest2[1], p1.doubleY);
+		TestUtils.assertEqual("", dest2[0], p1.doubleX);
+		TestUtils.assertEqual("", dest2[1], p1.doubleY);
+		
+		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
+		double d1[] = new double[3];
+		double d2[] = new double[3];
+
+		d1[0] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
+		d1[1] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
+		d1[2] = p1.keyPointList.scaleZ;
+		RotationZYZ.instance.transformForward(m, d1, d2);
+		SpherePanoTransformer2.cartesianToPolar(d2[0], d2[1], d2[2], d2);
+		TestUtils.assertEqualAngle("", dest[0], d2[0]);
+		TestUtils.assertEqualAngle("", dest[1], d2[1]);
+
 		SpherePanoTransformer2.transformForeward(dest2[0], dest2[1], kpl1, dest2);
 		TestUtils.assertEqualAngle("", dest2[0], dest[0]);
 		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
@@ -199,6 +227,7 @@ public class UT_SpherePanoTransformer2 {
 								p2.doubleY = dest2[1];
 								try {
 									checkNorm(kpp, delta, delta, delta, delta, delta, delta, delta, delta);
+//									checkNorm(kpp, delta, 0, 0, 0, delta, 0, 0, 0);
 								} catch (RuntimeException e) {
 									System.out.println("RX1=" + MathUtil.rad2degStr(kpl1.sphereRZ1));
 									System.out.println("RY1=" + MathUtil.rad2degStr(kpl1.sphereRY));
@@ -240,7 +269,7 @@ public class UT_SpherePanoTransformer2 {
 		kpl.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 
 		KeyPointPairList kppl = new KeyPointPairList();
-		boolean sourceOrigin = false;
+		boolean sourceOrigin = true;
 		if (sourceOrigin) {
 			kppl.source = origin;
 			kppl.target = kpl;
@@ -370,9 +399,9 @@ public class UT_SpherePanoTransformer2 {
 		test.testSpherePanoTransformerRotate();
 		test.testSpherePanoTransformer();
 		test.testSphericalDistance();
-		test.testNorm0();
+//		test.testNorm0();
 //		test.testSphereNorm();
-//		test.testCalcPrims();
+		test.testCalcPrims();
 		System.out.println("Done");
 	}
 }

@@ -1,13 +1,21 @@
 package com.unitTest;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.matrix.Matrix;
 
 public class TestUtils {
 
-	static double precision = 1000;
+	public static double precision = 1.0 / 10000.0;
 	
 	public static boolean equal(double a, double b) {
-		return ((int)(Math.abs(a - b) * precision) == 0);
+		return Math.abs(a - b) <= precision;
+	}
+	
+	public static void assertTrue(String str, boolean b) {
+		if (b)
+			return;
+		System.out.println("Expected true, but was false: " + str);
+		throw new RuntimeException("Failed");
 	}
 	
 	public static void assertEqualAngle(String str, double a, double b) {
@@ -43,6 +51,22 @@ public class TestUtils {
 				throw new RuntimeException("Failed");
 			}
 		}
+	}
+
+	public static void assertMatrix0(String str, Matrix m) {
+		if (m.is0(precision))
+			return;
+		System.out.println("Matrix elements not equal to 0: " + str);
+		System.out.println(m.toString());
+		throw new RuntimeException("Failed");
+	}
+	
+	public static void assertMatrixE(String str, Matrix m) {
+		if (m.isE(precision))
+			return;
+		System.out.println("Matrix not equal to E: " + str);
+		System.out.println(m.toString());
+		throw new RuntimeException("Failed");
 	}
 	
 	public static void dumpArray(String str, double p[]) {

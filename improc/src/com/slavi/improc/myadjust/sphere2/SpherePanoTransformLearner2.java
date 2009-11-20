@@ -91,6 +91,7 @@ public class SpherePanoTransformLearner2 {
 					angles[0] = minHopPairList.sphereRZ1;
 					angles[1] = minHopPairList.sphereRY;
 					angles[2] = minHopPairList.sphereRZ2;
+					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
 					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix targetToWorld = RotationZYZ.instance.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
@@ -104,7 +105,10 @@ public class SpherePanoTransformLearner2 {
 					}
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
-					RotationZYZ.instance.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
+					angles[0] = minHopPairList.sphereRZ1;
+					angles[1] = minHopPairList.sphereRY;
+					angles[2] = minHopPairList.sphereRZ2;
+//					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
 					Matrix targetToSource = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix sourceToWorld = RotationZYZ.instance.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);
@@ -134,6 +138,20 @@ public class SpherePanoTransformLearner2 {
 		
 		if (todo.size() > 0) 
 			throw new RuntimeException("Failed calculating the prims");
+/*		
+		double source[] = new double[2];
+		double target[] = new double[2];
+		for (KeyPointPairList pairList : chain) {
+			for (KeyPointPair item : pairList.items) {
+				if (item.panoBad)
+					continue;
+				
+				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, source);
+				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, target);
+				double dist = SpherePanoTransformer2.getSphericalDistance(source[0], source[1], target[0], target[1]);
+				System.out.println("Dist=" + MathUtil.rad2degStr(dist));
+			}
+		}*/
 	}
 
 	double scaleTheZ = 1;
@@ -400,7 +418,7 @@ public class SpherePanoTransformLearner2 {
 		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		Matrix m1 = lsa.getNm().makeSquareMatrix();
+/*		Matrix m1 = lsa.getNm().makeSquareMatrix();
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();
 		if (!m2.inverse())
@@ -409,13 +427,13 @@ public class SpherePanoTransformLearner2 {
 		System.out.println("DET=" + m1.det());
 		m2.printM("M2");
 		m1.mMul(m2, m3);		
-		m3.printM("M3");
+		m3.printM("M3");*/
 		
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-		u.printM("U");
+//		u.printM("U");
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
@@ -435,11 +453,11 @@ public class SpherePanoTransformLearner2 {
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
 					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3) / scaleTheZ) : "") 
 					);
-			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 + u.getItem(0, index + 0));
-			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY + u.getItem(0, index + 1));
-			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 + u.getItem(0, index + 2));
+			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 - u.getItem(0, index + 0));
+			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY - u.getItem(0, index + 1));
+			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 - u.getItem(0, index + 2));
 			if (adjustForScale) {
-				image.scaleZ = (image.scaleZ + u.getItem(0, index + 3) / scaleTheZ);
+				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleTheZ);
 			}
 		}
 		computeDiscrepancies(result);
