@@ -1,0 +1,116 @@
+
+ZXZ - acting on reference frames
+===
+
+Z1
+c1	s1	0
+-s1	c1	0
+0	0	1
+
+X
+1	0	0
+0	c2	s2
+0	-s2	c2
+
+Z2
+c3	s3	0
+-s3	c3	0
+0	0	1
+
+P'=R*P
+R=Z2*(X*Z1)
+
+X*Z1
+1	0	0	| c1	s1	0
+0	c2	s2	| -s1	c1	0
+0	-s2	c2	| 0 	0	1    
+
+c1		s1		0
+-s1*c2	c1*c2	s2
+s1*s2	-c1*s2	c2
+
+Z2*(X*Z1)
+c3	s3	0 | c1		s1		0
+-s3	c3	0 | -s1*c2	c1*c2	s2
+0	0	1 | s1*s2 	-c1*s2	c2
+
+c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
+-c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
+s1*s2			-c1*s2			c2
+
+
+
+
+ZYZ - acting on reference frames
+===
+
+Z1
+c1	s1	0
+-s1	c1	0
+0	0	1
+
+Y
+c2	0	-s2
+0	1	0
+s2	0	c2
+
+Z2
+c3	s3	0
+-s3	c3	0
+0	0	1
+
+P'=R*P
+R=Z2*(Y*Z1)
+
+Y*Z1
+c2	0	-s2	| c1	s1	0
+0	1	0	| -s1	c1	0
+s2	0	c2	| 0 	0	1        
+
+c1*c2	s1*c2	-s2
+-s1		c1		0
+c1*s2	s1*s2	c2
+
+Z2*(Y*Z1)
+c3	s3	0 | c1*c2	s1*c2	-s2
+-s3	c3	0 | -s1 	c1		0
+0 	0	1 | c1*s2	s1*s2	c2
+
+c1*c2*c3-s1*s3	s1*c2*c3+c1*s3	-s2*c3
+-c1*c2*s3-s1*c3	-s1*c2*s3+c1*c3	s2*s3
+c1*s2			s1*s2			c2
+
+
+------------------------------
+
+ZYZ - acting on objects
+===
+
+Z1
+c1	-s1	0
+s1	c1	0
+0	0	1
+
+Y
+c2	0	s2
+0	1	0
+-s2	0	c2
+
+Z2
+c3	-s3	0
+s3	c3	0
+0	0	1
+
+P'=R*P
+
+R=Z2*(Y*Z1)
+
+Y*Z1
+c1*c2	-s1*c2	s2
+s1		c1		0
+-c1*s2	s1*s2	c2
+
+Z2*(Y*Z1)
+c1*c2*c3-s1*s3	-s1*c2*c3-c1*s3	s2*c3
+c1*c2*s3+s1*c3	-s1*c2*s3+c1*c3	s2*s3
+

@@ -3,6 +3,7 @@ package com.unitTest;
 import com.slavi.improc.myadjust.zyx.MyPanoPairTransformerZYX;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
+import com.slavi.math.RotationZXZ;
 import com.slavi.math.RotationZYX;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.matrix.Matrix;
@@ -11,7 +12,8 @@ public class UT_RotationZYX {
 
 	RotationXYZ rot1 = RotationXYZ.instance;
 	RotationZYX rot2 = RotationZYX.instance;
-	RotationZYZ rot = RotationZYZ.instance;
+	RotationZYZ rot3 = RotationZYZ.instance;
+	RotationZXZ rot = RotationZXZ.instance;
 	
 	double angles[] = { 10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad };
 	double point[] = { 5, 15, 25 };
