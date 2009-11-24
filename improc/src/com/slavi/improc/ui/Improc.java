@@ -11,8 +11,8 @@ import org.eclipse.swt.widgets.Shell;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.improc.myadjust.sphere2.CalculatePanoramaParamsSpherical2;
-import com.slavi.improc.myadjust.sphere2.MyGeneratePanoramasSphere;
+import com.slavi.improc.myadjust.sphere3.CalculatePanoramaParamsSpherical3;
+import com.slavi.improc.myadjust.sphere3.MyGeneratePanoramasSphere3;
 import com.slavi.improc.myadjust.zyz.CalculatePanoramaParamsZYZ;
 import com.slavi.improc.myadjust.zyz.MyGeneratePanoramasZYZ;
 import com.slavi.util.Marker;
@@ -73,12 +73,12 @@ public class Improc {
 		if (true) {
 			System.out.println("---------- Calculating panorama parameters");
 			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-					new CalculatePanoramaParamsSpherical2(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
+					new CalculatePanoramaParamsSpherical3(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
 							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 			
 			System.out.println("---------- Generating panorama images");
 			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-					new MyGeneratePanoramasSphere(exec, panos, settings.outputDirStr,
+					new MyGeneratePanoramasSphere3(exec, panos, settings.outputDirStr,
 							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		} else {	
 			System.out.println("---------- Calculating panorama parameters");

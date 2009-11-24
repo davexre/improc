@@ -10,13 +10,14 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.xyz.CalculatePanoramaParams;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
+import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner2 {
 
-	static boolean adjustForScale = false;
+	static boolean adjustForScale = true;
 	
 	ArrayList<KeyPointPairList> chain;
 	ArrayList<KeyPointList> images;
@@ -291,14 +292,16 @@ public class SpherePanoTransformLearner2 {
 				double discrepancy = getDiscrepancy(item);
 				boolean curIsBad = discrepancy > maxDiscrepancy;
 				if (oldIsBad != curIsBad) {
-//					setBad(item, curIsBad);
 					if (curIsBad) {
 						setBad(item, curIsBad);
 						result.oldGoodNowBad++;
 						pairList.transformResult.oldGoodNowBad++;
 					} else {
-//						result.oldBadNowGood++;
-//						pairList.transformResult.oldBadNowGood++;
+						if (discrepancy < result.discrepancyStatistics.getAvgValue()) {
+							setBad(item, curIsBad);
+							result.oldBadNowGood++;
+							pairList.transformResult.oldBadNowGood++;
+						}
 					}
 				}
 				if (curIsBad) {
@@ -337,7 +340,7 @@ public class SpherePanoTransformLearner2 {
 				// Compute for all points, so no item.isBad check
 				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = SpherePanoTransformer2.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

@@ -3,6 +3,7 @@ package com.test.improc;
 import com.slavi.improc.myadjust.sphere2.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
+import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.matrix.Matrix;
 
 public class Dummy {
@@ -90,8 +91,8 @@ public class Dummy {
 		double y1 = 30 * MathUtil.deg2rad; 
 		double x2 = 40 * MathUtil.deg2rad; 
 		double y2 = 50 * MathUtil.deg2rad;
-		double d1 = SpherePanoTransformer2.getSphericalDistance(x1, y1, x2, y2);
-		double d2 = SpherePanoTransformer2.getSphericalDistance(x2, y2, x1, y1);
+		double d1 = SphericalCoordsLongZen.getSphericalDistance(x1, y1, x2, y2);
+		double d2 = SphericalCoordsLongZen.getSphericalDistance(x2, y2, x1, y1);
 		System.out.println(d1 - d2);
 	}
 	

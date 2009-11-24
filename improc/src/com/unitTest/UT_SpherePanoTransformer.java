@@ -10,6 +10,7 @@ import com.slavi.improc.myadjust.sphere.SphereNorm;
 import com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner;
 import com.slavi.improc.myadjust.sphere.SpherePanoTransformer;
 import com.slavi.math.MathUtil;
+import com.slavi.math.SphericalCoordsLongLat;
 
 public class UT_SpherePanoTransformer {
 
@@ -79,17 +80,17 @@ public class UT_SpherePanoTransformer {
 		double delta = 2 * MathUtil.deg2rad;
 		double rx1 = 180 * MathUtil.deg2rad;
 		double ry1 = 89 * MathUtil.deg2rad;
-		double d = SpherePanoTransformer.getSphericalDistance(rx1, ry1, rx1, ry1 + delta);
+		double d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1, ry1 + delta);
 		TestUtils.assertEqual("", d, delta);
 		
 		rx1 = 0 * MathUtil.deg2rad;
 		ry1 = 90 * MathUtil.deg2rad;
-		d = SpherePanoTransformer.getSphericalDistance(rx1, ry1, rx1, -ry1);
+		d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1, -ry1);
 		TestUtils.assertEqual("", d, 180 * MathUtil.deg2rad);
 		
 		rx1 = 179 * MathUtil.deg2rad;
 		ry1 = 0 * MathUtil.deg2rad;
-		d = SpherePanoTransformer.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
+		d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
 		TestUtils.assertEqual("", d, delta);
 	}
 	
@@ -103,16 +104,16 @@ public class UT_SpherePanoTransformer {
 		
 		SpherePanoTransformer.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, dest1);
 		SpherePanoTransformer.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
-		double dist0 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-		dist0 -= sn.dDist_dIX1 * dX1;
-		dist0 -= sn.dDist_dIY1 * dY1;
-		dist0 -= sn.dDist_dIZ1 * dZ1;
-		dist0 -= sn.dDist_dIF1 * dF1;
+		double dist0 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		dist0 -= sn.dDist_dSR1 * dX1;
+		dist0 -= sn.dDist_dSR2 * dY1;
+		dist0 -= sn.dDist_dSR3 * dZ1;
+		dist0 -= sn.dDist_dSF * dF1;
 		
-		dist0 -= sn.dDist_dIX2 * dX2;
-		dist0 -= sn.dDist_dIY2 * dY2;
-		dist0 -= sn.dDist_dIZ2 * dZ2;
-		dist0 -= sn.dDist_dIF2 * dF2;
+		dist0 -= sn.dDist_dTR1 * dX2;
+		dist0 -= sn.dDist_dTR2 * dY2;
+		dist0 -= sn.dDist_dTR3 * dZ2;
+		dist0 -= sn.dDist_dTF * dF2;
 
 		kpp.sourceSP.keyPointList.sphereRZ1 += dX1;
 		kpp.sourceSP.keyPointList.sphereRY += dY1;
@@ -126,7 +127,7 @@ public class UT_SpherePanoTransformer {
 		
 		SpherePanoTransformer.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, dest1);
 		SpherePanoTransformer.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
-		double dist1 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		double dist1 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 
 		kpp.sourceSP.keyPointList.sphereRZ1 -= dX1;
 		kpp.sourceSP.keyPointList.sphereRY -= dY1;
@@ -172,7 +173,7 @@ public class UT_SpherePanoTransformer {
 		checkNorm(kpp, delta, delta, delta, delta, delta, delta, delta, delta);
 		
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist0 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		double dist0 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 		kpl1.rx += delta;
 		kpl1.ry += delta;
 		kpl1.rz += delta;
@@ -186,16 +187,16 @@ public class UT_SpherePanoTransformer {
 		
 		SpherePanoTransformer.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
 		SpherePanoTransformer.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
-		double dist1 = SpherePanoTransformer.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
-		dist1 -= sn.dDist_dIX1 * delta;
-		dist1 -= sn.dDist_dIY1 * delta;
-		dist1 -= sn.dDist_dIZ1 * delta;
-		dist1 -= sn.dDist_dIF1 * delta;
+		double dist1 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
+		dist1 -= sn.dDist_dSR1 * delta;
+		dist1 -= sn.dDist_dSR2 * delta;
+		dist1 -= sn.dDist_dSR3 * delta;
+		dist1 -= sn.dDist_dSF * delta;
 		
-		dist1 -= sn.dDist_dIX2 * delta;
-		dist1 -= sn.dDist_dIY2 * delta;
-		dist1 -= sn.dDist_dIZ2 * delta;
-		dist1 -= sn.dDist_dIF2 * delta;
+		dist1 -= sn.dDist_dTR1 * delta;
+		dist1 -= sn.dDist_dTR2 * delta;
+		dist1 -= sn.dDist_dTR3 * delta;
+		dist1 -= sn.dDist_dTF * delta;
 		
 //		System.out.println(MathUtil.rad2degStr(dist));
 //		System.out.println(MathUtil.rad2degStr(dist0));

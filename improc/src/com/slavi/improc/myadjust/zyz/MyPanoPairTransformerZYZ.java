@@ -3,6 +3,7 @@ package com.slavi.improc.myadjust.zyz;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.math.RotationZYZ;
+import com.slavi.math.SphericalCoordsLongLat;
 
 public class MyPanoPairTransformerZYZ {
 
@@ -12,29 +13,6 @@ public class MyPanoPairTransformerZYZ {
 	 * x -> fi (longitude)
 	 * y -> psi (latitude) 
 	 */
-	
-	/**
-	 * dest[0] = x
-	 * dest[1] = y
-	 * dest[2] = z
-	 */
-	public static void polarToCartesian(double fi, double psi, double r, double dest[]) {
-		double cosPsi = Math.cos(psi);
-		dest[0] = r * Math.cos(fi) * cosPsi;
-		dest[1] = r * Math.sin(fi) * cosPsi;
-		dest[2] = r * Math.sin(psi);
-	}
-	
-	/**
-	 * dest[0] = fi
-	 * dest[1] = psi
-	 * dest[2] = r 
-	 */
-	public static void cartesianToPolar(double x, double y, double z, double dest[]) {
-		dest[0] = Math.atan2(y, x);
-		dest[2] = Math.sqrt(x*x + y*y + z*z);
-		dest[1] = dest[2] == 0.0 ? 0.0 : Math.asin(z / dest[2]);
-	}
 	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
@@ -49,11 +27,11 @@ public class MyPanoPairTransformerZYZ {
 		double sz = srcImage.scaleZ;
 		
 		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
-		cartesianToPolar(dest[2], dest[0], dest[1], dest);
+		SphericalCoordsLongLat.cartesianToPolar(dest[2], dest[0], dest[1], dest);
 	}
 
 	public static void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		polarToCartesian(rx, ry, 1.0, dest);
+		SphericalCoordsLongLat.polarToCartesian(rx, ry, 1.0, dest);
 		rot.transformBackward(srcImage.camera2real, dest[1], dest[2], dest[0], dest);
 
 		if (dest[2] == 0) {

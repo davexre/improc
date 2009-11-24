@@ -4,9 +4,10 @@ import com.slavi.math.MathUtil;
 
 /**
  * Helmert2DTransformer performs a 4-parametered affine transform
- * 
+ * <pre>
  * X(target) = a * X(source) - b * Y(source) + c
  * Y(target) = b * X(source) + a * Y(source) + d
+ * </pre>
  */
 public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTransformer<InputType, OutputType> {
 	

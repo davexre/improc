@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust.sphere2;
+package com.slavi.improc.myadjust.sphere3;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
@@ -19,7 +19,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
 
-public class MyGeneratePanoramasSphere implements Callable<Void> {
+public class MyGeneratePanoramasSphere3 implements Callable<Void> {
 
 	ExecutorService exec;	
 	ArrayList<ArrayList<KeyPointPairList>> panos;
@@ -42,7 +42,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 	int outputImageSizeX = 5000;
 	int outputImageSizeY;
 
-	public MyGeneratePanoramasSphere(ExecutorService exec,
+	public MyGeneratePanoramasSphere3(ExecutorService exec,
 			ArrayList<ArrayList<KeyPointPairList>> panos,
 			String outputDir,
 			boolean pinPoints,
@@ -77,20 +77,20 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		
 		double tmp[] = new double[3];
 		for (KeyPointList i : images) {
-			SpherePanoTransformer2.transformForeward(0, 0, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			SpherePanoTransformer3.transformForeward(0, 0, i, tmp);
+			SpherePanoTransformer3.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
 			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(0, i.imageSizeY - 1, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			SpherePanoTransformer3.transformForeward(0, i.imageSizeY - 1, i, tmp);
+			SpherePanoTransformer3.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
 			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, 0, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			SpherePanoTransformer3.transformForeward(i.imageSizeX - 1, 0, i, tmp);
+			SpherePanoTransformer3.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
 			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
+			SpherePanoTransformer3.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
+			SpherePanoTransformer3.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
 			tmp[1] = MathUtil.PIover2 - tmp[1];
 			calcExt(tmp, minAngle, sizeAngle);
 		}
@@ -129,13 +129,13 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
 		y = MathUtil.PIover2 - y;
-		SpherePanoTransformer2.rotateBackward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
-		SpherePanoTransformer2.transformBackward(x, y, image, dest);
+		SpherePanoTransformer3.rotateBackward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
+		SpherePanoTransformer3.transformBackward(x, y, image, dest);
 	}
 	
 	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
-		SpherePanoTransformer2.transformForeward(x, y, image, dest);
-		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
+		SpherePanoTransformer3.transformForeward(x, y, image, dest);
+		SpherePanoTransformer3.rotateForeward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
 		dest[1] = MathUtil.PIover2 - dest[1];
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
@@ -463,7 +463,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		images = new ArrayList<KeyPointList>();
 		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
 			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
-			SpherePanoTransformLearner2.buildImagesList(pano, images);
+			SpherePanoTransformLearner3.buildImagesList(pano, images);
 			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
 			for (KeyPointList image : images) {
 				System.out.println(image.imageFileStamp.getFile().getName());
@@ -475,7 +475,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
-			SpherePanoTransformLearner2.buildImagesList(pairLists, images);
+			SpherePanoTransformLearner3.buildImagesList(pairLists, images);
 			calcExtents();
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));

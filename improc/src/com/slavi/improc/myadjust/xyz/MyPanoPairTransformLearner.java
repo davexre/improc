@@ -10,9 +10,9 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.MyPoint3D;
-import com.slavi.improc.myadjust.sphere.SpherePanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
+import com.slavi.math.SphericalCoordsLongLat;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
@@ -399,7 +399,7 @@ public class MyPanoPairTransformLearner {
 				MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				MyPanoPairTransformer.transform(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 
-				double discrepancy = SpherePanoTransformer.getSphericalDistance(PW1.x, PW1.y, PW2.x, PW2.y) * MathUtil.rad2deg;
+				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1.x, PW1.y, PW2.x, PW2.y) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

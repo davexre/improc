@@ -3,6 +3,7 @@ package com.slavi.improc.myadjust.sphere2;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.math.MathUtil;
+import com.slavi.math.SphericalCoordsLongZen;
 
 public class SphereNorm2 {
 
@@ -28,7 +29,7 @@ public class SphereNorm2 {
 		double target[] = new double[2];
 		SpherePanoTransformer2.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, source);
 		SpherePanoTransformer2.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, target);
-		dist0 = SpherePanoTransformer2.getSphericalDistance(source[0], source[1], target[0], target[1]);
+		dist0 = SphericalCoordsLongZen.getSphericalDistance(source[0], source[1], target[0], target[1]);
 
 		p1.setKeyPoint(kpp.sourceSP);
 		p2.setKeyPoint(kpp.targetSP);
