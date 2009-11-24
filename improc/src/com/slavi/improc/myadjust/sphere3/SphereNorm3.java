@@ -177,11 +177,11 @@ public class SphereNorm3 {
 			double A = B / kp.keyPointList.scaleZ;
 			double dAdF = - B / (kp.keyPointList.scaleZ * kp.keyPointList.scaleZ) ;
 			
-			sx = Math.atan2(B, kp.keyPointList.scaleZ);
-			dSX_dF = dAdF / (1.0 + A * A);
+			sy = Math.atan2(B, kp.keyPointList.scaleZ);
+			dSY_dF = dAdF / (1.0 + A * A);
 			
-			sy = Math.atan2(tmpx, tmpy);
-			dSY_dF = 0.0;
+			sx = Math.atan2(tmpx, -tmpy);
+			dSX_dF = 0.0;
 		}
 	}
 	

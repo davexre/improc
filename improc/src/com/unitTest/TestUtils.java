@@ -72,14 +72,14 @@ public class TestUtils {
 	public static void dumpArray(String str, double p[]) {
 		System.out.print(str);
 		for (int i = 0; i < p.length; i++) 
-			System.out.print("\t" + MathUtil.d4(p[0]));
+			System.out.print("\t" + MathUtil.d4(p[i]));
 		System.out.println();
 	}
 	
 	public static void dumpAngles(String str, double p[]) {
 		System.out.print(str);
 		for (int i = 0; i < p.length; i++) 
-			System.out.print("\t" + MathUtil.rad2degStr(p[0]));
+			System.out.print("\t" + MathUtil.rad2degStr(p[i]));
 		System.out.println();
 	}
 }

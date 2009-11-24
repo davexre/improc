@@ -17,9 +17,9 @@ public class SpherePanoTransformer3 {
 		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
 		double f = srcImage.scaleZ;
 		// x => longitude, y => zenith
-		double y = Math.atan2(sx, sy); /// TODO: CHECK ME!!!!
-		double r1 = Math.sqrt(sx*sx + sy*sy);
-		double x = Math.atan2(r1, f);
+		double x = Math.atan2(sx, -sy);
+		double r = Math.sqrt(sx * sx + sy * sy);
+		double y = Math.atan2(r, f);
 		rotateForeward(x, y, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 	}
 
@@ -51,7 +51,7 @@ public class SpherePanoTransformer3 {
 		rotateBackward(rx, ry, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 		// x => longitude, y => zenith
 		double r1 = srcImage.scaleZ * Math.tan(dest[1]);
-		dest[1] = srcImage.cameraOriginY + r1 * Math.cos(dest[0]) / srcImage.cameraScale;
+		dest[1] = srcImage.cameraOriginY - r1 * Math.cos(dest[0]) / srcImage.cameraScale;
 		dest[0] = srcImage.cameraOriginX + r1 * Math.sin(dest[0]) / srcImage.cameraScale;
 	}
 
