@@ -5,6 +5,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.matrix.Matrix;
+import com.unitTest.TestUtils;
 
 public class Dummy {
 
@@ -96,7 +97,22 @@ public class Dummy {
 		System.out.println(d1 - d2);
 	}
 	
+	void sss() {
+		double angles[] = {
+				10 * MathUtil.deg2rad,
+				0 * MathUtil.deg2rad,
+				30 * MathUtil.deg2rad
+		};
+		double tmp[] = new double[2];
+		SpherePanoTransformer2.rotateForeward(0, 0*MathUtil.deg2rad, angles[0], angles[1], angles[2], tmp);
+		TestUtils.dumpAngles("", tmp);
+		
+		Matrix m = RotationZYZ.instance.makeAngles(angles);
+		RotationZYZ.instance.getRotationAngles(m, angles);
+		TestUtils.dumpAngles("", angles);
+	}
+	
 	public static void main(String[] args) {
-		new Dummy().aaa();
+		new Dummy().sss();
 	}
 }

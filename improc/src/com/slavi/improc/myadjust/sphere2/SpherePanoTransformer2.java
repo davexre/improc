@@ -18,8 +18,8 @@ public class SpherePanoTransformer2 {
 		double f = srcImage.scaleZ;
 		// x => longitude, y => zenith
 		double x = Math.atan2(sy, sx);
-		double r = Math.sqrt(sx * sx + sy * sy);
-		double y = Math.atan2(r, f);
+		double r = Math.sqrt(sx * sx + sy * sy + f * f);
+		double y = Math.acos(f / r);
 		rotateForeward(x, y, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 	}
 

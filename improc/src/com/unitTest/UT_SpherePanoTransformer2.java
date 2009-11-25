@@ -74,13 +74,13 @@ public class UT_SpherePanoTransformer2 {
 		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
 		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		kpl1.sphereRZ1 = 30 * MathUtil.deg2rad;
-		kpl1.sphereRY = 20 * MathUtil.deg2rad;
+		kpl1.sphereRY = 30 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 10 * MathUtil.deg2rad;
 
 		KeyPoint p1 = new KeyPoint();
 		p1.keyPointList = kpl1;
 		p1.doubleX = p1.keyPointList.cameraOriginX;
-		p1.doubleY = p1.keyPointList.cameraOriginY;
+		p1.doubleY = p1.keyPointList.cameraOriginY + 1000;
 
 		double dest[] = new double[2];
 		double dest2[] = new double[2];
@@ -89,15 +89,18 @@ public class UT_SpherePanoTransformer2 {
 		TestUtils.assertEqual("", dest2[0], p1.doubleX);
 		TestUtils.assertEqual("", dest2[1], p1.doubleY);
 		
-		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
+		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ2, -kpl1.sphereRY, kpl1.sphereRZ1);
 		double d1[] = new double[3];
 		double d2[] = new double[3];
 
 		d1[0] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
 		d1[1] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
 		d1[2] = p1.keyPointList.scaleZ;
-		RotationZYZ.instance.transformForward(m, d1, d2);
+		RotationZYZ.instance.transformBackward(m, d1, d2);
 		SphericalCoordsLongZen.cartesianToPolar(d2[0], d2[1], d2[2], d2);
+		TestUtils.dumpAngles("d1", d1);
+		TestUtils.dumpAngles("pano", dest);
+		TestUtils.dumpAngles("rot", d2);
 		TestUtils.assertEqualAngle("", dest[0], d2[0]);
 		TestUtils.assertEqualAngle("", dest[1], d2[1]);
 

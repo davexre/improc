@@ -49,7 +49,7 @@ public class SphericalCoordsLongZen {
 	 * dest[2] = r -> radius 
 	 */
 	public static void cartesianToPolar(double x, double y, double z, double dest[]) {
-		dest[0] = -Math.atan2(y, x);
+		dest[0] = Math.atan2(y, x);
 		dest[2] = Math.sqrt(x*x + y*y + z*z);
 		dest[1] = dest[2] == 0.0 ? 0.0 : Math.acos(z / dest[2]);
 	}
