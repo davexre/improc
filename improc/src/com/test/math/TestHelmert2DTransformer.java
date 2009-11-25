@@ -11,6 +11,7 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.Helmert2DTransformer;
 import com.slavi.math.transform.TransformLearnerResult;
+import com.unitTest.TestUtils;
 
 public class TestHelmert2DTransformer {
 
@@ -167,8 +168,8 @@ public class TestHelmert2DTransformer {
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
 
-		int maxX = 5;
-		int maxY = 5;
+		int maxX = 50;
+		int maxY = 50;
 		
 		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < maxX; xcounter++) {
@@ -178,7 +179,7 @@ public class TestHelmert2DTransformer {
 		}
 		
 		// add fake data
-		int percentFakeData = 50;
+		int percentFakeData = 55;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
 
@@ -219,7 +220,7 @@ public class TestHelmert2DTransformer {
 		MyTestData pair;
 		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), points);
 		
-		for (int iter = 0; iter < 10; iter++) {
+		for (int iter = 0; iter < 100; iter++) {
 			System.out.println();
 			System.out.println("**** Iteration " + iter);
 			TransformLearnerResult res = learner.calculateOne();
@@ -264,5 +265,7 @@ public class TestHelmert2DTransformer {
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
 		test.dumpBad();
+		TestUtils.assertMatrix0("Delta", delta);
+		System.out.println("Done");
 	}
 }

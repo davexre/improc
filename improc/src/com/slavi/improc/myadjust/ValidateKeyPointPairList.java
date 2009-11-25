@@ -46,10 +46,18 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		
 		f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
 		double r = Math.sqrt(tr.c * tr.c + tr.d * tr.d);
-		double z = Math.atan2(tr.c, tr.d);
+		pairList.sphereRZ1 = Math.atan2(tr.d, tr.c);
+		pairList.sphereRY = -Math.atan2(r, f);
+		pairList.sphereRZ2 = angle - pairList.sphereRZ1;
+
+/*		
+		f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
+		double r = Math.sqrt(tr.c * tr.c + tr.d * tr.d);
+		double z = Math.atan2(tr.d, tr.c); // ZYZ
+//		double z = Math.atan2(tr.c, tr.d); // ZXZ
 		pairList.sphereRZ1 = angle - z;
 		pairList.sphereRY = Math.atan2(r, f);
-		pairList.sphereRZ2 = z;
+		pairList.sphereRZ2 = z;*/
 	}
 
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws Exception {

@@ -92,7 +92,7 @@ public class SpherePanoTransformLearner2 {
 					angles[0] = minHopPairList.sphereRZ1;
 					angles[1] = minHopPairList.sphereRY;
 					angles[2] = minHopPairList.sphereRZ2;
-					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
+//					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
 					Matrix sourceToTarget = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix targetToWorld = RotationZYZ.instance.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
@@ -109,7 +109,7 @@ public class SpherePanoTransformLearner2 {
 					angles[0] = minHopPairList.sphereRZ1;
 					angles[1] = minHopPairList.sphereRY;
 					angles[2] = minHopPairList.sphereRZ2;
-//					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
+					RotationZYZ.instance.getRotationAnglesBackword(angles[0], angles[1], angles[2], angles);
 					Matrix targetToSource = RotationZYZ.instance.makeAngles(angles[0], angles[1], angles[2]);
 					Matrix sourceToWorld = RotationZYZ.instance.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);

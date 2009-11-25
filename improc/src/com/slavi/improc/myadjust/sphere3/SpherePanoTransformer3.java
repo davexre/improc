@@ -5,6 +5,7 @@ import com.slavi.math.MathUtil;
 
 public class SpherePanoTransformer3 {
 
+	static double threshold = Math.sin(MathUtil.epsAngle * 10); 
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
@@ -17,9 +18,16 @@ public class SpherePanoTransformer3 {
 		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
 		double f = srcImage.scaleZ;
 		// x => longitude, y => zenith
-		double x = Math.atan2(sx, -sy);
 		double r = Math.sqrt(sx * sx + sy * sy);
-		double y = Math.atan2(r, f);
+		double x;
+		double y;
+		if (r < threshold) {
+			x = 0;
+			y = 0;
+		} else {
+			x = Math.atan2(sx, -sy);
+			y = Math.atan2(r, f);
+		}
 		rotateForeward(x, y, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 	}
 
