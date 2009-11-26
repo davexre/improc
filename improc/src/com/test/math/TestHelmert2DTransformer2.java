@@ -162,8 +162,8 @@ public class TestHelmert2DTransformer2 {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
 		jTransform.rotate(9 * degreeToRad);
-		jTransform.scale(123.456, 123.456);
-		jTransform.translate(100.567, 200.123);
+//		jTransform.scale(123.456, 123.456);
+//		jTransform.translate(100.567, 200.123);
 
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
@@ -211,6 +211,7 @@ public class TestHelmert2DTransformer2 {
 		System.out.println(d.src);
 		System.out.println(d.dest);
 */
+		System.out.println();
 		System.out.println("Good points " + goodPoints);
 		System.out.println("Fake points " + numberOfFakePoints);
 		System.out.println("All  points " + points.size());
@@ -227,7 +228,7 @@ public class TestHelmert2DTransformer2 {
 			System.out.println();
 			System.out.println("**** Iteration " + iter);
 			TransformLearnerResult res = learner.calculateOne();
-			System.out.println(res);
+//			System.out.println(res);
 			System.out.println(tr.toString());
 			dumpBad();
 			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < 1.0))

@@ -43,27 +43,82 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		double d = 0.5 * (
 				targetMax.getItem(1, 0) + targetMin.getItem(1, 0)  
 				- sourceMax.getItem(1, 0) - sourceMin.getItem(1, 0));
-		Statistics stat = new Statistics();
-		stat.start();
+		Statistics statA = new Statistics();
+		Statistics statB = new Statistics();
+		statA.start();
+		statB.start();
 		for (Map.Entry<InputType, OutputType> item : items) {
 			if (isBad(item))
 				continue;
 			InputType source = item.getKey();
 			OutputType target = item.getValue();
-			double dx = tr.getTargetCoord(target, 0) - (tr.getSourceCoord(source, 0) + c);
-			double dy = tr.getTargetCoord(target, 1) - (tr.getSourceCoord(source, 1) + d);
-			double angle = Math.atan2(dy, dx);
-			stat.addValue(angle);
+			double a = tr.getTargetCoord(target, 0) - (tr.getSourceCoord(source, 0) + c);
+			double b = tr.getTargetCoord(target, 1) - (tr.getSourceCoord(source, 1) + d);
+			statA.addValue(a);
+			statB.addValue(b);
 //			stat.addValue(angle, getWeight(item));
 		}
-		stat.stop();
-		double angle = stat.getA();
-		tr.a = Math.cos(angle);
-		tr.b = Math.sin(angle);
+		statA.stop();
+		statB.stop();
+		tr.a = statA.getA();
+		tr.b = statB.getA();
 		tr.c = c;
 		tr.d = d;
 	}
 
+	public TransformLearnerResult calculateTwo() {
+		TransformLearnerResult result = new TransformLearnerResult();
+		result.minGoodRequired = lsa.getRequiredPoints();
+		computeWeights(result);
+		if (result.oldGoodCount < result.minGoodRequired)
+			return result;
+
+		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
+		// Calculate the affine transform parameters 
+		lsa.clear();
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
+				continue;
+			InputType source = item.getKey();
+			OutputType target = item.getValue();
+			double computedWeight = getComputedWeight(item);
+			
+			double SX = transformer.getSourceCoord(source, 0);
+			double SY = transformer.getSourceCoord(source, 1);
+			double TX = transformer.getTargetCoord(target, 0);
+			double TY = transformer.getTargetCoord(target, 1);
+
+			coefs.setItem(0, 0, SX);
+			coefs.setItem(1, 0, SY);
+			coefs.setItem(2, 0, 1);
+			coefs.setItem(3, 0, 0);
+			lsa.addMeasurement(coefs, computedWeight, TX-SX, 0);
+
+			coefs.setItem(0, 0, -SY);
+			coefs.setItem(1, 0, SX);
+			coefs.setItem(2, 0, 0);
+			coefs.setItem(3, 0, 1);
+			lsa.addMeasurement(coefs, computedWeight, TY-SY, 0);
+		}
+		if (!lsa.calculate())
+			return result;
+		
+		// Build transformer
+		Matrix u = lsa.getUnknown();
+//		u.rMul(-1);
+		u.printM("U");
+		
+		tr.a = u.getItem(0, 0);
+		tr.b = u.getItem(0, 1);
+		tr.c = u.getItem(0, 2); 
+		tr.d = u.getItem(0, 3);
+		
+		computeDiscrepancies(result);
+		computeBad(result);
+		result.adjustFailed = false;
+		return result; 
+	}
+	
 	/**
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
@@ -109,7 +164,8 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 
 		// Build transformer
 		Matrix u = lsa.getUnknown(); 
-
+		u.printM("U");
+		
 		tr.a -= u.getItem(0, 0);
 		tr.b -= u.getItem(0, 1);
 		tr.c -= u.getItem(0, 2); 
