@@ -177,19 +177,19 @@ public class SpherePanoTransformLearner2 {
 				
 				coefs.make0();
 				if (srcIndex >= 0) {
-					coefs.setItem(srcIndex + 0, 0, sn.dDist_dIX1);
-					coefs.setItem(srcIndex + 1, 0, sn.dDist_dIY1);
-					coefs.setItem(srcIndex + 2, 0, sn.dDist_dIZ1);
+					coefs.setItem(srcIndex + 0, 0, sn.dDist_dSR1);
+					coefs.setItem(srcIndex + 1, 0, sn.dDist_dSR2);
+					coefs.setItem(srcIndex + 2, 0, sn.dDist_dSR3);
 					if (adjustForScale) {
-						coefs.setItem(srcIndex + 3, 0, sn.dDist_dIF1 * scaleTheZ);
+						coefs.setItem(srcIndex + 3, 0, sn.dDist_dSF * scaleTheZ);
 					}
 				}
 				if (destIndex >= 0) {
-					coefs.setItem(destIndex + 0, 0, sn.dDist_dIX2);
-					coefs.setItem(destIndex + 1, 0, sn.dDist_dIY2);
-					coefs.setItem(destIndex + 2, 0, sn.dDist_dIZ2);
+					coefs.setItem(destIndex + 0, 0, sn.dDist_dTR1);
+					coefs.setItem(destIndex + 1, 0, sn.dDist_dTR2);
+					coefs.setItem(destIndex + 2, 0, sn.dDist_dTR3);
 					if (adjustForScale) {
-						coefs.setItem(destIndex + 3, 0, sn.dDist_dIF2 * scaleTheZ);
+						coefs.setItem(destIndex + 3, 0, sn.dDist_dTF * scaleTheZ);
 					}
 				}
 				lsa.addMeasurement(coefs, computedWeight, sn.Dist, 0);

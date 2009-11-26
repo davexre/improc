@@ -43,7 +43,7 @@ public class UT_SpherePanoTransformer2 {
 		rot[0] = 10 * MathUtil.deg2rad;
 		rot[1] = 20 * MathUtil.deg2rad;
 		rot[2] = 30 * MathUtil.deg2rad;
-		dest1[0] = 20 * MathUtil.deg2rad;
+		dest1[0] = 40 * MathUtil.deg2rad;
 		dest1[1] = 50 * MathUtil.deg2rad;
 		SpherePanoTransformer2.rotateForeward(dest1[0], dest1[1], rot[0], rot[1], rot[2], dest2);
 		SpherePanoTransformer2.rotateBackward(dest2[0], dest2[1], rot[0], rot[1], rot[2], dest3);
@@ -73,9 +73,9 @@ public class UT_SpherePanoTransformer2 {
 		kpl1.cameraOriginY = 2002;
 		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
 		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		kpl1.sphereRZ1 = 30 * MathUtil.deg2rad;
-		kpl1.sphereRY = 30 * MathUtil.deg2rad;
-		kpl1.sphereRZ2 = 10 * MathUtil.deg2rad;
+		kpl1.sphereRZ1 = 10 * MathUtil.deg2rad;
+		kpl1.sphereRY = 20 * MathUtil.deg2rad;
+		kpl1.sphereRZ2 = 30 * MathUtil.deg2rad;
 
 		KeyPoint p1 = new KeyPoint();
 		p1.keyPointList = kpl1;
@@ -89,18 +89,15 @@ public class UT_SpherePanoTransformer2 {
 		TestUtils.assertEqual("", dest2[0], p1.doubleX);
 		TestUtils.assertEqual("", dest2[1], p1.doubleY);
 		
-		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ2, -kpl1.sphereRY, kpl1.sphereRZ1);
+		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
 		double d1[] = new double[3];
 		double d2[] = new double[3];
 
 		d1[0] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
 		d1[1] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
 		d1[2] = p1.keyPointList.scaleZ;
-		RotationZYZ.instance.transformBackward(m, d1, d2);
+		RotationZYZ.instance.transformForward(m, d1, d2);
 		SphericalCoordsLongZen.cartesianToPolar(d2[0], d2[1], d2[2], d2);
-		TestUtils.dumpAngles("d1", d1);
-		TestUtils.dumpAngles("pano", dest);
-		TestUtils.dumpAngles("rot", d2);
 		TestUtils.assertEqualAngle("", dest[0], d2[0]);
 		TestUtils.assertEqualAngle("", dest[1], d2[1]);
 
@@ -139,15 +136,15 @@ public class UT_SpherePanoTransformer2 {
 		SpherePanoTransformer2.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
 		double dist0 = SphericalCoordsLongZen.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 		double dist2 = dist0;
-		dist2 += sn.dDist_dIX1 * dX1;
-		dist2 += sn.dDist_dIY1 * dY1;
-		dist2 += sn.dDist_dIZ1 * dZ1;
-		dist2 += sn.dDist_dIF1 * dF1;
+		dist2 += sn.dDist_dSR1 * dX1;
+		dist2 += sn.dDist_dSR2 * dY1;
+		dist2 += sn.dDist_dSR3 * dZ1;
+		dist2 += sn.dDist_dSF * dF1;
 		
-		dist2 += sn.dDist_dIX2 * dX2;
-		dist2 += sn.dDist_dIY2 * dY2;
-		dist2 += sn.dDist_dIZ2 * dZ2;
-		dist2 += sn.dDist_dIF2 * dF2;
+		dist2 += sn.dDist_dTR1 * dX2;
+		dist2 += sn.dDist_dTR2 * dY2;
+		dist2 += sn.dDist_dTR3 * dZ2;
+		dist2 += sn.dDist_dTF * dF2;
 
 		kpp.sourceSP.keyPointList.sphereRZ1 += dX1;
 		kpp.sourceSP.keyPointList.sphereRY += dY1;
@@ -335,12 +332,12 @@ public class UT_SpherePanoTransformer2 {
 		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
 		pd.setKeyPoint(kp);
 		
-		TestUtils.assertEqualAngle("", dest0[0], pd.rx);
-		TestUtils.assertEqualAngle("", dest0[1], pd.ry);
+		TestUtils.assertEqualAngle("", dest0[0], pd.tx);
+		TestUtils.assertEqualAngle("", dest0[1], pd.ty);
 		
 		double dest2[] = new double[2];
-		dest2[0] = dest0[0] + pd.dRX_dIX * dX + pd.dRX_dIY * dY + pd.dRX_dIZ * dZ + pd.dRX_dIF * dF;
-		dest2[1] = dest0[1] + pd.dRY_dIX * dX + pd.dRY_dIY * dY + pd.dRY_dIZ * dZ + pd.dRY_dIF * dF;
+		dest2[0] = dest0[0] + pd.dTX_dR1 * dX + pd.dTX_dR2 * dY + pd.dTX_dR3 * dZ + pd.dTX_dF * dF;
+		dest2[1] = dest0[1] + pd.dTY_dR1 * dX + pd.dTY_dR2 * dY + pd.dTY_dR3 * dZ + pd.dTY_dF * dF;
 		
 		kp.keyPointList.sphereRZ1 += dX;
 		kp.keyPointList.sphereRY += dY;
@@ -374,7 +371,7 @@ public class UT_SpherePanoTransformer2 {
 		p1.doubleX = 1881;
 		p1.doubleY = 897;
 
-		double delta = 10 * MathUtil.deg2rad;
+		double delta = 0.1 * MathUtil.deg2rad;
 		int parts = 16;
 		for (int x = 0; x < parts; x++) {
 			double rx = x * MathUtil.C2PI / parts;
@@ -398,13 +395,34 @@ public class UT_SpherePanoTransformer2 {
 		}
 	}
 	
+	void testRotationZYZ() {
+		double rot[] = new double[3];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
+		double dest3[] = new double[3];
+		rot[0] = 10 * MathUtil.deg2rad;
+		rot[1] = 20 * MathUtil.deg2rad;
+		rot[2] = 30 * MathUtil.deg2rad;
+		dest1[0] = 40 * MathUtil.deg2rad;
+		dest1[1] = 50 * MathUtil.deg2rad;
+		dest1[2] = 1;
+		
+		SphericalCoordsLongZen.polarToCartesian(dest1[0], dest1[1], dest1[2], dest2);
+		Matrix m = RotationZYZ.instance.makeAngles(rot);
+		RotationZYZ.instance.transformForward(m, dest2, dest3);
+		SphericalCoordsLongZen.cartesianToPolar(dest3[0], dest3[1], dest3[2], dest3);
+		TestUtils.dumpAngles("dest1", dest1);
+		TestUtils.dumpAngles("dest3", dest3);
+	}
+	
 	public static void main(String[] args) {
 		UT_SpherePanoTransformer2 test = new UT_SpherePanoTransformer2();
+//		test.testRotationZYZ();
 		test.testSpherePanoTransformerRotate();
 		test.testSpherePanoTransformer();
 		test.testSphericalDistance();
-//		test.testNorm0();
-//		test.testSphereNorm();
+		test.testNorm0();
+		test.testSphereNorm();
 		test.testCalcPrims();
 		System.out.println("Done");
 	}

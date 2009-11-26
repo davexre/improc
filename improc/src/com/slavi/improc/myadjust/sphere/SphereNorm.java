@@ -70,10 +70,10 @@ public class SphereNorm {
 		public void setKeyPoint(KeyPoint kp) {
 			this.kp = kp;
 			calcLocalSphericalCoords();
-			calcWorldSphericalCoords();
+			calcTargetSphericalCoords();
 		}
 		
-		private void calcWorldSphericalCoords() {
+		private void calcTargetSphericalCoords() {
 			double sinDSX = Math.sin(sx - kp.keyPointList.rx);
 			double cosDSX = Math.cos(sx - kp.keyPointList.rx);
 			double sinSY = Math.sin(sy);

@@ -115,18 +115,18 @@ public class SphereNorm3 {
 			double H = cosSY * cosR2;
 			double dH_dR1 = 0;
 			double dH_dR2 = - cosSY * sinR2;
-			double dH_dR3 = - sinSY * cosR2 * dSY_dF;
+			double dH_dF = - sinSY * cosR2 * dSY_dF;
 			
 			double G = H + I;
 			double dG_dR1 = dH_dR1 + dI_dR1;
 			double dG_dR2 = dH_dR2 + dI_dR2;
-			double dG_dR3 = dH_dR3 + dI_dF;
+			double dG_dF = dH_dF + dI_dF;
 			
 			ty = Math.acos(G);
 			double tmp = - Math.sqrt(1 - G * G);
 			dTY_dR1 = dG_dR1 / tmp;
 			dTY_dR2 = dG_dR2 / tmp;
-			dTY_dF = dG_dR3 / tmp;
+			dTY_dF = dG_dF / tmp;
 			dTY_dR3 = 0;
 
 			// dTX
