@@ -95,13 +95,23 @@ public class TestHelmert2DTransformer2 {
 			super(transformer, pointsPairList);
 		}
 
+		double discrepancyThreshold = 1.0;
 		public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
-			double r = result.discrepancyStatistics.getAvgValue();
+			double r = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
+//			double r = result.discrepancyStatistics.getAvgValue();
+			double je = result.discrepancyStatistics.getJ_End();
+			if (je < result.discrepancyStatistics.getMaxX())
+				r = je;
+			if (r < discrepancyThreshold)
+				r = discrepancyThreshold;
+			return r;
+			
+/*			double r = result.discrepancyStatistics.getAvgValue();
 			double je = result.discrepancyStatistics.getJ_End();
 			if (je < result.discrepancyStatistics.getMaxX())
 				r = je;
 //			double r = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2;
-			return r < 1.0 ? 1.0 : r;
+			return r < 1.0 ? 1.0 : r;*/
 		}
 		
 		public Point2D.Double createTemporaryTargetObject() {
@@ -168,8 +178,8 @@ public class TestHelmert2DTransformer2 {
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
 
-		int maxX = 50;
-		int maxY = 50;
+		int maxX = 3;
+		int maxY = 3;
 		
 		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < maxX; xcounter++) {
@@ -228,7 +238,7 @@ public class TestHelmert2DTransformer2 {
 			System.out.println();
 			System.out.println("**** Iteration " + iter);
 			TransformLearnerResult res = learner.calculateOne();
-//			System.out.println(res);
+			System.out.println(res);
 			System.out.println(tr.toString());
 			dumpBad();
 			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < 1.0))

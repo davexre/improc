@@ -179,7 +179,7 @@ public class TestHelmert2DTransformer {
 		}
 		
 		// add fake data
-		int percentFakeData = 55;
+		int percentFakeData = 45;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
 

@@ -196,7 +196,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			transformer.transform(source, sourceTransformed);
 			for (int i = outputSize - 1; i >= 0; i--) {
 				double d = transformer.getTargetCoord(item.getValue(), i) - transformer.getTargetCoord(sourceTransformed, i);
-				if (d > result.getItem(i, 0))
+				if (Math.abs(d) > Math.abs(result.getItem(i, 0)))
 					result.setItem(i, 0, d);
 			}
 		}
@@ -219,10 +219,12 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			}
 			setDiscrepancy(item, Math.sqrt(sum2));
 			if (!isBad(item)) {
-				result.discrepancyStatistics.addValue(getDiscrepancy(item), getWeight(item));
+				result.discrepancyStatistics.addValue(getDiscrepancy(item), 1);
+//				result.discrepancyStatistics.addValue(getDiscrepancy(item), getWeight(item));
 			}
 		}
 		result.discrepancyStatistics.stop();
+		System.out.println(result.discrepancyStatistics);
 	}
 	
 	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {

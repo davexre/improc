@@ -64,6 +64,11 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		tr.b = statB.getA();
 		tr.c = c;
 		tr.d = d;
+		
+		tr.a = 0.5;
+		tr.b = 0.2;
+		tr.c = 10;
+		tr.d = 20;
 	}
 
 	public TransformLearnerResult calculateTwo() {
@@ -92,13 +97,13 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			coefs.setItem(1, 0, SY);
 			coefs.setItem(2, 0, 1);
 			coefs.setItem(3, 0, 0);
-			lsa.addMeasurement(coefs, computedWeight, TX-SX, 0);
+			lsa.addMeasurement(coefs, computedWeight, TX, 0);
 
-			coefs.setItem(0, 0, -SY);
-			coefs.setItem(1, 0, SX);
+			coefs.setItem(0, 0, SY);
+			coefs.setItem(1, 0, -SX);
 			coefs.setItem(2, 0, 0);
 			coefs.setItem(3, 0, 1);
-			lsa.addMeasurement(coefs, computedWeight, TY-SY, 0);
+			lsa.addMeasurement(coefs, computedWeight, TY, 0);
 		}
 		if (!lsa.calculate())
 			return result;
@@ -131,6 +136,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			return result;
 
 		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
+		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Calculate the affine transform parameters 
 		lsa.clear();
 		for (Map.Entry<InputType, OutputType> item : items) {
@@ -157,19 +163,31 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			coefs.setItem(1, 0, dF_db);
 			coefs.setItem(2, 0, dF_dc);
 			coefs.setItem(3, 0, dF_dd);
+			System.out.print(coefs);
 			lsa.addMeasurement(coefs, computedWeight, F, 0);
+			
+			transformer.transform(source, sourceTransformed);
+			double d1 = transformer.getTargetCoord(target, 0) - transformer.getTargetCoord(sourceTransformed, 0);
+			double d2 = transformer.getTargetCoord(target, 1) - transformer.getTargetCoord(sourceTransformed, 1);
+			double d = d1 * d1 + d2 * d2;
+			if (d != F)
+				System.out.println("d=" + d + "\tF=" + F);
 		}
+		System.out.println("det=" + lsa.getNm().makeSquareMatrix().det());
+		lsa.getNm().makeSquareMatrix().printM("NM");
 		if (!lsa.calculate())
 			return result;
+		lsa.getNm().makeSquareMatrix().printM("NM'");
 
 		// Build transformer
-		Matrix u = lsa.getUnknown(); 
+		Matrix u = lsa.getUnknown();
+//		u.rMul(-1);
 		u.printM("U");
 		
-		tr.a -= u.getItem(0, 0);
-		tr.b -= u.getItem(0, 1);
-		tr.c -= u.getItem(0, 2); 
-		tr.d -= u.getItem(0, 3);
+		tr.a += u.getItem(0, 0);
+		tr.b += u.getItem(0, 1);
+		tr.c += u.getItem(0, 2); 
+		tr.d += u.getItem(0, 3);
 		
 		computeDiscrepancies(result);
 		computeBad(result);
