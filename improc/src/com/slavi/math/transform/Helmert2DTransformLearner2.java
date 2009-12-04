@@ -43,6 +43,10 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		double d = 0.5 * (
 				targetMax.getItem(1, 0) + targetMin.getItem(1, 0)  
 				- sourceMax.getItem(1, 0) - sourceMin.getItem(1, 0));
+		
+		c = 0.5 * (targetMin.getItem(0, 0) + sourceMin.getItem(0, 0));
+		d = 0.5 * (targetMin.getItem(1, 0) + sourceMin.getItem(1, 0));
+		
 		Statistics statA = new Statistics();
 		Statistics statB = new Statistics();
 		statA.start();
@@ -54,21 +58,26 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			OutputType target = item.getValue();
 			double a = tr.getTargetCoord(target, 0) - (tr.getSourceCoord(source, 0) + c);
 			double b = tr.getTargetCoord(target, 1) - (tr.getSourceCoord(source, 1) + d);
+			System.out.println("A=" + a + "\tB=" + b);
 			statA.addValue(a);
 			statB.addValue(b);
 //			stat.addValue(angle, getWeight(item));
 		}
 		statA.stop();
 		statB.stop();
+		System.out.println("StatA");
+		System.out.println(statA);
+		System.out.println("StatB");
+		System.out.println(statB);
 		tr.a = statA.getA();
 		tr.b = statB.getA();
 		tr.c = c;
 		tr.d = d;
-		
-		tr.a = 0.5;
-		tr.b = 0.2;
-		tr.c = 10;
-		tr.d = 20;
+/*		
+		tr.a = 0;
+		tr.b = 0;
+		tr.c = 0;
+		tr.d = 0;*/
 	}
 
 	public TransformLearnerResult calculateTwo() {
@@ -167,8 +176,8 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			lsa.addMeasurement(coefs, computedWeight, F, 0);
 			
 			transformer.transform(source, sourceTransformed);
-			double d1 = transformer.getTargetCoord(target, 0) - transformer.getTargetCoord(sourceTransformed, 0);
-			double d2 = transformer.getTargetCoord(target, 1) - transformer.getTargetCoord(sourceTransformed, 1);
+			double d1 = transformer.getTargetCoord(sourceTransformed, 0) - transformer.getTargetCoord(target, 0);
+			double d2 = transformer.getTargetCoord(sourceTransformed, 1) - transformer.getTargetCoord(target, 1);
 			double d = d1 * d1 + d2 * d2;
 			if (d != F)
 				System.out.println("d=" + d + "\tF=" + F);
@@ -181,7 +190,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-//		u.rMul(-1);
+		u.rMul(-1);
 		u.printM("U");
 		
 		tr.a += u.getItem(0, 0);

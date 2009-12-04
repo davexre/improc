@@ -11,7 +11,6 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.Helmert2DTransformer;
 import com.slavi.math.transform.TransformLearnerResult;
-import com.unitTest.TestUtils;
 
 public class TestHelmert2DTransformer {
 
@@ -253,19 +252,71 @@ public class TestHelmert2DTransformer {
 		System.out.println("Good marked as bad: " + goodMarkedAsBad);		
 	}
 	
+	void doit(MyTestData data, MyTestHelmert2DTransformer tr) {
+		double SX = data.src.x;
+		double SY = data.src.y;
+		double TX = data.dest.x;
+		double TY = data.dest.y;
+		
+		double B =  tr.a * SX - tr.b * SY + tr.c - TX;
+		double C = +tr.b * SX + tr.a * SY + tr.d - TY;
+		double F = B*B + C*C;
+		double dF_da = 2.0 * (SX * B - SY * C); 
+		double dF_db = 2.0 * (SY * B + SX * C); 
+		double dF_dc = 2.0 * B; 
+		double dF_dd = 2.0 * C; 
+		
+		double delta = 0.01;
+		
+		Point2D.Double dest0 = new Point2D.Double();
+		Point2D.Double dest1 = new Point2D.Double();
+		tr.transform(data.src, dest0);
+		tr.a += delta;
+		tr.b += delta;
+		tr.c += delta;
+		tr.d += delta;
+		tr.transform(data.src, dest1);
+		
+		tr.a -= delta;
+		tr.b -= delta;
+		tr.c -= delta;
+		tr.d -= delta;
+
+		double dx = data.dest.x - dest0.x;
+		double dy = data.dest.y - dest0.y;
+		double F0 = dx*dx + dy*dy;
+		
+		dx = data.dest.x - dest1.x;
+		dy = data.dest.y - dest1.y;
+		double F1 = dx*dx + dy*dy;
+
+		double FP = F1 + 
+			dF_da * delta +
+			dF_db * delta +
+			dF_dc * delta +
+			dF_dd * delta;
+		
+		System.out.println("FP " + FP);
+		System.out.println("F1 " + F1);
+		System.out.println("F0 " + F0);
+		System.out.println("F  " + F);
+	}
+
 	public static void main(String[] args) {
 		TestHelmert2DTransformer test = new TestHelmert2DTransformer();
 		test.generatePoints();
 		test.learn();
 
-		Matrix delta = test.learner.computeTransformedTargetDelta(false);
+		test.doit(test.points.get(55), (MyTestHelmert2DTransformer) test.learner.transformer);
+		
+/*		Matrix delta = test.learner.computeTransformedTargetDelta(false);
 		System.out.println("==== max discrepancy ====");
 		System.out.println(delta.toString());
 		delta = test.learner.computeTransformedTargetDelta(true);
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
 		test.dumpBad();
-		TestUtils.assertMatrix0("Delta", delta);
+		TestUtils.assertMatrix0("Delta", delta);*/
 		System.out.println("Done");
 	}
 }

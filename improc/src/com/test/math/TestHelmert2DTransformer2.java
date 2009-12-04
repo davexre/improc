@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner2;
 import com.slavi.math.transform.Helmert2DTransformer2;
@@ -139,8 +140,6 @@ public class TestHelmert2DTransformer2 {
 		}
 	}
 	
-	private static double degreeToRad = Math.PI / 180;
-	
 	private ArrayList<MyTestData> points;
 	
 	AffineTransform jTransform;
@@ -171,9 +170,9 @@ public class TestHelmert2DTransformer2 {
 	private void generatePoints() {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
-		jTransform.rotate(9 * degreeToRad);
+		jTransform.rotate(9 * MathUtil.deg2rad);
 //		jTransform.scale(123.456, 123.456);
-//		jTransform.translate(100.567, 200.123);
+		jTransform.translate(100.567, 200.123);
 
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
