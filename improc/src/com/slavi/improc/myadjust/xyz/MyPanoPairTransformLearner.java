@@ -332,16 +332,16 @@ public class MyPanoPairTransformLearner {
 		result.newGoodCount = 0;
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
-		double maxMaxDiscrepancy = result.discrepancyStatistics.getJ_End();
-		if (maxMaxDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
-			maxMaxDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
+		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
+		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
+			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
 		}
-		if (maxMaxDiscrepancy < discrepancyThreshold)
-			maxMaxDiscrepancy = discrepancyThreshold;
+		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
+			result.maxAllowedDiscrepancy = discrepancyThreshold;
 		
 		for (KeyPointPairList pairList : chain) {
-			if (pairList.maxDiscrepancy > maxMaxDiscrepancy)
-				pairList.maxDiscrepancy = maxMaxDiscrepancy;
+			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
+				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
 			double maxDiscrepancy = pairList.maxDiscrepancy;
 			pairList.transformResult.newBadCount = 0;
 			pairList.transformResult.newGoodCount = 0;

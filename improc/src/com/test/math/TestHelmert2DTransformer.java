@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.Helmert2DTransformer;
@@ -302,12 +303,56 @@ public class TestHelmert2DTransformer {
 		System.out.println("F  " + F);
 	}
 
+	void calcOne() {
+		Matrix coefs = new Matrix(4, 1);
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(4, 1);
+		Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) learner.transformer;
+		lsa.clear();
+		for (MyTestData item : points) {
+			if (item.isBad)
+				continue;
+			double SX = item.src.x;
+			double SY = item.src.y;
+			double TX = item.dest.x;
+			double TY = item.dest.y;
+			double computedWeight = 1.0;
+			
+			double B =  tr.a * SX - tr.b * SY + tr.c - TX;
+			double C =  tr.b * SX + tr.a * SY + tr.d - TY;
+			double F = B*B + C*C;
+			double dF_da = 2.0 * (SX * B - SY * C); 
+			double dF_db = 2.0 * (SY * B + SX * C); 
+			double dF_dc = 2.0 * B; 
+			double dF_dd = 2.0 * C; 
+			
+			coefs.setItem(0, 0, dF_da);
+			coefs.setItem(1, 0, dF_db);
+			coefs.setItem(2, 0, dF_dc);
+			coefs.setItem(3, 0, dF_dd);
+			System.out.print(coefs);
+			lsa.addMeasurement(coefs, computedWeight, F, 0);
+		}
+		System.out.println("det=" + lsa.getNm().makeSquareMatrix().det());
+		lsa.getApl().printM("APL");
+		lsa.getNm().makeSquareMatrix().printM("NM");
+		if (!lsa.calculate())
+			throw new Error();
+		lsa.getNm().makeSquareMatrix().printM("NM'");
+
+		// Build transformer
+		Matrix u = lsa.getUnknown();
+		u.rMul(-1);
+		u.printM("U");
+	}
+	
 	public static void main(String[] args) {
 		TestHelmert2DTransformer test = new TestHelmert2DTransformer();
 		test.generatePoints();
 		test.learn();
-
-		test.doit(test.points.get(55), (MyTestHelmert2DTransformer) test.learner.transformer);
+		test.calcOne();
+		
+//		test.doit(test.points.get(55), (MyTestHelmert2DTransformer) test.learner.transformer);
+		
 		
 /*		Matrix delta = test.learner.computeTransformedTargetDelta(false);
 		System.out.println("==== max discrepancy ====");

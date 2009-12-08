@@ -25,6 +25,8 @@ public class TransformLearnerResult {
 	
 	public boolean adjustFailed = true;
 	
+	public double maxAllowedDiscrepancy = Double.MAX_VALUE;
+	
 	public final Statistics discrepancyStatistics = new Statistics();
 	
 	public double getGoodDataRatio() {
@@ -59,6 +61,7 @@ public class TransformLearnerResult {
 				"\nAfter adjust bad count:     " + newBadCount +
 				"\nBad before adjust now good: " + oldBadNowGood +
 				"\nGood before adjust now bad: " + oldGoodNowBad +
+				"\nMax allowed dicrepancy:     " + MathUtil.d4(maxAllowedDiscrepancy) +
 				"\nDiscrepancy statistics:\n" + discrepancyStatistics;				
 		}
 		return res;			

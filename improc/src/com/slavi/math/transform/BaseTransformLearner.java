@@ -224,7 +224,6 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			}
 		}
 		result.discrepancyStatistics.stop();
-		System.out.println(result.discrepancyStatistics);
 	}
 	
 	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
@@ -236,12 +235,11 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		result.newGoodCount = 0;
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
-		
-		double maxDiscrepancy = getMaxAllowedDiscrepancy(result);
+		result.maxAllowedDiscrepancy = getMaxAllowedDiscrepancy(result);
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
 			double discrepancy = getDiscrepancy(item);
-			boolean curIsBad = discrepancy > maxDiscrepancy;
+			boolean curIsBad = discrepancy > result.maxAllowedDiscrepancy;
 			if (oldIsBad != curIsBad) {
 				setBad(item, curIsBad);
 				if (curIsBad) {
