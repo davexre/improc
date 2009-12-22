@@ -2,17 +2,24 @@ package com.test.scripting;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.List;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 
 public class MyScriptTest {
 	public static void main(String[] args) throws Exception {
 		ScriptEngineManager manager = new ScriptEngineManager();
+		List<ScriptEngineFactory> l = manager.getEngineFactories();
+		for (ScriptEngineFactory f : l) {
+			System.out.println(f.getEngineName());
+		}
+		
 		ScriptEngine engine = manager.getEngineByName("js");
 		Reader source = new InputStreamReader(MyScriptTest.class.getResourceAsStream("MyScriptTest.js"));
 

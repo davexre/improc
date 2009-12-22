@@ -96,7 +96,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 				continue;
 			InputType source = item.getKey();
 			OutputType target = item.getValue();
-			double computedWeight = getComputedWeight(item);
+			double computedWeight = 1.0; //getComputedWeight(item);
 			
 			double SX = transformer.getSourceCoord(source, 0);
 			double SY = transformer.getSourceCoord(source, 1);
@@ -203,6 +203,11 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Calculate the affine transform parameters 
 		lsa.clear();
+		double scale = Math.sqrt(tr.a*tr.a + tr.b*tr.b);
+		double cosA = tr.a / scale;
+		double sinA = tr.b / scale;
+		double Angle = Math.atan2(cosA, sinA);
+		
 		for (Map.Entry<InputType, OutputType> item : items) {
 			if (isBad(item))
 				continue;
@@ -217,21 +222,35 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			
 			double B =  tr.a * SX + tr.b * SY + tr.c - TX;
 			double C = -tr.b * SX + tr.a * SY + tr.d - TY;
-
+			
+			double F = Math.sqrt(B*B + C*C);
+			if (F == 0.0)
+				throw new Error("0");
+			double dF_ds = ((cosA * SX +  sinA * SY) * B + (cosA * SY - sinA * SX) * C) / F; 
+			double dF_dA = ((scale * (-sinA) * SX + scale * cosA * SY) * B + (-scale * cosA * SX - scale * sinA * SY) * C) / F; 
+			double dF_dc = B / F;
+			double dF_dd = C / F;
+			
+			coefs.setItem(0, 0, dF_ds);
+			coefs.setItem(1, 0, dF_dA);
+			coefs.setItem(2, 0, dF_dc);
+			coefs.setItem(3, 0, dF_dd);
+			lsa.addMeasurement(coefs, computedWeight, F, 0);
+/*
 			if (true) {
 				double F = Math.sqrt(B*B + C*C);
 				if (F == 0.0)
 					throw new Error("0");
-				double dF_da = (SX * B + SY * C) / F; 
-				double dF_db = (SY * B - SX * C) / F; 
-				double dF_dc = B / F; 
-				double dF_dd = C / F; 
+				double dF_da = (SX * B + SY * C); 
+				double dF_db = (SY * B - SX * C); 
+				double dF_dc = B; 
+				double dF_dd = C; 
 				
 				coefs.setItem(0, 0, dF_da);
 				coefs.setItem(1, 0, dF_db);
 				coefs.setItem(2, 0, dF_dc);
 				coefs.setItem(3, 0, dF_dd);
-				System.out.print(MathUtil.d4(F) + "\t" + coefs);
+//				System.out.print(MathUtil.d4(F) + "\t" + coefs);
 				lsa.addMeasurement(coefs, computedWeight, F, 0);
 			} else {
 				double F = B*B;
@@ -259,7 +278,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 				coefs.setItem(3, 0, dF_dd);
 //				System.out.print(MathUtil.d4(F) + "\t" + coefs);
 				lsa.addMeasurement(coefs, computedWeight, F, 0);
-			}
+			}*/
 /*			transformer.transform(source, sourceTransformed);
 			double d1 = transformer.getTargetCoord(sourceTransformed, 0) - transformer.getTargetCoord(target, 0);
 			double d2 = transformer.getTargetCoord(sourceTransformed, 1) - transformer.getTargetCoord(target, 1);
@@ -277,12 +296,19 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		Matrix u = lsa.getUnknown();
 		u.rMul(-1);
 		u.printM("U");
-		
-		tr.a += u.getItem(0, 0);
+	
+		scale += u.getItem(0, 0);
+		Angle += u.getItem(0, 1);
+		tr.a = scale * Math.cos(Angle);
+		tr.b = scale * Math.sin(Angle);
+		tr.c += u.getItem(0, 2); 
+		tr.d += u.getItem(0, 3);
+
+/*		tr.a += u.getItem(0, 0);
 		tr.b += u.getItem(0, 1);
 		tr.c += u.getItem(0, 2); 
 		tr.d += u.getItem(0, 3);
-		
+*/		
 		computeDiscrepancies(result);
 		computeBad(result);
 		result.adjustFailed = false;

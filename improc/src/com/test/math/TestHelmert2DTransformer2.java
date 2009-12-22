@@ -185,7 +185,7 @@ public class TestHelmert2DTransformer2 {
 		}
 		
 		// add fake data
-		int percentFakeData = 0;
+		int percentFakeData = 20;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
 
@@ -226,11 +226,11 @@ public class TestHelmert2DTransformer2 {
 	public void learn() {
 		MyTestData pair;
 		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), points);
-		learner.calculatePrims();
+		learner.calculateTwo();
 		Helmert2DTransformer2<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer2<Point2D.Double, Point2D.Double>) learner.transformer;
 		System.out.println(tr.toString());
 		
-		for (int iter = 0; iter < 5; iter++) {
+		for (int iter = 0; iter < 50; iter++) {
 			System.out.println();
 			System.out.println("**** Iteration " + iter);
 			TransformLearnerResult res = learner.calculateOne();

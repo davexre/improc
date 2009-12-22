@@ -28,7 +28,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 	public static void calcRotationsUsingHelmert(
 			KeyPointHelmertTransformer tr,
 			KeyPointPairList pairList) {
-		double params[] = new double[2];
+		double params[] = new double[4];
 		tr.getParams(params);
 		pairList.scale = params[0];
 		double angle = params[1];

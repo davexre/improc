@@ -44,13 +44,17 @@ public abstract class Helmert2DTransformer2<InputType, OutputType> extends BaseT
 
 	/**
 	 * Extraxts the scale and angle parameters of the current 
-	 * transformation coefficients. The scale parameter is
-	 * returned in params[0] and the angle [-pi..pi] is returned
-	 * in params[1].
+	 * transformation coefficients.
+	 * params[0] = scale;
+	 * params[1] = angle [-pi..pi];
+	 * params[2] = translate x
+	 * params[3] = translate y
 	 */
 	public void getParams(double params[]) {
 		params[0] = MathUtil.hypot(a, b);
 		params[1] = Math.atan2(b, a);
+		params[2] = c;
+		params[3] = d;
 	}
 	
 	/**
@@ -58,9 +62,11 @@ public abstract class Helmert2DTransformer2<InputType, OutputType> extends BaseT
 	 * the specified scale and angle parameters. The translation 
 	 * coefficients c and d are unchanged. 
 	 */
-	public void setParams(double scale, double angle) {
+	public void setParams(double scale, double angle, double translateX, double translateY) {
 		a = scale * Math.cos(angle);
 		b = scale * Math.sin(angle);
+		c = translateX;
+		d = translateY;
 	}
 	
 	public String toString() {
