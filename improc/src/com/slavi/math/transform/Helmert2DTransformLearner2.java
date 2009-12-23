@@ -2,7 +2,6 @@ package com.slavi.math.transform;
 
 import java.util.Map;
 
-import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -198,7 +197,16 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		computeWeights(result);
 		if (result.oldGoodCount < result.minGoodRequired)
 			return result;
-
+		computeScaleAndOrigin();
+		double SOX = sourceMin.getItem(0, 0);
+		double SOY = sourceMin.getItem(1, 0);
+		
+		double TOX = targetMin.getItem(0, 0);
+		double TOY = targetMin.getItem(1, 0);
+		
+		double SS = Math.max(sourceMax.getItem(0, 0) + SOX, sourceMax.getItem(1, 0) + SOY) / 2.0;
+		double TS = Math.max(targetMax.getItem(0, 0) + TOX, targetMax.getItem(1, 0) + TOY) / 2.0;
+		
 		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
 		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Calculate the affine transform parameters 
@@ -219,6 +227,12 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			double SY = transformer.getSourceCoord(source, 1);
 			double TX = transformer.getTargetCoord(target, 0);
 			double TY = transformer.getTargetCoord(target, 1);
+			
+			double sx = (SX - SOX) / SS;
+			double sy = (SY - SOY) / SS;
+			double tx = (TX - TOX) / TS;
+			double ty = (TY - TOY) / TS;
+						
 			
 			double B =  tr.a * SX + tr.b * SY + tr.c - TX;
 			double C = -tr.b * SX + tr.a * SY + tr.d - TY;
