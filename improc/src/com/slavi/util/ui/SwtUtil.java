@@ -365,7 +365,6 @@ public class SwtUtil {
 		Display display = Display.getCurrent();
 		waitDialogTaskProgress.setTitle(title);
 		waitDialogTaskProgress.setProgressMaximum(maxProgressValue);
-		waitDialogTaskProgress.startTask();
 		waitDialogShell.addListener(SWT.Traverse, new Listener () {
 			public void handleEvent (Event event) {
 				switch (event.detail) {
@@ -377,8 +376,9 @@ public class SwtUtil {
 				}
 			}
 		});
-
 		waitDialogShell.open();
+		waitDialogTaskProgress.startTask();
+
 		while (!waitDialogShell.isDisposed()) {
 			if (display.readAndDispatch()) {
 				// Check once more if dialog is disposed as the dialog is disposed 

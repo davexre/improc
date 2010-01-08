@@ -2,6 +2,7 @@ package com.slavi.math.transform;
 
 import java.util.Map;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -186,7 +187,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		result.adjustFailed = false;
 		return result; 
 	}
-	
+
 	/**
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
@@ -211,9 +212,19 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		OutputType sourceTransformed = createTemporaryTargetObject();
 		// Calculate the affine transform parameters 
 		lsa.clear();
-		double scale = Math.sqrt(tr.a*tr.a + tr.b*tr.b);
-		double cosA = tr.a / scale;
-		double sinA = tr.b / scale;
+		double tr_a = tr.a * SS / TS;
+		double tr_b = tr.b * SS / TS;
+		double tr_c = (tr.c - TOX + tr.a * SOX + tr.b * SOY) / TS;
+		double tr_d = (tr.d - TOY - tr.b * SOX + tr.a * SOY) / TS;
+		
+		System.out.println("tr_a=" + MathUtil.d4(tr_a));
+		System.out.println("tr_b=" + MathUtil.d4(tr_b));
+		System.out.println("tr_c=" + MathUtil.d4(tr_c));
+		System.out.println("tr_d=" + MathUtil.d4(tr_d));
+		
+		double scale = Math.sqrt(tr_a*tr_a + tr_b*tr_b);
+		double cosA = tr_a / scale;
+		double sinA = tr_b / scale;
 		double Angle = Math.atan2(cosA, sinA);
 		
 		for (Map.Entry<InputType, OutputType> item : items) {
@@ -221,7 +232,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 				continue;
 			InputType source = item.getKey();
 			OutputType target = item.getValue();
-			double computedWeight = getComputedWeight(item);
+			double computedWeight = 1.0; //getComputedWeight(item);
 			
 			double SX = transformer.getSourceCoord(source, 0);
 			double SY = transformer.getSourceCoord(source, 1);
@@ -234,14 +245,15 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			double ty = (TY - TOY) / TS;
 						
 			
-			double B =  tr.a * SX + tr.b * SY + tr.c - TX;
-			double C = -tr.b * SX + tr.a * SY + tr.d - TY;
+			double B =  tr_a * sx + tr_b * sy + tr_c - tx;
+			double C = -tr_b * sx + tr_a * sy + tr_d - ty;
 			
 			double F = Math.sqrt(B*B + C*C);
 			if (F == 0.0)
-				throw new Error("0");
-			double dF_ds = ((cosA * SX +  sinA * SY) * B + (cosA * SY - sinA * SX) * C) / F; 
-			double dF_dA = ((scale * (-sinA) * SX + scale * cosA * SY) * B + (-scale * cosA * SX - scale * sinA * SY) * C) / F; 
+				//throw new Error("0");
+				continue;
+			double dF_ds = ((cosA * sx +  sinA * sy) * B + (cosA * sy - sinA * sx) * C) / F; 
+			double dF_dA = ((scale * (-sinA) * sx + scale * cosA * sy) * B + (-scale * cosA * sx - scale * sinA * sy) * C) / F; 
 			double dF_dc = B / F;
 			double dF_dd = C / F;
 			
@@ -313,11 +325,21 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 	
 		scale += u.getItem(0, 0);
 		Angle += u.getItem(0, 1);
-		tr.a = scale * Math.cos(Angle);
-		tr.b = scale * Math.sin(Angle);
-		tr.c += u.getItem(0, 2); 
-		tr.d += u.getItem(0, 3);
+		tr_a = scale * Math.cos(Angle);
+		tr_b = scale * Math.sin(Angle);
+		tr_c += u.getItem(0, 2); 
+		tr_d += u.getItem(0, 3);
 
+		System.out.println("tr_a=" + MathUtil.d4(tr_a));
+		System.out.println("tr_b=" + MathUtil.d4(tr_b));
+		System.out.println("tr_c=" + MathUtil.d4(tr_c));
+		System.out.println("tr_d=" + MathUtil.d4(tr_d));
+		
+		tr.a = tr_a * TS / SS;
+		tr.b = tr_b * TS / SS;
+		tr.d = tr_d * TS + TOY + tr.b * SOX - tr.a * SOY;
+		tr.c = tr_c * TS + TOX - tr.a * SOX - tr.b * SOY;
+		
 /*		tr.a += u.getItem(0, 0);
 		tr.b += u.getItem(0, 1);
 		tr.c += u.getItem(0, 2); 

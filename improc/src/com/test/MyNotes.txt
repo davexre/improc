@@ -1,0 +1,54 @@
+Helmert transformation
+======================
+Data points: (sx,sy,tx,ty)
+
+tx = a*sx + b*sy + c;
+ty =-b*sx + a*sy + d;
+
+Discrepancy
+DX = a*sx + b*sy + c - tx;
+DY =-b*sx + a*sy + d - ty;
+D^2 = DX*DX + DY*DY;
+
+Adjustment function:
+F = F(a,b,c,d) = Sum(D^2) = min;
+dF/da = 0; dF/db = 0; dF/dc = 0; dF/dd = 0;
+
+dF/da = d(DX*DX)/da + d(DY*DY)/da
+dF/da = 2*DX*sx + 2*DY*sy 
+dF/da = 2*(a*sx*sx + b*sx*sy + c*sx - tx*sx - b*sx*sy + a*sy*sy + d*sy - ty*sy)
+
+dF/db = d(DX*DX)/db + d(DY*DY)/db
+dF/db = 2*DX*sy - 2*DY*sx 
+dF/db = 2*(a*sx*sy + b*sy*sy + c*sy - tx*sy + b*sx*sx - a*sx*sy - d*sx + ty*sx)
+
+dF/dc = d(DX*DX)/dc + d(DY*DY)/dc
+dF/dc = 2*DX*1 + 2*DY*0
+dF/dc = 2*DX
+
+dF/dd = d(DX*DX)/dc + d(DY*DY)/dc
+dF/dd = 2*DX*0 + 2*DY*1
+dF/dd = 2*DY
+
+Aproximate values
+=================
+a0,b0,c0,d0 -> aprozimate values
+a1,b1,c1,d1 -> adjusted values
+δa,δb,δc,δd -> delta values
+
+a1 = a0 + δa;
+b1 = b0 + δb;
+c1 = c0 + δc;
+d1 = d0 + δd;
+
+F(a1,b1,c1,d1) = F(a0,b0,c0,d0) +
+	δa * dF(a0,b0,c0,d0)/da +
+	δb * dF(a0,b0,c0,d0)/db +
+	δc * dF(a0,b0,c0,d0)/dc +
+	δd * dF(a0,b0,c0,d0)/dd;
+
+
+
+
+
+

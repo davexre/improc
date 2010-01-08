@@ -143,8 +143,8 @@ public class TestTaskProgress {
 	}
 	
 	public static void main(String[] args) {
-		test2();
-//		test3();
+//		test2();
+		test3();
 //		testJobThrowingException();
 	}
 	

@@ -120,7 +120,7 @@ public class TaskProgress extends Composite {
 	 * will be invoked. The event {@link #TaskFinished} will be fired
 	 * when the task truly finished/aborts/throws an exception.
 	 */
-	public void abortTask() {
+	public synchronized void abortTask() {
 		if (taskState == TaskState.NOTSTARTED) {
 			internalSetStatusThreadSafe("Aborted and not run");
 			taskState = TaskState.ABORTED;
@@ -143,16 +143,6 @@ public class TaskProgress extends Composite {
 	}
 
 	/**
-	 * Returns the task execution state, thread SAFE.
-	 * 
-	 * @return True if the task execution state is
-	 * 		{@link TaskState#ABORTED} or {@link TaskState#ABORTING}. 
-	 */
-	public boolean isAborted() {
-		return (taskState == TaskState.ABORTED) || (taskState == TaskState.ABORTING);
-	}
-
-	/**
 	 * Start the task in a new thread, thread SAFE.
 	 * 
 	 * The task will be started if not meanwhile aborted, i.e.
@@ -160,7 +150,7 @@ public class TaskProgress extends Composite {
 	 * already been started, or has already completed this method
 	 * will do nothing and just return.
 	 */
-	public void startTask() {
+	public synchronized void startTask() {
 		if (taskState == TaskState.NOTSTARTED) {
 			thread = new NotifyingThread(task);
 			thread.setPriority(Thread.MIN_PRIORITY);
@@ -170,6 +160,16 @@ public class TaskProgress extends Composite {
 		}
 	}
 	
+	/**
+	 * Returns the task execution state, thread SAFE.
+	 * 
+	 * @return True if the task execution state is
+	 * 		{@link TaskState#ABORTED} or {@link TaskState#ABORTING}. 
+	 */
+	public boolean isAborted() {
+		return (taskState == TaskState.ABORTED) || (taskState == TaskState.ABORTING);
+	}
+
 	class TaskFinishedNotification implements Runnable {
 		public void run() {
 			if (!isDisposed()) {

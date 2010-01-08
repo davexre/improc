@@ -96,6 +96,8 @@ public class TestHelmert2DTransformer2 {
 			super(transformer, pointsPairList);
 		}
 
+		double lastMaxAllowedDiscrepancy = Double.MAX_VALUE;
+
 		double discrepancyThreshold = 1.0;
 		public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
 			double max = result.discrepancyStatistics.getMaxX();
@@ -104,6 +106,12 @@ public class TestHelmert2DTransformer2 {
 			double r = Math.min(je, (avg + max) / 2.0);
 			if (r < discrepancyThreshold)
 				r = discrepancyThreshold;
+
+			if (r < lastMaxAllowedDiscrepancy) {
+				lastMaxAllowedDiscrepancy = r;
+			} else {
+				r = lastMaxAllowedDiscrepancy;
+			}			
 			return r;
 		}
 		
