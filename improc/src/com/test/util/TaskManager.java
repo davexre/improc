@@ -1,29 +1,38 @@
 package com.test.util;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 
 import com.slavi.util.ui.SwtUtil;
 
 public class TaskManager {
 	
-	private static Timer timer = new Timer(true);
+	private static Timer timer = new Timer("Update task manager", true);
 	
 	Shell shell;
 	Table table;
@@ -33,37 +42,41 @@ public class TaskManager {
 	TableColumn columnCPU;
 	TableColumn columnState;
 	TableColumn columnPriority;
-	TableColumn columnIsAlive;
 	TableColumn columnIsDaemon;
 	TableColumn columnIsInterrupted;
-	
-	private int refreshRateMillis;
-
-	private final ThreadMXBean threadMXBean;
-	
-	private long lastRefreshNanoTime;
-
-	private int numberOfProcessors;
-
-	private ThreadGroup rootThreadGroup;
-
-	private HashMap<Long, ThreadData> threadData;
-
-	private HashMap<Long, ThreadData> oldThreadData;
+	TableColumn columnIsSuspended;
 	
 	Runnable refreshTask;
 	
-	public TaskManager() {
-		rootThreadGroup = Thread.currentThread().getThreadGroup();
-		for (ThreadGroup tmp = rootThreadGroup; tmp != null; tmp = rootThreadGroup.getParent()) {
-			rootThreadGroup = tmp;
+	private static int refreshRateMillis;
+	
+	private static final ThreadMXBean threadMXBean;
+	
+	private static final int numberOfProcessors;
+
+	private static final ThreadGroup rootThreadGroup;
+
+	private static final HashMap<Long, ThreadData> threadData;
+
+	private static final ArrayList<TaskManager> refreshListeners;
+	
+	private static long lastRefreshNanoTime;
+
+	static {
+		ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+		for (ThreadGroup tmp = threadGroup; tmp != null; tmp = threadGroup.getParent()) {
+			threadGroup = tmp;
 		}
-		refreshRateMillis = 1000;
+		rootThreadGroup = threadGroup;
 		numberOfProcessors = Runtime.getRuntime().availableProcessors();
 		threadMXBean = ManagementFactory.getThreadMXBean();
-		lastRefreshNanoTime = System.nanoTime();
 		threadData = new HashMap<Long, ThreadData>();
-		oldThreadData = new HashMap<Long, ThreadData>();
+		refreshListeners = new ArrayList<TaskManager>();
+		lastRefreshNanoTime = System.nanoTime();
+		refreshRateMillis = 1000;
+	}
+	
+	public TaskManager() {
 		refreshTask = new Runnable() {
 			public void run() {
 				if (shell.isDisposed())
@@ -77,12 +90,101 @@ public class TaskManager {
 		};
 	}
 	
-	private static final int increaseColumnWidth = 35;
-	
 	void createWidgets() {
 		shell = new Shell();
-		shell.setLayout(new FillLayout());
+		shell.setLayout(new GridLayout());
+		shell.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				refreshListeners.remove(this);
+			}
+		});
+		
+		ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.FLAT | SWT.WRAP);
+		toolbar.setLayout(new RowLayout(SWT.HORIZONTAL));
+		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		ToolItem btn;
+		
+		btn = new ToolItem(toolbar, SWT.PUSH);
+		btn.setText("&+");
+		btn.setToolTipText("Increase thread priority");
+		btn.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				Thread thread = getSelectedThread();
+				if (thread == null)
+					return;
+				int priority = thread.getPriority() + 1;
+				if (priority > Thread.MAX_PRIORITY)
+					return;
+				thread.setPriority(priority);
+				refresh();
+			}
+		});
+		
+		btn = new ToolItem(toolbar, SWT.PUSH);
+		btn.setText("&-");
+		btn.setToolTipText("Decrease thread priority");
+		btn.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				Thread thread = getSelectedThread();
+				if (thread == null)
+					return;
+				int priority = thread.getPriority() - 1;
+				if (priority < Thread.MIN_PRIORITY)
+					return;
+				thread.setPriority(priority);
+				refresh();
+			}
+		});
+		
+		btn = new ToolItem(toolbar, SWT.PUSH);
+		btn.setText("&Interrupt");
+		btn.setToolTipText("Interrupt");
+		btn.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				Thread thread = getSelectedThread();
+				if (thread == null)
+					return;
+				thread.interrupt();
+				refresh();
+			}
+		});
+		
+		btn = new ToolItem(toolbar, SWT.PUSH);
+		btn.setText("Sto&p");
+		btn.setToolTipText("Stop");
+		btn.addSelectionListener(new SelectionAdapter() {
+			@SuppressWarnings("deprecation")
+			public void widgetSelected(SelectionEvent event) {
+				Thread thread = getSelectedThread();
+				if (thread == null)
+					return;
+				thread.stop();
+				refresh();
+			}
+		});
+		
+		btn = new ToolItem(toolbar, SWT.PUSH);
+		btn.setText("&Suspend/Resume");
+		btn.setToolTipText("Suspend/Resume");
+		btn.addSelectionListener(new SelectionAdapter() {
+			@SuppressWarnings("deprecation")
+			public void widgetSelected(SelectionEvent event) {
+				Thread thread = getSelectedThread();
+				if (thread == null)
+					return;
+				long tid = thread.getId();
+				ThreadInfo info = threadMXBean.getThreadInfo(tid, 0);
+				if (info == null || info.isSuspended())
+					thread.resume();
+				else
+					thread.suspend();
+				refresh();
+			}
+		});
+		
 		table = new Table(shell, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setSortDirection(SWT.DOWN);
 		table.setHeaderVisible(true);
 
@@ -105,7 +207,11 @@ public class TaskManager {
 		col.setText("TID");
 		col.addSelectionListener(columnListener);
 		col.pack();
-		col.setWidth(col.getWidth() + increaseColumnWidth);
+		int increaseColumnWidth = col.getWidth();
+		table.setSortColumn(col);
+		col.pack();
+		increaseColumnWidth = col.getWidth() - increaseColumnWidth;
+//		col.setWidth(col.getWidth() + increaseColumnWidth);
 		
 		col = columnName = new TableColumn(table, SWT.NONE);
 		col.setText("Thread name");
@@ -129,45 +235,48 @@ public class TaskManager {
 		col.setText("Priority");
 		col.addSelectionListener(columnListener);
 		col.pack();
-		col.setWidth(col.getWidth() + increaseColumnWidth);
-		
-		col = columnIsAlive = new TableColumn(table, SWT.NONE);
-		col.setText("Alive");
-		col.addSelectionListener(columnListener);
-		col.pack();
-		col.setWidth(col.getWidth() + increaseColumnWidth);
+		col.setWidth(col.getWidth());
 		
 		col = columnIsDaemon = new TableColumn(table, SWT.NONE);
 		col.setText("Daemon");
 		col.addSelectionListener(columnListener);
 		col.pack();
-		col.setWidth(columnState.getWidth() + increaseColumnWidth);
+		col.setWidth(col.getWidth());
 		
 		col = columnIsInterrupted = new TableColumn(table, SWT.NONE);
 		col.setText("Interrupted");
 		col.addSelectionListener(columnListener);
 		col.pack();
-		col.setWidth(columnState.getWidth() + increaseColumnWidth);
+		col.setWidth(col.getWidth());
 		
+		col = columnIsSuspended = new TableColumn(table, SWT.NONE);
+		col.setText("Suspended");
+		col.addSelectionListener(columnListener);
+		col.pack();
+		col.setWidth(col.getWidth());
+		
+		table.setFocus();
 		table.setSortColumn(columnTID);
 		table.setSortDirection(SWT.UP);
 		table.pack();
 		shell.pack();
-		shell.setSize(350, 600);
+		shell.setSize(570, 600);
 		SwtUtil.centerShell(shell);
+		
+		refreshListeners.add(this);
 		refreshTask.run();
 	}
 
 	private static class ThreadData {
-		public long id;
-		public long lastCpuTime;
-		public int cpuUsage;
-		public String threadName;
-		public int priority;
-		public String state;
-		public boolean isAlive;
-		public boolean isDaemon;
-		public boolean isInterrupted;
+		public long id = -1;
+		public long lastCpuTime = 0;
+		public int cpuUsage = 0;
+		public String threadName = "n/a";
+		public int priority = 0;
+		public String state = "n/a";
+		public boolean isDaemon = false;
+		public boolean isInterrupted = false;
+		public boolean isSuspended = false;
 	}
 	
 	private class RefreshTimerTask extends TimerTask {
@@ -181,7 +290,7 @@ public class TaskManager {
 		}
 	}
 	
-	private Comparator columnSort = new Comparator<ThreadData>() {
+	private Comparator<ThreadData> columnSort = new Comparator<ThreadData>() {
 		public int compare(ThreadData o1, ThreadData o2) {
 			TableColumn sortCol = table.getSortColumn();
 			if (table.getSortDirection() == SWT.DOWN) {
@@ -199,12 +308,12 @@ public class TaskManager {
 				result = o1.state.compareTo(o2.state);
 			} else if (sortCol == columnPriority) {
 				result = o1.priority == o2.priority ? 0 : o1.priority < o2.priority ? -1 : 1;
-			} else if (sortCol == columnIsAlive) {
-				result = o1.isAlive == o2.isAlive ? 0 : o1.isAlive ? 1 : -1;
 			} else if (sortCol == columnIsDaemon) {
 				result = o1.isDaemon == o2.isDaemon ? 0 : o1.isDaemon ? 1 : -1;
 			} else if (sortCol == columnIsInterrupted) {
 				result = o1.isInterrupted == o2.isInterrupted ? 0 : o1.isInterrupted ? 1 : -1;
+			} else if (sortCol == columnIsSuspended) {
+				result = o1.isSuspended == o2.isSuspended ? 0 : o1.isSuspended ? 1 : -1;
 			} // if (sortCol == columnTID)
 			
 			if (result == 0)
@@ -213,40 +322,56 @@ public class TaskManager {
 		}
 	};
 	
-	private void refresh() {
-		TableItem items[] = table.getItems();
+	private long getSelectedTID() {
 		TableItem selected[] = table.getSelection();
-		long selectedTid = selected.length <= 0 ? -1 : ((ThreadData) selected[0].getData()).id;  
-		
-		oldThreadData.clear();
-		for (TableItem item : items) {
-			ThreadData data = (ThreadData) item.getData(); 
-			oldThreadData.put(data.id, data);
+		return selected.length <= 0 ? -1 : ((ThreadData) selected[0].getData()).id;  
+	}
+	
+	private Thread getSelectedThread() {
+		long tid = getSelectedTID();
+		if (tid == -1)
+			return null;
+		int activeCount = rootThreadGroup.activeCount();
+		Thread threads[] = new Thread[activeCount];
+		int maxThreads = rootThreadGroup.enumerate(threads, true);
+		for (int i = 0; i < maxThreads; i++) {
+			Thread thread = threads[i];
+			if (tid == thread.getId())
+				return thread;
 		}
+		return null;
+	}
+	
+	private void refresh() {
 		long[] tids = threadMXBean.getAllThreadIds();
+		Arrays.sort(tids);
+		Iterator<Long> tdata = threadData.keySet().iterator();
+		for (; tdata.hasNext(); ) {
+			Long tid = tdata.next();
+			if (Arrays.binarySearch(tids, tid) < 0)
+				tdata.remove();
+		}
+		
 		long curNanoTime = System.nanoTime();
 		long div = (numberOfProcessors * (curNanoTime - lastRefreshNanoTime)) / 100;
 		if (div == 0)
 			div = 1;
 		
-		threadData.clear();
 		for (long tid : tids) {
 			long cpuTime = threadMXBean.getThreadCpuTime(tid);
-			ThreadData d = oldThreadData.get(tid);
+			ThreadData d = threadData.get(tid);
 			if (d == null) {
 				d = new ThreadData();
 				d.id = tid;
-				d.threadName = "n/a";
-				d.state = "n/a";
-				d.priority = 0;
-				d.isAlive = false;
-				d.isDaemon = false;
-				d.isInterrupted = false;
 				d.lastCpuTime = cpuTime;
+				threadData.put(tid, d);
 			}
 			d.cpuUsage = (int)((cpuTime - d.lastCpuTime) / div);
 			d.lastCpuTime = cpuTime;
-			threadData.put(tid, d);
+			ThreadInfo info = threadMXBean.getThreadInfo(tid, 0);
+			if (info != null) {
+				d.isSuspended = info.isSuspended();
+			}			
 		}
 
 		int activeCount = rootThreadGroup.activeCount();
@@ -261,41 +386,47 @@ public class TaskManager {
 			data.threadName = thread.getName();
 			data.priority = thread.getPriority();
 			data.state = thread.getState().name();
-			data.isAlive = thread.isAlive();
 			data.isDaemon = thread.isDaemon();
 			data.isInterrupted = thread.isInterrupted();
 		}
 		
 		lastRefreshNanoTime = curNanoTime;
 		ThreadData data[] = threadData.values().toArray(new ThreadData[0]);
+		updateTable(data);
+	}
+	
+	private void updateTable(ThreadData data[]) {
+		long selectedTid = getSelectedTID();  
 		Arrays.sort(data, columnSort);
-		table.clearAll();
-		table.removeAll();
+		table.setItemCount(data.length);
+		TableItem items[] = table.getItems();
+			
 		int sel = -1;
 		for (int i = 0; i < data.length; i++) {
 			ThreadData d = data[i];
-			TableItem item = new TableItem(table, SWT.NONE);
+			TableItem item = items[i];
 			item.setData(d);
-			item.setText(0, Long.toString(d.id));
-			item.setText(1, d.threadName);
-			item.setText(2, Long.toString(d.cpuUsage));
-			item.setText(3, d.state);
-			item.setText(4, Integer.toString(d.priority));
-			item.setText(5, d.isAlive ? "true" : "false");
-			item.setText(6, d.isDaemon ? "true" : "false");
-			item.setText(7, d.isInterrupted ? "true" : "false");
+			int col = 0;
+			item.setText(col++, Long.toString(d.id));
+			item.setText(col++, d.threadName);
+			item.setText(col++, Long.toString(d.cpuUsage));
+			item.setText(col++, d.state);
+			item.setText(col++, Integer.toString(d.priority));
+			item.setText(col++, d.isDaemon ? "true" : "false");
+			item.setText(col++, d.isInterrupted ? "true" : "false");
+			item.setText(col++, d.isSuspended ? "true" : "false");
 			if (d.id == selectedTid)
 				sel = i;
 		}
 		table.setSelection(sel);
 	}
 	
-	public int getRefreshRateMillis() {
+	public static int getRefreshRateMillis() {
 		return refreshRateMillis;
 	}
 	
-	public void setRefreshRateMillis(int refreshRateMillis) {
-		this.refreshRateMillis = refreshRateMillis;
+	public static void setRefreshRateMillis(int newRefreshRateMillis) {
+		refreshRateMillis = newRefreshRateMillis;
 	}
 	
 	
