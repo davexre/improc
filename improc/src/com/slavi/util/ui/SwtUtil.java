@@ -2,6 +2,7 @@ package com.slavi.util.ui;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Timer;
 import java.util.concurrent.Callable;
 
 import org.eclipse.swt.SWT;
@@ -28,7 +29,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
-import com.slavi.ui.SystemMonitor;
+import com.slavi.ui.TaskManager;
 import com.slavi.ui.TaskProgress;
 
 /**
@@ -36,6 +37,8 @@ import com.slavi.ui.TaskProgress;
  * the SWT (Standard Widget Toolkit) library.   
  */
 public class SwtUtil {
+	
+	public static final Timer timer = new Timer("Update timer", true);
 	
 	public static Shell makeShell(Shell parent, int style) {
 		return parent == null ? new Shell(Display.getDefault(), style) : new Shell(parent, style);
@@ -425,7 +428,7 @@ public class SwtUtil {
 		throw new InterruptedException("Aborted");
 	}
 	
-	private static Shell memoryMonitorShell = null;
+	private static Shell taskManagerShell = null;
 
 	/**
 	 * Closes safely a shell using the {@link Display#asyncExec(Runnable)}. 
@@ -445,45 +448,35 @@ public class SwtUtil {
 		});
 	}
 	
-	public synchronized static boolean isMemoryMonitorOpened() {
-		if ((memoryMonitorShell == null) || memoryMonitorShell.isDisposed())
+	public synchronized static boolean isTaskManagerOpened() {
+		if ((taskManagerShell == null) || taskManagerShell.isDisposed())
 			return false;
-		return memoryMonitorShell.isVisible();
+		return taskManagerShell.isVisible();
 	}
 	
 	/**
-	 * Closes the previously opened memory monitor dialog.
+	 * Closes the previously opened task manager dialog.
 	 */
-	public synchronized static void closeMemoryMonitor() {
-		asyncCloseShell(memoryMonitorShell);
-		memoryMonitorShell = null;
+	public synchronized static void closeTaskManager() {
+		asyncCloseShell(taskManagerShell);
+		taskManagerShell = null;
 	}
 	
 	/**
-	 * Opens a memory monitor dialog. 
+	 * Opens a task manager dialog. 
 	 */
-	public synchronized static void openMemoryMonitor(final Shell parent, final boolean closeable) {
-		asyncCloseShell(memoryMonitorShell);
-		memoryMonitorShell = makeShell(parent, closeable ? SWT.TITLE | SWT.CLOSE : SWT.TITLE);
-
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 1;
-
-		memoryMonitorShell.setLayout(layout);
-		memoryMonitorShell.setText("System monitor");
-		
-		SystemMonitor sysMon = new SystemMonitor(memoryMonitorShell, SWT.NONE);
-		GridData shellLayoutData = new GridData();
-		shellLayoutData.horizontalAlignment = SWT.FILL;
-		shellLayoutData.grabExcessHorizontalSpace = true;
-		sysMon.setLayoutData(shellLayoutData);
-		
+	public synchronized static void openTaskManager(final Shell parent, final boolean closeable) {
+		asyncCloseShell(taskManagerShell);
+		taskManagerShell = makeShell(parent, closeable ? SWT.TITLE | SWT.CLOSE : SWT.TITLE);
+		taskManagerShell.setLayout(new FillLayout());
+		taskManagerShell.setText("Task manager");
+		new TaskManager(taskManagerShell, SWT.NONE);
 		if (closeable) {
-			memoryMonitorShell.addListener (SWT.Traverse, new Listener () {
+			taskManagerShell.addListener (SWT.Traverse, new Listener () {
 				public void handleEvent (Event event) {
 					switch (event.detail) {
 						case SWT.TRAVERSE_ESCAPE:
-							memoryMonitorShell.close();
+							taskManagerShell.close();
 							event.detail = SWT.TRAVERSE_NONE;
 							event.doit = false;
 							break;
@@ -491,8 +484,8 @@ public class SwtUtil {
 				}
 			});
 		}
-		memoryMonitorShell.pack();
-		memoryMonitorShell.open();
+		taskManagerShell.pack();
+		taskManagerShell.open();
 	}
 	
 	/**

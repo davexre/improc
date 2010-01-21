@@ -1,4 +1,4 @@
-package com.test.util;
+package com.slavi.ui;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
@@ -20,8 +19,8 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -30,11 +29,8 @@ import org.eclipse.swt.widgets.ToolItem;
 
 import com.slavi.util.ui.SwtUtil;
 
-public class TaskManager {
+public class ProcessManager extends Composite {
 	
-	private static Timer timer = new Timer("Update task manager", true);
-	
-	Shell shell;
 	Table table;
 	
 	TableColumn columnTID;
@@ -46,7 +42,7 @@ public class TaskManager {
 	TableColumn columnIsInterrupted;
 	TableColumn columnIsSuspended;
 	
-	Runnable refreshTask;
+	private static final Runnable refreshTask;
 	
 	private static int refreshRateMillis;
 	
@@ -58,7 +54,7 @@ public class TaskManager {
 
 	private static final HashMap<Long, ThreadData> threadData;
 
-	private static final ArrayList<TaskManager> refreshListeners;
+	private static final ArrayList<ProcessManager> refreshListeners;
 	
 	private static long lastRefreshNanoTime;
 
@@ -71,35 +67,72 @@ public class TaskManager {
 		numberOfProcessors = Runtime.getRuntime().availableProcessors();
 		threadMXBean = ManagementFactory.getThreadMXBean();
 		threadData = new HashMap<Long, ThreadData>();
-		refreshListeners = new ArrayList<TaskManager>();
+		refreshListeners = new ArrayList<ProcessManager>();
 		lastRefreshNanoTime = System.nanoTime();
 		refreshRateMillis = 1000;
-	}
-	
-	public TaskManager() {
 		refreshTask = new Runnable() {
 			public void run() {
-				if (shell.isDisposed())
-					return;
-				Display display = shell.getDisplay();
-				if (display.isDisposed())
-					return;
-				refresh();
-				timer.schedule(new RefreshTimerTask(), refreshRateMillis);
+				refreshAllListeners();
+				synchronized (refreshListeners) {
+					if (refreshListeners.size() == 0)
+						return;
+				}
+				SwtUtil.timer.schedule(new RefreshTimerTask(), refreshRateMillis);
 			}
 		};
 	}
 	
-	void createWidgets() {
-		shell = new Shell();
-		shell.setLayout(new GridLayout());
-		shell.addDisposeListener(new DisposeListener() {
+	private static class ThreadData {
+		public long id = -1;
+		public long lastCpuTime = 0;
+		public int cpuUsage = 0;
+		public String threadName = "n/a";
+		public int priority = 0;
+		public String state = "n/a";
+		public boolean isDaemon = false;
+		public boolean isInterrupted = false;
+		public boolean isSuspended = false;
+	}
+	
+	private static class RefreshTimerTask extends TimerTask {
+		public void run() {
+			synchronized (refreshListeners) {
+				for (int i = refreshListeners.size() - 1; i >= 0; i--) {
+					ProcessManager tm = refreshListeners.get(i);
+					if (tm.isDisposed()) {
+						continue;
+					}
+					Display display = tm.getDisplay();
+					display.asyncExec(refreshTask);
+					return;
+				}
+			}
+		}
+	}
+	
+	public ProcessManager(Composite parent, int style) {
+		super(parent, style);
+		createWidgets();
+		synchronized (refreshListeners) {
+			refreshListeners.add(this);
+			if (refreshListeners.size() == 1) {
+				SwtUtil.timer.schedule(new RefreshTimerTask(), refreshRateMillis);
+			}
+		}
+		refreshAllListeners();
+	}
+	
+	private void createWidgets() {
+		setLayout(new GridLayout());
+		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				refreshListeners.remove(this);
+				synchronized(refreshListeners) {
+					refreshListeners.remove(this);
+				}
 			}
 		});
 		
-		ToolBar toolbar = new ToolBar(shell, SWT.HORIZONTAL | SWT.FLAT | SWT.WRAP);
+		ToolBar toolbar = new ToolBar(this, SWT.HORIZONTAL | SWT.FLAT | SWT.WRAP);
 		toolbar.setLayout(new RowLayout(SWT.HORIZONTAL));
 		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -117,7 +150,7 @@ public class TaskManager {
 				if (priority > Thread.MAX_PRIORITY)
 					return;
 				thread.setPriority(priority);
-				refresh();
+				refreshAllListeners();
 			}
 		});
 		
@@ -133,7 +166,7 @@ public class TaskManager {
 				if (priority < Thread.MIN_PRIORITY)
 					return;
 				thread.setPriority(priority);
-				refresh();
+				refreshAllListeners();
 			}
 		});
 		
@@ -146,7 +179,7 @@ public class TaskManager {
 				if (thread == null)
 					return;
 				thread.interrupt();
-				refresh();
+				refreshAllListeners();
 			}
 		});
 		
@@ -160,7 +193,7 @@ public class TaskManager {
 				if (thread == null)
 					return;
 				thread.stop();
-				refresh();
+				refreshAllListeners();
 			}
 		});
 		
@@ -179,11 +212,11 @@ public class TaskManager {
 					thread.resume();
 				else
 					thread.suspend();
-				refresh();
+				refreshAllListeners();
 			}
 		});
 		
-		table = new Table(shell, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		table = new Table(this, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setSortDirection(SWT.DOWN);
 		table.setHeaderVisible(true);
@@ -198,7 +231,7 @@ public class TaskManager {
 					table.setSortColumn((TableColumn)e.widget);
 					table.setSortDirection(SWT.UP);
 				}
-				refresh();
+				refreshAllListeners();
 			}
 		};
 		
@@ -259,37 +292,8 @@ public class TaskManager {
 		table.setSortColumn(columnTID);
 		table.setSortDirection(SWT.UP);
 		table.pack();
-		shell.pack();
-		shell.setSize(570, 600);
-		SwtUtil.centerShell(shell);
-		
-		refreshListeners.add(this);
-		refreshTask.run();
 	}
 
-	private static class ThreadData {
-		public long id = -1;
-		public long lastCpuTime = 0;
-		public int cpuUsage = 0;
-		public String threadName = "n/a";
-		public int priority = 0;
-		public String state = "n/a";
-		public boolean isDaemon = false;
-		public boolean isInterrupted = false;
-		public boolean isSuspended = false;
-	}
-	
-	private class RefreshTimerTask extends TimerTask {
-		public void run() {
-			if (shell.isDisposed())
-				return;
-			Display display = shell.getDisplay();
-			if (display.isDisposed())
-				return;
-			display.asyncExec(refreshTask);
-		}
-	}
-	
 	private Comparator<ThreadData> columnSort = new Comparator<ThreadData>() {
 		public int compare(ThreadData o1, ThreadData o2) {
 			TableColumn sortCol = table.getSortColumn();
@@ -342,7 +346,21 @@ public class TaskManager {
 		return null;
 	}
 	
-	private void refresh() {
+	private static void refreshAllListeners() {
+		synchronized (refreshListeners) {
+			ThreadData data[] = getThreadData();
+			for (int i = refreshListeners.size() - 1; i >= 0; i--) {
+				ProcessManager tm = refreshListeners.get(i);
+				if (tm.isDisposed()) {
+					refreshListeners.remove(i);
+					continue;
+				}
+				tm.updateTable(data);
+			}
+		}
+	}
+	
+	private static ThreadData[] getThreadData() {
 		long[] tids = threadMXBean.getAllThreadIds();
 		Arrays.sort(tids);
 		Iterator<Long> tdata = threadData.keySet().iterator();
@@ -366,7 +384,11 @@ public class TaskManager {
 				d.lastCpuTime = cpuTime;
 				threadData.put(tid, d);
 			}
-			d.cpuUsage = (int)((cpuTime - d.lastCpuTime) / div);
+			if ((cpuTime == -1) || (d.lastCpuTime == -1)) {
+				d.cpuUsage = 0;
+			} else {
+				d.cpuUsage = (int)((cpuTime - d.lastCpuTime) / div);
+			}
 			d.lastCpuTime = cpuTime;
 			ThreadInfo info = threadMXBean.getThreadInfo(tid, 0);
 			if (info != null) {
@@ -392,7 +414,7 @@ public class TaskManager {
 		
 		lastRefreshNanoTime = curNanoTime;
 		ThreadData data[] = threadData.values().toArray(new ThreadData[0]);
-		updateTable(data);
+		return data;
 	}
 	
 	private void updateTable(ThreadData data[]) {
@@ -427,34 +449,5 @@ public class TaskManager {
 	
 	public static void setRefreshRateMillis(int newRefreshRateMillis) {
 		refreshRateMillis = newRefreshRateMillis;
-	}
-	
-	
-	void doit() {
-		shell.open();
-		Display display = shell.getDisplay();
-		while(!shell.isDisposed()){
-			if(!display.readAndDispatch())
-				display.sleep();
-		}
-		shell.dispose();
-	}
-
-	public static class DummyJob extends Thread {
-		public void run() {
-			while (true);
-		}
-	}
-		
-	public static void main(String[] args) throws Exception {
-		for (int i = 0; i < 5; i++) {
-			Thread t = new DummyJob();
-			t.setDaemon(true);
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();			
-		}
-		TaskManager d = new TaskManager();
-		d.createWidgets();
-		d.doit();
 	}
 }

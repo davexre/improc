@@ -33,7 +33,7 @@ public class Improc {
 		Settings settings = Settings.getSettings(parent);
 		if (settings == null)
 			return;
-		SwtUtil.openMemoryMonitor(parent, true);
+		SwtUtil.openTaskManager(parent, true);
 		Marker.mark("Image Processing");
 
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);
@@ -119,6 +119,6 @@ public class Improc {
 			exec.shutdown();
 			application.parent.close();
 		}
-		SwtUtil.closeMemoryMonitor();
+		SwtUtil.closeTaskManager();
 	}
 }

@@ -12,9 +12,9 @@ public class TestSystemMonitor {
 		shell.setBounds(0, 0, 0, 0);
 		shell.open();
 		Display display = shell.getDisplay();
-		SwtUtil.openMemoryMonitor(shell, true);
+		SwtUtil.openTaskManager(shell, true);
 		SwtUtil.openWaitDialog(shell, "aaaa", new dummy(), -1);
-		while (SwtUtil.isMemoryMonitorOpened()){
+		while (SwtUtil.isTaskManagerOpened()){
 			@SuppressWarnings("unused")
 			double d[] = new double[4000];
 			if(!display.readAndDispatch())
@@ -26,7 +26,8 @@ public class TestSystemMonitor {
 	private static class dummy implements Runnable {
 		public void run() {
 			try {
-				Thread.sleep((int) (Math.random() * 5000));
+				while (true) { }
+//				Thread.sleep((int) (Math.random() * 5000));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -35,9 +36,11 @@ public class TestSystemMonitor {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-//		for (int i = 0; i < 10; i++) {
-//			new Thread(new dummy()).start();
-//		}
+		for (int i = 0; i < 4; i++) {
+			Thread t = new Thread(new dummy());
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		}
 		new TestSystemMonitor().doIt();
 	}
 }

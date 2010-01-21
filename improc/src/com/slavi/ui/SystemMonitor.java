@@ -4,10 +4,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -19,6 +18,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 
 import com.slavi.util.Marker;
 import com.slavi.util.Util;
+import com.slavi.util.ui.SwtUtil;
 
 public class SystemMonitor extends Composite {
 
@@ -45,13 +45,23 @@ public class SystemMonitor extends Composite {
 				return;
 			try {
 				refreshData();
+				SwtUtil.timer.schedule(new RefreshTimerTask(), refreshRateMillis);
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
 		}
 	};
 	
-	private Thread refreshThread;
+	private class RefreshTimerTask extends TimerTask {
+		public void run() {
+			if (isDisposed())
+				return;
+			Display d = getDisplay();
+			if (d == null || d.isDisposed())
+				return;
+			d.asyncExec(refreshTask);
+		}
+	};
 	
 	public int getRefreshRateMillis() {
 		return refreshRateMillis;
@@ -64,29 +74,7 @@ public class SystemMonitor extends Composite {
 	public SystemMonitor(Composite parent, int style) {
 		super(parent, style);
 		createWidgets();
-		refreshThread = new Thread(new Runnable() {
-			public void run() {
-				while (!Thread.currentThread().isInterrupted()) {
-					try {
-						if (isDisposed())
-							break;
-						Display d = getDisplay();
-						if (d == null || d.isDisposed())
-							break;
-						d.asyncExec(refreshTask);
-						Thread.sleep(refreshRateMillis);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			}
-		});
-		refreshThread.setDaemon(true);
-		refreshThread.start();
-	}
-
-	public void stopRefresh() {
-		refreshThread.interrupt();
+		refreshTask.run();
 	}
 
 	private static final long memoryUsageDivisor = 100000;
@@ -169,6 +157,9 @@ public class SystemMonitor extends Composite {
 		lblActiveThreadsCount = new Label(group, SWT.LEFT);
 		lblActiveThreadsCount.setLayoutData(gridData);
 
+		label = new Label(group, SWT.RIGHT);
+		label.setText("Memory usage");
+		
 		progressBar = new ProgressBar(group, SWT.HORIZONTAL | SWT.SMOOTH);
 		progressBar.setMinimum(0);
 		progressBar.setMaximum(100);
@@ -178,11 +169,5 @@ public class SystemMonitor extends Composite {
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.horizontalSpan = 2;
 		progressBar.setLayoutData(gridData);
-		
-		addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				stopRefresh();
-			}
-		});
 	}
 }
