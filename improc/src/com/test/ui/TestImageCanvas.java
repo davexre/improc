@@ -57,10 +57,10 @@ public class TestImageCanvas {
 						if (isDragging) {
 							atX += event.x - dragOriginX;
 							atY += event.y - dragOriginY;
-							if (atX > 0) 
-								atX = 0;
-							if (atY > 0) 
-								atY = 0;
+//							if (atX > 0) 
+//								atX = 0;
+//							if (atY > 0) 
+//								atY = 0;
 							dragOriginX = event.x;
 							dragOriginY = event.y;
 							redraw();
@@ -75,12 +75,17 @@ public class TestImageCanvas {
 						break;
 					}
 					case SWT.MouseWheel: {
-						zoom += 5 * zoom * event.count / 100.0;
-						if (zoom < 0.01)
-							zoom = 0.01;
-						if (zoom > 100)
-							zoom = 100;
-						System.out.println(zoom);
+						double newZoom = zoom + 5 * zoom * event.count / 100.0;
+						if (newZoom < 0.01)
+							newZoom = 0.01;
+						if (newZoom > 100)
+							newZoom = 100;
+						Rectangle r = getBounds();
+						double newAtX = imgWidth / 2 - atX * zoom; 
+						double newAtY = imgHeight / 2 - atY * zoom;
+						atX = (int) (-(newAtX - imgWidth / 2) / newZoom);
+						atY = (int) (-(newAtY - imgHeight / 2) / newZoom);
+						zoom = newZoom;
 						redraw();
 						break;
 					}
@@ -99,7 +104,30 @@ public class TestImageCanvas {
 		
 		public void paint(GC gc, int width, int height) {
 			if (image != null) {
-				gc.drawImage(image, 0, 0, imgWidth, imgHeight, atX, atY, (int) (imgWidth * zoom), (int) (imgHeight * zoom));
+				double x1 = Math.max(0, (int) (imgWidth / 2 - (atX + width / 2) / zoom)); 
+				double y1 = Math.max(0, (int) (imgHeight / 2 - (atY + height / 2) / zoom)); 
+				double X1 = (int) ((x1 - imgWidth / 2) * zoom + atX + width / 2); 
+				double Y1 = (int) ((y1 - imgHeight / 2) * zoom + atY + height / 2); 
+				
+				double x2 = Math.min(imgWidth, (int) (imgWidth / 2 - (atX - width / 2) / zoom)) - 1;
+				double y2 = Math.min(imgHeight, (int) (imgHeight / 2 - (atY - height / 2) / zoom)) - 1; 
+				double X2 = (int) ((x2 - imgWidth / 2) * zoom + atX + width / 2); 
+				double Y2 = (int) ((y2 - imgHeight / 2) * zoom + atY + height / 2); 
+				System.out.println(
+						x1 + "\t" +	y1 + "\t" + x2 + "\t" + y2 + "\t|" +
+						X1 + "\t" +	Y1 + "\t" + X2 + "\t" + Y2);
+				int w = (int) (x2 - x1); 
+				int h = (int) (y2 - y1);
+				int W = (int) (X2 - X1);
+				int H = (int) (Y2 - Y1);
+				if ((w > 0) && (h > 0) && (W > 0) && (H > 0)) {
+					gc.drawImage(image, 
+							(int) x1, (int) y1, w, h,
+							(int) X1, (int) Y1, W, H);
+				}
+				gc.drawLine(0, height / 2, width, height / 2);
+				gc.drawLine(width / 2, 0, width / 2, height);
+//				gc.drawImage(image, 0, 0, imgWidth, imgHeight, atX, atY, (int) (imgWidth * zoom), (int) (imgHeight * zoom));
 			}
 		}
 		
