@@ -13,18 +13,17 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.util.Const;
-import com.slavi.util.ui.SwtUtil;
 
 public class TestImageCanvas {
 
 	public static class ImageCanvas extends Composite {
 		ImageData idata;
 		Image image;
-		int atX = 0; 
-		int atY = 0;
+		double atX = 0; 
+		double atY = 0;
 		int imgWidth = 0;
 		int imgHeight = 0;
-		double zoom = 1.0;
+		double zoom = 30.0;
 		
 		public ImageCanvas(Composite parent, int style) {
 			super(parent, style | SWT.DOUBLE_BUFFERED );
@@ -75,16 +74,15 @@ public class TestImageCanvas {
 						break;
 					}
 					case SWT.MouseWheel: {
-						double newZoom = zoom + 5 * zoom * event.count / 100.0;
+						double newZoom = zoom + 5.0 * zoom * event.count / 100.0;
 						if (newZoom < 0.01)
 							newZoom = 0.01;
 						if (newZoom > 100)
 							newZoom = 100;
-						Rectangle r = getBounds();
-						double newAtX = imgWidth / 2 - atX * zoom; 
-						double newAtY = imgHeight / 2 - atY * zoom;
-						atX = (int) (-(newAtX - imgWidth / 2) / newZoom);
-						atY = (int) (-(newAtY - imgHeight / 2) / newZoom);
+						
+						atX *= newZoom / zoom;
+						atY *= newZoom / zoom;
+						
 						zoom = newZoom;
 						redraw();
 						break;
@@ -104,18 +102,21 @@ public class TestImageCanvas {
 		
 		public void paint(GC gc, int width, int height) {
 			if (image != null) {
-				double x1 = Math.max(0, (int) (imgWidth / 2 - (atX + width / 2) / zoom)); 
-				double y1 = Math.max(0, (int) (imgHeight / 2 - (atY + height / 2) / zoom)); 
-				double X1 = (int) ((x1 - imgWidth / 2) * zoom + atX + width / 2); 
-				double Y1 = (int) ((y1 - imgHeight / 2) * zoom + atY + height / 2); 
+				double x1 = Math.max(0.0, (imgWidth / 2.0 - (atX + width / 2.0) / zoom)); 
+				double y1 = Math.max(0.0, (imgHeight / 2.0 - (atY + height / 2.0) / zoom)); 
+				double X1 = ((x1 - imgWidth / 2.0) * zoom + atX + width / 2.0); 
+				double Y1 = ((y1 - imgHeight / 2.0) * zoom + atY + height / 2.0); 
 				
-				double x2 = Math.min(imgWidth, (int) (imgWidth / 2 - (atX - width / 2) / zoom)) - 1;
-				double y2 = Math.min(imgHeight, (int) (imgHeight / 2 - (atY - height / 2) / zoom)) - 1; 
-				double X2 = (int) ((x2 - imgWidth / 2) * zoom + atX + width / 2); 
-				double Y2 = (int) ((y2 - imgHeight / 2) * zoom + atY + height / 2); 
+				double x2 = Math.min(imgWidth, 1+ (imgWidth / 2.0 - (atX - width / 2.0) / zoom));
+				double y2 = Math.min(imgHeight, 1+ (imgHeight / 2.0 - (atY - height / 2.0) / zoom)); 
+				double X2 = ((x2 - imgWidth / 2.0) * zoom + atX + width / 2.0); 
+				double Y2 = ((y2 - imgHeight / 2.0) * zoom + atY + height / 2.0); 
 				System.out.println(
+//						zoom
+//						atX + "\t" + atY + "\t" +
 						x1 + "\t" +	y1 + "\t" + x2 + "\t" + y2 + "\t|" +
-						X1 + "\t" +	Y1 + "\t" + X2 + "\t" + Y2);
+						X1 + "\t" +	Y1 + "\t" + X2 + "\t" + Y2
+						);
 				int w = (int) (x2 - x1); 
 				int h = (int) (y2 - y1);
 				int W = (int) (X2 - X1);
@@ -149,7 +150,7 @@ public class TestImageCanvas {
 //		BufferedImage src = ImageIO.read(new File(Const.sourceImage)); 
 //		src.getData().getDataBuffer().
 		
-		SwtUtil.openTaskManager(null, true);
+//		SwtUtil.openTaskManager(null, true);
 		Shell shell = new Shell();
 		shell.setLayout(new FillLayout());
 		shell.setText("Have a nice day!");

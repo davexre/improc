@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
@@ -119,6 +121,27 @@ public class ListClassesInPackage {
 			}
 			result = f.getAbsolutePath();
 		}
+		return result;
+	}
+	
+	public static List<String> getSubPackageNames(String jarFileName, String rootPackageName) {
+		String packagePath = rootPackageName.replace(".", "/");
+		int packagePathLength = packagePath.length() + 1;
+		ArrayList<String>result = new ArrayList<String>();
+		listClassFiles(jarFileName, packagePath, packagePathLength, true, result);
+		HashSet<String> packageSet = new HashSet<String>();
+		for (String className : result) {
+			int lastIndex = className.lastIndexOf('.');
+			if (lastIndex <= 0)
+				continue;
+			String packageName = className.substring(0, lastIndex);
+			packageSet.add(packageName);
+		}
+		result.clear();
+		for (String packageName : packageSet) {
+			result.add(packageName);
+		}
+		Collections.sort(result);
 		return result;
 	}
 }
