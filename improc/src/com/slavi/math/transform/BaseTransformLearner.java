@@ -79,8 +79,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	
 	private double oneOverSumWeights = 1.0;
 	/**
-	 * 
-	 * @return Number of point pairs NOT marked as bad.
+	 * Number of point pairs NOT marked as bad.
 	 */
 	protected void computeWeights(TransformLearnerResult result) {
 		result.iteration = ++iteration;
@@ -102,7 +101,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 			sumWeight += weight;
 		}
 		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / result.oldGoodCount;
+			oneOverSumWeights = result.oldGoodCount == 0 ? 0.0 : 1.0 / result.oldGoodCount;
 		} else {
 			oneOverSumWeights = 1.0 / sumWeight;
 		}
@@ -210,11 +209,12 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		for (Map.Entry<InputType, OutputType> item : items) {
 			// Compute for all points, so no item.isBad check
 			InputType source = item.getKey();
+			OutputType target = item.getValue();
 			transformer.transform(source, sourceTransformed);
 			// Compute distance between target and sourceTransformed
 			double sum2 = 0;
 			for (int i = outputSize - 1; i >= 0; i--) {
-				double d = transformer.getTargetCoord(item.getValue(), i) - transformer.getTargetCoord(sourceTransformed, i);
+				double d = transformer.getTargetCoord(target, i) - transformer.getTargetCoord(sourceTransformed, i);
 				sum2 += d * d;
 			}
 			setDiscrepancy(item, Math.sqrt(sum2));

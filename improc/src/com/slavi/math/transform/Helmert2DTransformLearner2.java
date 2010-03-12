@@ -192,7 +192,7 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
 	 */
-	public TransformLearnerResult calculateOne() {
+	public TransformLearnerResult calculateOne1() {
 		TransformLearnerResult result = new TransformLearnerResult();
 		result.minGoodRequired = lsa.getRequiredPoints();
 		computeWeights(result);
@@ -205,8 +205,8 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		double TOX = targetMin.getItem(0, 0);
 		double TOY = targetMin.getItem(1, 0);
 		
-		double SS = Math.max(sourceMax.getItem(0, 0) + SOX, sourceMax.getItem(1, 0) + SOY) / 2.0;
-		double TS = Math.max(targetMax.getItem(0, 0) + TOX, targetMax.getItem(1, 0) + TOY) / 2.0;
+		double SS = Math.max(sourceMax.getItem(0, 0) - SOX, sourceMax.getItem(1, 0) - SOY) / 2.0;
+		double TS = Math.max(targetMax.getItem(0, 0) - TOX, targetMax.getItem(1, 0) - TOY) / 2.0;
 		
 		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
 		OutputType sourceTransformed = createTemporaryTargetObject();
@@ -345,9 +345,128 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 		tr.c += u.getItem(0, 2); 
 		tr.d += u.getItem(0, 3);
 */		
+
+		System.out.println("A=" + MathUtil.d4(tr.a));
+		System.out.println("B=" + MathUtil.d4(tr.b));
+		System.out.println("C=" + MathUtil.d4(tr.c));
+		System.out.println("D=" + MathUtil.d4(tr.d));
+		
 		computeDiscrepancies(result);
 		computeBad(result);
 		result.adjustFailed = false;
 		return result; 
 	}
+
+	public TransformLearnerResult calculateOne() {
+		TransformLearnerResult result = new TransformLearnerResult();
+		result.minGoodRequired = lsa.getRequiredPoints();
+		computeWeights(result);
+		if (result.oldGoodCount < result.minGoodRequired)
+			return result;
+		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
+		// Calculate the affine transform parameters 
+		lsa.clear();
+		computeScaleAndOrigin();
+		
+		double scaleX = sourceScale.getItem(0, 0);
+		double scaleY = scaleX; //sourceScale.getItem(1, 0);
+		
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
+				continue;
+			InputType source = item.getKey();
+			OutputType target = item.getValue();
+			double computedWeight = 1.0; //getComputedWeight(item);
+			
+			double SX = transformer.getSourceCoord(source, 0);
+			double SY = transformer.getSourceCoord(source, 1);
+			double TX = transformer.getTargetCoord(target, 0);
+			double TY = transformer.getTargetCoord(target, 1);
+
+			double DX = tr.a * SX + tr.b * SY + tr.c - TX;
+			double DY =-tr.b * SX + tr.a * SY + tr.d - TY;
+			double F = DX*DX + DY*DY;
+			if (F == 0.0) {
+				//throw new Error("0");
+				System.out.println("Got F=0");
+				continue;
+			}
+			double dF_da = DX * SX + DY * SY; 
+			double dF_db = DX * SY - DY * SX; 
+			double dF_dc = DX;
+			double dF_dd = DY;
+			
+//			System.out.println(F + "\t" + dF_da + "\t" + dF_db + "\t" + dF_dc + "\t" + dF_dd);
+			
+			coefs.setItem(0, 0, dF_da * scaleX);
+			coefs.setItem(1, 0, dF_db * scaleY);
+			coefs.setItem(2, 0, dF_dc);
+			coefs.setItem(3, 0, dF_dd);
+			lsa.addMeasurement(coefs, computedWeight, F, 0);
+		}
+		System.out.println("det=" + lsa.getNm().makeSquareMatrix().det());
+		Matrix nm = lsa.getNm().makeSquareMatrix();
+//		nm.printM("NM");
+		if (!lsa.calculate())
+			return result;
+		Matrix nm_inv = lsa.getNm().makeSquareMatrix();
+//		nm_inv.printM("NM'");
+		Matrix check = new Matrix();
+		nm.mMul(nm_inv, check);
+//		check.printM("nm*nm'");
+		double sumAbs = check.sumAbs();
+		System.out.println("sumAbs=" + sumAbs);
+		if (Math.abs(sumAbs - check.getSizeX()) > 1)
+			throw new RuntimeException("");
+
+		// Build transformer
+		Matrix u = lsa.getUnknown();
+		u.rMul(-1);
+		u.printM("U");
+	
+		tr.a += u.getItem(0, 0) / scaleX;
+		tr.b += u.getItem(0, 1) / scaleY;
+		tr.d += u.getItem(0, 2);
+		tr.c += u.getItem(0, 3);
+		
+		computeDiscrepancies(result);
+		computeBad(result);
+		result.adjustFailed = false;
+		return result; 
+	}
+	
+	public void testDerivative(double a, double b, double c, double d) {
+		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>)transformer;
+		for (Map.Entry<InputType, OutputType> item : items) {
+			InputType source = item.getKey();
+			OutputType target = item.getValue();
+
+			double SX = transformer.getSourceCoord(source, 0);
+			double SY = transformer.getSourceCoord(source, 1);
+			double TX = transformer.getTargetCoord(target, 0);
+			double TY = transformer.getTargetCoord(target, 1);
+			
+			double DX0 = a * SX + b * SY + c - TX;
+			double DY0 =-b * SX + a * SY + d - TY;
+			double F0 = DX0*DX0 + DY0*DY0;
+						
+			double DX = tr.a * SX + tr.b * SY + tr.c - TX;
+			double DY =-tr.b * SX + tr.a * SY + tr.d - TY;
+			double F = DX*DX + DY*DY;
+
+			double dF_da = DX * SX + DY * SY; 
+			double dF_db = DX * SY - DY * SX; 
+			double dF_dc = DX;
+			double dF_dd = DY;
+			
+			double F1 = F 
+				+ dF_da * (a - tr.a)
+				+ dF_db * (b - tr.b)
+				+ dF_dc * (c - tr.c)
+				+ dF_dd * (d - tr.d);
+			System.out.println(isBad(item) + "\t" + MathUtil.d20(F1 - F0)
+				+ "\t" + MathUtil.d20(Math.sqrt(F))
+				+ "\t" + MathUtil.d20(Math.sqrt(F0)) );
+		}		
+	}	
 }

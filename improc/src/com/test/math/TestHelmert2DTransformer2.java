@@ -107,11 +107,11 @@ public class TestHelmert2DTransformer2 {
 			if (r < discrepancyThreshold)
 				r = discrepancyThreshold;
 
-			if (r < lastMaxAllowedDiscrepancy) {
+/*			if (r < lastMaxAllowedDiscrepancy) {
 				lastMaxAllowedDiscrepancy = r;
 			} else {
 				r = lastMaxAllowedDiscrepancy;
-			}			
+			}*/			
 			return r;
 		}
 		
@@ -172,12 +172,21 @@ public class TestHelmert2DTransformer2 {
 		return pair;
 	}
 	
+	double a0, b0, c0, d0;
+	
 	private void generatePoints() {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
 		jTransform.rotate(9 * MathUtil.deg2rad);
-		jTransform.scale(123.456, 123.456);
+		jTransform.scale(1.23456, 1.23456);
 		jTransform.translate(100.567, 200.123);
+
+		double[] temp = new double[6]; 
+		jTransform.getMatrix(temp);
+		a0 = temp[0];
+		b0 = temp[2];
+		c0 = temp[4];
+		d0 = temp[5];
 
 		System.out.println("== The java.awt.geom.AffineTransform is:");
 		dumpAffineTransform(jTransform);
@@ -188,37 +197,22 @@ public class TestHelmert2DTransformer2 {
 		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < maxX; xcounter++) {
 			for (int ycounter = 0; ycounter < maxY; ycounter++) {
-				addp(xcounter, ycounter);
+//				addp(xcounter, ycounter);
 			}
 		}
 		
 		// add fake data
-		int percentFakeData = 20;
+		int percentFakeData = 3;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
-
-		if (false) {
-			int xcounter = 0;
-			int ycounter = 0;
-			for (int i = 0; i < numberOfFakePoints; i++) {
-				MyTestData d = addp(xcounter, ycounter);
-				d.originalBad = true;
-				d.dest.x += 1000 + i * 10000 / numberOfFakePoints;
-				d.dest.y += 1000 + i * 10000 / numberOfFakePoints;
-				xcounter++;
-				if (xcounter >= maxX) {
-					ycounter++;
-					xcounter = 0;
-				}
-			}
-		} else {
-			Random r = new Random();
-			for (int i = 0; i < numberOfFakePoints; i++) {
-				MyTestData d = addp(r.nextInt(maxX), r.nextInt(maxY));
-				d.originalBad = true;
-				d.dest.x += 1000 + r.nextInt(10000);
-				d.dest.y += 1000 + r.nextInt(10000);
-			}
+		numberOfFakePoints = 12;
+		
+		Random r = new Random();
+		for (int i = 0; i < numberOfFakePoints; i++) {
+			MyTestData d = addp(r.nextInt(maxX), r.nextInt(maxY));
+			d.originalBad = true;
+			d.dest.x += 10 + r.nextInt(100);
+			d.dest.y += 10 + r.nextInt(100);
 		}
 
 /*		MyTestData d = points.get(0);
@@ -233,20 +227,21 @@ public class TestHelmert2DTransformer2 {
 	
 	public void learn() {
 		MyTestData pair;
-		learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), points);
-		learner.calculateTwo();
+//		System.out.println("*******************");
+//		System.out.println(learner.calculateTwo());
+//		dumpBad();
+		
 		Helmert2DTransformer2<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer2<Point2D.Double, Point2D.Double>) learner.transformer;
 		System.out.println(tr.toString());
-		
 		for (int iter = 0; iter < 50; iter++) {
-			System.out.println();
-			System.out.println("**** Iteration " + iter);
-			TransformLearnerResult res = learner.calculateOne();
+			System.out.println("******************* " + iter);
+			TransformLearnerResult res = learner.calculateTwo();
 			System.out.println(res);
 			System.out.println(tr.toString());
 			dumpBad();
 			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < TestUtils.precision))
 				break;
+			learner.testDerivative(a0, b0, c0, d0);
 		}
 		
 		Point2D.Double dest = new Point2D.Double();
@@ -269,18 +264,34 @@ public class TestHelmert2DTransformer2 {
 		System.out.println("Good marked as bad: " + goodMarkedAsBad);		
 	}
 	
-	public static void main(String[] args) {
-		TestHelmert2DTransformer2 test = new TestHelmert2DTransformer2();
-		test.generatePoints();
-		test.learn();
+	public void calc() {
+		learn();
+//		learner.testDerivative(a0, b0, c0, d0);
 
-		Matrix delta = test.learner.computeTransformedTargetDelta(false);
+		Matrix delta = learner.computeTransformedTargetDelta(false);
 		System.out.println("==== max discrepancy ====");
 		System.out.println(delta.toString());
-		delta = test.learner.computeTransformedTargetDelta(true);
+		delta = learner.computeTransformedTargetDelta(true);
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
 		TestUtils.assertMatrix0("Delta", delta);
+	}
+	
+	public void testDerivative() {
+		System.out.println("*******************");
+		System.out.println(learner.calculateTwo());
+		dumpBad();
+		learner.testDerivative(a0, b0, c0, d0);
+	}
+	
+	public static void main(String[] args) {
+		TestHelmert2DTransformer2 test = new TestHelmert2DTransformer2();
+		test.generatePoints();
+		test.learner = new MyTestHelmert2DTransformLearner(new MyTestHelmert2DTransformer(), test.points);
+
+		test.calc();
+//		test.testDerivative();
+		
 		System.out.println("Done");
 	}
 }
