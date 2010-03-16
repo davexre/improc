@@ -396,10 +396,13 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 			double dF_dc = DX;
 			double dF_dd = DY;
 			
-//			System.out.println(F + "\t" + dF_da + "\t" + dF_db + "\t" + dF_dc + "\t" + dF_dd);
+			dF_da *= scaleX;
+			dF_db *= scaleY;
 			
-			coefs.setItem(0, 0, dF_da * scaleX);
-			coefs.setItem(1, 0, dF_db * scaleY);
+			System.out.println(F + "\t" + dF_da + "\t" + dF_db + "\t" + dF_dc + "\t" + dF_dd);
+			
+			coefs.setItem(0, 0, dF_da);
+			coefs.setItem(1, 0, dF_db);
 			coefs.setItem(2, 0, dF_dc);
 			coefs.setItem(3, 0, dF_dd);
 			lsa.addMeasurement(coefs, computedWeight, F, 0);

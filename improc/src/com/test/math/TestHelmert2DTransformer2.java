@@ -197,7 +197,7 @@ public class TestHelmert2DTransformer2 {
 		points = new ArrayList<MyTestData>();
 		for (int xcounter = 0; xcounter < maxX; xcounter++) {
 			for (int ycounter = 0; ycounter < maxY; ycounter++) {
-//				addp(xcounter, ycounter);
+				addp(xcounter, ycounter);
 			}
 		}
 		
@@ -205,7 +205,7 @@ public class TestHelmert2DTransformer2 {
 		int percentFakeData = 3;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
-		numberOfFakePoints = 12;
+		numberOfFakePoints = 0;
 		
 		Random r = new Random();
 		for (int i = 0; i < numberOfFakePoints; i++) {
@@ -235,7 +235,7 @@ public class TestHelmert2DTransformer2 {
 		System.out.println(tr.toString());
 		for (int iter = 0; iter < 50; iter++) {
 			System.out.println("******************* " + iter);
-			TransformLearnerResult res = learner.calculateTwo();
+			TransformLearnerResult res = learner.calculateOne();
 			System.out.println(res);
 			System.out.println(tr.toString());
 			dumpBad();
