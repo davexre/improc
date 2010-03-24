@@ -3,8 +3,10 @@ package com.test.util;
 import com.slavi.util.DumpUtil;
 
 public class TestDumpUtils {
+	public static String str = "alabala";
+	
 	public static void main(String[] args) {
-		DumpUtil du = new DumpUtil();
-		DumpUtil.showObject(du);
+		TestDumpUtils du = new TestDumpUtils();
+		DumpUtil.showObject(du, false, false);
 	}
 }

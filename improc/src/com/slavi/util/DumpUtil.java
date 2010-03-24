@@ -2,6 +2,7 @@ package com.slavi.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -67,16 +68,21 @@ public class DumpUtil {
 			Field[] fields = loopC.getDeclaredFields();
 			for (int i = 0; i < fields.length; i++) {
 				Field f = fields[i];
-				Object fldVal = null;
-				if ((!f.isAccessible()) && (!showHidden))
-					continue;
-				try {
-					f.setAccessible(true);
-					fldVal = f.get(object);
-				} catch (Exception e) {
-					//e.printStackTrace();
+				if (showHidden || Modifier.isPublic(f.getModifiers())) {
+					boolean isAccessible = f.isAccessible();
+					Object fldVal = null;
+					try {
+						f.setAccessible(true);
+						fldVal = f.get(object);
+					} catch (Exception e) {
+						//e.printStackTrace();
+					}
+					lst.add(f.getName() + ":" + f.getType().getName() + "=" + fldVal);
+					try {
+						f.setAccessible(isAccessible);
+					} catch (Exception e) {
+					}
 				}
-				lst.add(f.getName() + ":" + f.getType().getName() + "=" + fldVal);
 			}
 			loopC = loopC.getSuperclass();
 		}

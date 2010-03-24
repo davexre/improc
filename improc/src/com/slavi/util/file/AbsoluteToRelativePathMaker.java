@@ -105,8 +105,51 @@ public class AbsoluteToRelativePathMaker {
 	public String getRelativePath(String aPath, boolean useCaseSensitiveCompare) {
 		return getRelativePath(new File(aPath), useCaseSensitiveCompare);
 	}
-	
+
 	public String getRelativePath(File file, boolean useCaseSensitiveCompare) {
+		String fname;
+		try {
+			fname = file.getCanonicalPath();
+		} catch (IOException e) {
+			fname = file.getPath();
+		}
+		String fullName = fname;
+
+		File f = new File(fname);
+		int elementIndex = 0;
+		StringBuilder trimmed = new StringBuilder();
+		String prefix = "";
+		while (f != null) {
+			if (elementIndex >= elements.size()) {
+				elementIndex = 0;
+				trimmed.insert(0, prefix);
+				trimmed.insert(0, f.getName());
+				//trimmed = f.getName() + prefix + trimmed;
+				prefix = File.separator;
+				f = f.getParentFile();
+				if (f == null)
+					return fullName;
+				fname = (f == null) ? "" : f.getPath();
+			}
+			if (useCaseSensitiveCompare) {
+				if (fname.equals(elements.get(elementIndex)))
+					break;
+			} else {
+				if (fname.equalsIgnoreCase(elements.get(elementIndex)))
+					break;
+			} 
+			elementIndex++;
+		}
+		if (f != null) {
+			prefix = ".." + File.separator;
+			for (int i = elementIndex - 1; i >= 0; i--)
+				trimmed.insert(0, prefix);
+		}
+		return trimmed.toString();
+	}
+	
+	/* FIXME */
+	public String getRelativePathOLD(File file, boolean useCaseSensitiveCompare) {
 		String fname;
 		try {
 			fname = file.getCanonicalPath();
@@ -145,10 +188,19 @@ public class AbsoluteToRelativePathMaker {
 	}
 	
 	public File getFullPathFile(String aRelativePath) {
-		return new File(rootDir + File.separator + aRelativePath);
+		File f = new File(aRelativePath);
+		if (!f.isAbsolute()) {
+			f = new File(rootDir + File.separator + aRelativePath);
+			try {
+				f = f.getCanonicalFile();
+			} catch (IOException e) {
+				// Ignore
+			}
+		}
+		return f;
 	}
 	
 	public String getFullPath(String aRelativePath) {
-		return rootDir + File.separator + aRelativePath;
+		return getFullPathFile(aRelativePath).getPath();
 	}
 }
