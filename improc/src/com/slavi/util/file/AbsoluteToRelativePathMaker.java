@@ -148,45 +148,6 @@ public class AbsoluteToRelativePathMaker {
 		return trimmed.toString();
 	}
 	
-	/* FIXME */
-	public String getRelativePathOLD(File file, boolean useCaseSensitiveCompare) {
-		String fname;
-		try {
-			fname = file.getCanonicalPath();
-		} catch (IOException e) {
-			fname = file.getPath();
-		}
-
-		File f = new File(fname);
-		int elementIndex = 0;
-		String trimmed = "";
-		String prefix = "";
-		while (f != null) {
-			if (elementIndex >= elements.size()) {
-				elementIndex = 0;
-				trimmed = f.getName() + prefix + trimmed;
-				prefix = File.separator;
-				f = f.getParentFile();
-				fname = (f == null) ? "" : f.getPath();
-			}
-			if (useCaseSensitiveCompare) {
-				if (fname.equals(elements.get(elementIndex)))
-					break;
-			} else {
-				if (fname.equalsIgnoreCase(elements.get(elementIndex)))
-					break;
-			} 
-			elementIndex++;
-		}
-		if (f == null) {
-			return file.getPath();
-		}
-		String fn = "";
-		for (int i = elementIndex - 1; i >= 0; i--)
-			fn = fn + ".." + File.separator;
-		return fn + trimmed;
-	}
-	
 	public File getFullPathFile(String aRelativePath) {
 		File f = new File(aRelativePath);
 		if (!f.isAbsolute()) {

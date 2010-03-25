@@ -241,7 +241,7 @@ public class TestHelmert2DTransformer2 {
 			dumpBad();
 			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < TestUtils.precision))
 				break;
-			learner.testDerivative(a0, b0, c0, d0);
+//			learner.testDerivative(a0, b0, c0, d0);
 		}
 		
 		Point2D.Double dest = new Point2D.Double();

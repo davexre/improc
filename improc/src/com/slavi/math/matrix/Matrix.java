@@ -159,7 +159,14 @@ public class Matrix {
 	 * Saves the matrix to a text stream
 	 */
 	public void save(PrintStream fou) {
-		fou.printf(this.toString(), (Object[])null);
+		for (int j = 0; j < sizeY; j++) {
+			for (int i = 0; i < sizeX; i++) {
+				if (i != 0)
+					fou.print("\t");
+				fou.print(getItem(i, j));
+			}
+			fou.print("\n");
+		}
 	}
 
 	/**
