@@ -33,8 +33,54 @@ public abstract class Helmert2DTransformLearner2<InputType, OutputType> extends 
 	
 	public int getRequiredTrainingPoints() {
 		return 4;
-	}	
+	}
 	
+	public void calculatePrims() {
+		computeScaleAndOrigin();
+		Helmert2DTransformer2<InputType, OutputType> tr = (Helmert2DTransformer2<InputType, OutputType>) transformer;
+		double c = 0.5 * (
+				targetMax.getItem(0, 0) + targetMin.getItem(0, 0)  
+				- sourceMax.getItem(0, 0) - sourceMin.getItem(0, 0));
+		double d = 0.5 * (
+				targetMax.getItem(1, 0) + targetMin.getItem(1, 0)  
+				- sourceMax.getItem(1, 0) - sourceMin.getItem(1, 0));
+		
+//		c = 0.5 * (targetMin.getItem(0, 0) + sourceMin.getItem(0, 0));
+//		d = 0.5 * (targetMin.getItem(1, 0) + sourceMin.getItem(1, 0));
+		
+		Statistics statA = new Statistics();
+		Statistics statB = new Statistics();
+		statA.start();
+		statB.start();
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
+				continue;
+			InputType source = item.getKey();
+			OutputType target = item.getValue();
+			double a = tr.getTargetCoord(target, 0) - (tr.getSourceCoord(source, 0) + c);
+			double b = tr.getTargetCoord(target, 1) - (tr.getSourceCoord(source, 1) + d);
+//			System.out.println("A=" + a + "\tB=" + b);
+			statA.addValue(a);
+			statB.addValue(b);
+//			stat.addValue(angle, getWeight(item));
+		}
+		statA.stop();
+		statB.stop();
+		System.out.println("StatA");
+		System.out.println(statA);
+		System.out.println("StatB");
+		System.out.println(statB);
+		tr.a = statA.getAvgValue();
+		tr.b = statB.getAvgValue();
+		tr.c = c;
+		tr.d = d;
+/*		
+		tr.a = 0;
+		tr.b = 0;
+		tr.c = 0;
+		tr.d = 0;*/
+	}
+
 	public TransformLearnerResult calculateTwo() {
 		TransformLearnerResult result = new TransformLearnerResult();
 		result.minGoodRequired = lsa.getRequiredPoints();
