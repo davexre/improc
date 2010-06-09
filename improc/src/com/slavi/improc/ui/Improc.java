@@ -26,8 +26,8 @@ public class Improc {
 	Shell parent;
 	
 	public void doTheJob(ExecutorService exec) throws Exception {
-		parent = new Shell((Shell) null, SWT.NONE);
-		parent.setBounds(-10, -10, 1, 1); // fixes a bug in SWT
+		parent = new Shell(SWT.NONE);
+		parent.setBounds(-10, -10, 0, 0); // fixes a bug in SWT
 		parent.open();
 		
 		Settings settings = Settings.getSettings(parent);

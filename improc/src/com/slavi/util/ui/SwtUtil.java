@@ -286,7 +286,7 @@ public class SwtUtil {
 	 * Centers the specified shell according to the primary display bounds.  
 	 */
 	public static void centerShell(final Shell shell) {
-		Rectangle displayRect = shell.getDisplay().getBounds();
+		Rectangle displayRect = shell.getMonitor().getBounds();
 		Rectangle shellRect = shell.getBounds();
 		shellRect.x = (displayRect.width - shellRect.width) / 2;
 		shellRect.y = (displayRect.height - shellRect.height) / 2;

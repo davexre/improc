@@ -16,6 +16,7 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
+import com.slavi.math.matrix.BitMatrix;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
 
@@ -67,6 +68,34 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			max.x = rx;
 		if (ry > max.y) 
 			max.y = ry;
+	}
+	
+	void calcExtents2() throws InterruptedException {
+		int bmSizeX = 360 * 60;
+		int bmSizeY = 180 * 60;
+		int bmSizeYOver2 = bmSizeY / 2;
+		double dest[] = new double[2];
+		BitMatrix bm = new BitMatrix(bmSizeX, bmSizeY);
+		for (int j = 0; j < bmSizeY; j++) {
+			double y = (j - bmSizeYOver2) * MathUtil.PIover2 / bmSizeY;
+			for (int i = 0; i < bmSizeX; i++) {
+				double x = i * MathUtil.C2PI / bmSizeX;
+				
+				for (int index = 0; index < images.size(); index++) {
+					if (Thread.currentThread().isInterrupted())
+						throw new InterruptedException();
+					KeyPointList image = images.get(index);
+					SpherePanoTransformer2.transformBackward(x, y, image, dest);
+				}
+				
+//				x = sizeAngle.x * (i / bmSizeX) + minAngle.x;
+//				y = sizeAngle.y * (j / bmSizeY) + minAngle.y;
+//				y = MathUtil.PIover2 - y;
+//				SpherePanoTransformer2.rotateBackward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
+//				SpherePanoTransformer2.transformBackward(x, y, image, dest);
+				
+			}
+		}
 	}
 	
 	void calcExtents() {

@@ -588,20 +588,28 @@ public class SymmetricMatrix {
 	 *         matrix can not be computed this.make0 is called and the returned
 	 *         value is false.
 	 */
+	public double debugMinAbsDiag = 0; 
+	
 	public boolean inverse() {
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
-
+		debugMinAbsDiag = Double.MAX_VALUE;
+		
 		for (int i = 0; i < sizeM; i++) {
 			double A = getItem(i, i);
+			double abs = Math.abs(A);
+			if (abs != 0.0) {
+				debugMinAbsDiag = Math.min(debugMinAbsDiag, abs);
+			}			
 			if (A == 0) {
 				int indexI = 0;
-				for (int j = i + 1; j < sizeM; j++)
+				for (int j = i + 1; j < sizeM; j++) {
 					if (getItem(i, j) != 0) {
 						indexI = j;
 						exchangeX(i, j);
 						xchg.add(new XchgRec(i, j));
 						break;
 					}
+				}
 				if (indexI == 0) {
 					make0();
 					return false;

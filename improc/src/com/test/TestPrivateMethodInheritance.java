@@ -19,7 +19,7 @@ public class TestPrivateMethodInheritance {
 	}
 	
 	public static class Child extends Base {
-		private void privateMethod() {
+		public void privateMethod() {
 			System.out.println("Child:privateMethod");
 		}
 

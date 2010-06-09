@@ -47,7 +47,7 @@ public class TestSpeedOfMathPackage {
 	
 	
 	public static void main(String[] args) {
-		//testNumberOfMultiplies();
+		testNumberOfMultiplies();
 
 		testNumberOfSQRs();
 		testNumberOfMathSQRs();

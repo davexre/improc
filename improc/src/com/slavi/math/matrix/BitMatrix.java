@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 public class BitMatrix {
 
-	private final Object synchObj = new Object();
-	
 	private byte m[];
 	
 	/**
@@ -77,25 +75,21 @@ public class BitMatrix {
 		if ((newSizeX == sizeX) && (newSizeY == sizeY)) {
 			return;
 		}
-		synchronized (synchObj) {
-			sizeX = newSizeX;
-			sizeY = newSizeY;
-			int sizeM = (int) Math.ceil((double) (sizeX * sizeY) / 8.0);
-			m = new byte[sizeM];
-			Arrays.fill(m, (byte) 0);
-		}
+		sizeX = newSizeX;
+		sizeY = newSizeY;
+		int sizeM = (int) Math.ceil((double) (sizeX * sizeY) / 8.0);
+		m = new byte[sizeM];
+		Arrays.fill(m, (byte) 0);
 	}
 
 	public void make0() {
-		synchronized (synchObj) {
-			Arrays.fill(m, (byte) 0);
-		}
+		Arrays.fill(m, (byte) 0);
 	}
 	
 	/**
 	 * Returns true if all elements are 0 (false). 
 	 */
-	public boolean is0(double tolerance) {
+	public boolean is0() {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
 				if (getItem(i, j))
@@ -104,9 +98,7 @@ public class BitMatrix {
 	}
 
 	public void make1() {
-		synchronized (synchObj) {
-			Arrays.fill(m, (byte) 0xff);
-		}
+		Arrays.fill(m, (byte) 0xff);
 	}
 	
 	public void setItem(int atX, int atY, boolean aValue) {
@@ -117,12 +109,10 @@ public class BitMatrix {
 		int index = atY * sizeX + atX;
 		int indexM = index / 8;
 		byte mask = (byte) (1 << (index % 8));
-		synchronized (synchObj) {
-			if (aValue) {
-				m[indexM] |= mask;
-			} else {
-				m[indexM] &= ~mask;
-			}
+		if (aValue) {
+			m[indexM] |= mask;
+		} else {
+			m[indexM] &= ~mask;
 		}
 	}
 	
@@ -134,17 +124,12 @@ public class BitMatrix {
 		int index = atY * sizeX + atX;
 		int indexM = index / 8;
 		byte mask = (byte) (1 << (index % 8));
-		synchronized (synchObj) {
-			return (m[indexM] & mask) != 0;
-		}
+		return (m[indexM] & mask) != 0;
 	}
 	
 	public void copyTo(BitMatrix dest) {
 		dest.resize(sizeX, sizeY);
-		synchronized (synchObj) {
-			// do not synch to dest.synchObj
-			System.arraycopy(m, 0, dest.m, 0, m.length);
-		}
+		System.arraycopy(m, 0, dest.m, 0, m.length);
 	}
 	
 	public String toString() {

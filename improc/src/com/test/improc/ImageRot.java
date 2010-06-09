@@ -450,6 +450,7 @@ public class ImageRot {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		System.out.println("Start.");
 		new ImageRot().doIt();
 		System.out.println("Done.");
 	}
