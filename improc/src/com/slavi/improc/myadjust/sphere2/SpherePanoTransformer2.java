@@ -36,16 +36,22 @@ public class SpherePanoTransformer2 {
 		double sinSY = Math.sin(sy);
 		double cosSY = Math.cos(sy);
 
-		dest[0] = MathUtil.fixAngleMPI_PI(Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ2);
+		dest[0] = MathUtil.fixAngle2PI(Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ2);
 		dest[1] = Math.acos(cosSY * cosIY + sinSY * sinIY * cosDX);
 	}
 
-	public static void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
+	/**
+	 * dest[0] = x in image coordinates
+	 * dest[1] = y in image coordinates
+	 * Returns the radius if r>0 coordinates are ok, if r<0 coordinates the on the opposite side of the sphere.  
+	 */
+	public static double transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
 		rotateBackward(rx, ry, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
 		// x => longitude, y => zenith
 		double r = srcImage.scaleZ * Math.tan(dest[1]);
 		dest[1] = srcImage.cameraOriginY + r * Math.sin(dest[0]) / srcImage.cameraScale;
 		dest[0] = srcImage.cameraOriginX + r * Math.cos(dest[0]) / srcImage.cameraScale;
+		return r;
 	}
 
 	/**
@@ -61,7 +67,7 @@ public class SpherePanoTransformer2 {
 		double sinRX = Math.sin(rx);
 		double cosRX = Math.cos(rx);
 		
-		dest[0] = MathUtil.fixAngleMPI_PI(Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY) + IZ1);
+		dest[0] = MathUtil.fixAngle2PI(Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY) + IZ1);
 		dest[1] = Math.acos(cosRY * cosIY - sinRY * sinIY * cosRX);
 	}
 }

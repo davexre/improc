@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust.sphere2;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,7 +41,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 	final boolean pinPoints;
 	final boolean useColorMasks;
 	final boolean useImageMaxWeight;
-	int outputImageSizeX = 5000;
+	int outputImageSizeX = 2000;
 	int outputImageSizeY;
 
 	public MyGeneratePanoramasSphere2(ExecutorService exec,
@@ -57,9 +58,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		this.useImageMaxWeight = useImageMaxWeight;
 	}
 	
-	static void calcExt(double p[], Point2D.Double min, Point2D.Double max) {
-		double rx = p[0];
-		double ry = p[1];
+	static void minMax(double rx, double ry, Point2D.Double min, Point2D.Double max) {
 		if (rx < min.x) 
 			min.x = rx;
 		if (ry < min.y) 
@@ -69,107 +68,90 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		if (ry > max.y) 
 			max.y = ry;
 	}
-	
-	void calcExtents2() throws InterruptedException {
-		int bmSizeX = 360 * 60;
-		int bmSizeY = 180 * 60;
-		int bmSizeYOver2 = bmSizeY / 2;
-		double dest[] = new double[2];
-		BitMatrix bm = new BitMatrix(bmSizeX, bmSizeY);
-		for (int j = 0; j < bmSizeY; j++) {
-			double y = (j - bmSizeYOver2) * MathUtil.PIover2 / bmSizeY;
-			for (int i = 0; i < bmSizeX; i++) {
-				double x = i * MathUtil.C2PI / bmSizeX;
-				
-				for (int index = 0; index < images.size(); index++) {
-					if (Thread.currentThread().isInterrupted())
-						throw new InterruptedException();
-					KeyPointList image = images.get(index);
-					SpherePanoTransformer2.transformBackward(x, y, image, dest);
-				}
-				
-//				x = sizeAngle.x * (i / bmSizeX) + minAngle.x;
-//				y = sizeAngle.y * (j / bmSizeY) + minAngle.y;
-//				y = MathUtil.PIover2 - y;
-//				SpherePanoTransformer2.rotateBackward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
-//				SpherePanoTransformer2.transformBackward(x, y, image, dest);
-				
-			}
-		}
-	}
-	
-	void calcExtents() {
-		minAngle.x = Double.POSITIVE_INFINITY;
-		minAngle.y = Double.POSITIVE_INFINITY;
-		sizeAngle.x = Double.NEGATIVE_INFINITY;
-		sizeAngle.y = Double.NEGATIVE_INFINITY;
-		
-		double tmp[] = new double[3];
-		for (KeyPointList i : images) {
-			SpherePanoTransformer2.transformForeward(0, 0, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
-			tmp[1] = MathUtil.PIover2 - tmp[1];
-			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(0, i.imageSizeY - 1, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
-			tmp[1] = MathUtil.PIover2 - tmp[1];
-			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, 0, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
-			tmp[1] = MathUtil.PIover2 - tmp[1];
-			calcExt(tmp, minAngle, sizeAngle);
-			SpherePanoTransformer2.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
-			SpherePanoTransformer2.rotateForeward(tmp[0], tmp[1], w2w[0], w2w[1], w2w[2], tmp);
-			tmp[1] = MathUtil.PIover2 - tmp[1];
-			calcExt(tmp, minAngle, sizeAngle);
-		}
-//		minAngle.x += Math.PI / 4.0;
-//		sizeAngle.x += Math.PI / 2.0;
-		
-		sizeAngle.x -= minAngle.x;
-		sizeAngle.y -= minAngle.y;
-		
-		minAngle.x = -180 * MathUtil.deg2rad;
-		minAngle.y = -90 * MathUtil.deg2rad;
-		sizeAngle.x = 359 * MathUtil.deg2rad;
-		sizeAngle.y = 180 * MathUtil.deg2rad;
-		
-		outputImageSizeY = (int)(outputImageSizeX * (sizeAngle.y / sizeAngle.x));
-		
-		for (KeyPointList i : images) {
-			i.min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-			i.max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-			transformCameraToWorld(0, 0, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(0, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(i.imageSizeX - 1, 0, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, i.min, i.max);
-		}
-	}
-	
-	double w2w[] = new double[] { 0 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, -90 * MathUtil.deg2rad }; 
-//	double w2w[] = new double[] { 180 * MathUtil.deg2rad, 45 * MathUtil.deg2rad, -180 * MathUtil.deg2rad }; 
-	
+	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
+
 	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
-		y = MathUtil.PIover2 - y;
-		SpherePanoTransformer2.rotateBackward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
-		SpherePanoTransformer2.transformBackward(x, y, image, dest);
+		SpherePanoTransformer2.rotateBackward(x, y, wRot[0], wRot[1], wRot[2], dest);
+		double r = SpherePanoTransformer2.transformBackward(dest[0], dest[1], image, dest);
+		if (r < 0)
+			throw new RuntimeException("r < 0");
 	}
 	
 	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
 		SpherePanoTransformer2.transformForeward(x, y, image, dest);
-		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], w2w[0], w2w[1], w2w[2], dest);
-		dest[1] = MathUtil.PIover2 - dest[1];
+		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
 	}
 
+	void pinPoint(int imgX, int imgY, int color, KeyPointList image, SafeImage si, double dest[]) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted())
+			throw new InterruptedException();
+		SpherePanoTransformer2.transformForeward(imgX, imgY, image, dest);
+		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+		// min, max are in radians x (-pi..pi] y [0..pi]
+		minMax(dest[0], dest[1], image.min, image.max);
+		double x = MathUtil.fixAngle2PI(dest[0]) * si.sizeX / MathUtil.C2PI;
+		double y = dest[1] * si.sizeY / Math.PI;
+		si.setRGB((int) x, (int) y, color);
+	}
+	
+	void calcExtents(String outputfile) throws InterruptedException, IOException {
+		int step = 20;
+		int bmSizeX = 3600;
+		int bmSizeY = 1800;
+		double dest[] = new double[2];
+		SafeImage si = new SafeImage(bmSizeX, bmSizeY);
+		
+		for (KeyPointList image : images) {
+			image.min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+			image.max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+			int color = si.getNextColor();
+			for (int i = 0; i < image.imageSizeX; i+=step) {
+				for (int j = 0; j < image.imageSizeY; j+=step) {
+					pinPoint(i, j, color, image, si, dest);
+				}
+				pinPoint(i, image.imageSizeY - 1, color, image, si, dest);
+			}
+			for (int j = 0; j < image.imageSizeY; j+=step) {
+				pinPoint(image.imageSizeX - 1, j, color, image, si, dest);
+			}
+			pinPoint(image.imageSizeX - 1, image.imageSizeY - 1, color, image, si, dest);
+		}
+
+		si.save(outputfile);
+		
+		minAngle.x = Double.POSITIVE_INFINITY;
+		minAngle.y = Double.POSITIVE_INFINITY;
+		sizeAngle.x = Double.NEGATIVE_INFINITY;
+		sizeAngle.y = Double.NEGATIVE_INFINITY;
+		for (KeyPointList image : images) {
+			minMax(image.min.x, image.min.y, minAngle, sizeAngle);
+			minMax(image.max.x, image.max.y, minAngle, sizeAngle);
+		}
+		sizeAngle.x -= minAngle.x;
+		sizeAngle.y -= minAngle.y;
+		
+		outputImageSizeY = (int)(outputImageSizeX * (sizeAngle.y / sizeAngle.x));
+		
+		for (KeyPointList image : images) {
+			System.out.println(image.imageFileStamp.getFile().getName() 
+				+ "\tminX=" + MathUtil.rad2degStr(image.min.x)
+				+ "\tminY=" + MathUtil.rad2degStr(image.min.y)
+				+ "\tmaxX=" + MathUtil.rad2degStr(image.max.x)
+				+ "\tmaxY=" + MathUtil.rad2degStr(image.max.y)
+				);
+			
+			image.min.x = outputImageSizeX * ((image.min.x - minAngle.x) / sizeAngle.x);
+			image.min.y = outputImageSizeY * ((image.min.y - minAngle.y) / sizeAngle.y);
+			image.max.x = outputImageSizeX * ((image.max.x - minAngle.x) / sizeAngle.x);
+			image.max.y = outputImageSizeY * ((image.max.y - minAngle.y) / sizeAngle.y);
+		}
+	}
+	
 	private void drawWorldMesh(SafeImage img) {
 		int cols[] = {
 			// 0		15			30		45			60		75
@@ -352,8 +334,25 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		}
 	}
 
-	private void pinPoints(SafeImage oi) {
+	private void pinPoints(SafeImage oi) throws InterruptedException {
 		double d[] = new double[3];
+		for (KeyPointList image : images) {
+			int color = oi.getNextColor();
+			for (int i = 0; i < image.imageSizeX; i++) {
+				transformCameraToWorld(i, 0, image, d);
+				oi.setRGB((int) d[0], (int) d[1], color);
+				transformCameraToWorld(i, image.imageSizeY - 1, image, d);
+				oi.setRGB((int) d[0], (int) d[1], color);
+			}
+			
+			for (int j = 0; j < image.imageSizeY; j++) {
+				transformCameraToWorld(0, j, image, d);
+				oi.setRGB((int) d[0], (int) d[1], color);
+				transformCameraToWorld(image.imageSizeX - 1, j, image, d);
+				oi.setRGB((int) d[0], (int) d[1], color);
+			}
+		}
+		
 		for (KeyPointPairList pairList : pairLists) {
 			int colorCross = images.indexOf(pairList.source);
 			int colorX = images.indexOf(pairList.target);
@@ -501,22 +500,30 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 
 		for (ArrayList<KeyPointPairList> pano : panos) {
 			int panoId = panoCounter.incrementAndGet();
+			String outputFile = outputDir + "/pano" + panoId;
+
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
 			SpherePanoTransformLearner2.buildImagesList(pairLists, images);
-			calcExtents();
+			calcExtents(outputFile + " mask extent.png");
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));
 			System.out.println("SIZE angle X,Y: " + MathUtil.rad2degStr(sizeAngle.x) + "\t" + MathUtil.rad2degStr(sizeAngle.y));
 			System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 
 			for (KeyPointList image : images) {
+//				System.out.println(image.imageFileStamp.getFile().getName() 
+//						+ "\tminX=" + MathUtil.rad2degStr(image.min.x)
+//						+ "\tminY=" + MathUtil.rad2degStr(image.min.y)
+//						+ "\tmaxX=" + MathUtil.rad2degStr(image.max.x)
+//						+ "\tmaxY=" + MathUtil.rad2degStr(image.max.y)
+//						);
 				System.out.println(image.imageFileStamp.getFile().getName() 
-						+ "\tminX=" + MathUtil.rad2degStr(image.min.x)
-						+ "\tminY=" + MathUtil.rad2degStr(image.min.y)
-						+ "\tmaxX=" + MathUtil.rad2degStr(image.max.x)
-						+ "\tmaxY=" + MathUtil.rad2degStr(image.max.y)
+						+ "\tminX=" + (int)(image.min.x)
+						+ "\tminY=" + (int)(image.min.y)
+						+ "\tmaxX=" + (int)(image.max.x)
+						+ "\tmaxY=" + (int)(image.max.y)
 						);
 			}
 			
@@ -547,11 +554,10 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			}
 			taskSet.addFinished();
 			taskSet.get();
-			pinPoints(outImageMask);
-			drawWorldMesh(outImageMask);
-//			drawWorldMesh(outImageColor);
 			
-			String outputFile = outputDir + "/pano" + panoId;
+			pinPoints(outImageMask);
+//			drawWorldMesh(outImageMask);
+			
 			outImageColor.save(outputFile + " color.png");
 			outImageMask.save(outputFile + " mask.png");
 			

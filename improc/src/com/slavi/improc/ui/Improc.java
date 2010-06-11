@@ -107,8 +107,8 @@ public class Improc {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
 //		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {
