@@ -6,7 +6,7 @@ public class SphericalCoordsLongZen {
 	 * Find the angular (Great circle) distance between the two points on a sphere.
 	 * http://en.wikipedia.org/wiki/Great-circle_distance
 	 * 
-	 * x -> longitude
+	 * rx -> longitude
 	 * ry -> zenith angle (90 - latitude) 
 	 */
 	public static double getSphericalDistance(double rx1, double ry1, double rx2, double ry2) {
