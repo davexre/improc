@@ -69,7 +69,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			max.y = ry;
 	}
 
-	double wRot[] = new double[] { 0 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
+	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
 
 	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;

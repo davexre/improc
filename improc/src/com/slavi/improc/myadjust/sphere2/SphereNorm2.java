@@ -180,7 +180,7 @@ public class SphereNorm2 {
 			sy = Math.atan2(B, kp.keyPointList.scaleZ);
 			dSY_dF = dAdF / (1.0 + A * A);
 			
-			sx = Math.atan2(tmpx, tmpy);
+			sx = Math.atan2(tmpy, tmpx);
 			dSX_dF = 0.0;
 		}
 	}

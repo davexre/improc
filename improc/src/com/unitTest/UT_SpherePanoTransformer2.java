@@ -93,8 +93,8 @@ public class UT_SpherePanoTransformer2 {
 		double d1[] = new double[3];
 		double d2[] = new double[3];
 
-		d1[0] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
-		d1[1] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
+		d1[0] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
+		d1[1] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
 		d1[2] = p1.keyPointList.scaleZ;
 		RotationZYZ.instance.transformForward(m, d1, d2);
 		SphericalCoordsLongZen.cartesianToPolar(d2[0], d2[1], d2[2], d2);
