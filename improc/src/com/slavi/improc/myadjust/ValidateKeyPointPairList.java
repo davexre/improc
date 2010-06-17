@@ -31,6 +31,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		double params[] = new double[4];
 		tr.getParams(params);
 		pairList.scale = params[0];
+		if ((int)(params[0] * 1000) == 0)
+			System.out.println("ERROR");
 		double angle = params[1];
 
 		double f = pairList.scale * pairList.source.scaleZ;
@@ -70,8 +72,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		TransformLearnerResult res = null;
 		for (int i = 0; i < 100; i++) {
 			res = learner.calculateOne();
-//			System.out.println("------Validate KeyPointPairList ------------");
-//			System.out.println(res);
+			System.out.println("------Validate KeyPointPairList ------------");
+			System.out.println(res);
 			goodCount = pairList.getGoodCount();
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;

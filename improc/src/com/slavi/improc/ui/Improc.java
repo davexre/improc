@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -79,7 +80,7 @@ public class Improc {
 			System.out.println("---------- Generating panorama images");
 			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
 					new MyGeneratePanoramasSphere2(exec, panos, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
 		} else {	
 			System.out.println("---------- Calculating panorama parameters");
 			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
@@ -96,8 +97,11 @@ public class Improc {
 	}
 	
 	public static class MyThreadFactory implements ThreadFactory {
+		AtomicInteger threadCounter = new AtomicInteger(0);
+		
 		public Thread newThread(Runnable r) {
 			Thread thread = new Thread(r);
+			thread.setName("Worker thread " + threadCounter.incrementAndGet());
 			thread.setPriority(Thread.MIN_PRIORITY);
 			return thread;
 		}
@@ -107,8 +111,8 @@ public class Improc {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
 //		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {

@@ -306,10 +306,12 @@ public class SwtUtil {
 	 * <p>
 	 * The method is thread safe. It is INTENDED to be called from the runnable
 	 * as specified by {@link #openWaitDialog(String, Runnable, int)}.
-	 * @param status The status message
+	 * @param status The status message. If message = null the message will 
+	 * 		not be modified.
 	 * @param taskCompleted The progress bar value. 
 	 * 		Should be 0 <= taskCompleted <= maxProgressValue (as specified by
-	 *		{@link #openWaitDialog(String, Runnable, int)})
+	 *		{@link #openWaitDialog(String, Runnable, int)}).
+	 *		If the taskCompleted < 0 then it will not be set
 	 * @see #openWaitDialog(String, Runnable, int)
 	 */
 	public static void activeWaitDialogSetStatus(final String status, final int taskCompleted) {

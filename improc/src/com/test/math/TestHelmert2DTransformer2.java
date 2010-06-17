@@ -236,7 +236,7 @@ public class TestHelmert2DTransformer2 {
 //		learner.calculateTwo();
 		for (int iter = 0; iter < 50; iter++) {
 			System.out.println("******************* " + iter);
-			TransformLearnerResult res = learner.calculateOne();
+			TransformLearnerResult res = learner.calculateTwo();
 			System.out.println(res);
 			System.out.println(tr.toString());
 			dumpBad();

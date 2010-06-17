@@ -17,9 +17,9 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
-import com.slavi.math.matrix.BitMatrix;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.ui.SwtUtil;
 
 public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 
@@ -43,6 +43,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 	final boolean useImageMaxWeight;
 	int outputImageSizeX = 2000;
 	int outputImageSizeY;
+	AtomicInteger rowsProcessed;
 
 	public MyGeneratePanoramasSphere2(ExecutorService exec,
 			ArrayList<ArrayList<KeyPointPairList>> panos,
@@ -96,7 +97,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		minMax(dest[0], dest[1], image.min, image.max);
 		double x = MathUtil.fixAngle2PI(dest[0]) * si.sizeX / MathUtil.C2PI;
 		double y = dest[1] * si.sizeY / Math.PI;
-		si.setRGB((int) x, (int) y, color);
+		si.setRGB(outputImageSizeX - 1 - (int) x, (int) y, color);
 	}
 	
 	void calcExtents(String outputfile) throws InterruptedException, IOException {
@@ -314,21 +315,25 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 
 					int color = 0;
 					if (useImageMaxWeight) {
-						outImageColor.setRGB(oimgX, oimgY, curMaxColor);
-						outImageMask.setRGB(oimgX, oimgY, mcurMaxColor);
+						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, mcurMaxColor);
 					} else {
 						color = 
 							(fixColorValue(colorR, countR) << 16) |
 							(fixColorValue(colorG, countG) << 8) |
 							fixColorValue(colorB, countB);
-						outImageColor.setRGB(oimgX, oimgY, color);
+						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, color);
 						color = 
 							(fixColorValue(mcolorR, mcountR) << 16) |
 							(fixColorValue(mcolorG, mcountG) << 8) |
 							fixColorValue(mcolorB, mcountB);
-						outImageMask.setRGB(oimgX, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
 					}
-				}			
+				}
+				int processed = rowsProcessed.getAndIncrement();
+				if (processed % 10 == 0) {
+					SwtUtil.activeWaitDialogSetStatus(null, (100 * processed) / outputImageSizeY);
+				}				
 			}
 			return null;
 		}
@@ -340,16 +345,16 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			int color = oi.getNextColor();
 			for (int i = 0; i < image.imageSizeX; i++) {
 				transformCameraToWorld(i, 0, image, d);
-				oi.setRGB((int) d[0], (int) d[1], color);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
 				transformCameraToWorld(i, image.imageSizeY - 1, image, d);
-				oi.setRGB((int) d[0], (int) d[1], color);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
 			}
 			
 			for (int j = 0; j < image.imageSizeY; j++) {
 				transformCameraToWorld(0, j, image, d);
-				oi.setRGB((int) d[0], (int) d[1], color);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
 				transformCameraToWorld(image.imageSizeX - 1, j, image, d);
-				oi.setRGB((int) d[0], (int) d[1], color);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
 			}
 		}
 		
@@ -501,7 +506,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		for (ArrayList<KeyPointPairList> pano : panos) {
 			int panoId = panoCounter.incrementAndGet();
 			String outputFile = outputDir + "/pano" + panoId;
-
+			SwtUtil.activeWaitDialogSetStatus("Generating pano " + panoId + "/" + panos.size(), 0);
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
@@ -546,6 +551,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			
 			int startRow = 0;
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+			rowsProcessed = new AtomicInteger(0);
 			while (startRow < outputImageSizeY) {
 				int endRow = Math.min(startRow + dY - 1, outputImageSizeY - 1);
 				ParallelRender task = new ParallelRender(startRow, endRow);
