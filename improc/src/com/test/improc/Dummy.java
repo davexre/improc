@@ -1,6 +1,5 @@
 package com.test.improc;
 
-import com.slavi.improc.myadjust.sphere2.SpherePanoTransformer2;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;

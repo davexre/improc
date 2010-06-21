@@ -100,7 +100,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		int step = 20;
 		int bmSizeX = 3600;
 		int bmSizeY = 1800;
-		double dest[] = new double[2];
+		double dest[] = new double[3];
 		SafeImage si = new SafeImage(bmSizeX, bmSizeY);
 		
 		for (KeyPointList image : images) {

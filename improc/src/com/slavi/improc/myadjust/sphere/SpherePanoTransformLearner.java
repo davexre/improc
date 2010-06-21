@@ -6,6 +6,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYX;
 import com.slavi.math.SphericalCoordsLongLat;
@@ -13,20 +14,72 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
-public class SpherePanoTransformLearner {
+public class SpherePanoTransformLearner extends PanoTransformer {
 
-	ArrayList<KeyPointPairList> chain;
-	ArrayList<KeyPointList> images;
-	ArrayList<KeyPointPairList> ignoredPairLists;
-	KeyPointList origin;
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
 	protected int iteration = 0; 
 
-	public SpherePanoTransformLearner(ArrayList<KeyPointPairList> chain) {
+	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
+		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+	}
+	
+	public double getDiscrepancyThreshold() {
+		return discrepancyThreshold;
+	}
+
+	/**
+	 * Transforms from source image coordinate system into world coord.system.
+	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
+	 * @param dest		The transformed coordinates in radians. Longitude is 
+	 * 					returned in dest[0] and is in the range (-pi; pi] and Latitude
+	 * 					is returned in dest[1] in the range [-pi/2; pi/2].   
+	 */
+	public void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
+		sx -= srcImage.cameraOriginX;
+		sy -= srcImage.cameraOriginY;
+		// sx => longitude, sy => latitude
+		sy = Math.asin(sy / Math.sqrt(sx * sx + sy * sy + srcImage.scaleZ * srcImage.scaleZ));
+		sx = Math.atan2(sx, srcImage.scaleZ);
+		rotateForeward(sx, sy, srcImage.rx, srcImage.ry, srcImage.rz, dest);
+	}
+	
+	public static void rotateForeward(double sx, double sy, double IX, double IY, double IZ, double dest[]) {
+		double sinDX = Math.sin(sx - IX);
+		double cosDX = Math.cos(sx - IX);
+		double sinIY = Math.sin(IY);
+		double cosIY = Math.cos(IY);
+		double sinSY = Math.sin(sy);
+		double cosSY = Math.cos(sy);
+
+		dest[0] = IZ - Math.atan2(sinDX * cosSY, cosIY * sinSY - cosDX * sinIY * cosSY);
+//		dest[0] = IZ + Math.PI - Math.atan2(sinDX * cosSY, cosIY * sinSY - cosDX * sinIY * cosSY);
+		dest[1] = Math.asin(sinIY * sinSY + cosIY * cosSY * cosDX);
+	}
+
+	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
+		rotateBackward(rx, ry, srcImage.rx, srcImage.ry, srcImage.rz, dest);
+		// sx => longitude, sy => latitude
+		dest[1] = srcImage.cameraOriginY + srcImage.scaleZ * Math.tan(dest[1]) / Math.cos(dest[0]);
+		dest[0] = srcImage.cameraOriginX + srcImage.scaleZ * Math.tan(dest[0]);
+	}
+
+	public static void rotateBackward(double rx, double ry, double IX, double IY, double IZ, double dest[]) {
+		rx = IZ - rx;
+//		rx = IZ + Math.PI - rx;
+		
+		double sinIY = Math.sin(IY);
+		double cosIY = Math.cos(IY);
+		double sinRY = Math.sin(ry);
+		double cosRY = Math.cos(ry);
+		double sinRX = Math.sin(rx);
+		double cosRX = Math.cos(rx);
+		
+		dest[0] = IX + Math.atan2(sinRX * cosRY, cosIY * sinRY - cosRX * sinIY * cosRY);
+		dest[1] = Math.asin(sinIY * sinRY + cosIY * cosRY * cosRX);
 	}
 	
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
@@ -310,8 +363,8 @@ public class SpherePanoTransformLearner {
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				SpherePanoTransformer.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				SpherePanoTransformer.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {

@@ -1,6 +1,5 @@
 package com.slavi.improc.myadjust.xyz;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import com.slavi.improc.KeyPoint;
@@ -9,6 +8,7 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.MyPoint3D;
+import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.SphericalCoordsLongLat;
@@ -17,20 +17,101 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 
-public class MyPanoPairTransformLearner {
+public class MyPanoPairTransformLearner extends PanoTransformer {
 
-	ArrayList<KeyPointPairList> chain;
-	ArrayList<KeyPointList> images;
-	ArrayList<KeyPointPairList> ignoredPairLists;
-	KeyPointList origin;
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
 	protected int iteration = 0; 
 
-	public MyPanoPairTransformLearner(ArrayList<KeyPointPairList> chain) {
+	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
+		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+	}
+	
+	public double getDiscrepancyThreshold() {
+		return discrepancyThreshold;
+	}
+
+	/**
+	 * Transforms from source image coordinate system into world coord.system.
+	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
+	 * @param dest		The transformed coordinates in radians. Longitude is 
+	 * 					returned in dest.x and is in the range (-pi; pi] and Latitude
+	 * 					is returned in dest.y in the range [-pi/2; pi/2].    
+	 */
+	public void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
+		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
+		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
+		double sz = srcImage.scaleZ;
+		
+		double x = 
+			sx * srcImage.camera2real.getItem(0, 0) +
+			sy * srcImage.camera2real.getItem(1, 0) +
+			sz * srcImage.camera2real.getItem(2, 0);
+		double y = 
+			sx * srcImage.camera2real.getItem(0, 1) +
+			sy * srcImage.camera2real.getItem(1, 1) +
+			sz * srcImage.camera2real.getItem(2, 1);
+		double z = 
+			sx * srcImage.camera2real.getItem(0, 2) +
+			sy * srcImage.camera2real.getItem(1, 2) +
+			sz * srcImage.camera2real.getItem(2, 2);
+		
+		double d = Math.sqrt(x*x + z*z);
+		dest[0] = Math.atan2(x, z);
+		dest[1] = Math.atan2(y, d);
+	}
+
+	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
+		double d = Math.cos(ry);
+		double sx = d * Math.sin(rx);
+		double sy = Math.sin(ry);
+		double sz = d * Math.cos(rx);
+		
+		double x = 
+			sx * srcImage.camera2real.getItem(0, 0) +
+			sy * srcImage.camera2real.getItem(0, 1) +
+			sz * srcImage.camera2real.getItem(0, 2);
+		double y = 
+			sx * srcImage.camera2real.getItem(1, 0) +
+			sy * srcImage.camera2real.getItem(1, 1) +
+			sz * srcImage.camera2real.getItem(1, 2);
+		double z = 
+			sx * srcImage.camera2real.getItem(2, 0) +
+			sy * srcImage.camera2real.getItem(2, 1) +
+			sz * srcImage.camera2real.getItem(2, 2);
+		
+		if (z == 0) {
+			dest[0] = Double.NaN;
+			dest[1] = Double.NaN;
+			return;
+		}
+		x = srcImage.scaleZ * (x / z);
+		y = srcImage.scaleZ * (y / z);
+		
+		dest[0] = (x / srcImage.cameraScale) + srcImage.cameraOriginX;
+		dest[1] = (y / srcImage.cameraScale) + srcImage.cameraOriginY;
+	}
+	
+	public void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
+		double sx = (source.doubleX - srcImage.cameraOriginX) * srcImage.cameraScale;
+		double sy = (source.doubleY - srcImage.cameraOriginY) * srcImage.cameraScale;
+		double sz = srcImage.scaleZ;
+		
+		dest.x = 
+			sx * srcImage.camera2real.getItem(0, 0) +
+			sy * srcImage.camera2real.getItem(1, 0) +
+			sz * srcImage.camera2real.getItem(2, 0);
+		dest.y = 
+			sx * srcImage.camera2real.getItem(0, 1) +
+			sy * srcImage.camera2real.getItem(1, 1) +
+			sz * srcImage.camera2real.getItem(2, 1);
+		dest.z = 
+			sx * srcImage.camera2real.getItem(0, 2) +
+			sy * srcImage.camera2real.getItem(1, 2) +
+			sz * srcImage.camera2real.getItem(2, 2);
 	}
 	
 	void calculatePrims() {
@@ -167,8 +248,8 @@ public class MyPanoPairTransformLearner {
 				
 				coefs.make0();
 	
-				MyPanoPairTransformer.transform3D(source, pairList.source, PW1);
-				MyPanoPairTransformer.transform3D(dest, pairList.target, PW2);
+				transform3D(source, pairList.source, PW1);
+				transform3D(dest, pairList.target, PW2);
 				
 				P1.setItem(0, 0, source1.doubleX);
 				P1.setItem(0, 1, source1.doubleY);
@@ -371,8 +452,8 @@ public class MyPanoPairTransformLearner {
 	}
 	
 	protected void computeDiscrepancies(TransformLearnerResult result) {
-		Point2D.Double PW1 = new Point2D.Double();
-		Point2D.Double PW2 = new Point2D.Double();
+		double[] PW1 = new double[2];
+		double[] PW2 = new double[2];
 
 		result.discrepancyStatistics.start();
 		for (KeyPointPairList pairList : chain) {
@@ -380,10 +461,10 @@ public class MyPanoPairTransformLearner {
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				MyPanoPairTransformer.transform(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				MyPanoPairTransformer.transform(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 
-				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1.x, PW1.y, PW2.x, PW2.y) * MathUtil.rad2deg;
+				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);
@@ -424,7 +505,7 @@ public class MyPanoPairTransformLearner {
 			}
 		}
 		if (chainModified) {
-			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParamsXYZ.getImageChain(chain);
+			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
 			ignoredPairLists.addAll(chain);
 			chain = tmpChain;
 		}

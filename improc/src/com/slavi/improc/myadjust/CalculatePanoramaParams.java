@@ -134,7 +134,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		
 		public Void call() {
 			copyBadStatus(chain);
-			PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
 			panoTransformer.initialize(chain);
 			for (int i = 0; i < maxIterations; i++) {
 				TransformLearnerResult result = panoTransformer.calculateOne();

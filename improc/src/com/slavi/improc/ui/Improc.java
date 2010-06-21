@@ -15,11 +15,7 @@ import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.improc.myadjust.sphere2.CalculatePanoramaParamsSpherical2;
-import com.slavi.improc.myadjust.sphere2.MyGeneratePanoramasSphere2;
 import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
-import com.slavi.improc.myadjust.zyz.CalculatePanoramaParamsZYZ;
-import com.slavi.improc.myadjust.zyz.MyGeneratePanoramasZYZ;
 import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
@@ -75,39 +71,22 @@ public class Improc {
 				kppl.size() - 1);
 		kppl = null;
 
-		if (true) {
-			PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
-			System.out.println("---------- Calculating panorama parameters");
-			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-					new CalculatePanoramaParams(exec, panoTransformer, validkppl, keyPointFileRoot, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+		PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner();
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner();
+//		PanoTransformer panoTransformer = new MyPanoPairTransformLearner();
+//		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
+		
+		System.out.println("---------- Calculating panorama parameters");
+		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+				new CalculatePanoramaParams(exec, panoTransformer, validkppl, keyPointFileRoot, settings.outputDirStr,
+						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+		
+		System.out.println("---------- Generating panorama images");
+		SwtUtil.openWaitDialog(parent, "Generating panorama images", 
+				new GeneratePanoramas(exec, panoTransformer, panos, settings.outputDirStr,
+						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
 			
-			System.out.println("---------- Generating panorama images");
-			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-					new GeneratePanoramas(exec, panoTransformer, panos, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
-			
-		} else if (true) {
-			System.out.println("---------- Calculating panorama parameters");
-			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-					new CalculatePanoramaParamsSpherical2(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-			
-			System.out.println("---------- Generating panorama images");
-			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-					new MyGeneratePanoramasSphere2(exec, panos, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
-		} else {	
-			System.out.println("---------- Calculating panorama parameters");
-			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-					new CalculatePanoramaParamsZYZ(exec, validkppl, keyPointFileRoot, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-			
-			System.out.println("---------- Generating panorama images");
-			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-					new MyGeneratePanoramasZYZ(exec, panos, settings.outputDirStr,
-							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-		}
 		Marker.release();
 		System.out.println("Done.");
 	}
