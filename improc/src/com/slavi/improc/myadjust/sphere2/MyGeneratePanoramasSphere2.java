@@ -16,7 +16,9 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.math.MathUtil;
+import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
@@ -75,15 +77,15 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
-		SpherePanoTransformer2.rotateBackward(x, y, wRot[0], wRot[1], wRot[2], dest);
-		double r = SpherePanoTransformer2.transformBackward(dest[0], dest[1], image, dest);
+		SphericalCoordsLongZen.rotateBackward(x, y, wRot[0], wRot[1], wRot[2], dest);
+		double r = SphereNorm2.transformBackward(dest[0], dest[1], image, dest);
 		if (r < 0)
 			throw new RuntimeException("r < 0");
 	}
 	
 	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
-		SpherePanoTransformer2.transformForeward(x, y, image, dest);
-		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+		SphereNorm2.transformForeward(x, y, image, dest);
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
 	}
@@ -91,8 +93,8 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 	void pinPoint(int imgX, int imgY, int color, KeyPointList image, SafeImage si, double dest[]) throws InterruptedException {
 		if (Thread.currentThread().isInterrupted())
 			throw new InterruptedException();
-		SpherePanoTransformer2.transformForeward(imgX, imgY, image, dest);
-		SpherePanoTransformer2.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+		SphereNorm2.transformForeward(imgX, imgY, image, dest);
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 		// min, max are in radians x (-pi..pi] y [0..pi]
 		minMax(dest[0], dest[1], image.min, image.max);
 		double x = MathUtil.fixAngle2PI(dest[0]) * si.sizeX / MathUtil.C2PI;
@@ -496,7 +498,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 		images = new ArrayList<KeyPointList>();
 		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
 			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
-			SpherePanoTransformLearner2.buildImagesList(pano, images);
+			CalculatePanoramaParams.buildImagesList(pano, images);
 			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
 			for (KeyPointList image : images) {
 				System.out.println(image.imageFileStamp.getFile().getName());
@@ -510,7 +512,7 @@ public class MyGeneratePanoramasSphere2 implements Callable<Void> {
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
-			SpherePanoTransformLearner2.buildImagesList(pairLists, images);
+			CalculatePanoramaParams.buildImagesList(pairLists, images);
 			calcExtents(outputFile + " mask extent.png");
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));

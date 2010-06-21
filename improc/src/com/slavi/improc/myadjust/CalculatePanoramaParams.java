@@ -1,19 +1,38 @@
-package com.slavi.improc.myadjust.sphere2;
+package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
-public class CalculatePanoramaParamsSpherical2 implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
+public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
 
+	public static void buildImagesList(ArrayList<KeyPointPairList> chain, ArrayList<KeyPointList> images) {
+		images.clear();
+		for (KeyPointPairList pairList : chain) {
+			if (!images.contains(pairList.source))
+				images.add(pairList.source);
+			if (!images.contains(pairList.target))
+				images.add(pairList.target);
+		}
+		Collections.sort(images, new Comparator<KeyPointList>() {
+			public int compare(KeyPointList o1, KeyPointList o2) {
+				return o1.imageFileStamp.getFile().getName().compareTo(o2.imageFileStamp.getFile().getName());
+			}
+		});
+	}
+	
 	ExecutorService exec;
+	PanoTransformer panoTransformer;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
 	ArrayList<KeyPointPairList> kppl;
 	final String outputDir;
@@ -23,7 +42,8 @@ public class CalculatePanoramaParamsSpherical2 implements Callable<ArrayList<Arr
 	
 	ArrayList<ArrayList<KeyPointPairList>> panos = new ArrayList<ArrayList<KeyPointPairList>>();
 	
-	public CalculatePanoramaParamsSpherical2(ExecutorService exec,
+	public CalculatePanoramaParams(ExecutorService exec,
+			PanoTransformer panoTransformer,
 			ArrayList<KeyPointPairList> kppl,
 			AbsoluteToRelativePathMaker keyPointPairFileRoot,
 			String outputDir,
@@ -31,6 +51,7 @@ public class CalculatePanoramaParamsSpherical2 implements Callable<ArrayList<Arr
 			boolean useColorMasks,
 			boolean useImageMaxWeight) {
 		this.exec = exec;
+		this.panoTransformer = panoTransformer;
 		this.kppl = kppl;
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
 		this.outputDir = outputDir;
@@ -113,26 +134,26 @@ public class CalculatePanoramaParamsSpherical2 implements Callable<ArrayList<Arr
 		
 		public Void call() {
 			copyBadStatus(chain);
-			SpherePanoTransformLearner2 learner = new SpherePanoTransformLearner2();
-			learner.initialize(chain);
+			PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
+			panoTransformer.initialize(chain);
 			for (int i = 0; i < maxIterations; i++) {
-				TransformLearnerResult result = learner.calculateOne();
+				TransformLearnerResult result = panoTransformer.calculateOne();
 				System.out.println(result);
 				if (result.isAdjustFailed())
 					break;
-				if (/*result.isAdjusted() ||*/ (result.discrepancyStatistics.getMaxX() < learner.discrepancyThreshold)) {
+				if (/*result.isAdjusted() || */ (result.discrepancyStatistics.getMaxX() < panoTransformer.getDiscrepancyThreshold())) {
 					synchronized (panos) {
-						panos.add(learner.chain);
+						panos.add(panoTransformer.chain);
 					}
 					break;
 				}
 			}
-			learner.images.add(learner.origin);
-			removeProcessedFromChain(learner.ignoredPairLists, learner.images);
+			panoTransformer.images.add(panoTransformer.origin);
+			removeProcessedFromChain(panoTransformer.ignoredPairLists, panoTransformer.images);
 			synchronized(kppl) {
-				kppl.addAll(learner.ignoredPairLists);
+				kppl.addAll(panoTransformer.ignoredPairLists);
 			}
-			return null;
+			return null; 
 		}
 	}
 	

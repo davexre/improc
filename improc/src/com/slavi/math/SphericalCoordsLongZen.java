@@ -53,4 +53,44 @@ public class SphericalCoordsLongZen {
 		dest[2] = Math.sqrt(x*x + y*y + z*z);
 		dest[1] = dest[2] == 0.0 ? 0.0 : Math.acos(z / dest[2]);
 	}
+	
+	/**
+	 * sx -> longitude
+	 * sy -> zenith angle (90 - latitude) 
+	 */
+	public static void rotateForeward(double sx, double sy, double IZ1, double IY, double IZ2, double dest[]) {
+		sx -= IZ1;
+		double sinDX = Math.sin(sx);
+		double cosDX = Math.cos(sx);
+		double sinIY = Math.sin(IY);
+		double cosIY = Math.cos(IY);
+		double sinSY = Math.sin(sy);
+		double cosSY = Math.cos(sy);
+
+		dest[0] = MathUtil.fixAngle2PI(Math.atan2(sinDX * sinSY, cosDX * cosIY * sinSY - sinIY * cosSY) - IZ2);
+		double d = cosSY * cosIY + sinSY * sinIY * cosDX;
+		if (d > 1.0)
+			d = 1.0; // this might happen (ex. sx == IZ1 == 12 * MathUtil.deg2rad)
+		dest[1] = Math.acos(d);
+	}
+
+	/**
+	 * rx -> longitude
+	 * ry -> zenith angle (90 - latitude) 
+	 */
+	public static void rotateBackward(double rx, double ry, double IZ1, double IY, double IZ2, double dest[]) {
+		rx += IZ2;
+		double sinIY = Math.sin(IY);
+		double cosIY = Math.cos(IY);
+		double sinRY = Math.sin(ry);
+		double cosRY = Math.cos(ry);
+		double sinRX = Math.sin(rx);
+		double cosRX = Math.cos(rx);
+		
+		dest[0] = MathUtil.fixAngle2PI(Math.atan2(sinRX * sinRY, sinIY * cosRY + cosRX * cosIY * sinRY) + IZ1);
+		double d = cosRY * cosIY - sinRY * sinIY * cosRX;
+		if (d > 1.0)
+			d = 1.0; // this might happen (ex. sx == IZ1 == 12 * MathUtil.deg2rad)
+		dest[1] = Math.acos(d);
+	}
 }

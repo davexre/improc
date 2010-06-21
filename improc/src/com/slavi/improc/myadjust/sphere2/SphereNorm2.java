@@ -1,11 +1,44 @@
 package com.slavi.improc.myadjust.sphere2;
 
 import com.slavi.improc.KeyPoint;
+import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.math.MathUtil;
 import com.slavi.math.SphericalCoordsLongZen;
 
 public class SphereNorm2 {
+
+	/**
+	 * Transforms from source image coordinate system into world coord.system.
+	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
+	 * @param dest		The transformed coordinates in radians. Longitude is 
+	 * 					returned in dest[0] and is in the range (-pi; pi] and Latitude
+	 * 					is returned in dest[1] in the range [-pi/2; pi/2].   
+	 */
+	public static void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
+		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
+		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
+		double f = srcImage.scaleZ;
+		// x => longitude, y => zenith
+		double x = Math.atan2(sy, sx);
+		double r = Math.sqrt(sx * sx + sy * sy + f * f);
+		double y = Math.acos(f / r);
+		SphericalCoordsLongZen.rotateForeward(x, y, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
+	}
+
+	/**
+	 * dest[0] = x in image coordinates
+	 * dest[1] = y in image coordinates
+	 * Returns the radius if r>0 coordinates are ok, if r<0 coordinates the on the opposite side of the sphere.  
+	 */
+	public static double transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
+		SphericalCoordsLongZen.rotateBackward(rx, ry, srcImage.sphereRZ1, srcImage.sphereRY, srcImage.sphereRZ2, dest);
+		// x => longitude, y => zenith
+		double r = srcImage.scaleZ * Math.tan(dest[1]);
+		dest[1] = srcImage.cameraOriginY + r * Math.sin(dest[0]) / srcImage.cameraScale;
+		dest[0] = srcImage.cameraOriginX + r * Math.cos(dest[0]) / srcImage.cameraScale;
+		return r;
+	}
 
 	PointDerivatives p1 = new PointDerivatives();
 	PointDerivatives p2 = new PointDerivatives();
@@ -27,8 +60,8 @@ public class SphereNorm2 {
 	public void setKeyPointPair(KeyPointPair kpp) {
 		double source[] = new double[2];
 		double target[] = new double[2];
-		SpherePanoTransformer2.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, source);
-		SpherePanoTransformer2.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, target);
+		transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, source);
+		transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, target);
 		dist0 = SphericalCoordsLongZen.getSphericalDistance(source[0], source[1], target[0], target[1]);
 
 		p1.setKeyPoint(kpp.sourceSP);

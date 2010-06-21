@@ -1,7 +1,8 @@
-package com.slavi.improc.myadjust.zyz;
+package com.slavi.improc.myadjust;
 
 import java.awt.geom.Point2D;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,14 +16,15 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
-import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.ui.SwtUtil;
 
-public class MyGeneratePanoramasZYZ implements Callable<Void> {
+public class GeneratePanoramas implements Callable<Void> {
 
-	ExecutorService exec;	
+	ExecutorService exec;
+	PanoTransformer panoTransformer;
 	ArrayList<ArrayList<KeyPointPairList>> panos;
 	
 	ArrayList<KeyPointList> images;
@@ -40,16 +42,19 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 	final boolean pinPoints;
 	final boolean useColorMasks;
 	final boolean useImageMaxWeight;
-	int outputImageSizeX = 5000;
+	int outputImageSizeX = 2000;
 	int outputImageSizeY;
+	AtomicInteger rowsProcessed;
 
-	public MyGeneratePanoramasZYZ(ExecutorService exec,
+	public GeneratePanoramas(ExecutorService exec,
+			PanoTransformer panoTransformer,
 			ArrayList<ArrayList<KeyPointPairList>> panos,
 			String outputDir,
 			boolean pinPoints,
 			boolean useColorMasks,
 			boolean useImageMaxWeight) {
 		this.exec = exec;
+		this.panoTransformer = panoTransformer;
 		this.panos = panos;
 		this.outputDir = outputDir;
 		this.pinPoints = pinPoints;
@@ -57,68 +62,93 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 		this.useImageMaxWeight = useImageMaxWeight;
 	}
 	
-	static void calcExt(double p[], Point2D.Double min, Point2D.Double max) {
-		if (p[0] < min.x) 
-			min.x = p[0];
-		if (p[1] < min.y) 
-			min.y = p[1];
-		if (p[0] > max.x) 
-			max.x = p[0];
-		if (p[1] > max.y) 
-			max.y = p[1];
+	static void minMax(double rx, double ry, Point2D.Double min, Point2D.Double max) {
+		if (rx < min.x) 
+			min.x = rx;
+		if (ry < min.y) 
+			min.y = ry;
+		if (rx > max.x) 
+			max.x = rx;
+		if (ry > max.y) 
+			max.y = ry;
 	}
-	
-	void calcExtents() {
-		minAngle.x = Double.POSITIVE_INFINITY;
-		minAngle.y = Double.POSITIVE_INFINITY;
-		sizeAngle.x = Double.NEGATIVE_INFINITY;
-		sizeAngle.y = Double.NEGATIVE_INFINITY;
-		
-		double tmp[] = new double[3];
-		for (KeyPointList i : images) {
-			MyPanoPairTransformerZYZ.transformForeward(0, 0, i, tmp);
-			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYZ.transformForeward(0, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYZ.transformForeward(i.imageSizeX - 1, 0, i, tmp);
-			calcExt(tmp, minAngle, sizeAngle);
-			MyPanoPairTransformerZYZ.transformForeward(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, minAngle, sizeAngle);
-		}
-//		minAngle.x += Math.PI / 4.0;
-//		sizeAngle.x += Math.PI / 2.0;
-		
-		sizeAngle.x -= minAngle.x;
-		sizeAngle.y -= minAngle.y;
-		outputImageSizeY = (int)(outputImageSizeX * (sizeAngle.y / sizeAngle.x));
-		
-		for (KeyPointList i : images) {
-			i.min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-			i.max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-			transformCameraToWorld(0, 0, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(0, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(i.imageSizeX - 1, 0, i, tmp);
-			calcExt(tmp, i.min, i.max);
-			transformCameraToWorld(i.imageSizeX - 1, i.imageSizeY - 1, i, tmp);
-			calcExt(tmp, i.min, i.max);
-		}
-	}
-	
-	private void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
+	void transformWorldToCamera(double x, double y, KeyPointList image, double dest[]) {
 		x = sizeAngle.x * (x / outputImageSizeX) + minAngle.x;
 		y = sizeAngle.y * (y / outputImageSizeY) + minAngle.y;
-		MyPanoPairTransformerZYZ.transformBackward(x, y, image, dest);
+		panoTransformer.transformBackward(x, y, image, dest);
 	}
 	
-	private void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
-		MyPanoPairTransformerZYZ.transformForeward(x, y, image, dest);
+	void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
+		panoTransformer.transformForeward(x, y, image, dest);
 		dest[0] = outputImageSizeX * ((dest[0] - minAngle.x) / sizeAngle.x);
 		dest[1] = outputImageSizeY * ((dest[1] - minAngle.y) / sizeAngle.y);
 	}
 
+	void pinPoint(int imgX, int imgY, int color, KeyPointList image, SafeImage si, double dest[]) throws InterruptedException {
+		if (Thread.currentThread().isInterrupted())
+			throw new InterruptedException();
+		panoTransformer.transformForeward(imgX, imgY, image, dest);
+		// min, max are in radians x (-pi..pi] y [0..pi]
+		minMax(dest[0], dest[1], image.min, image.max);
+		double x = MathUtil.fixAngle2PI(dest[0]) * si.sizeX / MathUtil.C2PI;
+		double y = dest[1] * si.sizeY / Math.PI;
+		si.setRGB(outputImageSizeX - 1 - (int) x, (int) y, color);
+	}
+	
+	void calcExtents(String outputfile) throws InterruptedException, IOException {
+		int step = 20;
+		int bmSizeX = 3600;
+		int bmSizeY = 1800;
+		double dest[] = new double[2];
+		SafeImage si = new SafeImage(bmSizeX, bmSizeY);
+		
+		for (KeyPointList image : images) {
+			image.min = new Point2D.Double(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+			image.max = new Point2D.Double(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+			int color = si.getNextColor();
+			for (int i = 0; i < image.imageSizeX; i+=step) {
+				for (int j = 0; j < image.imageSizeY; j+=step) {
+					pinPoint(i, j, color, image, si, dest);
+				}
+				pinPoint(i, image.imageSizeY - 1, color, image, si, dest);
+			}
+			for (int j = 0; j < image.imageSizeY; j+=step) {
+				pinPoint(image.imageSizeX - 1, j, color, image, si, dest);
+			}
+			pinPoint(image.imageSizeX - 1, image.imageSizeY - 1, color, image, si, dest);
+		}
+
+		si.save(outputfile);
+		
+		minAngle.x = Double.POSITIVE_INFINITY;
+		minAngle.y = Double.POSITIVE_INFINITY;
+		sizeAngle.x = Double.NEGATIVE_INFINITY;
+		sizeAngle.y = Double.NEGATIVE_INFINITY;
+		for (KeyPointList image : images) {
+			minMax(image.min.x, image.min.y, minAngle, sizeAngle);
+			minMax(image.max.x, image.max.y, minAngle, sizeAngle);
+		}
+		sizeAngle.x -= minAngle.x;
+		sizeAngle.y -= minAngle.y;
+		
+		outputImageSizeY = (int)(outputImageSizeX * (sizeAngle.y / sizeAngle.x));
+		
+		for (KeyPointList image : images) {
+			System.out.println(image.imageFileStamp.getFile().getName() 
+				+ "\tminX=" + MathUtil.rad2degStr(image.min.x)
+				+ "\tminY=" + MathUtil.rad2degStr(image.min.y)
+				+ "\tmaxX=" + MathUtil.rad2degStr(image.max.x)
+				+ "\tmaxY=" + MathUtil.rad2degStr(image.max.y)
+				);
+			
+			image.min.x = outputImageSizeX * ((image.min.x - minAngle.x) / sizeAngle.x);
+			image.min.y = outputImageSizeY * ((image.min.y - minAngle.y) / sizeAngle.y);
+			image.max.x = outputImageSizeX * ((image.max.x - minAngle.x) / sizeAngle.x);
+			image.max.y = outputImageSizeY * ((image.max.y - minAngle.y) / sizeAngle.y);
+		}
+	}
+	
 	private void drawWorldMesh(SafeImage img) {
 		int cols[] = {
 			// 0		15			30		45			60		75
@@ -131,7 +161,6 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 			0xffff00, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff
 		};
 		int numDivisionsX = cols.length;
-//		int numDivisionsY = 8;
 		// draw meridians
 		for (int i = numDivisionsX - 1; i >= 0; i--) {
 			int colorX = cols[i]; // i == 0 ? 0xff0000 : 0xffffff;
@@ -281,28 +310,49 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 
 					int color = 0;
 					if (useImageMaxWeight) {
-						outImageColor.setRGB(oimgX, oimgY, curMaxColor);
-						outImageMask.setRGB(oimgX, oimgY, mcurMaxColor);
+						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, mcurMaxColor);
 					} else {
 						color = 
 							(fixColorValue(colorR, countR) << 16) |
 							(fixColorValue(colorG, countG) << 8) |
 							fixColorValue(colorB, countB);
-						outImageColor.setRGB(oimgX, oimgY, color);
+						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, color);
 						color = 
 							(fixColorValue(mcolorR, mcountR) << 16) |
 							(fixColorValue(mcolorG, mcountG) << 8) |
 							fixColorValue(mcolorB, mcountB);
-						outImageMask.setRGB(oimgX, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
 					}
-				}			
+				}
+				int processed = rowsProcessed.getAndIncrement();
+				if (processed % 10 == 0) {
+					SwtUtil.activeWaitDialogSetStatus(null, (100 * processed) / outputImageSizeY);
+				}				
 			}
 			return null;
 		}
 	}
 
-	private void pinPoints(SafeImage oi) {
+	private void pinPoints(SafeImage oi) throws InterruptedException {
 		double d[] = new double[3];
+		for (KeyPointList image : images) {
+			int color = oi.getNextColor();
+			for (int i = 0; i < image.imageSizeX; i++) {
+				transformCameraToWorld(i, 0, image, d);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				transformCameraToWorld(i, image.imageSizeY - 1, image, d);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+			}
+			
+			for (int j = 0; j < image.imageSizeY; j++) {
+				transformCameraToWorld(0, j, image, d);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				transformCameraToWorld(image.imageSizeX - 1, j, image, d);
+				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+			}
+		}
+		
 		for (KeyPointPairList pairList : pairLists) {
 			int colorCross = images.indexOf(pairList.source);
 			int colorX = images.indexOf(pairList.target);
@@ -450,16 +500,33 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 
 		for (ArrayList<KeyPointPairList> pano : panos) {
 			int panoId = panoCounter.incrementAndGet();
+			String outputFile = outputDir + "/pano" + panoId;
+			SwtUtil.activeWaitDialogSetStatus("Generating pano " + panoId + "/" + panos.size(), 0);
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
 			CalculatePanoramaParams.buildImagesList(pairLists, images);
-			calcExtents();
+			calcExtents(outputFile + " mask extent.png");
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));
 			System.out.println("SIZE angle X,Y: " + MathUtil.rad2degStr(sizeAngle.x) + "\t" + MathUtil.rad2degStr(sizeAngle.y));
 			System.out.println("Size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 
+			for (KeyPointList image : images) {
+//				System.out.println(image.imageFileStamp.getFile().getName() 
+//						+ "\tminX=" + MathUtil.rad2degStr(image.min.x)
+//						+ "\tminY=" + MathUtil.rad2degStr(image.min.y)
+//						+ "\tmaxX=" + MathUtil.rad2degStr(image.max.x)
+//						+ "\tmaxY=" + MathUtil.rad2degStr(image.max.y)
+//						);
+				System.out.println(image.imageFileStamp.getFile().getName() 
+						+ "\tminX=" + (int)(image.min.x)
+						+ "\tminY=" + (int)(image.min.y)
+						+ "\tmaxX=" + (int)(image.max.x)
+						+ "\tmaxY=" + (int)(image.max.y)
+						);
+			}
+			
 			outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
 			imageData = new HashMap<KeyPointList, SafeImage>();
@@ -479,6 +546,7 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 			
 			int startRow = 0;
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+			rowsProcessed = new AtomicInteger(0);
 			while (startRow < outputImageSizeY) {
 				int endRow = Math.min(startRow + dY - 1, outputImageSizeY - 1);
 				ParallelRender task = new ParallelRender(startRow, endRow);
@@ -487,11 +555,10 @@ public class MyGeneratePanoramasZYZ implements Callable<Void> {
 			}
 			taskSet.addFinished();
 			taskSet.get();
-			pinPoints(outImageMask);
-			drawWorldMesh(outImageMask);
-//			drawWorldMesh(outImageColor);
 			
-			String outputFile = outputDir + "/pano" + panoId;
+			pinPoints(outImageMask);
+//			drawWorldMesh(outImageMask);
+			
 			outImageColor.save(outputFile + " color.png");
 			outImageMask.save(outputFile + " mask.png");
 			

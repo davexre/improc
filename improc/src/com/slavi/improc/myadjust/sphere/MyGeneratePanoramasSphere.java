@@ -15,6 +15,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
@@ -463,7 +464,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 		images = new ArrayList<KeyPointList>();
 		for (int panoIndex = 0; panoIndex < panos.size(); panoIndex++) {
 			ArrayList<KeyPointPairList> pano = panos.get(panoIndex);
-			SpherePanoTransformLearner.buildImagesList(pano, images);
+			CalculatePanoramaParams.buildImagesList(pano, images);
 			System.out.println("Panorama " + panoIndex + " contains " + images.size() + " images:");
 			for (KeyPointList image : images) {
 				System.out.println(image.imageFileStamp.getFile().getName());
@@ -475,7 +476,7 @@ public class MyGeneratePanoramasSphere implements Callable<Void> {
 			Marker.mark("Generate panorama " + panoId);
 			images.clear();
 			pairLists = pano;
-			SpherePanoTransformLearner.buildImagesList(pairLists, images);
+			CalculatePanoramaParams.buildImagesList(pairLists, images);
 			calcExtents();
 
 			System.out.println("MIN Angle X,Y:  " + MathUtil.rad2degStr(minAngle.x) + "\t" + MathUtil.rad2degStr(minAngle.y));

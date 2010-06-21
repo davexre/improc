@@ -1,13 +1,11 @@
 package com.slavi.improc.myadjust.sphere;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.xyz.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYX;
 import com.slavi.math.SphericalCoordsLongLat;
@@ -31,21 +29,6 @@ public class SpherePanoTransformLearner {
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
 	}
 	
-	public static void buildImagesList(ArrayList<KeyPointPairList> chain, ArrayList<KeyPointList> images) {
-		images.clear();
-		for (KeyPointPairList pairList : chain) {
-			if (!images.contains(pairList.source))
-				images.add(pairList.source);
-			if (!images.contains(pairList.target))
-				images.add(pairList.target);
-		}
-		Collections.sort(images, new Comparator<KeyPointList>() {
-			public int compare(KeyPointList o1, KeyPointList o2) {
-				return o1.imageFileStamp.getFile().getName().compareTo(o2.imageFileStamp.getFile().getName());
-			}
-		});
-	}
-
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
 		origin.rx = 0.0;
 		origin.ry = 0 * MathUtil.deg2rad;
@@ -387,7 +370,7 @@ public class SpherePanoTransformLearner {
 		
 		if (chainModified) {
 			ArrayList<KeyPointList> tmp_images = new ArrayList<KeyPointList>();
-			buildImagesList(chain, tmp_images);
+			CalculatePanoramaParams.buildImagesList(chain, tmp_images);
 			if (tmp_images.size() != images.size() + 1) {
 				images.clear();
 				images.addAll(tmp_images);

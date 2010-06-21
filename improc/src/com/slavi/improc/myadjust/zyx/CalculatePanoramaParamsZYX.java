@@ -142,7 +142,7 @@ public class CalculatePanoramaParamsZYX implements Callable<ArrayList<ArrayList<
 				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
 				ignoredPairLists.addAll(chain);
 				chain = tmp_chain;
-				MyPanoPairTransformLearner.buildImagesList(chain, images);
+				CalculatePanoramaParams.buildImagesList(chain, images);
 //				copyBadStatus();
 				int iter = 0;
 				if (images.size() > 0) {

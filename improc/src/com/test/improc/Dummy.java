@@ -29,7 +29,7 @@ public class Dummy {
 		dest1[0] = 190 * MathUtil.deg2rad;
 		dest1[1] = -122 * MathUtil.deg2rad;
 
-		SpherePanoTransformer2.rotateForeward(dest1[0], dest1[1], 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, dest2);
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, dest2);
 		dump2(dest1);
 		dump2(dest2);
 	}
@@ -104,7 +104,7 @@ public class Dummy {
 				30 * MathUtil.deg2rad
 		};
 		double tmp[] = new double[2];
-		SpherePanoTransformer2.rotateForeward(0, 0*MathUtil.deg2rad, angles[0], angles[1], angles[2], tmp);
+		SphericalCoordsLongZen.rotateForeward(0, 0*MathUtil.deg2rad, angles[0], angles[1], angles[2], tmp);
 		TestUtils.dumpAngles("", tmp);
 		
 		Matrix m = RotationZYZ.instance.makeAngles(angles);

@@ -2,13 +2,12 @@ package com.slavi.improc.myadjust.xyz;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.MyPoint3D;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
@@ -34,21 +33,6 @@ public class MyPanoPairTransformLearner {
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
 	}
 	
-	public static void buildImagesList(ArrayList<KeyPointPairList> chain, ArrayList<KeyPointList> images) {
-		images.clear();
-		for (KeyPointPairList pairList : chain) {
-			if (!images.contains(pairList.source))
-				images.add(pairList.source);
-			if (!images.contains(pairList.target))
-				images.add(pairList.target);
-		}
-		Collections.sort(images, new Comparator<KeyPointList>() {
-			public int compare(KeyPointList o1, KeyPointList o2) {
-				return o1.imageFileStamp.getFile().getName().compareTo(o2.imageFileStamp.getFile().getName());
-			}
-		});
-	}
-
 	void calculatePrims() {
 		origin.rx = 0.0;
 		origin.ry = 0.0;
@@ -440,7 +424,7 @@ public class MyPanoPairTransformLearner {
 			}
 		}
 		if (chainModified) {
-			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
+			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParamsXYZ.getImageChain(chain);
 			ignoredPairLists.addAll(chain);
 			chain = tmpChain;
 		}
@@ -457,7 +441,7 @@ public class MyPanoPairTransformLearner {
 		
 		if (chainModified) {
 			ArrayList<KeyPointList> tmp_images = new ArrayList<KeyPointList>();
-			buildImagesList(chain, tmp_images);
+			CalculatePanoramaParams.buildImagesList(chain, tmp_images);
 			if (tmp_images.size() != images.size() + 1) {
 				images.clear();
 				images.addAll(tmp_images);

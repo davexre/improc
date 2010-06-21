@@ -11,7 +11,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
-public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
+public class CalculatePanoramaParamsXYZ implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
 
 	ExecutorService exec;
 	AbsoluteToRelativePathMaker keyPointPairFileRoot;
@@ -23,7 +23,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	
 	ArrayList<ArrayList<KeyPointPairList>> panos = new ArrayList<ArrayList<KeyPointPairList>>();
 	
-	public CalculatePanoramaParams(ExecutorService exec,
+	public CalculatePanoramaParamsXYZ(ExecutorService exec,
 			ArrayList<KeyPointPairList> kppl,
 			AbsoluteToRelativePathMaker keyPointPairFileRoot,
 			String outputDir,
@@ -142,7 +142,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				ArrayList<KeyPointPairList> tmp_chain = getImageChain(chain);
 				ignoredPairLists.addAll(chain);
 				chain = tmp_chain;
-				MyPanoPairTransformLearner.buildImagesList(chain, images);
+				CalculatePanoramaParams.buildImagesList(chain, images);
 //				copyBadStatus();
 				int iter = 0;
 				if (images.size() > 0) {

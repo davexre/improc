@@ -1,13 +1,12 @@
 package com.slavi.improc.myadjust.sphere2;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.xyz.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.CalculatePanoramaParams;
+import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
@@ -15,37 +14,37 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
-public class SpherePanoTransformLearner2 {
+public class SpherePanoTransformLearner2 extends PanoTransformer {
 
 	static boolean adjustForScale = true;
 	
-	ArrayList<KeyPointPairList> chain;
-	ArrayList<KeyPointList> images;
-	ArrayList<KeyPointPairList> ignoredPairLists;
-	KeyPointList origin;
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
 	protected int iteration = 0; 
 
-	public SpherePanoTransformLearner2(ArrayList<KeyPointPairList> chain) {
+	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
+		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
 	}
 	
-	public static void buildImagesList(ArrayList<KeyPointPairList> chain, ArrayList<KeyPointList> images) {
-		images.clear();
-		for (KeyPointPairList pairList : chain) {
-			if (!images.contains(pairList.source))
-				images.add(pairList.source);
-			if (!images.contains(pairList.target))
-				images.add(pairList.target);
-		}
-		Collections.sort(images, new Comparator<KeyPointList>() {
-			public int compare(KeyPointList o1, KeyPointList o2) {
-				return o1.imageFileStamp.getFile().getName().compareTo(o2.imageFileStamp.getFile().getName());
-			}
-		});
+	public double getDiscrepancyThreshold() {
+		return discrepancyThreshold;
+	}
+	
+	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
+	
+	public void transformForeward(double sx, double sy, KeyPointList image, double dest[]) {
+		SphereNorm2.transformForeward(sx, sy, image, dest);
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+	}
+	
+	public void transformBackward(double rx, double ry, KeyPointList image, double dest[]) {
+		SphericalCoordsLongZen.rotateBackward(rx, ry, wRot[0], wRot[1], wRot[2], dest);
+		double r = SphereNorm2.transformBackward(dest[0], dest[1], image, dest);
+		if (r < 0)
+			throw new RuntimeException("r < 0");
 	}
 
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
@@ -338,8 +337,8 @@ public class SpherePanoTransformLearner2 {
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
+				SphereNorm2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
+				SphereNorm2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
@@ -393,7 +392,6 @@ public class SpherePanoTransformLearner2 {
 	
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
-		discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
 
 		boolean chainModified = removeBadKeyPointPairLists();
 		if (iteration == 0) 
@@ -401,7 +399,7 @@ public class SpherePanoTransformLearner2 {
 		
 		if (chainModified) {
 			ArrayList<KeyPointList> tmp_images = new ArrayList<KeyPointList>();
-			buildImagesList(chain, tmp_images);
+			CalculatePanoramaParams.buildImagesList(chain, tmp_images);
 			if (tmp_images.size() != images.size() + 1) {
 				images.clear();
 				images.addAll(tmp_images);
