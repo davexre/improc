@@ -17,6 +17,10 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 	public double d; // d = translate y
 	
 	public Helmert2DTransformer() {
+		a = 1.0;
+		b = 0.0;
+		c = 0.0;
+		d = 0.0;
 	}
 	
 	public int getInputSize() {

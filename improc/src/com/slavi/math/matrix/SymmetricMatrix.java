@@ -98,7 +98,7 @@ public class SymmetricMatrix {
 		if (aSizeM < 0) {
 			throw new IllegalArgumentException("Invalid matrix size");
 		}
-		if (aSizeM == sizeM) {
+		if ((aSizeM == sizeM) && (m != null)) {
 			return;
 		}
 		sizeM = aSizeM;

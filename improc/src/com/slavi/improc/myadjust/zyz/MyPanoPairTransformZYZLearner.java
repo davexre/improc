@@ -29,6 +29,13 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
 		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		for (KeyPointPairList pairList : chain) {
+			double f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
+			double r = Math.sqrt(pairList.translateX * pairList.translateX + pairList.translateY * pairList.translateY);
+			pairList.sphereRZ1 = Math.atan2(pairList.translateY, pairList.translateX);
+			pairList.sphereRY = -Math.atan2(r, f);
+			pairList.sphereRZ2 = pairList.angle - pairList.sphereRZ1;
+		}
 	}
 	
 	public double getDiscrepancyThreshold() {

@@ -32,7 +32,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		tr.getParams(params);
 		pairList.scale = params[0];
 		if ((int)(params[0] * 1000) == 0)
-			System.out.println("ERROR");
+			throw new Error("ERROR");
 		double angle = params[1];
 
 		double f = pairList.scale * pairList.source.scaleZ;
@@ -72,8 +72,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		TransformLearnerResult res = null;
 		for (int i = 0; i < 100; i++) {
 			res = learner.calculateOne();
-			System.out.println("------Validate KeyPointPairList ------------");
-			System.out.println(res);
+//			System.out.println("------Validate KeyPointPairList ------------");
+//			System.out.println(res);
 			goodCount = pairList.getGoodCount();
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;
@@ -86,18 +86,25 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
 		}		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
-		calcRotationsUsingHelmert(tr, pairList);
+		double params[] = new double[4];
+		tr.getParams(params);
+		pairList.scale = params[0];
+		pairList.angle = params[1];
+		pairList.translateX= params[2];
+		pairList.translateY= params[3];
+		if ((int)(pairList.scale * 1000) == 0) {
+			throw new Error("ERROR");
+			// return false;
+		}
+//		calcRotationsUsingHelmert(tr, pairList);
 
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
-				"\tsZ1=" +MathUtil.rad2degStr(pairList.sphereRZ1) + 
-				"\tsY=" +MathUtil.rad2degStr(pairList.sphereRY) + 
-				"\tsZ2=" +MathUtil.rad2degStr(pairList.sphereRZ2) + 
-				"\trx=" +MathUtil.rad2degStr(pairList.rx) + 
-				"\try=" +MathUtil.rad2degStr(pairList.ry) + 
-				"\trz=" + MathUtil.rad2degStr(pairList.rz) +
-				"\ts=" + MathUtil.d4(pairList.scale)
+				"\tangle=" +MathUtil.rad2degStr(pairList.angle) + 
+				"\tscale=" +MathUtil.d4(pairList.scale) + 
+				"\tdX=" +MathUtil.d4(pairList.translateX) + 
+				"\tdY=" +MathUtil.d4(pairList.translateY) 
 				);
 
 		return true;

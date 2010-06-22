@@ -20,13 +20,23 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 	
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
-	protected int iteration = 0; 
+	protected int iteration; 
+	private double oneOverSumWeights;
 
 	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
 		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		iteration = 0;
+		oneOverSumWeights = 1.0;
+		for (KeyPointPairList pairList : chain) {
+			double f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
+			double r = Math.sqrt(pairList.translateX * pairList.translateX + pairList.translateY * pairList.translateY);
+			pairList.sphereRZ1 = Math.atan2(pairList.translateY, pairList.translateX);
+			pairList.sphereRY = -Math.atan2(r, f);
+			pairList.sphereRZ2 = pairList.angle - pairList.sphereRZ1;
+		}
 	}
 	
 	public double getDiscrepancyThreshold() {
@@ -138,23 +148,8 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 		
 		if (todo.size() > 0) 
 			throw new RuntimeException("Failed calculating the prims");
-/*		
-		double source[] = new double[2];
-		double target[] = new double[2];
-		for (KeyPointPairList pairList : chain) {
-			for (KeyPointPair item : pairList.items) {
-				if (item.panoBad)
-					continue;
-				
-				SpherePanoTransformer2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, source);
-				SpherePanoTransformer2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, target);
-				double dist = SpherePanoTransformer2.getSphericalDistance(source[0], source[1], target[0], target[1]);
-				System.out.println("Dist=" + MathUtil.rad2degStr(dist));
-			}
-		}*/
 	}
 
-	double scaleTheZ = 1;
 	void calculateNormalEquations() {
 		origin.sphereRZ1 = 0;
 		origin.sphereRY = 0;
@@ -180,7 +175,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 					coefs.setItem(srcIndex + 1, 0, sn.dDist_dSR2);
 					coefs.setItem(srcIndex + 2, 0, sn.dDist_dSR3);
 					if (adjustForScale) {
-						coefs.setItem(srcIndex + 3, 0, sn.dDist_dSF * scaleTheZ);
+						coefs.setItem(srcIndex + 3, 0, sn.dDist_dSF);
 					}
 				}
 				if (destIndex >= 0) {
@@ -188,7 +183,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 					coefs.setItem(destIndex + 1, 0, sn.dDist_dTR2);
 					coefs.setItem(destIndex + 2, 0, sn.dDist_dTR3);
 					if (adjustForScale) {
-						coefs.setItem(destIndex + 3, 0, sn.dDist_dTF * scaleTheZ);
+						coefs.setItem(destIndex + 3, 0, sn.dDist_dTF);
 					}
 				}
 				lsa.addMeasurement(coefs, computedWeight, sn.Dist, 0);
@@ -220,7 +215,6 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
 	}
 
-	private double oneOverSumWeights = 1.0;
 	/**
 	 * @return Number of point pairs NOT marked as bad.
 	 */
@@ -452,13 +446,13 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3) / scaleTheZ) : "") 
+					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 3)) : "") 
 					);
 			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 - u.getItem(0, index + 0));
 			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY - u.getItem(0, index + 1));
 			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 - u.getItem(0, index + 2));
 			if (adjustForScale) {
-				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3) / scaleTheZ);
+				image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
 			}
 		}
 		computeDiscrepancies(result);

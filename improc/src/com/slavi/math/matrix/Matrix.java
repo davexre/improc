@@ -176,7 +176,7 @@ public class Matrix {
 		if ((newSizeX < 0) || (newSizeY < 0)) {
 			throw new Error("Invalid matrix size");
 		}
-		if ((newSizeX == sizeX) && (newSizeY == sizeY)) {
+		if ((newSizeX == sizeX) && (newSizeY == sizeY) && (m != null)) {
 			return;
 		}
 		sizeX = newSizeX;

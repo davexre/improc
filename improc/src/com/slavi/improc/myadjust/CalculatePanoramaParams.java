@@ -178,15 +178,16 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			System.out.println("*********** ATTEMPT " + curAttempt + " ****************");
 			if (Thread.interrupted())
 				throw new InterruptedException();
-			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+//			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 			while (true) {
 				ArrayList<KeyPointPairList> chain = getImageChain(kppl);
 				if (chain.size() == 0)
 					break;
-				taskSet.add(new ProcessOne(chain));
+//				taskSet.add(new ProcessOne(chain));
+				new ProcessOne(chain).call();
 			}
-			taskSet.addFinished();
-			taskSet.get();
+//			taskSet.addFinished();
+//			taskSet.get();
 		}
 		return panos;
 	}	

@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.Helmert2DTransformLearner2;
-import com.slavi.math.transform.Helmert2DTransformer2;
+import com.slavi.math.transform.Helmert2DTransformer;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.unitTest.TestUtils;
 
@@ -44,7 +44,7 @@ public class TestHelmert2DTransformer2 {
 		}
 	}
 	
-	public static class MyTestHelmert2DTransformer extends Helmert2DTransformer2<Point2D.Double, Point2D.Double> {
+	public static class MyTestHelmert2DTransformer extends Helmert2DTransformer<Point2D.Double, Point2D.Double> {
 		public int getInputSize() {
 			return 2;
 		}
@@ -202,7 +202,7 @@ public class TestHelmert2DTransformer2 {
 		}
 		
 		// add fake data
-		int percentFakeData = 1;
+		int percentFakeData = 70;
 		int goodPoints = points.size();
 		int numberOfFakePoints = percentFakeData == 0 ? 0 : goodPoints * percentFakeData / (100 - percentFakeData);
 //		numberOfFakePoints = 0;
@@ -231,14 +231,14 @@ public class TestHelmert2DTransformer2 {
 //		System.out.println(learner.calculateTwo());
 //		dumpBad();
 		
-		Helmert2DTransformer2<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer2<Point2D.Double, Point2D.Double>) learner.transformer;
-		System.out.println(tr.toString());
+//		Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) learner.transformer;
+		System.out.println(learner.transformer.toString());
 //		learner.calculateTwo();
 		for (int iter = 0; iter < 50; iter++) {
 			System.out.println("******************* " + iter);
-			TransformLearnerResult res = learner.calculateTwo();
+			TransformLearnerResult res = learner.calculateOne();
 			System.out.println(res);
-			System.out.println(tr.toString());
+			System.out.println(learner.transformer.toString());
 			dumpBad();
 			if (res.isAdjustFailed() || (res.discrepancyStatistics.getMaxX() < TestUtils.precision))
 				break;
@@ -247,7 +247,7 @@ public class TestHelmert2DTransformer2 {
 		
 		Point2D.Double dest = new Point2D.Double();
 		pair = points.get(0);
-		tr.transform(pair.src, dest);
+		learner.transformer.transform(pair.src, dest);
 		System.out.println("" + pair.dest.x + "\t" + pair.dest.y);
 		System.out.println("" + dest.x + "\t" + dest.y);
 	}
@@ -280,9 +280,9 @@ public class TestHelmert2DTransformer2 {
 	
 	public void testDerivative() {
 		System.out.println("*******************");
-		System.out.println(learner.calculateTwo());
+		System.out.println(learner.calculateOne());
 		dumpBad();
-		learner.testDerivative(a0, b0, c0, d0);
+//		learner.testDerivative(a0, b0, c0, d0);
 	}
 	
 	public static void main(String[] args) {

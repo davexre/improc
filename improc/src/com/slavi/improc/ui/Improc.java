@@ -27,8 +27,8 @@ public class Improc {
 	Shell parent;
 	
 	public void doTheJob(ExecutorService exec) throws Exception {
-		parent = new Shell(SWT.NONE);
-		parent.setBounds(-10, -10, 0, 0); // fixes a bug in SWT
+		parent = new Shell((Shell) null, SWT.NONE);
+		parent.setBounds(-10, -10, 1, 1); // fixes a bug in SWT
 		parent.open();
 		
 		Settings settings = Settings.getSettings(parent);
@@ -72,9 +72,9 @@ public class Improc {
 		kppl = null;
 
 		PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
-//		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner();
-//		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner();
-//		PanoTransformer panoTransformer = new MyPanoPairTransformLearner();
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner(); // inverts the image
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner(); // inverts the image
+//		PanoTransformer panoTransformer = new MyPanoPairTransformLearner(); // inverts the image
 //		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
 		
 		System.out.println("---------- Calculating panorama parameters");
