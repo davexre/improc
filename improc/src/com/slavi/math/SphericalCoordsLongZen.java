@@ -44,12 +44,16 @@ public class SphericalCoordsLongZen {
 	}
 	
 	/**
+	 * x=1,y=z=0 -> long=0,zenith=pi/2,r=1
+	 * y=1,x=z=0 -> long=pi/2,zenith=pi/2,r=1
+	 * z=1,x=y=0 -> long=0,zenith=0,r=1
+	 * 
 	 * dest[0] = sx -> longitude
 	 * dest[1] = sy -> zenith angle (90 - latitude)
 	 * dest[2] = r -> radius 
 	 */
 	public static void cartesianToPolar(double x, double y, double z, double dest[]) {
-		dest[0] = Math.atan2(y, x);
+		dest[0] = ((x == 0.0) && (y == 0.0)) ? 0.0 : Math.atan2(y, x);
 		dest[2] = Math.sqrt(x*x + y*y + z*z);
 		dest[1] = dest[2] == 0.0 ? 0.0 : Math.acos(z / dest[2]);
 	}

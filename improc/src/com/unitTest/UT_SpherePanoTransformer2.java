@@ -81,8 +81,8 @@ public class UT_SpherePanoTransformer2 {
 		p1.doubleX = p1.keyPointList.cameraOriginX;
 		p1.doubleY = p1.keyPointList.cameraOriginY + 1000;
 
-		double dest[] = new double[2];
-		double dest2[] = new double[2];
+		double dest[] = new double[3];
+		double dest2[] = new double[3];
 		SphereNorm2.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
 		SphereNorm2.transformBackward(dest[0], dest[1], kpl1, dest2);
 		TestUtils.assertEqual("", dest2[0], p1.doubleX);
@@ -126,8 +126,8 @@ public class UT_SpherePanoTransformer2 {
 	private static void checkNorm(KeyPointPair kpp, 
 			double dX1, double dY1, double dZ1, double dF1, 
 			double dX2, double dY2, double dZ2, double dF2) {
-		double dest1[] = new double[2];
-		double dest2[] = new double[2];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
 		SphereNorm2 sn = new SphereNorm2();
 		sn.setKeyPointPair(kpp);
 		
@@ -196,8 +196,8 @@ public class UT_SpherePanoTransformer2 {
 		kpl2.sphereRY = 30 * MathUtil.deg2rad;
 		kpl2.sphereRZ2 = 40 * MathUtil.deg2rad;
 		
-		double dest1[] = new double[2];
-		double dest2[] = new double[2];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
 		KeyPoint p2 = new KeyPoint();
 		p2.keyPointList = kpl2;
 
@@ -326,7 +326,7 @@ public class UT_SpherePanoTransformer2 {
 	}
 	
 	private static void checkNorm0(KeyPoint kp, double dX, double dY, double dZ, double dF) {
-		double dest0[] = new double[2];
+		double dest0[] = new double[3];
 		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest0);
 		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
 		pd.setKeyPoint(kp);
@@ -343,7 +343,7 @@ public class UT_SpherePanoTransformer2 {
 		kp.keyPointList.sphereRZ2 += dZ;
 		kp.keyPointList.scaleZ += dF;
 
-		double dest1[] = new double[2];
+		double dest1[] = new double[3];
 		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest1);
 		
 		kp.keyPointList.sphereRZ1 -= dX;

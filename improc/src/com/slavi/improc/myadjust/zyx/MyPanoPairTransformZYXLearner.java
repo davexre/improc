@@ -10,7 +10,7 @@ import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYX;
-import com.slavi.math.SphericalCoordsLongLat;
+import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
@@ -51,6 +51,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 	 * x -> fi (longitude)
 	 * y -> psi (latitude) 
 	 */
+	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
 	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
@@ -65,23 +66,22 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		double sz = srcImage.scaleZ;
 		
 		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
-		SphericalCoordsLongLat.cartesianToPolar(dest[2], dest[0], dest[1], dest);
+		SphericalCoordsLongZen.cartesianToPolar(dest[0], dest[1], dest[2], dest);
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		SphericalCoordsLongLat.polarToCartesian(rx, ry, 1.0, dest);
-		rot.transformBackward(srcImage.camera2real, dest[1], dest[2], dest[0], dest);
-
-		if (dest[2] == 0) {
+		SphericalCoordsLongZen.rotateBackward(rx, ry, wRot[0], wRot[1], wRot[2], dest);
+		SphericalCoordsLongZen.polarToCartesian(dest[0], dest[1], 1.0, dest);
+		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
+		if (dest[2] <= 0.0) {
 			dest[0] = Double.NaN;
 			dest[1] = Double.NaN;
 			return;
 		}
-		dest[0] = srcImage.scaleZ * (dest[0] / dest[2]);
-		dest[1] = srcImage.scaleZ * (dest[1] / dest[2]);
-		
-		dest[0] = (dest[0] / srcImage.cameraScale) + srcImage.cameraOriginX;
-		dest[1] = (dest[1] / srcImage.cameraScale) + srcImage.cameraOriginY;
+		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[2] = dest[2] == 0.0 ? 0.0 : srcImage.scaleZ / dest[2];
 	}
 	
 	public void transform3D(KeyPoint source, KeyPointList srcImage, double dest[]) {
@@ -431,7 +431,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 				
-				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

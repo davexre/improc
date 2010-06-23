@@ -25,43 +25,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		this.kppl = kppl;
 	}
 	
-	public static void calcRotationsUsingHelmert(
-			KeyPointHelmertTransformer tr,
-			KeyPointPairList pairList) {
-		double params[] = new double[4];
-		tr.getParams(params);
-		pairList.scale = params[0];
-		if ((int)(params[0] * 1000) == 0)
-			throw new Error("ERROR");
-		double angle = params[1];
-
-		double f = pairList.scale * pairList.source.scaleZ;
-		double c = tr.c * pairList.source.cameraScale;
-		double d = tr.d * pairList.source.cameraScale;
-		double f1f1 = f * f + d * d;
-		double f1 = Math.sqrt(f1f1);
-		double f2 = Math.sqrt(f1f1 + c * c);
-
-		pairList.rx = Math.atan2(d, f);
-		pairList.ry = Math.atan2(c, f1);
-		pairList.rz = Math.atan2(Math.tan(angle) * f1f1, f * f2);
-		
-		f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
-		double r = Math.sqrt(tr.c * tr.c + tr.d * tr.d);
-		pairList.sphereRZ1 = Math.atan2(tr.d, tr.c);
-		pairList.sphereRY = -Math.atan2(r, f);
-		pairList.sphereRZ2 = angle - pairList.sphereRZ1;
-
-/*		
-		f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
-		double r = Math.sqrt(tr.c * tr.c + tr.d * tr.d);
-		double z = Math.atan2(tr.d, tr.c); // ZYZ
-//		double z = Math.atan2(tr.c, tr.d); // ZXZ
-		pairList.sphereRZ1 = angle - z;
-		pairList.sphereRY = Math.atan2(r, f);
-		pairList.sphereRZ2 = z;*/
-	}
-
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws Exception {
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 1 / pair.distanceToNearest;
@@ -96,7 +59,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			throw new Error("ERROR");
 			// return false;
 		}
-//		calcRotationsUsingHelmert(tr, pairList);
 
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),

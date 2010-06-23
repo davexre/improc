@@ -10,7 +10,7 @@ import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
-import com.slavi.math.SphericalCoordsLongLat;
+import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
@@ -18,17 +18,21 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 
+	public static final RotationZYZ rot = RotationZYZ.instance;
 	static boolean adjustForScale = false;
 	
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
-	protected int iteration = 0; 
+	protected int iteration; 
+	private double oneOverSumWeights;
 
 	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
 		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		this.iteration = 0;
+		this.oneOverSumWeights = 1.0;
 		for (KeyPointPairList pairList : chain) {
 			double f = 1.0 / (2.0 * Math.tan(pairList.source.fov / 2.0) * pairList.source.cameraScale);
 			double r = Math.sqrt(pairList.translateX * pairList.translateX + pairList.translateY * pairList.translateY);
@@ -42,12 +46,11 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		return discrepancyThreshold;
 	}
 	
-	public static final RotationZYZ rot = RotationZYZ.instance;
-
 	/*
 	 * x -> fi (longitude)
 	 * y -> psi (latitude) 
 	 */
+	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
 	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
@@ -62,23 +65,22 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		double sz = srcImage.scaleZ;
 		
 		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
-		SphericalCoordsLongLat.cartesianToPolar(dest[2], dest[0], dest[1], dest);
+		SphericalCoordsLongZen.cartesianToPolar(dest[0], dest[1], dest[2], dest);
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		SphericalCoordsLongLat.polarToCartesian(rx, ry, 1.0, dest);
-		rot.transformBackward(srcImage.camera2real, dest[1], dest[2], dest[0], dest);
-
-		if (dest[2] == 0) {
+		SphericalCoordsLongZen.rotateBackward(rx, ry, wRot[0], wRot[1], wRot[2], dest);
+		SphericalCoordsLongZen.polarToCartesian(dest[0], dest[1], 1.0, dest);
+		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
+		if (dest[2] <= 0.0) {
 			dest[0] = Double.NaN;
 			dest[1] = Double.NaN;
 			return;
 		}
-		dest[0] = srcImage.scaleZ * (dest[0] / dest[2]);
-		dest[1] = srcImage.scaleZ * (dest[1] / dest[2]);
-		
-		dest[0] = (dest[0] / srcImage.cameraScale) + srcImage.cameraOriginX;
-		dest[1] = (dest[1] / srcImage.cameraScale) + srcImage.cameraOriginY;
+		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[2] = dest[2] == 0.0 ? 0.0 : srcImage.scaleZ / dest[2];
 	}
 	
 	public static void transform3D(KeyPoint source, KeyPointList srcImage, double dest[]) {
@@ -339,7 +341,6 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
 	}
 
-	private double oneOverSumWeights = 1.0;
 	/**
 	 * @return Number of point pairs NOT marked as bad.
 	 */
@@ -456,7 +457,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 				
-				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);

@@ -52,9 +52,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 	
 	public void transformBackward(double rx, double ry, KeyPointList image, double dest[]) {
 		SphericalCoordsLongZen.rotateBackward(rx, ry, wRot[0], wRot[1], wRot[2], dest);
-		double r = SphereNorm2.transformBackward(dest[0], dest[1], image, dest);
-		if (r < 0)
-			throw new RuntimeException("r < 0");
+		SphereNorm2.transformBackward(dest[0], dest[1], image, dest);
 	}
 
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
@@ -322,8 +320,8 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 	}
 	
 	protected void computeDiscrepancies(TransformLearnerResult result) {
-		double PW1[] = new double[2];
-		double PW2[] = new double[2];
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
 
 		result.discrepancyStatistics.start();
 		for (KeyPointPairList pairList : chain) {

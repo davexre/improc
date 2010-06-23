@@ -3,6 +3,7 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,7 +18,6 @@ import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
 import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
 import com.slavi.util.Marker;
-import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -72,8 +72,8 @@ public class Improc {
 		kppl = null;
 
 		PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
-//		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner(); // inverts the image
-//		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner(); // inverts the image
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner();
+//		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformLearner(); // inverts the image
 //		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
 		
@@ -105,8 +105,8 @@ public class Improc {
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-//		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
 //		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();

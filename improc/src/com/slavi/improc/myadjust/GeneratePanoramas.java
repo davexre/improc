@@ -167,13 +167,13 @@ public class GeneratePanoramas implements Callable<Void> {
 			double xd = i * 2 * Math.PI / numDivisionsX - MathUtil.PIover2;
 			int x = (int) (outputImageSizeX * ((xd - minAngle.x) / sizeAngle.x));
 			for (int j = outputImageSizeY - 1; j >= 0; j--) {
-				img.setRGB(x, j, colorX);
+				img.setRGB(outputImageSizeX - 1 - x, j, colorX);
 			}
 		}
 		// draw parallels
 		int y = (int) (outputImageSizeY * ((-minAngle.y) / sizeAngle.y));
 		for (int i = img.sizeX - 1; i >= 0; i--) {
-			img.setRGB(i, y, 0x00ff00);
+			img.setRGB(outputImageSizeX - 1 - i, y, 0x00ff00);
 		}
 	}
 	
@@ -310,19 +310,19 @@ public class GeneratePanoramas implements Callable<Void> {
 
 					int color = 0;
 					if (useImageMaxWeight) {
-						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
-						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, mcurMaxColor);
+						outImageColor.setRGB(outputImageSizeX - 1 - oimgX, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - 1 - oimgX, oimgY, mcurMaxColor);
 					} else {
 						color = 
 							(fixColorValue(colorR, countR) << 16) |
 							(fixColorValue(colorG, countG) << 8) |
 							fixColorValue(colorB, countB);
-						outImageColor.setRGB(outputImageSizeX - oimgX - 1, oimgY, color);
+						outImageColor.setRGB(outputImageSizeX - 1 - oimgX, oimgY, color);
 						color = 
 							(fixColorValue(mcolorR, mcountR) << 16) |
 							(fixColorValue(mcolorG, mcountG) << 8) |
 							fixColorValue(mcolorB, mcountB);
-						outImageMask.setRGB(outputImageSizeX - oimgX - 1, oimgY, curMaxColor);
+						outImageMask.setRGB(outputImageSizeX - 1 - oimgX, oimgY, curMaxColor);
 					}
 				}
 				int processed = rowsProcessed.getAndIncrement();
@@ -556,8 +556,8 @@ public class GeneratePanoramas implements Callable<Void> {
 			taskSet.addFinished();
 			taskSet.get();
 			
-			pinPoints(outImageMask);
 //			drawWorldMesh(outImageMask);
+			pinPoints(outImageMask);
 			
 			outImageColor.save(outputFile + " color.png");
 			outImageMask.save(outputFile + " mask.png");
