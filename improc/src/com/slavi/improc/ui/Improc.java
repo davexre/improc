@@ -16,7 +16,7 @@ import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
+import com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -71,11 +71,11 @@ public class Improc {
 				kppl.size() - 1);
 		kppl = null;
 
-		PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
+//		PanoTransformer panoTransformer = new SpherePanoTransformLearner2();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformLearner(); // inverts the image
-//		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
+		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
 		
 		System.out.println("---------- Calculating panorama parameters");
 		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 

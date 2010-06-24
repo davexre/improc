@@ -18,7 +18,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class SpherePanoTransformLearner extends PanoTransformer {
 
 	static boolean adjustForScale = true;
-	static boolean adjustOriginForScale = false;
+	static boolean adjustOriginForScale = true;
 	
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
@@ -177,11 +177,13 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 				
 				sn.setKeyPointPair(item);
 				double computedWeight = getComputedWeight(item);
-				int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * (adjustForScale ? 4 : 3);
-				int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * (adjustForScale ? 4 : 3);
+				int srcIndexOf = images.indexOf(pairList.source);
+				int destIndexOf = images.indexOf(pairList.target);
+				int srcIndex = (adjustOriginForScale ? 1 : 0) + srcIndexOf * (adjustForScale ? 4 : 3);
+				int destIndex = (adjustOriginForScale ? 1 : 0) + destIndexOf * (adjustForScale ? 4 : 3);
 				
 				coefs.make0();
-				if (srcIndex > 0) {
+				if (srcIndexOf >= 0) {
 					coefs.setItem(srcIndex + 0, 0, sn.dDist_dSR1);
 					coefs.setItem(srcIndex + 1, 0, sn.dDist_dSR2);
 					coefs.setItem(srcIndex + 2, 0, sn.dDist_dSR3);
@@ -192,7 +194,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 					if (adjustOriginForScale)
 						coefs.setItem(0, 0, sn.dDist_dSF);
 				}
-				if (destIndex > 0) {
+				if (destIndexOf >= 0) {
 					coefs.setItem(destIndex + 0, 0, sn.dDist_dTR1);
 					coefs.setItem(destIndex + 1, 0, sn.dDist_dTR2);
 					coefs.setItem(destIndex + 2, 0, sn.dDist_dTR3);
@@ -434,13 +436,14 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();
 		if (!m2.inverse())
-			throw new RuntimeException("failed");
+			System.out.println("FAILED!!!!!");
+//			throw new RuntimeException("failed");
 		m1.printM("M1");
 		System.out.println("DET=" + m1.det());
 		m2.printM("M2");
 		m1.mMul(m2, m3);		
 		m3.printM("M3");
-*/		
+*/
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer

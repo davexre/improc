@@ -56,8 +56,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.translateX= params[2];
 		pairList.translateY= params[3];
 		if ((int)(pairList.scale * 1000) == 0) {
-			throw new Error("ERROR");
-			// return false;
+//			throw new Error("ERROR");
+			return false;
 		}
 
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
