@@ -10,6 +10,7 @@ import com.slavi.improc.myadjust.sphere.SphereNorm;
 import com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner;
 import com.slavi.math.MathUtil;
 import com.slavi.math.SphericalCoordsLongLat;
+import com.slavi.math.SphericalCoordsLongZen;
 
 public class UT_SpherePanoTransformer {
 
@@ -42,20 +43,20 @@ public class UT_SpherePanoTransformer {
 		rot[2] = 30 * MathUtil.deg2rad;
 		dest1[0] = 20 * MathUtil.deg2rad;
 		dest1[1] = 50 * MathUtil.deg2rad;
-		panoTransform.rotateForeward(dest1[0], dest1[1], rot[0], rot[1], rot[2], dest2);
-		panoTransform.rotateBackward(dest2[0], dest2[1], rot[0], rot[1], rot[2], dest3);
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], rot[0], rot[1], rot[2], dest2);
+		SphericalCoordsLongZen.rotateBackward(dest2[0], dest2[1], rot[0], rot[1], rot[2], dest3);
 		TestUtils.assertEqualAngle("", dest1[0], dest3[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest3[1]);
 
-		panoTransform.rotateForeward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 
-		panoTransform.rotateBackward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
+		SphericalCoordsLongZen.rotateBackward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 
-		panoTransform.rotateForeward(dest1[0], dest1[1], 
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 
 				45 * MathUtil.deg2rad, 
 				90 * MathUtil.deg2rad, 
 				(180 + 45) * MathUtil.deg2rad, 
@@ -274,9 +275,9 @@ public class UT_SpherePanoTransformer {
 		pOrigin[0] = 0 * MathUtil.deg2rad;
 		pOrigin[1] = 0 * MathUtil.deg2rad;
 		
-		panoTransform.rotateForeward(pOrigin[0], pOrigin[1], origin.rx, origin.ry + 90 * MathUtil.deg2rad, origin.rz + 0 * MathUtil.deg2rad, pWorld1);
-		panoTransform.rotateForeward(pOrigin[0], pOrigin[1], kppl.rx, kppl.ry, kppl.rz + 180 * MathUtil.deg2rad, pKPL);
-		panoTransform.rotateForeward(pKPL[0], pKPL[1], kpl.rx, kpl.ry + 90 * MathUtil.deg2rad, kpl.rz + 0 * MathUtil.deg2rad, pWorld2);
+		SphericalCoordsLongZen.rotateForeward(pOrigin[0], pOrigin[1], origin.rx, origin.ry + 90 * MathUtil.deg2rad, origin.rz + 0 * MathUtil.deg2rad, pWorld1);
+		SphericalCoordsLongZen.rotateForeward(pOrigin[0], pOrigin[1], kppl.rx, kppl.ry, kppl.rz + 180 * MathUtil.deg2rad, pKPL);
+		SphericalCoordsLongZen.rotateForeward(pKPL[0], pKPL[1], kpl.rx, kpl.ry + 90 * MathUtil.deg2rad, kpl.rz + 0 * MathUtil.deg2rad, pWorld2);
 		System.out.println("-------");
 //		dump(pOrigin);
 		dump("1", pWorld1);

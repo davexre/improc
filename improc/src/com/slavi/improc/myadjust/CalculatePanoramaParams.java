@@ -9,9 +9,7 @@ import java.util.concurrent.ExecutorService;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
 import com.slavi.math.transform.TransformLearnerResult;
-import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
