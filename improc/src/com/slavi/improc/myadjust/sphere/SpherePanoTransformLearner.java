@@ -40,7 +40,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		this.discrepancyThreshold = 30.0 / 60.0; // 5 angular minutes
 		iteration = 0;
 		oneOverSumWeights = 1.0;
 		for (KeyPointPairList pairList : chain) {
@@ -303,7 +303,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 						result.oldGoodNowBad++;
 						pairList.transformResult.oldGoodNowBad++;
 					} else {
-						if (discrepancy < result.discrepancyStatistics.getAvgValue()) {
+						if (discrepancy < pairList.transformResult.discrepancyStatistics.getAvgValue()) {
 							setBad(item, curIsBad);
 							result.oldBadNowGood++;
 							pairList.transformResult.oldBadNowGood++;
@@ -396,6 +396,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			}
 		}
 		if (chainModified) {
+			CalculatePanoramaParams.copyBadStatus(chain);
 			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
 			ignoredPairLists.addAll(chain);
 			chain = tmpChain;

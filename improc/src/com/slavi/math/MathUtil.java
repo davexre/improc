@@ -53,6 +53,13 @@ public class MathUtil {
 	}
 	
 	/**
+	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 */
+	public static double clipValue(double value, double min, double max) {
+		return Math.min(max, Math.max(min, value));
+	}
+	
+	/**
 	 * Returns the specified angle in the range [0..2*pi)
 	 */
 	public static double fixAngle2PI(double angle) {

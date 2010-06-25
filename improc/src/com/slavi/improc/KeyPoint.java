@@ -7,10 +7,8 @@ public class KeyPoint {
 	
 	public static final int numDirections = 4;
 
-	public static final int descriptorSize = 4;
+	public static final int descriptorSize = 8;
 
-	public static final int descriptorPixelSize = 4;
-	
 	public static final int featureVectorLinearSize = descriptorSize * descriptorSize * numDirections;
 
 	public int imgX;		// TODO: Obsolete
@@ -38,7 +36,7 @@ public class KeyPoint {
 			(atY < 0) || (atY >= descriptorSize) ||
 			(atOrientation < 0) || (atOrientation >= numDirections))
 			throw new ArrayIndexOutOfBoundsException("X=" + atX + " Y=" + atY + " O=" + atOrientation);
-		return featureVector[((atX * descriptorSize) + atY) * descriptorSize + atOrientation];
+		return featureVector[((atX * descriptorSize) + atY) * numDirections + atOrientation];
 	}
 
 	public void setItem(int atX, int atY, int atOrientation, byte aValue) {
@@ -46,7 +44,18 @@ public class KeyPoint {
 			(atY < 0) || (atY >= descriptorSize) ||
 			(atOrientation < 0) || (atOrientation >= numDirections))
 			throw new ArrayIndexOutOfBoundsException("X=" + atX + " Y=" + atY + " O=" + atOrientation);
-		featureVector[((atX * descriptorSize) + atY) * descriptorSize + atOrientation] = aValue;
+		int atIndex = ((atX * descriptorSize) + atY) * numDirections + atOrientation; 
+		try {
+			featureVector[((atX * descriptorSize) + atY) * numDirections + atOrientation] = aValue;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			System.out.println("atX=" + atX);
+			System.out.println("atY=" + atY);
+			System.out.println("atO=" + atOrientation);
+			System.out.println("atI=" + atIndex);
+			System.out.println("atMax=" + featureVectorLinearSize);
+			throw new Error(t);
+		}
 	}
 
 	public int getNumberOfNonZero() {

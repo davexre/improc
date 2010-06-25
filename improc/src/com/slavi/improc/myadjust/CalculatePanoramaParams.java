@@ -75,10 +75,9 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	 */
 	public static ArrayList<KeyPointPairList> getImageChain(ArrayList<KeyPointPairList> kppl) {
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
-		while (kppl.size() > 0) {
-			KeyPointPairList start = kppl.remove(0);
-			result.add(start);
-			
+		if (kppl.size() > 0) {
+			result.add(kppl.remove(0));
+
 			int curItemIndex = kppl.size() - 1;
 			while (curItemIndex >= 0) {
 				KeyPointPairList curItem = kppl.get(curItemIndex);
@@ -98,9 +97,28 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				}
 				curItemIndex--;
 			}
-			// Found a chain.
-			return result;
 		}
+/*		// print
+		System.out.println();
+		System.out.println("Result image chain:");
+		for (KeyPointPairList pairList : result) {
+			System.out.println(
+					pairList.source.imageFileStamp.getFile().getName() +
+					"\t" + pairList.target.imageFileStamp.getFile().getName() + 
+					"\t" + pairList.items.size()
+					);
+
+		}
+		System.out.println();
+		System.out.println("Remaining image chain:");
+		for (KeyPointPairList pairList : kppl) {
+			System.out.println(
+					pairList.source.imageFileStamp.getFile().getName() +
+					"\t" + pairList.target.imageFileStamp.getFile().getName() + 
+					"\t" + pairList.items.size()
+					);
+		}
+*/
 		return result;
 	}
 	
