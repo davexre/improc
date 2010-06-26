@@ -17,6 +17,7 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
 import com.slavi.math.MathUtil;
+import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
@@ -211,6 +212,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		
 		public Void call() throws Exception {
 			double d[] = new double[3];
+			double DRGB[] = new double[3];
 			for (int oimgY = startRow; oimgY <= endRow; oimgY++) {
 				for (int oimgX = 0; oimgX < outImageColor.sizeX; oimgX++) {
 					long colorR = 0;
@@ -234,6 +236,7 @@ public class GeneratePanoramas implements Callable<Void> {
 
 					int mcurMaxWeight = 0;
 					int mcurMaxColor = 0;
+					KeyPointList mcurMaxImage = null;
 
 					for (int index = 0; index < images.size(); index++) {
 						if (Thread.currentThread().isInterrupted())
@@ -265,6 +268,7 @@ public class GeneratePanoramas implements Callable<Void> {
 						if (useImageMaxWeight) {
 							if (mcurMaxWeight < weight) {
 								mcurMaxWeight = weight;
+								mcurMaxImage = image;
 								int m[] = masks[index % masks.length];
 //								grayColor = grayColor | (grayColor << 8) | (grayColor << 16);
 //								mcurMaxColor = (grayColor & m[0]) | m[1] ;
@@ -311,6 +315,15 @@ public class GeneratePanoramas implements Callable<Void> {
 					int color = 0;
 					if (useImageMaxWeight) {
 						outImageColor.setRGB(outputImageSizeX - 1 - oimgX, oimgY, curMaxColor);
+						if (mcurMaxImage == null) {
+							mcurMaxColor = 0;
+						} else {
+							double h = mcurMaxImage.imageId * MathUtil.C2PI * 2.0 / 13.0;
+							double v = (DWindowedImageUtils.getGrayColor(curMaxColor) & 0xff) / 255.0;
+							double s = 1.0;
+							ColorConversion.HSV.toDRGB(h, s, v, DRGB);
+							mcurMaxColor = ColorConversion.RGB.toRGB(DRGB);
+						}
 						outImageMask.setRGB(outputImageSizeX - 1 - oimgX, oimgY, mcurMaxColor);
 					} else {
 						color = 

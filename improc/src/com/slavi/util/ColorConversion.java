@@ -72,6 +72,8 @@ public class ColorConversion {
 	}
 
 	/**
+	 * http://en.wikipedia.org/wiki/HSL_and_HSV
+	 * 
 	 * H - Hue [0..2*pi]
 	 * S - Saturation [0..1]
 	 * V - Value [0..1]
