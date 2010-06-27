@@ -43,8 +43,13 @@ public class KeyPointList {
 	public double scaleZ;
 	public int calculatePrimsAtHop;
 	public int goodCount;
-	// My adjust
 
+	// Helmert pano adjust
+	public double a;
+	public double b;
+	public double hTranslateX; // c
+	public double hTranslateY; // d
+	
 	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
 	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
 			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));

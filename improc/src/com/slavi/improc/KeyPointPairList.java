@@ -14,7 +14,7 @@ public class KeyPointPairList {
 
 	public KeyPointList target = null;
 
-	// Helmert transformation parameters
+	// Helmert transformation parameters (Validate keypoint pairs)
 	public double scale;
 	public double angle;
 	public double translateX;
@@ -25,11 +25,17 @@ public class KeyPointPairList {
 	public double sphereRY;
 	public double sphereRZ2;
 
-	//////////////////////////// myAdjust
+	// ZYX and XYZ pano adjust
 	public double rx, ry, rz; // source->target angles of rotation
+
+	// Helmert pano adjust
+	public double a;
+	public double b;
+	public double hTranslateX; // c
+	public double hTranslateY; // d
+	
 	public double maxDiscrepancy;
 	public TransformLearnerResult transformResult;
-	//////////////////////////// myAdjust
 	
 	public KeyPointPairList() {
 	}

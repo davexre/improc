@@ -546,7 +546,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		m3.printM("M3");*/
 		
 		if (!lsa.calculate()) 
-			return null;
+			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
 //		u.printM("U");

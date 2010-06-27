@@ -509,7 +509,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		calculateNormalEquations();
 		// Calculate Unknowns
 		if (!lsa.calculate()) 
-			return null;
+			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
 		System.out.println(origin.imageFileStamp.getFile().getName() + 

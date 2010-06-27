@@ -14,9 +14,9 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
+import com.slavi.improc.myadjust.HelmertPanoTransformLearner;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner;
 import com.slavi.util.Marker;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
@@ -75,7 +75,8 @@ public class Improc {
 //		PanoTransformer panoTransformer = new MyPanoPairTransformZYZLearner();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformZYXLearner();
 //		PanoTransformer panoTransformer = new MyPanoPairTransformLearner(); // inverts the image
-		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); // BAD!!!
+//		PanoTransformer panoTransformer = new SpherePanoTransformLearner(); 
+		PanoTransformer panoTransformer = new HelmertPanoTransformLearner(); 
 		
 		System.out.println("---------- Calculating panorama parameters");
 		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
@@ -105,7 +106,7 @@ public class Improc {
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors + 1, new MyThreadFactory());
+		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors, new MyThreadFactory());
 //		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
 //		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
