@@ -22,19 +22,13 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		this.discrepancyThreshold = 5.0; // 5 pixels
 	}
 	
 	public double getDiscrepancyThreshold() {
 		return discrepancyThreshold;
 	}
 
-	/*
-	 * x -> fi (longitude)
-	 * y -> psi (latitude) 
-	 */
-	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
-	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
@@ -56,8 +50,8 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		rx -= srcImage.imageSizeX;
-		ry -= srcImage.imageSizeY;
+		rx -= srcImage.hTranslateX;
+		ry -= srcImage.hTranslateY;
 		dest[0] =  srcImage.a * rx + srcImage.b * ry;
 		dest[1] = -srcImage.b * rx + srcImage.a * ry;
 		dest[2] = 1.0;
@@ -71,7 +65,7 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 	
 	void calculatePrims() {
 		origin.a = 1.0;
-		origin.b = 1.0;
+		origin.b = 0.0;
 		origin.hTranslateX = 0.0;
 		origin.hTranslateY = 0.0;
 		origin.calculatePrimsAtHop = 0;
@@ -169,26 +163,39 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 				
 				int srcIndex = images.indexOf(pairList.source) * 4;
 				int destIndex = images.indexOf(pairList.target) * 4;
-				
-				/*
-				 * f: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
-				 */
+
 				coefs.make0();
-				double L = PW1[0] * PW2[1] - PW1[1] * PW2[0];
+				double L = PW1[0] - PW2[0];
 				if (srcIndex >= 0) {
-					coefs.setItem(srcIndex + 0, 0, source.doubleX * PW2[1] - source.doubleY * PW2[0]);
-					coefs.setItem(srcIndex + 1, 0, -source.doubleY * PW2[1] + source.doubleX * PW2[0]);
-					coefs.setItem(srcIndex + 2, 0, PW2[1]);
-					coefs.setItem(srcIndex + 3, 0, -PW2[0]);
+					coefs.setItem(srcIndex + 0, 0, source.doubleX);
+					coefs.setItem(srcIndex + 1, 0, -source.doubleY);
+					coefs.setItem(srcIndex + 2, 0, 1.0);
+					coefs.setItem(srcIndex + 3, 0, 0);
 				}
 				if (destIndex >= 0) {
-					coefs.setItem(destIndex + 0, 0, PW1[0] * target.doubleY - PW1[1] * target.doubleX);
-					coefs.setItem(destIndex + 1, 0, PW1[0] * target.doubleX + PW1[1] * target.doubleY);
-					coefs.setItem(destIndex + 2, 0, -PW1[1]);
-					coefs.setItem(destIndex + 3, 0, PW1[0]);
+					coefs.setItem(destIndex + 0, 0, -target.doubleX);
+					coefs.setItem(destIndex + 1, 0, target.doubleY);
+					coefs.setItem(destIndex + 2, 0, -1.0);
+					coefs.setItem(destIndex + 3, 0, 0);
 				}
-				lsa.addMeasurement(coefs, computedWeight, L, 0);
 //				System.out.print(L + "\t" + coefs.toString());
+				lsa.addMeasurement(coefs, computedWeight, L, 0);
+
+				L = PW1[1] - PW2[1];
+				if (srcIndex >= 0) {
+					coefs.setItem(srcIndex + 0, 0, source.doubleY);
+					coefs.setItem(srcIndex + 1, 0, source.doubleX);
+					coefs.setItem(srcIndex + 2, 0, 0);
+					coefs.setItem(srcIndex + 3, 0, 1.0);
+				}
+				if (destIndex >= 0) {
+					coefs.setItem(destIndex + 0, 0, -target.doubleY);
+					coefs.setItem(destIndex + 1, 0, -target.doubleX);
+					coefs.setItem(destIndex + 2, 0, 0);
+					coefs.setItem(destIndex + 3, 0, -1.0);
+				}
+//				System.out.print(L + "\t" + coefs.toString());
+				lsa.addMeasurement(coefs, computedWeight, L, 0);
 			}
 		}
 	}
@@ -413,7 +420,7 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 
 		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
 		calculateNormalEquations();
-		// Calculate Unknowns
+/*		// Calculate Unknowns
 		Matrix m1 = lsa.getNm().makeSquareMatrix();
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();
@@ -425,36 +432,38 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 		m2.printM("M2");
 		m1.mMul(m2, m3);		
 		m3.printM("M3");
-
+*/
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-		double hScale = MathUtil.hypot(origin.a, origin.b);
-		double hAngle = Math.atan2(origin.b, origin.a);
+		double scaleOLD = MathUtil.hypot(origin.a, origin.b);
+		double angleOLD = Math.atan2(origin.b, origin.a);
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
-				"\tangle=" + MathUtil.rad2degStr(hAngle) + 
-				"\tscale=" + MathUtil.d4(hScale) + 
+				"\tangle=" + MathUtil.rad2degStr(angleOLD) + 
+				"\tscale=" + MathUtil.d4(scaleOLD) + 
 				"\ttranslateX=" + MathUtil.d4(origin.hTranslateX) + 
 				"\ttranslateY=" + MathUtil.d4(origin.hTranslateY)
 				);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
 			int index = curImage * 4;
-			hScale = MathUtil.hypot(image.a, image.b);
-			hAngle = Math.atan2(image.b, image.a);
+			scaleOLD = MathUtil.hypot(image.a, image.b);
+			angleOLD = Math.atan2(image.b, image.a);
+			image.a -= u.getItem(0, index + 0);
+			image.b -= u.getItem(0, index + 1);
+			double scaleNEW = MathUtil.hypot(image.a, image.b);
+			double angleNEW = Math.atan2(image.b, image.a);
 			System.out.println(image.imageFileStamp.getFile().getName() + 
-					"\tangle=" + MathUtil.rad2degStr(hAngle) + 
-					"\tscale=" + MathUtil.d4(hScale) + 
+					"\tangle=" + MathUtil.rad2degStr(angleOLD) + 
+					"\tscale=" + MathUtil.d4(scaleOLD) + 
 					"\ttranslateX=" + MathUtil.d4(image.hTranslateX) + 
 					"\ttranslateY=" + MathUtil.d4(image.hTranslateY) +
-					"\tda=" + MathUtil.d4(u.getItem(0, index + 0)) + 
-					"\tdb=" + MathUtil.d4(u.getItem(0, index + 1)) + 
+					"\tdangle=" + MathUtil.rad2degStr(angleOLD - angleNEW) + 
+					"\tdscale=" + MathUtil.d4(scaleOLD - scaleNEW) + 
 					"\tdTrX=" + MathUtil.d4(u.getItem(0, index + 2)) + 
 					"\tdTrY=" + MathUtil.d4(u.getItem(0, index + 3)) 
 					);
-			image.a -= u.getItem(0, index + 0);
-			image.b -= u.getItem(0, index + 1);
 			image.hTranslateX -= u.getItem(0, index + 2);
 			image.hTranslateY -= u.getItem(0, index + 3);
 		}

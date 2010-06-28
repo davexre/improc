@@ -230,12 +230,12 @@ public class GeneratePanoramas implements Callable<Void> {
 						(fixColorValue(colorR, countR) << 16) |
 						(fixColorValue(colorG, countG) << 8) |
 						fixColorValue(colorB, countB);
-					outImageColor.setRGB(outputImageSizeX - 1 - oimgX, oimgY, color);
+					outImageColor.setRGB(oimgX, oimgY, color);
 					color = 
 						(fixColorValue(mcolorR, mcountR) << 16) |
 						(fixColorValue(mcolorG, mcountG) << 8) |
 						fixColorValue(mcolorB, mcountB);
-					outImageMask.setRGB(outputImageSizeX - 1 - oimgX, oimgY, curMaxColor);
+					outImageMask.setRGB(oimgX, oimgY, curMaxColor);
 				}
 				if (oimgY % 10 == 0) {
 					SwtUtil.activeWaitDialogSetStatus(null, (100 * oimgY) / outputImageSizeY);
@@ -290,7 +290,7 @@ public class GeneratePanoramas implements Callable<Void> {
 						}
 					}
 
-					outImageColor.setRGB(outputImageSizeX - 1 - oimgX, oimgY, color);
+					outImageColor.setRGB(oimgX, oimgY, color);
 					if (maxWeightImage == null) {
 						color = 0;
 					} else {
@@ -300,7 +300,7 @@ public class GeneratePanoramas implements Callable<Void> {
 						ColorConversion.HSV.toDRGB(h, s, v, DRGB);
 						color = ColorConversion.RGB.toRGB(DRGB);
 					}
-					outImageMask.setRGB(outputImageSizeX - 1 - oimgX, oimgY, color);
+					outImageMask.setRGB(oimgX, oimgY, color);
 				}
 				if (oimgY % 10 == 0) {
 					SwtUtil.activeWaitDialogSetStatus(null, (100 * oimgY) / outputImageSizeY);
@@ -319,16 +319,16 @@ public class GeneratePanoramas implements Callable<Void> {
 			int color = ColorConversion.RGB.toRGB(DRGB);
 			for (int i = 0; i < image.imageSizeX; i++) {
 				transformCameraToWorld(i, 0, image, d);
-				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				oi.setRGB((int) d[0], (int) d[1], color);
 				transformCameraToWorld(i, image.imageSizeY - 1, image, d);
-				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				oi.setRGB((int) d[0], (int) d[1], color);
 			}
 			
 			for (int j = 0; j < image.imageSizeY; j++) {
 				transformCameraToWorld(0, j, image, d);
-				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				oi.setRGB((int) d[0], (int) d[1], color);
 				transformCameraToWorld(image.imageSizeX - 1, j, image, d);
-				oi.setRGB(outputImageSizeX - 1 - (int) d[0], (int) d[1], color);
+				oi.setRGB((int) d[0], (int) d[1], color);
 			}
 		}
 		

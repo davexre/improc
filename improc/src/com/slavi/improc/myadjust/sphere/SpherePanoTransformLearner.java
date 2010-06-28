@@ -63,10 +63,11 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 	public void transformForeward(double sx, double sy, KeyPointList image, double dest[]) {
 		SphereNorm.transformForeward(sx, sy, image, dest);
 		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+		dest[0] = -dest[0];
 	}
 	
 	public void transformBackward(double rx, double ry, KeyPointList image, double dest[]) {
-		SphericalCoordsLongZen.rotateBackward(rx, ry, wRot[0], wRot[1], wRot[2], dest);
+		SphericalCoordsLongZen.rotateBackward(-rx, ry, wRot[0], wRot[1], wRot[2], dest);
 		SphereNorm.transformBackward(dest[0], dest[1], image, dest);
 	}
 

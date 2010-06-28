@@ -44,11 +44,26 @@ public class KeyPointList {
 	public int calculatePrimsAtHop;
 	public int goodCount;
 
+	// Affine pano adjust
+	public double afa; // Affine Forward A
+	public double afb; // Affine Forward B
+	public double afc; // Affine Forward C (translateX)
+	public double afd; // Affine Forward D
+	public double afe; // Affine Forward E 
+	public double aff; // Affine Forward F (translateY)
+	
+	public double aba; // Affine Backward A
+	public double abb; // Affine Backward B
+	public double abc; // Affine Backward C (translateX)
+	public double abd; // Affine Backward D
+	public double abe; // Affine Backward E 
+	public double abf; // Affine Backward F (translateY)
+		
 	// Helmert pano adjust
 	public double a;
 	public double b;
-	public double hTranslateX; // c
-	public double hTranslateY; // d
+	public double hTranslateX;
+	public double hTranslateY;
 	
 	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
 	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 

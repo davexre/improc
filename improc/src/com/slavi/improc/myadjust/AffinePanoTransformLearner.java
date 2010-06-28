@@ -1,4 +1,4 @@
-package com.slavi.improc.myadjust.zyx;
+package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 
@@ -6,17 +6,13 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.CalculatePanoramaParams;
-import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
-import com.slavi.math.RotationZYX;
-import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 
-public class MyPanoPairTransformZYXLearner extends PanoTransformer {
+public class AffinePanoTransformLearner extends PanoTransformer {
 
 	LeastSquaresAdjust lsa;
 	double discrepancyThreshold;
@@ -26,33 +22,13 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
-		for (KeyPointPairList pairList : chain) {
-			double f = pairList.scale * KeyPointList.defaultCameraFOV_to_ScaleZ;
-			double c = pairList.translateX * pairList.source.cameraScale;
-			double d = pairList.translateY * pairList.source.cameraScale;
-			double f1f1 = f * f + pairList.translateY * pairList.translateY;
-			double f1 = Math.sqrt(f1f1);
-			double f2 = Math.sqrt(f1f1 + c * c);
-
-			pairList.rx = Math.atan2(d, f);
-			pairList.ry = Math.atan2(c, f1);
-			pairList.rz = Math.atan2(Math.tan(pairList.angle) * f1f1, f * f2);
-		}
+		this.discrepancyThreshold = 5.0; // 5 pixels
 	}
 	
 	public double getDiscrepancyThreshold() {
 		return discrepancyThreshold;
 	}
 
-	public static final RotationZYX rot = RotationZYX.instance;
-
-	/*
-	 * x -> fi (longitude)
-	 * y -> psi (latitude) 
-	 */
-	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
-	
 	/**
 	 * Transforms from source image coordinate system into world coord.system.
 	 * @param sx, sy	Coordinates in pixels of the source image with origin pixel(0,0)
@@ -61,48 +37,68 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 	 * 					is returned in dest[1] in the range [-pi/2; pi/2]. dest[2] should be 1.0    
 	 */
 	public void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
-		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
-		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
-		double sz = srcImage.scaleZ;
-		
-		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
-		SphericalCoordsLongZen.cartesianToPolar(dest[0], dest[1], dest[2], dest);
-		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
-		dest[0] = -dest[0];
+		if ((sx < 0.0) || (sx >= srcImage.imageSizeX) ||
+			(sy < 0.0) || (sy >= srcImage.imageSizeY)) {
+			dest[0] = 0.0;
+			dest[1] = 0.0;
+			dest[2] = -1.0;
+			return;
+		}
+		dest[0] = srcImage.afa * sx + srcImage.afb * sy + srcImage.afc;
+		dest[1] = srcImage.afd * sx + srcImage.afe * sy + srcImage.aff;
+		dest[2] = 1.0;
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		SphericalCoordsLongZen.rotateBackward(-rx, ry, wRot[0], wRot[1], wRot[2], dest);
-		SphericalCoordsLongZen.polarToCartesian(dest[0], dest[1], 1.0, dest);
-		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
-		if (dest[2] <= 0.0) {
-			dest[0] = Double.NaN;
-			dest[1] = Double.NaN;
-			return;
+		dest[0] = srcImage.aba * rx + srcImage.abb * ry + srcImage.abc;
+		dest[1] = srcImage.abd * rx + srcImage.abe * ry + srcImage.abf;
+		if ((dest[0] < 0.0) || (dest[0] >= srcImage.imageSizeX) ||
+			(dest[1] < 0.0) || (dest[1] >= srcImage.imageSizeY)) {
+			dest[0] = 0.0;
+			dest[1] = 0.0;
+			dest[2] = -1.0;
+		} else {
+			dest[2] = 1.0;
 		}
-		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
-		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
-		dest[2] = dest[2] == 0.0 ? 0.0 : srcImage.scaleZ / dest[2];
 	}
 	
-	public void transform3D(KeyPoint source, KeyPointList srcImage, double dest[]) {
-		double sx = (source.doubleX - srcImage.cameraOriginX) * srcImage.cameraScale;
-		double sy = (source.doubleY - srcImage.cameraOriginY) * srcImage.cameraScale;
-		double sz = srcImage.scaleZ;
+	private void fillReverseParams(KeyPointList image, Matrix work) {
+		work.setItem(0, 0, image.afa);
+		work.setItem(1, 0, image.afb);
+		work.setItem(2, 0, image.afc);
+		work.setItem(0, 1, image.afd);
+		work.setItem(1, 1, image.afe);
+		work.setItem(2, 1, image.aff);
+		work.setItem(0, 2, 0.0);
+		work.setItem(1, 2, 0.0);
+		work.setItem(2, 2, 1.0);
+		work.inverse();
 		
-		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
+		image.aba = work.getItem(0, 0);
+		image.abb = work.getItem(1, 0);
+		image.abc = work.getItem(2, 0);
+		image.abd = work.getItem(0, 1);
+		image.abe = work.getItem(1, 1);
+		image.abf = work.getItem(2, 1);
 	}
 	
 	void calculatePrims() {
-		origin.rx = 0.0;
-		origin.ry = 0.0;
-		origin.rz = 0.0;
-		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		origin.a = 1.0;
+		origin.b = 0.0;
+		origin.hTranslateX = 0.0;
+		origin.hTranslateY = 0.0;
 		origin.calculatePrimsAtHop = 0;
 		
 		ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(images);
-		for (KeyPointList image : todo)
+		for (KeyPointList image : todo) {
 			image.calculatePrimsAtHop = -1;
+		}
+		for (KeyPointPairList pairList : chain) {
+			pairList.a = pairList.scale * Math.cos(pairList.angle);
+			pairList.b = pairList.scale * Math.sin(pairList.angle);
+			pairList.hTranslateX = pairList.translateX;
+			pairList.hTranslateY = pairList.translateY;
+		}
 		
 		int curImageIndex = todo.size() - 1;
 		boolean listModified = false;
@@ -133,29 +129,20 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 			
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
-					double angles[] = new double[3];
-					Matrix sourceToTarget = rot.makeAngles(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz);
-					Matrix targetToWorld = rot.makeAngles(-minHopPairList.target.rx, -minHopPairList.target.ry, minHopPairList.target.rz);
-					Matrix sourceToWorld = new Matrix(3, 3);
-					sourceToTarget.mMul(targetToWorld, sourceToWorld);
-					rot.getRotationAngles(sourceToWorld, angles);
-					curImage.rx = -angles[0];
-					curImage.ry = -angles[1];
-					curImage.rz = angles[2];
-					curImage.scaleZ = minHopPairList.target.scaleZ * minHopPairList.scale; 
+					curImage.a = minHopPairList.target.a * minHopPairList.a - minHopPairList.target.b * minHopPairList.b;
+					curImage.b = minHopPairList.target.b * minHopPairList.a + minHopPairList.target.a * minHopPairList.b;
+					curImage.hTranslateX = minHopPairList.target.a * minHopPairList.hTranslateX - 
+							minHopPairList.target.b * minHopPairList.hTranslateY + minHopPairList.target.hTranslateX;
+					curImage.hTranslateY = minHopPairList.target.b * minHopPairList.hTranslateX + 
+							minHopPairList.target.a * minHopPairList.hTranslateY + minHopPairList.target.hTranslateY;
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
-					double angles[] = new double[3];
-					rot.getRotationAnglesBackword(minHopPairList.rx, minHopPairList.ry, minHopPairList.rz, angles);
-					Matrix targetToSource = rot.makeAngles(-angles[0], -angles[1], angles[2]);
-					Matrix sourceToWorld = rot.makeAngles(minHopPairList.source.rx, minHopPairList.source.ry, minHopPairList.source.rz);
-					Matrix targetToWorld = new Matrix(3, 3);
-					targetToSource.mMul(sourceToWorld, targetToWorld);
-					rot.getRotationAngles(targetToWorld, angles);
-					curImage.rx = angles[0];
-					curImage.ry = angles[1];
-					curImage.rz = angles[2];
-					curImage.scaleZ = minHopPairList.source.scaleZ / minHopPairList.scale; 
+					curImage.a = minHopPairList.source.a * minHopPairList.a + minHopPairList.source.b * minHopPairList.b;
+					curImage.b = minHopPairList.source.b * minHopPairList.a - minHopPairList.source.a * minHopPairList.b;
+					curImage.hTranslateX = - minHopPairList.source.a * minHopPairList.hTranslateX + 
+							minHopPairList.source.b * minHopPairList.hTranslateY + minHopPairList.source.hTranslateX;
+					curImage.hTranslateY = - minHopPairList.source.b * minHopPairList.hTranslateX - 
+							minHopPairList.source.a * minHopPairList.hTranslateY + minHopPairList.source.hTranslateY;
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
 				}
 				curImage.calculatePrimsAtHop = minHop + 1;
@@ -174,121 +161,77 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		
 		if (todo.size() > 0) 
 			throw new RuntimeException("Failed calculating the prims");
+
+		origin.afa = 1.0;
+		origin.afb = 0.0;
+		origin.afc = 0.0;
+		origin.afd = 0.0;
+		origin.afe = 1.0;
+		origin.aff = 0.0;
+		Matrix work = new Matrix(3, 3);
+		for (KeyPointList image : images) {
+			image.afa = image.a;
+			image.afb = -image.b;
+			image.afc = image.hTranslateX;
+
+			image.afd = image.b;
+			image.afe = image.a;
+			image.aff = image.hTranslateY;
+			fillReverseParams(image, work);
+		}
 	}
 
 	void calculateNormalEquations() {
-		Matrix coefs = new Matrix(images.size() * 4, 1);			
-
-		origin.rx = 0;
-		origin.ry = 0;
-		origin.rz = 0;
-		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		buildCamera2RealMatrix(origin);
-		for (KeyPointList image : images) {
-			buildCamera2RealMatrix(image);
-		}
-		
-		Matrix P1 = new Matrix(1, 3);
-		Matrix P2 = new Matrix(1, 3);
-		
-		Matrix dPW1dX1 = new Matrix(1, 3);
-		Matrix dPW1dY1 = new Matrix(1, 3);
-		Matrix dPW1dZ1 = new Matrix(1, 3);
-
-		Matrix dPW2dX2 = new Matrix(1, 3);
-		Matrix dPW2dY2 = new Matrix(1, 3);
-		Matrix dPW2dZ2 = new Matrix(1, 3);
-
+		Matrix coefs = new Matrix(images.size() * 6, 1);			
 		double PW1[] = new double[3];
 		double PW2[] = new double[3];
-		
-		KeyPoint source1 = new KeyPoint();
-		KeyPoint dest1= new KeyPoint();
 		lsa.clear();
-		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
-				pointCounter++;
-				
+
 				double computedWeight = getComputedWeight(item);
 				KeyPoint source = item.getKey();
-				KeyPoint dest = item.getValue();
+				KeyPoint target = item.getValue();
 				
-				source1.doubleX = (source.doubleX - pairList.source.cameraOriginX) * pairList.source.cameraScale;
-				source1.doubleY = (source.doubleY - pairList.source.cameraOriginY) * pairList.source.cameraScale;
+				transformForeward(source.doubleX, source.doubleY, source.keyPointList, PW1);
+				transformForeward(target.doubleX, target.doubleY, target.keyPointList, PW2);
+				
+				int srcIndex = images.indexOf(pairList.source) * 6;
+				int destIndex = images.indexOf(pairList.target) * 6;
 
-				dest1.doubleX = (dest.doubleX - pairList.target.cameraOriginX) * pairList.target.cameraScale;
-				dest1.doubleY = (dest.doubleY - pairList.target.cameraOriginY) * pairList.target.cameraScale;
-				
-				int srcIndex = images.indexOf(pairList.source) * 4;
-				int destIndex = images.indexOf(pairList.target) * 4;
-				
 				coefs.make0();
-	
-				transform3D(source, pairList.source, PW1);
-				transform3D(dest, pairList.target, PW2);
-				
-				P1.setItem(0, 0, source1.doubleX);
-				P1.setItem(0, 1, source1.doubleY);
-				P1.setItem(0, 2, pairList.source.scaleZ);
-				
-				P2.setItem(0, 0, dest1.doubleX);
-				P2.setItem(0, 1, dest1.doubleY);
-				P2.setItem(0, 2, pairList.target.scaleZ);
-				
-				source.keyPointList.dMdX.mMul(P1, dPW1dX1);
-				source.keyPointList.dMdY.mMul(P1, dPW1dY1);
-				source.keyPointList.dMdZ.mMul(P1, dPW1dZ1);
-				
-				dest.keyPointList.dMdX.mMul(P2, dPW2dX2);
-				dest.keyPointList.dMdY.mMul(P2, dPW2dY2);
-				dest.keyPointList.dMdZ.mMul(P2, dPW2dZ2);
-	
-				for (int c1 = 0; c1 < 3; c1++) {
-					int c2 = (c1 + 1) % 3;
-					coefs.make0();
-					double L = PW1[c1] * PW2[c2] - PW1[c2] * PW2[c1];
-					/*
-					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
-					 * fy: P'1(z) * P'2(x) - P'1(x) * P'2(z) = 0
-					 * fz: P'1(x) * P'2(y) - P'1(y) * P'2(x) = 0
-					 * 
-					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
-					 */
-					if (srcIndex >= 0) {
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
-						coefs.setItem(srcIndex + 3, 0, (
-								source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
-								source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
-					}
-					if (destIndex >= 0) {
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
-						coefs.setItem(destIndex + 3, 0, (
-								PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
-								PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
-					}
-					lsa.addMeasurement(coefs, computedWeight, L, 0);
+				double L = PW1[0] - PW2[0];
+				if (srcIndex >= 0) {
+					coefs.setItem(srcIndex + 0, 0, source.doubleX);
+					coefs.setItem(srcIndex + 1, 0, source.doubleY);
+					coefs.setItem(srcIndex + 2, 0, 1.0);
 				}
+				if (destIndex >= 0) {
+					coefs.setItem(destIndex + 0, 0, -target.doubleX);
+					coefs.setItem(destIndex + 1, 0, -target.doubleY);
+					coefs.setItem(destIndex + 2, 0, -1.0);
+				}
+//				System.out.print(L + "\t" + coefs.toString());
+				lsa.addMeasurement(coefs, computedWeight, L, 0);
+
+				coefs.make0();
+				L = PW1[1] - PW2[1];
+				if (srcIndex >= 0) {
+					coefs.setItem(srcIndex + 3, 0, source.doubleX);
+					coefs.setItem(srcIndex + 4, 0, source.doubleY);
+					coefs.setItem(srcIndex + 5, 0, 1.0);
+				}
+				if (destIndex >= 0) {
+					coefs.setItem(destIndex + 3, 0, -target.doubleX);
+					coefs.setItem(destIndex + 4, 0, -target.doubleY);
+					coefs.setItem(destIndex + 5, 0, -1.0);
+				}
+//				System.out.print(L + "\t" + coefs.toString());
+				lsa.addMeasurement(coefs, computedWeight, L, 0);
 			}
 		}
-	}
-	
-	void buildCamera2RealMatrix(KeyPointList image) {
-		image.camera2real = rot.makeAngles(image.rx, image.ry, image.rz);
-		image.dMdX = rot.make_dF_dR1(image.rx, image.ry, image.rz);
-		image.dMdY = rot.make_dF_dR2(image.rx, image.ry, image.rz);
-		image.dMdZ = rot.make_dF_dR3(image.rx, image.ry, image.rz);
-	}
-
-	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
-			int atIndex, int c1, double transformedCoord) {
-		coef.setItem(atIndex + 0, 0, dPWdX.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 0, 0));
-		coef.setItem(atIndex + 1, 0, dPWdY.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 1, 0));
-		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
 	}
 	
 	public void setDiscrepancy(KeyPointPair item, double discrepancy) {
@@ -386,13 +329,16 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 				double discrepancy = getDiscrepancy(item);
 				boolean curIsBad = discrepancy > maxDiscrepancy;
 				if (oldIsBad != curIsBad) {
-					setBad(item, curIsBad);
 					if (curIsBad) {
+						setBad(item, curIsBad);
 						result.oldGoodNowBad++;
 						pairList.transformResult.oldGoodNowBad++;
 					} else {
-						result.oldBadNowGood++;
-						pairList.transformResult.oldBadNowGood++;
+						if (discrepancy < pairList.transformResult.discrepancyStatistics.getAvgValue()) {
+							setBad(item, curIsBad);
+							result.oldBadNowGood++;
+							pairList.transformResult.oldBadNowGood++;
+						}
 					}
 				}
 				if (curIsBad) {
@@ -432,7 +378,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
 				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
 				
-				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
+				double discrepancy = MathUtil.hypot(PW1[0] - PW2[0], PW1[1] - PW2[1]);
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);
@@ -506,37 +452,60 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 			calculatePrims();
 		}
 
-		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
+		lsa = new LeastSquaresAdjust(images.size() * 6, 1);
 		calculateNormalEquations();
-		// Calculate Unknowns
+/*		// Calculate Unknowns
+		Matrix m1 = lsa.getNm().makeSquareMatrix();
+		Matrix m2 = lsa.getNm().makeSquareMatrix();
+		Matrix m3 = new Matrix();
+		if (!m2.inverse())
+			System.out.println("FAILED!!!!!");
+//			throw new RuntimeException("failed");
+		m1.printM("M1");
+		System.out.println("DET=" + m1.det());
+		m2.printM("M2");
+		m1.mMul(m2, m3);		
+		m3.printM("M3");
+*/
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
+		double scaleOLD = MathUtil.hypot(origin.a, origin.b);
+		double angleOLD = Math.atan2(origin.b, origin.a);
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
-				"\trx=" + MathUtil.rad2degStr(origin.rx) + 
-				"\try=" + MathUtil.rad2degStr(origin.ry) + 
-				"\trz=" + MathUtil.rad2degStr(origin.rz) + 
-				"\ts=" + MathUtil.d4(origin.scaleZ)
+				"\tangle=" + MathUtil.rad2degStr(angleOLD) + 
+				"\tscale=" + MathUtil.d4(scaleOLD) + 
+				"\ttranslateX=" + MathUtil.d4(origin.hTranslateX) + 
+				"\ttranslateY=" + MathUtil.d4(origin.hTranslateY)
 				);
+
+		Matrix work = new Matrix(3, 3);
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
-			int index = curImage * 4;
+			int index = curImage * 6;
 			System.out.println(image.imageFileStamp.getFile().getName() + 
-					"\trx=" + MathUtil.rad2degStr(image.rx) + 
-					"\try=" + MathUtil.rad2degStr(image.ry) + 
-					"\trz=" + MathUtil.rad2degStr(image.rz) + 
-					"\ts=" + MathUtil.d4(image.scaleZ) +
-					"\tdx=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
-					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
-					"\tdz=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					"\tds=" + MathUtil.d4(u.getItem(0, index + 3)) 
+					"\tafa=" + MathUtil.d4(image.afa) + 
+					"\tafb=" + MathUtil.d4(image.afb) +
+					"\tafc=" + MathUtil.d4(image.afc) +
+					"\tafd=" + MathUtil.d4(image.afd) +
+					"\tafe=" + MathUtil.d4(image.afe) +
+					"\tafr=" + MathUtil.d4(image.aff) +
+					"\tdafa=" + MathUtil.d4(u.getItem(0, index + 0)) + 
+					"\tdafb=" + MathUtil.d4(u.getItem(0, index + 1)) + 
+					"\tdafc=" + MathUtil.d4(u.getItem(0, index + 2)) + 
+					"\tdafd=" + MathUtil.d4(u.getItem(0, index + 3)) + 
+					"\tdafe=" + MathUtil.d4(u.getItem(0, index + 4)) + 
+					"\tdaff=" + MathUtil.d4(u.getItem(0, index + 5)) 
 					);
-			image.scaleZ = (image.scaleZ - u.getItem(0, index + 3));
-			image.rx = MathUtil.fixAngleMPI_PI(image.rx - u.getItem(0, index + 0));
-			image.ry = MathUtil.fixAngleMPI_PI(image.ry - u.getItem(0, index + 1));
-			image.rz = MathUtil.fixAngleMPI_PI(image.rz - u.getItem(0, index + 2));
-			buildCamera2RealMatrix(image);
+			image.afa -= u.getItem(0, index + 0);
+			image.afb -= u.getItem(0, index + 1);
+			image.afc -= u.getItem(0, index + 2);
+			image.afd -= u.getItem(0, index + 3);
+			image.afe -= u.getItem(0, index + 4);
+			image.aff -= u.getItem(0, index + 5);
+
+			fillReverseParams(image, work);
 		}
 		computeDiscrepancies(result);
 		computeBad(result);
