@@ -47,6 +47,13 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		for (KeyPointPair pair : pairList.items) {
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
+/*			double dsx = pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX;  
+			double dsy = pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY;
+			double dtx = pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX;  
+			double dty = pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY;
+			pair.weight = Math.sqrt(dsx*dsx + dsy*dsy) / Math.max(pair.sourceSP.keyPointList.cameraOriginX, pair.sourceSP.keyPointList.cameraOriginY)
+			+ Math.sqrt(dtx*dtx + dty*dty) / Math.max(pair.targetSP.keyPointList.cameraOriginX, pair.targetSP.keyPointList.cameraOriginY);
+*/			
 		}		
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		double params[] = new double[4];

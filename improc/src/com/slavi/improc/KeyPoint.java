@@ -5,9 +5,9 @@ import java.util.StringTokenizer;
 public class KeyPoint {
 	public KeyPointList keyPointList = null;
 	
-	public static final int numDirections = 4;
+	public static final int numDirections = 4;	// originally 8
 
-	public static final int descriptorSize = 8;
+	public static final int descriptorSize = 4;	// originally 4
 
 	public static final int featureVectorLinearSize = descriptorSize * descriptorSize * numDirections;
 

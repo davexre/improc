@@ -41,15 +41,15 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	ArrayList<ArrayList<KeyPointPairList>> panos = new ArrayList<ArrayList<KeyPointPairList>>();
 	
 	public CalculatePanoramaParams(ExecutorService exec,
-			PanoTransformer panoTransformer,
+			String panoTransformerClassName,
 			ArrayList<KeyPointPairList> kppl,
 			AbsoluteToRelativePathMaker keyPointPairFileRoot,
 			String outputDir,
 			boolean pinPoints,
 			boolean useColorMasks,
-			boolean useImageMaxWeight) {
+			boolean useImageMaxWeight) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		this.exec = exec;
-		this.panoTransformer = panoTransformer;
+		this.panoTransformer = (PanoTransformer) Class.forName(panoTransformerClassName).newInstance();
 		this.kppl = kppl;
 		this.keyPointPairFileRoot = keyPointPairFileRoot;
 		this.outputDir = outputDir;

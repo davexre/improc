@@ -12,6 +12,7 @@ public class Settings {
 	public String imagesRootStr;
 	public String keyPointFileRootStr; 
 	public String outputDirStr;
+	public String adjustMethodClassName;
 	public boolean pinPoints;
 	public boolean useColorMasks;
 	public boolean useImageMaxWeight;
@@ -47,6 +48,7 @@ public class Settings {
 		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
 		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
 		result.outputDirStr = properties.getProperty("OutputDir", userHomeRootStr);
+		result.adjustMethodClassName = properties.getProperty("AdjustMethodClassName");
 		result.pinPoints = getBooleanProperty(properties, "PinPoints");
 		result.useColorMasks = getBooleanProperty(properties, "UseColorMasks");
 		result.useImageMaxWeight = getBooleanProperty(properties, "UseImageMaxWeight");
@@ -59,6 +61,7 @@ public class Settings {
 		properties.setProperty("ImagesRoot", imagesRootStr);
 		properties.setProperty("KeyPointFileRoot", keyPointFileRootStr);
 		properties.setProperty("OutputDir", outputDirStr);
+		properties.setProperty("AdjustMethodClassName", adjustMethodClassName);
 		properties.setProperty("PinPoints", pinPoints ? "true" : "false");
 		properties.setProperty("UseColorMasks", useColorMasks ? "true" : "false");
 		properties.setProperty("UseImageMaxWeight", useImageMaxWeight ? "true" : "false");

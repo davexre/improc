@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -22,12 +23,32 @@ import com.slavi.util.ui.SwtUtil;
 
 public class SettingsDialog {
 	
+	String[] strAdjustMethods = {
+			"Helmert transformation",
+			"Affine transformation",
+			"SpherePanoTransformLearner", 
+			"SpherePanoTransformLearner2",
+			"MyPanoPairTransformLearner (XYZ)",
+			"MyPanoPairTransformZYZLearner",
+			"MyPanoPairTransformZYXLearner"
+			};
+	String[] strAdjustClasses = {
+			"com.slavi.improc.myadjust.HelmertPanoTransformLearner",
+			"com.slavi.improc.myadjust.AffinePanoTransformLearner",
+			"com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner",
+			"com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2",
+			"com.slavi.improc.myadjust.xyz.MyPanoPairTransformLearner",
+			"com.slavi.improc.myadjust.zyx.MyPanoPairTransformZYXLearner",
+			"com.slavi.improc.myadjust.zyz.MyPanoPairTransformZYZLearner"
+	};
+	
 	Shell shell;
 
 	// Control references
 	Text txtImagesRoot;
 	Text txtKeyPointFileRoot;
 	Text txtOutputDir;
+	Combo optAdjustMethod;
 	Button btnPinPoints;
 	Button btnUseColorMasks;
 	Button btnUseImageMaxWeight;
@@ -35,7 +56,7 @@ public class SettingsDialog {
 	Button btnCancel;
 	Button btnNext;
 	boolean result;
-	
+		
 	public SettingsDialog(Shell parent) {
 		shell = new Shell(parent, SWT.SHELL_TRIM);
 		createWidgets();
@@ -132,6 +153,9 @@ public class SettingsDialog {
 
 		/////////////
 		
+		optAdjustMethod = new Combo(group, SWT.READ_ONLY);
+		optAdjustMethod.setItems(strAdjustMethods);
+		
 		btnPinPoints = new Button(group, SWT.CHECK);
 		btnPinPoints.setText("Pin points");
 		
@@ -170,6 +194,7 @@ public class SettingsDialog {
 					settings.imagesRootStr = txtImagesRoot.getText();
 					settings.keyPointFileRootStr = txtKeyPointFileRoot.getText();
 					settings.outputDirStr = txtOutputDir.getText();
+					settings.adjustMethodClassName = strAdjustClasses[optAdjustMethod.getSelectionIndex()];
 					settings.pinPoints = btnPinPoints.getSelection();
 					settings.useColorMasks = btnUseColorMasks.getSelection();
 					settings.useImageMaxWeight = btnUseImageMaxWeight.getSelection();
@@ -218,6 +243,16 @@ public class SettingsDialog {
 		txtImagesRoot.setText(settings.imagesRootStr);
 		txtKeyPointFileRoot.setText(settings.keyPointFileRootStr);
 		txtOutputDir.setText(settings.outputDirStr);
+
+		int selectedItemIndex = 0;
+		for (int i = 0; i < strAdjustClasses.length; i++) {
+			String item = strAdjustClasses[i];
+			if (item != null && item.equalsIgnoreCase(settings.adjustMethodClassName)) {
+				selectedItemIndex = i;
+				break;
+			}				
+		}
+		optAdjustMethod.select(selectedItemIndex);
 		btnPinPoints.setSelection(settings.pinPoints);
 		btnUseColorMasks.setSelection(settings.useColorMasks);
 		btnUseImageMaxWeight.setSelection(settings.useImageMaxWeight);

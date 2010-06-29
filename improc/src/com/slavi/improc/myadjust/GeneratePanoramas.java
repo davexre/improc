@@ -51,14 +51,14 @@ public class GeneratePanoramas implements Callable<Void> {
 	AtomicInteger rowsProcessed;
 
 	public GeneratePanoramas(ExecutorService exec,
-			PanoTransformer panoTransformer,
+			String panoTransformerClassName,
 			ArrayList<ArrayList<KeyPointPairList>> panos,
 			String outputDir,
 			boolean pinPoints,
 			boolean useColorMasks,
-			boolean useImageMaxWeight) {
+			boolean useImageMaxWeight) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
 		this.exec = exec;
-		this.panoTransformer = panoTransformer;
+		this.panoTransformer = (PanoTransformer) Class.forName(panoTransformerClassName).newInstance();
 		this.panos = panos;
 		this.outputDir = outputDir;
 		this.pinPoints = pinPoints;
@@ -333,26 +333,27 @@ public class GeneratePanoramas implements Callable<Void> {
 		}
 		
 		for (KeyPointPairList pairList : pairLists) {
-			int colorCross = images.indexOf(pairList.source);
-			int colorX = images.indexOf(pairList.target);
+			int colorCross;
+			int colorX;
 			
 			if (useImageMaxWeight) {
 				double h = pairList.source.imageId * MathUtil.C2PI * 2.0 / 13.0;
 				ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
 				colorCross = ColorConversion.RGB.toRGB(DRGB);
 
-				h = pairList.source.imageId * MathUtil.C2PI * 2.0 / 13.0;
+				h = pairList.target.imageId * MathUtil.C2PI * 2.0 / 13.0;
 				ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
 				colorX = ColorConversion.RGB.toRGB(DRGB);
 			} else {
+				colorCross = images.indexOf(pairList.source);;
 				colorCross = colorCross % 3;
 				colorCross = colorCross < 0 ? -1 : 255 << (8 * colorCross);
 				
+				colorX = images.indexOf(pairList.target);
 				colorX = colorX % 3;
 				colorX = colorX < 0 ? -1 : 255 << (8 * colorX);			
 			}
-			
-			
+
 			for (KeyPointPair pair : pairList.items) {
 				if (!pair.bad) {
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
