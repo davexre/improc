@@ -19,14 +19,12 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 
 	LeastSquaresAdjust lsa;
-	double discrepancyThreshold;
-	protected int iteration = 0; 
 
 	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 5.0 / 60.0; // 5 angular minutes
+		this.iteration = 0;
 		for (KeyPointPairList pairList : chain) {
 			double f = pairList.scale * KeyPointList.defaultCameraFOV_to_ScaleZ;
 			double c = pairList.translateX * pairList.source.cameraScale;
@@ -42,7 +40,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return discrepancyThreshold;
+		return 5.0 / 60.0; // 5 angular minutes
 	}
 
 	public static final RotationZYX rot = RotationZYX.instance;
@@ -291,139 +289,12 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
 	}
 	
-	public void setDiscrepancy(KeyPointPair item, double discrepancy) {
-		item.discrepancy = discrepancy;
-	}
-
-	public double getDiscrepancy(KeyPointPair item) {
-		return item.discrepancy;
-	}
-	
-	public void setBad(KeyPointPair item, boolean bad) {
-		item.panoBad = bad;
-	}
-
-	public boolean isBad(KeyPointPair item) {
-		return item.panoBad;
-	}
-
-	public double getWeight(KeyPointPair item) {
-		return item.weight;
-	}
-	
-	public double getComputedWeight(KeyPointPair item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
-	}
-
-	private double oneOverSumWeights = 1.0;
-	/**
-	 * @return Number of point pairs NOT marked as bad.
-	 */
-	protected void computeWeights(TransformLearnerResult result) {
-		result.iteration = ++iteration;
-		result.dataCount = 0;
-		result.oldBadCount = 0;
-		result.oldGoodCount = 0;
-
-		for (KeyPointList image : images) {
-			image.goodCount = 0;
-		}
-		double sumWeight = 0;
-		for (KeyPointPairList pairList : chain) {
-			result.dataCount += pairList.items.size();
-			pairList.transformResult = new TransformLearnerResult();
-			pairList.transformResult.iteration = result.iteration;
-			pairList.transformResult.dataCount = pairList.items.size();
-			pairList.transformResult.oldBadCount = 0;
-			pairList.transformResult.oldGoodCount = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				if (isBad(item)) {
-					result.oldBadCount++;
-					pairList.transformResult.oldBadCount++;
-					continue;
-				}
-				result.oldGoodCount++;
-				pairList.transformResult.oldGoodCount++;
-				item.sourceSP.keyPointList.goodCount++;
-				item.targetSP.keyPointList.goodCount++;
-				double weight = getWeight(item); 
-				if (weight < 0)
-					throw new IllegalArgumentException("Negative weight received.");
-				sumWeight += weight;
-			}
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / result.oldGoodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
-		}
-	}
-	
-	protected void computeBad(TransformLearnerResult result) {
-		result.newBadCount = 0;
-		result.newGoodCount = 0;
-		result.oldGoodNowBad = 0;
-		result.oldBadNowGood = 0;
-		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
-		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
-			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
-		}
-		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
-			result.maxAllowedDiscrepancy = discrepancyThreshold;
-		
-		for (KeyPointPairList pairList : chain) {
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
-				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
-			double maxDiscrepancy = pairList.maxDiscrepancy;
-			pairList.transformResult.newBadCount = 0;
-			pairList.transformResult.newGoodCount = 0;
-			pairList.transformResult.oldGoodNowBad = 0;
-			pairList.transformResult.oldBadNowGood = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				boolean oldIsBad = isBad(item);
-				double discrepancy = getDiscrepancy(item);
-				boolean curIsBad = discrepancy > maxDiscrepancy;
-				if (oldIsBad != curIsBad) {
-					setBad(item, curIsBad);
-					if (curIsBad) {
-						result.oldGoodNowBad++;
-						pairList.transformResult.oldGoodNowBad++;
-					} else {
-						result.oldBadNowGood++;
-						pairList.transformResult.oldBadNowGood++;
-					}
-				}
-				if (curIsBad) {
-					result.newBadCount++;
-					pairList.transformResult.newBadCount++;
-				} else {
-					result.newGoodCount++;
-					pairList.transformResult.newGoodCount++;
-				}
-			}
-
-			System.out.println(
-					pairList.source.imageFileStamp.getFile().getName() + "\t" +
-					pairList.target.imageFileStamp.getFile().getName() +
-					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
-					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
-					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
-					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
-					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
-					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
-					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
-					"\t" + pairList.transformResult.newGoodCount + "/" + pairList.transformResult.dataCount
-					);
-		}
-	}
-	
 	protected void computeDiscrepancies(TransformLearnerResult result) {
 		double PW1[] = new double[3];
 		double PW2[] = new double[3];
 
 		result.discrepancyStatistics.start();
+		double discrepancyThreshold = getDiscrepancyThreshold();
 		for (KeyPointPairList pairList : chain) {
 			pairList.transformResult.discrepancyStatistics.start();
 			int goodCount = 0;
@@ -452,32 +323,6 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		}
 		result.discrepancyStatistics.stop();
 		return;
-	}
-	
-	private boolean removeBadKeyPointPairLists() {
-		boolean chainModified = false;
-		for (int i = chain.size() - 1; i >= 0; i--) {
-			KeyPointPairList pairList = chain.get(i);
-			int goodCount = 0;
-			for (KeyPointPair pair : pairList.items) {
-				if (!isBad(pair))
-					goodCount++;
-			}
-			if (goodCount < 10) {
-				System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
-						"\t" + pairList.source.imageFileStamp.getFile().getName() +
-						"\t" + pairList.target.imageFileStamp.getFile().getName());
-				chain.remove(i);
-				ignoredPairLists.add(pairList);
-				chainModified = true;
-			}
-		}
-		if (chainModified) {
-			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
-			ignoredPairLists.addAll(chain);
-			chain = tmpChain;
-		}
-		return chainModified;
 	}
 	
 	public TransformLearnerResult calculateOne() {
