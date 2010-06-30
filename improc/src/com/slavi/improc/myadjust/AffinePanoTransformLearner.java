@@ -15,18 +15,16 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class AffinePanoTransformLearner extends PanoTransformer {
 
 	LeastSquaresAdjust lsa;
-	double discrepancyThreshold;
-	protected int iteration = 0; 
 
 	public void initialize(ArrayList<KeyPointPairList> chain) {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 5.0; // 5 pixels
+		this.iteration = 0;
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return discrepancyThreshold;
+		return 3.0; // 5 pixels
 	}
 
 	/**
@@ -62,31 +60,21 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 		}
 	}
 	
-	private void fillReverseParams(KeyPointList image, Matrix work) {
-		work.setItem(0, 0, image.afa);
-		work.setItem(1, 0, image.afb);
-		work.setItem(2, 0, image.afc);
-		work.setItem(0, 1, image.afd);
-		work.setItem(1, 1, image.afe);
-		work.setItem(2, 1, image.aff);
-		work.setItem(0, 2, 0.0);
-		work.setItem(1, 2, 0.0);
-		work.setItem(2, 2, 1.0);
-		work.inverse();
-		
-		image.aba = work.getItem(0, 0);
-		image.abb = work.getItem(1, 0);
-		image.abc = work.getItem(2, 0);
-		image.abd = work.getItem(0, 1);
-		image.abe = work.getItem(1, 1);
-		image.abf = work.getItem(2, 1);
-	}
-	
 	void calculatePrims() {
-		origin.a = 1.0;
-		origin.b = 0.0;
-		origin.hTranslateX = 0.0;
-		origin.hTranslateY = 0.0;
+		origin.afa = 1.0;
+		origin.afb = 0.0;
+		origin.afc = 0.0;
+		origin.afd = 0.0;
+		origin.afe = 1.0;
+		origin.aff = 0.0;
+
+		origin.aba = 1.0;
+		origin.abb = 0.0;
+		origin.abc = 0.0;
+		origin.abd = 0.0;
+		origin.abe = 1.0;
+		origin.abf = 0.0;
+
 		origin.calculatePrimsAtHop = 0;
 		
 		ArrayList<KeyPointList> todo = new ArrayList<KeyPointList>(images);
@@ -96,8 +84,6 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 		for (KeyPointPairList pairList : chain) {
 			pairList.a = pairList.scale * Math.cos(pairList.angle);
 			pairList.b = pairList.scale * Math.sin(pairList.angle);
-			pairList.hTranslateX = pairList.translateX;
-			pairList.hTranslateY = pairList.translateY;
 		}
 		
 		int curImageIndex = todo.size() - 1;
@@ -129,20 +115,104 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 			
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
-					curImage.a = minHopPairList.target.a * minHopPairList.a - minHopPairList.target.b * minHopPairList.b;
-					curImage.b = minHopPairList.target.b * minHopPairList.a + minHopPairList.target.a * minHopPairList.b;
-					curImage.hTranslateX = minHopPairList.target.a * minHopPairList.hTranslateX - 
-							minHopPairList.target.b * minHopPairList.hTranslateY + minHopPairList.target.hTranslateX;
-					curImage.hTranslateY = minHopPairList.target.b * minHopPairList.hTranslateX + 
-							minHopPairList.target.a * minHopPairList.hTranslateY + minHopPairList.target.hTranslateY;
+					Matrix sourceToTarget = new Matrix(3, 3);
+					sourceToTarget.setItem(0, 0, minHopPairList.a);
+					sourceToTarget.setItem(1, 0, -minHopPairList.b);
+					sourceToTarget.setItem(2, 0, minHopPairList.translateX);
+					sourceToTarget.setItem(0, 1, minHopPairList.b);
+					sourceToTarget.setItem(1, 1, minHopPairList.a);
+					sourceToTarget.setItem(2, 1, minHopPairList.translateY);
+					sourceToTarget.setItem(0, 2, 0.0);
+					sourceToTarget.setItem(1, 2, 0.0);
+					sourceToTarget.setItem(2, 2, 1.0);
+					
+					Matrix targetToWorld = new Matrix(3, 3);
+					targetToWorld.setItem(0, 0, minHopPairList.target.afa);
+					targetToWorld.setItem(1, 0, minHopPairList.target.afb);
+					targetToWorld.setItem(2, 0, minHopPairList.target.afc);
+					targetToWorld.setItem(0, 1, minHopPairList.target.afd);
+					targetToWorld.setItem(1, 1, minHopPairList.target.afe);
+					targetToWorld.setItem(2, 1, minHopPairList.target.aff);
+					targetToWorld.setItem(0, 2, 0.0);
+					targetToWorld.setItem(1, 2, 0.0);
+					targetToWorld.setItem(2, 2, 1.0);
+					
+					Matrix sourceToWorld = new Matrix(3, 3);
+					sourceToTarget.mMul(targetToWorld, sourceToWorld);
+					
+					curImage.afa = sourceToWorld.getItem(0, 0);
+					curImage.afb = sourceToWorld.getItem(1, 0);
+					curImage.afc = sourceToWorld.getItem(2, 0);
+					curImage.afd = sourceToWorld.getItem(0, 1);
+					curImage.afe = sourceToWorld.getItem(1, 1);
+					curImage.aff = sourceToWorld.getItem(2, 1);
+					if (!sourceToWorld.inverse())
+						throw new RuntimeException("Invalid inverse matrix");
+					curImage.aba = sourceToWorld.getItem(0, 0);
+					curImage.abb = sourceToWorld.getItem(1, 0);
+					curImage.abc = sourceToWorld.getItem(2, 0);
+					curImage.abd = sourceToWorld.getItem(0, 1);
+					curImage.abe = sourceToWorld.getItem(1, 1);
+					curImage.abf = sourceToWorld.getItem(2, 1);
+					
+/*					curImage.afa = minHopPairList.target.afa * minHopPairList.a - minHopPairList.target.afb * minHopPairList.b;
+					curImage.afb = minHopPairList.target.afb * minHopPairList.a + minHopPairList.target.afa * minHopPairList.b;
+					curImage.afc = minHopPairList.target.afa * minHopPairList.hTranslateX - 
+							minHopPairList.target.afb * minHopPairList.hTranslateY + minHopPairList.target.hTranslateX;
+					curImage.aff = minHopPairList.target.afb * minHopPairList.hTranslateX + 
+							minHopPairList.target.afa * minHopPairList.hTranslateY + minHopPairList.target.hTranslateY;
+*/
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.target.imageFileStamp.getFile().getName());
 				} else { // if (curImage == minHopPairList.target) {
-					curImage.a = minHopPairList.source.a * minHopPairList.a + minHopPairList.source.b * minHopPairList.b;
-					curImage.b = minHopPairList.source.b * minHopPairList.a - minHopPairList.source.a * minHopPairList.b;
-					curImage.hTranslateX = - minHopPairList.source.a * minHopPairList.hTranslateX + 
-							minHopPairList.source.b * minHopPairList.hTranslateY + minHopPairList.source.hTranslateX;
-					curImage.hTranslateY = - minHopPairList.source.b * minHopPairList.hTranslateX - 
-							minHopPairList.source.a * minHopPairList.hTranslateY + minHopPairList.source.hTranslateY;
+					Matrix targetToSource = new Matrix(3, 3);
+					targetToSource.setItem(0, 0, minHopPairList.a);
+					targetToSource.setItem(1, 0, -minHopPairList.b);
+					targetToSource.setItem(2, 0, minHopPairList.translateX);
+					targetToSource.setItem(0, 1, minHopPairList.b);
+					targetToSource.setItem(1, 1, minHopPairList.a);
+					targetToSource.setItem(2, 1, minHopPairList.translateY);
+					targetToSource.setItem(0, 2, 0.0);
+					targetToSource.setItem(1, 2, 0.0);
+					targetToSource.setItem(2, 2, 1.0);
+					if (!targetToSource.inverse())
+						throw new RuntimeException("Invalid inverse matrix");
+					
+					Matrix sourceToWorld = new Matrix(3, 3);
+					sourceToWorld.setItem(0, 0, minHopPairList.source.afa);
+					sourceToWorld.setItem(1, 0, minHopPairList.source.afb);
+					sourceToWorld.setItem(2, 0, minHopPairList.source.afc);
+					sourceToWorld.setItem(0, 1, minHopPairList.source.afd);
+					sourceToWorld.setItem(1, 1, minHopPairList.source.afe);
+					sourceToWorld.setItem(2, 1, minHopPairList.source.aff);
+					sourceToWorld.setItem(0, 2, 0.0);
+					sourceToWorld.setItem(1, 2, 0.0);
+					sourceToWorld.setItem(2, 2, 1.0);
+					
+					Matrix targetToWorld = new Matrix(3, 3);
+					targetToSource.mMul(sourceToWorld, targetToWorld);
+
+					curImage.afa = targetToWorld.getItem(0, 0);
+					curImage.afb = targetToWorld.getItem(1, 0);
+					curImage.afc = targetToWorld.getItem(2, 0);
+					curImage.afd = targetToWorld.getItem(0, 1);
+					curImage.afe = targetToWorld.getItem(1, 1);
+					curImage.aff = targetToWorld.getItem(2, 1);
+					if (!targetToWorld.inverse())
+						throw new RuntimeException("Invalid inverse matrix");
+					curImage.aba = targetToWorld.getItem(0, 0);
+					curImage.abb = targetToWorld.getItem(1, 0);
+					curImage.abc = targetToWorld.getItem(2, 0);
+					curImage.abd = targetToWorld.getItem(0, 1);
+					curImage.abe = targetToWorld.getItem(1, 1);
+					curImage.abf = targetToWorld.getItem(2, 1);
+					
+/*					curImage.afa = minHopPairList.source.afa * minHopPairList.a + minHopPairList.source.afb * minHopPairList.b;
+					curImage.afb = minHopPairList.source.afb * minHopPairList.a - minHopPairList.source.afa * minHopPairList.b;
+					curImage.afc = - minHopPairList.source.afa * minHopPairList.hTranslateX + 
+							minHopPairList.source.afb * minHopPairList.hTranslateY + minHopPairList.source.hTranslateX;
+					curImage.aff = - minHopPairList.source.afb * minHopPairList.hTranslateX - 
+							minHopPairList.source.afa * minHopPairList.hTranslateY + minHopPairList.source.hTranslateY;
+*/
 //					System.out.println(curImage.imageFileStamp.getFile().getName() + "\t" + minHopPairList.source.imageFileStamp.getFile().getName());
 				}
 				curImage.calculatePrimsAtHop = minHop + 1;
@@ -161,24 +231,6 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 		
 		if (todo.size() > 0) 
 			throw new RuntimeException("Failed calculating the prims");
-
-		origin.afa = 1.0;
-		origin.afb = 0.0;
-		origin.afc = 0.0;
-		origin.afd = 0.0;
-		origin.afe = 1.0;
-		origin.aff = 0.0;
-		Matrix work = new Matrix(3, 3);
-		for (KeyPointList image : images) {
-			image.afa = image.a;
-			image.afb = -image.b;
-			image.afc = image.hTranslateX;
-
-			image.afd = image.b;
-			image.afe = image.a;
-			image.aff = image.hTranslateY;
-			fillReverseParams(image, work);
-		}
 	}
 
 	void calculateNormalEquations() {
@@ -234,198 +286,6 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 		}
 	}
 	
-	public void setDiscrepancy(KeyPointPair item, double discrepancy) {
-		item.discrepancy = discrepancy;
-	}
-
-	public double getDiscrepancy(KeyPointPair item) {
-		return item.discrepancy;
-	}
-	
-	public void setBad(KeyPointPair item, boolean bad) {
-		item.panoBad = bad;
-	}
-
-	public boolean isBad(KeyPointPair item) {
-		return item.panoBad;
-	}
-
-	public double getWeight(KeyPointPair item) {
-		return item.weight;
-	}
-	
-	public double getComputedWeight(KeyPointPair item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
-	}
-
-	private double oneOverSumWeights = 1.0;
-	/**
-	 * @return Number of point pairs NOT marked as bad.
-	 */
-	protected void computeWeights(TransformLearnerResult result) {
-		result.iteration = ++iteration;
-		result.dataCount = 0;
-		result.oldBadCount = 0;
-		result.oldGoodCount = 0;
-
-		for (KeyPointList image : images) {
-			image.goodCount = 0;
-		}
-		double sumWeight = 0;
-		for (KeyPointPairList pairList : chain) {
-			result.dataCount += pairList.items.size();
-			pairList.transformResult = new TransformLearnerResult();
-			pairList.transformResult.iteration = result.iteration;
-			pairList.transformResult.dataCount = pairList.items.size();
-			pairList.transformResult.oldBadCount = 0;
-			pairList.transformResult.oldGoodCount = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				if (isBad(item)) {
-					result.oldBadCount++;
-					pairList.transformResult.oldBadCount++;
-					continue;
-				}
-				result.oldGoodCount++;
-				pairList.transformResult.oldGoodCount++;
-				item.sourceSP.keyPointList.goodCount++;
-				item.targetSP.keyPointList.goodCount++;
-				double weight = getWeight(item); 
-				if (weight < 0)
-					throw new IllegalArgumentException("Negative weight received.");
-				sumWeight += weight;
-			}
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / result.oldGoodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
-		}
-	}
-	
-	protected void computeBad(TransformLearnerResult result) {
-		result.newBadCount = 0;
-		result.newGoodCount = 0;
-		result.oldGoodNowBad = 0;
-		result.oldBadNowGood = 0;
-		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
-		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
-			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
-		}
-		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
-			result.maxAllowedDiscrepancy = discrepancyThreshold;
-		
-		for (KeyPointPairList pairList : chain) {
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
-				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
-			double maxDiscrepancy = pairList.maxDiscrepancy;
-			pairList.transformResult.newBadCount = 0;
-			pairList.transformResult.newGoodCount = 0;
-			pairList.transformResult.oldGoodNowBad = 0;
-			pairList.transformResult.oldBadNowGood = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				boolean oldIsBad = isBad(item);
-				double discrepancy = getDiscrepancy(item);
-				boolean curIsBad = discrepancy > maxDiscrepancy;
-				if (oldIsBad != curIsBad) {
-					if (curIsBad) {
-						setBad(item, curIsBad);
-						result.oldGoodNowBad++;
-						pairList.transformResult.oldGoodNowBad++;
-					} else {
-						if (discrepancy < pairList.transformResult.discrepancyStatistics.getAvgValue()) {
-							setBad(item, curIsBad);
-							result.oldBadNowGood++;
-							pairList.transformResult.oldBadNowGood++;
-						}
-					}
-				}
-				if (curIsBad) {
-					result.newBadCount++;
-					pairList.transformResult.newBadCount++;
-				} else {
-					result.newGoodCount++;
-					pairList.transformResult.newGoodCount++;
-				}
-			}
-
-			System.out.println(
-					pairList.source.imageFileStamp.getFile().getName() + "\t" +
-					pairList.target.imageFileStamp.getFile().getName() +
-					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
-					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
-					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
-					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
-					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
-					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
-					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
-					"\t" + pairList.transformResult.newGoodCount + "/" + pairList.transformResult.dataCount
-					);
-		}
-	}
-	
-	protected void computeDiscrepancies(TransformLearnerResult result) {
-		double PW1[] = new double[3];
-		double PW2[] = new double[3];
-
-		result.discrepancyStatistics.start();
-		for (KeyPointPairList pairList : chain) {
-			pairList.transformResult.discrepancyStatistics.start();
-			int goodCount = 0;
-			for (KeyPointPair item : pairList.items) {
-				// Compute for all points, so no item.isBad check
-				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				
-				double discrepancy = MathUtil.hypot(PW1[0] - PW2[0], PW1[1] - PW2[1]);
-				setDiscrepancy(item, discrepancy);
-				if (!isBad(item)) {
-					double weight = getWeight(item);
-					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
-					result.discrepancyStatistics.addValue(discrepancy, weight);
-					goodCount++;
-				}
-			}
-			pairList.transformResult.discrepancyStatistics.stop();
-			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
-			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
-						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
-			}
-			if (pairList.maxDiscrepancy < discrepancyThreshold)
-				pairList.maxDiscrepancy = discrepancyThreshold;
-		}
-		result.discrepancyStatistics.stop();
-		return;
-	}
-	
-	private boolean removeBadKeyPointPairLists() {
-		boolean chainModified = false;
-		for (int i = chain.size() - 1; i >= 0; i--) {
-			KeyPointPairList pairList = chain.get(i);
-			int goodCount = 0;
-			for (KeyPointPair pair : pairList.items) {
-				if (!isBad(pair))
-					goodCount++;
-			}
-			if (goodCount < 10) {
-				System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
-						"\t" + pairList.source.imageFileStamp.getFile().getName() +
-						"\t" + pairList.target.imageFileStamp.getFile().getName());
-				chain.remove(i);
-				ignoredPairLists.add(pairList);
-				chainModified = true;
-			}
-		}
-		if (chainModified) {
-			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
-			ignoredPairLists.addAll(chain);
-			chain = tmpChain;
-		}
-		return chainModified;
-	}
-	
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
 
@@ -471,13 +331,13 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-		double scaleOLD = MathUtil.hypot(origin.a, origin.b);
-		double angleOLD = Math.atan2(origin.b, origin.a);
 		System.out.println(origin.imageFileStamp.getFile().getName() + 
-				"\tangle=" + MathUtil.rad2degStr(angleOLD) + 
-				"\tscale=" + MathUtil.d4(scaleOLD) + 
-				"\ttranslateX=" + MathUtil.d4(origin.hTranslateX) + 
-				"\ttranslateY=" + MathUtil.d4(origin.hTranslateY)
+				"\tafa=" + MathUtil.d4(origin.afa) + 
+				"\tafb=" + MathUtil.d4(origin.afb) +
+				"\tafc=" + MathUtil.d4(origin.afc) +
+				"\tafd=" + MathUtil.d4(origin.afd) +
+				"\tafe=" + MathUtil.d4(origin.afe) +
+				"\taff=" + MathUtil.d4(origin.aff)
 				);
 
 		Matrix work = new Matrix(3, 3);
@@ -490,7 +350,7 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 					"\tafc=" + MathUtil.d4(image.afc) +
 					"\tafd=" + MathUtil.d4(image.afd) +
 					"\tafe=" + MathUtil.d4(image.afe) +
-					"\tafr=" + MathUtil.d4(image.aff) +
+					"\taff=" + MathUtil.d4(image.aff) +
 					"\tdafa=" + MathUtil.d4(u.getItem(0, index + 0)) + 
 					"\tdafb=" + MathUtil.d4(u.getItem(0, index + 1)) + 
 					"\tdafc=" + MathUtil.d4(u.getItem(0, index + 2)) + 
@@ -505,7 +365,23 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 			image.afe -= u.getItem(0, index + 4);
 			image.aff -= u.getItem(0, index + 5);
 
-			fillReverseParams(image, work);
+			work.setItem(0, 0, image.afa);
+			work.setItem(1, 0, image.afb);
+			work.setItem(2, 0, image.afc);
+			work.setItem(0, 1, image.afd);
+			work.setItem(1, 1, image.afe);
+			work.setItem(2, 1, image.aff);
+			work.setItem(0, 2, 0.0);
+			work.setItem(1, 2, 0.0);
+			work.setItem(2, 2, 1.0);
+			if (!work.inverse())
+				throw new RuntimeException("Invalid inverse matrix");
+			image.aba = work.getItem(0, 0);
+			image.abb = work.getItem(1, 0);
+			image.abc = work.getItem(2, 0);
+			image.abd = work.getItem(0, 1);
+			image.abe = work.getItem(1, 1);
+			image.abf = work.getItem(2, 1);
 		}
 		computeDiscrepancies(result);
 		computeBad(result);

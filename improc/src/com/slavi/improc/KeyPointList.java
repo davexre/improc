@@ -60,8 +60,15 @@ public class KeyPointList {
 	public double abf; // Affine Backward F (translateY)
 		
 	// Helmert pano adjust
-	public double a;
-	public double b;
+	public double hfa; // Helmert Forward A
+	public double hfb; // Helmert Forward B
+	public double hfc; // Helmert Forward C
+	public double hfd; // Helmert Forward D
+	
+	public double hba; // Helmert Backward A
+	public double hbb; // Helmert Backward B
+	public double hbc; // Helmert Backward C
+	public double hbd; // Helmert Backward D
 	public double hTranslateX;
 	public double hTranslateY;
 	

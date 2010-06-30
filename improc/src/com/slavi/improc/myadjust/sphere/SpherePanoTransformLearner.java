@@ -378,33 +378,6 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		return;
 	}
 	
-	private boolean removeBadKeyPointPairLists() {
-		boolean chainModified = false;
-		for (int i = chain.size() - 1; i >= 0; i--) {
-			KeyPointPairList pairList = chain.get(i);
-			int goodCount = 0;
-			for (KeyPointPair pair : pairList.items) {
-				if (!isBad(pair))
-					goodCount++;
-			}
-			if (goodCount < 10) {
-				System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
-						"\t" + pairList.source.imageFileStamp.getFile().getName() +
-						"\t" + pairList.target.imageFileStamp.getFile().getName());
-				chain.remove(i);
-				ignoredPairLists.add(pairList);
-				chainModified = true;
-			}
-		}
-		if (chainModified) {
-			CalculatePanoramaParams.copyBadStatus(chain);
-			ArrayList<KeyPointPairList> tmpChain = CalculatePanoramaParams.getImageChain(chain);
-			ignoredPairLists.addAll(chain);
-			chain = tmpChain;
-		}
-		return chainModified;
-	}
-	
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
 
