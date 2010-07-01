@@ -13,10 +13,10 @@ public class TestSystemMonitor {
 		shell.open();
 		Display display = shell.getDisplay();
 		SwtUtil.openTaskManager(shell, true);
-		SwtUtil.openWaitDialog(shell, "aaaa", new dummy(), -1);
+		SwtUtil.openWaitDialog(shell, "aaaa", new dummy(), 100);
 		while (SwtUtil.isTaskManagerOpened()){
-			@SuppressWarnings("unused")
-			double d[] = new double[4000];
+//			@SuppressWarnings("unused")
+//			double d[] = new double[4000];
 			if(!display.readAndDispatch())
 				display.sleep();
 		}
@@ -26,7 +26,13 @@ public class TestSystemMonitor {
 	private static class dummy implements Runnable {
 		public void run() {
 			try {
-				while (true) { }
+				long last = System.currentTimeMillis();
+				while (!Thread.currentThread().isInterrupted()) { 
+					long now = System.currentTimeMillis();
+					if (now - last > 20) {
+						SwtUtil.activeWaitDialogSetStatus(null, (int) (Math.random() * 100));
+					}
+				}
 //				Thread.sleep((int) (Math.random() * 5000));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -36,11 +42,11 @@ public class TestSystemMonitor {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		for (int i = 0; i < 4; i++) {
-			Thread t = new Thread(new dummy());
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		}
+//		for (int i = 0; i < 4; i++) {
+//			Thread t = new Thread(new dummy());
+//			t.setPriority(Thread.MIN_PRIORITY);
+//			t.start();
+//		}
 		new TestSystemMonitor().doIt();
 	}
 }

@@ -33,6 +33,7 @@ public class Improc {
 		if (settings == null)
 			return;
 		SwtUtil.openTaskManager(parent, true);
+		System.out.println("Making panorama using " + settings.adjustMethodClassName);
 		Marker.mark("Image Processing");
 
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);

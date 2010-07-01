@@ -7,7 +7,6 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
-import com.slavi.improc.myadjust.MyPoint3D;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
@@ -105,20 +104,20 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 		dest[1] = (y / srcImage.cameraScale) + srcImage.cameraOriginY;
 	}
 	
-	public void transform3D(KeyPoint source, KeyPointList srcImage, MyPoint3D dest) {
+	public void transform3D(KeyPoint source, KeyPointList srcImage, double dest[]) {
 		double sx = (source.doubleX - srcImage.cameraOriginX) * srcImage.cameraScale;
 		double sy = (source.doubleY - srcImage.cameraOriginY) * srcImage.cameraScale;
 		double sz = srcImage.scaleZ;
 		
-		dest.x = 
+		dest[0] = 
 			sx * srcImage.camera2real.getItem(0, 0) +
 			sy * srcImage.camera2real.getItem(1, 0) +
 			sz * srcImage.camera2real.getItem(2, 0);
-		dest.y = 
+		dest[1] = 
 			sx * srcImage.camera2real.getItem(0, 1) +
 			sy * srcImage.camera2real.getItem(1, 1) +
 			sz * srcImage.camera2real.getItem(2, 1);
-		dest.z = 
+		dest[2] = 
 			sx * srcImage.camera2real.getItem(0, 2) +
 			sy * srcImage.camera2real.getItem(1, 2) +
 			sz * srcImage.camera2real.getItem(2, 2);
@@ -230,9 +229,9 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 		Matrix dPW2dY2 = new Matrix(1, 3);
 		Matrix dPW2dZ2 = new Matrix(1, 3);
 
-		MyPoint3D PW1 = new MyPoint3D();
-		MyPoint3D PW2 = new MyPoint3D();
-		
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
+
 		KeyPoint source1 = new KeyPoint();
 		KeyPoint dest1= new KeyPoint();
 		lsa.clear();
@@ -280,9 +279,7 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 				for (int c1 = 0; c1 < 3; c1++) {
 					int c2 = (c1 + 1) % 3;
 					coefs.make0();
-					double L = 
-						getTransformedCoord(PW1, c1) * getTransformedCoord(PW2, c2) -
-						getTransformedCoord(PW1, c2) * getTransformedCoord(PW2, c1);
+					double L = PW1[c1] * PW2[c2] - PW1[c2] * PW2[c1];
 					/*
 					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
 					 * fy: P'1(z) * P'2(x) - P'1(x) * P'2(z) = 0
@@ -291,18 +288,18 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
 					if (srcIndex >= 0) {
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  getTransformedCoord(PW2, c2));
-						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -getTransformedCoord(PW2, c1));
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
 						coefs.setItem(srcIndex + 3, 0, (
-								source.keyPointList.camera2real.getItem(2, c1) * getTransformedCoord(PW2, c2) - 
-								source.keyPointList.camera2real.getItem(2, c2) * getTransformedCoord(PW2, c1)));
+								source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
+								source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
 					}
 					if (destIndex >= 0) {
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -getTransformedCoord(PW1, c2));
-						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  getTransformedCoord(PW1, c1));
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
 						coefs.setItem(destIndex + 3, 0, (
-								getTransformedCoord(PW1, c1) * dest.keyPointList.camera2real.getItem(2, c2) - 
-								getTransformedCoord(PW1, c2) * dest.keyPointList.camera2real.getItem(2, c1)));
+								PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
+								PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
 				}
@@ -324,49 +321,10 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
 	}
 	
-	private double getTransformedCoord(MyPoint3D point, int coord) {
-		switch (coord) {
-		case 0: return point.x;
-		case 1: return point.y;
-		case 2: return point.z;
-		}
-		throw new IllegalArgumentException();
-	}
-	
-	protected void computeDiscrepancies(TransformLearnerResult result) {
-		double[] PW1 = new double[2];
-		double[] PW2 = new double[2];
-
-		result.discrepancyStatistics.start();
-		double discrepancyThreshold = getDiscrepancyThreshold();
-		for (KeyPointPairList pairList : chain) {
-			pairList.transformResult.discrepancyStatistics.start();
-			int goodCount = 0;
-			for (KeyPointPair item : pairList.items) {
-				// Compute for all points, so no item.isBad check
-				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-
-				double discrepancy = SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
-				setDiscrepancy(item, discrepancy);
-				if (!isBad(item)) {
-					double weight = getWeight(item);
-					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
-					result.discrepancyStatistics.addValue(discrepancy, weight);
-					goodCount++;
-				}
-			}
-			pairList.transformResult.discrepancyStatistics.stop();
-			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
-			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
-						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
-			}
-			if (pairList.maxDiscrepancy < discrepancyThreshold)
-				pairList.maxDiscrepancy = discrepancyThreshold;
-		}
-		result.discrepancyStatistics.stop();
-		return;
+	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
+		transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		return SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	
 	public TransformLearnerResult calculateOne() {

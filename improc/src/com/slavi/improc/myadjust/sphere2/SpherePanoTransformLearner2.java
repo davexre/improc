@@ -16,7 +16,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner2 extends PanoTransformer {
 
-	static boolean adjustForScale = true;
+	final static boolean adjustForScale = true;
 	
 	LeastSquaresAdjust lsa;
 
@@ -184,43 +184,11 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 			}
 		}
 	}
-	
-	protected void computeDiscrepancies(TransformLearnerResult result) {
-		double PW1[] = new double[3];
-		double PW2[] = new double[3];
 
-		result.discrepancyStatistics.start();
-		double discrepancyThreshold = getDiscrepancyThreshold();
-		for (KeyPointPairList pairList : chain) {
-			pairList.transformResult.discrepancyStatistics.start();
-			int goodCount = 0;
-			for (KeyPointPair item : pairList.items) {
-				// Compute for all points, so no item.isBad check
-				SphereNorm2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				SphereNorm2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
-				setDiscrepancy(item, discrepancy);
-				if (!isBad(item)) {
-					double weight = getWeight(item);
-					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
-					result.discrepancyStatistics.addValue(discrepancy, weight);
-					goodCount++;
-				}
-			}
-			pairList.transformResult.discrepancyStatistics.stop();
-			pairList.maxDiscrepancy = 0.8 * Math.min(
-				pairList.transformResult.discrepancyStatistics.getMaxX(),
-				pairList.transformResult.discrepancyStatistics.getJ_End());
-/*			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
-			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
-						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
-			}*/
-			if (pairList.maxDiscrepancy < discrepancyThreshold)
-				pairList.maxDiscrepancy = discrepancyThreshold;
-		}
-		result.discrepancyStatistics.stop();
-		return;
+	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
+		SphereNorm2.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		SphereNorm2.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		return SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	
 	public TransformLearnerResult calculateOne() {

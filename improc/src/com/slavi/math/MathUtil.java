@@ -63,7 +63,9 @@ public class MathUtil {
 	 * Returns the specified angle in the range [0..2*pi)
 	 */
 	public static double fixAngle2PI(double angle) {
-		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
+		angle %= MathUtil.C2PI;
+		return (angle < 0) ? MathUtil.C2PI + angle : angle;
+//		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
 	}
 
 	/**
@@ -71,14 +73,19 @@ public class MathUtil {
 	 */
 	public static double fixAngleMPI_PI(double angle) {
 		angle += Math.PI;
-		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI) - Math.PI;
+		angle %= MathUtil.C2PI;
+		return ((angle < 0) ? MathUtil.C2PI + angle : angle) - Math.PI;
+//		angle += Math.PI;
+//		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI) - Math.PI;
 	}
 	
 	/**
 	 * Returns the specified angle in the range [0..pi)
 	 */
 	public static double fixAnglePI(double angle) {
-		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
+		angle %= Math.PI;
+		return (angle < 0) ? Math.PI + angle : angle;
+//		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
 	}
 
 	/**
@@ -156,7 +163,7 @@ public class MathUtil {
 	 * Transfer the sign of B on to A. 
 	 */
 	public static final double SIGN(double a, double b) {
-		return ((b) >= 0.0 ? Math.abs(a) : -Math.abs(a));
+		return (b >= 0.0 ? Math.abs(a) : -Math.abs(a));
 	}
 	
 	/** 

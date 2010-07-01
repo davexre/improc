@@ -122,18 +122,8 @@ public abstract class PanoTransformer {
 		result.newGoodCount = 0;
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
-		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
-		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
-			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
-		}
-		double discrepancyThreshold = getDiscrepancyThreshold();
-		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
-			result.maxAllowedDiscrepancy = discrepancyThreshold;
 		
 		for (KeyPointPairList pairList : chain) {
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
-				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
-			double maxDiscrepancy = pairList.maxDiscrepancy;
 			pairList.transformResult.newBadCount = 0;
 			pairList.transformResult.newGoodCount = 0;
 			pairList.transformResult.oldGoodNowBad = 0;
@@ -142,14 +132,14 @@ public abstract class PanoTransformer {
 			for (KeyPointPair item : pairList.items) {
 				boolean oldIsBad = isBad(item);
 				double discrepancy = getDiscrepancy(item);
-				boolean curIsBad = discrepancy > maxDiscrepancy;
+				boolean curIsBad = discrepancy > pairList.maxDiscrepancy;
 				if (oldIsBad != curIsBad) {
 					if (curIsBad) {
 						setBad(item, curIsBad);
 						result.oldGoodNowBad++;
 						pairList.transformResult.oldGoodNowBad++;
 					} else {
-						if (discrepancy < pairList.transformResult.discrepancyStatistics.getAvgValue()) {
+						if (discrepancy < pairList.recoverDiscrepancy) {
 							setBad(item, curIsBad);
 							result.oldBadNowGood++;
 							pairList.transformResult.oldBadNowGood++;
@@ -168,10 +158,11 @@ public abstract class PanoTransformer {
 			System.out.println(
 					pairList.source.imageFileStamp.getFile().getName() + "\t" +
 					pairList.target.imageFileStamp.getFile().getName() +
-					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
-					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
-					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
-					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
+					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + 
+					"\trecover=" + MathUtil.d4(pairList.recoverDiscrepancy) + 
+					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + 
+					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + 
+					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + 
 					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
 					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
 					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
@@ -180,21 +171,23 @@ public abstract class PanoTransformer {
 		}
 	}
 	
+	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
+		transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		return MathUtil.hypot(PW1[0] - PW2[0], PW1[1] - PW2[1]);
+	}
+	
 	protected void computeDiscrepancies(TransformLearnerResult result) {
 		double PW1[] = new double[3];
 		double PW2[] = new double[3];
 
 		result.discrepancyStatistics.start();
-		double discrepancyThreshold = getDiscrepancyThreshold();
 		for (KeyPointPairList pairList : chain) {
 			pairList.transformResult.discrepancyStatistics.start();
 			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
-				transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				
-				double discrepancy = MathUtil.hypot(PW1[0] - PW2[0], PW1[1] - PW2[1]);
+				double discrepancy = computeOneDiscrepancy(item, PW1, PW2);
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
 					double weight = getWeight(item);
@@ -204,16 +197,36 @@ public abstract class PanoTransformer {
 				}
 			}
 			pairList.transformResult.discrepancyStatistics.stop();
+		}
+		result.discrepancyStatistics.stop();
+			
+		double discrepancyThreshold = getDiscrepancyThreshold();
+		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
+		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
+			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + 
+					result.discrepancyStatistics.getMaxX()) / 2.0;
+		}
+		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
+			result.maxAllowedDiscrepancy = discrepancyThreshold;
+		
+		for (KeyPointPairList pairList : chain) {
 			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
 			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
 				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
 						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
 			}
+			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
+				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
 			if (pairList.maxDiscrepancy < discrepancyThreshold)
 				pairList.maxDiscrepancy = discrepancyThreshold;
+
+			pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+					pairList.transformResult.discrepancyStatistics.getMinX()) / 2.0;
+			if (pairList.recoverDiscrepancy > pairList.maxDiscrepancy)
+				pairList.recoverDiscrepancy = 0.0;
+			if (pairList.recoverDiscrepancy > discrepancyThreshold)
+				pairList.recoverDiscrepancy = discrepancyThreshold;
 		}
-		result.discrepancyStatistics.stop();
-		return;
 	}
 	
 	protected boolean removeBadKeyPointPairLists() {

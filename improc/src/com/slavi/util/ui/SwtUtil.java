@@ -472,6 +472,7 @@ public class SwtUtil {
 		taskManagerShell = makeShell(parent, closeable ? SWT.TITLE | SWT.CLOSE : SWT.TITLE);
 		taskManagerShell.setLayout(new FillLayout());
 		taskManagerShell.setText("Task manager");
+		taskManagerShell.setLocation(0, 0);
 		new TaskManager(taskManagerShell, SWT.NONE);
 		if (closeable) {
 			taskManagerShell.addListener (SWT.Traverse, new Listener () {

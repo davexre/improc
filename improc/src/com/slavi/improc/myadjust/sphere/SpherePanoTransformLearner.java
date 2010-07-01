@@ -11,19 +11,15 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner extends PanoTransformer {
 
-	static boolean adjustForScale = true;
-	static boolean adjustOriginForScale = true;
+	final static boolean adjustForScale = true;
+	final static boolean adjustOriginForScale = true;
 	
 	LeastSquaresAdjust lsa;
-	double discrepancyThreshold;
-	protected int iteration; 
-	private double oneOverSumWeights;
 
 	private static double getFocalDistance(KeyPointList image) {
 		return Math.max(image.imageSizeX, image.imageSizeY) / 
@@ -40,9 +36,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		this.chain = chain;
 		this.images = new ArrayList<KeyPointList>();
 		this.ignoredPairLists = new ArrayList<KeyPointPairList>();
-		this.discrepancyThreshold = 30.0 / 60.0; // 5 angular minutes
-		iteration = 0;
-		oneOverSumWeights = 1.0;
+		this.iteration = 0;
 		for (KeyPointPairList pairList : chain) {
 			pairList.source.fov = KeyPointList.defaultCameraFieldOfView;
 			pairList.target.fov = KeyPointList.defaultCameraFieldOfView;
@@ -55,7 +49,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return discrepancyThreshold;
+		return 5.0 / 60.0; // 5 angular minutes
 	}
 	
 	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
@@ -211,171 +205,10 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		}
 	}
 	
-	public void setDiscrepancy(KeyPointPair item, double discrepancy) {
-		item.discrepancy = discrepancy;
-	}
-
-	public double getDiscrepancy(KeyPointPair item) {
-		return item.discrepancy;
-	}
-	
-	public void setBad(KeyPointPair item, boolean bad) {
-		item.panoBad = bad;
-	}
-
-	public boolean isBad(KeyPointPair item) {
-		return item.panoBad;
-	}
-
-	public double getWeight(KeyPointPair item) {
-		return item.weight;
-	}
-	
-	public double getComputedWeight(KeyPointPair item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
-	}
-
-	/**
-	 * @return Number of point pairs NOT marked as bad.
-	 */
-	protected void computeWeights(TransformLearnerResult result) {
-		result.iteration = ++iteration;
-		result.dataCount = 0;
-		result.oldBadCount = 0;
-		result.oldGoodCount = 0;
-
-		for (KeyPointList image : images) {
-			image.goodCount = 0;
-		}
-		double sumWeight = 0;
-		for (KeyPointPairList pairList : chain) {
-			result.dataCount += pairList.items.size();
-			pairList.transformResult = new TransformLearnerResult();
-			pairList.transformResult.iteration = result.iteration;
-			pairList.transformResult.dataCount = pairList.items.size();
-			pairList.transformResult.oldBadCount = 0;
-			pairList.transformResult.oldGoodCount = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				if (isBad(item)) {
-					result.oldBadCount++;
-					pairList.transformResult.oldBadCount++;
-					continue;
-				}
-				result.oldGoodCount++;
-				pairList.transformResult.oldGoodCount++;
-				item.sourceSP.keyPointList.goodCount++;
-				item.targetSP.keyPointList.goodCount++;
-				double weight = getWeight(item); 
-				if (weight < 0)
-					throw new IllegalArgumentException("Negative weight received.");
-				sumWeight += weight;
-			}
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / result.oldGoodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
-		}
-	}
-	
-	protected void computeBad(TransformLearnerResult result) {
-		result.newBadCount = 0;
-		result.newGoodCount = 0;
-		result.oldGoodNowBad = 0;
-		result.oldBadNowGood = 0;
-		
-		for (KeyPointPairList pairList : chain) {
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
-				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
-			double maxDiscrepancy = pairList.maxDiscrepancy;
-			pairList.transformResult.newBadCount = 0;
-			pairList.transformResult.newGoodCount = 0;
-			pairList.transformResult.oldGoodNowBad = 0;
-			pairList.transformResult.oldBadNowGood = 0;
-			
-			for (KeyPointPair item : pairList.items) {
-				boolean oldIsBad = isBad(item);
-				double discrepancy = getDiscrepancy(item);
-				boolean curIsBad = discrepancy > maxDiscrepancy;
-				if (oldIsBad != curIsBad) {
-					if (curIsBad) {
-						setBad(item, curIsBad);
-						result.oldGoodNowBad++;
-						pairList.transformResult.oldGoodNowBad++;
-					} else {
-						if (discrepancy < pairList.transformResult.discrepancyStatistics.getAvgValue()) {
-							setBad(item, curIsBad);
-							result.oldBadNowGood++;
-							pairList.transformResult.oldBadNowGood++;
-						}
-					}
-				}
-				if (curIsBad) {
-					result.newBadCount++;
-					pairList.transformResult.newBadCount++;
-				} else {
-					result.newGoodCount++;
-					pairList.transformResult.newGoodCount++;
-				}
-			}
-
-			System.out.println(
-					pairList.source.imageFileStamp.getFile().getName() + "\t" +
-					pairList.target.imageFileStamp.getFile().getName() +
-					"\tmax=" + MathUtil.d4(pairList.maxDiscrepancy) + " deg" +
-					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + " deg" +
-					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + " deg" +
-					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + " deg" +
-					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
-					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
-					"\tgoodRatio=" + MathUtil.d2(pairList.transformResult.getGoodDataRatio()) + "%" +
-					"\t" + pairList.transformResult.newGoodCount + "/" + pairList.transformResult.dataCount
-					);
-		}
-	}
-	
-	private double calcMaxDiscrepancy(Statistics stat) {
-		double res = Math.min(stat.getMaxX(), stat.getJ_End());
-		if (res < discrepancyThreshold)
-			res = discrepancyThreshold;
-			
-/*		res = stat.getJ_End();
-		if (res >= stat.getMaxX()) { 
-			res = (stat.getAvgValue() + stat.getMaxX()) / 2.0;
-		}
-		if (res < discrepancyThreshold)
-			res = discrepancyThreshold;*/
-		return res;
-	}
-	
-	protected void computeDiscrepancies(TransformLearnerResult result) {
-		double PW1[] = new double[3];
-		double PW2[] = new double[3];
-
-		result.discrepancyStatistics.start();
-		for (KeyPointPairList pairList : chain) {
-			pairList.transformResult.discrepancyStatistics.start();
-			int goodCount = 0;
-			for (KeyPointPair item : pairList.items) {
-				// Compute for all points, so no item.isBad check
-				SphereNorm.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, pairList.source, PW1);
-				SphereNorm.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, pairList.target, PW2);
-				double discrepancy = SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
-				setDiscrepancy(item, discrepancy);
-				if (!isBad(item)) {
-					double weight = getWeight(item);
-					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
-					result.discrepancyStatistics.addValue(discrepancy, weight);
-					goodCount++;
-				}
-			}
-			pairList.transformResult.discrepancyStatistics.stop();
-			pairList.maxDiscrepancy = calcMaxDiscrepancy(pairList.transformResult.discrepancyStatistics);
-		}
-		result.discrepancyStatistics.stop();
-		result.maxAllowedDiscrepancy = calcMaxDiscrepancy(result.discrepancyStatistics);
-		return;
+	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
+		SphereNorm.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		SphereNorm.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		return SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	
 	public TransformLearnerResult calculateOne() {
@@ -429,7 +262,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
 				"\tFOV=" + MathUtil.rad2degStr(origin.fov) + 
-				"\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, 0))
+				(adjustOriginForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, 0)) : "")
 				);
 		if (adjustOriginForScale) {
 			origin.fov = (origin.fov - u.getItem(0, 0));
