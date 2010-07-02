@@ -161,6 +161,8 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			throw new RuntimeException("Failed calculating the prims");
 	}
 
+	static final double scaleF = 10; // TODO: Is this necessary?
+	
 	void calculateNormalEquations() {
 		lsa.clear();
 		Matrix coefs = new Matrix((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 4 : 3), 1);			
@@ -183,22 +185,22 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 					coefs.setItem(srcIndex + 1, 0, sn.dDist_dSR2);
 					coefs.setItem(srcIndex + 2, 0, sn.dDist_dSR3);
 					if (adjustForScale) {
-						coefs.setItem(srcIndex + 3, 0, sn.dDist_dSF);
+						coefs.setItem(srcIndex + 3, 0, sn.dDist_dSF * scaleF);
 					}
 				} else {
 					if (adjustOriginForScale)
-						coefs.setItem(0, 0, sn.dDist_dSF);
+						coefs.setItem(0, 0, sn.dDist_dSF * scaleF);
 				}
 				if (destIndexOf >= 0) {
 					coefs.setItem(destIndex + 0, 0, sn.dDist_dTR1);
 					coefs.setItem(destIndex + 1, 0, sn.dDist_dTR2);
 					coefs.setItem(destIndex + 2, 0, sn.dDist_dTR3);
 					if (adjustForScale) {
-						coefs.setItem(destIndex + 3, 0, sn.dDist_dTF);
+						coefs.setItem(destIndex + 3, 0, sn.dDist_dTF * scaleF);
 					}
 				} else {
 					if (adjustOriginForScale)
-						coefs.setItem(0, 0, sn.dDist_dSF);
+						coefs.setItem(0, 0, sn.dDist_dSF * scaleF);
 				}
 				lsa.addMeasurement(coefs, computedWeight, sn.Dist, 0);
 			}
@@ -262,10 +264,10 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
 				"\tFOV=" + MathUtil.rad2degStr(origin.fov) + 
-				(adjustOriginForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, 0)) : "")
+				(adjustOriginForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, 0) / scaleF) : "")
 				);
 		if (adjustOriginForScale) {
-			origin.fov = (origin.fov - u.getItem(0, 0));
+			origin.fov = (origin.fov - u.getItem(0, 0) / scaleF);
 			origin.scaleZ = getFocalDistance(origin);
 		}
 		
@@ -280,13 +282,13 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					(adjustForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, index + 3)) : "") 
+					(adjustForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, index + 3) / scaleF) : "") 
 					);
 			image.sphereRZ1 = MathUtil.fixAngle2PI(image.sphereRZ1 - u.getItem(0, index + 0));
 			image.sphereRY = MathUtil.fixAngle2PI(image.sphereRY - u.getItem(0, index + 1));
 			image.sphereRZ2 = MathUtil.fixAngle2PI(image.sphereRZ2 - u.getItem(0, index + 2));
 			if (adjustForScale) {
-				image.fov = (image.fov - u.getItem(0, index + 3));
+				image.fov = (image.fov - u.getItem(0, index + 3) / scaleF);
 				image.scaleZ = getFocalDistance(image);
 			}
 		}

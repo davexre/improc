@@ -184,16 +184,14 @@ public abstract class PanoTransformer {
 		result.discrepancyStatistics.start();
 		for (KeyPointPairList pairList : chain) {
 			pairList.transformResult.discrepancyStatistics.start();
-			int goodCount = 0;
 			for (KeyPointPair item : pairList.items) {
 				// Compute for all points, so no item.isBad check
 				double discrepancy = computeOneDiscrepancy(item, PW1, PW2);
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
-					double weight = getWeight(item);
+					double weight = getComputedWeight(item);
 					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
 					result.discrepancyStatistics.addValue(discrepancy, weight);
-					goodCount++;
 				}
 			}
 			pairList.transformResult.discrepancyStatistics.stop();
@@ -256,36 +254,3 @@ public abstract class PanoTransformer {
 		return chainModified;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -160,4 +160,100 @@ public class ColorConversion {
 			}
 		}
 	}
+
+	/**
+	 * http://en.wikipedia.org/wiki/HSL_and_HSV
+	 * 
+	 * H - Hue [0..2*pi]
+	 * S - Saturation [0..1]
+	 * L - Lightness [0..1]
+	 * 
+	 * DR - Red [0..1]
+	 * DG - Green [0..1]
+	 * DB - Blue [0..1]
+	 */
+	public static class HSL {
+		public static void fromDRGB(double DRGB[], double hsl[]) {
+			fromDRGB(DRGB[0], DRGB[1], DRGB[2], hsl);
+		}
+		
+		public static void toDRGB(double hsl[], double DRGB[]) {
+			toDRGB(hsl[0], hsl[1], hsl[2], DRGB);
+		}
+		
+		/**
+		 * @param hsl	dest[0] = Hue
+		 * 				dest[1] = Saturation
+		 * 				dest[2] = Lightness
+		 */
+		public static void fromDRGB(double DR, double DG, double DB, double hsl[]) {
+			clipRGB(DR, DG, DB, hsl);
+			double max = Math.max(Math.max(hsl[0], hsl[1]), hsl[2]);
+			double min = Math.min(Math.min(hsl[0], hsl[1]), hsl[2]);
+			double chroma = max - min;
+			if ((max == 0.0) || (chroma == 0.0)) {
+				hsl[0] = 0.0;
+				hsl[1] = 0.0;
+				hsl[2] = (max + min) / 2.0;
+				return;
+			}
+			if (hsl[0] == max) {
+				hsl[0] = MathUtil.fixAngle2PI(piOver3 * (hsl[1] - hsl[2]) / chroma);
+			} else if (hsl[1] == max) {
+				hsl[0] = piOver3 * (2.0 + (hsl[2] - hsl[0]) / chroma);
+			} else {
+				hsl[0] = piOver3 * (4.0 + (hsl[0] - hsl[1]) / chroma);
+			}
+			double L2 = max + min;
+			hsl[2] = L2 * 0.5;
+			if (hsl[2] <= 0.5) {
+				hsl[1] = chroma / L2;
+			} else {
+				hsl[1] = chroma / (2.0 - L2);
+			}
+		}
+		
+		public static void toDRGB(double h, double s, double l, double DRGB[]) {
+			h = MathUtil.fixAngle2PI(h);
+			s = MathUtil.clipValue(s, 0.0, 1.0);
+			l = MathUtil.clipValue(l, 0.0, 1.0);
+			double C = s * (l <= 0.5 ? l : 1.0 - l);
+			double m = l - C;
+			C *= 2.0;
+			double h1 = h / piOver3;
+			double X = C * (1 - Math.abs(h1 % 2 - 1));
+			switch ((int) h1 % 6) {
+			case 0:
+				DRGB[0] = m + C;
+				DRGB[1] = m + X;
+				DRGB[2] = m;
+				break;
+			case 1:
+				DRGB[0] = m + X;
+				DRGB[1] = m + C;
+				DRGB[2] = m;
+				break;
+			case 2:
+				DRGB[0] = m;
+				DRGB[1] = m + C;
+				DRGB[2] = m + X;
+				break;
+			case 3:
+				DRGB[0] = m;
+				DRGB[1] = m + X;
+				DRGB[2] = m + C;
+				break;
+			case 4:
+				DRGB[0] = m + X;
+				DRGB[1] = m;
+				DRGB[2] = m + C;
+				break;
+			case 5:
+				DRGB[0] = m + C;
+				DRGB[1] = m;
+				DRGB[2] = m + X;
+				break;
+			}
+		}
+	}
 }

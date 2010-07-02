@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import com.slavi.math.adjust.Statistics;
+import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 
 public class SafeImage {
@@ -106,5 +108,21 @@ public class SafeImage {
 		int color = getNextColor();
 		drawCross(x1, y1, color, imgCrossColor);
 		drawX(x2, y2, color, imgXColor);
+	}
+	
+	public Statistics stat;
+	public void buildHistogramData() {
+		stat = new Statistics();
+		stat.start();
+		double dest[] = new double[3];
+		for (int i = bi.getWidth() - 1; i >= 0; i--) {
+			for (int j = bi.getHeight() - 1; j >= 0; j--) {
+				int rgb = bi.getRGB(i, j) & 0x00FFFFFF; 
+				ColorConversion.RGB.fromRGB(rgb, dest);
+				ColorConversion.HSL.fromDRGB(dest, dest);
+				stat.addValue(dest[2]);
+			}
+		}
+		stat.stop();
 	}
 }

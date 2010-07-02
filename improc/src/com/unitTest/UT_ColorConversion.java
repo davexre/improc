@@ -109,10 +109,74 @@ public class UT_ColorConversion {
 		}
 	}
 	
+	public void testHSL2() {
+		double dest0[] = new double[3];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
+		double dest3[] = new double[3];
+
+		TestUtils.precision = 1.0 / 1000.0;
+		for (int index = 0; index < testData.length; index++) {
+			Data i = testData[index];
+			dest0[0] = i.R;
+			dest0[1] = i.G;
+			dest0[2] = i.B;
+			
+			dest3[0] = i.H * MathUtil.deg2rad;
+			dest3[1] = i.SHSL;
+			dest3[2] = i.L;
+			
+			ColorConversion.HSL.fromDRGB(dest0, dest1);
+			ColorConversion.HSL.toDRGB(dest1, dest2);
+			try {
+				TestUtils.assertEqual("Color not matched HSL", dest1, dest3);
+				TestUtils.assertEqual("Color not matched RGB", dest0, dest2);
+			} catch (RuntimeException e) {
+				System.out.println("Error at index " + index);
+				TestUtils.dumpArray("", dest0);
+				TestUtils.dumpArray("", dest1);
+				TestUtils.dumpArray("", dest2);
+				TestUtils.dumpArray("", dest3);
+				throw e;
+			}
+		}
+	}
+	
+	public void testHSL() {
+		double dest0[] = new double[3];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
+		
+		for (int r = 0; r <= 255; r++) {
+			for (int g = 0; g <= 255; g++) {
+				for (int b = 0; b <= 255; b++) {
+					dest0[0] = r;
+					dest0[1] = g;
+					dest0[2] = b;
+					ColorConversion.RGB.toDRGB(dest0, dest1);
+					ColorConversion.HSL.fromDRGB(dest1, dest1);
+					ColorConversion.HSL.toDRGB(dest1, dest2);
+					ColorConversion.RGB.fromDRGB(dest2, dest2);
+					try {
+						TestUtils.assertEqual("Color not matched", dest0, dest2);
+					} catch (RuntimeException e) {
+						TestUtils.dumpArray("", dest0);
+						TestUtils.dumpArray("", dest1);
+						TestUtils.dumpArray("", dest2);
+						System.out.println("----");
+						throw e;
+					}
+				}
+			}			
+		}
+	}
+	
 	public static void main(String[] args) {
 		UT_ColorConversion test = new UT_ColorConversion();
-		test.testHSV2();
-		test.testHSV();
+//		test.testHSV2();
+//		test.testHSV();
+		test.testHSL();
+		test.testHSL2();
 		System.out.println("Done.");
 	}
 }
