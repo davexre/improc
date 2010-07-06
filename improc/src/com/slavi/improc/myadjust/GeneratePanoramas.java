@@ -1,6 +1,11 @@
 package com.slavi.improc.myadjust;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -484,6 +489,43 @@ public class GeneratePanoramas implements Callable<Void> {
 		out.close();
 	}
 */	
+	
+	private void labelImageNames(SafeImage oi) {
+		double d[] = new double[3];
+		double DRGB[] = new double[3];
+		Graphics2D gr = (Graphics2D) oi.bi.getGraphics();
+		int fontSize = (int) Math.max(outputImageSizeY / 90, 10);
+		Font font = new Font("Arial", Font.BOLD, fontSize);
+		gr.setFont(font);
+		Color colorRect = Color.black;
+		FontMetrics fm = gr.getFontMetrics();
+		int fontDescent = fm.getDescent();
+		int fontHeight = fm.getAscent() + fontDescent;
+		for (KeyPointList image : images) {
+			double h = image.imageId * MathUtil.C2PI * 2.0 / 13.0;
+			ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
+			int color = ColorConversion.RGB.toRGB(DRGB);
+
+			String str = image.imageFileStamp.getFile().getName();
+			Rectangle2D rect= fm.getStringBounds(str, gr);
+			transformCameraToWorld(image.cameraOriginX, image.cameraOriginY, image, d);
+
+			double scale = 1.2;
+			double width = Math.max(4, rect.getWidth()) * scale;
+			double height = Math.max(4, fontHeight) * scale;
+			double atX = d[0] - width / 2.0;
+			double atY = d[1] - height / 2.0;
+			gr.setColor(colorRect);
+			gr.fillRect((int) atX, (int) atY, (int) width, (int) height);
+			gr.setColor(new Color(color));
+			gr.drawRect((int) atX, (int) atY, (int) width, (int) height);
+			
+			atX = d[0] - rect.getWidth() / 2.0;
+			atY = d[1] + fontHeight / 2.0 - fontDescent - fm.getLeading() - 1;
+			gr.drawString(str, (int) atX, (int) atY);
+		}
+	}
+	
 	private static final AtomicInteger panoCounter = new AtomicInteger(0);
 	
 	public Void call() throws Exception {
@@ -544,6 +586,7 @@ public class GeneratePanoramas implements Callable<Void> {
 			taskSet.get();
 			
 			pinPointPairs(outImageMask);
+			labelImageNames(outImageMask);
 			outImageColor.save(outputFile + " color.png");
 			outImageMask.save(outputFile + " mask.png");
 			

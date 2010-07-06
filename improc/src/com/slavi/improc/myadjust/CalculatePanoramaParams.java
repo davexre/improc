@@ -151,9 +151,16 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		public Void call() {
 			copyBadStatus(chain);
 			panoTransformer.initialize(chain);
-			for (int i = 0; i < maxIterations; i++) {
+			int iteration = 0;
+//			for (int i = 0; i < maxIterations; i++) {
+			while (iteration < maxIterations) {
 				TransformLearnerResult result = panoTransformer.calculateOne();
 				System.out.println(result);
+				iteration = result.iteration;
+				if (iteration < 3) {
+					copyBadStatus(chain);
+					continue;
+				}
 				if (result.isAdjustFailed())
 					break;
 				if (/*result.isAdjusted() || */ (result.discrepancyStatistics.getMaxX() < panoTransformer.getDiscrepancyThreshold())) {

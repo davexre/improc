@@ -27,7 +27,7 @@ public class SafeImage {
 
 	protected int nextColor = 0;
 	
-	protected BufferedImage bi;
+	public BufferedImage bi;
 	
 	public final int sizeX, sizeY;
 	

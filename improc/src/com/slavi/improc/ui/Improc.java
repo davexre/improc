@@ -44,7 +44,7 @@ public class Improc {
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath("*.jpg"), true, true);
 		ArrayList<String> images = SwtUtil.openWaitDialog(parent, "Searching for images", new EnumerateImageFiles(imagesIterator), -1);
 		Collections.sort(images);
-		
+/*		
 		for (String image : images) {
 			SafeImage im = new SafeImage(new FileInputStream(image));
 			im.buildHistogramData();
@@ -56,7 +56,7 @@ public class Improc {
 		
 		if (true)
 			return;
-		
+*/
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 		

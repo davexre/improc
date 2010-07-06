@@ -9,7 +9,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<KeyPoint, KeyPoint>{
 
-	public double discrepancyThreshold = 5; // value is in pixels
+	public double discrepancyThreshold = 15; // value is in pixels
 	
 	public KeyPointHelmertTransformLearner(Iterable<KeyPointPair> pointsPairList) {
 		super(new KeyPointHelmertTransformer(), pointsPairList);

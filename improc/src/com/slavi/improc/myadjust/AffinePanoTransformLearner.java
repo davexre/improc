@@ -24,7 +24,7 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return 3.0; // 5 pixels
+		return 5.0; // 5 pixels
 	}
 
 	/**
