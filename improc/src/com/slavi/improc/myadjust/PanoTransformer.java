@@ -20,6 +20,8 @@ public abstract class PanoTransformer {
 	
 	public abstract TransformLearnerResult calculateOne();
 	
+	public static final double maxDiscrepancyInPixelsOfOriginImage = 5;
+	
 	public abstract double getDiscrepancyThreshold();
 	
 	/**

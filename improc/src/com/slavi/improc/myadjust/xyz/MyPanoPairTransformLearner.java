@@ -40,7 +40,7 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return 5.0 / 60.0; // 5 angular minutes
+		return MathUtil.rad2deg * Math.atan2(maxDiscrepancyInPixelsOfOriginImage * origin.cameraScale, origin.scaleZ);
 	}
 
 	/**

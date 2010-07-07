@@ -24,7 +24,7 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return 3.0; // 5 pixels
+		return maxDiscrepancyInPixelsOfOriginImage;
 	}
 
 	/**

@@ -40,7 +40,7 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return 5.0 / 60.0; // 5 angular minutes
+		return MathUtil.rad2deg * Math.atan2(maxDiscrepancyInPixelsOfOriginImage * origin.cameraScale, origin.scaleZ);
 	}
 
 	public static final RotationZYX rot = RotationZYX.instance;

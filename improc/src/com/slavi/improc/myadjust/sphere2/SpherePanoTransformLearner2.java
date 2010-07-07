@@ -35,7 +35,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 	}
 	
 	public double getDiscrepancyThreshold() {
-		return 5.0 / 60.0; // 5 angular minutes
+		return MathUtil.rad2deg * Math.atan2(maxDiscrepancyInPixelsOfOriginImage * origin.cameraScale, origin.scaleZ);
 	}
 	
 	double wRot[] = new double[] { -90 * MathUtil.deg2rad, 90 * MathUtil.deg2rad, 0 * MathUtil.deg2rad }; 
