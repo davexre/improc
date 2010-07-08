@@ -66,7 +66,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			File image) {
 		return new File(Util.changeFileExtension(
 			rootKeyPointFileDir.getFullPath(
-				rootImagesDir.getRelativePath(image, false)), "spf"));
+				rootImagesDir.getRelativePath(image, false)), ".spf"));
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded2(ExecutorService exec, File image) throws Exception {

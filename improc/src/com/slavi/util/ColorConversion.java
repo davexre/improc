@@ -66,7 +66,7 @@ public class ColorConversion {
 		
 		public static void fromRGB(int rgb, double DRGB[]) {
 			DRGB[0] = ((rgb >> 16) & 255) / 255.0;
-			DRGB[1] = ((rgb >> 6) & 255) / 255.0;
+			DRGB[1] = ((rgb >> 8) & 255) / 255.0;
 			DRGB[2] = ((rgb) & 255) / 255.0;
 		}		
 	}
@@ -97,7 +97,7 @@ public class ColorConversion {
 		 * 				dest[2] = Value
 		 */
 		public static void fromDRGB(double DR, double DG, double DB, double hsv[]) {
-			clipRGB(DR, DG, DB, hsv);
+			clipDRGB(DR, DG, DB, hsv);
 			double max = Math.max(Math.max(hsv[0], hsv[1]), hsv[2]);
 			double min = Math.min(Math.min(hsv[0], hsv[1]), hsv[2]);
 			double chroma = max - min;
@@ -187,7 +187,7 @@ public class ColorConversion {
 		 * 				dest[2] = Lightness
 		 */
 		public static void fromDRGB(double DR, double DG, double DB, double hsl[]) {
-			clipRGB(DR, DG, DB, hsl);
+			clipDRGB(DR, DG, DB, hsl);
 			double max = Math.max(Math.max(hsl[0], hsl[1]), hsl[2]);
 			double min = Math.min(Math.min(hsl[0], hsl[1]), hsl[2]);
 			double chroma = max - min;

@@ -1,6 +1,8 @@
 package com.slavi.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -98,19 +100,19 @@ public class Util {
 	 * <p>
 	 * <table border=1>
 	 * <tr><th>fileName</th><th>newExtension</th><th>result</th></tr>
-	 * <tr><td>c:\temp\somefile.log</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
-	 * <tr><td>c:\temp\somefile.log</td><td>&nbsp;</td><td>c:\temp\somefile.</td></tr>
-	 * <tr><td>c:\temp\somefile</td><td>txt</td><td>c:\temp\somefile.txt</td></tr>
-	 * <tr><td>c:\temp.tmp\somefile.log</td><td>txt</td><td>c:\temp.tmp\somefile.txt</td></tr>
-	 * <tr><td><b>c:\temp.tmp\somefile</b></td><td><b>txt</b></td><td><b>c:\temp.tmp\somefile.txt</b></td></tr>
+	 * <tr><td>c:\temp\somefile.log</td><td>.txt</td><td>c:\temp\somefile.txt</td></tr>
+	 * <tr><td>c:\temp\somefile.log</td><td>&nbsp;</td><td>c:\temp\somefile</td></tr>
+	 * <tr><td>c:\temp\somefile</td><td>.txt</td><td>c:\temp\somefile.txt</td></tr>
+	 * <tr><td>c:\temp.tmp\somefile.log</td><td>.txt</td><td>c:\temp.tmp\somefile.txt</td></tr>
+	 * <tr><td><b>c:\temp.tmp\somefile</b></td><td><b>.txt</b></td><td><b>c:\temp.tmp\somefile.txt</b></td></tr>
 	 * </table>
 	 */
 	public static String changeFileExtension(String fileName, String newExtension) {
 		int lastPath = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
 		int lastIndex = fileName.lastIndexOf('.');
 		if ((lastPath > lastIndex) || (lastIndex < 0))
-			return fileName + '.' + newExtension;
-		return fileName.substring(0, lastIndex) + '.' + newExtension; 
+			return fileName + newExtension;
+		return fileName.substring(0, lastIndex) + newExtension; 
 	}
 
 	/**
@@ -705,5 +707,59 @@ public class Util {
 			m = vars.matcher(str);
 		}
 		return str;
+	}
+	
+	public static void copyStream(InputStream is, OutputStream os) throws IOException {
+		byte buf[] = new byte[256];
+		while (is.available() > 0) {
+			int len = is.read(buf);
+			if (len > 0)
+				os.write(buf, 0, len);
+		}
+	}
+
+	public static void copyFile(File fromFile, File toFile) throws IOException {
+		copyFile(fromFile, toFile, true);
+	}
+	
+	public static void copyFile(File fromFile, File toFile, boolean overrideIfFileExists) throws IOException {
+		if (toFile.isDirectory())
+			toFile = new File(toFile, fromFile.getName());
+
+		if (toFile.exists() && (!overrideIfFileExists))
+			return;
+		File parent = toFile.getParentFile();
+		if ((parent != null) && (!parent.exists())) {
+			 parent.mkdirs();
+		}
+
+		FileInputStream from = null;
+		FileOutputStream to = null;
+		try {
+			from = new FileInputStream(fromFile);
+			to = new FileOutputStream(toFile);
+			copyStream(from, to);
+		} finally {
+			try {
+				if (from != null)
+					from.close();
+			} finally {
+				if (to != null)
+					to.close();
+			}
+		}
+		toFile.setLastModified(fromFile.lastModified());
+	}
+
+	public static void copyFileIfDifferent(File fromFile, File toFile) throws IOException {
+		if (toFile.isDirectory())
+			toFile = new File(toFile, fromFile.getName());
+		if (fromFile.exists() && 
+			toFile.exists() && 
+			fromFile.lastModified() == toFile.lastModified() && 
+			fromFile.length() == toFile.length()) {
+			return;
+		}
+		copyFile(fromFile, toFile, true);
 	}
 }
