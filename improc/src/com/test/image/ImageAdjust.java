@@ -42,7 +42,7 @@ public class ImageAdjust {
 		System.out.println(statL);
 	}
 	
-	public void hist(BufferedImage bi, String fouName, Transform tr) throws Exception {
+	public void gen(BufferedImage bi, String fouName, Transform tr) throws Exception {
 		double srcDRGB[] = new double[3];
 		double destDRGB[] = new double[3];
 
@@ -77,7 +77,7 @@ public class ImageAdjust {
 		});
 */
 
- 		hist(bi, Util.changeFileExtension(fouBaseName, "_SL.jpg"), new Transform() {
+ 		gen(bi, Util.changeFileExtension(fouBaseName, "_SL.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[1] *= 0.35 / statS.getAvgValue();
@@ -85,7 +85,7 @@ public class ImageAdjust {
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
-		hist(bi, Util.changeFileExtension(fouBaseName, "_L.jpg"), new Transform() {
+		gen(bi, Util.changeFileExtension(fouBaseName, "_L.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[2] *= 0.45 / statL.getAvgValue();
@@ -108,15 +108,16 @@ public class ImageAdjust {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		ImageAdjust t = new ImageAdjust();
 		String finName = Const.sourceImage;
 		String fouDir = "d:/temp/1/";
-
+		
 		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/*.jpg";
 		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir, true, true);
 		
-		ImageAdjust t = new ImageAdjust();
 		while (ff.hasNext()) {
 			finName = ff.next().getAbsolutePath();
+			System.out.println(finName);
 			t.doIt(finName, fouDir);
 		}
 		System.out.println("Done.");

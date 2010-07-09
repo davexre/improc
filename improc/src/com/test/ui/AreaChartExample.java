@@ -8,6 +8,7 @@ import org.swtchart.Chart;
 import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.Range;
+import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
 
 /**
@@ -36,7 +37,7 @@ public class AreaChartExample {
         Chart chart = new Chart(shell, SWT.NONE);
 
         // set titles
-        chart.getTitle().setText("Area Chart Example");
+        chart.getTitle().setVisible(false);
 
         // create line series
         ILineSeries lineSeries1 = (ILineSeries) chart.getSeriesSet()
@@ -45,11 +46,13 @@ public class AreaChartExample {
         lineSeries1.setLineColor(Display.getDefault().getSystemColor(
                 SWT.COLOR_RED));
         lineSeries1.enableArea(true);
+        lineSeries1.setSymbolType(PlotSymbolType.NONE);
 
         ILineSeries lineSeries2 = (ILineSeries) chart.getSeriesSet()
                 .createSeries(SeriesType.LINE, "line series 2");
         lineSeries2.setYSeries(ySeries2);
         lineSeries2.enableArea(true);
+        lineSeries2.setSymbolType(PlotSymbolType.NONE);
 
         // adjust the axis range
         chart.getAxisSet().adjustRange();
@@ -57,9 +60,9 @@ public class AreaChartExample {
         chart.getLegend().setVisible(false);
         lineSeries1.getLabel().setVisible(false);
         for (IAxis axis : chart.getAxisSet().getAxes()) {
-//        	axis.getTitle().setVisible(false);
+        	axis.getTitle().setVisible(false);
 //        	axis.getTick().setVisible(false);
-        	axis.setRange(new Range(0, 3));
+//        	axis.setRange(new Range(0, 3));
         }
         
 
