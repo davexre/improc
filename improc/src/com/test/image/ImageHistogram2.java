@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.imageio.ImageIO;
 
@@ -105,15 +107,29 @@ public class ImageHistogram2 {
 		}
 		
 		// calc cumul
-		double cumul[] = s;
-		double sum = 0;
-		for (double d : cumul) {
-			sum += d;
+		{
+			double cumul[] = s;
+			double sum = 0;
+			for (double d : cumul) {
+				sum += d;
+			}
+			double c = 0;
+			for (int i = 0; i < cumul.length; i++) {
+				c += cumul[i];
+				s[i] = c / sum;
+			}
 		}
-		double c = 0;
-		for (int i = 0; i < cumul.length; i++) {
-			c += cumul[i];
-			v[i] = c / sum;
+		{
+			double cumul[] = l;
+			double sum = 0;
+			for (double d : cumul) {
+				sum += d;
+			}
+			double c = 0;
+			for (int i = 0; i < cumul.length; i++) {
+				c += cumul[i];
+				v[i] = c / sum;
+			}
 		}
 		
 		Marker.release();
@@ -145,9 +161,13 @@ public class ImageHistogram2 {
 		fdir = finDir;
 		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir + "/*.jpg", true, true);
 		fileList.removeAll();
+		ArrayList<String> files = new ArrayList<String>();
 		while (ff.hasNext()) {
-			fileList.add(ff.next().getAbsolutePath());
+			files.add(ff.next().getAbsolutePath());
 		}
+		Collections.sort(files);
+		for (String file : files)
+			fileList.add(file);
 	}
 	
 	public void createWidgets() {
@@ -234,7 +254,9 @@ public class ImageHistogram2 {
 		ImageHistogram2 t = new ImageHistogram2();
 //		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/";
 //		String finDir = "D:/Users/S/Java/Images/Image data/Beli plast";
-		String finDir = "D:/Temp/1";
+//		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2";
+		String finDir = "/home/slavian/S/temp/1";
+		
 		t.createWidgets();
 		t.setFiles(finDir);
 		t.open();

@@ -22,6 +22,8 @@ public class ImageAdjust {
 	Statistics statL;
 	int light[] = new int[256];
 	double lightCumul[] = new double[256];
+	int saturation[] = new int[256];
+	double saturationCumul[] = new double[256];
 	
 	public void makeStats(BufferedImage bi) {
 		double srcDRGB[] = new double[3];
@@ -40,15 +42,19 @@ public class ImageAdjust {
 				statS.addValue(srcDRGB[1]);
 				statL.addValue(HSL[2]);
 				light[(int) (HSL[2] * 255)]++;
+				saturation[(int) (HSL[1] * 255)]++;
 			}
 		statS.stop();
 		statL.stop();
 		
-		double c = 0;
+		double lightC = 0;
+		double saturationC = 0;
 		double sum = bi.getWidth() * bi.getHeight();
 		for (int i = 0; i < light.length; i++) {
-			c += light[i];
-			lightCumul[i] = c / sum;
+			lightC += light[i];
+			lightCumul[i] = lightC / sum;
+			saturationC += saturation[i];
+			saturationCumul[i] = saturationC / sum;
 		}
 		for (int i = 0; i < light.length; i++) {
 			int j = light.length - 1;
@@ -58,6 +64,16 @@ public class ImageAdjust {
 				perfectCumul = j / 255.0;
 				j--;
 			} while ( (j >= 0) && (lightCumul[i] < perfectCumul) );
+		}
+
+		for (int i = 0; i < saturation.length; i++) {
+			int j = saturation.length - 1;
+			double perfectCumul;
+			do {
+				saturation[i] = j;
+				perfectCumul = j / 255.0;
+				j--;
+			} while ( (j >= 0) && (saturationCumul[i] < perfectCumul) );
 		}
 		
 		System.out.println("Stat S");
@@ -85,7 +101,7 @@ public class ImageAdjust {
 	
 	public void doIt(String finName, String fouDir) throws Exception {
 		File fin = new File(finName);
-		String fouBaseName = new File(fouDir + fin.getName()).getAbsolutePath();
+		String fouBaseName = new File(fouDir + "/" + fin.getName()).getAbsolutePath();
 		Util.copyFileIfDifferent(fin, new File(Util.changeFileExtension(fouBaseName, "_original.jpg")));
 		BufferedImage bi = ImageIO.read(fin);
 		makeStats(bi);
@@ -100,7 +116,7 @@ public class ImageAdjust {
 			}
 		});
 */
-
+/*
  		gen(bi, Util.changeFileExtension(fouBaseName, "_SL.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
@@ -109,23 +125,45 @@ public class ImageAdjust {
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
-
+*/
+		
+		final double scaleL = 0.8;
+		final double scaleS = scaleL;
+		
  		gen(bi, Util.changeFileExtension(fouBaseName, "_L2.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
-				destDRGB[2] += delta * 0.3;
+				destDRGB[2] += delta * scaleL;
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
- 		
+ 		gen(bi, Util.changeFileExtension(fouBaseName, "_S2.jpg"), new Transform() {
+			public void transform(double[] srcDRGB, double[] destDRGB) {
+				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+				double delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
+				destDRGB[1] += delta * scaleS;
+				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+			}
+		});
+ 		gen(bi, Util.changeFileExtension(fouBaseName, "_SL2.jpg"), new Transform() {
+			public void transform(double[] srcDRGB, double[] destDRGB) {
+				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+				double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
+				destDRGB[2] += delta * scaleL;
+				delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
+				destDRGB[1] += delta * scaleS;
+				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+			}
+		});
+/* 		
  		gen(bi, Util.changeFileExtension(fouBaseName, "_L.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[2] *= 0.45 / statL.getAvgValue();
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
-		});
+		});*/
 /* 		
 		hist(bi, Util.changeFileExtension(fouBaseName, "_S_BW.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
@@ -145,9 +183,11 @@ public class ImageAdjust {
 	public static void main(String[] args) throws Exception {
 		ImageAdjust t = new ImageAdjust();
 		String finName = Const.sourceImage;
-		String fouDir = "d:/temp/1/";
+//		String fouDir = "d:/temp/1/";
+		String fouDir = "/home/slavian/S/temp/1";
 		
-		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/*.jpg";
+//		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/*.jpg";
+		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2/*.jpg";
 		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir, true, true);
 		
 		while (ff.hasNext()) {
