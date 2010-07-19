@@ -2,6 +2,7 @@ package com.test.image;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -19,23 +20,46 @@ public class ImageAdjust {
 	
 	Statistics statS;
 	Statistics statL;
+	int light[] = new int[256];
+	double lightCumul[] = new double[256];
 	
 	public void makeStats(BufferedImage bi) {
 		double srcDRGB[] = new double[3];
+		double HSL[] = new double[3];
+		Arrays.fill(light, 0);
 		statS = new Statistics();
 		statL = new Statistics();
 		statS.start();
 		statL.start();
+		
 		for (int j = 0; j < bi.getHeight(); j++)
 			for (int i = 0; i < bi.getWidth(); i++) {
 				int color = bi.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, srcDRGB);
-				ColorConversion.HSL.fromDRGB(srcDRGB, srcDRGB);
+				ColorConversion.HSL.fromDRGB(srcDRGB, HSL);
 				statS.addValue(srcDRGB[1]);
-				statL.addValue(srcDRGB[2]);
+				statL.addValue(HSL[2]);
+				light[(int) (HSL[2] * 255)]++;
 			}
 		statS.stop();
 		statL.stop();
+		
+		double c = 0;
+		double sum = bi.getWidth() * bi.getHeight();
+		for (int i = 0; i < light.length; i++) {
+			c += light[i];
+			lightCumul[i] = c / sum;
+		}
+		for (int i = 0; i < light.length; i++) {
+			int j = light.length - 1;
+			double perfectCumul;
+			do {
+				light[i] = j;
+				perfectCumul = j / 255.0;
+				j--;
+			} while ( (j >= 0) && (lightCumul[i] < perfectCumul) );
+		}
+		
 		System.out.println("Stat S");
 		System.out.println(statS);
 		System.out.println("Stat L");
@@ -85,14 +109,25 @@ public class ImageAdjust {
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
-		gen(bi, Util.changeFileExtension(fouBaseName, "_L.jpg"), new Transform() {
+
+ 		gen(bi, Util.changeFileExtension(fouBaseName, "_L2.jpg"), new Transform() {
+			public void transform(double[] srcDRGB, double[] destDRGB) {
+				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+				double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
+				destDRGB[2] += delta * 0.3;
+				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+			}
+		});
+ 		
+ 		gen(bi, Util.changeFileExtension(fouBaseName, "_L.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[2] *= 0.45 / statL.getAvgValue();
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
-/*		hist(bi, Util.changeFileExtension(fouBaseName, "_S_BW.jpg"), new Transform() {
+/* 		
+		hist(bi, Util.changeFileExtension(fouBaseName, "_S_BW.jpg"), new Transform() {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[0] = destDRGB[2] = destDRGB[1];
