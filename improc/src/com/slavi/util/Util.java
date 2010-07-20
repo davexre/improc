@@ -10,6 +10,7 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -761,5 +762,51 @@ public class Util {
 			return;
 		}
 		copyFile(fromFile, toFile, true);
+	}
+	
+	public static String arrayToString(double array[]) {
+		if (array == null)
+			return "";
+		StringBuilder sb = new StringBuilder();
+		for (double i : array) {
+			sb.append(i);
+			sb.append('\t');
+		}		
+		return sb.toString();
+	}
+	
+	public static String arrayToString(int array[]) {
+		if (array == null)
+			return "";
+		StringBuilder sb = new StringBuilder();
+		for (int i : array) {
+			sb.append(i);
+			sb.append('\t');
+		}		
+		return sb.toString();
+	}
+	
+	public static double[] stringToDoubleArray(String str) {
+		StringTokenizer st = new StringTokenizer(str, "\t");
+		int size = st.countTokens();
+		double result[] = new double[size];
+		for (int i = 0; i < size; i++) {
+			String s = st.nextToken();
+			double v = Double.parseDouble(s);
+			result[i] = v;
+		}
+		return result;
+	}
+	
+	public static int[] stringToIntArray(String str) {
+		StringTokenizer st = new StringTokenizer(str, "\t");
+		int size = st.countTokens();
+		int result[] = new int[size];
+		for (int i = 0; i < size; i++) {
+			String s = st.nextToken();
+			int v = Integer.parseInt(s);
+			result[i] = v;
+		}
+		return result;
 	}
 }

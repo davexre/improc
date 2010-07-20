@@ -125,7 +125,7 @@ public class UT_AffineTransformer {
 	
 	private MyTestAffineTransformLearner learner;
 
-	private void dumpAffineTransform(AffineTransform af) {
+	void dumpAffineTransform(AffineTransform af) {
 		double[] d = new double[6]; 
 		af.getMatrix(d);
 		for (int i = 0; i < d.length; i++)

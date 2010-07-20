@@ -8,6 +8,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -38,6 +39,7 @@ public class GeneratePanoramas implements Callable<Void> {
 	
 	Map<KeyPointList, SafeImage> imageData = new HashMap<KeyPointList, SafeImage>();
 	SafeImage outImageColor;
+	SafeImage outImageColor2;
 	SafeImage outImageMask;
 	
 	/* 
@@ -254,9 +256,16 @@ public class GeneratePanoramas implements Callable<Void> {
 		public Void call() throws Exception {
 			double d[] = new double[3];
 			double DRGB[] = new double[3];
+			double HSL[] = new double[3];
+			double scale = 1.0;
 			for (int oimgY = rowsProcessed.getAndIncrement(); oimgY < outputImageSizeY; oimgY = rowsProcessed.getAndIncrement()) {
 				for (int oimgX = 0; oimgX < outImageColor.sizeX; oimgX++) {
-					int curMaxWeight = 0;
+					double curMaxWeight = 0.0;
+					double sumWeight = 0.0;
+					double sumLight = 0.0;
+					double sumSaturation = 0.0;
+					double curLightDiv = 0.0;
+					double curSaturationDiv = 0.0;
 					int color = 0;
 					KeyPointList maxWeightImage = null;
 
@@ -278,24 +287,52 @@ public class GeneratePanoramas implements Callable<Void> {
 						SafeImage im = imageData.get(image);
 						int ox = (int)d[0];
 						int oy = (int)d[1];
+						if ((ox < 0) || (ox >= image.imageSizeX) ||
+							(oy < 0) || (oy >= image.imageSizeY))
+							continue;
+						
 						int curColor = im.getRGB(ox, oy);
 						if (curColor < 0)
 							continue;
 
-						final double precision = 1000.0;
 						double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 						double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
-						int weight = 1 + (int) (precision * (2 - MathUtil.hypot(dx, dy)));  
+						double weight = 2.2 - MathUtil.hypot(dx, dy);
 						
+						ox /= image.pixelsPerDivision;
+						oy /= image.pixelsPerDivision;
+						sumWeight += weight;
+						sumLight += weight * image.lightDiv[ox][oy];
+						sumSaturation += weight * image.saturationDiv[ox][oy];
+												
 						// Calculate the color image
 						if (curMaxWeight < weight) {
 							maxWeightImage = image;
 							curMaxWeight = weight;
+							curLightDiv = image.lightDiv[ox][oy];
+							curSaturationDiv = image.saturationDiv[ox][oy];
 							color = curColor;
 						}
 					}
 
+					int color2 = color;
+					if (maxWeightImage != null) {
+						ColorConversion.RGB.fromRGB(color, DRGB);
+						ColorConversion.HSL.fromDRGB(DRGB, HSL);
+						int sizeL = maxWeightImage.lightCDF.length - 1;
+						int sizeS = maxWeightImage.saturationCDF.length - 1;
+						double delta;
+//						delta = maxWeightImage.saturationCDF[(int) (HSL[1] * sizeS)] - HSL[1];
+//						HSL[1] += delta * scale;
+						delta = maxWeightImage.lightCDF[(int) (HSL[2] * sizeL)] - HSL[2];
+						HSL[2] += delta * scale;
+//						HSL[2] *= (sumLight ) / (sumWeight * curLightDiv);
+						ColorConversion.HSL.toDRGB(HSL, DRGB);
+						color2 = ColorConversion.RGB.toRGB(DRGB);
+					}
+					
 					outImageColor.setRGB(oimgX, oimgY, color);
+					outImageColor2.setRGB(oimgX, oimgY, color2);
 					if (maxWeightImage == null) {
 						color = 0;
 					} else {
@@ -526,6 +563,44 @@ public class GeneratePanoramas implements Callable<Void> {
 		}
 	}
 	
+	double lightCDF[] = new double[KeyPointList.histogramSize];
+	double saturationCDF[] = new double[KeyPointList.histogramSize];
+	void calcHistograms() {
+		double sum = 0.0;
+		for (KeyPointList image : images) {
+			sum += image.imageSizeX * image.imageSizeY;
+		}
+		// Compute pano histograms
+		Arrays.fill(lightCDF, 0);
+		Arrays.fill(saturationCDF, 0);
+		for (KeyPointList image : images) {
+			double imageWeight = image.imageSizeX * image.imageSizeY / sum;
+			for (int i = 0; i < lightCDF.length; i++) {
+				lightCDF[i] += image.lightCDF[i] * imageWeight;
+				saturationCDF[i] += image.saturationCDF[i] * imageWeight;
+			}
+		}
+		
+		// Compute image light & saturation LUT (Look Up Table)
+		for (KeyPointList image : images) {
+			for (int i = 0; i < image.lightCDF.length; i++) {
+				double cur = image.lightCDF[i];
+				int j = lightCDF.length;
+				do {
+					j--;
+				} while ((j > 0) && (cur < lightCDF[j]));
+				image.lightCDF[i] = (double) j / (image.lightCDF.length - 1);
+
+				cur = image.saturationCDF[i];
+				j = saturationCDF.length;
+				do {
+					j--;
+				} while ((j > 0) && (cur < saturationCDF[j]));
+				image.saturationCDF[i] = (double) j / (image.saturationCDF.length - 1);
+			}
+		}
+	}
+	
 	private static final AtomicInteger panoCounter = new AtomicInteger(0);
 	
 	public Void call() throws Exception {
@@ -549,7 +624,8 @@ public class GeneratePanoramas implements Callable<Void> {
 			pairLists = pano;
 			CalculatePanoramaParams.buildImagesList(pairLists, images);
 			calcExtents();
-
+			calcHistograms();
+			
 			System.out.println("Output image size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 
 			for (KeyPointList image : images) {
@@ -562,6 +638,7 @@ public class GeneratePanoramas implements Callable<Void> {
 			}
 			
 			outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
+			outImageColor2 = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
 			imageData = new HashMap<KeyPointList, SafeImage>();
 			for (int index = 0; index < images.size(); index++) {
@@ -588,6 +665,7 @@ public class GeneratePanoramas implements Callable<Void> {
 			pinPointPairs(outImageMask);
 			labelImageNames(outImageMask);
 			outImageColor.save(outputFile + " color.png");
+			outImageColor2.save(outputFile + " color2.png");
 			outImageMask.save(outputFile + " mask.png");
 			
 			Marker.release();

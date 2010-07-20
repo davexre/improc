@@ -2,6 +2,8 @@ package com.test.image;
 
 import java.io.File;
 
+import javax.imageio.ImageIO;
+
 import com.slavi.image.DWindowedBMPImage;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
@@ -11,7 +13,7 @@ public class TestDBufferedBMPImage {
 	public static void main(String[] args) throws Exception {
 		String fname = Const.smallImage;
 		String fou = Const.tempDir + "/output.bmp";
-		DWindowedImage im = new PDImageMapBuffer(new File(fname));
+		DWindowedImage im = new PDImageMapBuffer(ImageIO.read(new File(fname)));
 		DWindowedBMPImage out = DWindowedBMPImage.create(new File(fou), im.maxX() + 1, im.maxY() + 1);
 		try {
 			for (int j = im.maxY(); j >= im.minX(); j--) {

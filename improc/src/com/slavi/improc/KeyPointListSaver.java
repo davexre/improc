@@ -1,6 +1,7 @@
 package com.slavi.improc;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import javax.imageio.ImageIO;
 
 import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
@@ -70,10 +73,13 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded2(ExecutorService exec, File image) throws Exception {
-		DWindowedImage img = new PDImageMapBuffer(image);
 		final KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.maxX() + 1;
-		result.imageSizeY = img.maxY() + 1;
+		BufferedImage bi = ImageIO.read(image);
+		result.imageSizeX = bi.getWidth();
+		result.imageSizeY = bi.getHeight();
+		result.makeHistogram(bi);
+		DWindowedImage img = new PDImageMapBuffer(bi);
+		bi = null;
 		result.cameraOriginX = result.imageSizeX / 2.0;
 		result.cameraOriginY = result.imageSizeY / 2.0;
 		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);
@@ -148,10 +154,13 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
-		DWindowedImage img = new PDImageMapBuffer(image);
 		final KeyPointList result = new KeyPointList();
-		result.imageSizeX = img.maxX() + 1;
-		result.imageSizeY = img.maxY() + 1;
+		BufferedImage bi = ImageIO.read(image);
+		result.imageSizeX = bi.getWidth();
+		result.imageSizeY = bi.getHeight();
+		result.makeHistogram(bi);
+		DWindowedImage img = new PDImageMapBuffer(bi);
+		bi = null;
 		result.cameraOriginX = result.imageSizeX / 2.0;
 		result.cameraOriginY = result.imageSizeY / 2.0;
 		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);

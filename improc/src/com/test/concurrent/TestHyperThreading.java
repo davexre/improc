@@ -23,7 +23,7 @@ public class TestHyperThreading {
 		public void run() {
 			try {
 				startLatch.await();
-				long start = System.currentTimeMillis();
+//				long start = System.currentTimeMillis();
 				for (int i = 0; i < 1000; i++) {
 					for (int j = 0; j < 1000; j++) {
 						for (int k = 0; k < 10000; k++) {
@@ -31,7 +31,7 @@ public class TestHyperThreading {
 						}					
 					}				
 				}
-				long end = System.currentTimeMillis();
+//				long end = System.currentTimeMillis();
 //				System.out.println("Task " + name + " finished in " + Util.getFormatedMilliseconds(end - start));
 				countDown.countDown();
 			} catch (Exception e) {

@@ -2,10 +2,6 @@ package com.slavi.image;
 
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 /**
  * This class represents a gray scale image with the pixels stored 
@@ -45,14 +41,6 @@ public class PDImageMapBuffer implements DWindowedImage {
 						((c >> 8) & 0xff) + 
 						 (c & 0xff)) / (3.0 * 255.0);
 			}
-	}
-	
-	/**
-	 * Reads the image and converts it to gray scale values in the
-	 * range [0..1].
-	 */
-	public PDImageMapBuffer(File image) throws IOException {
-		this(ImageIO.read(image));
 	}
 	
 	public Rectangle getExtent() {

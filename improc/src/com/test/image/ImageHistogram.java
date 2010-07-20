@@ -3,127 +3,69 @@ package com.test.image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
+import com.slavi.util.ColorConversion;
+
 public class ImageHistogram {
-	
-	public int avgR, avgG, avgB, avgGRAY;
-	
-	public ImageHistogram(File fImage) throws IOException {
-		this(ImageIO.read(fImage));
-	}
-	
-	public ImageHistogram(BufferedImage bImage) {
-		int sizeX = bImage.getWidth();
-		int sizeY = bImage.getHeight();
 		
-		avgR = 0;
-		avgG = 0;
-		avgB = 0;
-		avgGRAY = 0;
-		
-		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--) {
-				int c = bImage.getRGB(i, j);
-				int r = (c >> 16) & 0xff;
-				int g = (c >> 8) & 0xff;
-				int b = c & 0xff;
-								
-				avgR += r;
-				avgG += g;
-				avgB += b;
+	public static void makeHistogram(BufferedImage bi, int lightHist[], int saturationHist[]) {
+		int sizeX = bi.getWidth();
+		int sizeY = bi.getHeight();
+		int sizeL = lightHist.length;
+		int sizeS = saturationHist.length;
+		double DRGB[] = new double[3];
+		double HSL[] = new double[3];
+		Arrays.fill(lightHist, 0);
+		for (int j = sizeY - 1; j >= 0; j--) {
+			for (int i = sizeX - 1; i >= 0; i--) {
+				int color = bi.getRGB(i, j);
+				ColorConversion.RGB.fromRGB(color, DRGB);
+				ColorConversion.HSL.fromDRGB(DRGB, HSL);
+				lightHist[(int) (HSL[2] * sizeL)]++;
+				saturationHist[(int) (HSL[1] * sizeS)]++;
 			}
-		int numPixels = sizeX * sizeY;
-		avgGRAY = (avgR + avgG + avgB) / (numPixels * 3); 
-		avgR /= numPixels;
-		avgG /= numPixels;
-		avgB /= numPixels;
+		}
 	}
 	
-	public String toString() {
-		return "Avg(R,G,B,GRAY)\t" + avgR + "\t" + avgG + "\t" + avgB + "\t" + avgGRAY;
-	}
-
-	public void fixBrightness(BufferedImage bi, BufferedImage bo, int newAvgGRAY) {
-		if (newAvgGRAY <= 0)
-			newAvgGRAY = avgGRAY;
-		
-		int sizeX = bi.getWidth();
-		int sizeY = bi.getHeight();
-		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--) {
-				int c = bi.getRGB(i, j);
-				int r = (c >> 16) & 0xff;
-				int g = (c >> 8) & 0xff;
-				int b = c & 0xff;
-
-				r = r * newAvgGRAY / avgGRAY;
-				g = g * newAvgGRAY / avgGRAY;
-				b = b * newAvgGRAY / avgGRAY;
-				
-				r = Math.min(r, 255); 
-				g = Math.min(g, 255); 
-				b = Math.min(b, 255); 
-				
-				c = (r << 16) | (g << 8) | b;
-				bo.setRGB(i, j, c);
-			}		
+	public static void makeCDF(int histogram[], double dest[]) {
+		int size = histogram.length;
+		if (size != dest.length) {
+			throw new Error("Invalid argument");
+		}
+		double sum = 0.0;
+		for (int i = 0; i < size; i++) {
+			sum += histogram[i];
+		}
+		double c = 0.0;
+		for (int i = 0; i < size; i++) {
+			c += histogram[i];
+			dest[i] = c / sum;
+		}
 	}
 	
-	public void fixAutoColor(BufferedImage bi, BufferedImage bo) {
-		int newAvgR = (avgR + avgR + avgGRAY) / 3;
-		int newAvgG = (avgG + avgG + avgGRAY) / 3;
-		int newAvgB = (avgB + avgB + avgGRAY) / 3;
-
-//		int newAvgR = (avgR + avgGRAY) / 2;
-//		int newAvgG = (avgG + avgGRAY) / 2;
-//		int newAvgB = (avgB + avgGRAY) / 2;
-		
-		int sizeX = bi.getWidth();
-		int sizeY = bi.getHeight();
-		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--) {
-				int c = bi.getRGB(i, j);
-				int r = (c >> 16) & 0xff;
-				int g = (c >> 8) & 0xff;
-				int b = c & 0xff;
-
-				r = (r * newAvgR) / avgR;
-				g = (g * newAvgG) / avgG;
-				b = (b * newAvgB) / avgB;
-				
-				r = Math.min(r, 255); 
-				g = Math.min(g, 255); 
-				b = Math.min(b, 255); 
-				
-				c = (r << 16) | (g << 8) | b;
-				bo.setRGB(i, j, c);
-			}		
+	public String histCDFToString(double cdf[]) {
+		StringBuilder sb = new StringBuilder();
+		for (double i : cdf) {
+			sb.append(i);
+			sb.append('\t');
+		}		
+		return sb.toString();
 	}
 	
-	public void fixRGB(BufferedImage bi, BufferedImage bo, int newAvgR, int newAvgG, int newAvgB) {
-		int sizeX = bi.getWidth();
-		int sizeY = bi.getHeight();
-		
-		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--) {
-				int c = bi.getRGB(i, j);
-				int r = (c >> 16) & 0xff;
-				int g = (c >> 8) & 0xff;
-				int b = c & 0xff;
-
-				r = (r * newAvgR) / avgR;
-				g = (g * newAvgG) / avgG;
-				b = (b * newAvgB) / avgB;
-				
-				r = Math.min(r, 255); 
-				g = Math.min(g, 255); 
-				b = Math.min(b, 255); 
-				
-				c = (r << 16) | (g << 8) | b;
-				bo.setRGB(i, j, c);
-			}
+	public double[] fromString(String str) {
+		StringTokenizer st = new StringTokenizer(str, "\t");
+		int size = st.countTokens();
+		double res[] = new double[size];
+		for (int i = 0; i < size; i++) {
+			String s = st.nextToken();
+			double v = Double.parseDouble(s);
+			res[i] = v;
+		}
+		return res;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -141,32 +83,15 @@ public class ImageHistogram {
 		BufferedImage bo1 = new BufferedImage(bi1.getWidth(), bi1.getHeight(), BufferedImage.TYPE_INT_RGB);
 		BufferedImage bo2 = new BufferedImage(bi2.getWidth(), bi2.getHeight(), BufferedImage.TYPE_INT_RGB);
 		
-		ImageHistogram hi1 = new ImageHistogram(bi1);
-		ImageHistogram hi2 = new ImageHistogram(bi2);
+		ImageHistogram hi1 = new ImageHistogram();
+		ImageHistogram hi2 = new ImageHistogram();
 
 		System.out.println(hi1);
 		System.out.println(hi2);
 		
-		int newAvgGRAY = (hi1.avgGRAY + hi2.avgGRAY + 100) / 3;
-		//int newAvgGRAY = (hi1.avgGRAY + hi2.avgGRAY) / 2;
 		
-		hi1.fixAutoColor(bi1, bo1);
-		hi1.fixBrightness(bo1, bo2, newAvgGRAY);
-//		hi2.fixBrightness(bi2, bo2, newAvgGRAY);
-		
-//		hi1.fixRGB(bi1, bo1, 
-//				(hi1.avgR + hi2.avgR) / 2,
-//				(hi1.avgG + hi2.avgG) / 2,
-//				(hi1.avgB + hi2.avgB) / 2
-//				);
-//		hi2.fixRGB(bi2, bo2, 
-//				(hi1.avgR + hi2.avgR) / 2,
-//				(hi1.avgG + hi2.avgG) / 2,
-//				(hi1.avgB + hi2.avgB) / 2
-//				);
-		
-		ImageHistogram ho1 = new ImageHistogram(bo1);
-		ImageHistogram ho2 = new ImageHistogram(bo2);
+		ImageHistogram ho1 = new ImageHistogram();
+		ImageHistogram ho2 = new ImageHistogram();
 		
 		System.out.println(ho1);
 		System.out.println(ho2);

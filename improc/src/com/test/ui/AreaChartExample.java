@@ -7,7 +7,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
 import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
-import org.swtchart.Range;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
 

@@ -6,6 +6,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
+import javax.imageio.ImageIO;
+
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
@@ -28,7 +30,7 @@ public class TestDLowe {
 	}
 
 	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
-		DWindowedImage img = new PDImageMapBuffer(image);
+		DWindowedImage img = new PDImageMapBuffer(ImageIO.read(image));
 		final KeyPointList result = new KeyPointList();
 		result.imageSizeX = img.maxX() + 1;
 		result.imageSizeY = img.maxY() + 1;
