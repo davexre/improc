@@ -632,7 +632,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * Specifies whether to accept or to ignore duplicated items.
 	 * 
 	 * Setting this property to true will cause invocation of
-	 * {@link #contains(Object)} at each {@link #add(Object)} and
+	 * {@link #compareItems(Object, Object)} at each {@link #add(Object)} and
 	 * thus slowing down the addition of new items.
 	 * <p>
 	 * Changing this value affects only newly added items.
