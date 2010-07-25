@@ -42,8 +42,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
 			res = learner.calculateOne();
-			System.out.println("------Validate KeyPointPairList ------------");
-			System.out.println(res);
+//			System.out.println("------Validate KeyPointPairList ------------");
+//			System.out.println(res);
 			goodCount = pairList.getGoodCount();
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;
@@ -143,7 +143,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
 				tr.transform(kp, tmpKP);
-				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 30);
+				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 1000);
 				double minDistance = Double.MAX_VALUE;
 				KeyPoint target = null;
 				for (int i = nearest.size() - 1; i >= 0; i--) {
@@ -177,7 +177,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-/*		
+
+		System.out.println("---------------");
+		
 		//////////////////////////////////
 		HashSet<KeyPointList> targets = new HashSet<KeyPointList>();
 		for (KeyPointPairList pairList : result) {
@@ -208,7 +210,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-*/
+
 		return result;
 	}
 }
