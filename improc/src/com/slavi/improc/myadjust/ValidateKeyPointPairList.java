@@ -35,7 +35,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 1 / pair.distanceToNearest;
 		}		
 
-		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList.items);
+		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList);
 		int goodCount = 0;
 		TransformLearnerResult res = null;
 		for (int i = 0; i < 100; i++) {
@@ -133,17 +133,31 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			this.pairList = pairList;
 		}
 
+		double getDiscrepancy(KeyPoint k1, KeyPoint k2) {
+			return Math.hypot(k1.doubleX - k2.doubleX, k1.doubleY - k2.doubleY);
+		}
+		
 		public Void call() throws Exception {
+			ArrayList<KeyPointPair> dummyPairs = new ArrayList<KeyPointPair>();
+			dummyPairs.addAll(pairList.items);
 			pairList.items.clear();
 			KeyPoint tmpKP = new KeyPoint();
+			tmpKP.keyPointList = pairList.target;
 			KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
 			tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
 			
 			for (KeyPoint kp : pairList.source.items) {
+//			for (KeyPointPair kpp : dummyPairs) {
+//				if (kpp.bad)
+//					continue;
+//				KeyPoint kp = kpp.sourceSP;
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
 				tr.transform(kp, tmpKP);
-				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 1000);
+//				double dis0 = kpp.discrepancy;
+//				double dis1 = getDiscrepancy(tmpKP, kpp.targetSP);
+				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 
+					Math.pow(2 * KeyPointHelmertTransformLearner.discrepancyThreshold, 2));
 				double minDistance = Double.MAX_VALUE;
 				KeyPoint target = null;
 				for (int i = nearest.size() - 1; i >= 0; i--) {
@@ -160,6 +174,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				}
 				if (target != null) {
 					KeyPointPair pair = new KeyPointPair(kp, target, minDistance, minDistance);
+//					double dis2 = getDiscrepancy(tmpKP, pair.targetSP);
+//					if (!kpp.bad)
+//						System.out.println(dis0 + "\t" + dis1 + "\t" + dis2 + "\t" + (dis1-dis2));
 					pairList.items.add(pair);
 				}
 			}

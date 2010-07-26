@@ -106,7 +106,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			
 			if (minHopPairList != null) {
 				if (curImage == minHopPairList.source) {
-					System.out.println("curImage=source " + curImage.imageFileStamp.getFile().getName());
+//					System.out.println("curImage=source " + curImage.imageFileStamp.getFile().getName());
 					double angles[] = new double[3];
 					angles[0] = minHopPairList.sphereRZ1;
 					angles[1] = minHopPairList.sphereRY;
@@ -125,7 +125,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 						curImage.fov = getFOV(curImage);
 					}
 				} else { // if (curImage == minHopPairList.target) {
-					System.out.println("curImage=target " + curImage.imageFileStamp.getFile().getName());
+//					System.out.println("curImage=target " + curImage.imageFileStamp.getFile().getName());
 					double angles[] = new double[3];
 					angles[0] = minHopPairList.sphereRZ1;
 					angles[1] = minHopPairList.sphereRY;

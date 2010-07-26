@@ -8,12 +8,12 @@ public class KeyPointTreeImageSpace extends KDTree<KeyPoint> {
 	}
 
 	public boolean canFindDistanceBetween(KeyPoint fromNode, KeyPoint toNode) {
-		if (fromNode.keyPointList == toNode.keyPointList)
-			return false;
 		return true;
 	}
 
 	public double getValue(KeyPoint node, int dimensionIndex) {
-		return dimensionIndex == 0 ? node.doubleX : node.doubleY;
+		return dimensionIndex == 0 ? 
+			node.doubleX - node.keyPointList.cameraOriginX : 
+			node.doubleY - node.keyPointList.cameraOriginY;
 	}
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.slavi.image.DWindowedImageUtils;
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
@@ -636,7 +637,50 @@ public class GeneratePanoramas implements Callable<Void> {
 						+ "\tmaxY=" + (int)(image.max.y)
 						);
 			}
-			
+
+			for (KeyPointPairList pairList : pano) {
+				int panoBadPairGood = 0;
+				int panoBadPairBad = 0;
+				int panoGoodPairGood= 0;
+				int panoGoodPairBad = 0;
+				double maxHelmertDiscrepancy = Double.MIN_VALUE;
+
+				KeyPoint tmpKP = new KeyPoint();
+				tmpKP.keyPointList = pairList.target;
+				KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
+				tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
+				
+				for (KeyPointPair pair : pairList.items) {
+					if (pair.bad) {
+						if (pair.panoBad) {
+							panoBadPairBad++;
+						} else {
+							panoGoodPairBad++;
+						}
+					} else {
+						tr.transform(pair.sourceSP, tmpKP);
+						double d = Math.hypot(tmpKP.doubleX - pair.targetSP.doubleX, tmpKP.doubleY - pair.targetSP.doubleY);
+						if (maxHelmertDiscrepancy < d) 
+							maxHelmertDiscrepancy = d;
+						if (pair.panoBad) {
+							panoBadPairGood++;
+						} else {
+							panoGoodPairGood++;
+						}
+					}
+				}
+				System.out.println(
+						pairList.source.imageFileStamp.getFile().getName() + "\t" +
+						pairList.target.imageFileStamp.getFile().getName() + "\t" +
+						"pairs=" + pairList.items.size() + "\t" +
+						"maxHelmertDiscrepancy=" + maxHelmertDiscrepancy + "\t" +
+						"panoBadPairGood =" + panoBadPairGood + "\t" + 
+						"panoBadPairBad  =" + panoBadPairBad + "\t" + 
+						"panoGoodPairGood=" + panoGoodPairGood + "\t" + 
+						"panoGoodPairBad =" + panoGoodPairBad 
+				);
+			}
+
 			outImageColor = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageColor2 = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);

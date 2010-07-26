@@ -4,19 +4,24 @@ import java.util.Map.Entry;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
+import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.TransformLearnerResult;
 
 public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<KeyPoint, KeyPoint>{
 
-	public double discrepancyThreshold = 15; // value is in pixels
+	public static double discrepancyThreshold = 55; // TODO: ???? value is in pixels
+	KeyPointPairList pairList;
 	
-	public KeyPointHelmertTransformLearner(Iterable<KeyPointPair> pointsPairList) {
-		super(new KeyPointHelmertTransformer(), pointsPairList);
+	public KeyPointHelmertTransformLearner(KeyPointPairList pairList) {
+		super(new KeyPointHelmertTransformer(), pairList.items);
+		this.pairList = pairList;
 	}
 
 	public KeyPoint createTemporaryTargetObject() {
-		return new KeyPoint();
+		KeyPoint result = new KeyPoint();
+		result.keyPointList = pairList.target;
+		return result; 
 	}
 
 	public double getDiscrepancy(Entry<KeyPoint, KeyPoint> item) {
