@@ -398,7 +398,7 @@ public class GeneratePanoramas implements Callable<Void> {
 			}
 
 			for (KeyPointPair pair : pairList.items) {
-				if (!pair.bad) {
+				if (!pair.panoBad) {
 					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
 					int x1 = (int)d[0];
 					int y1 = (int)d[1];
@@ -639,10 +639,10 @@ public class GeneratePanoramas implements Callable<Void> {
 			}
 
 			for (KeyPointPairList pairList : pano) {
-				int panoBadPairGood = 0;
-				int panoBadPairBad = 0;
-				int panoGoodPairGood= 0;
-				int panoGoodPairBad = 0;
+				int helmBadPanoGood = 0;
+				int helmBadPanoBad = 0;
+				int helmGoodPanoGood= 0;
+				int helmGoodPanoBad = 0;
 				double maxHelmertDiscrepancy = Double.MIN_VALUE;
 
 				KeyPoint tmpKP = new KeyPoint();
@@ -651,21 +651,21 @@ public class GeneratePanoramas implements Callable<Void> {
 				tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
 				
 				for (KeyPointPair pair : pairList.items) {
-					if (pair.bad) {
-						if (pair.panoBad) {
-							panoBadPairBad++;
+					if (pair.panoBad) {
+						if (pair.validatePairBad) {
+							helmBadPanoBad++;
 						} else {
-							panoGoodPairBad++;
+							helmGoodPanoBad++;
 						}
 					} else {
 						tr.transform(pair.sourceSP, tmpKP);
 						double d = Math.hypot(tmpKP.doubleX - pair.targetSP.doubleX, tmpKP.doubleY - pair.targetSP.doubleY);
 						if (maxHelmertDiscrepancy < d) 
 							maxHelmertDiscrepancy = d;
-						if (pair.panoBad) {
-							panoBadPairGood++;
+						if (pair.validatePairBad) {
+							helmBadPanoGood++;
 						} else {
-							panoGoodPairGood++;
+							helmGoodPanoGood++;
 						}
 					}
 				}
@@ -673,11 +673,11 @@ public class GeneratePanoramas implements Callable<Void> {
 						pairList.source.imageFileStamp.getFile().getName() + "\t" +
 						pairList.target.imageFileStamp.getFile().getName() + "\t" +
 						"pairs=" + pairList.items.size() + "\t" +
-						"maxHelmertDiscrepancy=" + maxHelmertDiscrepancy + "\t" +
-						"panoBadPairGood =" + panoBadPairGood + "\t" + 
-						"panoBadPairBad  =" + panoBadPairBad + "\t" + 
-						"panoGoodPairGood=" + panoGoodPairGood + "\t" + 
-						"panoGoodPairBad =" + panoGoodPairBad 
+						"maxHelmertDiscrepancy=" + MathUtil.d2(maxHelmertDiscrepancy) + "\t" +
+						"helmBadPanoGood =" + helmBadPanoGood + "\t" + 
+						"helmBadPanoBad  =" + helmBadPanoBad + "\t" + 
+						"helmGoodPanoGood=" + helmGoodPanoGood + "\t" + 
+						"helmGoodPanoBad =" + helmGoodPanoBad 
 				);
 			}
 

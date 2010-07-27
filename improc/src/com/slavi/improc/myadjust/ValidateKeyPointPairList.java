@@ -44,7 +44,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			res = learner.calculateOne();
 //			System.out.println("------Validate KeyPointPairList ------------");
 //			System.out.println(res);
-			goodCount = pairList.getGoodCount();
+			goodCount = res.newGoodCount;
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;
 			}

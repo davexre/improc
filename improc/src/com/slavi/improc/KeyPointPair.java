@@ -19,9 +19,9 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 
 	public double weight;
 	
-	public boolean bad;
+	public boolean validatePairBad; // filled by ValidateKeyPointPairList
 	
-	public boolean panoBad;
+	public boolean panoBad; // filled by PanoTransformer 
 
 	public KeyPointPair() {
 		super();

@@ -62,7 +62,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		for (int i = chain.size() - 1; i >= 0; i--) {
 			KeyPointPairList pairList = chain.get(i);
 			for (KeyPointPair pair : pairList.items) {
-				pair.panoBad = pair.bad;
+				pair.panoBad = pair.validatePairBad;
 			}
 		}
 	}
@@ -182,7 +182,10 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	private void removeBadKeyPointPairLists() {
 		for (int i = kppl.size() - 1; i >= 0; i--) {
 			KeyPointPairList pairList = kppl.get(i);
-			int goodCount = pairList.getGoodCount();
+			int goodCount = 0;
+			for (KeyPointPair pair : pairList.items)
+				if (!pair.panoBad)
+					goodCount++;
 			if (goodCount < 10) {
 				System.out.println("BAD PAIR: " + goodCount + "/" + pairList.items.size() +
 						"\t" + pairList.source.imageFileStamp.getFile().getName() +
