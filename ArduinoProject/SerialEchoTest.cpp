@@ -72,19 +72,29 @@ extern "C" void setup() {
 	reader.initialize(9600, size(buf), buf);
 }
 
-char *c;
+void processReader() {
+	char *c;
+	int lightOn;
+	reader.update();
+	if (!reader.available()) {
+		return;
+	}
+	c = reader.readln();
+	switch (c++[0]) {
+	case 's':
+		lightOn = myatoi(&c);
+		led.playBlink(BLINK_FAST, lightOn);
+		break;
+	case 'l':
+		Serial.print("LED ");
+		Serial.println(led.isPlaying() ? "PLAYING" : "OFF");
+		break;
+	}
+}
+
 extern "C" void loop() {
 	led.update();
-	reader.update();
-	if (reader.available()) {
-		led.playBlink(BLINK_FAST, 3);
-
-		c = reader.readln();
-		Serial.print("NUM : ");
-		Serial.println(myatoi(&c));
-		Serial.print("REST: ");
-		Serial.println(c);
-	}
+	processReader();
 }
 
 #endif
