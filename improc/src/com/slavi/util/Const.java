@@ -1,11 +1,32 @@
 package com.slavi.util;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class Const {
 
+	public static class PropertiesWithModCounter extends Properties {
+		private static final long serialVersionUID = 3260018309030864911L;
+		private int modCount = 0;
+		
+		public synchronized Object put(Object key, Object value) {
+			modCount++;
+			return super.put(key, value);
+		}
+		
+		public synchronized Object remove(Object key) {
+			modCount++;
+			return super.remove(key);			
+		}
+		
+		public synchronized void clear() {
+			modCount++;
+			super.clear();			
+		}
+	}
+	
 	public static final String tempDir;
 	
 	public static final String workDir;
@@ -19,6 +40,13 @@ public class Const {
 	public static final String outputImage;
 	
 	public static final String imagesDir;
+	
+	public static final String properyFileName;
+	
+	public static final Properties properties;
+	
+	private static final int propertiesModCount;
+	
 	
 	/*
 	 * Sample property file
@@ -39,19 +67,43 @@ public class Const {
 	 */
 	static {
 		tempDir = System.getProperty("java.io.tmpdir", ".");
-		String properyFile = System.getProperty("user.home") + "/java.const.xproperties";
-		Properties props = new Properties();
+		properyFileName = System.getProperty("user.home") + "/java.const.xproperties";
+		final PropertiesWithModCounter prop = new PropertiesWithModCounter();
+		properties = prop;
 		try {
-			props.loadFromXML(new FileInputStream(properyFile));
-			workDir = props.getProperty("workDir");
-			sourceImage = props.getProperty("sourceImage");
-			sourceImage2 = props.getProperty("sourceImage2");
-			smallImage = props.getProperty("smallImage");
-			outputImage = props.getProperty("outputImage");
-			imagesDir = props.getProperty("imagesDir");
+			properties.loadFromXML(new FileInputStream(properyFileName));
+			workDir = properties.getProperty("workDir");
+			sourceImage = properties.getProperty("sourceImage");
+			sourceImage2 = properties.getProperty("sourceImage2");
+			smallImage = properties.getProperty("smallImage");
+			outputImage = properties.getProperty("outputImage");
+			imagesDir = properties.getProperty("imagesDir");
 		} catch (IOException e) {
 			throw new RuntimeException("User consts file not found or incomplete");
 		}
+		propertiesModCount = prop.modCount;
+		
+		Runtime.getRuntime().addShutdownHook(
+			new Thread(Const.class.getName() + " writer shutdown hook") {
+				public void run() {
+					if (prop.modCount == propertiesModCount)
+						return;
+					FileOutputStream fou = null;
+					try {
+						fou = new FileOutputStream(properyFileName);
+						properties.storeToXML(fou, Const.class.getName() + " properties");
+					} catch (Throwable t) {
+						t.printStackTrace();
+					} finally {
+						try {
+							if (fou != null)
+								fou.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			});
 	}
 	
 	public static void main(String[] args) {

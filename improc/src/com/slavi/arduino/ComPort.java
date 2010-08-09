@@ -4,25 +4,29 @@ import gnu.io.SerialPort;
 
 import java.util.StringTokenizer;
 
+import com.slavi.util.Const;
+
 
 public class ComPort {
+	
+	public int frequency;
 	
 	class LineProcess implements LineProcessor {
 		public void processLine(String line) {
 			StringTokenizer st = new StringTokenizer(line, ":");
 			String stat = st.nextToken();
-			String frequency = st.nextToken();
-			String isPlaying = st.nextToken();
-			String wasButtonPressed = st.nextToken();
-			String isButtonDown = st.nextToken();
+			int freq = Integer.parseInt(st.nextToken());
 			
-//			System.out.println("IGOT: " + line);
+			boolean isPlaying = st.nextToken().equals("1");
+			boolean wasButtonPressed = st.nextToken().equals("1");
+			boolean isButtonDown = st.nextToken().equals("1");
 		}
 	}
 	
 	LineProcess lineProcessor = new LineProcess();
 	
 	public void doIt() throws Exception {
+		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "10"));
 		ComPortLineReader comReader = new ComPortLineReader();
 		comReader.setParams("/dev/ttyUSB0", 9600, SerialPort.DATABITS_8, SerialPort.PARITY_NONE, SerialPort.STOPBITS_1);
 		comReader.open(lineProcessor);
