@@ -4,72 +4,44 @@
 #include <WProgram.h>
 #include "utils.h"
 #include "BlinkingLed.h"
+#include "Button.h"
+#include "SerialReader.h"
 
+const int buttonPin = 4;	// the number of the pushbutton pin
 const int ledPin = 13;		// the number of the LED pin
+const int speakerPin = 8;
 
-class SerialReader {
-private:
-	int bufferSize;
-	int bufferFull;
-	char *buffer;
-	boolean eol;
-public:
-	void initialize(int speed, int bufferSize, char *buffer);
-	void setBuffer(int bufferSize, char *buffer);
-	void update(void);
-	boolean available();
-	char *readln();
-};
+long frequency;		// if frequency==0 -> turn off
+boolean isPlaying;
+boolean wasButtonPressed;
 
-void SerialReader::initialize(int speed, int bufferSize, char *buffer) {
-	Serial.begin(speed);
-	setBuffer(bufferSize, buffer);
-}
-
-void SerialReader::setBuffer(int bufferSize, char *buffer) {
-	this->bufferFull = 0;
-	this->bufferSize = bufferSize;
-	this->buffer = buffer;
-	this->buffer[0] = 0;
-	eol = false;
-}
-
-void SerialReader::update(void) {
-	if (eol)
-		return;
-	while ((bufferSize > bufferFull + 1) && (Serial.available() > 0)) {
-		if ((buffer[bufferFull] = Serial.read()) == '\n') {
-			eol = true;
-			buffer[bufferFull] = 0;
-			break;
-		}
-		buffer[++bufferFull] = 0;
-	}
-	if (bufferSize <= bufferFull + 1) {
-		eol = true;
-	}
-}
-
-boolean SerialReader::available(void) {
-	return eol;
-}
-
-char *SerialReader::readln() {
-	if (eol) {
-		eol = false;
-		bufferFull = 0;
-		return buffer;
-	}
-	return NULL;
-}
-
-SerialReader reader;
 BlinkingLed led;
+Button btn;
+
 char buf[200];
 
 extern "C" void setup() {
+	frequency = 0;
+	isPlaying = false;
+	wasButtonPressed = false;
+	noTone(speakerPin);
+	pinMode(speakerPin, OUTPUT);
+
 	led.initialilze(ledPin);
+	btn.initialize(buttonPin);
 	reader.initialize(9600, size(buf), buf);
+}
+
+void showStatus() {
+	Serial.print("STAT:");
+	Serial.print(frequency);
+	Serial.print(":");
+	Serial.print(isPlaying ? "1" : "0");
+	Serial.print(":");
+	Serial.print(wasButtonPressed ? "1" : "0");
+	Serial.print(":");
+	Serial.print(btn.isDown() ? "1" : "0");
+	Serial.println();
 }
 
 void processReader() {
@@ -82,18 +54,33 @@ void processReader() {
 	c = reader.readln();
 	switch (c++[0]) {
 	case 's':
-		lightOn = myatoi(&c);
-		led.playBlink(BLINK_FAST, lightOn);
+		frequency = myatol(&c);
+		wasButtonPressed = false;
+		if (frequency == 0) {
+			isPlaying = false;
+			noTone(speakerPin);
+		} else {
+			isPlaying = true;
+			tone(speakerPin, frequency);
+		}
+		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
 		break;
 	case 'l':
-		Serial.print("LED ");
-		Serial.println(led.isPlaying() ? "PLAYING" : "OFF");
+		showStatus();
 		break;
 	}
 }
 
 extern "C" void loop() {
 	led.update();
+	btn.update();
+	if (btn.isDown()) {
+		wasButtonPressed = true;
+		isPlaying = false;
+		noTone(speakerPin);
+		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
+		showStatus();
+	}
 	processReader();
 }
 

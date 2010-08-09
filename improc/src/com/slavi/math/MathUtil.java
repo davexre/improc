@@ -53,6 +53,14 @@ public class MathUtil {
 	}
 	
 	/**
+	 * Returns a number from one range to another. Out-of-range values are re-mapped accordingly.
+	 * The "lower bounds" of either range may be larger or smaller than the "upper bounds". 
+	 */
+	public static double mapValue(double vale, double fromLow, double fromHigh, double toLow, double toHigh) {
+	  return (vale - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
+	}
+	
+	/**
 	 * Returns the value if min <= value <= max else returns min or max respecively.
 	 */
 	public static double clipValue(double value, double min, double max) {

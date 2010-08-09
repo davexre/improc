@@ -2,12 +2,21 @@ package com.slavi.arduino;
 
 import gnu.io.SerialPort;
 
+import java.util.StringTokenizer;
+
 
 public class ComPort {
 	
 	class LineProcess implements LineProcessor {
 		public void processLine(String line) {
-			System.out.println("IGOT: " + line);
+			StringTokenizer st = new StringTokenizer(line, ":");
+			String stat = st.nextToken();
+			String frequency = st.nextToken();
+			String isPlaying = st.nextToken();
+			String wasButtonPressed = st.nextToken();
+			String isButtonDown = st.nextToken();
+			
+//			System.out.println("IGOT: " + line);
 		}
 	}
 	
@@ -29,7 +38,8 @@ public class ComPort {
 	public static void main(String[] args) throws Exception {
 //		System.setProperty("java.library.path", "/home/slavian/.bin/");
 //		-Djava.library.path=/home/slavian/.bin/
-		ComPortOLD test = new ComPortOLD();
+//		-Djava.library.path=D:\prg\rxtx
+		ComPort test = new ComPort();
 		test.doIt();
 	}
 }
