@@ -3,8 +3,6 @@
 
 #include "WProgram.h"
 
-void delayLoop(unsigned long millis);
-
 /**
  *  The cirtuit: push button attached to pin_X from ground
  */
@@ -13,6 +11,8 @@ public:
 	int buttonPin;
 	int lastState;
 	int buttonState;
+	int debounce;		// time in millis, default 50
+	long lastTime;		// used to debounce the button, so no delay is needed
 
 	void initialize(int pin);
 	void update(void);

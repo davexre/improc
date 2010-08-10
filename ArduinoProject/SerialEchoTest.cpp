@@ -33,7 +33,6 @@ extern "C" void setup() {
 }
 
 void showStatus() {
-	Serial.print("STAT:");
 	Serial.print(frequency);
 	Serial.print(":");
 	Serial.print(isPlaying ? "1" : "0");

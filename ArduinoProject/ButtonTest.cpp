@@ -21,7 +21,6 @@ extern "C" void loop() {
 		lightOn = !lightOn;
 		digitalWrite(ledPin, lightOn ? HIGH : LOW);
 	}
-	delayLoop(50);
 }
 
 #endif

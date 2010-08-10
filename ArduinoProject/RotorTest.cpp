@@ -2,6 +2,7 @@
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
+#include "utils.h"
 #include "Button.h"
 
 extern "C" {
@@ -30,13 +31,6 @@ void UpdateRotation() {
     Rotor = constrain(Rotor, -MaxRotor, MaxRotor);
 }
 
-
-//void (*aaa)(void) = void() {
-//	Rotor++;
-//};
-
-
-
 unsigned long toggle;
 void setup() {
 	pinMode(ledPin, OUTPUT);
@@ -52,12 +46,6 @@ void setup() {
     digitalWrite(B, HIGH);
     // Attach interrupt to pin A
     attachInterrupt(0, UpdateRotation, FALLING);
-
-
-//    aaa = &UpdateRotation;
-//    aaa = void() {
-//    	Rotor++;
-//    }
 }
 
 int counter = 0;
