@@ -24,19 +24,21 @@ public class ComPort {
 	
 	long startedOn;
 	
+	int lowPresureThreshold = 110;
+	
 	class LineProcess implements LineProcessor {
 		public void processLine(String line) {
 			out.println(new Date() + ":" + line);
 			StringTokenizer st = new StringTokenizer(line, ":");
 			int freq = Integer.parseInt(st.nextToken());
 			boolean isPlaying = st.nextToken().equals("1");
-			boolean wasButtonPressed = st.nextToken().equals("1");
-			boolean isButtonDown = st.nextToken().equals("1");
+			int curPresure = Integer.parseInt(st.nextToken());
+			int maxPresure = Integer.parseInt(st.nextToken());
+			int presureThreshold = Integer.parseInt(st.nextToken());
 
-			if (wasButtonPressed) {
-				out.println("BUTTON WAS PRESSED at frequency " + Integer.toString(freq));
+			if (maxPresure > presureThreshold) {
+				out.println("PRESURE THRESHOLD WAS EXCEEDED at frequency " + Integer.toString(freq));
 			}
-			
 			if (isPlaying) {
 				if (System.currentTimeMillis() - startedOn > 10000) {
 					out.println("Stopping frequency " + freq);
@@ -45,23 +47,21 @@ public class ComPort {
 				}
 			} else {
 				// not playing
-				if (isButtonDown) {
-					out.println("Button is down. Wait and refresh state.");
+				if (curPresure > lowPresureThreshold) {
+					out.println("Presure threshold is still above low presure threshold. Wait and refresh state.");
 					refreshArduinoState();
 				} else {
-					if (freq == frequency) {
-						frequency++;
-						if (frequency > maxFrequency) {
-							out.println("All frequencies tested. Test finished.");
-							System.exit(0);
-						} else {
-							String frequencyStr = Integer.toString(frequency);
-							out.println("Starting new test at frequency " + frequencyStr);
-							Const.properties.setProperty("ComPort.startFrequency", frequencyStr);
-							startedOn = System.currentTimeMillis();
-							comReader.out.println("s" + frequencyStr);
-						}
+					if (frequency > maxFrequency) {
+						out.println("All frequencies tested. Test finished.");
+						System.exit(0);
+					} else {
+						String frequencyStr = Integer.toString(frequency);
+						out.println("Starting test at frequency " + frequencyStr);
+						Const.properties.setProperty("ComPort.startFrequency", frequencyStr);
+						startedOn = System.currentTimeMillis();
+						comReader.out.println("s" + frequencyStr);
 					}
+					frequency++;
 				}
 			}
 		}
@@ -102,8 +102,11 @@ public class ComPort {
 		while (true) {
 			int i = System.in.read();
 			char c = (char) i;
-			System.out.print(c);
-			comReader.out.print(c);
+			if (c == 'q') {
+				System.out.println("CLOSING...");
+				comReader.out.println("s0");
+				System.exit(0);
+			}
 		}
 	}	
 	

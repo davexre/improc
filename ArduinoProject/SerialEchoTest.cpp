@@ -4,31 +4,32 @@
 #include <WProgram.h>
 #include "utils.h"
 #include "BlinkingLed.h"
-#include "Button.h"
 #include "SerialReader.h"
 
-const int buttonPin = 4;	// the number of the pushbutton pin
+const int presurePin = 0;	// the number of the pin of the presre sensor
 const int ledPin = 13;		// the number of the LED pin
 const int speakerPin = 8;
 
 long frequency;		// if frequency==0 -> turn off
 boolean isPlaying;
-boolean wasButtonPressed;
+int maxPresure;
+int curPresure;
+int presureTreshold;
 
 BlinkingLed led;
-Button btn;
 
 char buf[200];
 
 extern "C" void setup() {
 	frequency = 0;
 	isPlaying = false;
-	wasButtonPressed = false;
+	maxPresure = 0;
+	curPresure = 0;
+	presureTreshold = 120;
 	noTone(speakerPin);
 	pinMode(speakerPin, OUTPUT);
 
 	led.initialilze(ledPin);
-	btn.initialize(buttonPin);
 	reader.initialize(9600, size(buf), buf);
 }
 
@@ -37,9 +38,11 @@ void showStatus() {
 	Serial.print(":");
 	Serial.print(isPlaying ? "1" : "0");
 	Serial.print(":");
-	Serial.print(wasButtonPressed ? "1" : "0");
+	Serial.print(curPresure);
 	Serial.print(":");
-	Serial.print(btn.isDown() ? "1" : "0");
+	Serial.print(maxPresure);
+	Serial.print(":");
+	Serial.print(presureTreshold);
 	Serial.println();
 }
 
@@ -54,8 +57,8 @@ void processReader() {
 	switch (c++[0]) {
 	case 's':
 		frequency = myatol(&c);
-		wasButtonPressed = false;
-		if (frequency == 0) {
+		maxPresure = curPresure = analogRead(presurePin);
+		if ((frequency == 0) || (curPresure > presureTreshold)) {
 			isPlaying = false;
 			noTone(speakerPin);
 		} else {
@@ -67,20 +70,25 @@ void processReader() {
 	case 'l':
 		showStatus();
 		break;
+	case 't':
+		presureTreshold = myatol(&c);
+		break;
 	}
 }
 
 extern "C" void loop() {
 	led.update();
-	btn.update();
-	if (btn.isDown()) {
-		wasButtonPressed = true;
-		isPlaying = false;
+	processReader();
+	curPresure = analogRead(presurePin);
+	if (maxPresure < curPresure)
+		maxPresure = curPresure;
+	if (curPresure > presureTreshold) {
+		// turn off
 		noTone(speakerPin);
-		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
+		led.playBlink(BLINK_FAST, 0);
+		isPlaying = false;
 		showStatus();
 	}
-	processReader();
 }
 
 #endif
