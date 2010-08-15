@@ -5,12 +5,13 @@
 #include "HardwareSerial.h"
 
 class SerialReader {
-private:
+//private:
+public:
 	int bufferSize;
 	int bufferFull;
 	char *buffer;
 	boolean eol;
-public:
+
 	void initialize(int speed, int bufferSize, char *buffer);
 	void setBuffer(int bufferSize, char *buffer);
 	void update(void);

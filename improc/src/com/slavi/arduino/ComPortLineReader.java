@@ -98,11 +98,18 @@ public class ComPortLineReader implements SerialPortEventListener {
 				while (inputStream.available() > 0) {
 					int i = inputStream.read();
 					char c = (char) i;
-					if (c == '\n') {
-						String line = sb.toString();
-						sb = new StringBuilder();
-						if (lineProcessor != null)
-							lineProcessor.processLine(line);
+					if ((c == '\r') || (c == '\n')) {
+						if (sb.length() > 0) {
+							String line = sb.toString();
+							sb = new StringBuilder();
+							if (lineProcessor != null) {
+								try {
+									lineProcessor.processLine(line);
+								} catch (Throwable t) {
+									t.printStackTrace();
+								}
+							}
+						}
 					} else {
 						sb.append(c);
 					}

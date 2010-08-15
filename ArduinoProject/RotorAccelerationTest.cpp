@@ -7,7 +7,7 @@
 #include "RotorAcelleration.h"
 
 const int buttonPin = 4;	// the number of the pushbutton pin
-const int ledPin =  13;		// the number of the LED pin
+const int ledPin =  12;		// the number of the LED pin
 const int speakerPin = 8;
 const int rotorPinA = 2;	// One quadrature pin
 const int rotorPinB = 3;	// the other quadrature pin
@@ -32,7 +32,7 @@ extern "C" void setup() {
 	led.initialilze(ledPin, true, size(states), states);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.minValue = 0;
-	rotor.maxValue = 20000;
+	rotor.maxValue = 50000;
 	lastRotor = rotor.position = 500;
 
     Serial.begin(9600);

@@ -12,7 +12,7 @@ void RotorAcelleration::UpdateRotation() {
 	}
 	int step = delta < rotor.time0 ? 0 : (delta < rotor.time1 ? 1 : 2);
 	int curDirection = (direction == HIGH ? 2 : 1);
-	if ((step == 0) && (rotor.lastDirection != curDirection)) {
+	if ((step != 2) && (rotor.lastDirection != curDirection)) {
 		// debounce pinB
 		return;
 	}
