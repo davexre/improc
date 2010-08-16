@@ -4,20 +4,21 @@ import gnu.io.SerialPort;
 
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
-import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.util.Const;
-import com.slavi.util.ui.SwtUtil;
 
 
 public class ComPort {
 	
 	public PrintStream out;
 
+	SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH/mm/ss");
+	
 	ArrayBlockingQueue<String>queue = new ArrayBlockingQueue<String>(5);
 	
 	ComPortLineReader comReader;
@@ -36,50 +37,10 @@ public class ComPort {
 		}
 	};
 
-	public void processLine(String line) {
-		out.println(new Date() + ":" + line);
-		StringTokenizer st = new StringTokenizer(line, ":");
-		int freq = Integer.parseInt(st.nextToken());
-		boolean isPlaying = st.nextToken().equals("1");
-		int curPresure = Integer.parseInt(st.nextToken());
-		int maxPresure = Integer.parseInt(st.nextToken());
-		int presureThreshold = Integer.parseInt(st.nextToken());
-
-		if (maxPresure > presureThreshold) {
-			out.println("PRESURE THRESHOLD WAS EXCEEDED at frequency " + Integer.toString(freq));
-		}
-		if (isPlaying) {
-			if (System.currentTimeMillis() - startedOn > 10000) {
-				out.println("Stopping frequency " + freq);
-				comReader.out.println("s0");
-			}
-		} else {
-			// not playing
-			if (curPresure > lowPresureThreshold) {
-				out.println("Presure threshold is still above low presure threshold. Wait and refresh state.");
-			} else {
-				if (frequency > maxFrequency) {
-					out.println("All frequencies tested. Test finished.");
-					System.exit(0);
-				} else {
-					String frequencyStr = Integer.toString(frequency);
-					out.println("Starting test at frequency " + frequencyStr);
-					Const.properties.setProperty("ComPort.startFrequency", frequencyStr);
-					startedOn = System.currentTimeMillis();
-					comReader.out.println("s" + frequencyStr);
-				}
-				frequency++;
-			}
-		}
-	}
-	
-	class RefreshTimerTask extends TimerTask {
-		public void run() {
-			comReader.out.println("l"); // ping arduino
-		}
-	}
-	
-	RefreshTimerTask refreshTimerTask = new RefreshTimerTask();
+	long lastTimeDataReceived;
+	boolean playNextFrequency;
+	boolean isPlaying;
+	int curPresure;
 	
 	public void doIt() throws Exception {
 		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "100"));
@@ -98,22 +59,83 @@ public class ComPort {
 		comReader.setParams("/dev/ttyUSB0", 9600, SerialPort.DATABITS_8, SerialPort.PARITY_NONE, SerialPort.STOPBITS_1);
 		comReader.open(lineProcessor);
 		
-		SwtUtil.timer.schedule(refreshTimerTask, new Date(), 2000); 
+		startedOn = lastTimeDataReceived = 0;
+		playNextFrequency = true;
+		isPlaying = false;
+		
+		comReader.out.println("t140");
 		comReader.out.println("l");
 		
 		while (true) {
+			String cmdToSend = null;
 			String line = queue.poll(100, TimeUnit.MILLISECONDS);
 			if (line != null) {
-				processLine(line);
+				String comment = "";
+				StringTokenizer st = new StringTokenizer(line, ":");
+				int freq = Integer.parseInt(st.nextToken());
+				isPlaying = st.nextToken().equals("1");
+				curPresure = Integer.parseInt(st.nextToken());
+				int maxPresure = Integer.parseInt(st.nextToken());
+				int presureThreshold = Integer.parseInt(st.nextToken());
+		
+				if (maxPresure > presureThreshold) {
+					comment = "MAX PRESURE THRESHOLD EXCEEDED";
+				} else if (!isPlaying) {
+					if (curPresure > lowPresureThreshold) {
+						comment = "Presure still above low threshold";
+					} else {
+						playNextFrequency = true;
+					}
+				}
+				String str = df.format(System.currentTimeMillis()) + ":" + line + ":" + comment;
+				out.println(str);
+//				System.out.println(str);
+				lastTimeDataReceived = System.currentTimeMillis();
+			} else {
+				if (System.currentTimeMillis() - lastTimeDataReceived > 2000) {
+					cmdToSend = "l"; // ping arduino
+				}
 			}
-			int i = System.in.read();
-			char c = (char) i;
-			if (c == 'q') {
-				System.out.println("CLOSING...");
-				comReader.out.println("s0");
-				System.exit(0);
+			
+			if (isPlaying) {
+				if (System.currentTimeMillis() - startedOn > 10000) {
+					playNextFrequency = true;
+				}
 			}
+			
+			if (playNextFrequency) {
+				if (frequency > maxFrequency) {
+					out.println("All frequencies tested. Test finished.");
+					break;
+				} else {
+					String frequencyStr = Integer.toString(frequency);
+					Const.properties.setProperty("ComPort.startFrequency", frequencyStr);
+					startedOn = System.currentTimeMillis();
+					cmdToSend = "s" + frequencyStr;
+					isPlaying = true;
+				}
+				frequency++;
+			}
+			
+			if (cmdToSend != null) {
+				comReader.out.println(cmdToSend);
+//				System.out.println(cmdToSend);
+			}
+					
+			if (System.in.available() > 0) {
+				int i = System.in.read();
+				char c = (char) i;
+				if (c == 'q') {
+					System.out.println("CLOSING...");
+					comReader.out.println("s0");
+					break;
+				}
+			}
+			playNextFrequency = false;
 		}
+		out.flush();
+		out.close();
+		comReader.close();
 	}	
 	
 	public static void main(String[] args) throws Exception {
