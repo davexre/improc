@@ -11,7 +11,7 @@ public:
 	int buttonPin;
 	int lastState;
 	int buttonState;
-	int debounce;		// time in millis, default 50
+	int debounce;		// time in millis, default 10
 	long lastTime;		// used to debounce the button, so no delay is needed
 
 	void initialize(int pin);

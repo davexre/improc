@@ -24,7 +24,7 @@ void RotorAcelleration2::initialize(int pinA, int pinB) {
 
 void RotorAcelleration2::update() {
 	long now = millis();
-	long timeExpire = now - time1 << 1;
+	long timeExpire = now - 10000;
 	boolean toggle = digitalRead(pinA) == HIGH;
 	boolean direction = digitalRead(pinB) == HIGH;
 	if (direction != pinBState) {
@@ -39,7 +39,7 @@ void RotorAcelleration2::update() {
 	if (toggle != pinAState) {
 		if (now - lastTimeToggleA > debounce) {
 			pinAState = toggle;
-			if (pinAState) {
+			if (!pinAState) {
 				long delta = now - lastTimeToggleA;
 				int step = delta < time0 ? 0 : (delta < time1 ? 1 : 2);
 				position = constrain(position + (direction ? steps[step] : -steps[step]),
