@@ -25,7 +25,7 @@ extern "C" void setup() {
 	isPlaying = false;
 	maxPresure = 0;
 	curPresure = 0;
-	presureTreshold = 120;
+	presureTreshold = 140;
 	noTone(speakerPin);
 	pinMode(speakerPin, OUTPUT);
 
@@ -33,12 +33,14 @@ extern "C" void setup() {
 	reader.initialize(9600, size(buf), buf);
 }
 
-void showStatus() {
-	Serial.print(frequency);
+void showStatus(boolean aborting) {
+	Serial.print(curPresure);
 	Serial.print(":");
 	Serial.print(isPlaying ? "1" : "0");
 	Serial.print(":");
-	Serial.print(curPresure);
+	Serial.print(aborting ? "1" : "0");
+	Serial.print(":");
+	Serial.print(frequency);
 	Serial.print(":");
 	Serial.print(maxPresure);
 	Serial.print(":");
@@ -56,8 +58,9 @@ void processReader() {
 	c = reader.readln();
 	switch (c++[0]) {
 	case 's':
-		frequency = myatol(&c);
-		maxPresure = curPresure = analogRead(presurePin);
+//		frequency = myatol(&c);
+		frequency = strtol(c, &c, 10);
+		maxPresure = curPresure;
 		if ((frequency == 0) || (curPresure > presureTreshold)) {
 			isPlaying = false;
 			noTone(speakerPin);
@@ -68,26 +71,29 @@ void processReader() {
 		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
 		break;
 	case 'l':
-		showStatus();
+		showStatus(false);
 		break;
 	case 't':
-		presureTreshold = myatol(&c);
+//		presureTreshold = myatol(&c);
+		presureTreshold = strtol(c, &c, 10);
 		break;
 	}
 }
 
 extern "C" void loop() {
 	led.update();
-	processReader();
 	curPresure = analogRead(presurePin);
+	processReader();
 	if (maxPresure < curPresure)
 		maxPresure = curPresure;
 	if (curPresure > presureTreshold) {
 		// turn off
 		noTone(speakerPin);
 		led.playBlink(BLINK_FAST, 0);
-		isPlaying = false;
-		showStatus();
+		if (isPlaying) {
+			isPlaying = false;
+			showStatus(true);
+		}
 	}
 }
 
