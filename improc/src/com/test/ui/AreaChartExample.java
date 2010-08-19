@@ -9,6 +9,7 @@ import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
+import org.swtchart.ext.InteractiveChart;
 
 /**
  * An example for area chart.
@@ -33,7 +34,7 @@ public class AreaChartExample {
         shell.setLayout(new FillLayout());
 
         // create a chart
-        Chart chart = new Chart(shell, SWT.NONE);
+        Chart chart = new InteractiveChart(shell, SWT.NONE);
 
         // set titles
         chart.getTitle().setVisible(false);

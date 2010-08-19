@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -15,6 +20,7 @@ import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
+import org.swtchart.ext.InteractiveChart;
 
 import com.slavi.util.Util;
 import com.slavi.util.ui.SwtUtil;
@@ -29,7 +35,21 @@ public class PlotComPortLogFile {
         shell.setLayout(new FillLayout(SWT.HORIZONTAL));
         Composite parent = shell;
         
-        chart = new Chart(parent, SWT.NONE);
+        chart = new InteractiveChart(parent, SWT.NONE) {
+            public void save(String filename, int format) {
+                Point size = getSize();
+                Image image = new Image(Display.getDefault(), size.x, size.y);
+                GC gc = new GC(image);
+                gc.copyArea(image, 0, 0);
+                gc.dispose();
+
+                ImageData data = image.getImageData();
+                ImageLoader loader = new ImageLoader();
+                loader.data = new ImageData[] { data };
+                loader.save(filename, format);
+                image.dispose();
+            }
+        };
         chart.getTitle().setText("comport.log");
         ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, "comport.log");
 //        lineSeries.setYSeries(data);
@@ -75,7 +95,7 @@ public class PlotComPortLogFile {
 			int maxPresure = Integer.parseInt(st.nextToken());
 			int presureThreshold = Integer.parseInt(st.nextToken());
 			
-			int plotValue = curPresure;
+			int plotValue = maxPresure;
 			
 			if (curFreq == freq) {
 				if (maxValue < plotValue) {
