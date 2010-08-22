@@ -29,7 +29,7 @@ extern "C" void setup() {
 	pinMode(speakerPin, OUTPUT);
 
 	btn.initialize(buttonPin);
-	led.initialilze(ledPin, true, size(states), states);
+	led.initialize(ledPin, true, size(states), states);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.minValue = 0;
 	rotor.maxValue = 50000;

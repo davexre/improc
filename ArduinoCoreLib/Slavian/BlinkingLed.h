@@ -21,7 +21,7 @@ public:
 	int playCount;
 	void stop();
 	void play(int playCount);
-	void initialilze(uint8_t pin);
+	void initialize(uint8_t pin);
 	void playBlink(const unsigned int *delays, int playCount);
 	void update(void);
 	inline boolean isPlaying() {

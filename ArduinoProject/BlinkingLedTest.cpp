@@ -13,7 +13,7 @@ BlinkingLed led;
 
 extern "C" void setup(void) {
 	btn.initialize(buttonPin);
-	led.initialilze(ledPin);
+	led.initialize(ledPin);
 }
 
 extern "C" void loop(void) {

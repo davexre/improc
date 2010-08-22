@@ -29,7 +29,7 @@ public:
 	int numberOfStates;
 	const unsigned int *(*stateDelays);
 
-	void initialilze(uint8_t pin, boolean looped, int numberOfStates, const unsigned int *(*stateDelays));
+	void initialize(uint8_t pin, boolean looped, int numberOfStates, const unsigned int *(*stateDelays));
 	void setState(int state);
 	void nextState(void);
 	void previousState(void);

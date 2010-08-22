@@ -27,9 +27,11 @@ import com.slavi.util.ui.SwtUtil;
 
 public class PlotComPortLogFile {
 
+	static final String finName = "comport_2.log";
+	
 	Shell shell;
 	Chart chart;
-
+	
 	public void createWidgets() {
         shell = new Shell();
         shell.setLayout(new FillLayout(SWT.HORIZONTAL));
@@ -50,8 +52,8 @@ public class PlotComPortLogFile {
                 image.dispose();
             }
         };
-        chart.getTitle().setText("comport.log");
-        ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, "comport.log");
+        chart.getTitle().setText(finName);
+        ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, finName);
 //        lineSeries.setYSeries(data);
         lineSeries.setLineColor(Display.getDefault().getSystemColor(SWT.COLOR_RED));
         lineSeries.enableArea(true);
@@ -78,24 +80,27 @@ public class PlotComPortLogFile {
 	}
 	
 	private void setFile(BufferedReader fin) throws Exception {
-		ArrayList<Integer> peaks = new ArrayList<Integer>();
-		ArrayList<Integer> freqs = new ArrayList<Integer>();
+		ArrayList<Integer> yAxis = new ArrayList<Integer>();
+		ArrayList<Integer> xAxis = new ArrayList<Integer>();
 		int curFreq = -1;
 		int maxValue = -1;
 		while (fin.ready()) {
 			String line = Util.trimNZ(fin.readLine());
-			StringTokenizer st = new StringTokenizer(line, ":"); 
-			if (st.countTokens() < 6)
+			StringTokenizer st = new StringTokenizer(line, "\t"); 
+			if (st.countTokens() < 8)
 				continue;
 			String time = st.nextToken();
+			int freq = Integer.parseInt(st.nextToken());
 			int curPresure = Integer.parseInt(st.nextToken());
+			int maxPresure = Integer.parseInt(st.nextToken());
+			double temperature1 = Double.parseDouble(st.nextToken());
+			double temperature2 = Double.parseDouble(st.nextToken());
 			boolean isPlaying = st.nextToken().equals("1");
 			boolean aborting = st.nextToken().equals("1");
-			int freq = Integer.parseInt(st.nextToken());
-			int maxPresure = Integer.parseInt(st.nextToken());
-			int presureThreshold = Integer.parseInt(st.nextToken());
 			
 			int plotValue = maxPresure;
+			yAxis.add((int)curPresure);
+			xAxis.add(curFreq);
 			
 			if (curFreq == freq) {
 				if (maxValue < plotValue) {
@@ -103,29 +108,29 @@ public class PlotComPortLogFile {
 				}
 			} else {
 				if (curFreq > 0) {
-					peaks.add(Integer.valueOf(maxValue));
-					freqs.add(Integer.valueOf(curFreq));
+//					yAxis.add(maxValue);
+//					xAxis.add(curFreq);
 				}
 				curFreq = freq;
 				maxValue = plotValue;
 			}
 		}
-		peaks.add(Integer.valueOf(maxValue));
-		freqs.add(Integer.valueOf(curFreq));
-		double dataY[] = new double[peaks.size()];
-		double dataX[] = new double[peaks.size()];
-		for (int i = 0; i < peaks.size(); i++) {
-			dataX[i] = freqs.get(i);
-			dataY[i] = peaks.get(i);
+		yAxis.add(Integer.valueOf(maxValue));
+		xAxis.add(Integer.valueOf(curFreq));
+		double dataY[] = new double[yAxis.size()];
+		double dataX[] = new double[yAxis.size()];
+		for (int i = 0; i < yAxis.size(); i++) {
+			dataX[i] = xAxis.get(i);
+			dataY[i] = yAxis.get(i);
 		}
-		chart.getSeriesSet().getSeries()[0].setXSeries(dataX);
+//		chart.getSeriesSet().getSeries()[0].setXSeries(dataX);
 		chart.getSeriesSet().getSeries()[0].setYSeries(dataY);
 		chart.getAxisSet().adjustRange();
 	}
 
 	public static void main(String[] args) throws Exception {
-		String finName = System.getProperty("user.home") + "/comport.log";
-		BufferedReader fin = new BufferedReader(new FileReader(finName));
+		String fName = System.getProperty("user.home") + "/" + finName;
+		BufferedReader fin = new BufferedReader(new FileReader(fName));
 
 		PlotComPortLogFile t = new PlotComPortLogFile();
 		t.createWidgets();

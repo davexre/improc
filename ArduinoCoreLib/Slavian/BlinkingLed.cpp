@@ -29,7 +29,7 @@ void BlinkingLed::play(int playCount) {
 	update();
 }
 
-void BlinkingLed::initialilze(uint8_t pin) {
+void BlinkingLed::initialize(uint8_t pin) {
 	this->pin = pin;
 	this->delays = NULL;
 	curDelay = 0;

@@ -1,10 +1,10 @@
 #include "StateLed.h"
 
-void StateLed::initialilze(uint8_t pin, boolean looped, int numberOfStates, const unsigned int *(*stateDelays)) {
+void StateLed::initialize(uint8_t pin, boolean looped, int numberOfStates, const unsigned int *(*stateDelays)) {
 	this->looped = looped;
 	this->numberOfStates = numberOfStates;
 	this->stateDelays = stateDelays;
-	led.initialilze(pin);
+	led.initialize(pin);
 	state = 0;
 	led.playBlink(stateDelays[state], 0);
 }

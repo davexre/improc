@@ -17,12 +17,16 @@ void SerialReader::update(void) {
 	if (eol)
 		return;
 	while ((bufferSize > bufferFull + 1) && (Serial.available() > 0)) {
-		if ((buffer[bufferFull] = Serial.read()) == '\n') {
+		char c = Serial.read();
+		if (c == '\n') {
 			eol = true;
 			buffer[bufferFull] = 0;
 			break;
 		}
-		buffer[++bufferFull] = 0;
+		if (c != '\r') {	// Ignore carriage return
+			buffer[bufferFull++] = c;
+			buffer[bufferFull] = 0;
+		}
 	}
 	if (bufferSize <= bufferFull + 1) {
 		eol = true;

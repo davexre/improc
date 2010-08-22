@@ -21,7 +21,7 @@ const unsigned int *states[] = {
 
 extern "C" void setup(void) {
 	btn.initialize(buttonPin);
-	led.initialilze(ledPin, true, size(states), states);
+	led.initialize(ledPin, true, size(states), states);
 }
 
 extern "C" void loop(void) {
