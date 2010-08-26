@@ -13,7 +13,7 @@ import com.slavi.math.MathUtil;
 /**
  * Use with AnalogSensorTest 
  */
-public class TemperatureSensorTest {
+public class CurrentSensorTest {
 	
 	final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -89,8 +89,10 @@ public class TemperatureSensorTest {
 			String str = df.format(System.currentTimeMillis());
 			while (st.hasMoreTokens()) {
 				double t = Double.parseDouble(st.nextToken());
-				t *= 500.0 / 1024.0;
-				str += "\t" + MathUtil.d2(t);
+				t *= 5.0 / 1024.0;		// Now t contains voltage (in Volts)
+				double R = 0.275;		// This is the shunt resistance in Ohms
+				double q = t / R;
+				str += "\t" + MathUtil.d2(q) + "\t" + MathUtil.d2(t) + "\t|";
 			}
 			out.println(str);
 		}
@@ -100,7 +102,7 @@ public class TemperatureSensorTest {
 //		System.setProperty("java.library.path", "/home/slavian/.bin/");
 //		-Djava.library.path=/home/slavian/.bin/
 //		-Djava.library.path=D:\prg\rxtx
-		TemperatureSensorTest test = new TemperatureSensorTest();
+		CurrentSensorTest test = new CurrentSensorTest();
 		try {
 			test.setup();
 			test.doIt();
