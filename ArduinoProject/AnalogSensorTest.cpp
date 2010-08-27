@@ -22,7 +22,10 @@ char readerBuffer[200];
 
 long lastTime;
 
+float mySmoothVal;
+
 extern "C" void setup() {
+	rps.initialize();
 	led.initialize(ledPin);
 	led.playBlink(BLINK_FAST, -1);
 	reader.initialize(9600, size(readerBuffer), readerBuffer);
@@ -31,6 +34,7 @@ extern "C" void setup() {
 		int val = analogRead(sensorPins[i]);
 		sval[i].initialize(smoothBuffer[i], smoothBufferSize, val);
 	}
+	mySmoothVal = 0.0;
 	lastTime = millis();
 }
 
@@ -49,6 +53,8 @@ void showStatus() {
 	}
 	Serial.print("\t");
 	Serial.print(smoothedVal);
+	Serial.print("\t");
+	Serial.print((int) mySmoothVal);
 	Serial.println();
 }
 /*
@@ -82,12 +88,14 @@ int smooth(int data, float filterVal, float smoothedVal) {
 
 extern "C" void loop() {
 	led.update();
+	rps.update();
 	int val;
 	for (int i = 0; i < numberOfSensors; i++) {
 		val = analogRead(sensorPins[i]);
 		sval[i].addValue(val);
 	}
 	smoothedVal =  smooth(val, 0.95, smoothedVal);
+	rps.smooth(val, &mySmoothVal);
 
 //	processReader();
 	if (millis() - lastTime > 500) {

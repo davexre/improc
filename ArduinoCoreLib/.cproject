@@ -29,7 +29,9 @@
 								<option id="de.innot.avreclipse.assembler.option.debug.level.107331648" name="Generate Debugging Info" superClass="de.innot.avreclipse.assembler.option.debug.level" value="de.innot.avreclipse.assembler.option.debug.level.none" valueType="enumerated"/>
 								<inputType id="de.innot.avreclipse.tool.assembler.input.1539703940" superClass="de.innot.avreclipse.tool.assembler.input"/>
 							</tool>
-							<tool command="-avr-size" commandLinePattern="${COMMAND} ${FLAGS} ${INPUTS}" errorParsers="" id="de.innot.avreclipse.tool.size.winavr.app.release.1170155392" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.release"/>
+							<tool command="-avr-size" commandLinePattern="${COMMAND} ${FLAGS} ${INPUTS}" errorParsers="" id="de.innot.avreclipse.tool.size.winavr.app.release.1170155392" name="Print Size" superClass="de.innot.avreclipse.tool.size.winavr.app.release">
+								<option id="de.innot.avreclipse.size.option.formatwithavr.260011538" name="Size Format" superClass="de.innot.avreclipse.size.option.formatwithavr" value="de.innot.avreclipse.size.option.format.berkeley" valueType="enumerated"/>
+							</tool>
 							<tool command="avr-g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="de.innot.avreclipse.tool.linker.winavr.app.release.1688294786" name="AVR C Linker" superClass="de.innot.avreclipse.tool.linker.winavr.app.release">
 								<option id="de.innot.avreclipse.linker.option.libpath.201112952" name="Libraries Path (-L)" superClass="de.innot.avreclipse.linker.option.libpath"/>
 								<option id="de.innot.avreclipse.linker.option.libs.85414870" name="Libraries (-l)" superClass="de.innot.avreclipse.linker.option.libs"/>

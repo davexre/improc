@@ -1,7 +1,6 @@
 #ifndef STATELED_H_
 #define STATELED_H_
 
-#include "utils.h"
 #include "BlinkingLed.h"
 
 /**
@@ -19,8 +18,6 @@
  * led.initialize(pin, true, size(states), states);
  *
  */
-
-
 class StateLed {
 public:
 	BlinkingLed led;
