@@ -10,19 +10,27 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.math.MathUtil;
+import com.slavi.util.Beep;
 import com.slavi.util.Const;
 
 public class GeneratorWithPressureSensor {
+
+	final double analogReadingToVoltage = 5.0 / 1024.0;
+	final double shuntResistance = 0.275;	// Shunt resistance in Ohms
+
+	final double toCelsius = 100 * analogReadingToVoltage; 
+	final double toAmpers = analogReadingToVoltage / shuntResistance; 
 	
-	final double toCelsius = 500.0 / 1024.0; 
-	
-	final int maxFrequency = 3080; //50000;
+	final int maxFrequency = 50000;
+
 	final int pressureThresholdMax = 140;
 	final int pressureThresholdLow = 120;
-	final int temperature1ThresholdMax = (int) (80 / toCelsius);
-	final int temperature1ThresholdLow = (int) (60 / toCelsius);
-	final int temperature2ThresholdMax = (int) (80 / toCelsius);
-	final int temperature2ThresholdLow = (int) (60 / toCelsius);
+	final int cellTemperatureThresholdMax = (int) (80 / toCelsius);
+	final int cellTemperatureThresholdLow = (int) (60 / toCelsius);
+	final int mosfetTemperatureThresholdMax = (int) (80 / toCelsius);
+	final int mosfetTemperatureThresholdLow = (int) (60 / toCelsius);
+	final int currentThresholdMax = (int) (10 / toAmpers);
+	final int currentThresholdLow = (int) (6 / toAmpers);
 
 	final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -46,17 +54,18 @@ public class GeneratorWithPressureSensor {
 
 	void setup() throws Exception {
 		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "100"));
-		frequency = 2900; //4700;
-		String fouName = System.getProperty("user.home") + "/comport_4.log";
-//		FileOutputStream fou = new FileOutputStream(fouName, true);
-//		out = new PrintStream(fou, true); // autoflush
-		out = System.out;
+//		frequency = 2900; //4700;
+		String fouName = System.getProperty("user.home") + "/comport_6.log";
+		FileOutputStream fou = new FileOutputStream(fouName, true);
+		out = new PrintStream(fou, true); // autoflush
+//		out = System.out;
 		out.println();
 		out.println("*******************");
 		out.println("* Started on " + df.format(System.currentTimeMillis()));
 		out.println("* Using start frequency " + frequency);
 		out.println("*******************");
-		out.println();
+		out.println("* time frequency isPlaying aborting pressure cellTemperature mosfetTemperature ambientTemperature current maxPressure maxCurrent COMMENT");
+		out.println("*******************");
 		frequency--; // Will increase by 1 before sending it to arduino.
 		
 		comReader = new ComPortLineReader();
@@ -82,8 +91,9 @@ public class GeneratorWithPressureSensor {
 	}
 	
 	void doIt() throws Exception {
-		comReader.out.println("a" + temperature1ThresholdMax);
-		comReader.out.println("b" + temperature2ThresholdMax);
+		comReader.out.println("a" + cellTemperatureThresholdMax);
+		comReader.out.println("b" + mosfetTemperatureThresholdMax);
+		comReader.out.println("d" + currentThresholdMax);
 		comReader.out.println("t" + pressureThresholdMax);
 		comReader.out.println("l");
 
@@ -109,47 +119,59 @@ public class GeneratorWithPressureSensor {
 			}
 
 			StringTokenizer st = new StringTokenizer(line, "\t");
-			int curPressure = Integer.parseInt(st.nextToken());
 			boolean isPlaying = st.nextToken().equals("1");
 			boolean aborting = st.nextToken().equals("1");
+			int pressure = Integer.parseInt(st.nextToken());
+			int cellTemperature = Integer.parseInt(st.nextToken());
+			int mosfetTemperature = Integer.parseInt(st.nextToken());
+			int ambientTemperature = Integer.parseInt(st.nextToken());
+			int current = Integer.parseInt(st.nextToken());
 			int maxPressure = Integer.parseInt(st.nextToken());
-			int curTemperature1 = Integer.parseInt(st.nextToken());
-			int curTemperature2 = Integer.parseInt(st.nextToken());
+			int maxCurrent = Integer.parseInt(st.nextToken());
 
 			boolean playNextFrequency = false;
 			String comment = "";
 			if (aborting) {
-				if (maxPressure > pressureThresholdMax)
+				Beep.beep();
+				Beep.beep();
+				if (maxPressure >= pressureThresholdMax)
 					comment = "MAX PRESSURE THRESHOLD EXCEEDED";
-				else if (curTemperature1 > temperature1ThresholdMax)
+				else if (cellTemperature >= cellTemperatureThresholdMax)
 					comment = "CELL TEMPERATURE THRESHOLD EXCEEDED";
-				else if (curTemperature2 > temperature2ThresholdMax)
+				else if (mosfetTemperature >= mosfetTemperatureThresholdMax)
 					comment = "MOSFET TEMPERATURE THRESHOLD EXCEEDED";
+				else if (current >= currentThresholdMax)
+					comment = "CURRENT THRESHOLD EXCEEDED";
 			} else if (isPlaying) {
 				if (System.currentTimeMillis() - startedOn > 10000) {
 					playNextFrequency = true;
 				}
-			} else if (curPressure > pressureThresholdLow) {
+			} else if (pressure >= pressureThresholdLow) {
 				comment = "Pressure still above low threshold";
-			} else if (curTemperature1 > temperature1ThresholdLow) {
+			} else if (cellTemperature >= cellTemperatureThresholdLow) {
 				comment = "Cell temperature still above threshold";
-			} else if (curTemperature1 > temperature1ThresholdLow) {
+			} else if (mosfetTemperature >= mosfetTemperatureThresholdLow) {
 				comment = "MOSFET temperature still above threshold";
+			} else if (current >= currentThresholdLow) {
+				comment = "CURRENT still above threshold";
 			} else {
 				playNextFrequency = true;
 			}
 			
-			String str = df.format(System.currentTimeMillis()) + "\t" +
+			String str = 
+				df.format(System.currentTimeMillis()) + "\t" +
 				Integer.toString(frequency) + "\t" +
-				Integer.toString(curPressure) + "\t" +
-				Integer.toString(maxPressure) + "\t" +
-				MathUtil.d2(curTemperature1 * toCelsius) + "\t" +
-				MathUtil.d2(curTemperature2 * toCelsius) + "\t" +
 				(isPlaying ? "1" : "0") + "\t" +
 				(aborting ? "1" : "0") + "\t" +
+				Integer.toString(pressure) + "\t" +
+				MathUtil.d2(cellTemperature * toCelsius) + "\t" +
+				MathUtil.d2(mosfetTemperature * toCelsius) + "\t" +
+				MathUtil.d2(ambientTemperature * toCelsius) + "\t" +
+				MathUtil.d2(current * toAmpers) + "\t" +
+				Integer.toString(maxPressure) + "\t" +
+				MathUtil.d2(maxCurrent * toAmpers) + "\t" +
 				comment;
 			out.println(str);
-//			System.out.println(str);
 			
 			if (playNextFrequency) {
 				frequency++;

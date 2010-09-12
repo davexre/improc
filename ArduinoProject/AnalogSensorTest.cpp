@@ -1,4 +1,4 @@
-#define UseThisFileForMainProgram
+//#define UseThisFileForMainProgram
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
@@ -11,7 +11,7 @@ const int ledPin = 13;			// the number of the LED pin
 const int numberOfSensors = 1;
 const int sensorPins[numberOfSensors] = { 1 };
 
-const int smoothBufferSize = 200;
+const int smoothBufferSize = 20;
 int smoothBuffer[numberOfSensors][smoothBufferSize];
 
 SmoothValue sval[numberOfSensors];
@@ -41,9 +41,11 @@ extern "C" void setup() {
 int smoothedVal = 0;
 
 void showStatus() {
+	Serial.print(rps.rps);
+	Serial.print("\t");
 	for (int i = 0; i < numberOfSensors; i++) {
-		if (i > 0) {
 			Serial.print("\t");
+		if (i > 0) {
 		}
 		Serial.print(sval[i].getAvg());
 		Serial.print("\t");

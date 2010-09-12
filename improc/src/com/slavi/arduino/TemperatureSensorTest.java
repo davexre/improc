@@ -87,8 +87,10 @@ public class TemperatureSensorTest {
 			}
 			StringTokenizer st = new StringTokenizer(line, "\t");
 			String str = df.format(System.currentTimeMillis());
+			double t = Double.parseDouble(st.nextToken());
+			str += "\t" + MathUtil.d2(t);
 			while (st.hasMoreTokens()) {
-				double t = Double.parseDouble(st.nextToken());
+				t = Double.parseDouble(st.nextToken());
 				t *= 500.0 / 1024.0;
 				str += "\t" + MathUtil.d2(t);
 			}

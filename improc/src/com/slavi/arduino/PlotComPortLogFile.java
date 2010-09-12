@@ -2,7 +2,9 @@ package com.slavi.arduino;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
@@ -27,7 +29,9 @@ import com.slavi.util.ui.SwtUtil;
 
 public class PlotComPortLogFile {
 
-	static final String finName = "comport_2.log";
+	static final String finName = "comport_6.log";
+
+	final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	Shell shell;
 	Chart chart;
@@ -80,50 +84,56 @@ public class PlotComPortLogFile {
 	}
 	
 	private void setFile(BufferedReader fin) throws Exception {
-		ArrayList<Integer> yAxis = new ArrayList<Integer>();
-		ArrayList<Integer> xAxis = new ArrayList<Integer>();
-		int curFreq = -1;
-		int maxValue = -1;
+		ArrayList<Double> yAxis = new ArrayList<Double>();
+		ArrayList<Double> xAxis = new ArrayList<Double>();
+		double curFreq = -1;
+		double maxValue = -1;
+		double plotLabel = -1;
 		while (fin.ready()) {
 			String line = Util.trimNZ(fin.readLine());
-			StringTokenizer st = new StringTokenizer(line, "\t"); 
-			if (st.countTokens() < 8)
+			if ("".equals(line) || line.startsWith("*"))
 				continue;
-			String time = st.nextToken();
-			int freq = Integer.parseInt(st.nextToken());
-			int curPresure = Integer.parseInt(st.nextToken());
-			int maxPresure = Integer.parseInt(st.nextToken());
-			double temperature1 = Double.parseDouble(st.nextToken());
-			double temperature2 = Double.parseDouble(st.nextToken());
+			StringTokenizer st = new StringTokenizer(line, "\t"); 
+			if (st.countTokens() < 11)
+				continue;
+			Date time = df.parse(st.nextToken());
+			int frequency = Integer.parseInt(st.nextToken());
 			boolean isPlaying = st.nextToken().equals("1");
 			boolean aborting = st.nextToken().equals("1");
+			int pressure = Integer.parseInt(st.nextToken());
+			double cellTemperature = Double.parseDouble(st.nextToken());
+			double mosfetTemperature = Double.parseDouble(st.nextToken());
+			double ambientTemperature = Double.parseDouble(st.nextToken());
+			double current = Double.parseDouble(st.nextToken());
+			int maxPressure = Integer.parseInt(st.nextToken());
+			double maxCurrent = Double.parseDouble(st.nextToken());
 			
-			int plotValue = maxPresure;
-			yAxis.add((int)curPresure);
-			xAxis.add(curFreq);
+			double plotValue = maxCurrent;
+//			plotLabel = time.getHours() + time.getMinutes() / 60.0;
+			plotLabel = curFreq;
 			
-			if (curFreq == freq) {
+			if (curFreq == frequency) {
 				if (maxValue < plotValue) {
 					maxValue = plotValue;
 				}
 			} else {
 				if (curFreq > 0) {
-//					yAxis.add(maxValue);
-//					xAxis.add(curFreq);
+					yAxis.add(maxValue);
+					xAxis.add(plotLabel);
 				}
-				curFreq = freq;
+				curFreq = frequency;
 				maxValue = plotValue;
 			}
 		}
-		yAxis.add(Integer.valueOf(maxValue));
-		xAxis.add(Integer.valueOf(curFreq));
+		yAxis.add(maxValue);
+		xAxis.add(plotLabel);
 		double dataY[] = new double[yAxis.size()];
 		double dataX[] = new double[yAxis.size()];
 		for (int i = 0; i < yAxis.size(); i++) {
 			dataX[i] = xAxis.get(i);
 			dataY[i] = yAxis.get(i);
 		}
-//		chart.getSeriesSet().getSeries()[0].setXSeries(dataX);
+		chart.getSeriesSet().getSeries()[0].setXSeries(dataX);
 		chart.getSeriesSet().getSeries()[0].setYSeries(dataY);
 		chart.getAxisSet().adjustRange();
 	}

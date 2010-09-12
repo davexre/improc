@@ -1,4 +1,4 @@
-//#define UseThisFileForMainProgram
+#define UseThisFileForMainProgram
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
@@ -7,58 +7,73 @@
 #include "SerialReader.h"
 
 // analog pins
-const int presurePin = 0;		// the number of the pin of the presre sensor
-const int temperaturePin1 = 1;	// the number of the pin of the temperature sensor of the cell
-const int temperaturePin2 = 2;	// the number of the pin of the temperature sensor of the MOSFET
+const int pressurePin = 0;				// pin of the pressre sensor
+const int cellTemperaturePin = 1;		// pin of the CELL temperature sensor
+const int mosfetTemperaturePin = 2;		// pin of the MOSFET temperature sensor
+const int ambientTemperaturePin = 3;	// pin of the AMBIENT temperature sensor
+const int currentPin = 4;				// pin of the CURRENT sensor
 
 // digital pins
-const int ledPin = 13;			// the number of the LED pin
-const int speakerPin = 8;
+const int mosfetPin = 8;
+const int ledPin = 13;					// LED pin
 
+const float shuntResistance = 0.275;	// Shunt resistance in Ohms
+const float analogReadingToVoltage = 5.0 / 1024.0;
 
+float pressure = 0.0;
+float cellTemperature = 0.0;
+float mosfetTemperature = 0.0;
+float ambientTemperature = 0.0;
+float current = 0.0;
 
-boolean isPlaying;
+int pressureTreshold = 140;
+int cellTemperatureThreshold = (int) (60 / analogReadingToVoltage / 100.0);		// 60 degrees
+int mosfetTemperatureThreshold = (int) (80 / analogReadingToVoltage / 100.0);	// 80 degrees
+int currentThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
 
-int presureTreshold;
-int maxPresure;
-int curPresure;
-
-int temperature1Threshold;
-int curTemperature1;
-int temperature2Threshold;
-int curTemperature2;
+boolean isPlaying = false;
+int maxPressure = 0;
+int maxCurrent = 0;
 
 BlinkingLed led;
 
 char buf[20];
 
 extern "C" void setup() {
-	isPlaying = false;
-	maxPresure = 0;
-	curPresure = 0;
-	presureTreshold = 140;
-	temperature1Threshold = 123; //60 * 1024 / 500;	// 60 degrees
-	temperature2Threshold = 164; //80 * 1024 / 500;	// 80 degrees
-	noTone(speakerPin);
-	pinMode(speakerPin, OUTPUT);
-
+	noTone(mosfetPin);
+	pinMode(mosfetPin, OUTPUT);
+	rps.initialize();
 	led.initialize(ledPin);
 	reader.initialize(9600, size(buf), buf);
 }
 
 void showStatus(boolean aborting) {
-	Serial.print(curPresure);
-	Serial.print("\t");
 	Serial.print(isPlaying ? "1" : "0");
 	Serial.print("\t");
 	Serial.print(aborting ? "1" : "0");
 	Serial.print("\t");
-	Serial.print(maxPresure);
+	Serial.print((int) pressure);
 	Serial.print("\t");
-	Serial.print(curTemperature1);
+	Serial.print((int) cellTemperature);
 	Serial.print("\t");
-	Serial.print(curTemperature2);
+	Serial.print((int) mosfetTemperature);
+	Serial.print("\t");
+	Serial.print((int) ambientTemperature);
+	Serial.print("\t");
+	Serial.print((int) current);
+	Serial.print("\t");
+	Serial.print(maxPressure);
+	Serial.print("\t");
+	Serial.print(maxCurrent);
 	Serial.println();
+}
+
+boolean checkThresholdsExceeded() {
+	return (
+		(pressure >= pressureTreshold) |
+		(cellTemperature >= cellTemperatureThreshold) |
+		(mosfetTemperature >= mosfetTemperatureThreshold) |
+		(current >= currentThreshold) );
 }
 
 long frequency;
@@ -71,27 +86,28 @@ void processReader() {
 	}
 	c = reader.readln();
 	switch (c++[0]) {
-	case 'a':	// Set temperature 1 threshold
-		temperature1Threshold = strtol(c, &c, 10);
+	case 'a':	// Set cell temperature threshold
+		cellTemperatureThreshold = strtol(c, &c, 10);
 		break;
-	case 'b':	// Set temperature 2 threshold
-		temperature2Threshold = strtol(c, &c, 10);
+	case 'b':	// Set mosfet temperature threshold
+		mosfetTemperatureThreshold = strtol(c, &c, 10);
+		break;
+	case 'd':	// Set current threshold
+		currentThreshold = strtol(c, &c, 10);
 		break;
 	case 't':	// Set pressure threshold
-		presureTreshold = strtol(c, &c, 10);
+		pressureTreshold = strtol(c, &c, 10);
 		break;
 	case 's':	// Set new frequency. If frequency == 0 turn off
 		frequency = strtol(c, &c, 10);
-		maxPresure = curPresure;
-		if ((frequency == 0) ||
-			(curPresure > presureTreshold) ||
-			(curTemperature1 > temperature1Threshold) ||
-			(curTemperature2 > temperature2Threshold) ) {
+		maxPressure = pressure;
+		maxCurrent = current;
+		if ((frequency == 0) || checkThresholdsExceeded()) {
 			isPlaying = false;
-			noTone(speakerPin);
+			noTone(mosfetPin);
 		} else {
 			isPlaying = true;
-			tone(speakerPin, frequency);
+			tone(mosfetPin, frequency);
 		}
 		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
 		break;
@@ -102,24 +118,27 @@ void processReader() {
 }
 
 extern "C" void loop() {
+	rps.update();
 	led.update();
-	curPresure = analogRead(presurePin);
-	curTemperature1 = analogRead(temperaturePin1);
-	curTemperature2 = analogRead(temperaturePin2);
+
+	rps.smooth(analogRead(pressurePin), &pressure, 4);
+	rps.smooth(analogRead(cellTemperaturePin), &cellTemperature, 4);
+	rps.smooth(analogRead(mosfetTemperaturePin), &mosfetTemperature, 4);
+	rps.smooth(analogRead(ambientTemperaturePin), &ambientTemperature, 4);
+	rps.smooth(analogRead(currentPin), &current, 4);
 
 	processReader();
-	if (maxPresure < curPresure)
-		maxPresure = curPresure;
-	if ((curPresure > presureTreshold) ||
-		(curTemperature1 > temperature1Threshold) ||
-		(curTemperature2 > temperature2Threshold) ) {
+	if (maxPressure < pressure)
+		maxPressure = pressure;
+	if (maxCurrent < current)
+		maxCurrent = current;
+	if (checkThresholdsExceeded()) {
 		// turn off
-		noTone(speakerPin);
+		noTone(mosfetPin);
 		led.playBlink(BLINK_FAST, 0);
 		if (isPlaying) {
 			isPlaying = false;
 			showStatus(true);
-			maxPresure = curPresure;
 		}
 	}
 }
