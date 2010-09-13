@@ -1,13 +1,17 @@
 package com.slavi.arduino;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -19,6 +23,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
 import org.swtchart.IAxis;
+import org.swtchart.IAxis.Position;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
@@ -29,11 +34,12 @@ import com.slavi.util.ui.SwtUtil;
 
 public class PlotComPortLogFile {
 
-	static final String finName = "comport_6.log";
-
-	final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	static boolean labelFrequency = true;
+	
+	static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	Shell shell;
+	
 	Chart chart;
 	
 	public void createWidgets() {
@@ -56,19 +62,10 @@ public class PlotComPortLogFile {
                 image.dispose();
             }
         };
-        chart.getTitle().setText(finName);
-        ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, finName);
-//        lineSeries.setYSeries(data);
-        lineSeries.setLineColor(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-        lineSeries.enableArea(true);
-        lineSeries.setSymbolType(PlotSymbolType.NONE);
-//        chart.getAxisSet().adjustRange();
-        chart.getLegend().setVisible(false);
-        for (IAxis axis : chart.getAxisSet().getAxes()) {
-        	axis.getTitle().setVisible(false);
-//        	axis.getTick().setVisible(false);
-//        	axis.setRange(new Range(0, 3));
-        }
+//        chart.getTitle().setText(finName);
+//        chart.getLegend().setVisible(false);
+        chart.getTitle().setVisible(false);
+		chart.getAxisSet().getXAxes()[0].getTitle().setText(labelFrequency ? "frequency (Hz)" : "hour");
 	}
 	
 	public void open() throws Exception {
@@ -83,12 +80,24 @@ public class PlotComPortLogFile {
         shell.dispose();
 	}
 	
-	private void setFile(BufferedReader fin) throws Exception {
-		ArrayList<Double> yAxis = new ArrayList<Double>();
-		ArrayList<Double> xAxis = new ArrayList<Double>();
+	public static class MeasurementData {
+		Date time = null;
+		public int frequency = 0;
+//		public boolean isPlaying = false;
+//		public boolean aborting = false;
+		public int pressure = 0;
+		public double cellTemperature = 0;
+		public double mosfetTemperature = 0;
+		public double ambientTemperature = 0;
+		public double current = 0;
+		public int maxPressure = 0;
+		public double maxCurrent = 0;
+	}
+	
+	static ArrayList<MeasurementData> readData(BufferedReader fin) throws Exception {
+		ArrayList<MeasurementData> r = new ArrayList<MeasurementData>();
 		double curFreq = -1;
-		double maxValue = -1;
-		double plotLabel = -1;
+		MeasurementData d = null;
 		while (fin.ready()) {
 			String line = Util.trimNZ(fin.readLine());
 			if ("".equals(line) || line.startsWith("*"))
@@ -98,8 +107,8 @@ public class PlotComPortLogFile {
 				continue;
 			Date time = df.parse(st.nextToken());
 			int frequency = Integer.parseInt(st.nextToken());
-			boolean isPlaying = st.nextToken().equals("1");
-			boolean aborting = st.nextToken().equals("1");
+			/*boolean isPlaying =*/ st.nextToken().equals("1");
+			/*boolean aborting = */ st.nextToken().equals("1");
 			int pressure = Integer.parseInt(st.nextToken());
 			double cellTemperature = Double.parseDouble(st.nextToken());
 			double mosfetTemperature = Double.parseDouble(st.nextToken());
@@ -108,44 +117,119 @@ public class PlotComPortLogFile {
 			int maxPressure = Integer.parseInt(st.nextToken());
 			double maxCurrent = Double.parseDouble(st.nextToken());
 			
-			double plotValue = maxCurrent;
-//			plotLabel = time.getHours() + time.getMinutes() / 60.0;
-			plotLabel = curFreq;
-			
-			if (curFreq == frequency) {
-				if (maxValue < plotValue) {
-					maxValue = plotValue;
-				}
-			} else {
+			if (curFreq != frequency) {
 				if (curFreq > 0) {
-					yAxis.add(maxValue);
-					xAxis.add(plotLabel);
+					r.add(d);
 				}
 				curFreq = frequency;
-				maxValue = plotValue;
+				d = new MeasurementData();
+				d.time = time;
+				d.frequency = frequency;
 			}
+			d.pressure = Math.max(d.pressure, pressure);
+			d.cellTemperature = Math.max(d.cellTemperature, cellTemperature);
+			d.mosfetTemperature = Math.max(d.mosfetTemperature, mosfetTemperature);
+			d.ambientTemperature = Math.max(d.ambientTemperature, ambientTemperature);
+			d.current = Math.max(d.current, current);
+			d.maxPressure = Math.max(d.maxPressure, maxPressure);
+			d.maxCurrent = Math.max(d.maxCurrent, maxCurrent);
 		}
-		yAxis.add(maxValue);
-		xAxis.add(plotLabel);
-		double dataY[] = new double[yAxis.size()];
-		double dataX[] = new double[yAxis.size()];
-		for (int i = 0; i < yAxis.size(); i++) {
-			dataX[i] = xAxis.get(i);
-			dataY[i] = yAxis.get(i);
+		if (d != null)
+			r.add(d);
+
+		Collections.sort(r, new Comparator<MeasurementData>() {
+			public int compare(MeasurementData o1, MeasurementData o2) {
+				if (labelFrequency)
+					return (o1.frequency < o2.frequency ? -1 : (o1.frequency > o2.frequency ? 1 : 0));
+				return o1.time.compareTo(o2.time);
+			}
+		});
+		return r;
+	}
+	
+	private ILineSeries makeSeries(String label, int color, boolean createNewYSeries) {
+		Color systemColor = Display.getDefault().getSystemColor(color);
+		ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, label);
+		lineSeries.setLineColor(systemColor);
+		lineSeries.enableArea(false);
+		lineSeries.setSymbolType(PlotSymbolType.NONE);
+
+		IAxis yAxis;
+		if ((chart.getSeriesSet().getSeries().length == 0) || (!createNewYSeries)) {
+			yAxis = chart.getAxisSet().getYAxes()[0];
+		} else {
+			int axisId = chart.getAxisSet().createYAxis();
+			yAxis = chart.getAxisSet().getYAxis(axisId);
+			yAxis.setPosition(Position.Secondary);
 		}
-		chart.getSeriesSet().getSeries()[0].setXSeries(dataX);
-		chart.getSeriesSet().getSeries()[0].setYSeries(dataY);
-		chart.getAxisSet().adjustRange();
+        
+		yAxis.getTitle().setText(label);
+		yAxis.getTick().setForeground(systemColor);
+		yAxis.getTitle().setForeground(systemColor);
+		lineSeries.setYAxisId(yAxis.getId());
+        if (createNewYSeries) {
+        }
+        return lineSeries;
+	}
+	
+	int colors[] = {
+			SWT.COLOR_BLUE,
+			SWT.COLOR_RED,
+			SWT.COLOR_DARK_GREEN,
+			SWT.COLOR_MAGENTA
+	};
+	int curColor = 0;
+	
+	int getNextColor() {
+		return colors[(curColor++) % colors.length];
+	}
+	
+	@SuppressWarnings("deprecation")
+	private void readFile(File fin) throws Exception {
+		BufferedReader in = new BufferedReader(new FileReader(fin));
+		ArrayList<MeasurementData> data = readData(in);
+		in.close();
+		Date mindate = new Date(data.get(0).time.getTime());
+		mindate.setHours(0);
+		mindate.setMinutes(0);
+		mindate.setSeconds(0);
+		
+		double dataX[] = new double[data.size()];
+		double dataY[] = new double[data.size()];
+		double dataY2[] = new double[data.size()];
+
+		for (int i = 0; i < data.size(); i++) {
+			MeasurementData d = data.get(i);
+			if (labelFrequency) {
+				dataX[i] = d.frequency;
+			} else {
+				double delta = d.time.getTime() - mindate.getTime(); // delta in millis
+				dataX[i] = delta / (1000 * 60 * 60);
+			}
+			dataY[i] = d.maxCurrent;
+			dataY2[i] = d.maxPressure;
+		}
+
+		int col = getNextColor();
+		ILineSeries lineSeries;
+		lineSeries = makeSeries("current (A) " + fin.getName(), col, false);
+		lineSeries.setXSeries(dataX);
+		lineSeries.setYSeries(dataY);
+		
+//		lineSeries = makeSeries("pressure (rel)", getNextColor());
+//		lineSeries.setXSeries(dataX);
+//		lineSeries.setYSeries(dataY2);
 	}
 
 	public static void main(String[] args) throws Exception {
-		String fName = System.getProperty("user.home") + "/" + finName;
-		BufferedReader fin = new BufferedReader(new FileReader(fName));
-
 		PlotComPortLogFile t = new PlotComPortLogFile();
 		t.createWidgets();
-		t.setFile(fin);
-		fin.close();
+
+		t.readFile(new File(System.getProperty("user.home") + "/comport_4.log"));
+		t.readFile(new File(System.getProperty("user.home") + "/comport_5.log"));
+		t.readFile(new File(System.getProperty("user.home") + "/comport_6.log"));
+		
+        t.chart.getAxisSet().adjustRange();
 		t.open();
 
 		System.out.println("Done.");
