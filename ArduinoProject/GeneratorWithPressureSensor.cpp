@@ -77,6 +77,7 @@ boolean checkThresholdsExceeded() {
 }
 
 long frequency;
+long temp;
 void processReader() {
 	char *c;
 	int lightOn;
@@ -94,6 +95,19 @@ void processReader() {
 		break;
 	case 'd':	// Set current threshold
 		currentThreshold = strtol(c, &c, 10);
+		break;
+	case 'f':	// fix to always on/off
+		temp = strtol(c, &c, 10);
+		frequency = 0;
+		pinMode(mosfetPin, OUTPUT);
+		if ((temp == 0) || checkThresholdsExceeded()) {
+			digitalWrite(mosfetPin, LOW);
+			isPlaying = false;
+		} else {
+			digitalWrite(mosfetPin, HIGH);
+			isPlaying = true;
+		}
+		led.playBlink(BLINK_FAST, isPlaying ? -1 : 0);
 		break;
 	case 't':	// Set pressure threshold
 		pressureTreshold = strtol(c, &c, 10);
@@ -113,6 +127,16 @@ void processReader() {
 		break;
 	case 'l':
 		showStatus(false);
+		break;
+	case 'z':
+		Serial.print("cellTemperatureThreshold=");
+		Serial.println(cellTemperatureThreshold);
+		Serial.print("mosfetTemperatureThreshold=");
+		Serial.println(mosfetTemperatureThreshold);
+		Serial.print("currentThreshold=");
+		Serial.println(currentThreshold);
+		Serial.print("pressureTreshold=");
+		Serial.println(pressureTreshold);
 		break;
 	}
 }
