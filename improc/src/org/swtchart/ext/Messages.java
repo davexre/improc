@@ -9,7 +9,7 @@ public class Messages {
     public static final String ADJUST_AXIS_RANGE_GROUP = "&Adjust Axis Range";
 
     /** the menu for adjust axis range */
-    public static final String ADJUST_AXIS_RANGE = "&Adjust Axis Range";
+    public static final String ADJUST_AXIS_RANGE = "&Adjust Axis Range\tCtrl+A";
 
     /** the menu for adjust X axis range */
     public static final String ADJUST_X_AXIS_RANGE = "Adjust &X Axis Range";
@@ -24,10 +24,10 @@ public class Messages {
     public static final String ZOOMIN = "Zoom &In\tCtrl+Up";
 
     /** the menu for zoom in X axis */
-    public static final String ZOOMIN_X = "Zoom In &X Axis";
+    public static final String ZOOMIN_X = "Zoom In &X Axis\tCtrl+Shift+Left";
 
     /** the menu for zoom in Y axis */
-    public static final String ZOOMIN_Y = "Zoom In &Y Axis";
+    public static final String ZOOMIN_Y = "Zoom In &Y Axis\tCtrl+Shift+Up";
 
     /** the menu group for zoom out menus */
     public static final String ZOOMOUT_GROUP = "Zoom &Out";
@@ -36,10 +36,10 @@ public class Messages {
     public static final String ZOOMOUT = "Zoom &Out\tCtrl+Down";
 
     /** the menu for zoom out X axis */
-    public static final String ZOOMOUT_X = "Zoom Out &X Axis";
+    public static final String ZOOMOUT_X = "Zoom Out &X Axis\tCtrl+Shift+Right";
 
     /** the menu for zoom out Y axis */
-    public static final String ZOOMOUT_Y = "Zoom Out &Y Axis";
+    public static final String ZOOMOUT_Y = "Zoom Out &Y Axis\tCtrl+Shift+Down";
 
     /** the menu for save as */
     public static final String SAVE_AS = "Save As...";

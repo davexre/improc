@@ -1,8 +1,8 @@
 package com.slavi.arduino;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -185,8 +185,9 @@ public class PlotComPortLogFile {
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void readFile(File fin) throws Exception {
-		BufferedReader in = new BufferedReader(new FileReader(fin));
+	private void readFile(String finName) throws Exception {
+		InputStream fin = getClass().getResourceAsStream("comport/" + finName);
+		BufferedReader in = new BufferedReader(new InputStreamReader(fin));
 		ArrayList<MeasurementData> data = readData(in);
 		in.close();
 		Date mindate = new Date(data.get(0).time.getTime());
@@ -196,7 +197,7 @@ public class PlotComPortLogFile {
 		
 		double dataX[] = new double[data.size()];
 		double dataY[] = new double[data.size()];
-		double dataY2[] = new double[data.size()];
+//		double dataY2[] = new double[data.size()];
 
 		for (int i = 0; i < data.size(); i++) {
 			MeasurementData d = data.get(i);
@@ -207,12 +208,12 @@ public class PlotComPortLogFile {
 				dataX[i] = delta / (1000 * 60 * 60);
 			}
 			dataY[i] = d.maxCurrent;
-			dataY2[i] = d.maxPressure;
+//			dataY2[i] = d.maxPressure;
 		}
 
 		int col = getNextColor();
 		ILineSeries lineSeries;
-		lineSeries = makeSeries("current (A) " + fin.getName(), col, false);
+		lineSeries = makeSeries("current (A) " + finName, col, false);
 		lineSeries.setXSeries(dataX);
 		lineSeries.setYSeries(dataY);
 		
@@ -225,9 +226,9 @@ public class PlotComPortLogFile {
 		PlotComPortLogFile t = new PlotComPortLogFile();
 		t.createWidgets();
 
-		t.readFile(new File(System.getProperty("user.home") + "/comport_4.log"));
-		t.readFile(new File(System.getProperty("user.home") + "/comport_5.log"));
-		t.readFile(new File(System.getProperty("user.home") + "/comport_6.log"));
+		t.readFile("comport_output_04.txt");
+		t.readFile("comport_output_05.txt");
+		t.readFile("comport_output_06.txt");
 		
         t.chart.getAxisSet().adjustRange();
 		t.open();

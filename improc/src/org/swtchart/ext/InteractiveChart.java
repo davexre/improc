@@ -287,33 +287,66 @@ public class InteractiveChart extends Chart implements PaintListener {
      */
     private void handleKeyDownEvent(Event event) {
         if (event.keyCode == SWT.ARROW_DOWN) {
-            if (event.stateMask == SWT.CTRL) {
+        	switch (event.stateMask) {
+        	case SWT.CTRL | SWT.SHIFT:
+	            for (IAxis axis : getAxisSet().getYAxes()) {
+	                axis.zoomOut();
+	            }
+	            break;
+        	case SWT.CTRL:
                 getAxisSet().zoomOut();
-            } else {
+       			break;
+        	case 0:
                 for (IAxis axis : getAxes(SWT.VERTICAL)) {
                     axis.scrollDown();
                 }
-            }
+        	}
             redraw();
         } else if (event.keyCode == SWT.ARROW_UP) {
-            if (event.stateMask == SWT.CTRL) {
+        	switch (event.stateMask) {
+        	case SWT.CTRL | SWT.SHIFT:
+	            for (IAxis axis : getAxisSet().getYAxes()) {
+	                axis.zoomIn();
+	            }
+	            break;
+        	case SWT.CTRL:
                 getAxisSet().zoomIn();
-            } else {
+       			break;
+        	case 0:
                 for (IAxis axis : getAxes(SWT.VERTICAL)) {
                     axis.scrollUp();
                 }
-            }
+        	}
             redraw();
         } else if (event.keyCode == SWT.ARROW_LEFT) {
-            for (IAxis axis : getAxes(SWT.HORIZONTAL)) {
-                axis.scrollDown();
-            }
+        	switch (event.stateMask) {
+        	case SWT.CTRL | SWT.SHIFT:
+	            for (IAxis axis : getAxisSet().getXAxes()) {
+	                axis.zoomIn();
+	            }
+	            break;
+        	case 0:
+            	for (IAxis axis : getAxes(SWT.HORIZONTAL)) {
+                    axis.scrollDown();
+                }
+        	}
             redraw();
         } else if (event.keyCode == SWT.ARROW_RIGHT) {
-            for (IAxis axis : getAxes(SWT.HORIZONTAL)) {
-                axis.scrollUp();
-            }
+        	switch (event.stateMask) {
+        	case SWT.CTRL | SWT.SHIFT:
+	            for (IAxis axis : getAxisSet().getXAxes()) {
+	                axis.zoomOut();
+	            }
+	            break;
+        	case 0:
+            	for (IAxis axis : getAxes(SWT.HORIZONTAL)) {
+                    axis.scrollUp();
+                }
+        	}
             redraw();
+        } else if ((event.keyCode == 'A') || (event.keyCode == 'a')) {
+        	if (event.stateMask == SWT.CTRL)
+        		getAxisSet().adjustRange();
         }
     }
 
