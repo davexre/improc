@@ -21,7 +21,7 @@ public class GeneratorWithPressureSensor {
 	final double toCelsius = 100 * analogReadingToVoltage; 
 	final double toAmpers = analogReadingToVoltage / shuntResistance; 
 	
-	final int maxFrequency = 50000;
+	final int maxFrequency = 4000;
 
 	final int pressureThresholdMax = 140;
 	final int pressureThresholdLow = 120;
@@ -54,11 +54,14 @@ public class GeneratorWithPressureSensor {
 
 	void setup() throws Exception {
 		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "100"));
-//		frequency = 2900; //4700;
-		String fouName = System.getProperty("user.home") + "/comport_6.log";
-		FileOutputStream fou = new FileOutputStream(fouName, true);
-		out = new PrintStream(fou, true); // autoflush
-//		out = System.out;
+		frequency = 3120; //4700;
+		if (true) {
+			String fouName = System.getProperty("user.home") + "/comport_9.log";
+			FileOutputStream fou = new FileOutputStream(fouName, true);
+			out = new PrintStream(fou, true); // autoflush
+		} else {
+			out = System.out;
+		}
 		out.println();
 		out.println("*******************");
 		out.println("* Started on " + df.format(System.currentTimeMillis()));
@@ -174,7 +177,7 @@ public class GeneratorWithPressureSensor {
 			out.println(str);
 			
 			if (playNextFrequency) {
-				frequency++;
+				frequency += 1;
 				if (frequency > maxFrequency) {
 					out.println("\n\nAll frequencies tested. Test finished.\n\n");
 					break;
