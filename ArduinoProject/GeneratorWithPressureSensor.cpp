@@ -29,7 +29,8 @@ float current = 0.0;
 int pressureTreshold = 140;
 int cellTemperatureThreshold = (int) (60 / analogReadingToVoltage / 100.0);		// 60 degrees
 int mosfetTemperatureThreshold = (int) (80 / analogReadingToVoltage / 100.0);	// 80 degrees
-int currentThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
+int currentMaxThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
+int currentMinThreshold = (int) (0.020 * shuntResistance / analogReadingToVoltage);	// 0.020 amps
 
 boolean isPlaying = false;
 int maxPressure = 0;
@@ -39,10 +40,13 @@ BlinkingLed led;
 
 char buf[20];
 
+RPS currentRPS;
+
 extern "C" void setup() {
 	noTone(mosfetPin);
 	pinMode(mosfetPin, OUTPUT);
 	rps.initialize();
+	currentRPS.initialize();
 	led.initialize(ledPin);
 	reader.initialize(9600, size(buf), buf);
 }
@@ -73,7 +77,7 @@ boolean checkThresholdsExceeded() {
 		(pressure >= pressureTreshold) |
 		(cellTemperature >= cellTemperatureThreshold) |
 		(mosfetTemperature >= mosfetTemperatureThreshold) |
-		(current >= currentThreshold) );
+		(current >= currentMaxThreshold) );
 }
 
 long frequency;
@@ -94,7 +98,7 @@ void processReader() {
 		mosfetTemperatureThreshold = strtol(c, &c, 10);
 		break;
 	case 'd':	// Set current threshold
-		currentThreshold = strtol(c, &c, 10);
+		currentMaxThreshold = strtol(c, &c, 10);
 		break;
 	case 'f':	// fix to always on/off
 		temp = strtol(c, &c, 10);
@@ -133,14 +137,15 @@ void processReader() {
 		Serial.println(cellTemperatureThreshold);
 		Serial.print("mosfetTemperatureThreshold=");
 		Serial.println(mosfetTemperatureThreshold);
-		Serial.print("currentThreshold=");
-		Serial.println(currentThreshold);
+		Serial.print("currentMaxThreshold=");
+		Serial.println(currentMaxThreshold);
 		Serial.print("pressureTreshold=");
 		Serial.println(pressureTreshold);
 		break;
 	}
 }
 
+int tempCurrent;
 extern "C" void loop() {
 	rps.update();
 	led.update();
@@ -149,7 +154,11 @@ extern "C" void loop() {
 	rps.smooth(analogRead(cellTemperaturePin), &cellTemperature, 4);
 	rps.smooth(analogRead(mosfetTemperaturePin), &mosfetTemperature, 4);
 	rps.smooth(analogRead(ambientTemperaturePin), &ambientTemperature, 4);
-	rps.smooth(analogRead(currentPin), &current, 4);
+	tempCurrent = analogRead(currentPin);
+	if (tempCurrent > currentMinThreshold) {
+		currentRPS.update();
+		currentRPS.smooth(tempCurrent, &current, 4);
+	}
 
 	processReader();
 	if (maxPressure < pressure)

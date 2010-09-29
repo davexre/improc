@@ -21,7 +21,8 @@ public class GeneratorWithPressureSensor {
 	final double toCelsius = 100 * analogReadingToVoltage; 
 	final double toAmpers = analogReadingToVoltage / shuntResistance; 
 	
-	final int maxFrequency = 4000;
+	final int maxFrequency = 7540;
+	final int frequencyIncrement = 5; 
 
 	final int pressureThresholdMax = 140;
 	final int pressureThresholdLow = 120;
@@ -54,9 +55,9 @@ public class GeneratorWithPressureSensor {
 
 	void setup() throws Exception {
 		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "100"));
-		frequency = 3120; //4700;
-		if (true) {
-			String fouName = System.getProperty("user.home") + "/comport_9.log";
+		frequency = 3000; //4700;
+		if (false) {
+			String fouName = System.getProperty("user.home") + "/comport_output_12.txt";
 			FileOutputStream fou = new FileOutputStream(fouName, true);
 			out = new PrintStream(fou, true); // autoflush
 		} else {
@@ -69,7 +70,7 @@ public class GeneratorWithPressureSensor {
 		out.println("*******************");
 		out.println("* time frequency isPlaying aborting pressure cellTemperature mosfetTemperature ambientTemperature current maxPressure maxCurrent COMMENT");
 		out.println("*******************");
-		frequency--; // Will increase by 1 before sending it to arduino.
+		frequency -= frequencyIncrement; // Will increase before sending it to arduino.
 		
 		comReader = new ComPortLineReader();
 		comReader.setParams("/dev/ttyUSB0", 9600, SerialPort.DATABITS_8, SerialPort.PARITY_NONE, SerialPort.STOPBITS_1);
@@ -94,6 +95,7 @@ public class GeneratorWithPressureSensor {
 	}
 	
 	void doIt() throws Exception {
+		comReader.out.println("s0");
 		comReader.out.println("a" + cellTemperatureThresholdMax);
 		comReader.out.println("b" + mosfetTemperatureThresholdMax);
 		comReader.out.println("d" + currentThresholdMax);
@@ -112,11 +114,12 @@ public class GeneratorWithPressureSensor {
 				}
 			}
 
+			long now = System.currentTimeMillis();
 			String line = queue.poll(100, TimeUnit.MILLISECONDS);
 			if (line == null) {
-				if (System.currentTimeMillis() - lastRefresh > 1000) {
+				if (now - lastRefresh > 1000) {
 					comReader.out.println("l");		// ping arduino
-					lastRefresh = System.currentTimeMillis();
+					lastRefresh = now;
 				}
 				continue;
 			}
@@ -135,8 +138,8 @@ public class GeneratorWithPressureSensor {
 			boolean playNextFrequency = false;
 			String comment = "";
 			if (aborting) {
-				Beep.beep();
-				Beep.beep();
+//				Beep.beep();
+//				Beep.beep();
 				if (maxPressure >= pressureThresholdMax)
 					comment = "MAX PRESSURE THRESHOLD EXCEEDED";
 				else if (cellTemperature >= cellTemperatureThresholdMax)
@@ -146,7 +149,7 @@ public class GeneratorWithPressureSensor {
 				else if (current >= currentThresholdMax)
 					comment = "CURRENT THRESHOLD EXCEEDED";
 			} else if (isPlaying) {
-				if (System.currentTimeMillis() - startedOn > 10000) {
+				if (now - startedOn > 1000) {
 					playNextFrequency = true;
 				}
 			} else if (pressure >= pressureThresholdLow) {
@@ -162,7 +165,7 @@ public class GeneratorWithPressureSensor {
 			}
 			
 			String str = 
-				df.format(System.currentTimeMillis()) + "\t" +
+				df.format(now) + "\t" +
 				Integer.toString(frequency) + "\t" +
 				(isPlaying ? "1" : "0") + "\t" +
 				(aborting ? "1" : "0") + "\t" +
@@ -170,21 +173,21 @@ public class GeneratorWithPressureSensor {
 				MathUtil.d2(cellTemperature * toCelsius) + "\t" +
 				MathUtil.d2(mosfetTemperature * toCelsius) + "\t" +
 				MathUtil.d2(ambientTemperature * toCelsius) + "\t" +
-				MathUtil.d2(current * toAmpers) + "\t" +
+				MathUtil.d2(current * toAmpers / 2.0) + "\t" +
 				Integer.toString(maxPressure) + "\t" +
-				MathUtil.d2(maxCurrent * toAmpers) + "\t" +
+				MathUtil.d2(maxCurrent * toAmpers / 2.0) + "\t" +
 				comment;
 			out.println(str);
 			
 			if (playNextFrequency) {
-				frequency += 1;
+				frequency += frequencyIncrement;
 				if (frequency > maxFrequency) {
-					out.println("\n\nAll frequencies tested. Test finished.\n\n");
+					out.println("\n\n* All frequencies tested. Test finished.\n\n");
 					break;
 				} else {
 					String frequencyStr = Integer.toString(frequency);
 					Const.properties.setProperty("ComPort.startFrequency", frequencyStr);
-					startedOn = System.currentTimeMillis();
+					startedOn = now;
 					comReader.out.println("s" + frequencyStr);
 					isPlaying = true;
 				}

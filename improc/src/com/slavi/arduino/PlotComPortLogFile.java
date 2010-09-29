@@ -211,7 +211,7 @@ public class PlotComPortLogFile {
 				dataX[i] = delta / (1000 * 60 * 60);
 			}
 			dataY[i] = d.maxCurrent;
-//			dataY2[i] = d.maxPressure;
+//			dataY2[i] = d.maxCurrent - d.current;
 		}
 
 		int col = getNextColor();
@@ -219,18 +219,19 @@ public class PlotComPortLogFile {
 		lineSeries = makeSeries("current (A) " + finName, col, false);
 		lineSeries.setXSeries(dataX);
 		lineSeries.setYSeries(dataY);
-		
-//		lineSeries = makeSeries("pressure (rel)", getNextColor());
-//		lineSeries.setXSeries(dataX);
-//		lineSeries.setYSeries(dataY2);
+/*		
+		lineSeries = makeSeries("pressure (rel)" + finName, getNextColor(), true);
+		lineSeries.setXSeries(dataX);
+		lineSeries.setYSeries(dataY2);*/
 	}
 
 	public void doIt() throws Exception {
 		createWidgets();
 
-		readFile(new File(getClass().getResource("comport/comport_output_04.txt").toURI()));
-		readFile(new File(getClass().getResource("comport/comport_output_06.txt").toURI()));
-		readFile(new File(System.getProperty("user.home") + "/comport_9.log"));
+		readFile(new File(getClass().getResource("comport/comport_output_09.txt").toURI()));
+//		readFile(new File(getClass().getResource("comport/comport_output_10.txt").toURI()));
+//		readFile(new File(System.getProperty("user.home") + "/comport_output_10.txt"));
+		readFile(new File(System.getProperty("user.home") + "/comport_output_12.txt"));
 		
         chart.getAxisSet().adjustRange();
 		open();
