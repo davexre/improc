@@ -11,17 +11,17 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public KeyPoint targetSP;
 	
 	// Distance to nearest KeyPoint as reported by nearestNeighbourhood
-	public double distanceToNearest;
+	public double distanceToNearest = 0.0;
 	// Distance to second-nearest KeyPoint as reported by nearestNeighbourhood
-	public double distanceToNearest2;
+	public double distanceToNearest2 = 0.0;
 	
-	public double discrepancy;
+	public double discrepancy = 0.0;
 
-	public double weight;
+	public double weight = 0.0;
 	
-	public boolean validatePairBad; // filled by ValidateKeyPointPairList
+	public boolean validatePairBad = false; // filled by ValidateKeyPointPairList
 	
-	public boolean panoBad; // filled by PanoTransformer 
+	public boolean panoBad = false; // filled by PanoTransformer 
 
 	public KeyPointPair() {
 		super();

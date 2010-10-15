@@ -53,15 +53,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			return false;
 		}
 		for (KeyPointPair pair : pairList.items) {
-			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
-/*			double dsx = pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX;  
-			double dsy = pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY;
-			double dtx = pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX;  
-			double dty = pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY;
-			pair.weight = Math.sqrt(dsx*dsx + dsy*dsy) / Math.max(pair.sourceSP.keyPointList.cameraOriginX, pair.sourceSP.keyPointList.cameraOriginY)
-			+ Math.sqrt(dtx*dtx + dty*dty) / Math.max(pair.targetSP.keyPointList.cameraOriginX, pair.targetSP.keyPointList.cameraOriginY);
-*/			
-		}		
+			pair.weight = pair.discrepancy < 1.0 ? 1.0 : 1.0 / pair.discrepancy;
+		}
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		double params[] = new double[4];
 		tr.getParams(params);
@@ -70,7 +63,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.translateX= params[2];
 		pairList.translateY= params[3];
 		if ((int)(pairList.scale * 1000) == 0) {
-//			throw new Error("ERROR");
+			// The scale parameter can get very close to 0. It happens when no real match 
+			// is possible between two images, but when scale is close to 0 a false match
+			// is reported.
 			return false;
 		}
 
@@ -133,13 +128,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			this.pairList = pairList;
 		}
 
-		double getDiscrepancy(KeyPoint k1, KeyPoint k2) {
-			return Math.hypot(k1.doubleX - k2.doubleX, k1.doubleY - k2.doubleY);
-		}
-		
 		public Void call() throws Exception {
-			ArrayList<KeyPointPair> dummyPairs = new ArrayList<KeyPointPair>();
-			dummyPairs.addAll(pairList.items);
 			pairList.items.clear();
 			KeyPoint tmpKP = new KeyPoint();
 			tmpKP.keyPointList = pairList.target;
@@ -147,17 +136,16 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
 			
 			for (KeyPoint kp : pairList.source.items) {
-//			for (KeyPointPair kpp : dummyPairs) {
-//				if (kpp.bad)
-//					continue;
-//				KeyPoint kp = kpp.sourceSP;
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
 				tr.transform(kp, tmpKP);
-//				double dis0 = kpp.discrepancy;
-//				double dis1 = getDiscrepancy(tmpKP, kpp.targetSP);
-				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 
-					Math.pow(2 * KeyPointHelmertTransformLearner.discrepancyThreshold, 2));
+/*				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 1);
+				KeyPoint target = nearest.size() > 0 ? nearest.getItem(0) : null;
+				double minDistance = nearest.size() > 0 ? nearest.getDistanceToTarget(0) : Double.MAX_VALUE;
+*/
+				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 20); 
+//				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 
+//					40 * KeyPointHelmertTransformLearner.discrepancyThreshold);
 				double minDistance = Double.MAX_VALUE;
 				KeyPoint target = null;
 				for (int i = nearest.size() - 1; i >= 0; i--) {
@@ -171,12 +159,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 						minDistance = distance;
 						target = point;
 					}
-				}
+				}	
 				if (target != null) {
 					KeyPointPair pair = new KeyPointPair(kp, target, minDistance, minDistance);
-//					double dis2 = getDiscrepancy(tmpKP, pair.targetSP);
-//					if (!kpp.bad)
-//						System.out.println(dis0 + "\t" + dis1 + "\t" + dis2 + "\t" + (dis1-dis2));
 					pairList.items.add(pair);
 				}
 			}
@@ -197,7 +182,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		System.out.println("---------------");
 		
-		//////////////////////////////////
+		// Build 2D key point tree per target image
 		HashSet<KeyPointList> targets = new HashSet<KeyPointList>();
 		for (KeyPointPairList pairList : result) {
 			targets.add(pairList.target);
@@ -209,7 +194,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		taskSet.addFinished();
 		taskSet.get();
 		
-		//////////////////////////////////
+		// Rebuild key point pairs
 		taskSet = new TaskSetExecutor(exec);
 		for (KeyPointPairList pairList : result) {
 			taskSet.add(new GenerateNewKeyPointPairs(pairList));
@@ -218,6 +203,10 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		taskSet.get();
 		
 		//////////////////////////////////
+		for (KeyPointList image : targets) {
+			image.imageSpaceTree = null;
+		}
+		// Revalidate key point pairs
 		kppl.clear();
 		kppl.addAll(result);
 		result.clear();
@@ -227,7 +216,35 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-
+/*
+		// Generate image discrepancies
+		
+		for (KeyPointPairList pairList : result) {
+			String fou = "c:/temp/" + pairList.source.imageFileStamp.getFile().getName() + "-" +
+				pairList.target.imageFileStamp.getFile().getName() + ".png";
+			SafeImage im = new SafeImage(new FileInputStream(pairList.target.imageFileStamp.getFile()));
+			BufferedImage bi = new BufferedImage(pairList.target.imageSizeX, pairList.target.imageSizeY, BufferedImage.TYPE_INT_RGB);
+			for (int i = 0; i < bi.getWidth(); i++)
+				for (int j = 0; j < bi.getHeight(); j++) {
+					int color = im.getRGB(i, j);
+					int grayColor = DWindowedImageUtils.getGrayColor(color) & 0xff;
+					bi.setRGB(i, j, grayColor);
+				}
+			KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
+			tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
+			KeyPoint tmpKP = new KeyPoint();
+			tmpKP.keyPointList = pairList.target;
+			Graphics gr = bi.getGraphics();
+			gr.setColor(Color.yellow);
+			for (KeyPointPair kpp : pairList.items) {
+				if (kpp.validatePairBad)
+					continue;
+				tr.transform(kpp.sourceSP, tmpKP);
+				gr.drawLine((int)kpp.targetSP.doubleX, (int)kpp.targetSP.doubleY, (int)tmpKP.doubleX, (int)tmpKP.doubleY);
+			}
+			ImageIO.write(bi, "png", new File(fou));
+		}
+		throw new Exception("Done");*/
 		return result;
 	}
 }
