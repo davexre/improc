@@ -527,6 +527,44 @@ public class SymmetricMatrix {
 	}
 
 	/**
+	 * Returns true if this matrix is the identity matrix
+	 */
+	public double getSquaredDeviationFromE() {
+		double result = 0.0;
+		for (int i = sizeM - 1; i >= 0; i--)
+			for (int j = sizeM - 1; j >= 0; j--) {
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
+				result += d*d;
+			}
+		return result;
+	}
+	
+	/**
+	 * Returns true if this matrix is the identity matrix
+	 */
+	public boolean isE(double tolerance) {
+		tolerance = Math.abs(tolerance);
+		for (int i = sizeM - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--) {
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j); 
+				if (Math.abs(d) > tolerance)
+					return false;
+			}
+		return true;
+	}
+	
+	/**
+	 * Returns true if all elements are 0. 
+	 */
+	public boolean is0(double tolerance) {
+		tolerance = Math.abs(tolerance);
+		for (int i = m.length - 1; i >= 0; i--)
+			if (Math.abs(m[i]) > tolerance)
+				return false;
+		return true;
+	}
+
+	/**
 	 * Exchanges the column atX1 with column atX2.<br>
 	 * <b>Warning:</b>Do mind that the matrix is SymmetricMatrix and
 	 * this.get(i,j) returns the <i>SAME OBJECT</i> as this.get(j,i), i.e.

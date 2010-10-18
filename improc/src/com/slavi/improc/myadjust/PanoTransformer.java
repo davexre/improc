@@ -145,6 +145,8 @@ public abstract class PanoTransformer {
 							setBad(item, curIsBad);
 							result.oldBadNowGood++;
 							pairList.transformResult.oldBadNowGood++;
+						} else {
+							curIsBad = true; // rejected to be recovered
 						}
 					}
 				}

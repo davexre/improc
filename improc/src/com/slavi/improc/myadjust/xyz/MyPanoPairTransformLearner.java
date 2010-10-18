@@ -13,7 +13,9 @@ import com.slavi.math.RotationXYZ;
 import com.slavi.math.SphericalCoordsLongLat;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.transform.TransformLearnerResult;
+import com.test.InterpolatorFunctions.Triangle;
 
 
 public class MyPanoPairTransformLearner extends PanoTransformer {
@@ -356,6 +358,14 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 		lsa = new LeastSquaresAdjust(images.size() * 4, 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
+		SymmetricMatrix nm = lsa.getNm().makeCopy();
+		SymmetricMatrix tmp = nm.makeCopy();
+		if (!nm.inverse())
+			throw new RuntimeException();
+		nm.mMul(lsa.getNm(), tmp);
+		System.out.println("**** DEVIATION FROM E is: " + Math.sqrt(tmp.getSquaredDeviationFromE()));
+		
+		
 		if (!lsa.calculate()) 
 			return result;
 		// Build transformer

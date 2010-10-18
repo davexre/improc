@@ -29,8 +29,8 @@ public class SettingsDialog {
 			"SpherePanoTransformLearner", 
 			"SpherePanoTransformLearner2",
 			"MyPanoPairTransformLearner (XYZ)",
-			"MyPanoPairTransformZYZLearner",
-			"MyPanoPairTransformZYXLearner"
+			"MyPanoPairTransformZYXLearner",
+			"MyPanoPairTransformZYZLearner"
 			};
 	String[] strAdjustClasses = {
 			"com.slavi.improc.myadjust.HelmertPanoTransformLearner",
