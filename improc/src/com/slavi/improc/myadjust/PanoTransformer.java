@@ -84,9 +84,6 @@ public abstract class PanoTransformer {
 		result.oldBadCount = 0;
 		result.oldGoodCount = 0;
 
-		for (KeyPointList image : images) {
-			image.goodCount = 0;
-		}
 		double sumWeight = 0;
 		for (KeyPointPairList pairList : chain) {
 			result.dataCount += pairList.items.size();
@@ -104,8 +101,6 @@ public abstract class PanoTransformer {
 				}
 				result.oldGoodCount++;
 				pairList.transformResult.oldGoodCount++;
-				item.sourceSP.keyPointList.goodCount++;
-				item.targetSP.keyPointList.goodCount++;
 				double weight = getWeight(item); 
 				if (weight < 0)
 					throw new IllegalArgumentException("Negative weight received.");

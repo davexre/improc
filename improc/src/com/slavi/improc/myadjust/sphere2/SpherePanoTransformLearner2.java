@@ -12,6 +12,7 @@ import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner2 extends PanoTransformer {
@@ -220,6 +221,13 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 		lsa = new LeastSquaresAdjust(images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
+		SymmetricMatrix nm = lsa.getNm().makeCopy();
+		SymmetricMatrix tmp = nm.makeCopy();
+		if (!nm.inverse())
+			throw new RuntimeException();
+		nm.mMul(lsa.getNm(), tmp);
+		System.out.println("**** DEVIATION FROM E is: " + Math.sqrt(tmp.getSquaredDeviationFromE()));
+		
 /*		Matrix m1 = lsa.getNm().makeSquareMatrix();
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();

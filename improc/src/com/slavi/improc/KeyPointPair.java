@@ -4,8 +4,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
-	public int id = hashCode();
-	
 	public KeyPoint sourceSP;
 	
 	public KeyPoint targetSP;
