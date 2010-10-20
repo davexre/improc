@@ -11,6 +11,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.KeyPointTreeImageSpace;
+import com.slavi.math.AbstractConvexHullArea;
 import com.slavi.math.MathUtil;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
@@ -69,7 +70,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			return false;
 		}
 
-		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
+/*		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
 				"\tangle=" +MathUtil.rad2degStr(pairList.angle) + 
@@ -77,29 +78,97 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				"\tdX=" +MathUtil.d4(pairList.translateX) + 
 				"\tdY=" +MathUtil.d4(pairList.translateY) 
 				);
-
+*/
 		return true;
 	}
 	
 	AtomicInteger processedPairsList = new AtomicInteger(0);
 	
-	private class ValidateOne implements Callable<Void> {
+	private class ValidateOne extends AbstractConvexHullArea implements Callable<Void> {
 		KeyPointPairList pairList;
+		int curPoint;
+		boolean calcSourceArea;
 		
 		public ValidateOne(KeyPointPairList pairList) {
 			this.pairList = pairList;
 		}
 		
+		private boolean checkAreaRatio(boolean calcSourceArea) {
+			this.calcSourceArea = calcSourceArea;
+			double convexHullArea = Math.abs(getConvexHullArea());
+			double imageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
+			double ratio = convexHullArea / imageArea;
+			if (ratio <= 0.05)
+				System.out.println("RATIO " +
+					pairList.source.imageFileStamp.getFile().getName() + "\t" +
+					pairList.target.imageFileStamp.getFile().getName() + "\t" +
+					MathUtil.d2(convexHullArea) + "\t" +
+					MathUtil.d2(imageArea) + "\t" +
+					MathUtil.d2(ratio) + "\t"
+					);
+			return ratio > 0.05;
+		}
+		
 		public Void call() throws Exception {
 			if (validateKeyPointPairList(pairList)) {
-				synchronized (result) {
-					result.add(pairList);
-				}
+//				&& checkAreaRatio(true) && checkAreaRatio(false)) 
+				calcSourceArea = true;
+				double sourceConvexHullArea = Math.abs(getConvexHullArea());
+				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
+				double sourceRatio = sourceConvexHullArea / sourceImageArea;
+				
+				calcSourceArea = false;
+				double targetConvexHullArea = Math.abs(getConvexHullArea());
+				double targetImageArea = pairList.target.imageSizeX * pairList.target.imageSizeY;
+				double targetRatio = targetConvexHullArea / targetImageArea;
+				
+//				if (sourceRatio <= 0.05 || targetRatio <= 0.05) {
+					System.out.println("RATIO " +
+						pairList.source.imageFileStamp.getFile().getName() + "\t" +
+						pairList.target.imageFileStamp.getFile().getName() + "\t" +
+						MathUtil.d2(sourceConvexHullArea) + "\t" +
+						MathUtil.d2(sourceImageArea) + "\t" +
+						MathUtil.d2(sourceRatio) + "\t|" +
+						MathUtil.d2(targetConvexHullArea) + "\t" +
+						MathUtil.d2(targetImageArea) + "\t" +
+						MathUtil.d2(targetRatio) + "\t"
+						);
+//				} else {
+					synchronized (result) {
+						result.add(pairList);
+					}
+//				}
 			}
+			
 			int curCount = processedPairsList.incrementAndGet();
 			String status = "Processing " + Integer.toString(curCount) + "/" + Integer.toString(kppl.size());
 			SwtUtil.activeWaitDialogSetStatus(status, curCount);
 			return null;
+		}
+
+		public void resetPointIterator() {
+			curPoint = -1;
+		}
+
+		public boolean nextPoint() {
+			while (true) {
+				curPoint++;
+				if (curPoint >= pairList.items.size())
+					return false;
+				KeyPointPair pair = pairList.items.get(curPoint); 
+				if (!pair.panoBad)
+					return true;
+			}
+		}
+
+		public double getX() {
+			KeyPointPair pair = pairList.items.get(curPoint); 
+			return calcSourceArea ? pair.sourceSP.doubleX : pair.targetSP.doubleX;
+		}
+
+		public double getY() {
+			KeyPointPair pair = pairList.items.get(curPoint); 
+			return calcSourceArea ? pair.sourceSP.doubleY : pair.targetSP.doubleY;
 		}
 	}
 
