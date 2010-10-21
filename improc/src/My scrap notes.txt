@@ -1,1 +1,25 @@
 http://www.dr-mikes-maths.com/DotPlacer.html
+
+helmert
+X = a*x - b*y + c
+Y = b*x + a*y + d
+
+x = (X-c + b*y) / a
+x = (Y-d - a*y) / b
+
+b*X - b*c + b*b*y = a*Y - a*d - a*a*y
+y = (a*Y - a*d - b*X + b*c) / (a*a + b*b)
+y = B*X + A*Y + D
+B = -b / (a*a + b*b)
+A = a / (a*a + b*b)
+D = (-a*d + b*c) / (a*a + b*b)
+
+y = (a*x + c - X) / b
+y = (Y - b*x - d) / a
+
+a*a*x + a*c - a*X = b*Y - b*b*x - b*d
+x = (b*Y - b*d - a*c + a*X) / (a*a + b*b)
+x = A*X - B*Y + C
+A = a / (a*a + b*b)
+B = -b / (a*a + b*b)
+C = (-a*c - b*d) / (a*a + b*b)

@@ -244,7 +244,9 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 		// Build transformer
 		Matrix u = lsa.getUnknown();
 //		u.printM("U");
-		System.out.println(origin.imageFileStamp.getFile().getName() + 
+		System.out.println(
+				origin.imageId +
+				"\t" + origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
@@ -253,7 +255,9 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
 			int index = curImage * (adjustForScale ? 4 : 3);
-			System.out.println(image.imageFileStamp.getFile().getName() + 
+			System.out.println(
+					image.imageId +
+					"\t" + image.imageFileStamp.getFile().getName() + 
 					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
 					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
 					"\trz2=" + MathUtil.rad2degStr(image.sphereRZ2) + 

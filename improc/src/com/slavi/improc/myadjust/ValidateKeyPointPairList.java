@@ -70,7 +70,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			return false;
 		}
 
-/*		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
+		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
 				"\tangle=" +MathUtil.rad2degStr(pairList.angle) + 
@@ -78,7 +78,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				"\tdX=" +MathUtil.d4(pairList.translateX) + 
 				"\tdY=" +MathUtil.d4(pairList.translateY) 
 				);
-*/
+
 		return true;
 	}
 	
@@ -123,7 +123,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				double targetRatio = targetConvexHullArea / targetImageArea;
 				
 //				if (sourceRatio <= 0.05 || targetRatio <= 0.05) {
-					System.out.println("RATIO " +
+/*					System.out.println("RATIO " +
 						pairList.source.imageFileStamp.getFile().getName() + "\t" +
 						pairList.target.imageFileStamp.getFile().getName() + "\t" +
 						MathUtil.d2(sourceConvexHullArea) + "\t" +
@@ -132,7 +132,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 						MathUtil.d2(targetConvexHullArea) + "\t" +
 						MathUtil.d2(targetImageArea) + "\t" +
 						MathUtil.d2(targetRatio) + "\t"
-						);
+						);*/
 //				} else {
 					synchronized (result) {
 						result.add(pairList);
@@ -156,7 +156,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				if (curPoint >= pairList.items.size())
 					return false;
 				KeyPointPair pair = pairList.items.get(curPoint); 
-				if (!pair.panoBad)
+				if (!pair.validatePairBad)
 					return true;
 			}
 		}
@@ -248,7 +248,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-
+/*
 		System.out.println("---------------");
 		
 		// Build 2D key point tree per target image
@@ -285,7 +285,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-
+*/
 /*
 		// Generate image discrepancies
 		

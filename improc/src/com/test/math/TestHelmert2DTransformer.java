@@ -349,7 +349,21 @@ public class TestHelmert2DTransformer {
 		TestHelmert2DTransformer test = new TestHelmert2DTransformer();
 		test.generatePoints();
 		test.learn();
-		test.calcOne();
+
+		Helmert2DTransformer<Point2D.Double, Point2D.Double> tr = (Helmert2DTransformer<Point2D.Double, Point2D.Double>) test.learner.transformer;
+		Point2D.Double p1 = new Point2D.Double();
+		Point2D.Double p2 = new Point2D.Double();
+		Point2D.Double p3 = new Point2D.Double();
+		for (MyTestData p : test.points) {
+			tr.transform(p.src, p1);
+			tr.transformBackward(p1, p2);
+			double d = p2.distance(p.src);
+			if (d != 0.0) {
+				System.out.println(d);
+			}
+				
+		}
+//		test.calcOne();
 		
 //		test.doit(test.points.get(55), (MyTestHelmert2DTransformer) test.learner.transformer);
 		

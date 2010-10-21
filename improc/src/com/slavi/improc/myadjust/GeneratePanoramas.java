@@ -21,6 +21,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.SafeImage;
+import com.slavi.math.AbstractConvexHullArea;
 import com.slavi.math.MathUtil;
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
@@ -604,6 +605,42 @@ public class GeneratePanoramas implements Callable<Void> {
 	
 	private static final AtomicInteger panoCounter = new AtomicInteger(0);
 	
+	private static class CalcArea extends AbstractConvexHullArea {
+		KeyPointPairList pairList;
+		int curPoint;
+		boolean calcSourceArea;
+		
+		public CalcArea(KeyPointPairList pairList) {
+			this.pairList = pairList;
+		}
+		
+		public void resetPointIterator() {
+			curPoint = -1;
+		}
+
+		public boolean nextPoint() {
+			while (true) {
+				curPoint++;
+				if (curPoint >= pairList.items.size())
+					return false;
+				KeyPointPair pair = pairList.items.get(curPoint); 
+				if (!pair.panoBad)
+					return true;
+			}
+		}
+
+		public double getX() {
+			KeyPointPair pair = pairList.items.get(curPoint); 
+			return calcSourceArea ? pair.sourceSP.doubleX : pair.targetSP.doubleX;
+		}
+
+		public double getY() {
+			KeyPointPair pair = pairList.items.get(curPoint); 
+			return calcSourceArea ? pair.sourceSP.doubleY : pair.targetSP.doubleY;
+		}
+	}
+	
+	
 	public Void call() throws Exception {
 		System.out.println("Panoramas found: " + panos.size());
 		images = new ArrayList<KeyPointList>();
@@ -669,9 +706,27 @@ public class GeneratePanoramas implements Callable<Void> {
 						}
 					}
 				}
+
+				CalcArea calcArea = new CalcArea(pairList);
+				calcArea.calcSourceArea = true;
+				double sourceConvexHullArea = Math.abs(calcArea.getConvexHullArea());
+				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
+				double sourceRatio = sourceConvexHullArea / sourceImageArea;
+				
+				calcArea.calcSourceArea = false;
+				double targetConvexHullArea = Math.abs(calcArea.getConvexHullArea());
+				double targetImageArea = pairList.target.imageSizeX * pairList.target.imageSizeY;
+				double targetRatio = targetConvexHullArea / targetImageArea;
+				
 				System.out.println(
 						pairList.source.imageFileStamp.getFile().getName() + "\t" +
 						pairList.target.imageFileStamp.getFile().getName() + "\t" +
+						MathUtil.d2(sourceConvexHullArea) + "\t" +
+						MathUtil.d2(sourceImageArea) + "\t" +
+						MathUtil.d2(sourceRatio) + "\t|" +
+						MathUtil.d2(targetConvexHullArea) + "\t" +
+						MathUtil.d2(targetImageArea) + "\t" +
+						MathUtil.d2(targetRatio) + "\t|" +
 						"pairs=" + pairList.items.size() + "\t" +
 						"maxHelmertDiscrepancy=" + MathUtil.d2(maxHelmertDiscrepancy) + "\t" +
 						"helmBadPanoGood =" + helmBadPanoGood + "\t" + 

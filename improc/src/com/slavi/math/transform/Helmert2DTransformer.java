@@ -42,6 +42,19 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 		setTargetCoord(dest, 1, d + b * x + a * y);
 	}
 
+	public void transformBackward(OutputType source, InputType dest) {
+		double x = getTargetCoord(source, 0) - c;
+		double y = getTargetCoord(source, 1) - d;
+		double d2 = a * a + b * b;
+		if (d2 == 0.0) {
+			setSourceCoord(dest, 0, 0.0);
+			setSourceCoord(dest, 1, 0.0);
+		} else {
+			setSourceCoord(dest, 0, (a * x + b * y) / d2);
+			setSourceCoord(dest, 1, (a * y - b * x) / d2);
+		}
+	}
+
 	/**
 	 * Extraxts the scale and angle parameters of the current 
 	 * transformation coefficients.
@@ -58,6 +71,32 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 	}
 	
 	/**
+	 * Extraxts the scale and angle parameters of the reverse
+	 * transformation coefficients.
+	 * params[0] = scale;
+	 * params[1] = angle [-pi..pi];
+	 * params[2] = translate x
+	 * params[3] = translate y
+	 */
+	public void getParamsBackward(double params[]) {
+		double d2 = a * a + b * b;
+		if (d2 == 0.0) {
+			params[0] = 0.0;
+			params[1] = 0.0;
+			params[2] = -c;
+			params[3] = -d;
+		} else {
+			double A = a / d2;
+			double B = - b / d2;
+			params[0] = MathUtil.hypot(A, B);
+			params[1] = Math.atan2(B, A);
+			params[2] = - (a * c + b * d) / d2;
+			params[3] = (b * c - a * d) / d2;
+			
+		}
+	}
+	
+	/**
 	 * Sets the coefficients a and b to the correct values using
 	 * the specified scale and angle parameters. The translation 
 	 * coefficients c and d are unchanged. 
@@ -67,6 +106,10 @@ public abstract class Helmert2DTransformer<InputType, OutputType> extends BaseTr
 		b = scale * Math.sin(angle);
 		c = translateX;
 		d = translateY;
+	}
+
+	public void setParams(double params[]) {
+		setParams(params[0], params[1], params[2], params[3]);
 	}
 	
 	public String toString() {

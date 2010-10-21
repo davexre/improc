@@ -163,7 +163,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			throw new RuntimeException("Failed calculating the prims");
 	}
 
-	static final double scaleF = 10; // TODO: Is this necessary?
+	static final double scaleF = 1; // TODO: Is this necessary?
 	
 	void calculateNormalEquations() {
 		lsa.clear();
@@ -262,7 +262,9 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		// Build transformer
 		Matrix u = lsa.getUnknown();
 //		u.printM("U");
-		System.out.println(origin.imageFileStamp.getFile().getName() + 
+		System.out.println(
+				origin.imageId + 
+				"\t" + origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
@@ -277,7 +279,9 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
 			int index = (adjustOriginForScale ? 1 : 0) + curImage * (adjustForScale ? 4 : 3);
-			System.out.println(image.imageFileStamp.getFile().getName() + 
+			System.out.println(
+					image.imageId +
+					"\t" + image.imageFileStamp.getFile().getName() + 
 					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
 					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
 					"\trz2=" + MathUtil.rad2degStr(image.sphereRZ2) + 
