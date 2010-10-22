@@ -207,20 +207,26 @@ public abstract class PanoTransformer {
 			result.maxAllowedDiscrepancy = discrepancyThreshold;
 		
 		for (KeyPointPairList pairList : chain) {
-			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End();
-			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) { 
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() + 
+			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End(); 
+			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) {
+				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
 						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
 			}
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy)
-				pairList.maxDiscrepancy = result.maxAllowedDiscrepancy;
+			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy) {
+				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+						result.maxAllowedDiscrepancy) / 2.0;
+			}
+			if (pairList.maxDiscrepancy <= pairList.transformResult.discrepancyStatistics.getAvgValue()) {
+				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
+			}
 			if (pairList.maxDiscrepancy < discrepancyThreshold)
 				pairList.maxDiscrepancy = discrepancyThreshold;
 
 			pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
-					pairList.transformResult.discrepancyStatistics.getMinX()) / 2.0;
+					pairList.maxDiscrepancy) / 2.0;
 			if (pairList.recoverDiscrepancy > pairList.maxDiscrepancy)
-				pairList.recoverDiscrepancy = 0.0;
+				pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+						pairList.transformResult.discrepancyStatistics.getMinX()) / 2.0;
 			if (pairList.recoverDiscrepancy > discrepancyThreshold)
 				pairList.recoverDiscrepancy = discrepancyThreshold;
 		}

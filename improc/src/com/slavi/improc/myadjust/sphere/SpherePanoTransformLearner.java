@@ -163,6 +163,55 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			throw new RuntimeException("Failed calculating the prims");
 	}
 
+	private void normalizeAnglesZYZ(double angles[]) {
+		angles[1] = MathUtil.fixAngleMPI_PI(angles[1]);
+		if (angles[1] < 0) {
+			angles[0] = MathUtil.fixAngleMPI_PI(angles[0] - Math.PI);
+			angles[1] = -angles[1];
+			angles[2] = angles[2] - Math.PI;
+		}
+		angles[1] = MathUtil.fixAngleMPI_PI(angles[1]);
+		angles[2] = MathUtil.fixAngleMPI_PI(angles[2]);
+	}
+	
+	public void calcKeyPointPairListCorrections() {
+		double angles1[] = new double[3];
+		double angles2[] = new double[3];
+		System.out.println("*** PRIM CORRECTIONS");
+		for (KeyPointPairList pairList : chain) {
+			Matrix sourceToWorld = RotationZYZ.instance.makeAngles(pairList.source.sphereRZ1, pairList.source.sphereRY, pairList.source.sphereRZ2);
+			RotationZYZ.instance.getRotationAnglesBackword(pairList.target.sphereRZ1, pairList.target.sphereRY, pairList.target.sphereRZ2, angles2);
+			Matrix worldToTarget = RotationZYZ.instance.makeAngles(angles2[0], angles2[1], angles2[2]);
+			Matrix sourceToTarget = new Matrix(3, 3);
+			sourceToWorld.mMul(worldToTarget, sourceToTarget);
+			RotationZYZ.instance.getRotationAngles(sourceToTarget, angles2);
+
+			angles1[0] = pairList.sphereRZ1;
+			angles1[1] = pairList.sphereRY;
+			angles1[2] = pairList.sphereRZ2;
+			normalizeAnglesZYZ(angles1);
+			normalizeAnglesZYZ(angles2);
+			
+			double ds = pairList.scale - pairList.source.scaleZ / pairList.target.scaleZ;
+			System.out.println(
+				pairList.source.imageFileStamp.getFile().getName() +  
+				"\t" + pairList.target.imageFileStamp.getFile().getName() + 
+//				"\tRZ1" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles1[0])) +
+//				"\tRZ1'" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles2[0])) +
+//				"\tRY" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles1[1])) +
+//				"\tRY'" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles2[1])) +
+//				"\tRZ2" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles1[2])) +
+//				"\tRZ2'" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(angles2[2])) +
+				
+				"\tdRZ1" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(MathUtil.fixAngle2PI(angles1[0]) - MathUtil.fixAngle2PI(angles2[0]))) +
+				"\tdRY" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(MathUtil.fixAngle2PI(angles1[1]) - MathUtil.fixAngle2PI(angles2[1]))) +
+				"\tdRZ2" + MathUtil.rad2degStr(MathUtil.fixAngleMPI_PI(MathUtil.fixAngle2PI(angles1[2]) - MathUtil.fixAngle2PI(angles2[2]))) +
+				"\tdS" + MathUtil.d4(ds)
+			);
+		}
+		System.out.println("------------------");
+	}
+	
 	static final double scaleF = 1; // TODO: Is this necessary?
 	
 	void calculateNormalEquations() {
@@ -302,6 +351,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		computeDiscrepancies(result);
 		computeBad(result);
 		result.adjustFailed = false;
+		calcKeyPointPairListCorrections();
 		return result;
 	}
 }
