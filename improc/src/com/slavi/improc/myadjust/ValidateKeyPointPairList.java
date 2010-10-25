@@ -106,12 +106,17 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 					MathUtil.d2(imageArea) + "\t" +
 					MathUtil.d2(ratio) + "\t"
 					);
+//			for (KeyPointPair pair : pairList.items) {
+//				pair.weight = ratio;
+//			}
 			return ratio > 0.05;
 		}
 		
 		public Void call() throws Exception {
 			if (validateKeyPointPairList(pairList)) {
 //				&& checkAreaRatio(true) && checkAreaRatio(false)) 
+				checkAreaRatio(true);
+//				checkAreaRatio(false); 
 				calcSourceArea = true;
 				double sourceConvexHullArea = Math.abs(getConvexHullArea());
 				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;

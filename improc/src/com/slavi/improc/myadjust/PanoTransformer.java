@@ -161,6 +161,7 @@ public abstract class PanoTransformer {
 					"\trecover=" + MathUtil.d4(pairList.recoverDiscrepancy) + 
 					"\tjend=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getJ_End()) + 
 					"\tmaxX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMaxX()) + 
+					"\tminX=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getMinX()) + 
 					"\tavg=" + MathUtil.d4(pairList.transformResult.discrepancyStatistics.getAvgValue()) + 
 					"\toldBadNowGood=" + String.format("%4d", pairList.transformResult.oldBadNowGood) +
 					"\toldGoodNowBad=" + String.format("%4d", pairList.transformResult.oldGoodNowBad) +
@@ -205,7 +206,7 @@ public abstract class PanoTransformer {
 		}
 		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
 			result.maxAllowedDiscrepancy = discrepancyThreshold;
-		
+/*
 		for (KeyPointPairList pairList : chain) {
 			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End(); 
 			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) {
@@ -230,6 +231,32 @@ public abstract class PanoTransformer {
 			if (pairList.recoverDiscrepancy > discrepancyThreshold)
 				pairList.recoverDiscrepancy = discrepancyThreshold;
 		}
+*/		
+		for (KeyPointPairList pairList : chain) {
+			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End(); 
+			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) {
+				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
+			}
+			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy) {
+				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+						result.maxAllowedDiscrepancy) / 2.0;
+			}
+			if (pairList.maxDiscrepancy <= pairList.transformResult.discrepancyStatistics.getAvgValue()) {
+				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
+			}
+			if (pairList.maxDiscrepancy < discrepancyThreshold)
+				pairList.maxDiscrepancy = discrepancyThreshold;
+
+			pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+					pairList.maxDiscrepancy) / 2.0;
+			if (pairList.recoverDiscrepancy > pairList.maxDiscrepancy)
+				pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
+						pairList.transformResult.discrepancyStatistics.getMinX()) / 2.0;
+			if (pairList.recoverDiscrepancy > discrepancyThreshold)
+				pairList.recoverDiscrepancy = discrepancyThreshold;
+		}
+
 	}
 	
 	protected boolean removeBadKeyPointPairLists() {

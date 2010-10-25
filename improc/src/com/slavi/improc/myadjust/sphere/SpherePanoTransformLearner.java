@@ -17,7 +17,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class SpherePanoTransformLearner extends PanoTransformer {
 
 	final static boolean adjustForScale = true;
-	final static boolean adjustOriginForScale = true;
+	final static boolean adjustOriginForScale = false;
 	
 	LeastSquaresAdjust lsa;
 
@@ -40,6 +40,8 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		for (KeyPointPairList pairList : chain) {
 			pairList.source.fov = KeyPointList.defaultCameraFieldOfView;
 			pairList.target.fov = KeyPointList.defaultCameraFieldOfView;
+			pairList.source.scaleZ = getFocalDistance(pairList.source);
+			pairList.target.scaleZ = getFocalDistance(pairList.target);
 			double f = getFocalDistance(pairList.source);
 			double r = Math.sqrt(pairList.translateX * pairList.translateX + pairList.translateY * pairList.translateY);
 			pairList.sphereRZ1 = Math.atan2(pairList.translateY, pairList.translateX);
