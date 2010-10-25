@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.math.MathUtil;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
@@ -157,6 +158,9 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				TransformLearnerResult result = panoTransformer.calculateOne();
 				System.out.println(result);
 				iteration = result.iteration;
+				
+				System.out.println("=== Discrepancy threshold " + MathUtil.d4(panoTransformer.getDiscrepancyThreshold()));
+				panoTransformer.showValidateKeyPointPairStatistic();				
 //				if (iteration < 3) {
 //					copyBadStatus(chain);
 //					continue;

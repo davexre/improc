@@ -63,7 +63,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.angle = params[1];
 		pairList.translateX= params[2];
 		pairList.translateY= params[3];
-		if ((int)(pairList.scale * 1000) == 0) {
+		if ((pairList.scale < 0.01) || (pairList.scale > 100)) {
 			// The scale parameter can get very close to 0. It happens when no real match 
 			// is possible between two images, but when scale is close to 0 a false match
 			// is reported.
@@ -99,7 +99,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			double imageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
 			double ratio = convexHullArea / imageArea;
 			if (ratio <= 0.05)
-				System.out.println("RATIO " +
+				System.out.println("RATIO " + calcSourceArea + "\t" +
 					pairList.source.imageFileStamp.getFile().getName() + "\t" +
 					pairList.target.imageFileStamp.getFile().getName() + "\t" +
 					MathUtil.d2(convexHullArea) + "\t" +
@@ -116,7 +116,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			if (validateKeyPointPairList(pairList)) {
 //				&& checkAreaRatio(true) && checkAreaRatio(false)) 
 				checkAreaRatio(true);
-//				checkAreaRatio(false); 
+				checkAreaRatio(false); 
 				calcSourceArea = true;
 				double sourceConvexHullArea = Math.abs(getConvexHullArea());
 				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
@@ -217,7 +217,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				KeyPoint target = nearest.size() > 0 ? nearest.getItem(0) : null;
 				double minDistance = nearest.size() > 0 ? nearest.getDistanceToTarget(0) : Double.MAX_VALUE;
 */
-				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 20); 
+				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 5); 
 //				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20, 
 //					40 * KeyPointHelmertTransformLearner.discrepancyThreshold);
 				double minDistance = Double.MAX_VALUE;
@@ -253,7 +253,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-/*
+
 		System.out.println("---------------");
 		
 		// Build 2D key point tree per target image
@@ -290,7 +290,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-*/
+
 /*
 		// Generate image discrepancies
 		

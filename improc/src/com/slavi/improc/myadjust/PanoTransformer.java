@@ -20,7 +20,7 @@ public abstract class PanoTransformer {
 	
 	public abstract TransformLearnerResult calculateOne();
 	
-	public static final double maxDiscrepancyInPixelsOfOriginImage = 5;
+	public static final double maxDiscrepancyInPixelsOfOriginImage = 25;
 	
 	public abstract double getDiscrepancyThreshold();
 	
@@ -199,11 +199,9 @@ public abstract class PanoTransformer {
 		result.discrepancyStatistics.stop();
 			
 		double discrepancyThreshold = getDiscrepancyThreshold();
-		result.maxAllowedDiscrepancy = result.discrepancyStatistics.getJ_End();
-		if (result.maxAllowedDiscrepancy >= result.discrepancyStatistics.getMaxX()) { 
-			result.maxAllowedDiscrepancy = (result.discrepancyStatistics.getAvgValue() + 
-					result.discrepancyStatistics.getMaxX()) / 2.0;
-		}
+		result.maxAllowedDiscrepancy = Math.min(result.discrepancyStatistics.getJ_End(),
+			(result.discrepancyStatistics.getAvgValue() + 
+					result.discrepancyStatistics.getMaxX()) / 2.0);
 		if (result.maxAllowedDiscrepancy < discrepancyThreshold)
 			result.maxAllowedDiscrepancy = discrepancyThreshold;
 /*
@@ -233,28 +231,12 @@ public abstract class PanoTransformer {
 		}
 */		
 		for (KeyPointPairList pairList : chain) {
-			pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getJ_End(); 
-			if (pairList.maxDiscrepancy >= pairList.transformResult.discrepancyStatistics.getMaxX()) {
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
-						pairList.transformResult.discrepancyStatistics.getMaxX()) / 2.0;
-			}
-			if (pairList.maxDiscrepancy > result.maxAllowedDiscrepancy) {
-				pairList.maxDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
-						result.maxAllowedDiscrepancy) / 2.0;
-			}
-			if (pairList.maxDiscrepancy <= pairList.transformResult.discrepancyStatistics.getAvgValue()) {
-				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
-			}
-			if (pairList.maxDiscrepancy < discrepancyThreshold)
-				pairList.maxDiscrepancy = discrepancyThreshold;
+			pairList.maxDiscrepancy =  
+				(pairList.transformResult.discrepancyStatistics.getAvgValue() + 
+				pairList.transformResult.discrepancyStatistics.getAvgValue() +
+				pairList.transformResult.discrepancyStatistics.getMaxX()) / 3.0;
 
-			pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
-					pairList.maxDiscrepancy) / 2.0;
-			if (pairList.recoverDiscrepancy > pairList.maxDiscrepancy)
-				pairList.recoverDiscrepancy = (pairList.transformResult.discrepancyStatistics.getAvgValue() +
-						pairList.transformResult.discrepancyStatistics.getMinX()) / 2.0;
-			if (pairList.recoverDiscrepancy > discrepancyThreshold)
-				pairList.recoverDiscrepancy = discrepancyThreshold;
+			pairList.recoverDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
 		}
 
 	}
@@ -284,5 +266,86 @@ public abstract class PanoTransformer {
 			chain = tmpChain;
 		}
 		return chainModified;
+	}
+	
+	public void showValidateKeyPointPairStatistic() {
+		int ALL_panoGood = 0;
+		int ALL_panoBad = 0;
+		int ALL_validateGood = 0;
+		int ALL_validateBad = 0;
+		int ALL_validateGoodPanoGood = 0;
+		int ALL_validateGoodPanoBad = 0;
+		int ALL_validateBadPanoGood = 0;
+		int ALL_validateBadPanoBad = 0;
+
+		System.out.println();
+		for (int i = chain.size() - 1; i >= 0; i--) {
+			KeyPointPairList pairList = chain.get(i);
+			int panoGood = 0;
+			int panoBad = 0;
+			int validateGood = 0;
+			int validateBad = 0;
+			int validateGoodPanoGood = 0;
+			int validateGoodPanoBad = 0;
+			int validateBadPanoGood = 0;
+			int validateBadPanoBad = 0;
+
+			for (KeyPointPair pair : pairList.items) {
+				if (pair.validatePairBad) {
+					validateBad++;
+					if (pair.panoBad) {
+						panoBad++;
+						validateBadPanoBad++;
+					} else {
+						panoGood++;
+						validateBadPanoGood++;
+					}
+				} else {
+					validateGood++;
+					if (pair.panoBad) {
+						panoBad++;
+						validateGoodPanoBad++;
+					} else {
+						panoGood++;
+						validateGoodPanoGood++;
+					}
+				}
+			}
+			
+			ALL_panoGood += panoGood;
+			ALL_panoBad += panoBad;
+			ALL_validateGood += validateGood;
+			ALL_validateBad += validateBad;
+			ALL_validateGoodPanoGood += validateGoodPanoGood;
+			ALL_validateGoodPanoBad += validateGoodPanoBad;
+			ALL_validateBadPanoGood += validateBadPanoGood;
+			ALL_validateBadPanoBad += validateBadPanoBad;
+			
+			System.out.println(
+					pairList.source.imageFileStamp.getFile().getName() + 
+					"\t" + pairList.target.imageFileStamp.getFile().getName() + 
+					"\tpanoGood " + panoGood +  
+					"\tpanoBad  " + panoBad +  
+					"\tvalidateGood  " + validateGood +  
+					"\tvalidateBad   " + validateBad +  
+					"\tvalidateGoodPanoGood " + validateGoodPanoGood +  
+					"\tvalidateGoodPanoBad  " + validateGoodPanoBad +  
+					"\tvalidateBadPanoGood  " + validateBadPanoGood +  
+					"\tvalidateBadPanoBad   " + validateBadPanoBad
+			);
+		}
+		System.out.println(
+				"--- total ---" +
+				"\t--- total ---" +
+				"\tpanoGood " + ALL_panoGood +  
+				"\tpanoBad  " + ALL_panoBad +  
+				"\tvalidateGood   " + ALL_validateGood +  
+				"\tvalidateBad    " + ALL_validateBad +  
+				"\tvalidateGoodPanoGood " + ALL_validateGoodPanoGood +  
+				"\tvalidateGoodPanoBad  " + ALL_validateGoodPanoBad +  
+				"\tvalidateBadPanoGood  " + ALL_validateBadPanoGood +  
+				"\tvalidateBadPanoBad   " + ALL_validateBadPanoBad
+		);
+		System.out.println();
 	}
 }
