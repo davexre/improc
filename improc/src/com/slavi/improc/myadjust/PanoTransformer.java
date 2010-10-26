@@ -235,7 +235,10 @@ public abstract class PanoTransformer {
 				(pairList.transformResult.discrepancyStatistics.getAvgValue() + 
 				pairList.transformResult.discrepancyStatistics.getAvgValue() +
 				pairList.transformResult.discrepancyStatistics.getMaxX()) / 3.0;
-
+			if (pairList.maxDiscrepancy < result.discrepancyStatistics.getAvgValue())
+				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getMaxX();
+			if (pairList.transformResult.discrepancyStatistics.getMaxX() < discrepancyThreshold)
+				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getMaxX();
 			pairList.recoverDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
 		}
 
@@ -322,29 +325,29 @@ public abstract class PanoTransformer {
 			ALL_validateBadPanoBad += validateBadPanoBad;
 			
 			System.out.println(
-					pairList.source.imageFileStamp.getFile().getName() + 
-					"\t" + pairList.target.imageFileStamp.getFile().getName() + 
-					"\tpanoGood " + panoGood +  
-					"\tpanoBad  " + panoBad +  
-					"\tvalidateGood  " + validateGood +  
-					"\tvalidateBad   " + validateBad +  
-					"\tvalidateGoodPanoGood " + validateGoodPanoGood +  
-					"\tvalidateGoodPanoBad  " + validateGoodPanoBad +  
-					"\tvalidateBadPanoGood  " + validateBadPanoGood +  
-					"\tvalidateBadPanoBad   " + validateBadPanoBad
+					pairList.source.imageFileStamp.getFile().getName() +
+					"\t" + pairList.target.imageFileStamp.getFile().getName() +
+					"\tvalidateGoodPanoGood " + MathUtil.l10(validateGoodPanoGood) +
+					"\tvalidateGoodPanoBad  " + MathUtil.l10(validateGoodPanoBad) +
+					"\tvalidateBadPanoGood  " + MathUtil.l10(validateBadPanoGood) +
+					"\tvalidateBadPanoBad   " + MathUtil.l10(validateBadPanoBad) +
+					"\tpanoGood " + MathUtil.l10(panoGood) +
+					"\tpanoBad  " + MathUtil.l10(panoBad) +
+					"\tvalidateGood  " + MathUtil.l10(validateGood) +
+					"\tvalidateBad   " + MathUtil.l10(validateBad)
 			);
 		}
 		System.out.println(
 				"--- total ---" +
 				"\t--- total ---" +
-				"\tpanoGood " + ALL_panoGood +  
-				"\tpanoBad  " + ALL_panoBad +  
-				"\tvalidateGood   " + ALL_validateGood +  
-				"\tvalidateBad    " + ALL_validateBad +  
-				"\tvalidateGoodPanoGood " + ALL_validateGoodPanoGood +  
-				"\tvalidateGoodPanoBad  " + ALL_validateGoodPanoBad +  
-				"\tvalidateBadPanoGood  " + ALL_validateBadPanoGood +  
-				"\tvalidateBadPanoBad   " + ALL_validateBadPanoBad
+				"\tvalidateGoodPanoGood " + MathUtil.l10(ALL_validateGoodPanoGood) +  
+				"\tvalidateGoodPanoBad  " + MathUtil.l10(ALL_validateGoodPanoBad) +  
+				"\tvalidateBadPanoGood  " + MathUtil.l10(ALL_validateBadPanoGood) +  
+				"\tvalidateBadPanoBad   " + MathUtil.l10(ALL_validateBadPanoBad) +
+				"\tpanoGood " + MathUtil.l10(ALL_panoGood) +
+				"\tpanoBad  " + MathUtil.l10(ALL_panoBad) +
+				"\tvalidateGood   " + MathUtil.l10(ALL_validateGood) +
+				"\tvalidateBad    " + MathUtil.l10(ALL_validateBad)
 		);
 		System.out.println();
 	}

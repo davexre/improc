@@ -63,7 +63,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.angle = params[1];
 		pairList.translateX= params[2];
 		pairList.translateY= params[3];
-		if ((pairList.scale < 0.01) || (pairList.scale > 100)) {
+		if ((pairList.scale < 0.2) || (pairList.scale > 20)) {
 			// The scale parameter can get very close to 0. It happens when no real match 
 			// is possible between two images, but when scale is close to 0 a false match
 			// is reported.
@@ -102,9 +102,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				System.out.println("RATIO " + calcSourceArea + "\t" +
 					pairList.source.imageFileStamp.getFile().getName() + "\t" +
 					pairList.target.imageFileStamp.getFile().getName() + "\t" +
-					MathUtil.d2(convexHullArea) + "\t" +
-					MathUtil.d2(imageArea) + "\t" +
-					MathUtil.d2(ratio) + "\t"
+					MathUtil.d4(convexHullArea) + "\t" +
+					MathUtil.d4(imageArea) + "\t" +
+					MathUtil.d4(ratio) + "\t"
 					);
 //			for (KeyPointPair pair : pairList.items) {
 //				pair.weight = ratio;
@@ -253,7 +253,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-
+/*
 		System.out.println("---------------");
 		
 		// Build 2D key point tree per target image
@@ -290,7 +290,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		}
 		taskSet.addFinished();
 		taskSet.get();
-
+*/
 /*
 		// Generate image discrepancies
 		

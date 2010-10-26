@@ -721,12 +721,12 @@ public class GeneratePanoramas implements Callable<Void> {
 				System.out.println(
 						pairList.source.imageFileStamp.getFile().getName() + "\t" +
 						pairList.target.imageFileStamp.getFile().getName() + "\t" +
-						MathUtil.d2(sourceConvexHullArea) + "\t" +
-						MathUtil.d2(sourceImageArea) + "\t" +
-						MathUtil.d2(sourceRatio) + "\t|" +
-						MathUtil.d2(targetConvexHullArea) + "\t" +
-						MathUtil.d2(targetImageArea) + "\t" +
-						MathUtil.d2(targetRatio) + "\t|" +
+						MathUtil.d4(sourceConvexHullArea) + "\t" +
+						MathUtil.d4(sourceImageArea) + "\t" +
+						MathUtil.d4(sourceRatio) + "\t|" +
+						MathUtil.d4(targetConvexHullArea) + "\t" +
+						MathUtil.d4(targetImageArea) + "\t" +
+						MathUtil.d4(targetRatio) + "\t|" +
 						"pairs=" + pairList.items.size() + "\t" +
 						"maxHelmertDiscrepancy=" + MathUtil.d2(maxHelmertDiscrepancy) + "\t" +
 						"helmBadPanoGood =" + helmBadPanoGood + "\t" + 
