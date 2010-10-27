@@ -50,12 +50,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				break;
 			}
 		}
-		if ((!res.isAdjusted()) || (goodCount < minRequredGoodPointPairs)) {
-			return false;
-		}
-//		for (KeyPointPair pair : pairList.items) {
-//			pair.weight = pair.discrepancy < 1.0 ? 1.0 : 1.0 / pair.discrepancy;
-//		}
+
 		KeyPointHelmertTransformer tr = (KeyPointHelmertTransformer) learner.transformer;
 		double params[] = new double[4];
 		tr.getParams(params);
@@ -63,13 +58,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		pairList.angle = params[1];
 		pairList.translateX= params[2];
 		pairList.translateY= params[3];
-		if ((pairList.scale < 0.2) || (pairList.scale > 20)) {
-			// The scale parameter can get very close to 0. It happens when no real match 
-			// is possible between two images, but when scale is close to 0 a false match
-			// is reported.
-			return false;
-		}
-
 		System.out.printf("%11s\t%s\t%s\n", (goodCount + "/" + pairList.items.size()),
 				pairList.source.imageFileStamp.getFile().getName(),
 				pairList.target.imageFileStamp.getFile().getName() +
@@ -78,6 +66,22 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				"\tdX=" +MathUtil.d4(pairList.translateX) + 
 				"\tdY=" +MathUtil.d4(pairList.translateY) 
 				);
+		if ((!res.isAdjusted()) || (goodCount < minRequredGoodPointPairs)) {
+			System.out.println("NOT adjusted");
+			System.out.println(res);
+			return false;
+		}
+//		for (KeyPointPair pair : pairList.items) {
+//			pair.weight = pair.discrepancy < 1.0 ? 1.0 : 1.0 / pair.discrepancy;
+//		}
+		if ((pairList.scale < 0.2) || (pairList.scale > 20)) {
+			// The scale parameter can get very close to 0. It happens when no real match 
+			// is possible between two images, but when scale is close to 0 a false match
+			// is reported.
+			System.out.println("BAD scale");
+			System.out.println(res);
+			return false;
+		}
 
 		return true;
 	}

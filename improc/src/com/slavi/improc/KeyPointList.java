@@ -20,6 +20,9 @@ public class KeyPointList {
 	public static final String fileHeader = "KeyPoint file version 1.26";
 	
 	public final ArrayList<KeyPoint> items = new ArrayList<KeyPoint>();
+	
+	public KeyPointTree tree;
+	
 	public KeyPointTreeImageSpace imageSpaceTree;	
 	
 	public FileStamp imageFileStamp = null;

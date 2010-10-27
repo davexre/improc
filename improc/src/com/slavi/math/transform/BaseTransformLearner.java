@@ -236,16 +236,23 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
 		result.maxAllowedDiscrepancy = getMaxAllowedDiscrepancy(result);
+		double recoverDiscrepancy = result.discrepancyStatistics.getAvgValue();
+		
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
 			double discrepancy = getDiscrepancy(item);
 			boolean curIsBad = discrepancy > result.maxAllowedDiscrepancy;
 			if (oldIsBad != curIsBad) {
-				setBad(item, curIsBad);
 				if (curIsBad) {
+					setBad(item, curIsBad);
 					result.oldGoodNowBad++;
 				} else {
-					result.oldBadNowGood++;
+					if (discrepancy < recoverDiscrepancy) {
+						setBad(item, curIsBad);
+						result.oldBadNowGood++;
+					} else {
+						curIsBad = true; // rejected to be recovered
+					}
 				}
 			}
 			if (curIsBad) {

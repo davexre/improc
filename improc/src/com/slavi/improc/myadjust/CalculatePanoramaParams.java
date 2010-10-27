@@ -1,15 +1,19 @@
 package com.slavi.improc.myadjust;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
@@ -149,6 +153,63 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			}
 		}
 		
+		private boolean isBad(KeyPointPair pair, boolean usePanoBad) {
+			return usePanoBad ? pair.panoBad : pair.validatePairBad;
+		}
+		
+		public void dumpPanoData(ArrayList<KeyPointPairList> pano, boolean usePanoBad) {
+			System.out.println("\n=============== Pano data ================== usePanoBad=" + usePanoBad);
+			Statistics good = new Statistics();
+			Statistics goodDist = new Statistics();
+			Statistics bad = new Statistics();
+			Statistics badDist = new Statistics();
+			for (KeyPointPairList pairList : pano) {
+				good.start();
+				goodDist.start();
+				bad.start();
+				badDist.start();
+				
+				for (KeyPointPair pair : pairList.items) {
+					double dist = 0.0;
+					for (int i = 0; i < KeyPoint.featureVectorLinearSize; i++) {
+						double sv = pair.sourceSP.getValue(i); 
+						double tv = pair.targetSP.getValue(i);
+						double d = Math.abs(sv - tv);
+						dist += d*d;
+						if (d > 0) {
+							if (isBad(pair, usePanoBad))
+								bad.addValue(d);
+							else
+								good.addValue(d);
+						}
+					}
+					if (isBad(pair, usePanoBad))
+						badDist.addValue(Math.sqrt(dist));
+					else
+						goodDist.addValue(Math.sqrt(dist));
+				}
+				good.stop();
+				goodDist.stop();
+				bad.stop();
+				badDist.stop();
+				
+				System.out.println(MathUtil.l10(goodDist.getItemsCount()) + "/" + MathUtil.l10(pairList.items.size()) +
+						"\t" + pairList.source.imageFileStamp.getFile().getName() +
+						"\t" + pairList.target.imageFileStamp.getFile().getName() + 
+						" goodDist.Avg=" + MathUtil.d4(goodDist.getAvgValue()) +
+						" goodDist.Max=" + MathUtil.d4(goodDist.getMaxX()) +
+						" badDist.Avg=" + MathUtil.d4(badDist.getAvgValue()) +
+						" badDist.Max=" + MathUtil.d4(badDist.getMaxX()) +
+						" good.Avg=" + MathUtil.d4(good.getAvgValue()) +
+						" good.Max=" + MathUtil.d4(good.getMaxX()) +
+						" good.Min=" + MathUtil.d4(good.getMinX()) +
+						" bad.Avg=" + MathUtil.d4(bad.getAvgValue()) +
+						" bad.Max=" + MathUtil.d4(bad.getMaxX()) +
+						" bad.Min=" + MathUtil.d4(bad.getMinX())
+				);
+			}
+		}
+		
 		public Void call() {
 			copyBadStatus(chain);
 			panoTransformer.initialize(chain);
@@ -170,6 +231,8 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 				if (/*result.isAdjusted() || */ (result.discrepancyStatistics.getMaxX() < panoTransformer.getDiscrepancyThreshold())) {
 					synchronized (panos) {
 						panos.add(panoTransformer.chain);
+						dumpPanoData(panoTransformer.chain, true);
+						dumpPanoData(panoTransformer.chain, false);
 					}
 					break;
 				}
