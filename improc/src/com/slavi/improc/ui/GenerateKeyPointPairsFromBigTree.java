@@ -13,7 +13,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.tree.KDTree;
+import com.slavi.util.tree.NearestNeighbours;
 import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyPointPairList>> {
@@ -57,10 +57,10 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				if (Thread.interrupted())
 					throw new InterruptedException();
 				
-//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMyBBF(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps);
-				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
-//				KDTree.NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
-				if (nnlst.size() < 2)
+//				NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMyBBF(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps);
+				NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
+//				NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighbours(kp, 2);
+				if (nnlst.getSize() < 2)
 					continue;
 //				if (nnlst.getDistanceToTarget(0) > nnlst.getDistanceToTarget(1) * 0.6) {
 //					continue;

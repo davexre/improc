@@ -160,21 +160,28 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		public void dumpPanoData(ArrayList<KeyPointPairList> pano, boolean usePanoBad) {
 			System.out.println("\n=============== Pano data ================== usePanoBad=" + usePanoBad);
 			Statistics good = new Statistics();
+			Statistics maxGood = new Statistics();
 			Statistics goodDist = new Statistics();
 			Statistics bad = new Statistics();
+			Statistics maxBad = new Statistics();
 			Statistics badDist = new Statistics();
+			
 			for (KeyPointPairList pairList : pano) {
 				good.start();
+				maxGood.start();
 				goodDist.start();
 				bad.start();
+				maxBad.start();
 				badDist.start();
-				
 				for (KeyPointPair pair : pairList.items) {
 					double dist = 0.0;
+					double maxD = 0.0; 
+					
 					for (int i = 0; i < KeyPoint.featureVectorLinearSize; i++) {
 						double sv = pair.sourceSP.getValue(i); 
 						double tv = pair.targetSP.getValue(i);
 						double d = Math.abs(sv - tv);
+						maxD = Math.max(maxD, d);
 						dist += d*d;
 						if (d > 0) {
 							if (isBad(pair, usePanoBad))
@@ -183,14 +190,19 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 								good.addValue(d);
 						}
 					}
-					if (isBad(pair, usePanoBad))
+					if (isBad(pair, usePanoBad)) {
 						badDist.addValue(Math.sqrt(dist));
-					else
+						maxBad.addValue(maxD);
+					} else {
 						goodDist.addValue(Math.sqrt(dist));
+						maxGood.addValue(maxD);
+					}
 				}
 				good.stop();
+				maxGood.stop();
 				goodDist.stop();
 				bad.stop();
+				maxBad.stop();
 				badDist.stop();
 				
 				System.out.println(MathUtil.l10(goodDist.getItemsCount()) + "/" + MathUtil.l10(pairList.items.size()) +
@@ -202,10 +214,12 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 						" badDist.Max=" + MathUtil.d4(badDist.getMaxX()) +
 						" good.Avg=" + MathUtil.d4(good.getAvgValue()) +
 						" good.Max=" + MathUtil.d4(good.getMaxX()) +
-						" good.Min=" + MathUtil.d4(good.getMinX()) +
+						" maxGood.Avg=" + MathUtil.d4(maxGood.getAvgValue()) +
+						" maxGood.Max=" + MathUtil.d4(maxGood.getMaxX()) +
+						" maxBad.Avg=" + MathUtil.d4(maxBad.getAvgValue()) +
+						" maxBad.Max=" + MathUtil.d4(maxBad.getMaxX()) +
 						" bad.Avg=" + MathUtil.d4(bad.getAvgValue()) +
-						" bad.Max=" + MathUtil.d4(bad.getMaxX()) +
-						" bad.Min=" + MathUtil.d4(bad.getMinX())
+						" bad.Max=" + MathUtil.d4(bad.getMaxX())
 				);
 			}
 		}

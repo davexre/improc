@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPoint;
+import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
 import com.slavi.improc.KeyPointPair;
@@ -14,7 +15,7 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.KeyPointTree;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.tree.KDTree;
+import com.slavi.util.tree.NearestNeighbours;
 import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairList>> {
@@ -89,6 +90,7 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 			}				
 		}
 		
+		public static final double maxDistanceToTarget = 110;
 		public Void call() throws Exception {
 			KeyPointPairList kppl = new KeyPointPairList();
 			kppl.source = source;
@@ -98,8 +100,11 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 			for (KeyPoint kp : source.items) {
 				if (Thread.interrupted())
 					throw new InterruptedException();
-				KDTree.NearestNeighbours<KeyPoint> nnlst = target.tree.getNearestNeighboursBBF(kp, 2, searchSteps);
-				if (nnlst.size() < 2)
+				NearestNeighbours<KeyPoint> nnlst = target.tree.getNearestNeighboursBBF(kp, 2, searchSteps);
+//				NearestNeighbours<KeyPoint> nnlst = target.tree.getNearestNeighboursMyBBF(kp, 2, 
+//						KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps,
+//						maxDistanceToTarget * maxDistanceToTarget);
+				if (nnlst.getSize() < 2)
 					continue;
 				KeyPointPair pair = new KeyPointPair(kp, nnlst.getItem(0), nnlst.getDistanceToTarget(0), nnlst.getDistanceToTarget(1));						
 				kppl.items.add(pair);

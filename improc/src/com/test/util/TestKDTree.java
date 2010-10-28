@@ -6,7 +6,8 @@ import java.util.List;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Marker;
 import com.slavi.util.tree.KDTree;
-import com.slavi.util.tree.KDTree.NearestNeighbours;
+import com.slavi.util.tree.NearestNeighbours;
+import com.slavi.util.tree.TreeNode;
 
 public class TestKDTree {
 	
@@ -69,7 +70,7 @@ public class TestKDTree {
 		}
 	}
 	
-	public static void printNode(KDTree.Node<MyKDData> node, int level) {
+	public static void printNode(TreeNode<MyKDData> node, int level) {
 		String s = "";
 		for (int i = 0; i < level; i++)
 			s += "|  ";
@@ -105,12 +106,12 @@ public class TestKDTree {
 		MyKDTree tree = new MyKDTree(dimensions, items);
 		printNode(tree.getRoot(), 0);
 
-		KDTree.NearestNeighbours<MyKDData> nnlst = tree.getNearestNeighbours(thePoint, 5);
+		NearestNeighbours<MyKDData> nnlst = tree.getNearestNeighbours(thePoint, 5);
 		int maxUsedSearchSteps = nnlst.getUsedSearchSteps();
 		
 		System.out.println("--------");
 		System.out.println("Point is:" + nnlst.getTarget().toString());
-		for (int i = 0; i < nnlst.size(); i++) {
+		for (int i = 0; i < nnlst.getSize(); i++) {
 			System.out.println("Distance=" + Math.sqrt(nnlst.getDistanceToTarget(i)) + " value=" + nnlst.getItem(i).toString());
 		}
 		System.out.println("Used search steps=" + nnlst.getUsedSearchSteps());
@@ -124,7 +125,7 @@ public class TestKDTree {
 		System.out.println("Max used steps=" + maxUsedSearchSteps);
 	}
 	
-	public KDTree.NearestNeighbours<MyKDData> findNearest(MyKDTree tree, MyKDData item) {
+	public NearestNeighbours<MyKDData> findNearest(MyKDTree tree, MyKDData item) {
 		int maxSearchSteps = tree.getTreeDepth() / 2;
 		return tree.getNearestNeighboursBBF(item, 2, maxSearchSteps);
 	}
@@ -165,7 +166,7 @@ public class TestKDTree {
 		System.out.println(stat);
 		NearestNeighbours<MyKDData> nn = tree.getNearestNeighboursMy(item, 3, 5);
 		System.out.println("Neares neighbours:");
-		for (int i = 0; i < nn.size(); i++)
+		for (int i = 0; i < nn.getSize(); i++)
 			System.out.println(nn.getItem(i));
 	}
 	

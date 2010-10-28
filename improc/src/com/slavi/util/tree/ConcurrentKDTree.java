@@ -42,24 +42,42 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 
-	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours) {
+	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours, double maxDistanceToTarget) {
 		lock.readLock().lock();
 		try {
-			return super.getNearestNeighbours(target, maxNeighbours);
+			return super.getNearestNeighbours(target, maxNeighbours, maxDistanceToTarget);
 		} finally {
 			lock.readLock().unlock();
 		}
 	}
 
-	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
+	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps, double maxDistanceToTarget) {
 		lock.readLock().lock();
 		try {
-			return super.getNearestNeighboursBBF(target, maxNeighbours, maxSearchSteps);
+			return super.getNearestNeighboursBBF(target, maxNeighbours, maxSearchSteps, maxDistanceToTarget);
 		} finally {
 			lock.readLock().unlock();
 		}
 	}
 
+	public NearestNeighbours<E> getNearestNeighboursMy(E target, int maxNeighbours, double maxDistancePerCoordinate, double maxDistanceToTarget) {
+		lock.readLock().lock();
+		try {
+			return super.getNearestNeighboursMy(target, maxNeighbours, maxDistancePerCoordinate, maxDistanceToTarget);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+	
+	public NearestNeighbours<E> getNearestNeighboursMyBBF(E target, int maxNeighbours, double maxDistancePerCoordinate, int maxSearchSteps, double maxDistanceToTarget) {
+		lock.readLock().lock();
+		try {
+			return super.getNearestNeighboursMyBBF(target, maxNeighbours, maxDistancePerCoordinate, maxSearchSteps, maxDistanceToTarget);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+	
 	public E findMatching(E target) {
 		lock.readLock().lock();
 		try {
@@ -69,7 +87,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 		}
 	}
 	
-	private void add_recursive(E data, Node<E> curNode, int dimension, int depthLevel) {
+	private void add_recursive(E data, TreeNode<E> curNode, int dimension, int depthLevel) {
 		depthLevel++;
 		double value = getValue(data, dimension);
 		double curNodeValue = getValue(curNode.data, dimension);
@@ -82,7 +100,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 					if (curNode.left == null) { // recheck needed
 						if (treeDepth < depthLevel)
 							treeDepth = depthLevel;
-						curNode.left = new Node<E>(data);
+						curNode.left = new TreeNode<E>(data);
 						mutations++;
 						size++;
 						return;
@@ -103,7 +121,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 					if (curNode.right == null) { // recheck needed
 						if (treeDepth < depthLevel)
 							treeDepth = depthLevel;
-						curNode.right = new Node<E>(data);
+						curNode.right = new TreeNode<E>(data);
 						mutations++;
 						size++;
 						return;
@@ -128,7 +146,7 @@ public abstract class ConcurrentKDTree<E> extends KDTree<E> {
 				try {
 					if (root == null) { // recheck needed
 						treeDepth = 1;
-						root = new Node<E>(item);
+						root = new TreeNode<E>(item);
 						mutations++;
 						size++;
 						return;

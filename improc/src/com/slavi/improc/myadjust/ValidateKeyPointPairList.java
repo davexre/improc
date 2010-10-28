@@ -1,7 +1,6 @@
 package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +14,7 @@ import com.slavi.math.AbstractConvexHullArea;
 import com.slavi.math.MathUtil;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.tree.KDTree.NearestNeighbours;
+import com.slavi.util.tree.NearestNeighbours;
 import com.slavi.util.ui.SwtUtil;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
@@ -226,7 +225,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 //					40 * KeyPointHelmertTransformLearner.discrepancyThreshold);
 				double minDistance = Double.MAX_VALUE;
 				KeyPoint target = null;
-				for (int i = nearest.size() - 1; i >= 0; i--) {
+				for (int i = nearest.getSize() - 1; i >= 0; i--) {
 					KeyPoint point = nearest.getItem(i);
 					double distance = 0;
 					for (int j = KeyPoint.featureVectorLinearSize - 1; j >= 0; j--) {

@@ -12,119 +12,9 @@ public abstract class KDTree<E> implements Iterable<E>{
 	
 	public abstract double getValue(E node, int dimensionIndex);
 
-	public static class NearestNeighbours<E>{
-		@SuppressWarnings("unchecked")
-		NearestNeighbours(E target, int maxCapacity, int dimensions) {
-			this.target = target;
-			distancesToTarget = new double[maxCapacity];
-			items = (E[])new Object[maxCapacity];
-			m_size = 0;
-			searchSteps = 0;
-			usedSearchSteps = 0;
-			hr = new double[dimensions][2];
-
-			for (int i = dimensions - 1; i >= 0; i--) {
-				hr[i][0] = Double.MIN_VALUE;
-				hr[i][1] = Double.MAX_VALUE;
-			}
-		}
-		
-		int searchSteps;
-		
-		int usedSearchSteps;
-
-		double[][] hr;
-
-		E target;
-		
-		double[] distancesToTarget;
-		
-		E[] items;
-		
-		int m_size;
-		
-		public int size() {
-			return m_size;
-		}
-		
-		public E getItem(int atIndex) {
-			return items[atIndex];
-		}
-		
-		public double getDistanceToTarget(int atIndex) {
-			return distancesToTarget[atIndex];
-		}
-		
-		public int getCapacity() {
-			return distancesToTarget.length;
-		}
-		
-		public E getTarget() {
-			return target;
-		}
-		
-		public int countAdds = 0;
-
-		public int getSearchSteps() {
-			return searchSteps;
-		}
-		
-		public int getUsedSearchSteps() {
-			return usedSearchSteps;
-		}
-		
-		void add(E item, double distanceToTarget) {
-			countAdds++;
-			int insertAt = 0;
-			// Find insert position
-			for (; insertAt < m_size; insertAt++) {
-				if (distanceToTarget < distancesToTarget[insertAt])
-					break;
-			}
-			// If value is greater than all elements then ignore it.
-			if (insertAt >= distancesToTarget.length)
-				return;
-			// Increase size if limit not reached
-			if (m_size < distancesToTarget.length)
-				m_size++;
-			// Make room to insert
-			int itemsToMove = m_size - insertAt - 1;
-			if (itemsToMove > 0) {
-				System.arraycopy(distancesToTarget, insertAt, distancesToTarget, insertAt + 1, itemsToMove);
-				System.arraycopy(items, insertAt, items, insertAt + 1, itemsToMove);
-			}
-			// Put item in insertAt position
-			distancesToTarget[insertAt] = distanceToTarget;
-			items[insertAt] = item;
-		}
-	}
-	
-	public static class Node<E> {
-		protected E data;
-		protected Node<E> left, right;
-		
-		Node(E data) {
-			this.data = data;
-			left = null;
-			right = null;
-		}
-		
-		public E getData() {
-			return data;
-		}
-		
-		public Node<E> getLeft() {
-			return left;
-		}
-		
-		public Node<E> getRight() {
-			return right;
-		}
-	}	
-	
 	protected int dimensions;
 
-	protected Node<E> root;
+	protected TreeNode<E> root;
 	
 	volatile int size;
 	
@@ -159,7 +49,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		mutations++;
 	}
 
-	private void addToList_recursive(ArrayList<E>list, Node<E> node) {
+	private void addToList_recursive(ArrayList<E>list, TreeNode<E> node) {
 		if (node == null)
 			return;
 		list.add(node.data);
@@ -270,7 +160,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return deepSort(items, dimensions, segmentStartIndex, segmentEndIndex, nextDimension, numberOfUnsuccessfullSorts);
 	}
 	
-	private Node<E> balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
+	private TreeNode<E> balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
 		if (left > right)
 			return null;
 		int midIndex = deepSort(items, dimensions, left, right, curDimension, 0);
@@ -286,7 +176,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			items.set(startIndex, tmp);
 		}
 		int nextDimension = (curDimension + 1) % dimensions;
-		Node<E> result = new Node<E>(items.get(startIndex));
+		TreeNode<E> result = new TreeNode<E>(items.get(startIndex));
 		depthLevel++;
 		if (depthLevel > treeDepth)
 			treeDepth = depthLevel;
@@ -299,6 +189,17 @@ public abstract class KDTree<E> implements Iterable<E>{
 		double result = 0;
 		for (int i = dimensions - 1; i >= 0; i--) {
 			double d = getValue(n1, i) - getValue(n2, i);
+			result += d * d;
+		}
+		return result;
+	}
+
+	private double getDistanceSquared(E n1, E n2, double maxDistancePerCoordinate) {
+		double result = 0;
+		for (int i = dimensions - 1; i >= 0; i--) {
+			double d = getValue(n1, i) - getValue(n2, i);
+			if (Math.abs(d) > maxDistancePerCoordinate)
+				return Double.MAX_VALUE;
 			result += d * d;
 		}
 		return result;
@@ -319,6 +220,10 @@ public abstract class KDTree<E> implements Iterable<E>{
 		}
 		return result;
 	}
+
+	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours) {
+		return getNearestNeighbours(target, maxNeighbours, Double.MAX_VALUE);
+	}
 	
 	/**
 	 * Returns [maxNeighbours] of elements closest to the [target] element.
@@ -326,8 +231,8 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * 
 	 * @see #getNearestNeighboursBBF(Object, int, int)
 	 */
-	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours) {
-		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+	public NearestNeighbours<E> getNearestNeighbours(E target, int maxNeighbours, double maxDistanceToTarget) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions, maxDistanceToTarget);
 		result.searchSteps = -1;
 		nearestSegment(result, target, root, 0);
 		return result;
@@ -351,7 +256,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * The returned value is a reference to the first found matching item. 
 	 */
 	public E findMatching(E target) {
-		Node<E> curNode = root;
+		TreeNode<E> curNode = root;
 		int dimension = 0;
 		while (curNode != null) {
 			double curNodeValue = getValue(curNode.data, dimension);
@@ -379,7 +284,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return findMatching(item) != null;
 	}
 	
-	private void nearestSegment(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension) {
+	private void nearestSegment(NearestNeighbours<E> nearest, E target, TreeNode<E> curNode, int dimension) {
 		if (curNode == null) 
 			return;
 		nearest.usedSearchSteps++;
@@ -406,8 +311,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
-				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+				if (getDistanceSquaredToHR(nearest.hr, target) < nearest.getMaxDistanceToTarget()) 
 					nearestSegment(nearest, target, curNode.right, nextDimension);
 				// Restore the hyper rectangle
 				nearest.hr[dimension][0] = tmp;
@@ -429,8 +333,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 				//   if capacity is not reached OR
 				//   if distance from target to "further" hyper rectangle is smaller 
 				//      than the maximum of the currently found neighbours
-				if ((nearest.size() < nearest.getCapacity()) ||
-						(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+				if (getDistanceSquaredToHR(nearest.hr, target) < nearest.getMaxDistanceToTarget()) 
 					nearestSegment(nearest, target, curNode.left, nextDimension);
 				// Restore the hyper rectangle
 				nearest.hr[dimension][1] = tmp;
@@ -438,6 +341,10 @@ public abstract class KDTree<E> implements Iterable<E>{
 		}
 	}
 
+	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
+		return getNearestNeighboursBBF(target, maxNeighbours, maxSearchSteps, Double.MAX_VALUE);
+	}
+	
 	/**
 	 * Uses an algorithm for Approximate Nearest Neighbourhood search, called Best Bin First.
 	 * The algorithm is developed by David G. Lowe and described in his paper
@@ -448,14 +355,14 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 *
 	 * @see #getNearestNeighbours(Object, int)
 	 */
-	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps) {
-		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+	public NearestNeighbours<E> getNearestNeighboursBBF(E target, int maxNeighbours, int maxSearchSteps, double maxDistanceToTarget) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions, maxDistanceToTarget);
 		result.searchSteps = maxSearchSteps;
 		nearestSegment(result, target, root, 0);
 		return result;
 	}
 
-	private void add_recursive(E data, Node<E> curNode, int dimension, int depthLevel) {
+	private void add_recursive(E data, TreeNode<E> curNode, int dimension, int depthLevel) {
 		depthLevel++;
 		double value = getValue(data, dimension);
 		double curNodeValue = getValue(curNode.data, dimension);
@@ -464,7 +371,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			if (curNode.left == null) {
 				if (treeDepth < depthLevel)
 					treeDepth = depthLevel;
-				curNode.left = new Node<E>(data);
+				curNode.left = new TreeNode<E>(data);
 				mutations++;
 				size++;
 			} else
@@ -475,7 +382,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 			if (curNode.right == null) {
 				if (treeDepth < depthLevel) 
 					treeDepth = depthLevel;
-				curNode.right = new Node<E>(data);
+				curNode.right = new TreeNode<E>(data);
 				mutations++;
 				size++;
 			} else
@@ -501,7 +408,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		if (item == null)
 			return;
 		if (root == null) { 
-			root = new Node<E>(item);
+			root = new TreeNode<E>(item);
 			mutations++;
 			size++;
 		} else {
@@ -541,30 +448,30 @@ public abstract class KDTree<E> implements Iterable<E>{
 		
 		private final int mutationsAtIteratorCreate;
 		
-		private Stack<IteratorVisit<Node<E>>>stack;
+		private Stack<IteratorVisit<TreeNode<E>>>stack;
 
-		private Node<E> nextItem;
+		private TreeNode<E> nextItem;
 
 		Itr() {
-			stack = new Stack<IteratorVisit<Node<E>>>();
+			stack = new Stack<IteratorVisit<TreeNode<E>>>();
 			nextItem = root;
 			mutationsAtIteratorCreate = mutations;
 			if (root != null) {
-				IteratorVisit<Node<E>>v = new IteratorVisit<Node<E>>();
+				IteratorVisit<TreeNode<E>>v = new IteratorVisit<TreeNode<E>>();
 				v.item = root;
 				v.status = 0;
 				stack.push(v);
 			}
 		}
 		
-		private Node<E> getNext() {
+		private TreeNode<E> getNext() {
 			while (!stack.empty()) {
-				IteratorVisit<Node<E>>v = stack.peek();
+				IteratorVisit<TreeNode<E>>v = stack.peek();
 				if (v.status == 0) {
 					v.status++;
-					Node<E> tmp = v.item.left;
+					TreeNode<E> tmp = v.item.left;
 					if (tmp != null) {
-						v = new IteratorVisit<Node<E>>();
+						v = new IteratorVisit<TreeNode<E>>();
 						v.item = tmp;
 						v.status = 0;
 						stack.push(v);
@@ -573,9 +480,9 @@ public abstract class KDTree<E> implements Iterable<E>{
 				}
 				if (v.status == 1) {
 					v.status++;
-					Node<E> tmp = v.item.right;
+					TreeNode<E> tmp = v.item.right;
 					if (tmp != null) {
-						v = new IteratorVisit<Node<E>>();
+						v = new IteratorVisit<TreeNode<E>>();
 						v.item = tmp;
 						v.status = 0;
 						stack.push(v);
@@ -604,7 +511,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 
 		public E next() {
 			checkForModification();
-			Node<E> result = nextItem;
+			TreeNode<E> result = nextItem;
 			nextItem = null;
 			if (result == null) 
 				result = getNext();
@@ -624,7 +531,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return toList().iterator();
 	}
 	
-	public Node<E> getRoot() {
+	public TreeNode<E> getRoot() {
 		return root;
 	}
 
@@ -657,32 +564,37 @@ public abstract class KDTree<E> implements Iterable<E>{
 	////////////////////////////////////////////////////////////////////////////////////
 	
 	public NearestNeighbours<E> getNearestNeighboursMy(E target, int maxNeighbours, double maxDistancePerCoordinate) {
-		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+		return getNearestNeighboursMy(target, maxNeighbours, maxDistancePerCoordinate, Double.MAX_VALUE);
+	}
+		
+	public NearestNeighbours<E> getNearestNeighboursMy(E target, int maxNeighbours, double maxDistancePerCoordinate, double maxDistanceToTarget) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions, maxDistanceToTarget);
 		result.searchSteps = -1;
 		nearestSegmentMy(result, target, root, 0, Math.abs(maxDistancePerCoordinate));
 		return result;
 	}
 	
 	public NearestNeighbours<E> getNearestNeighboursMyBBF(E target, int maxNeighbours, double maxDistancePerCoordinate, int maxSearchSteps) {
-		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions);
+		return getNearestNeighboursMyBBF(target, maxNeighbours, maxDistancePerCoordinate, maxSearchSteps, Double.MAX_VALUE);
+	}
+	
+	public NearestNeighbours<E> getNearestNeighboursMyBBF(E target, int maxNeighbours, double maxDistancePerCoordinate, int maxSearchSteps, double maxDistanceToTarget) {
+		NearestNeighbours<E> result = new NearestNeighbours<E>(target, maxNeighbours, dimensions, maxDistanceToTarget);
 		result.searchSteps = maxSearchSteps;
 		nearestSegmentMy(result, target, root, 0, Math.abs(maxDistancePerCoordinate));
 		return result;
 	}
 	
-	private void nearestSegmentMy(NearestNeighbours<E> nearest, E target, Node<E> curNode, int dimension, double maxDistancePerCoordinate) {
+	private void nearestSegmentMy(NearestNeighbours<E> nearest, E target, TreeNode<E> curNode, int dimension, double maxDistancePerCoordinate) {
 		if (curNode == null) 
 			return;
 		nearest.usedSearchSteps++;
 
+		if (canFindDistanceBetween(target, curNode.data))
+			nearest.add(curNode.data, getDistanceSquared(target, curNode.data, maxDistancePerCoordinate));
 		double curNodeValue = getValue(curNode.data, dimension);
-		double targetValue = getValue(target, dimension);
-		double min = targetValue - maxDistancePerCoordinate;
-		double max = targetValue + maxDistancePerCoordinate;
-		
-		if ((min <= curNodeValue) && (curNodeValue <= max) && canFindDistanceBetween(target, curNode.data))
-			nearest.add(curNode.data, getDistanceSquared(target, curNode.data));
 		int nextDimension = (dimension + 1) % dimensions;
+		double targetValue = getValue(target, dimension);
 		
 		if (targetValue < curNodeValue) {
 			// Prepare and check the "nearer" hyper rectangle
@@ -702,8 +614,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 					//   if capacity is not reached OR
 					//   if distance from target to "further" hyper rectangle is smaller 
 					//      than the maximum of the currently found neighbours
-					if ((nearest.size() < nearest.getCapacity()) ||
-							(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					if (getDistanceSquaredToHR(nearest.hr, target) < nearest.getMaxDistanceToTarget()) 
 						nearestSegmentMy(nearest, target, curNode.right, nextDimension, maxDistancePerCoordinate);
 					// Restore the hyper rectangle
 					nearest.hr[dimension][0] = tmp;
@@ -727,8 +638,7 @@ public abstract class KDTree<E> implements Iterable<E>{
 					//   if capacity is not reached OR
 					//   if distance from target to "further" hyper rectangle is smaller 
 					//      than the maximum of the currently found neighbours
-					if ((nearest.size() < nearest.getCapacity()) ||
-							(getDistanceSquaredToHR(nearest.hr, target) < nearest.getDistanceToTarget(nearest.size() - 1))) 
+					if (getDistanceSquaredToHR(nearest.hr, target) < nearest.getMaxDistanceToTarget()) 
 						nearestSegmentMy(nearest, target, curNode.left, nextDimension, maxDistancePerCoordinate);
 					// Restore the hyper rectangle
 					nearest.hr[dimension][1] = tmp;
@@ -736,5 +646,4 @@ public abstract class KDTree<E> implements Iterable<E>{
 			}
 		}
 	}
-
 }

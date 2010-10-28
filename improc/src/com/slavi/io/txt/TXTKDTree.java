@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import com.slavi.util.tree.KDTree;
-import com.slavi.util.tree.KDTree.Node;
+import com.slavi.util.tree.TreeNode;
 
 public abstract class TXTKDTree<E> {
 
@@ -13,7 +13,7 @@ public abstract class TXTKDTree<E> {
 	
 	public abstract E nodeFromString(String source);
 
-	private void toTextStream_recursive(Node<E> node, PrintWriter fou) {
+	private void toTextStream_recursive(TreeNode<E> node, PrintWriter fou) {
 		if (node == null)
 			return;
 		fou.println(nodeToString(node.getData()));

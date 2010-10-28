@@ -7,7 +7,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.util.tree.KDTree;
-import com.slavi.util.tree.KDTree.Node;
+import com.slavi.util.tree.TreeNode;
 
 public abstract class XMLKDTree<E> {
 
@@ -15,7 +15,7 @@ public abstract class XMLKDTree<E> {
 	
 	public abstract E nodeFromXML(Element source) throws JDOMException;
 
-	private void toXML_recursive(Node<E> node, Element dest) {
+	private void toXML_recursive(TreeNode<E> node, Element dest) {
 		if (node == null)
 			return;
 		nodeToXML(node.getData(), dest);
