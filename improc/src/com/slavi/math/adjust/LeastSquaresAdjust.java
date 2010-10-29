@@ -1,5 +1,6 @@
 package com.slavi.math.adjust;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 
@@ -97,6 +98,29 @@ public class LeastSquaresAdjust {
 		return measurementCount >= getRequiredMeasurements();
 	}
 
+	public boolean calculateWithDebug() {
+		if (!canCalculate()) {
+			System.out.println("Can not calculate. Not enough data.");
+			return false;
+		}
+		SymmetricMatrix nmCopy = nm.makeCopy();
+		if (!nm.inverse()) {
+			System.out.println("Inverse of normal matrix failed.");
+			return false;
+		}
+		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeM());
+		nmCopy.mMul(nm, tmp);
+		double deviation = tmp.getSquaredDeviationFromE();
+		System.out.println("Inverse of normal matrix precision (squared deviation from E) is: " + MathUtil.d4(deviation));
+
+		unknown.make0();
+		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
+			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)
+				for (int k = numCoordinates - 1; k >= 0; k--)
+					unknown.setItem(k, i, unknown.getItem(k, i) + nm.getItem(i, j) * apl.getItem(k, j));
+		return true;
+	}
+	
 	public boolean calculate() {
 		if (!canCalculate())
 			return false;
