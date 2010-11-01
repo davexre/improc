@@ -81,7 +81,8 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 		KeyPointList target;
 		
 		public MakePairs(KeyPointList l1, KeyPointList l2) {
-			if (l1.items.size() > l2.items.size()) {
+//			if (l1.items.size() > l2.items.size()) {
+			if (l1.imageId < l2.imageId) {
 				source = l2;
 				target = l1;
 			} else {

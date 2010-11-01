@@ -1,5 +1,6 @@
 package com.slavi.improc.ui;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -80,6 +81,21 @@ public class Improc {
 		}		
 		System.out.println("Key point pairs lists to be validated: " + kppl.size());
 				
+/*		KeyPointPairList kppl1 = kppl.get(0);
+		String fileName = "d:/temp/asdf.txt";
+		PrintWriter fou = new PrintWriter(fileName);
+		for (KeyPointPair pair : kppl1.items) {
+			fou.print(pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX);
+			fou.print('\t');
+			fou.print(pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY);
+			fou.print('\t');
+			fou.print(pair.targetSP.doubleX - pair.targetSP.keyPointList.cameraOriginX);
+			fou.print('\t');
+			fou.print(pair.targetSP.doubleY - pair.targetSP.keyPointList.cameraOriginY);
+			fou.println();
+		}
+		fou.close();
+*/		
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog(parent, "Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
@@ -110,8 +126,8 @@ public class Improc {
 						validkppl, keyPointFileRoot, settings.outputDirStr,
 						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 		
-		if (true) 
-			return;
+//		if (true) 
+//			return;
 		
 		System.out.println("---------- Generating panorama images");
 		SwtUtil.openWaitDialog(parent, "Generating panorama images", 
