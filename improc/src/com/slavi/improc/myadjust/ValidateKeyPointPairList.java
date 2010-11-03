@@ -69,8 +69,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 				"\tdY=" +MathUtil.d4(pairList.translateY) 
 				);
 		if ((!res.isAdjusted()) || (goodCount < minRequredGoodPointPairs)) {
-			System.out.println("NOT adjusted");
-			System.out.println(res);
+//			System.out.println("NOT adjusted");
+//			System.out.println(res);
 			return false;
 		}
 //		for (KeyPointPair pair : pairList.items) {
@@ -80,8 +80,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			// The scale parameter can get very close to 0. It happens when no real match 
 			// is possible between two images, but when scale is close to 0 a false match
 			// is reported.
-			System.out.println("BAD scale");
-			System.out.println(res);
+//			System.out.println("BAD scale");
+//			System.out.println(res);
 			return false;
 		}
 

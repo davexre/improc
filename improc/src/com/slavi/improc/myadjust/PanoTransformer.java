@@ -239,7 +239,8 @@ public abstract class PanoTransformer {
 				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getMaxX();
 			if (pairList.transformResult.discrepancyStatistics.getMaxX() < discrepancyThreshold)
 				pairList.maxDiscrepancy = pairList.transformResult.discrepancyStatistics.getMaxX();
-			pairList.recoverDiscrepancy = pairList.transformResult.discrepancyStatistics.getAvgValue();
+			pairList.recoverDiscrepancy = Math.min(pairList.transformResult.discrepancyStatistics.getAvgValue(),
+					result.discrepancyStatistics.getAvgValue());
 		}
 
 	}
