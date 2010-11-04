@@ -218,6 +218,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 	
 	void calculateNormalEquations() {
 		lsa.clear();
+		System.out.println("NORMAL EQUATIONS:");
 		Matrix coefs = new Matrix((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 4 : 3), 1);			
 		SphereNorm sn = new SphereNorm();
 		for (KeyPointPairList pairList : chain) {
@@ -256,6 +257,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 						coefs.setItem(0, 0, sn.dDist_dSF * scaleF);
 				}
 				lsa.addMeasurement(coefs, computedWeight, sn.Dist, 0);
+				System.out.print(MathUtil.d4(computedWeight) + "\t" + MathUtil.d4(sn.Dist) + "\t" + coefs.toString());
 			}
 		}
 	}
@@ -296,7 +298,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		lsa = new LeastSquaresAdjust((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-/*		Matrix m1 = lsa.getNm().makeSquareMatrix();
+		Matrix m1 = lsa.getNm().makeSquareMatrix();
 		Matrix m2 = lsa.getNm().makeSquareMatrix();
 		Matrix m3 = new Matrix();
 		if (!m2.inverse())
@@ -307,12 +309,12 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		m2.printM("M2");
 		m1.mMul(m2, m3);		
 		m3.printM("M3");
-*/
-		if (!lsa.calculate()) 
+
+		if (!lsa.calculateWithDebug()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
-//		u.printM("U");
+		u.printM("U");
 		System.out.println(
 				origin.imageId + 
 				"\t" + origin.imageFileStamp.getFile().getName() + 

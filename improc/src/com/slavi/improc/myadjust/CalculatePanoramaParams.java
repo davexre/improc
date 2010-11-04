@@ -139,7 +139,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			ignoredPairLists = new ArrayList<KeyPointPairList>();
 		}
 		
-		static final int maxIterations = 30;
+		static final int maxIterations = 50;
 		
 		void removeProcessedFromChain(ArrayList<KeyPointPairList>ignoredPairs, ArrayList<KeyPointList>processedImages) {
 			for (int i = processedImages.size() - 1; i >= 0; i--) {

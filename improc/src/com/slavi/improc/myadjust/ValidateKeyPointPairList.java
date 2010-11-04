@@ -32,7 +32,9 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 	
 	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws Exception {
 		for (KeyPointPair pair : pairList.items) {
-			pair.weight = pair.distanceToNearest < 1 ? 1.0 : 1 / pair.distanceToNearest;
+//			double dist = Math.sqrt(pair.distanceToNearest);
+			double dist = pair.distanceToNearest;
+			pair.weight = dist < 1 ? 1.0 : 1.0 / dist;
 		}		
 
 		KeyPointHelmertTransformLearner learner = new KeyPointHelmertTransformLearner(pairList);
