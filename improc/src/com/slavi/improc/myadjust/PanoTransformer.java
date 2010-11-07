@@ -6,6 +6,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.transform.TransformLearnerResult;
 
 public abstract class PanoTransformer {
@@ -283,6 +284,8 @@ public abstract class PanoTransformer {
 		int ALL_validateBadPanoBad = 0;
 
 		System.out.println();
+		Statistics statValidateBadPanoGood = new Statistics();
+		statValidateBadPanoGood.start();
 		for (int i = chain.size() - 1; i >= 0; i--) {
 			KeyPointPairList pairList = chain.get(i);
 			int panoGood = 0;
@@ -303,6 +306,7 @@ public abstract class PanoTransformer {
 					} else {
 						panoGood++;
 						validateBadPanoGood++;
+						statValidateBadPanoGood.addValue(pair.panoDiscrepancy);
 					}
 				} else {
 					validateGood++;
@@ -351,5 +355,7 @@ public abstract class PanoTransformer {
 				"\tvalidateBad    " + MathUtil.l10(ALL_validateBad)
 		);
 		System.out.println();
+		statValidateBadPanoGood.stop();
+		System.out.println(statValidateBadPanoGood);
 	}
 }

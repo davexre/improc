@@ -14,6 +14,7 @@ public class KeyPointPair implements Map.Entry<KeyPoint, KeyPoint>{
 	public double distanceToNearest2 = 0.0;
 	
 	public double discrepancy = 0.0;
+	public double panoDiscrepancy = 0.0;
 
 	public double weight = 0.0;
 	

@@ -52,6 +52,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			}
 		}
 		for (KeyPointPair pair : pairList.items) {
+			pair.panoDiscrepancy = pair.discrepancy;
 			pair.weight = pair.discrepancy < 1 ? 1.0 : 1 / pair.discrepancy;
 		}		
 
