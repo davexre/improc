@@ -20,7 +20,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 
 	public static final RotationZYZ rot = RotationZYZ.instance;
 	static boolean adjustForScale = true;
-	static boolean adjustOriginForScale = true;
+	static boolean adjustOriginForScale = false;
 	
 	LeastSquaresAdjust lsa;
 
@@ -224,7 +224,6 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		origin.tx = 0.0;
 		origin.ty = 0.0;
 		origin.tz = 0.0;
-		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		buildCamera2RealMatrix(origin);
 		for (KeyPointList image : images) {
 			buildCamera2RealMatrix(image);
@@ -245,6 +244,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		double PW2[] = new double[3];
 		
 		lsa.clear();
+//		System.out.println("NORMAL EQUASIONS");
 		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
 			for (KeyPointPair item : pairList.items) {
@@ -302,14 +302,16 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					 * dfx/dRY  = (dPW1/dRY )(y) * PW2(z) - (dPW1/dRY )(z) * PW2(y)
 					 * dfx/dRZ2 = (dPW1/dRZ2)(y) * PW2(z) - (dPW1/dRZ2)(z) * PW2(y)
 					 * dfx/dRF  = (f) * PW2(z) - (i) * PW2(y)
-					 * dfx/dTX  = PW2(z) - PW2(y) 
-					 * dfy/dTY  = PW2(z) - PW2(y) 
-					 * dfz/dTZ  = PW2(z) - PW2(y) 
+					 * dfx/dTX  = 0
+					 * dfx/dTY  = PW2(z)
+					 * dfx/dTZ  = -PW2(y) 
 					 * 
 					 */
 					if (srcIndex >= 0) {
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
 						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
+						coefs.setItem(srcIndex + 3 + c1, 0, PW2[c2] + coefs.getItem(srcIndex + 3 + c1, 0));
+						coefs.setItem(srcIndex + 3 + c2, 0,-PW2[c1] + coefs.getItem(srcIndex + 3 + c2, 0));
 						if (adjustForScale) {
 							coefs.setItem(srcIndex + 6, 0, (
 									source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
@@ -325,6 +327,8 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					if (destIndex >= 0) {
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
 						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
+						coefs.setItem(destIndex + 3 + c1, 0,-PW1[c2] + coefs.getItem(destIndex + 3 + c2, 0));
+						coefs.setItem(destIndex + 3 + c2, 0, PW1[c1] + coefs.getItem(destIndex + 3 + c1, 0));
 						if (adjustForScale) {
 							coefs.setItem(destIndex + 6, 0, (
 									PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
@@ -338,6 +342,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
+					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
 				}
 			}
 		}
@@ -355,9 +360,6 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		coef.setItem(atIndex + 0, 0, dPWdX.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 0, 0));
 		coef.setItem(atIndex + 1, 0, dPWdY.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 1, 0));
 		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
-		coef.setItem(atIndex + 3, 0, transformedCoord + coef.getItem(atIndex + 3, 0));
-		coef.setItem(atIndex + 4, 0, transformedCoord + coef.getItem(atIndex + 4, 0));
-		coef.setItem(atIndex + 5, 0, transformedCoord + coef.getItem(atIndex + 5, 0));
 	}
 	
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
@@ -405,10 +407,10 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
 				"\ts=" + MathUtil.d4(origin.scaleZ) +
-				(adjustOriginForScale ? "\tdFOV=" + MathUtil.rad2degStr(u.getItem(0, 0)) : "")
+				(adjustOriginForScale ? "\tds=" + MathUtil.d4(u.getItem(0, 0)) : "")
 				);
 		if (adjustOriginForScale) {
-			origin.fov = (origin.fov - u.getItem(0, 0));
+			origin.scaleZ = (origin.scaleZ - u.getItem(0, 0));
 		}
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
@@ -424,9 +426,9 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
 					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
 					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					"\tdtx=" + MathUtil.rad2degStr(u.getItem(0, index + 3)) + 
-					"\tdty=" + MathUtil.rad2degStr(u.getItem(0, index + 4)) + 
-					"\tdtz=" + MathUtil.rad2degStr(u.getItem(0, index + 5)) + 
+					"\tdtx=" + MathUtil.d4(u.getItem(0, index + 3)) + 
+					"\tdty=" + MathUtil.d4(u.getItem(0, index + 4)) + 
+					"\tdtz=" + MathUtil.d4(u.getItem(0, index + 5)) + 
 					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 6)) : "") 
 					);
 			image.sphereRZ1 = MathUtil.fixAngleMPI_PI(image.sphereRZ1 - u.getItem(0, index + 0));
