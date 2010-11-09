@@ -41,6 +41,8 @@ public class KeyPointList {
 	// My adjust
 	public int imageId = -1;
 	public double rx = 0.0, ry = 0.0, rz = 0.0;
+	// Translation in 7 params ZYZ
+	public double tx = 0.0, ty = 0.0, tz = 0.0;
 	
 	public Matrix camera2real;
 	public Matrix dMdX, dMdY, dMdZ;

@@ -15,8 +15,6 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.math.transform.TransformLearnerResult;
-import com.test.InterpolatorFunctions.Triangle;
-
 
 public class MyPanoPairTransformLearner extends PanoTransformer {
 

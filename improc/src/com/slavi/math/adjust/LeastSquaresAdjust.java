@@ -106,6 +106,8 @@ public class LeastSquaresAdjust {
 		SymmetricMatrix nmCopy = nm.makeCopy();
 		if (!nm.inverse()) {
 			System.out.println("Inverse of normal matrix failed.");
+			nmCopy.printM("Normal matrix");
+			apl.printM("APL");
 			return false;
 		}
 		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeM());

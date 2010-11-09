@@ -53,6 +53,10 @@ public class SymmetricMatrix {
 		return true;
 	}
 
+	public void printM(String title) {
+		System.out.print(title + "\n" + toString());
+	}
+
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
