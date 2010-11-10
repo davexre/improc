@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust.zyz7params;
 
 import java.util.ArrayList;
 
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
@@ -15,10 +16,10 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.TransformLearnerResult;
 
 
-public class ZYZ_7ParamsLearner extends PanoTransformer {
+public class ZYZ_7ParamsLearner_OLD extends PanoTransformer {
 
 	public static final RotationZYZ rot = RotationZYZ.instance;
-	static boolean adjustForScale = false;
+	static boolean adjustForScale = true;
 	static boolean adjustOriginForScale = false;
 	
 	LeastSquaresAdjust lsa;
@@ -55,7 +56,14 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 	 * 					is returned in dest[1] in the range [-pi/2; pi/2]. dest[2] should be 1.0    
 	 */
 	public void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
-		ZYZ_7ParamsNorm.transformForeward(sx, sy, srcImage, dest);
+		sx = (sx - srcImage.cameraOriginX) * srcImage.cameraScale;
+		sy = (sy - srcImage.cameraOriginY) * srcImage.cameraScale;
+		double sz = srcImage.scaleZ;
+		
+		rot.transformForward(srcImage.camera2real, sx, sy, sz, dest);
+		dest[0] += srcImage.tx;
+		dest[1] += srcImage.ty;
+		dest[2] += srcImage.tz;
 		SphericalCoordsLongZen.cartesianToPolar(dest[0], dest[1], dest[2], dest);
 		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
 		dest[0] = -dest[0];
@@ -64,7 +72,18 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
 		SphericalCoordsLongZen.rotateBackward(-rx, ry, wRot[0], wRot[1], wRot[2], dest);
 		SphericalCoordsLongZen.polarToCartesian(dest[0], dest[1], 1.0, dest);
-		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], srcImage, dest);
+		dest[0] -= srcImage.tx;
+		dest[1] -= srcImage.ty;
+		dest[2] -= srcImage.tz;
+		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
+		if (dest[2] <= 0.0) {
+			dest[0] = Double.NaN;
+			dest[1] = Double.NaN;
+			return;
+		}
+		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
+		dest[2] = dest[2] == 0.0 ? 0.0 : (srcImage.scaleZ / dest[2]);
 	}
 	
 	public static void calculatePrims(KeyPointList origin, ArrayList<KeyPointList> images, ArrayList<KeyPointPairList> chain) {
@@ -180,6 +199,22 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		}*/
 	}
 
+	static void calc3D(KeyPoint kp, double pointWorld[], Matrix point) {
+		double sx = (kp.doubleX - kp.keyPointList.cameraOriginX) * kp.keyPointList.cameraScale;
+		double sy = (kp.doubleY - kp.keyPointList.cameraOriginY) * kp.keyPointList.cameraScale;
+		double sz = kp.keyPointList.scaleZ;
+		
+		rot.transformForward(kp.keyPointList.camera2real, sx, sy, sz, pointWorld);
+		pointWorld[0] += kp.keyPointList.tx;
+		pointWorld[1] += kp.keyPointList.ty;
+		pointWorld[2] += kp.keyPointList.tz;
+		
+		point.setItem(0, 0, sx);
+		point.setItem(0, 1, sy);
+		point.setItem(0, 2, sz);
+	}
+	
+
 	void calculateNormalEquations() {
 		Matrix coefs = new Matrix((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 7 : 6), 1);			
 
@@ -194,25 +229,52 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 			buildCamera2RealMatrix(image);
 		}
 		
+		Matrix P1 = new Matrix(1, 3);
+		Matrix P2 = new Matrix(1, 3);
+		
+		Matrix dPW1dX1 = new Matrix(1, 3);
+		Matrix dPW1dY1 = new Matrix(1, 3);
+		Matrix dPW1dZ1 = new Matrix(1, 3);
+
+		Matrix dPW2dX2 = new Matrix(1, 3);
+		Matrix dPW2dY2 = new Matrix(1, 3);
+		Matrix dPW2dZ2 = new Matrix(1, 3);
+
+		double PW1[] = new double[3];
+		double PW2[] = new double[3];
+		
 		lsa.clear();
-		ZYZ_7ParamsNorm norm = new ZYZ_7ParamsNorm();
 //		System.out.println("NORMAL EQUASIONS");
 		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
-			int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * (adjustForScale ? 7 : 6);
-			int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * (adjustForScale ? 7 : 6);
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
 				pointCounter++;
 				
+				coefs.make0();
 				double computedWeight = getComputedWeight(item);
-				norm.setKeyPointPair(item);
+				KeyPoint source = item.getKey();
+				KeyPoint dest = item.getValue();
+				
+				calc3D(source, PW1, P1);
+				calc3D(dest, PW2, P2);
+				
+				source.keyPointList.dMdX.mMul(P1, dPW1dX1);
+				source.keyPointList.dMdY.mMul(P1, dPW1dY1);
+				source.keyPointList.dMdZ.mMul(P1, dPW1dZ1);
+				
+				dest.keyPointList.dMdX.mMul(P2, dPW2dX2);
+				dest.keyPointList.dMdY.mMul(P2, dPW2dY2);
+				dest.keyPointList.dMdZ.mMul(P2, dPW2dZ2);
+	
+				int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * (adjustForScale ? 7 : 6);
+				int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * (adjustForScale ? 7 : 6);
 				
 				for (int c1 = 0; c1 < 3; c1++) {
 					int c2 = (c1 + 1) % 3;
 					coefs.make0();
-					double L = norm.p1.P[c1] * norm.p2.P[c2] - norm.p1.P[c2] * norm.p2.P[c1];
+					double L = PW1[c1] * PW2[c2] - PW1[c2] * PW2[c1];
 					/*
 					 * fx: P'1(y) * P'2(z) - P'1(z) * P'2(y) = 0
 					 * fy: P'1(z) * P'2(x) - P'1(x) * P'2(z) = 0
@@ -220,53 +282,89 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					 * 
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
+					/*
+					 * sx, sy -> image coords
+					 * PO = [ox; oy; oz] -> coord sys in the center of the image, oz = focal distance
+					 * ox = sx - imageWidth / 2;
+					 * oy = sy - imageHeight / 2;
+					 * oz = focalDistance;
+					 * M -> rotation matrix
+					 * M = [a, b, c; d, e, f; g, h, i]
+					 * tx, ty, tz -> translation
+					 * 
+					 * PW1(x) = a*ox + b*oy + c*oz + tx;
+					 * PW1(y) = d*ox + e*oy + f*oz + ty;
+					 * PW1(z) = g*ox + h*oy + i*oz + tz;
+					 * PW1 = M * PO;
+					 * 
+					 * fx: PW1(y) * PW2(z) - PW1(z) * PW2(y) = 0
+					 * dfx/dRZ1 = (dPW1/dRZ1)(y) * PW2(z) - (dPW1/dRZ1)(z) * PW2(y)
+					 * dfx/dRY  = (dPW1/dRY )(y) * PW2(z) - (dPW1/dRY )(z) * PW2(y)
+					 * dfx/dRZ2 = (dPW1/dRZ2)(y) * PW2(z) - (dPW1/dRZ2)(z) * PW2(y)
+					 * dfx/dRF  = (f) * PW2(z) - (i) * PW2(y)
+					 * dfx/dTX  = 0
+					 * dfx/dTY  = PW2(z)
+					 * dfx/dTZ  = -PW2(y) 
+					 * 
+					 */
 					if (srcIndex >= 0) {
-						coefs.setItem(srcIndex + 0, 0, norm.p1.dPdZ1.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdZ1.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 1, 0, norm.p1.dPdY .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdY .getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 2, 0, norm.p1.dPdZ2.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdZ2.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 3, 0, norm.p1.dPdTX.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTX.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 4, 0, norm.p1.dPdTY.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTY.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 5, 0, norm.p1.dPdTZ.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTZ.getItem(0, c2) * norm.p2.P[c1]);
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c1,  PW2[c2]);
+						setCoef(coefs, dPW1dX1, dPW1dY1, dPW1dZ1, srcIndex, c2, -PW2[c1]);
+						coefs.setItem(srcIndex + 3 + c1, 0, PW2[c2] + coefs.getItem(srcIndex + 3 + c1, 0));
+						coefs.setItem(srcIndex + 3 + c2, 0,-PW2[c1] + coefs.getItem(srcIndex + 3 + c2, 0));
 						if (adjustForScale) {
-							coefs.setItem(srcIndex + 6, 0, norm.p1.dPdS .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdS .getItem(0, c2) * norm.p2.P[c1]);
+							coefs.setItem(srcIndex + 6, 0, (
+									source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
+									source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
 						}
 					} else {
 						if (adjustOriginForScale) {
-							coefs.setItem(0, 0, norm.p1.dPdS .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdS .getItem(0, c2) * norm.p2.P[c1]);
+							coefs.setItem(0, 0, (
+									source.keyPointList.camera2real.getItem(2, c1) * PW2[c2] - 
+									source.keyPointList.camera2real.getItem(2, c2) * PW2[c1]));
 						}
 					}
 					if (destIndex >= 0) {
-						coefs.setItem(destIndex + 0, 0, norm.p1.P[c1] * norm.p2.dPdZ1.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdZ1.getItem(0, c1));
-						coefs.setItem(destIndex + 1, 0, norm.p1.P[c1] * norm.p2.dPdY .getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdY .getItem(0, c1));
-						coefs.setItem(destIndex + 2, 0, norm.p1.P[c1] * norm.p2.dPdZ2.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdZ2.getItem(0, c1));
-						coefs.setItem(destIndex + 3, 0, norm.p1.P[c1] * norm.p2.dPdTX.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTX.getItem(0, c1));
-						coefs.setItem(destIndex + 4, 0, norm.p1.P[c1] * norm.p2.dPdTY.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTY.getItem(0, c1));
-						coefs.setItem(destIndex + 5, 0, norm.p1.P[c1] * norm.p2.dPdTZ.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTZ.getItem(0, c1));
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c1, -PW1[c2]);
+						setCoef(coefs, dPW2dX2, dPW2dY2, dPW2dZ2, destIndex, c2,  PW1[c1]);
+						coefs.setItem(destIndex + 3 + c1, 0,-PW1[c2] + coefs.getItem(destIndex + 3 + c2, 0));
+						coefs.setItem(destIndex + 3 + c2, 0, PW1[c1] + coefs.getItem(destIndex + 3 + c1, 0));
 						if (adjustForScale) {
-							coefs.setItem(destIndex + 6, 0, norm.p1.P[c1] * norm.p2.dPdS .getItem(c2, 0) - norm.p1.P[c2] * norm.p2.dPdS .getItem(c1, 0));
+							coefs.setItem(destIndex + 6, 0, (
+									PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
+									PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
 						}
 					} else {
 						if (adjustOriginForScale) {
-							coefs.setItem(0, 0, norm.p1.P[c1] * norm.p2.dPdS .getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdS .getItem(0, c1));
+							coefs.setItem(0, 0, (
+									PW1[c1] * dest.keyPointList.camera2real.getItem(2, c2) - 
+									PW1[c2] * dest.keyPointList.camera2real.getItem(2, c1)));
 						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
-//					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
+					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
 				}
 			}
 		}
 	}
 	
-	public static void buildCamera2RealMatrix(KeyPointList image) {
+	static void buildCamera2RealMatrix(KeyPointList image) {
 		image.camera2real = rot.makeAngles(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdX = rot.make_dF_dR1(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdY = rot.make_dF_dR2(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdZ = rot.make_dF_dR3(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 	}
 
+	private void setCoef(Matrix coef, Matrix dPWdX, Matrix dPWdY, Matrix dPWdZ,
+			int atIndex, int c1, double transformedCoord) {
+		coef.setItem(atIndex + 0, 0, dPWdX.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 0, 0));
+		coef.setItem(atIndex + 1, 0, dPWdY.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 1, 0));
+		coef.setItem(atIndex + 2, 0, dPWdZ.getItem(0, c1) * transformedCoord + coef.getItem(atIndex + 2, 0));
+	}
+	
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
-		ZYZ_7ParamsNorm.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
-		ZYZ_7ParamsNorm.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
 		return SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	
