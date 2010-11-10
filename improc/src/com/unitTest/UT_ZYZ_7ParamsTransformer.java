@@ -1,18 +1,11 @@
 package com.unitTest;
 
-import java.util.ArrayList;
-
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
-import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.myadjust.sphere2.SphereNorm2;
-import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
 import com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsLearner;
 import com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsNorm;
 import com.slavi.math.MathUtil;
-import com.slavi.math.RotationZYZ;
-import com.slavi.math.SphericalCoordsLongZen;
 
 public class UT_ZYZ_7ParamsTransformer {
 
@@ -40,6 +33,9 @@ public class UT_ZYZ_7ParamsTransformer {
 			double dTRZ1, double dTRY, double dTRZ2, double dTTX, double dTTY, double dTTZ, double dTS) {
 		double dest1[] = new double[3];
 		double dest2[] = new double[3];
+		
+		//if (kpp.)
+		
 		ZYZ_7ParamsNorm norm = new ZYZ_7ParamsNorm();
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
@@ -93,7 +89,7 @@ public class UT_ZYZ_7ParamsTransformer {
 				calcSum(0, norm.p1, dSRZ1, dSRY, dSRZ2, dSTX, dSTY, dSTZ, dSS) +
 				calcSum(0, norm.p2, dTRZ1, dTRY, dTRZ2, dTTX, dTTY, dTTZ, dTS);
 			double L1 = dest1[c1] * dest2[c2] - dest1[c2] * dest2[c1];
-			TestUtils.assertEqualAngle("", L2, L1);
+			TestUtils.assertEqual("", L2, L1);
 		}		
 	}
 	
@@ -130,7 +126,7 @@ public class UT_ZYZ_7ParamsTransformer {
 		kpp.sourceSP = p1;
 		kpp.targetSP = p2;
 //		double delta = 0.01 * MathUtil.deg2rad;
-		double delta = 0.00001;
+		double delta = 0.000000001; // too small! ignore this check at all!
 
 		int parts = 8;
 		for (int x1 = 0; x1 < parts; x1++) {
@@ -146,9 +142,14 @@ public class UT_ZYZ_7ParamsTransformer {
 							for (int z2 = 0; z2 < parts; z2++) {
 								kpl2.sphereRZ2 = z2 * MathUtil.C2PI / parts;
 								
-								SphereNorm2.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
-								SphereNorm2.transformBackward(dest1[0] + 1 * MathUtil.deg2rad, dest1[1], kpl2, dest2);
-								
+								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
+								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
+
+								ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
+								ZYZ_7ParamsNorm.transformBackward(dest1[0] + 1 * MathUtil.deg2rad, dest1[1], dest1[2], kpl2, dest2);
+								if (dest2[2] <= 0.0)
+									continue;
+
 								p2.doubleX = dest2[0];
 								p2.doubleY = dest2[1];
 								try {
@@ -169,90 +170,11 @@ public class UT_ZYZ_7ParamsTransformer {
 							}
 						}
 					}
-					
 				}
 			}
 		}
 	}
 
-	void testCalcPrims() {
-		KeyPointList origin = new KeyPointList();
-		origin.cameraOriginX = 1100;
-		origin.cameraOriginY = 2200;
-		origin.imageSizeX = (int) (origin.cameraOriginX * 2);
-		origin.imageSizeY = (int) (origin.cameraOriginY * 2);
-		origin.cameraScale = 1.0 / (2.0 * Math.max(origin.cameraOriginX, origin.cameraOriginY));
-		origin.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		origin.sphereRZ1 = 0 * MathUtil.deg2rad;
-		origin.sphereRY = 0 * MathUtil.deg2rad;
-		origin.sphereRZ2 = 0 * MathUtil.deg2rad;
-		
-		KeyPointList kpl = new KeyPointList();
-		kpl.cameraOriginX = origin.cameraOriginX;
-		kpl.cameraOriginY = origin.cameraOriginY;
-		kpl.cameraScale = 1.0 / (2.0 * Math.max(kpl.cameraOriginX, kpl.cameraOriginY));
-		kpl.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		kpl.imageSizeX = (int) (kpl.cameraOriginX * 2);
-		kpl.imageSizeY = (int) (kpl.cameraOriginY * 2);
-		kpl.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-
-		KeyPointPairList kppl = new KeyPointPairList();
-		boolean sourceOrigin = true;
-		if (sourceOrigin) {
-			kppl.source = origin;
-			kppl.target = kpl;
-		} else {
-			kppl.target = origin;
-			kppl.source = kpl;
-		}
-		kppl.sphereRZ1 = 40 * MathUtil.deg2rad;
-		kppl.sphereRY = 50 * MathUtil.deg2rad;
-		kppl.sphereRZ2 = 60 * MathUtil.deg2rad;
-		kppl.scale = kpl.scaleZ;
-		
-		ArrayList<KeyPointPairList> chain = new ArrayList<KeyPointPairList>();
-		chain.add(kppl);		
-		ArrayList<KeyPointList> images = new ArrayList<KeyPointList>();
-		images.add(kpl);
-		
-		SpherePanoTransformLearner2.calculatePrims(origin, images, chain);
-
-//		System.out.println(MathUtil.rad2degStr(kpl.sphereRZ1));
-//		System.out.println(MathUtil.rad2degStr(kpl.sphereRY));
-//		System.out.println(MathUtil.rad2degStr(kpl.sphereRZ2));
-//		System.out.println(kpl.scaleZ);
-
-		double pOrigin[] = new double[2];
-		double pWorld1[] = new double[2];
-		double pWorld2[] = new double[2];
-		double pKPL[] = new double[2];
-		
-		pOrigin[0] = 20 * MathUtil.deg2rad;
-		pOrigin[1] = 60 * MathUtil.deg2rad;
-		
-		double angles[] = new double[3];
-		if (sourceOrigin) {
-			angles[0] = kppl.sphereRZ1;
-			angles[1] = kppl.sphereRY;
-			angles[2] = kppl.sphereRZ2;
-		} else {
-			RotationZYZ.instance.getRotationAnglesBackword(kppl.sphereRZ1, kppl.sphereRY, kppl.sphereRZ2, angles);
-		}
-		SphericalCoordsLongZen.rotateForeward(pOrigin[0], pOrigin[1], origin.sphereRZ1, origin.sphereRY, origin.sphereRZ2, pWorld1);
-		SphericalCoordsLongZen.rotateForeward(pOrigin[0], pOrigin[1], angles[0], angles[1], angles[2], pKPL);
-		SphericalCoordsLongZen.rotateForeward(pKPL[0], pKPL[1], kpl.sphereRZ1, kpl.sphereRY, kpl.sphereRZ2, pWorld2);
-/*		System.out.println("-------");
-		dump("origin", pOrigin);
-		dump("world1", pWorld1);
-		dump("pKPL", pKPL);
-		dump("world2", pWorld2);
-		pKPL[0] = pWorld2[0] - pWorld1[0];
-		pKPL[1] = pWorld2[1] - pWorld1[1];
-		dump("delta", pKPL);*/
-		TestUtils.assertEqualAngle("", pWorld1[0], pWorld2[0]);
-		TestUtils.assertEqualAngle("", pWorld1[1], pWorld2[1]);
-	}
-	
 	private static double calcSum(int coord, ZYZ_7ParamsNorm.PointDerivatives pd, double dZ1, double dY, double dZ2, double dTX, double dTY, double dTZ, double dS) {
 		return 
 			pd.dPdZ1.getItem(0, coord) * dZ1 + 
@@ -349,12 +271,45 @@ public class UT_ZYZ_7ParamsTransformer {
 			}
 		}
 	}
+
+	void testTransformer() {
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1001;
+		kpl1.cameraOriginY = 2002;
+		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
+		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		kpl1.sphereRZ1 = 10 * MathUtil.deg2rad;
+		kpl1.sphereRY = 20 * MathUtil.deg2rad;
+		kpl1.sphereRZ2 = 30 * MathUtil.deg2rad;
+		kpl1.tx = 1.23;
+		kpl1.ty = 2.34;
+		kpl1.tz = 3.45;
+
+		KeyPoint p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = p1.keyPointList.cameraOriginX;
+		p1.doubleY = p1.keyPointList.cameraOriginY;
+
+		double dest[] = new double[3];
+		double dest2[] = new double[3];
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpl1);
+/*		ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], kpl1, dest2);
+		TestUtils.assertEqual("norm.transform.x", dest2[0], p1.doubleX);
+		TestUtils.assertEqual("norm.transform.y", dest2[1], p1.doubleY);
+*/
+		ZYZ_7ParamsLearner tr = new ZYZ_7ParamsLearner();
+		tr.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		tr.transformBackward(dest[0], dest[1], kpl1, dest2);
+		TestUtils.assertEqual("", dest2[0], p1.doubleX);
+		TestUtils.assertEqual("", dest2[1], p1.doubleY);
+	}
 	
 	public static void main(String[] args) {
 		UT_ZYZ_7ParamsTransformer test = new UT_ZYZ_7ParamsTransformer();
+		test.testTransformer();
 		test.testNorm0();
 		test.testNorm();
-//		test.testCalcPrims();
 		System.out.println("Done");
 	}
 }

@@ -37,16 +37,16 @@ public class ZYZ_7ParamsNorm {
 	 * 					the opposite side of the sphere)
 	 */
 	public static void transformBackward(double rx, double ry, double rz, KeyPointList srcImage, double dest[]) {
-		dest[0] -= srcImage.tx;
-		dest[1] -= srcImage.ty;
-		dest[2] -= srcImage.tz;
+		dest[0] = rx - srcImage.tx;
+		dest[1] = ry - srcImage.ty;
+		dest[2] = rz - srcImage.tz;
 		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
-		if (dest[2] <= 0.0) {
+/*		if (dest[2] <= 0.0) {
 			dest[0] = Double.NaN;
 			dest[1] = Double.NaN;
 			dest[2] = 0.0;
 			return;
-		}
+		}*/
 		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
 		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
 		dest[2] = dest[2] == 0.0 ? 0.0 : (srcImage.scaleZ / dest[2]);

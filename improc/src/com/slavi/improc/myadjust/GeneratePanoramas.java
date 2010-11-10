@@ -30,6 +30,8 @@ import com.slavi.util.ui.SwtUtil;
 
 public class GeneratePanoramas implements Callable<Void> {
 
+	static boolean validateTransformerInCalcExtent = true;
+	
 	ExecutorService exec;
 	PanoTransformer panoTransformer;
 	ArrayList<ArrayList<KeyPointPairList>> panos;
@@ -104,6 +106,7 @@ public class GeneratePanoramas implements Callable<Void> {
 	void calcExtents() throws InterruptedException {
 		int step = 20;
 		double dest[] = new double[3];
+		double tmp[] = new double[3];
 		
 		for (KeyPointList image : images) {
 			if (Thread.currentThread().isInterrupted())
@@ -113,6 +116,11 @@ public class GeneratePanoramas implements Callable<Void> {
 			for (int i = 0; i < image.imageSizeX; i+=step) {
 				for (int j = 0; j < image.imageSizeY; j+=step) {
 					panoTransformer.transformForeward(i, j, image, dest);
+					if (validateTransformerInCalcExtent) {
+						panoTransformer.transformBackward(dest[0], dest[1], image, tmp);
+						if ((Math.abs(tmp[0] - i) > 0.5) || (Math.abs(tmp[1] - j) > 0.5))
+							throw new RuntimeException("Error validating transformer i=" + i + " j=" + j + " backI=" + tmp[0] + " backJ=" + tmp[1]);
+					}
 					minMax(dest[0], dest[1], image.min, image.max);
 				}
 				panoTransformer.transformForeward(i, image.imageSizeY - 1, image, dest);
