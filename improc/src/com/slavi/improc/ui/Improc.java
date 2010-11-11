@@ -1,6 +1,5 @@
 package com.slavi.improc.ui;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -50,7 +49,7 @@ public class Improc {
 		AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(settings.imagesRootStr);
 		AbsoluteToRelativePathMaker keyPointFileRoot = new AbsoluteToRelativePathMaker(settings.keyPointFileRootStr);
 		
-		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath("*.jpg"), true, true);
+		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath(settings.imagesRelativePathStr + "/*.jpg"), true, true);
 		ArrayList<String> images = SwtUtil.openWaitDialog(parent, "Searching for images", new EnumerateImageFiles(imagesIterator), -1);
 		Collections.sort(images);
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
@@ -153,8 +152,8 @@ public class Improc {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
 //		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {

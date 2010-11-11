@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 
 public class Settings {
 
+	public String imagesRelativePathStr;
 	public String imagesRootStr;
 	public String keyPointFileRootStr; 
 	public String outputDirStr;
@@ -45,6 +46,7 @@ public class Settings {
 
 		String userHomeRootStr = System.getProperty("user.home");
 		Settings result = new Settings();
+		result.imagesRelativePathStr = properties.getProperty("ImagesRelativePath", "");
 		result.imagesRootStr = properties.getProperty("ImagesRoot", userHomeRootStr);
 		result.keyPointFileRootStr = properties.getProperty("KeyPointFileRoot", userHomeRootStr);
 		result.outputDirStr = properties.getProperty("OutputDir", userHomeRootStr);
@@ -58,6 +60,7 @@ public class Settings {
 	private void writeProperties(String propertiesFile) {
 		Properties properties = new Properties();
 
+		properties.setProperty("ImagesRelativePath", imagesRelativePathStr);
 		properties.setProperty("ImagesRoot", imagesRootStr);
 		properties.setProperty("KeyPointFileRoot", keyPointFileRootStr);
 		properties.setProperty("OutputDir", outputDirStr);

@@ -4,11 +4,16 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 
@@ -69,7 +74,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			File image) {
 		return new File(Util.changeFileExtension(
 			rootKeyPointFileDir.getFullPath(
-				rootImagesDir.getRelativePath(image, false)), ".spf"));
+				rootImagesDir.getRelativePath(image, false)), ".spf.z"));
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded2(ExecutorService exec, File image) throws Exception {
@@ -185,10 +190,16 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) throws Exception {
 		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
-		
-		try {
-			if (kplFile.isFile()) {
-				BufferedReader fin = new BufferedReader(new FileReader(kplFile));
+
+		if (kplFile.isFile()) {
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(kplFile));
+			ZipEntry entry = null;
+			while ((entry = zis.getNextEntry()) != null) {
+				if ("KeyPointFile.txt".equals(entry.getName()))
+					break;
+			}
+			if (entry != null) {
+				BufferedReader fin = new BufferedReader(new InputStreamReader(zis));
 				if (KeyPointList.fileHeader.equals(fin.readLine())) {
 					FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
 					if (!fs.isModified()) {
@@ -199,7 +210,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 					}
 				}
 			}
-		} catch (IOException e) {
+			zis.close();
 		}
 		
 		KeyPointList result = buildKeyPointFileMultiThreaded2(exec, image);
@@ -207,14 +218,18 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
 		kplFile.getParentFile().mkdirs();
-		PrintWriter fou = new PrintWriter(kplFile);
-		fou.println(KeyPointList.fileHeader);
-		result.toTextStream(fou);
-		if (fou.checkError()) {
-			fou.close();
+		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(kplFile));
+		zos.putNextEntry(new ZipEntry("KeyPointFile.txt"));
+		PrintWriter out = new PrintWriter(zos);
+		out.println(KeyPointList.fileHeader);
+		result.toTextStream(out);
+		if (out.checkError()) {
+			out.close();
 			throw new IOException("Write to file failed.");
 		}
-		fou.close();
+		out.flush();
+		zos.closeEntry();
+		zos.close();
 		return result;
 	}
 	
@@ -228,9 +243,20 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			return result;
 
 		File kplFile = getFile(rootImagesDir, rootKeyPointFileDir, image);
-		BufferedReader fin = new BufferedReader(new FileReader(kplFile));
-		fin.readLine(); // Skip header.
-		result = KeyPointList.fromTextStream(fin, rootImagesDir);
+		if (kplFile.isFile()) {
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(kplFile));
+			ZipEntry entry = null;
+			while ((entry = zis.getNextEntry()) != null) {
+				if ("KeyPointFile.txt".equals(entry.getName()))
+					break;
+			}
+			if (entry != null) {
+				BufferedReader fin = new BufferedReader(new InputStreamReader(zis));
+				fin.readLine(); // Skip header.
+				result = KeyPointList.fromTextStream(fin, rootImagesDir);
+			}
+			zis.close();
+		}
 		return result;
 	}
 }

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.ui.SwtUtil;
 
 public class SettingsDialog {
@@ -47,6 +48,7 @@ public class SettingsDialog {
 	Shell shell;
 
 	// Control references
+	Text txtImagesRelativePath;
 	Text txtImagesRoot;
 	Text txtKeyPointFileRoot;
 	Text txtOutputDir;
@@ -90,6 +92,27 @@ public class SettingsDialog {
 		gridData.horizontalAlignment = SWT.FILL;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.widthHint = 300;
+
+		label = new Label(group, SWT.RIGHT);
+		label.setText("Relative path to images root");
+		txtImagesRelativePath = new Text(group, SWT.BORDER);
+		txtImagesRelativePath.setLayoutData(gridData);
+		
+		button = new Button(group, SWT.PUSH);
+		button.setText("Browse");
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				AbsoluteToRelativePathMaker imagesRoot = new AbsoluteToRelativePathMaker(txtImagesRoot.getText());
+				String path = imagesRoot.getFullPath(txtImagesRelativePath.getText()) ;
+				String result = SwtUtil.browseForFolder(shell, "Relative path to images root", path);
+				if (result != null) {
+					path = imagesRoot.getRelativePath(result);
+					txtImagesRelativePath.setText(path);
+				}
+			}
+		});
+
+		//////////////
 
 		label = new Label(group, SWT.RIGHT);
 		label.setText("Images root folder");
@@ -193,6 +216,7 @@ public class SettingsDialog {
 			public void widgetSelected(SelectionEvent e) {
 				if (validateInput()) {
 					result = true;
+					settings.imagesRelativePathStr = txtImagesRelativePath.getText();
 					settings.imagesRootStr = txtImagesRoot.getText();
 					settings.keyPointFileRootStr = txtKeyPointFileRoot.getText();
 					settings.outputDirStr = txtOutputDir.getText();
@@ -242,6 +266,7 @@ public class SettingsDialog {
 	
 	public boolean open(Settings settings) {
 		this.settings = settings;
+		txtImagesRelativePath.setText(settings.imagesRelativePathStr);
 		txtImagesRoot.setText(settings.imagesRootStr);
 		txtKeyPointFileRoot.setText(settings.keyPointFileRootStr);
 		txtOutputDir.setText(settings.outputDirStr);
