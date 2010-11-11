@@ -41,15 +41,22 @@ public class ZYZ_7ParamsNorm {
 		dest[1] = ry - srcImage.ty;
 		dest[2] = rz - srcImage.tz;
 		rot.transformBackward(srcImage.camera2real, dest[0], dest[1], dest[2], dest);
-/*		if (dest[2] <= 0.0) {
+		// Find the point where the vector intersects the image
+		// The image is parallel to the XY plane and located at Z=focal distance 
+		// http://en.wikipedia.org/wiki/Line-plane_intersection
+		double d = dest[2] - srcImage.worldOrigin[2];
+		if (d == 0.0) {
+			// vector parallel to image
 			dest[0] = Double.NaN;
 			dest[1] = Double.NaN;
 			dest[2] = 0.0;
 			return;
-		}*/
-		dest[0] = srcImage.cameraOriginX + (dest[0] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
-		dest[1] = srcImage.cameraOriginY + (dest[1] / dest[2]) * srcImage.scaleZ / srcImage.cameraScale;
-		dest[2] = dest[2] == 0.0 ? 0.0 : (srcImage.scaleZ / dest[2]);
+		}
+		double f = srcImage.scaleZ;
+		d = (f - srcImage.worldOrigin[2]) / d;
+		dest[0] = srcImage.cameraOriginX + (srcImage.worldOrigin[0] + (dest[0] - srcImage.worldOrigin[0]) * d) / srcImage.cameraScale;
+		dest[1] = srcImage.cameraOriginY + (srcImage.worldOrigin[1] + (dest[1] - srcImage.worldOrigin[1]) * d) / srcImage.cameraScale;
+		dest[2] = f / srcImage.cameraScale;
 	}	
 
 	public PointDerivatives p1 = new PointDerivatives();

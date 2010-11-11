@@ -57,14 +57,12 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 	public void transformForeward(double sx, double sy, KeyPointList srcImage, double dest[]) {
 		ZYZ_7ParamsNorm.transformForeward(sx, sy, srcImage, dest);
 		SphericalCoordsLongZen.cartesianToPolar(dest[0], dest[1], dest[2], dest);
-//		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
-//		dest[0] = -dest[0];
+		SphericalCoordsLongZen.rotateForeward(dest[0], dest[1], wRot[0], wRot[1], wRot[2], dest);
+		dest[0] = -dest[0];
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		dest[0] = rx;
-		dest[1] = ry;
-//		SphericalCoordsLongZen.rotateBackward(-rx, ry, wRot[0], wRot[1], wRot[2], dest);
+		SphericalCoordsLongZen.rotateBackward(-rx, ry, wRot[0], wRot[1], wRot[2], dest);
 		SphericalCoordsLongZen.polarToCartesian(dest[0], dest[1], 1.0, dest);
 		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], srcImage, dest);
 	}
@@ -264,6 +262,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		image.dMdX = rot.make_dF_dR1(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdY = rot.make_dF_dR2(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
 		image.dMdZ = rot.make_dF_dR3(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
+		rot.transformBackward(image.camera2real, -image.tx, -image.ty, -image.tz, image.worldOrigin);		
 	}
 
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {

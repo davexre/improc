@@ -279,11 +279,11 @@ public class UT_ZYZ_7ParamsTransformer {
 		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
 		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
 		kpl1.sphereRZ1 = 10 * MathUtil.deg2rad;
-		kpl1.sphereRY = 20 * MathUtil.deg2rad;
+		kpl1.sphereRY  = 20 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 30 * MathUtil.deg2rad;
-		kpl1.tx = 1.23;
-		kpl1.ty = 2.34;
-		kpl1.tz = 3.45;
+		kpl1.tx = 10;
+		kpl1.ty = 20;
+		kpl1.tz = 30;
 
 		KeyPoint p1 = new KeyPoint();
 		p1.keyPointList = kpl1;
@@ -293,23 +293,23 @@ public class UT_ZYZ_7ParamsTransformer {
 		double dest[] = new double[3];
 		double dest2[] = new double[3];
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpl1);
-/*		ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
 		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], kpl1, dest2);
 		TestUtils.assertEqual("norm.transform.x", dest2[0], p1.doubleX);
 		TestUtils.assertEqual("norm.transform.y", dest2[1], p1.doubleY);
-*/
+
 		ZYZ_7ParamsLearner tr = new ZYZ_7ParamsLearner();
 		tr.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
 		tr.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqual("", dest2[0], p1.doubleX);
-		TestUtils.assertEqual("", dest2[1], p1.doubleY);
+		TestUtils.assertEqual("X", dest2[0], p1.doubleX);
+		TestUtils.assertEqual("Y", dest2[1], p1.doubleY);
 	}
 	
 	public static void main(String[] args) {
 		UT_ZYZ_7ParamsTransformer test = new UT_ZYZ_7ParamsTransformer();
 		test.testTransformer();
-		test.testNorm0();
-		test.testNorm();
+//		test.testNorm0();
+//		test.testNorm();
 		System.out.println("Done");
 	}
 }

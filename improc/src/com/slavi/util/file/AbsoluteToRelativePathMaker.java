@@ -125,7 +125,7 @@ public class AbsoluteToRelativePathMaker {
 				trimmed.insert(0, prefix);
 				trimmed.insert(0, f.getName());
 				//trimmed = f.getName() + prefix + trimmed;
-				prefix = File.separator;
+				prefix = "/";
 				f = f.getParentFile();
 				if (f == null)
 					return fullName;
@@ -141,7 +141,7 @@ public class AbsoluteToRelativePathMaker {
 			elementIndex++;
 		}
 		if (f != null) {
-			prefix = ".." + File.separator;
+			prefix = "../";
 			for (int i = elementIndex - 1; i >= 0; i--)
 				trimmed.insert(0, prefix);
 		}
@@ -151,7 +151,7 @@ public class AbsoluteToRelativePathMaker {
 	public File getFullPathFile(String aRelativePath) {
 		File f = new File(aRelativePath);
 		if (!f.isAbsolute()) {
-			f = new File(rootDir + File.separator + aRelativePath);
+			f = new File(rootDir + "/" + aRelativePath);
 			try {
 				f = f.getCanonicalFile();
 			} catch (IOException e) {

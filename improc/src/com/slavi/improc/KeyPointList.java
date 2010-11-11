@@ -43,6 +43,8 @@ public class KeyPointList {
 	public double rx = 0.0, ry = 0.0, rz = 0.0;
 	// Translation in 7 params ZYZ
 	public double tx = 0.0, ty = 0.0, tz = 0.0;
+	// World origin (Focal point of first image) in the coordinate system of the image 
+	public double worldOrigin[] = new double[3]; 
 	
 	public Matrix camera2real;
 	public Matrix dMdX, dMdY, dMdZ;

@@ -68,7 +68,7 @@ public class FileStamp {
 			(length >= 0) && 
 			(file.isFile()) &&
 			(file.length() == length) &&
-			(file.lastModified() == lastModified)
+			(Math.abs(file.lastModified() - lastModified) < 10000)
 		);
 	}
 	
@@ -86,7 +86,7 @@ public class FileStamp {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		FileStamp result = new FileStamp();
 		result.rootDir = rootDir;
-		String fileName = st.nextToken();
+		String fileName = st.nextToken().replace('\\', '/');
 		result.file = rootDir == null ? (new File(fileName)) : rootDir.getFullPathFile(fileName);
 		result.length = Long.parseLong(st.nextToken());
 		result.lastModified = Long.parseLong(st.nextToken());
