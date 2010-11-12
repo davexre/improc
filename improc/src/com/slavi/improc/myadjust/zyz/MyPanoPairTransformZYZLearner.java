@@ -307,7 +307,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
-					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
+//					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
 				}
 			}
 		}
@@ -372,7 +372,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
 				"\ts=" + MathUtil.d4(origin.scaleZ) +
-				(adjustOriginForScale ? "\tds=" + MathUtil.rad2degStr(u.getItem(0, 0)) : "")
+				(adjustOriginForScale ? "\tds=" + MathUtil.d4(u.getItem(0, 0)) : "")
 				);
 		if (adjustOriginForScale) {
 			origin.scaleZ = (origin.scaleZ - u.getItem(0, 0));

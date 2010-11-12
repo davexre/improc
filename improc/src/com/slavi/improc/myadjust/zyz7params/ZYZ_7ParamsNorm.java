@@ -4,7 +4,6 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.math.RotationZYZ;
-import com.slavi.math.matrix.Matrix;
 
 public class ZYZ_7ParamsNorm {
 
@@ -69,49 +68,40 @@ public class ZYZ_7ParamsNorm {
 	
 	public static class PointDerivatives {
 		
-		public double P[] = new double[3];
-		public Matrix dPdZ1 = new Matrix(1, 3);
-		public Matrix dPdY  = new Matrix(1, 3);
-		public Matrix dPdZ2 = new Matrix(1, 3);
-		public Matrix dPdS  = new Matrix(1, 3);
-		public Matrix dPdTX = new Matrix(1, 3);
-		public Matrix dPdTY = new Matrix(1, 3);
-		public Matrix dPdTZ = new Matrix(1, 3);
-		public Matrix tmp   = new Matrix(1, 3);
+		public double P[]     = new double[3];
+		public double dPdZ1[] = new double[3];
+		public double dPdY[]  = new double[3];
+		public double dPdZ2[] = new double[3];
+		public double dPdS[]  = new double[3];
+		public double dPdTX[] = new double[3];
+		public double dPdTY[] = new double[3];
+		public double dPdTZ[] = new double[3];
 		
 		public void setKeyPoint(KeyPoint kp) {
 			double sx = (kp.doubleX - kp.keyPointList.cameraOriginX) * kp.keyPointList.cameraScale;
 			double sy = (kp.doubleY - kp.keyPointList.cameraOriginY) * kp.keyPointList.cameraScale;
 			double sz = kp.keyPointList.scaleZ;
+			
+			rot.transformForward(kp.keyPointList.dMdX, sx, sy, sz, dPdZ1);
+			rot.transformForward(kp.keyPointList.dMdY, sx, sy, sz, dPdY);
+			rot.transformForward(kp.keyPointList.dMdZ, sx, sy, sz, dPdZ2);
+			rot.transformForward(kp.keyPointList.camera2real, 0, 0, 1, dPdS);
 			rot.transformForward(kp.keyPointList.camera2real, sx, sy, sz, P);
 			P[0] += kp.keyPointList.tx;
 			P[1] += kp.keyPointList.ty;
 			P[2] += kp.keyPointList.tz;
 			
-			tmp.setItem(0, 0, sx);
-			tmp.setItem(0, 1, sy);
-			tmp.setItem(0, 2, sz);
+			dPdTX[0] = 1;
+			dPdTX[1] = 0;
+			dPdTX[2] = 0;
 			
-			kp.keyPointList.dMdX.mMul(tmp, dPdZ1);
-			kp.keyPointList.dMdY.mMul(tmp, dPdY);
-			kp.keyPointList.dMdZ.mMul(tmp, dPdZ2);
+			dPdTY[0] = 0;
+			dPdTY[1] = 1;
+			dPdTY[2] = 0;
 			
-			tmp.setItem(0, 0, 0.0);
-			tmp.setItem(0, 1, 0.0);
-			tmp.setItem(0, 2, 1.0);
-			kp.keyPointList.camera2real.mMul(tmp, dPdS);
-			
-			dPdTX.setItem(0, 0, 1.0);
-			dPdTX.setItem(0, 1, 0.0);
-			dPdTX.setItem(0, 2, 0.0);
-			
-			dPdTY.setItem(0, 0, 0.0);
-			dPdTY.setItem(0, 1, 1.0);
-			dPdTY.setItem(0, 2, 0.0);
-			
-			dPdTZ.setItem(0, 0, 0.0);
-			dPdTZ.setItem(0, 1, 0.0);
-			dPdTZ.setItem(0, 2, 1.0);
+			dPdTZ[0] = 0;
+			dPdTZ[1] = 0;
+			dPdTZ[2] = 1;
 		}
 	}
 }

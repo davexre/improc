@@ -177,13 +177,13 @@ public class UT_ZYZ_7ParamsTransformer {
 
 	private static double calcSum(int coord, ZYZ_7ParamsNorm.PointDerivatives pd, double dZ1, double dY, double dZ2, double dTX, double dTY, double dTZ, double dS) {
 		return 
-			pd.dPdZ1.getItem(0, coord) * dZ1 + 
-			pd.dPdY .getItem(0, coord) * dY + 
-			pd.dPdZ2.getItem(0, coord) * dZ2 + 
-			pd.dPdTX.getItem(0, coord) * dTX + 
-			pd.dPdTY.getItem(0, coord) * dTY + 
-			pd.dPdTZ.getItem(0, coord) * dTZ + 
-			pd.dPdS .getItem(0, coord) * dS;
+			pd.dPdZ1[coord] * dZ1 + 
+			pd.dPdY [coord] * dY + 
+			pd.dPdZ2[coord] * dZ2 + 
+			pd.dPdTX[coord] * dTX + 
+			pd.dPdTY[coord] * dTY + 
+			pd.dPdTZ[coord] * dTZ + 
+			pd.dPdS [coord] * dS;
 	}
 	
 	private static void checkNorm0(KeyPoint kp, double dZ1, double dY, double dZ2, double dTX, double dTY, double dTZ, double dS) {

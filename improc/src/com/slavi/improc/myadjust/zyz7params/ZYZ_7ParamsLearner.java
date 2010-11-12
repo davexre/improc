@@ -221,37 +221,37 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
 					if (srcIndex >= 0) {
-						coefs.setItem(srcIndex + 0, 0, norm.p1.dPdZ1.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdZ1.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 1, 0, norm.p1.dPdY .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdY .getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 2, 0, norm.p1.dPdZ2.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdZ2.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 3, 0, norm.p1.dPdTX.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTX.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 4, 0, norm.p1.dPdTY.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTY.getItem(0, c2) * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 5, 0, norm.p1.dPdTZ.getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdTZ.getItem(0, c2) * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 0, 0, norm.p1.dPdZ1[c1] * norm.p2.P[c2] - norm.p1.dPdZ1[c2] * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 1, 0, norm.p1.dPdY [c1] * norm.p2.P[c2] - norm.p1.dPdY [c2] * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 2, 0, norm.p1.dPdZ2[c1] * norm.p2.P[c2] - norm.p1.dPdZ2[c2] * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 3, 0, norm.p1.dPdTX[c1] * norm.p2.P[c2] - norm.p1.dPdTX[c2] * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 4, 0, norm.p1.dPdTY[c1] * norm.p2.P[c2] - norm.p1.dPdTY[c2] * norm.p2.P[c1]);
+						coefs.setItem(srcIndex + 5, 0, norm.p1.dPdTZ[c1] * norm.p2.P[c2] - norm.p1.dPdTZ[c2] * norm.p2.P[c1]);
 						if (adjustForScale) {
-							coefs.setItem(srcIndex + 6, 0, norm.p1.dPdS .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdS .getItem(0, c2) * norm.p2.P[c1]);
+							coefs.setItem(srcIndex + 6, 0, norm.p1.dPdS[c1] * norm.p2.P[c2] - norm.p1.dPdS[c2] * norm.p2.P[c1]);
 						}
 					} else {
 						if (adjustOriginForScale) {
-							coefs.setItem(0, 0, norm.p1.dPdS .getItem(0, c1) * norm.p2.P[c2] - norm.p1.dPdS .getItem(0, c2) * norm.p2.P[c1]);
+							coefs.setItem(0, 0, norm.p1.dPdS[c1] * norm.p2.P[c2] - norm.p1.dPdS[c2] * norm.p2.P[c1]);
 						}
 					}
 					if (destIndex >= 0) {
-						coefs.setItem(destIndex + 0, 0, norm.p1.P[c1] * norm.p2.dPdZ1.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdZ1.getItem(0, c1));
-						coefs.setItem(destIndex + 1, 0, norm.p1.P[c1] * norm.p2.dPdY .getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdY .getItem(0, c1));
-						coefs.setItem(destIndex + 2, 0, norm.p1.P[c1] * norm.p2.dPdZ2.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdZ2.getItem(0, c1));
-						coefs.setItem(destIndex + 3, 0, norm.p1.P[c1] * norm.p2.dPdTX.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTX.getItem(0, c1));
-						coefs.setItem(destIndex + 4, 0, norm.p1.P[c1] * norm.p2.dPdTY.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTY.getItem(0, c1));
-						coefs.setItem(destIndex + 5, 0, norm.p1.P[c1] * norm.p2.dPdTZ.getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdTZ.getItem(0, c1));
+						coefs.setItem(destIndex + 0, 0, norm.p1.P[c1] * norm.p2.dPdZ1[c2] - norm.p1.P[c2] * norm.p2.dPdZ1[c1]);
+						coefs.setItem(destIndex + 1, 0, norm.p1.P[c1] * norm.p2.dPdY [c2] - norm.p1.P[c2] * norm.p2.dPdY [c1]);
+						coefs.setItem(destIndex + 2, 0, norm.p1.P[c1] * norm.p2.dPdZ2[c2] - norm.p1.P[c2] * norm.p2.dPdZ2[c1]);
+						coefs.setItem(destIndex + 3, 0, norm.p1.P[c1] * norm.p2.dPdTX[c2] - norm.p1.P[c2] * norm.p2.dPdTX[c1]);
+						coefs.setItem(destIndex + 4, 0, norm.p1.P[c1] * norm.p2.dPdTY[c2] - norm.p1.P[c2] * norm.p2.dPdTY[c1]);
+						coefs.setItem(destIndex + 5, 0, norm.p1.P[c1] * norm.p2.dPdTZ[c2] - norm.p1.P[c2] * norm.p2.dPdTZ[c1]);
 						if (adjustForScale) {
-							coefs.setItem(destIndex + 6, 0, norm.p1.P[c1] * norm.p2.dPdS .getItem(c2, 0) - norm.p1.P[c2] * norm.p2.dPdS .getItem(c1, 0));
+							coefs.setItem(destIndex + 6, 0, norm.p1.P[c1] * norm.p2.dPdS[c2] - norm.p1.P[c2] * norm.p2.dPdS[c1]);
 						}
 					} else {
 						if (adjustOriginForScale) {
-							coefs.setItem(0, 0, norm.p1.P[c1] * norm.p2.dPdS .getItem(0, c2) - norm.p1.P[c2] * norm.p2.dPdS .getItem(0, c1));
+							coefs.setItem(0, 0, norm.p1.P[c1] * norm.p2.dPdS[c2] - norm.p1.P[c2] * norm.p2.dPdS[c1]);
 						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
-//					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
+					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
 				}
 			}
 		}
@@ -266,8 +266,8 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 	}
 
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
-		ZYZ_7ParamsNorm.transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
-		ZYZ_7ParamsNorm.transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
+		transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
 		return SphericalCoordsLongZen.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	
