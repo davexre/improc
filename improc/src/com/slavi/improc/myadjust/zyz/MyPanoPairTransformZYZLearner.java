@@ -19,8 +19,8 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 
 	public static final RotationZYZ rot = RotationZYZ.instance;
-	static boolean adjustForScale = true;
 	static boolean adjustOriginForScale = true;
+	static boolean adjustForScale = true;
 	
 	LeastSquaresAdjust lsa;
 
@@ -224,7 +224,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		KeyPoint dest1= new KeyPoint();
 		lsa.clear();
 		int pointCounter = 0;
-		System.out.println("NORMAL EQUASIONS");
+//		System.out.println("NORMAL EQUASIONS");
 		for (KeyPointPairList pairList : chain) {
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
@@ -362,7 +362,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		lsa = new LeastSquaresAdjust((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		if (!lsa.calculateWithDebug()) 
+		if (!lsa.calculateWithDebug(true)) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();

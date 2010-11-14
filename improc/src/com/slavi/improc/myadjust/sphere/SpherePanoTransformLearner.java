@@ -16,7 +16,7 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class SpherePanoTransformLearner extends PanoTransformer {
 
-	final static boolean adjustForScale = true;
+	final static boolean adjustForScale = false;
 	final static boolean adjustOriginForScale = false;
 	
 	LeastSquaresAdjust lsa;
@@ -310,7 +310,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		m1.mMul(m2, m3);		
 		m3.printM("M3");
 */
-		if (!lsa.calculateWithDebug()) 
+		if (!lsa.calculateWithDebug(false)) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();

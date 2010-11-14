@@ -18,8 +18,9 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class ZYZ_7ParamsLearner extends PanoTransformer {
 
 	public static final RotationZYZ rot = RotationZYZ.instance;
-	static boolean adjustForScale = false;
-	static boolean adjustOriginForScale = false;
+	static boolean adjustOriginForScale = true;
+	static boolean adjustForTranslation = false;
+	static boolean adjustForScale = true;
 	
 	LeastSquaresAdjust lsa;
 
@@ -180,8 +181,26 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		}*/
 	}
 
+	int getParamsPerImage() {
+		int result = 3;				// 3 rotations
+		if (adjustForTranslation)
+			result += 3;			// 3 translations
+		if (adjustForScale)
+			result++;				// 1 focal distance
+		return result;
+	}
+	
+	int getNumberOfParams() {
+		int result = getParamsPerImage();
+		result *= images.size();	// every images has these
+		if (adjustOriginForScale)
+			result++;				// 1 focal distance of the origin image
+		return result;
+	}
+	
 	void calculateNormalEquations() {
-		Matrix coefs = new Matrix((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 7 : 6), 1);			
+//		Matrix coefs = new Matrix((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 7 : 6), 1);			
+		Matrix coefs = new Matrix(getNumberOfParams(), 1);			
 
 		origin.sphereRZ1 = 0.0;
 		origin.sphereRY = 0.0;
@@ -194,13 +213,14 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 			buildCamera2RealMatrix(image);
 		}
 		
+		int paramsPerImage = getParamsPerImage();
 		lsa.clear();
 		ZYZ_7ParamsNorm norm = new ZYZ_7ParamsNorm();
 //		System.out.println("NORMAL EQUASIONS");
 		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
-			int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * (adjustForScale ? 7 : 6);
-			int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * (adjustForScale ? 7 : 6);
+			int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * paramsPerImage;
+			int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * paramsPerImage;
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
@@ -221,14 +241,17 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					 * f(curCoord): P'1(c1) * P'2(c2) - P'1(c2) * P'2(c1) = 0
 					 */
 					if (srcIndex >= 0) {
-						coefs.setItem(srcIndex + 0, 0, norm.p1.dPdZ1[c1] * norm.p2.P[c2] - norm.p1.dPdZ1[c2] * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 1, 0, norm.p1.dPdY [c1] * norm.p2.P[c2] - norm.p1.dPdY [c2] * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 2, 0, norm.p1.dPdZ2[c1] * norm.p2.P[c2] - norm.p1.dPdZ2[c2] * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 3, 0, norm.p1.dPdTX[c1] * norm.p2.P[c2] - norm.p1.dPdTX[c2] * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 4, 0, norm.p1.dPdTY[c1] * norm.p2.P[c2] - norm.p1.dPdTY[c2] * norm.p2.P[c1]);
-						coefs.setItem(srcIndex + 5, 0, norm.p1.dPdTZ[c1] * norm.p2.P[c2] - norm.p1.dPdTZ[c2] * norm.p2.P[c1]);
+						int curParam = srcIndex;
+						coefs.setItem(curParam++, 0, norm.p1.dPdZ1[c1] * norm.p2.P[c2] - norm.p1.dPdZ1[c2] * norm.p2.P[c1]);
+						coefs.setItem(curParam++, 0, norm.p1.dPdY [c1] * norm.p2.P[c2] - norm.p1.dPdY [c2] * norm.p2.P[c1]);
+						coefs.setItem(curParam++, 0, norm.p1.dPdZ2[c1] * norm.p2.P[c2] - norm.p1.dPdZ2[c2] * norm.p2.P[c1]);
+						if (adjustForTranslation) {
+							coefs.setItem(curParam++, 0, norm.p1.dPdTX[c1] * norm.p2.P[c2] - norm.p1.dPdTX[c2] * norm.p2.P[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.dPdTY[c1] * norm.p2.P[c2] - norm.p1.dPdTY[c2] * norm.p2.P[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.dPdTZ[c1] * norm.p2.P[c2] - norm.p1.dPdTZ[c2] * norm.p2.P[c1]);
+						}
 						if (adjustForScale) {
-							coefs.setItem(srcIndex + 6, 0, norm.p1.dPdS[c1] * norm.p2.P[c2] - norm.p1.dPdS[c2] * norm.p2.P[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.dPdS[c1] * norm.p2.P[c2] - norm.p1.dPdS[c2] * norm.p2.P[c1]);
 						}
 					} else {
 						if (adjustOriginForScale) {
@@ -236,14 +259,17 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 						}
 					}
 					if (destIndex >= 0) {
-						coefs.setItem(destIndex + 0, 0, norm.p1.P[c1] * norm.p2.dPdZ1[c2] - norm.p1.P[c2] * norm.p2.dPdZ1[c1]);
-						coefs.setItem(destIndex + 1, 0, norm.p1.P[c1] * norm.p2.dPdY [c2] - norm.p1.P[c2] * norm.p2.dPdY [c1]);
-						coefs.setItem(destIndex + 2, 0, norm.p1.P[c1] * norm.p2.dPdZ2[c2] - norm.p1.P[c2] * norm.p2.dPdZ2[c1]);
-						coefs.setItem(destIndex + 3, 0, norm.p1.P[c1] * norm.p2.dPdTX[c2] - norm.p1.P[c2] * norm.p2.dPdTX[c1]);
-						coefs.setItem(destIndex + 4, 0, norm.p1.P[c1] * norm.p2.dPdTY[c2] - norm.p1.P[c2] * norm.p2.dPdTY[c1]);
-						coefs.setItem(destIndex + 5, 0, norm.p1.P[c1] * norm.p2.dPdTZ[c2] - norm.p1.P[c2] * norm.p2.dPdTZ[c1]);
+						int curParam = destIndex;
+						coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdZ1[c2] - norm.p1.P[c2] * norm.p2.dPdZ1[c1]);
+						coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdY [c2] - norm.p1.P[c2] * norm.p2.dPdY [c1]);
+						coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdZ2[c2] - norm.p1.P[c2] * norm.p2.dPdZ2[c1]);
+						if (adjustForTranslation) {
+							coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdTX[c2] - norm.p1.P[c2] * norm.p2.dPdTX[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdTY[c2] - norm.p1.P[c2] * norm.p2.dPdTY[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdTZ[c2] - norm.p1.P[c2] * norm.p2.dPdTZ[c1]);
+						}
 						if (adjustForScale) {
-							coefs.setItem(destIndex + 6, 0, norm.p1.P[c1] * norm.p2.dPdS[c2] - norm.p1.P[c2] * norm.p2.dPdS[c1]);
+							coefs.setItem(curParam++, 0, norm.p1.P[c1] * norm.p2.dPdS[c2] - norm.p1.P[c2] * norm.p2.dPdS[c1]);
 						}
 					} else {
 						if (adjustOriginForScale) {
@@ -251,7 +277,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 						}
 					}
 					lsa.addMeasurement(coefs, computedWeight, L, 0);
-					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
+//					System.out.print(MathUtil.d4(L) + "\t" + coefs.toString());
 				}
 			}
 		}
@@ -297,10 +323,10 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 			calculatePrims(origin, images, chain);
 		}
 
-		lsa = new LeastSquaresAdjust((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 7 : 6), 1);
+		lsa = new LeastSquaresAdjust(getNumberOfParams(), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		if (!lsa.calculateWithDebug()) 
+		if (!lsa.calculateWithDebug(true)) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
@@ -315,33 +341,43 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		if (adjustOriginForScale) {
 			origin.scaleZ = (origin.scaleZ - u.getItem(0, 0));
 		}
+		int paramsPerImage = getParamsPerImage();
 		for (int curImage = 0; curImage < images.size(); curImage++) {
 			KeyPointList image = images.get(curImage);
-			int index = (adjustOriginForScale ? 1 : 0) + curImage * (adjustForScale ? 7 : 6);
-			System.out.println(image.imageFileStamp.getFile().getName() + 
-					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
-					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
-					"\trz2=" + MathUtil.rad2degStr(image.sphereRZ2) + 
-					"\ttx=" + MathUtil.d4(image.tx) +
-					"\tty=" + MathUtil.d4(image.ty) +
-					"\ttz=" + MathUtil.d4(image.tz) +
-					"\ts=" + MathUtil.d4(image.scaleZ) +
-					"\tdz1=" + MathUtil.rad2degStr(u.getItem(0, index + 0)) + 
-					"\tdy=" + MathUtil.rad2degStr(u.getItem(0, index + 1)) + 
-					"\tdz2=" + MathUtil.rad2degStr(u.getItem(0, index + 2)) + 
-					"\tdtx=" + MathUtil.d4(u.getItem(0, index + 3)) + 
-					"\tdty=" + MathUtil.d4(u.getItem(0, index + 4)) + 
-					"\tdtz=" + MathUtil.d4(u.getItem(0, index + 5)) + 
-					(adjustForScale ? "\tds=" + MathUtil.d4(u.getItem(0, index + 6)) : "") 
-					);
-			image.sphereRZ1 = MathUtil.fixAngleMPI_PI(image.sphereRZ1 - u.getItem(0, index + 0));
-			image.sphereRY = MathUtil.fixAngleMPI_PI(image.sphereRY - u.getItem(0, index + 1));
-			image.sphereRZ2 = MathUtil.fixAngleMPI_PI(image.sphereRZ2 - u.getItem(0, index + 2));
-			image.tx = (image.tx - u.getItem(0, index + 3));
-			image.ty = (image.ty - u.getItem(0, index + 4));
-			image.tz = (image.tz - u.getItem(0, index + 5));
+			int index = (adjustOriginForScale ? 1 : 0) + curImage * paramsPerImage;
+			int tmpIndex = index;
+			StringBuilder sb = new StringBuilder();
+			sb.append(image.imageFileStamp.getFile().getName());
+			sb.append("\trz1=");		sb.append(MathUtil.rad2degStr(image.sphereRZ1));
+			sb.append("\try=" );		sb.append(MathUtil.rad2degStr(image.sphereRY)); 
+			sb.append("\trz2=");		sb.append(MathUtil.rad2degStr(image.sphereRZ2));
+			sb.append("\ttx=" );		sb.append(MathUtil.d4(image.tx));
+			sb.append("\tty=" );		sb.append(MathUtil.d4(image.ty));
+			sb.append("\ttz=" );		sb.append(MathUtil.d4(image.tz));
+			sb.append("\ts="  );		sb.append(MathUtil.d4(image.scaleZ));
+			sb.append("\tdz1=");		sb.append(MathUtil.rad2degStr(u.getItem(0, index++))); 
+			sb.append("\tdy=" );		sb.append(MathUtil.rad2degStr(u.getItem(0, index++)));
+			sb.append("\tdz2=");		sb.append(MathUtil.rad2degStr(u.getItem(0, index++)));
+			if (adjustForTranslation) {
+				sb.append("\tdtx=");	sb.append(MathUtil.d4(u.getItem(0, index++)));
+				sb.append("\tdty=");	sb.append(MathUtil.d4(u.getItem(0, index++)));
+				sb.append("\tdtz=");	sb.append(MathUtil.d4(u.getItem(0, index++)));
+			}
 			if (adjustForScale) {
-				image.scaleZ = (image.scaleZ - u.getItem(0, index + 6));
+				sb.append("\tds=");		sb.append(MathUtil.d4(u.getItem(0, index++)));
+			}
+			System.out.println(sb.toString());
+			index = tmpIndex;
+			image.sphereRZ1 = MathUtil.fixAngleMPI_PI(image.sphereRZ1 - u.getItem(0, index++));
+			image.sphereRY  = MathUtil.fixAngleMPI_PI(image.sphereRY  - u.getItem(0, index++));
+			image.sphereRZ2 = MathUtil.fixAngleMPI_PI(image.sphereRZ2 - u.getItem(0, index++));
+			if (adjustForTranslation) {
+				image.tx = image.tx - u.getItem(0, index++);
+				image.ty = image.ty - u.getItem(0, index++);
+				image.tz = image.tz - u.getItem(0, index++);
+			}
+			if (adjustForScale) {
+				image.scaleZ = (image.scaleZ - u.getItem(0, index++));
 			}
 			buildCamera2RealMatrix(image);
 		}

@@ -100,7 +100,7 @@ public class LeastSquaresAdjust {
 
 	public static double precision = 1.0 / 10000.0;
 	
-	public boolean calculateWithDebug() {
+	public boolean calculateWithDebug(boolean alwaysPrint) {
 		if (!canCalculate()) {
 			System.out.println("Can not calculate. Not enough data.");
 			return false;
@@ -118,10 +118,14 @@ public class LeastSquaresAdjust {
 		System.out.println("Inverse of normal matrix precision (squared deviation from E) is: " + MathUtil.d4(deviation));
 		if (deviation > precision) {
 			System.out.println("Inverse of normal matrix non-reliable.");
+		}
+		if (alwaysPrint || (deviation > precision)) {
 			nmCopy.makeSquareMatrix().printM("Normal matrix");
 			nm.printM("Inverted Normal Matrix");
 			tmp.printM("NM * (NM')");
 			apl.printM("APL");
+		}
+		if (deviation > precision) {
 			return false;
 		}
 		
