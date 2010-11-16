@@ -17,7 +17,7 @@ import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 
 public class KeyPointList {
-	public static final String fileHeader = "KeyPoint file version 1.26";
+	public static final String fileHeader = "KeyPoint file version 1.27";
 	
 	public final ArrayList<KeyPoint> items = new ArrayList<KeyPoint>();
 	

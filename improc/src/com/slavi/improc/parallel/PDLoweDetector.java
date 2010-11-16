@@ -463,7 +463,7 @@ public class PDLoweDetector implements Callable<Void> {
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0 ; k < KeyPoint.numDirections; k++)
-					sp.setItem(i, j, k, (byte)(255.0 * featureVector[i][j][k] / norm));
+					sp.setItem(i, j, k, (byte)(255.0 * featureVector[i][j][k] / norm - Byte.MIN_VALUE));
 
 		sp.doubleX *= sp.imgScale;
 		sp.doubleY *= sp.imgScale;

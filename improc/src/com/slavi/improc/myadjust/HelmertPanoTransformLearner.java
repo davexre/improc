@@ -48,8 +48,8 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		dest[0] = srcImage.hba * rx - srcImage.hbb * ry + srcImage.hbc;
-		dest[1] = srcImage.hbb * rx + srcImage.hba * ry + srcImage.hbd;
+		dest[0] = Math.round(srcImage.hba * rx - srcImage.hbb * ry + srcImage.hbc);
+		dest[1] = Math.round(srcImage.hbb * rx + srcImage.hba * ry + srcImage.hbd);
 		dest[2] = 1.0;
 		if ((dest[0] < 0.0) || (dest[0] >= srcImage.imageSizeX) ||
 			(dest[1] < 0.0) || (dest[1] >= srcImage.imageSizeY)) {

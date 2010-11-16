@@ -48,8 +48,8 @@ public class AffinePanoTransformLearner extends PanoTransformer {
 	}
 
 	public void transformBackward(double rx, double ry, KeyPointList srcImage, double dest[]) {
-		dest[0] = srcImage.aba * rx + srcImage.abb * ry + srcImage.abc;
-		dest[1] = srcImage.abd * rx + srcImage.abe * ry + srcImage.abf;
+		dest[0] = Math.round(srcImage.aba * rx + srcImage.abb * ry + srcImage.abc);
+		dest[1] = Math.round(srcImage.abd * rx + srcImage.abe * ry + srcImage.abf);
 		if ((dest[0] < 0.0) || (dest[0] >= srcImage.imageSizeX) ||
 			(dest[1] < 0.0) || (dest[1] >= srcImage.imageSizeY)) {
 			dest[0] = 0.0;

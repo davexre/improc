@@ -8,7 +8,6 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.PanoTransformer;
 import com.slavi.math.MathUtil;
-import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
@@ -17,10 +16,9 @@ import com.slavi.math.transform.TransformLearnerResult;
 
 public class ZYZ_7ParamsLearner extends PanoTransformer {
 
-	public static final RotationZYZ rot = RotationZYZ.instance;
-	static boolean adjustOriginForScale = true;
-	static boolean adjustForTranslation = false;
-	static boolean adjustForScale = true;
+	static boolean adjustOriginForScale = false;
+	static boolean adjustForTranslation = true;
+	static boolean adjustForScale = false;
 	
 	LeastSquaresAdjust lsa;
 
@@ -115,11 +113,11 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 				curImage.tz = 0.0;
 				if (curImage == minHopPairList.source) {
 					double angles[] = new double[3];
-					Matrix sourceToTarget = rot.makeAngles(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2);
-					Matrix targetToWorld = rot.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
+					Matrix sourceToTarget = ZYZ_7ParamsNorm.rot.makeAngles(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2);
+					Matrix targetToWorld = ZYZ_7ParamsNorm.rot.makeAngles(minHopPairList.target.sphereRZ1, minHopPairList.target.sphereRY, minHopPairList.target.sphereRZ2);
 					Matrix sourceToWorld = new Matrix(3, 3);
 					sourceToTarget.mMul(targetToWorld, sourceToWorld);
-					rot.getRotationAngles(sourceToWorld, angles);
+					ZYZ_7ParamsNorm.rot.getRotationAngles(sourceToWorld, angles);
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
@@ -128,12 +126,12 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 					}
 				} else { // if (curImage == minHopPairList.target) {
 					double angles[] = new double[3];
-					rot.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
-					Matrix targetToSource = rot.makeAngles(angles[0], angles[1], angles[2]);
-					Matrix sourceToWorld = rot.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
+					ZYZ_7ParamsNorm.rot.getRotationAnglesBackword(minHopPairList.sphereRZ1, minHopPairList.sphereRY, minHopPairList.sphereRZ2, angles);
+					Matrix targetToSource = ZYZ_7ParamsNorm.rot.makeAngles(angles[0], angles[1], angles[2]);
+					Matrix sourceToWorld = ZYZ_7ParamsNorm.rot.makeAngles(minHopPairList.source.sphereRZ1, minHopPairList.source.sphereRY, minHopPairList.source.sphereRZ2);
 					Matrix targetToWorld = new Matrix(3, 3);
 					targetToSource.mMul(sourceToWorld, targetToWorld);
-					rot.getRotationAngles(targetToWorld, angles);
+					ZYZ_7ParamsNorm.rot.getRotationAngles(targetToWorld, angles);
 					curImage.sphereRZ1 = angles[0];
 					curImage.sphereRY = angles[1];
 					curImage.sphereRZ2 = angles[2];
@@ -284,11 +282,11 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 	}
 	
 	public static void buildCamera2RealMatrix(KeyPointList image) {
-		image.camera2real = rot.makeAngles(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
-		image.dMdX = rot.make_dF_dR1(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
-		image.dMdY = rot.make_dF_dR2(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
-		image.dMdZ = rot.make_dF_dR3(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
-		rot.transformBackward(image.camera2real, -image.tx, -image.ty, -image.tz, image.worldOrigin);		
+		image.camera2real = ZYZ_7ParamsNorm.rot.makeAngles(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
+		image.dMdX = ZYZ_7ParamsNorm.rot.make_dF_dR1(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
+		image.dMdY = ZYZ_7ParamsNorm.rot.make_dF_dR2(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
+		image.dMdZ = ZYZ_7ParamsNorm.rot.make_dF_dR3(image.sphereRZ1, image.sphereRY, image.sphereRZ2);
+		ZYZ_7ParamsNorm.rot.transformBackward(image.camera2real, -image.tx, -image.ty, -image.tz, image.worldOrigin);		
 	}
 
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
