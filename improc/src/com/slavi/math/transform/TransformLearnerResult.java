@@ -25,7 +25,11 @@ public class TransformLearnerResult {
 	
 	public boolean adjustFailed = true;
 	
-	public double maxAllowedDiscrepancy = Double.MAX_VALUE;
+	public double discrepancyThreshold = 0;
+	
+	public double recoverDiscrepancy = 0;
+	
+	public double maxAllowedDiscrepancy = 0;
 	
 	public final Statistics discrepancyStatistics = new Statistics();
 	
@@ -38,10 +42,13 @@ public class TransformLearnerResult {
 	}
 	
 	public boolean isAdjusted() {
-		if (newGoodCount < 0)
+		if (isAdjustFailed())
 			return false;
 		if (newGoodCount < minGoodRequired)
 			return false;
+		if (discrepancyThreshold > 0) {
+			return (discrepancyStatistics.getMaxX() <= discrepancyThreshold);
+		}
 		return oldGoodNowBad == 0;
 	}
 	
@@ -61,6 +68,8 @@ public class TransformLearnerResult {
 				"\nAfter adjust bad count:     " + newBadCount +
 				"\nBad before adjust now good: " + oldBadNowGood +
 				"\nGood before adjust now bad: " + oldGoodNowBad +
+				"\nDicrepancy threshold:       " + MathUtil.d4(discrepancyThreshold) +
+				"\nRecover dicrepancy:         " + MathUtil.d4(recoverDiscrepancy) +
 				"\nMax allowed dicrepancy:     " + MathUtil.d4(maxAllowedDiscrepancy) +
 				"\nDiscrepancy statistics:\n" + discrepancyStatistics;				
 		}

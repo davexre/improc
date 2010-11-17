@@ -7,7 +7,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPoint;
-import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
 import com.slavi.improc.KeyPointPair;
@@ -81,7 +80,6 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 		KeyPointList target;
 		
 		public MakePairs(KeyPointList l1, KeyPointList l2) {
-//			if (l1.items.size() > l2.items.size()) {
 			if (l1.imageId < l2.imageId) {
 				source = l2;
 				target = l1;

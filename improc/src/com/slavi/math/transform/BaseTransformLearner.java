@@ -226,8 +226,19 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		result.discrepancyStatistics.stop();
 	}
 	
+	public double getDiscrepancyThreshold(TransformLearnerResult result) {
+		return 0;
+	}
+	
+	public double getRecoverDiscrepancy(TransformLearnerResult result) {
+		return result.discrepancyStatistics.getAvgValue();
+	}
+	
 	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
-		return result.discrepancyStatistics.getJ_End();
+		return Math.min(result.discrepancyStatistics.getJ_End(),
+				(result.discrepancyStatistics.getAvgValue() + 
+				result.discrepancyStatistics.getAvgValue() +
+				result.discrepancyStatistics.getMaxX()) / 3.0);
 	}
 	
 	protected void computeBad(TransformLearnerResult result) {
@@ -235,8 +246,9 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		result.newGoodCount = 0;
 		result.oldGoodNowBad = 0;
 		result.oldBadNowGood = 0;
-		result.maxAllowedDiscrepancy = getMaxAllowedDiscrepancy(result);
-		double recoverDiscrepancy = result.discrepancyStatistics.getAvgValue();
+		result.discrepancyThreshold = getDiscrepancyThreshold(result);
+		result.maxAllowedDiscrepancy = Math.max(getMaxAllowedDiscrepancy(result), result.discrepancyThreshold);
+		result.recoverDiscrepancy = Math.min(getRecoverDiscrepancy(result), result.maxAllowedDiscrepancy);
 		
 		for (Map.Entry<InputType, OutputType> item : items) {
 			boolean oldIsBad = isBad(item);
@@ -247,7 +259,7 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 					setBad(item, curIsBad);
 					result.oldGoodNowBad++;
 				} else {
-					if (discrepancy < recoverDiscrepancy) {
+					if (discrepancy < result.recoverDiscrepancy) {
 						setBad(item, curIsBad);
 						result.oldBadNowGood++;
 					} else {

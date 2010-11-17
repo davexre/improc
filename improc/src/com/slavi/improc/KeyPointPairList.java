@@ -34,7 +34,5 @@ public class KeyPointPairList {
 	public double hTranslateX; // c
 	public double hTranslateY; // d
 	
-	public double maxDiscrepancy;
-	public double recoverDiscrepancy;
 	public TransformLearnerResult transformResult;
 }

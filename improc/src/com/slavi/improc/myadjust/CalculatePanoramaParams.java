@@ -1,7 +1,5 @@
 package com.slavi.improc.myadjust;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -129,14 +127,9 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	
 	private class ProcessOne implements Callable<Void> {
 		ArrayList<KeyPointPairList> chain;
-		ArrayList<KeyPointList> images;
-		ArrayList<KeyPointPairList> ignoredPairLists;
-		KeyPointList origin;
 		
 		public ProcessOne(ArrayList<KeyPointPairList> chain) {
 			this.chain = chain;
-			images = new ArrayList<KeyPointList>();
-			ignoredPairLists = new ArrayList<KeyPointPairList>();
 		}
 		
 		static final int maxIterations = 50;

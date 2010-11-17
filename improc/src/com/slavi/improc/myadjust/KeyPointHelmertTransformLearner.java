@@ -44,21 +44,7 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner2<
 		((KeyPointPair)item).discrepancy = discrepancy;
 	}
 	
-	public double getMaxAllowedDiscrepancy(TransformLearnerResult result) {
-//		double r = (result.discrepancyStatistics.getAvgValue() + result.discrepancyStatistics.getMaxX()) / 2.0;
-/*		double r = result.discrepancyStatistics.getAvgValue();
-		double je = result.discrepancyStatistics.getJ_End();
-		if (je < result.discrepancyStatistics.getMaxX())
-			r = je;
-		if (r < discrepancyThreshold)
-			r = discrepancyThreshold;
-*/
-		double r = result.discrepancyStatistics.getMaxX();
-		if (r >= discrepancyThreshold) {
-			r = (result.discrepancyStatistics.getAvgValue() +
-				result.discrepancyStatistics.getAvgValue() + 
-				result.discrepancyStatistics.getMaxX()) / 3.0;
-		}
-		return r;
+	public double getDiscrepancyThreshold(TransformLearnerResult result) {
+		return discrepancyThreshold;
 	}
 }
