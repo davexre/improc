@@ -17,8 +17,8 @@ import com.slavi.math.transform.TransformLearnerResult;
 public class ZYZ_7ParamsLearner extends PanoTransformer {
 
 	static boolean adjustOriginForScale = false;
-	static boolean adjustForTranslation = true;
-	static boolean adjustForScale = false;
+	static boolean adjustForTranslation = false;
+	static boolean adjustForScale = true;
 	
 	LeastSquaresAdjust lsa;
 
@@ -320,11 +320,11 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 			origin = images.remove(0);
 			calculatePrims(origin, images, chain);
 		}
-
+		System.out.println("Number of images in chain: " + (images.size() + 1));
 		lsa = new LeastSquaresAdjust(getNumberOfParams(), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		if (!lsa.calculateWithDebug(true)) 
+		if (!lsa.calculateWithDebug(false)) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
