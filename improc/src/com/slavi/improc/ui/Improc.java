@@ -80,27 +80,12 @@ public class Improc {
 		}		
 		System.out.println("Key point pairs lists to be validated: " + kppl.size());
 				
-/*		KeyPointPairList kppl1 = kppl.get(0);
-		String fileName = "d:/temp/asdf.txt";
-		PrintWriter fou = new PrintWriter(fileName);
-		for (KeyPointPair pair : kppl1.items) {
-			fou.print(pair.sourceSP.doubleX - pair.sourceSP.keyPointList.cameraOriginX);
-			fou.print('\t');
-			fou.print(pair.sourceSP.doubleY - pair.sourceSP.keyPointList.cameraOriginY);
-			fou.print('\t');
-			fou.print(pair.targetSP.doubleX - pair.targetSP.keyPointList.cameraOriginX);
-			fou.print('\t');
-			fou.print(pair.targetSP.doubleY - pair.targetSP.keyPointList.cameraOriginY);
-			fou.println();
-		}
-		fou.close();
-*/		
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog(parent, "Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),
 				kppl.size() - 1);
 		kppl = null;
-
+/*
 		System.out.println("---------- point pair lists ------------");
 		for (int i = 0; i < validkppl.size(); i++) {
 			KeyPointPairList pairList = validkppl.get(i);
@@ -118,21 +103,26 @@ public class Improc {
 					"\tdY=" +MathUtil.d4(pairList.translateY) 
 					);
 		}
-		
+*/		
 		System.out.println("---------- Calculating panorama parameters");
-		ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
-				new CalculatePanoramaParams(exec, settings.adjustMethodClassName, 
-						validkppl, keyPointFileRoot, settings.outputDirStr,
-						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
-		
-//		if (true) 
-//			return;
-		
-		System.out.println("---------- Generating panorama images");
-		SwtUtil.openWaitDialog(parent, "Generating panorama images", 
-				new GeneratePanoramas(exec, settings.adjustMethodClassName, panos, settings.outputDirStr,
-						settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
+/*		if ("com.slavi.improc.myadjust.zyz7params.Stereo_7ParamsLearner".equals(settings.adjustMethodClassName)) {
+			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+					new CalculatePanoramaParams(exec, settings.adjustMethodClassName, 
+							validkppl, keyPointFileRoot, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 			
+		} else */ {
+			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
+					new CalculatePanoramaParams(exec, settings.adjustMethodClassName, 
+							validkppl, keyPointFileRoot, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
+
+			System.out.println("---------- Generating panorama images");
+			SwtUtil.openWaitDialog(parent, "Generating panorama images", 
+					new GeneratePanoramas(exec, settings.adjustMethodClassName, panos, settings.outputDirStr,
+							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), 100);
+		}
+		
 		Marker.release();
 		System.out.println("Done.");
 	}

@@ -15,14 +15,18 @@ Maths:
 Съответстващи точки от снимка 1 и 2 -> P1(px1, py1) P2(px2, py2)
 
 Формираме равнината S1,S2,PW1 - вектори A(S1,PW1), B(S1,S2) и C(S2, PW2)
+A = PW1 - S1
+B = S2 - S1
+C = PW2 - S2
+
 Намираме нормалата към тази равнина - вектор N = A x B (cross product, векторно произведение)
-N.x = S1.y * PW1.z - S1.z * PW1.y
-N.y = S1.z * PW1.x - S1.x * PW1.z
-N.z = S1.x * PW1.y - S1.y * PW1.x
+
+N.x = A.y * B.z - A.z * B.y
+N.y = A.z * B.x - A.x * B.z
+N.z = A.x * B.y - A.y * B.x
 
 Условие за компланарност (coplanarity http://en.wikipedia.org/wiki/Co-planar_vectors)
 Ако точките са "наистина съответстващи" и параметрите за ротация и транслация на КС на снимките са верни,
 то скаларното произведение (dot product) на N и C е нула:
 N.C = 0
 N.x * C.x + N.y * C.y + N.z * C.z = 0
-C = PW2 - S2

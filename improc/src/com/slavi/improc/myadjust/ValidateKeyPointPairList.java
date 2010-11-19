@@ -44,8 +44,8 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
 			res = learner.calculateOne();
-			System.out.println("------Validate KeyPointPairList ------------");
-			System.out.println(res);
+//			System.out.println("------Validate KeyPointPairList ------------");
+//			System.out.println(res);
 			goodCount = res.newGoodCount;
 			if (res.isAdjusted() || (goodCount < minRequredGoodPointPairs)) {
 				break;

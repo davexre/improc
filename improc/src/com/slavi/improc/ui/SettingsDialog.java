@@ -32,7 +32,8 @@ public class SettingsDialog {
 			"MyPanoPairTransformLearner (XYZ)",
 			"MyPanoPairTransformZYXLearner",
 			"MyPanoPairTransformZYZLearner",
-			"ZYZ 7 params Learner"
+			"ZYZ 7 params Learner",
+			"Stereo 7 params Learner",
 			};
 	String[] strAdjustClasses = {
 			"com.slavi.improc.myadjust.HelmertPanoTransformLearner",
@@ -42,7 +43,8 @@ public class SettingsDialog {
 			"com.slavi.improc.myadjust.xyz.MyPanoPairTransformLearner",
 			"com.slavi.improc.myadjust.zyx.MyPanoPairTransformZYXLearner",
 			"com.slavi.improc.myadjust.zyz.MyPanoPairTransformZYZLearner",
-			"com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsLearner"
+			"com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsLearner",
+			"com.slavi.improc.myadjust.zyz7params.Stereo_7ParamsLearner",
 	};
 	
 	Shell shell;
