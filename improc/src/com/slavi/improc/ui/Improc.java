@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import com.slavi.image.DWindowedImageUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
@@ -62,9 +63,17 @@ public class Improc {
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 	
 		if (false) {
+//			int count = 0;
 			for (String image : images) {
+//				int color = SafeImage.colors[count++ % SafeImage.colors.length];
 				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
 				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));
+				for (int i = 0; i < im.sizeX; i++)
+					for (int j = 0; j < im.sizeY; j++) {
+						int col = im.getRGB(i, j);
+						col = DWindowedImageUtils.getGrayColor(col);
+						im.setRGB(i, j, col);
+					}
 				for (KeyPoint p : l.items) {
 					im.drawCross((int)p.doubleX, (int)p.doubleY, 0xff0000, -1);
 				}
