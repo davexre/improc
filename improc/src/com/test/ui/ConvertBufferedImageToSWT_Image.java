@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
@@ -24,7 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 
 public class ConvertBufferedImageToSWT_Image {
 
-	static BufferedImage convertToAWT(ImageData data) {
+	public static BufferedImage convertToAWT(ImageData data) {
 		ColorModel colorModel = null;
 		PaletteData palette = data.palette;
 		if (palette.isDirect) {
@@ -75,7 +76,7 @@ public class ConvertBufferedImageToSWT_Image {
 		}
 	}
 
-	static ImageData convertToSWT(BufferedImage bufferedImage) {
+	public static ImageData convertToSWT(BufferedImage bufferedImage) {
 		if (bufferedImage.getColorModel() instanceof DirectColorModel) {
 			DirectColorModel colorModel = (DirectColorModel) bufferedImage.getColorModel();
 			PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel
@@ -115,6 +116,22 @@ public class ConvertBufferedImageToSWT_Image {
 				for (int x = 0; x < data.width; x++) {
 					raster.getPixel(x, y, pixelArray);
 					data.setPixel(x, y, pixelArray[0]);
+				}
+			}
+			return data;
+		} else if (bufferedImage.getColorModel() instanceof ComponentColorModel) {
+			ComponentColorModel colorModel = (ComponentColorModel) bufferedImage.getColorModel();
+			PaletteData palette = new PaletteData(0xff0000, 0x00ff00, 0x0000ff);
+			ImageData data = new ImageData(bufferedImage.getWidth(), bufferedImage.getHeight(), colorModel
+					.getPixelSize(), palette);
+//			WritableRaster raster = bufferedImage.getRaster();
+//			int[] pixelArray = new int[3];
+			for (int y = 0; y < data.height; y++) {
+				for (int x = 0; x < data.width; x++) {
+//					raster.getPixel(x, y, pixelArray);
+//					int pixel = palette.getPixel(new RGB(pixelArray[0], pixelArray[1], pixelArray[2]));
+//					data.setPixel(x, y, pixel);
+					data.setPixel(x, y, bufferedImage.getRGB(x, y));
 				}
 			}
 			return data;

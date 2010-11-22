@@ -1,5 +1,7 @@
 package com.slavi.improc.ui;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
@@ -9,9 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
+import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
+import com.slavi.improc.KeyPointList;
+import com.slavi.improc.KeyPointListSaver;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
+import com.slavi.improc.SafeImage;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
@@ -54,6 +60,21 @@ public class Improc {
 		Collections.sort(images);
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
+	
+		if (false) {
+			for (String image : images) {
+				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
+				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));
+				for (KeyPoint p : l.items) {
+					im.drawCross((int)p.doubleX, (int)p.doubleY, 0xff0000, -1);
+				}
+				String fou = settings.outputDirStr + "/" + l.imageFileStamp.getFile().getName();
+				System.out.println("Writing file " + fou);
+				im.save(fou);
+			}
+			return;
+		}
+		
 		ArrayList<KeyPointPairList> kppl;
 	
 		if (true) {
@@ -79,7 +100,7 @@ public class Improc {
 			images = null;
 		}		
 		System.out.println("Key point pairs lists to be validated: " + kppl.size());
-				
+		
 		System.out.println("---------- Validating key point pairs");
 		ArrayList<KeyPointPairList> validkppl = SwtUtil.openWaitDialog(parent, "Validating key point pairs", 
 				new ValidateKeyPointPairList(exec, kppl),

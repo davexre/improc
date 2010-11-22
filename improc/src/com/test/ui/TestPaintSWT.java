@@ -8,12 +8,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.Shell;
 
 public class TestPaintSWT {
 
-	public static class SmileyCanvas extends Scrollable {
+	public static class SmileyCanvas extends Composite {
 
 		public SmileyCanvas(Composite parent, int style) {
 			super(parent, style);
