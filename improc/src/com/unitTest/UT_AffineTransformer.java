@@ -94,6 +94,10 @@ public class UT_AffineTransformer {
 			super(new MyTestAffineTransformer(), pointsPairList);
 		}
 
+		public double getDiscrepancyThreshold(TransformLearnerResult result) {
+			return TestUtils.precision;
+		}
+		
 		public Point2D.Double createTemporaryTargetObject() {
 			return new Point2D.Double();
 		}
@@ -160,6 +164,7 @@ public class UT_AffineTransformer {
 	public void learn() {
 		learner = new MyTestAffineTransformLearner(points);
 		TransformLearnerResult res = learner.calculateOne();
+//		System.out.println(res);
 		TestUtils.assertTrue("Learner adjusted", res.isAdjusted());
 	}
 	

@@ -10,12 +10,32 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	protected Matrix coefs;			// Temporary matrix, used by computeOne methods
 	protected LeastSquaresAdjust lsa;
 
+	protected Matrix sourceOrigin;	
+	protected Matrix sourceScale; 	
+	protected Matrix sourceMin; 	
+	protected Matrix sourceMax;
+	
+	protected Matrix targetOrigin;	
+	protected Matrix targetScale;	
+	protected Matrix targetMin;	
+	protected Matrix targetMax;
+
 	public PolynomialTransformLearner(PolynomialTransformer<InputType, OutputType> transformer, 
 			Iterable<? extends Map.Entry<InputType, OutputType>> pointsPairList) {
 		super(transformer, pointsPairList);
 		int numberOfCoefsPerCoordinate = transformer.getNumberOfCoefsPerCoordinate();
 		this.coefs = new Matrix(numberOfCoefsPerCoordinate, 1);
-		this.lsa = new LeastSquaresAdjust(numberOfCoefsPerCoordinate, transformer.getOutputSize());		
+		this.lsa = new LeastSquaresAdjust(numberOfCoefsPerCoordinate, transformer.getOutputSize());
+		
+		this.sourceOrigin = new Matrix(inputSize, 1);
+		this.sourceScale = new Matrix(inputSize, 1); 
+		this.sourceMin = new Matrix(inputSize, 1); 
+		this.sourceMax = new Matrix(inputSize, 1);
+		
+		this.targetOrigin = new Matrix(outputSize, 1);
+		this.targetScale = new Matrix(outputSize, 1);
+		this.targetMin = new Matrix(outputSize, 1);
+		this.targetMax = new Matrix(outputSize, 1);
 	}
 	
 	public int getRequiredTrainingPoints() {
@@ -30,6 +50,67 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 				outputSize / inputSize);
 	}
 	
+	protected void computeScaleAndOrigin() {
+		// Find source and target points' extents and compute all - 
+		// scaleSource, scaleTarget, sourceOrigin, originTarget
+		boolean isFirst = true;
+		sourceOrigin.make0();
+		targetOrigin.make0();
+		double sumWeight = 0;
+		for (Map.Entry<InputType, OutputType> item : items) {
+			if (isBad(item))
+				continue;
+			InputType source = item.getKey();
+			OutputType dest = item.getValue();
+			if (isFirst) {
+				for (int i = inputSize - 1; i >= 0; i--) {
+					double v = transformer.getSourceCoord(source, i);
+					sourceMin.setItem(i, 0, v);
+					sourceMax.setItem(i, 0, v);
+				}
+				for (int i = outputSize - 1; i >= 0; i--) {
+					double v = transformer.getTargetCoord(dest, i);
+					targetMin.setItem(i, 0, v);
+					targetMax.setItem(i, 0, v);
+				}
+			} else {
+				for (int i = inputSize - 1; i >= 0; i--) {
+					double v = transformer.getSourceCoord(source, i);
+					if (v < sourceMin.getItem(i, 0))
+						sourceMin.setItem(i, 0, v);
+					if (v > sourceMax.getItem(i, 0))
+						sourceMax.setItem(i, 0, v);
+				}
+				for (int i = outputSize - 1; i >= 0; i--) {
+					double v = transformer.getTargetCoord(dest, i);
+					if (v < targetMin.getItem(i, 0))
+						targetMin.setItem(i, 0, v);
+					if (v > targetMax.getItem(i, 0))
+						targetMax.setItem(i, 0, v);
+				}
+			}
+			double weight = getWeight(item);
+			sumWeight += weight;
+			for (int i = inputSize - 1; i >= 0; i--)
+				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + transformer.getSourceCoord(source, i) * weight);
+			for (int i = outputSize - 1; i >= 0; i--)
+				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + transformer.getTargetCoord(dest, i) * weight);
+			isFirst = false;
+		}
+		
+		double t;
+		for (int i = inputSize - 1; i >= 0; i--) {
+			sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) / sumWeight);
+			t = sourceMax.getItem(i, 0) - sourceMin.getItem(i, 0);
+			sourceScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
+		}
+		for (int i = outputSize - 1; i >= 0; i--) {
+			targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) / sumWeight);
+			t = targetMax.getItem(i, 0) - targetMin.getItem(i, 0);
+			targetScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
+		}
+	}
+	
 	/**
 	 * 
 	 * @return True if adjusted. False - Try again/more adjustments needed.
@@ -37,7 +118,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
 		result.minGoodRequired = lsa.getRequiredPoints();
-		computeWeights(result);
+		startNewIteration(result);
 
 		if (result.oldGoodCount < result.minGoodRequired)
 			return result;
@@ -68,10 +149,10 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 				}
 				coefs.setItem(j, 0, tmp);
 			}
-			double computedWeight = getComputedWeight(item);
+			double weight = getWeight(item);
 			for (int i = outputSize - 1; i >= 0; i--) {
 				double L = tmpT.getItem(i, 0);						
-				lsa.addMeasurement(coefs, computedWeight, L, i);
+				lsa.addMeasurement(coefs, weight, L, i);
 			}
 		}
 		if (!lsa.calculate())

@@ -224,7 +224,7 @@ public class Stereo_7ParamsLearner extends PanoTransformer {
 					continue;
 				pointCounter++;
 				
-				double computedWeight = getComputedWeight(item);
+				double computedWeight = getWeight(item);
 				norm.setKeyPointPair(item);
 				coefs.make0();
 				
@@ -296,7 +296,7 @@ public class Stereo_7ParamsLearner extends PanoTransformer {
 				chainModified = false;
 			}
 		}
-		computeWeights(result);
+		startNewIteration(result);
 		if (chainModified) {
 			if (images.size() <= 1)
 				return result;

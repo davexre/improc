@@ -70,22 +70,13 @@ public abstract class PanoTransformer {
 	public double getWeight(KeyPointPair item) {
 		return item.weight;
 	}
-	
-	public double getComputedWeight(KeyPointPair item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
-	}
 
-	private double oneOverSumWeights = 1.0;
-	/**
-	 * @return Number of point pairs NOT marked as bad.
-	 */
-	protected void computeWeights(TransformLearnerResult result) {
+	protected void startNewIteration(TransformLearnerResult result) {
 		result.iteration = ++iteration;
 		result.dataCount = 0;
 		result.oldBadCount = 0;
 		result.oldGoodCount = 0;
 
-		double sumWeight = 0;
 		for (KeyPointPairList pairList : chain) {
 			result.dataCount += pairList.items.size();
 			pairList.transformResult = new TransformLearnerResult();
@@ -102,16 +93,7 @@ public abstract class PanoTransformer {
 				}
 				result.oldGoodCount++;
 				pairList.transformResult.oldGoodCount++;
-				double weight = getWeight(item); 
-				if (weight < 0)
-					throw new IllegalArgumentException("Negative weight received.");
-				sumWeight += weight;
 			}
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = 1.0 / result.oldGoodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
 		}
 	}
 
@@ -218,7 +200,7 @@ public abstract class PanoTransformer {
 				double discrepancy = computeOneDiscrepancy(item, PW1, PW2);
 				setDiscrepancy(item, discrepancy);
 				if (!isBad(item)) {
-					double weight = getComputedWeight(item);
+					double weight = getWeight(item);
 					pairList.transformResult.discrepancyStatistics.addValue(discrepancy, weight);
 					result.discrepancyStatistics.addValue(discrepancy, weight);
 				}

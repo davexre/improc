@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.math.transform.Helmert2DTransformLearner2;
+import com.slavi.math.transform.Helmert2DTransformLearner;
 import com.slavi.math.transform.TransformLearnerResult;
 
-public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner2<KeyPoint, KeyPoint>{
+public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<KeyPoint, KeyPoint>{
 
 	public static double discrepancyThreshold = 15; // TODO: ???? value is in pixels
 	KeyPointPairList pairList;

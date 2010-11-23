@@ -63,9 +63,7 @@ public class Improc {
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 	
 		if (false) {
-//			int count = 0;
 			for (String image : images) {
-//				int color = SafeImage.colors[count++ % SafeImage.colors.length];
 				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
 				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));
 				for (int i = 0; i < im.sizeX; i++)
@@ -75,7 +73,8 @@ public class Improc {
 						im.setRGB(i, j, col);
 					}
 				for (KeyPoint p : l.items) {
-					im.drawCross((int)p.doubleX, (int)p.doubleY, 0xff0000, -1);
+					int color = SafeImage.colors[p.dogLevel % SafeImage.colors.length];
+					im.drawCross((int)p.doubleX, (int)p.doubleY, color, -1);
 				}
 				String fou = settings.outputDirStr + "/" + l.imageFileStamp.getFile().getName();
 				System.out.println("Writing file " + fou);

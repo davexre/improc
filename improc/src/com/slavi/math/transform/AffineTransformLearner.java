@@ -34,12 +34,10 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 	public TransformLearnerResult calculateOne() {
 		TransformLearnerResult result = new TransformLearnerResult();
 		result.minGoodRequired = lsa.getRequiredPoints();
-		computeWeights(result);
+		startNewIteration(result);
 
 		if (result.oldGoodCount < result.minGoodRequired)
 			return result;
-
-		computeScaleAndOrigin();
 
 		// Calculate the affine transform parameters 
 		lsa.clear();
@@ -50,15 +48,13 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 			InputType source = item.getKey();
 			OutputType dest = item.getValue();
 			for (int i = inputSize - 1; i >= 0; i--) {
-				coefs.setItem(i, 0, (transformer.getSourceCoord(source, i) - sourceOrigin.getItem(i, 0)) /
-					sourceScale.getItem(i, 0));
+				coefs.setItem(i, 0, transformer.getSourceCoord(source, i));
 			}
 			coefs.setItem(inputSize, 0, 1.0);
-			double computedWeight = getComputedWeight(item);
+			double weight = getWeight(item);
 			for (int i = outputSize - 1; i >= 0; i--) {
-				double L = (transformer.getTargetCoord(dest, i) - targetOrigin.getItem(i, 0)) / 
-					targetScale.getItem(i, 0);
-				lsa.addMeasurement(coefs, computedWeight, L, i);
+				double L = transformer.getTargetCoord(dest, i);
+				lsa.addMeasurement(coefs, weight, L, i);
 			}
 		}
 		if (!lsa.calculate()) 
@@ -71,14 +67,10 @@ public abstract class AffineTransformLearner<InputType, OutputType> extends Base
 		for (int i = outputSize - 1; i >= 0; i--) {
 			for (int j = inputSize - 1; j >= 0; j--) {
 				tr.affineCoefs.setItem(i, j, 
-					u.getItem(i, j) * targetScale.getItem(i, 0) / sourceScale.getItem(j, 0));
+					u.getItem(i, j));
 			}
-			double t = 0;
-			for (int j = inputSize - 1; j >= 0; j--) { 
-				t += tr.affineCoefs.getItem(i, j) * sourceOrigin.getItem(j, 0);
-			}
-			tr.origin.setItem(i, 0, targetOrigin.getItem(i, 0) - t +
-				u.getItem(i, inputSize) * targetScale.getItem(i, 0)); 
+			tr.origin.setItem(i, 0, 
+				u.getItem(i, inputSize)); 
 		}
 
 		computeDiscrepancies(result);

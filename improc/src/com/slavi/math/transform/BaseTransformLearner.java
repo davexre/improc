@@ -33,16 +33,6 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 	
 	public Iterable<? extends Map.Entry<InputType, OutputType>> items;
 	
-	protected Matrix sourceOrigin;	
-	protected Matrix sourceScale; 	
-	protected Matrix sourceMin; 	
-	protected Matrix sourceMax;
-	
-	protected Matrix targetOrigin;	
-	protected Matrix targetScale;	
-	protected Matrix targetMin;	
-	protected Matrix targetMax;
-
 	protected int iteration = 0; 
 	
 	protected BaseTransformLearner(BaseTransformer<InputType, OutputType> transformer, 
@@ -51,130 +41,25 @@ public abstract class BaseTransformLearner<InputType, OutputType> {
 		inputSize = transformer.getInputSize();
 		outputSize = transformer.getOutputSize();
 		this.items = pointsPairList;
-		
-		this.sourceOrigin = new Matrix(inputSize, 1);
-		this.sourceScale = new Matrix(inputSize, 1); 
-		this.sourceMin = new Matrix(inputSize, 1); 
-		this.sourceMax = new Matrix(inputSize, 1);
-		
-		this.targetOrigin = new Matrix(outputSize, 1);
-		this.targetScale = new Matrix(outputSize, 1);
-		this.targetMin = new Matrix(outputSize, 1);
-		this.targetMax = new Matrix(outputSize, 1);
 	}
 	
 	public abstract TransformLearnerResult calculateOne();
 	
 	public abstract int getRequiredTrainingPoints();
 
-	public boolean canCompute() {
-		int required = getRequiredTrainingPoints();
-		int goodCount = 0;
-		for (Map.Entry<InputType, OutputType> item : items)
-			if (!isBad(item))
-				if (++goodCount >= required)
-					return true;
-		return false;
-	}
-	
-	private double oneOverSumWeights = 1.0;
-	/**
-	 * Number of point pairs NOT marked as bad.
-	 */
-	protected void computeWeights(TransformLearnerResult result) {
+	protected void startNewIteration(TransformLearnerResult result) {
 		result.iteration = ++iteration;
 		result.dataCount = 0;
 		result.oldBadCount = 0;
 		result.oldGoodCount = 0;
 		
-		double sumWeight = 0;
 		for (Map.Entry<InputType, OutputType> item : items) {
 			result.dataCount++;
 			if (isBad(item)) {
 				result.oldBadCount++;
-				continue;
-			}
-			double weight = getWeight(item); 
-			if (weight < 0)
-				throw new IllegalArgumentException("Negative weight received.");
-			result.oldGoodCount++;
-			sumWeight += weight;
-		}
-		if (sumWeight == 0.0) {
-			oneOverSumWeights = result.oldGoodCount == 0 ? 0.0 : 1.0 / result.oldGoodCount;
-		} else {
-			oneOverSumWeights = 1.0 / sumWeight;
-		}
-		return;
-	}
-	
-	public int countGood() {
-		int result = 0;
-		for (Map.Entry<InputType, OutputType> item : items) {
-			if (!isBad(item))
-				result++;
-		}
-		return result;
-	}
-	
-	public double getComputedWeight(Map.Entry<InputType, OutputType> item) {
-		return isBad(item) ? 0.0 : getWeight(item) * oneOverSumWeights; 
-	}
-	
-	protected void computeScaleAndOrigin() {
-		// Find source and target points' extents and compute all - 
-		// scaleSource, scaleTarget, sourceOrigin, originTarget
-		boolean isFirst = true;
-		sourceOrigin.make0();
-		targetOrigin.make0();
-		for (Map.Entry<InputType, OutputType> item : items) {
-			if (isBad(item))
-				continue;
-			InputType source = item.getKey();
-			OutputType dest = item.getValue();
-			if (isFirst) {
-				for (int i = inputSize - 1; i >= 0; i--) {
-					double v = transformer.getSourceCoord(source, i);
-					sourceMin.setItem(i, 0, v);
-					sourceMax.setItem(i, 0, v);
-				}
-				for (int i = outputSize - 1; i >= 0; i--) {
-					double v = transformer.getTargetCoord(dest, i);
-					targetMin.setItem(i, 0, v);
-					targetMax.setItem(i, 0, v);
-				}
 			} else {
-				for (int i = inputSize - 1; i >= 0; i--) {
-					double v = transformer.getSourceCoord(source, i);
-					if (v < sourceMin.getItem(i, 0))
-						sourceMin.setItem(i, 0, v);
-					if (v > sourceMax.getItem(i, 0))
-						sourceMax.setItem(i, 0, v);
-				}
-				for (int i = outputSize - 1; i >= 0; i--) {
-					double v = transformer.getTargetCoord(dest, i);
-					if (v < targetMin.getItem(i, 0))
-						targetMin.setItem(i, 0, v);
-					if (v > targetMax.getItem(i, 0))
-						targetMax.setItem(i, 0, v);
-				}
+				result.oldGoodCount++;
 			}
-			double computedWeight = getComputedWeight(item);
-			for (int i = inputSize - 1; i >= 0; i--)
-				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + transformer.getSourceCoord(source, i) * computedWeight);
-			for (int i = outputSize - 1; i >= 0; i--)
-				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + transformer.getTargetCoord(dest, i) * computedWeight);
-			isFirst = false;
-		}
-		
-		double t;
-		for (int i = inputSize - 1; i >= 0; i--) {
-			t = sourceMax.getItem(i, 0) - sourceMin.getItem(i, 0);
-			sourceScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
-		}
-		for (int i = outputSize - 1; i >= 0; i--) {
-			t = targetMax.getItem(i, 0) - targetMin.getItem(i, 0);
-			targetScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
 		}
 	}
 	

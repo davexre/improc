@@ -13,7 +13,7 @@ public class SafeImage {
 
 	static int imageCounter = 0;
 	
-	static final int colors[] = {
+	public static final int colors[] = {
 		0x00ff0000,
 		0x0000ff00,
 		0x000000ff,		

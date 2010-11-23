@@ -230,7 +230,7 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 				if (isBad(item))
 					continue;
 
-				double computedWeight = getComputedWeight(item);
+				double computedWeight = getWeight(item);
 				KeyPoint source = item.getKey();
 				KeyPoint target = item.getValue();
 				
@@ -293,7 +293,7 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 				chainModified = false;
 			}
 		}
-		computeWeights(result);
+		startNewIteration(result);
 		if (chainModified) {
 			if (images.size() <= 1)
 				return result;

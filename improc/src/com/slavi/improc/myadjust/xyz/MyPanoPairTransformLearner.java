@@ -175,7 +175,7 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 					continue;
 				pointCounter++;
 				
-				double computedWeight = getComputedWeight(item);
+				double computedWeight = getWeight(item);
 				norm.setKeyPointPair(item);
 
 				for (int c1 = 0; c1 < 3; c1++) {
@@ -249,7 +249,7 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 				chainModified = false;
 			}
 		}
-		computeWeights(result);
+		startNewIteration(result);
 		if (chainModified) {
 			if (images.size() <= 1)
 				return result;

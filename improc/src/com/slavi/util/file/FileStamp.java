@@ -67,8 +67,8 @@ public class FileStamp {
 		return !(
 			(length >= 0) && 
 			(file.isFile()) &&
-			(file.length() == length) &&
-			(Math.abs(file.lastModified() - lastModified) < 10000)
+			(file.length() == length) // && 
+//			(Math.abs(file.lastModified() - lastModified) < 10000)
 		);
 	}
 	

@@ -160,7 +160,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 					continue;
 				
 				sn.setKeyPointPair(item);
-				double computedWeight = getComputedWeight(item);
+				double computedWeight = getWeight(item);
 				int srcIndex = images.indexOf(pairList.source) * (adjustForScale ? 4 : 3);
 				int destIndex = images.indexOf(pairList.target) * (adjustForScale ? 4 : 3);
 				
@@ -209,7 +209,7 @@ public class SpherePanoTransformLearner2 extends PanoTransformer {
 				chainModified = false;
 			}
 		}
-		computeWeights(result);
+		startNewIteration(result);
 		if (chainModified) {
 			if (images.size() <= 1)
 				return result;
