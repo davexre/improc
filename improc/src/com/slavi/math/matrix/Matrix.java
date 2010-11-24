@@ -650,6 +650,16 @@ public class Matrix {
 				setItem(i, j, (i == j) ? 1.0 : 0.0);
 	}
 
+	public double getSquaredDeviationFromE() {
+		double result = 0.0;
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
+				result += d*d;
+			}
+		return result;
+	}
+	
 	/**
 	 * Returns true if this matrix is the identity matrix
 	 */
@@ -662,6 +672,16 @@ public class Matrix {
 					return false;
 			}
 		return true;
+	}
+	
+	public double getSquaredDeviationFrom0() {
+		double result = 0.0;
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double d = getItem(i, j);
+				result += d*d;
+			}
+		return result;
 	}
 	
 	/**

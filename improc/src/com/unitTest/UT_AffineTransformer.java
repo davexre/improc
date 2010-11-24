@@ -146,8 +146,9 @@ public class UT_AffineTransformer {
 		jTransform = new AffineTransform();
 		jTransform.setToIdentity();
 		jTransform.rotate(30 * MathUtil.deg2rad);
-		jTransform.scale(123.456, 789.123);
-		jTransform.shear(1.234, 2.345);
+		jTransform.scale(2, 1);
+//		jTransform.scale(123.456, 789.123);
+//		jTransform.shear(1.234, 2.345);
 		jTransform.translate(100.567, 200.123);
 
 //		System.out.println("== The java.awt.geom.AffineTransform is:");
@@ -167,6 +168,76 @@ public class UT_AffineTransformer {
 //		System.out.println(res);
 		TestUtils.assertTrue("Learner adjusted", res.isAdjusted());
 	}
+
+	public void testTransformBackward() {
+		MyTestAffineTransformer tr = (MyTestAffineTransformer) learner.transformer;
+		Matrix forward = new Matrix(3, 3);
+		Matrix forward2 = new Matrix(3, 3);
+		
+		forward.setItem(0, 0, tr.affineCoefs.getItem(0, 0));
+		forward.setItem(1, 0, tr.affineCoefs.getItem(1, 0));
+		forward.setItem(2, 0, 0);
+
+		forward.setItem(0, 1, tr.affineCoefs.getItem(0, 1));
+		forward.setItem(1, 1, tr.affineCoefs.getItem(1, 1));
+		forward.setItem(2, 1, 0);
+
+		forward.setItem(0, 2, tr.origin.getItem(0, 0));
+		forward.setItem(1, 2, tr.origin.getItem(1, 0));
+		forward.setItem(2, 2, 1);
+		
+		Matrix backward = new Matrix(3, 3);
+		forward.copyTo(backward);
+		TestUtils.assertTrue("Inverse", backward.inverse());
+		
+		Point2D.Double srcP = new Point2D.Double(100, 200);
+		Point2D.Double destP = new Point2D.Double();
+		tr.transform(srcP, destP);
+		
+		Matrix p1 = new Matrix(3, 1);
+		Matrix p2 = new Matrix(3, 1);
+		Matrix p3 = new Matrix(3, 1);
+		Matrix p4 = new Matrix(3, 1);
+
+		p1.setItem(0, 0, srcP.x);
+		p1.setItem(1, 0, srcP.y);
+		p1.setItem(2, 0, 1);
+		
+		p3.setItem(0, 0, destP.x);
+		p3.setItem(1, 0, destP.y);
+		p3.setItem(2, 0, 1);		
+		
+		p1.mMul(forward, p2);
+		p2.mSub(p3, p4);
+		TestUtils.assertMatrix0("Forward", p4);
+		
+		p2.mMul(backward, p3);
+		p3.mSub(p1, p4);
+		TestUtils.assertMatrix0("Inverse(Forward)", p4);
+		
+//		tr.affineCoefs.printM("Coefs");
+//		tr.origin.printM("Origin");
+
+		Matrix tmp = new Matrix(1, 3);
+		tmp.setItem(0, 0, p2.getItem(0, 0) - tr.origin.getItem(0, 0));
+		tmp.setItem(0, 1, p2.getItem(1, 0) - tr.origin.getItem(1, 0));
+		tmp.setItem(0, 2, 1);
+		
+		forward.copyTo(forward2);
+		forward2.setItem(0, 2, 0);
+		forward2.setItem(1, 2, 0);
+		
+		forward.printM("Forward");
+		forward2.printM("Forward2");
+		
+		forward2.mMul(tmp, p2);
+		p2.transpose(p3);
+		p3.mSub(p1, p4);
+		p3.printM("P3");
+		p4.printM("P4");
+		
+		System.out.println("Square deviation from 0 " + p4.getSquaredDeviationFrom0());
+	}
 	
 	public static void main(String[] args) {
 		UT_AffineTransformer test = new UT_AffineTransformer();
@@ -175,6 +246,8 @@ public class UT_AffineTransformer {
 
 		Matrix delta = test.learner.computeTransformedTargetDelta(true);
 		TestUtils.assertMatrix0("", delta);
+		
+		test.testTransformBackward();
 		System.out.println("Done");
 	}
 }
