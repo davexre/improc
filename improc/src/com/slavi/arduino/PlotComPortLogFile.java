@@ -228,10 +228,10 @@ public class PlotComPortLogFile {
 	public void doIt() throws Exception {
 		createWidgets();
 
-		readFile(new File(getClass().getResource("comport/comport_output_09.txt").toURI()));
-//		readFile(new File(getClass().getResource("comport/comport_output_10.txt").toURI()));
-//		readFile(new File(System.getProperty("user.home") + "/comport_output_10.txt"));
-		readFile(new File(System.getProperty("user.home") + "/comport_output_12.txt"));
+//		readFile(new File(getClass().getResource("comport/comport_output_09.txt").toURI()));
+//		readFile(new File(getClass().getResource("comport/comport_output_04.txt").toURI()));
+//		readFile(new File(System.getProperty("user.home") + "/comport_output_12.txt"));
+		readFile(new File(System.getProperty("user.home") + "/comport_output_11.txt"));
 		
         chart.getAxisSet().adjustRange();
 		open();

@@ -56,8 +56,8 @@ public class GeneratorWithPressureSensor {
 	void setup() throws Exception {
 		frequency = Integer.parseInt(Const.properties.getProperty("ComPort.startFrequency", "100"));
 		frequency = 3000; //4700;
-		if (false) {
-			String fouName = System.getProperty("user.home") + "/comport_output_12.txt";
+		if (true) {
+			String fouName = System.getProperty("user.home") + "/comport_output_13.txt";
 			FileOutputStream fou = new FileOutputStream(fouName, true);
 			out = new PrintStream(fou, true); // autoflush
 		} else {
@@ -90,6 +90,7 @@ public class GeneratorWithPressureSensor {
 			out.close();
 		}
 		if (comReader != null) {
+			comReader.out.println("s0");
 			comReader.close();
 		}
 	}
@@ -109,7 +110,6 @@ public class GeneratorWithPressureSensor {
 				char c = (char) i;
 				if (c == 'q') {
 					System.out.println("CLOSING...");
-					comReader.out.println("s0");
 					break;
 				}
 			}

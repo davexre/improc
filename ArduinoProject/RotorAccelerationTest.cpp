@@ -5,6 +5,7 @@
 #include "Button.h"
 #include "StateLed.h"
 #include "RotorAcelleration.h"
+#include "utils.h"
 
 const int buttonPin = 4;	// the number of the pushbutton pin
 const int ledPin =  12;		// the number of the LED pin

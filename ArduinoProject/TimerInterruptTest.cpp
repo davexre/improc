@@ -1,4 +1,4 @@
-#define UseThisFileForMainProgram
+//#define UseThisFileForMainProgram
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
