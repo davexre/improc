@@ -160,19 +160,34 @@ public class TaskSetExecutor {
 	
 	private void internalAdd(Object task) {
 		synchronized (tasks) {
-			if (task == null)
+			if (task == null) {
+				abort();
 				throw new NullPointerException();
-			if (addingFinished)
-				throw new RejectedExecutionException();
-			if (aborted)
-				return;
-		}
-		Future<Void> future = exec.submit(new InternalTaskWrapper(task));
-		synchronized (tasks) {
-			if (addingFinished || aborted) {
-				future.cancel(true);
 			}
-			tasks.add(future);
+			if (addingFinished) {
+				abort();
+				throw new RejectedExecutionException();
+			}				
+			if (aborted) {
+				throw new RejectedExecutionException();
+			}
+			if (Thread.currentThread().isInterrupted()) {
+				abort();
+				throw new RejectedExecutionException();
+			}
+		}
+		Future<Void> future = null;
+		try {
+			future = exec.submit(new InternalTaskWrapper(task));
+			synchronized (tasks) {
+				if (addingFinished || aborted) {
+					future.cancel(true);
+				}
+				tasks.add(future);
+			}
+		} catch (Throwable t) {
+			abort();
+			throw new RejectedExecutionException(t);
 		}
 	}
 	
