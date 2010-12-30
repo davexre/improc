@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
+import com.test.concurrent.FakeThreadExecutor;
 
 public class TestWaitDialog {
 
@@ -52,6 +53,7 @@ public class TestWaitDialog {
 	public class ProcessAll implements Callable<Void> {
 		public Void call() throws Exception {
 			ExecutorService exec = Util.newBlockingThreadPoolExecutor(30, new MyThreadFactory());
+//			ExecutorService exec = new FakeThreadExecutor();
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 			try {
 				for (int i = 0; i < 10; i++) {

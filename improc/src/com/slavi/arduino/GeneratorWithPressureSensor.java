@@ -10,8 +10,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.math.MathUtil;
-import com.slavi.util.Beep;
 import com.slavi.util.Const;
+import com.slavi.util.sound.Beep;
 
 public class GeneratorWithPressureSensor {
 

@@ -62,7 +62,7 @@ public class Improc {
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 	
-		if (false) {
+		if (true) {
 			for (String image : images) {
 				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
 				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));

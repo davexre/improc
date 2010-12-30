@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -25,11 +24,9 @@ import com.slavi.improc.parallel.PDLoweDetector;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.io.txt.TXTKDTree;
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.SteppedParallelTaskExecutor;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
-import com.test.improc.ExecutePDLowe2;
 import com.test.improc.PDLoweDetector2;
 
 public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
@@ -77,7 +74,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 				rootImagesDir.getRelativePath(image, false)), ".spf.z"));
 	}
 	
-	public static KeyPointList buildKeyPointFileMultiThreaded2(ExecutorService exec, File image) throws Exception {
+	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
 		final KeyPointList result = new KeyPointList();
 		BufferedImage bi = ImageIO.read(image);
 		result.imageSizeX = bi.getWidth();
@@ -158,32 +155,6 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		return result;
 	}
 	
-	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
-		final KeyPointList result = new KeyPointList();
-		BufferedImage bi = ImageIO.read(image);
-		result.imageSizeX = bi.getWidth();
-		result.imageSizeY = bi.getHeight();
-		result.makeHistogram(bi);
-		DWindowedImage img = new PDImageMapBuffer(bi);
-		bi = null;
-		result.cameraOriginX = result.imageSizeX / 2.0;
-		result.cameraOriginY = result.imageSizeY / 2.0;
-		result.cameraScale = 1.0 / Math.max(result.imageSizeX, result.imageSizeY);
-		result.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-
-		Hook hook = new Hook() {
-			public synchronized void keyPointCreated(KeyPoint scalePoint) {
-				result.items.add(scalePoint);
-			}		
-		};
-		ExecutionProfile profile = ExecutionProfile.suggestExecutionProfile(img.getExtent());
-		ExecutePDLowe2 execPDLowe = new ExecutePDLowe2(img, hook);
-
-		Future<Void> ft = new SteppedParallelTaskExecutor<Void>(exec, profile.parallelTasks, execPDLowe).start();
-		ft.get();
-		return result;
-	}
-	
 	private static KeyPointList doUpdateKeyPointFileIfNecessary(
 			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
@@ -213,7 +184,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			zis.close();
 		}
 		
-		KeyPointList result = buildKeyPointFileMultiThreaded2(exec, image);
+		KeyPointList result = buildKeyPointFileMultiThreaded(exec, image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image, false);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);

@@ -1,4 +1,4 @@
-package com.slavi.util;
+package com.slavi.util.sound;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,11 +11,13 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
+import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import com.slavi.math.MathUtil;
+import com.slavi.util.Marker;
 
 public class Beep {
 
@@ -30,6 +32,7 @@ public class Beep {
 	static final AudioFormat audioFormat = new AudioFormat(samplesPerSecond, 8, 1, true, false);
 	
 	static final byte[] beepData = new byte[samplesPerSecond / 10]; 
+	static final byte[] beepData2 = new byte[samplesPerSecond / 10]; 
 				//makeTone(1000, defaultBeepLoudness, samplesPerSecond, 100);
 	
 	public static void makeTone(double pitch, double volumeInPersent, int samplesPerSecond, byte dest[]) {
@@ -73,103 +76,83 @@ public class Beep {
 		}
 	}
 	
+	public static byte[] makeTone2(int beepLoudness, int ... data) {
+		int clipDuration = 0;
+		int i = 0;
+		while (i < data.length - 1) {
+			i++;
+			clipDuration += data[i++];
+		}
+		System.out.println(clipDuration);
+		byte result[] = new byte[samplesPerSecond * clipDuration / 1000];
+		double volumeInPersent = MathUtil.clipValue(beepLoudness, 0, 100) * 127 / 100;
+
+		i = 0;
+		int getNextAtIndex = 0;
+		int pitch = 0;
+		int duration = 0;
+		clipDuration = 0;
+		double omega = 0.0;
+		int sinCounter = 0;
+		
+		for (int index = 0; index < result.length; index++) {
+			if (index == getNextAtIndex) {
+				System.out.println(index + "\t" + i);
+				pitch = data[i++];
+				duration = data[i++];
+				clipDuration += duration;
+				omega = (2.0 * Math.PI * pitch) / samplesPerSecond;
+				getNextAtIndex = samplesPerSecond * clipDuration / 1000;
+				sinCounter = 0;
+			}
+			result[index] = (byte) (volumeInPersent * Math.sin(omega * index));
+			sinCounter++;
+		}
+		return result;
+	}
+	
 	public synchronized static void beep2(int beepLoudness, int ... data ) {
-		Clip clip1 = null;
-		Clip clip2 = null;
+		Clip clip = null;
 		try {
 			DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
-			clip1 = (Clip) AudioSystem.getLine(info);
-			clip2 = (Clip) AudioSystem.getLine(info);
-			Clip tmp;
-			int i = 0;
-			long delay = 0;
-			long last = 0;
-			while (i < data.length - 1) {
-				int pitch = data[i++];
-				makeTone(pitch, beepLoudness, samplesPerSecond, beepData);
-				clip1.open(audioFormat, beepData, 0, beepData.length);
-				clip1.setFramePosition(0);
-				if (last != 0) {
-					delay -= System.currentTimeMillis() - last;
-					if (delay > 0)
-						Thread.sleep(delay);
-					else {
-						System.out.println(delay);
+			clip = (Clip) AudioSystem.getLine(info);
+			byte[] beepData = makeTone2(beepLoudness, data);
+			clip.open(audioFormat, beepData, 0, beepData.length);
+			final CountDownLatch latch = new CountDownLatch(1);
+			clip.addLineListener(new LineListener() {
+				public void update(LineEvent event) {
+					if (event.getType() == Type.STOP) {
+						latch.countDown();
 					}
 				}
-				clip1.loop(-1);
-				clip2.stop();
-				clip2.close();
-				delay = data[i++];
-				last = System.currentTimeMillis();
-				tmp = clip2;
-				clip2 = clip1;
-				clip1 = tmp;
-			}
-			if (last != 0) {
-				delay -= System.currentTimeMillis() - last;
-				if (delay > 0)
-					Thread.sleep(delay);
-				else {
-					System.out.println(delay);
-				}
-			}
-//			Thread.sleep(delay);
-//			System.out.println(delay);
+			});
+			clip.start();
+			latch.await();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (clip2 != null) {
-				clip2.stop();
-				clip2.close();
-			}
-			if (clip1 != null) {
-				clip1.stop();
-				clip1.close();
+			if (clip != null) {
+				clip.stop();
+				clip.close();
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 //		FileInputStream is = new FileInputStream("/usr/lib/openoffice/basis3.2/share/gallery/sounds/pluck.wav");
 //		playSoundStream(is, 0);
 		Marker.mark();
-		int d = 250;
+		int d = 450;
+		int pitch = 1499;
 //		Beep.beep2(80, 900, d, 1000, d, 500, d, 1500, d);
+//		Beep.beep2(80, pitch, d, 0, 100, pitch, 250, 0, 100, pitch, 250);
+		Beep.beep2(80, 700, d, 1000, d, 700, d, 1000, d, 700, d);
 //		Beep.beep(1000, 400, 80);
 //		Beep.beep(1900, 300, 80);
 		Marker.release();
-		Beep.beep();
-		Beep.beep();
+//		Beep.beep();
+//		Beep.beep();
+//		Beep.beep();
 		System.out.println("Done");
-	}
-	
-	/**
-	 * code borrowed from
-	 * http://www.java2s.com/Code/Java/Development-Class/AnexampleofloadingandplayingasoundusingaClip.htm
-	 */
-	public static void playSoundStream(InputStream soundStream, long timeout) throws UnsupportedAudioFileException, IOException, LineUnavailableException, InterruptedException {
-		// assuming the sound can be played by the audio system
-		AudioInputStream sound = AudioSystem.getAudioInputStream(soundStream);
-
-		// load the sound into memory (a Clip)
-		DataLine.Info info = new DataLine.Info(Clip.class, sound.getFormat());
-		Clip clip = (Clip) AudioSystem.getLine(info);
-		clip.open(sound);
-
-		final CountDownLatch latch = new CountDownLatch(1);
-		clip.addLineListener(new LineListener() {
-			public void update(LineEvent event) {
-				if (event.getType() == LineEvent.Type.STOP) {
-					event.getLine().close();
-					latch.countDown();
-				}
-			}
-		});
-		clip.start();
-		if (timeout > 0)
-			latch.await(timeout, TimeUnit.MILLISECONDS);
-		else 
-			latch.await();
 	}
 }
