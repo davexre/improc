@@ -710,10 +710,9 @@ public class Util {
 	
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
 		byte buf[] = new byte[256];
-		while (is.available() > 0) {
-			int len = is.read(buf);
-			if (len > 0)
-				os.write(buf, 0, len);
+		int len;
+		while ((len = is.read(buf)) >= 0) {
+			os.write(buf, 0, len);
 		}
 	}
 
