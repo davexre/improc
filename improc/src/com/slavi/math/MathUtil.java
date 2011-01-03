@@ -70,6 +70,13 @@ public class MathUtil {
 	}
 	
 	/**
+	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 */
+	public static int clipValue(int value, int min, int max) {
+		return Math.min(max, Math.max(min, value));
+	}
+	
+	/**
 	 * Returns the specified angle in the range [0..2*pi)
 	 */
 	public static double fixAngle2PI(double angle) {

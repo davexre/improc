@@ -1,20 +1,14 @@
 package com.slavi.util.sound;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
@@ -143,7 +137,7 @@ public class Beep {
 //		playSoundStream(is, 0);
 		Marker.mark();
 		int d = 450;
-		int pitch = 1499;
+//		int pitch = 1499;
 //		Beep.beep2(80, 900, d, 1000, d, 500, d, 1500, d);
 //		Beep.beep2(80, pitch, d, 0, 100, pitch, 250, 0, 100, pitch, 250);
 		Beep.beep2(80, 700, d, 1000, d, 700, d, 1000, d, 700, d);
