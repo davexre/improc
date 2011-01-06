@@ -1,4 +1,4 @@
-//#define UseThisFileForMainProgram
+#define UseThisFileForMainProgram
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
@@ -12,7 +12,17 @@ const int rotorPinB = 3;	// the other quadrature pin
 
 const int coilPins[] = { 5, 6, 7 };
 const int coilCount = size(coilPins);
-int activeCoil = 0;
+
+const byte coilStates[][coilCount] = {
+		{1, 0, 0},
+		{1, 1, 0},
+		{0, 1, 0},
+		{0, 1, 1},
+		{0, 0, 1},
+		{1, 0, 1}
+};
+const int coilStatesCount = size(coilStates);
+int activeCoilState = 0;
 
 Button btn;
 boolean enabled = false;
@@ -42,9 +52,10 @@ extern "C" void loop() {
 	}
 
 	if (enabled) {
-		activeCoil = (activeCoil + 1) % coilCount;
+		activeCoilState = (activeCoilState + 1) % coilStatesCount;
+		const byte *states = coilStates[activeCoilState];
 		for (int i = 0; i < coilCount; i++) {
-			digitalWrite(coilPins[i], i == activeCoil);
+			digitalWrite(coilPins[i], states[i]);
 		}
 	} else {
 		for (int i = 0; i < coilCount; i++) {
