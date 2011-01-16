@@ -317,7 +317,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 //		u.printM("U");
 		System.out.println(
 				origin.imageId + 
-				"\t" + origin.imageFileStamp.getFile().getName() + 
+				"\t" + origin.calculatePrimsAtHop + ":" + origin.imageFileStamp.getFile().getName() + 
 				"\trz1=" + MathUtil.rad2degStr(origin.sphereRZ1) + 
 				"\try=" + MathUtil.rad2degStr(origin.sphereRY) + 
 				"\trz2=" + MathUtil.rad2degStr(origin.sphereRZ2) + 
@@ -334,7 +334,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 			int index = (adjustOriginForScale ? 1 : 0) + curImage * (adjustForScale ? 4 : 3);
 			System.out.println(
 					image.imageId +
-					"\t" + image.imageFileStamp.getFile().getName() + 
+					"\t" + image.calculatePrimsAtHop + ":" + image.imageFileStamp.getFile().getName() + 
 					"\trz1=" + MathUtil.rad2degStr(image.sphereRZ1) + 
 					"\try=" + MathUtil.rad2degStr(image.sphereRY) + 
 					"\trz2=" + MathUtil.rad2degStr(image.sphereRZ2) + 
