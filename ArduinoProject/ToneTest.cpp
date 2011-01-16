@@ -5,11 +5,13 @@
 //#include <avr/pgmspace.h>
 #include <pins_arduino.h>
 //#include <stdint.h>
-
 #include "utils.h"
-//#include "Button.h"
-//#include "RotorAcelleration.h"
+#include "Button.h"
+#include "RotorAcelleration.h"
 
+const int buttonPin = 4;	// the number of the pushbutton pin
+const int rotorPinA = 2;	// One quadrature pin
+const int rotorPinB = 3;	// the other quadrature pin
 const int ledPin =  13;      // the number of the LED pin
 const int speakerPin = 8;
 
@@ -35,8 +37,58 @@ struct pinDesc {
 volatile uint8_t *coilPinPorts[coilCount];
 volatile uint8_t coilPinMaks[coilCount];
 
+Button btn;
 
-void initialize() {
+// frequency in Hertz
+void playTimer1(uint16_t frequency) {
+	// two choices for the 16 bit timers: ck/1 or ck/64
+	uint32_t ocr = F_CPU / frequency / 2 - 1;
+	uint8_t prescalarbits = 0b001;
+	if (ocr > 0xffff) {
+		ocr = F_CPU / frequency / 2 / 64 - 1;
+		prescalarbits = 0b011;
+	}
+	TCCR1B = (TCCR1B & 0b11111000) | prescalarbits;
+    OCR1A = ocr;
+    // then turn on the interrupts
+    bitWrite(TIMSK1, OCIE1A, 1);
+}
+
+
+void stopTimer1() {
+	TIMSK1 &= ~(1 << OCIE1A);
+	pinDesc *pd = coilPorts;
+	for (int i = 0; i < coilCount; i++, pd++) {
+		*pd->port &= ~(pd->mask);
+	}
+}
+
+bool isPlaying(void) {
+  return TIMSK1 & (1 << OCIE1A);
+}
+
+ISR(TIMER1_COMPA_vect) {
+	const byte *states = coilStates[activeCoilState++];
+	pinDesc *pd = coilPorts;
+	for (int i = 0; i < coilCount; i++, pd++) {
+	    // set the pin
+		if (*(states++)) {
+			// set bit
+			*pd->port |= pd->mask;
+		} else {
+			// clear bit
+			*pd->port &= ~(pd->mask);
+		}
+	}
+	if (activeCoilState >= coilStatesCount) {
+		activeCoilState = 0;
+		*speakerPort.port ^= speakerPort.mask;
+	}
+}
+
+/////////////////////////////////
+
+extern "C" void setup() {
 	pinDesc *pd = coilPorts;
 	for (int i = 0; i < coilCount; i++) {
 		pinMode(coilPins[i], OUTPUT);
@@ -49,83 +101,51 @@ void initialize() {
 		pd++;
 	}
 
-	pinMode(speakerPin, OUTPUT);
-	speakerPort.port = portOutputRegister(digitalPinToPort(speakerPin));
-	speakerPort.mask = digitalPinToBitMask(speakerPin);
-
     // 16 bit timer
     TCCR1A = 0;
     TCCR1B = 0;
     bitWrite(TCCR1B, WGM12, 1);
     bitWrite(TCCR1B, CS10, 1);
+
+	speakerPort.port = portOutputRegister(digitalPinToPort(speakerPin));
+	speakerPort.mask = digitalPinToBitMask(speakerPin);
+	pinMode(speakerPin, OUTPUT);
+	pinMode(ledPin, OUTPUT);
+	digitalWrite(speakerPin, 0);
+	digitalWrite(ledPin, 0);
+
+	btn.initialize(buttonPin);
+	rotor.initialize(rotorPinA, rotorPinB);
+
+	rotor.minValue = 50;
+	rotor.maxValue = 50000;
+	rotor.position = 100;
+
+	Serial.begin(9600);
 }
 
-// frequency in Hertz
-void play(uint16_t frequency) {
-	uint8_t prescalarbits = 0b001;
-	int32_t toggle_count = 0;
-	uint32_t ocr = 0;
-
-	// Set the pinMode as OUTPUT
-	pinMode(_pin, OUTPUT);
-
-	// two choices for the 16 bit timers: ck/1 or ck/64
-	ocr = F_CPU / frequency / 2 - 1;
-
-	prescalarbits = 0b001;
-	if (ocr > 0xffff) {
-		ocr = F_CPU / frequency / 2 / 64 - 1;
-		prescalarbits = 0b011;
-	}
-
-	if (_timer == 1)
-		TCCR1B = (TCCR1B & 0b11111000) | prescalarbits;
-
-    // Set the OCR for the given timer,
-    // set the toggle count,
-    // then turn on the interrupts
-    OCR1A = ocr;
-    timer1_toggle_count = toggle_count;
-    bitWrite(TIMSK1, OCIE1A, 1);
-}
-
-
-void stop() {
-	TIMSK1 &= ~(1 << OCIE1A);
-	digitalWrite(_pin, 0);
-}
-
-bool isPlaying(void) {
-  return TIMSK1 & (1 << OCIE1A);
-}
-
-void alabala() {
-	const byte *states = coilStates[activeCoilState++];
-	pinDesc *pd = coilPorts;
-	for (int i = 0; i < coilCount; i++, pd++) {
-	    // set the pin
-		if (*(states++)) {
-			// set bit
-			*pd->port |= pd->mask;
-		} else {
-			// clear bit
-			*pd->port &= !pd->mask;
-		}
-	}
-	if (activeCoilState >= coilStatesCount) {
-		activeCoilState = 0;
-		speakerPort ^= speakerPort.mask;
-	}
-}
-
-/////////////////////////////////
-
-extern "C" void setup() {
-	alabala();
-//	tone(0, 0, 0);
-}
+long curPosition = 0;
+boolean enabled = false;
 
 extern "C" void loop() {
+	btn.update();
+	rotor.update();
+
+	if (btn.isPressed()) {
+		enabled = !enabled;
+		digitalWrite(ledPin, enabled);
+	}
+
+	if (enabled) {
+		if (curPosition != rotor.position) {
+			curPosition = rotor.position;
+			playTimer1(curPosition);
+			Serial.println(curPosition);
+		}
+	} else {
+		stopTimer1();
+		activeCoilState = curPosition = 0;
+	}
 }
 
 #endif
