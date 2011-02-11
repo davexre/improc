@@ -1,17 +1,17 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
+#include "utils.h"
 #include "StateLed.h"
 #include "Button.h"
 
-const int buttonPin = 4; // the number of the pushbutton pin
-const int ledPin = 13; // the number of the LED pin
+DefineClass(StateLedTest);
 
-Button btn;
-StateLed led;
+static const int buttonPin = 4; // the number of the pushbutton pin
+static const int ledPin = 13; // the number of the LED pin
 
-const unsigned int *states[] = {
+static Button btn;
+static StateLed led;
+
+static const unsigned int *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_FAST,
@@ -19,16 +19,14 @@ const unsigned int *states[] = {
 		BLINK_ON, BLINK_OFF
 };
 
-extern "C" void setup(void) {
+void StateLedTest::setup(void) {
 	btn.initialize(buttonPin);
 	led.initialize(ledPin, true, size(states), states);
 }
 
-extern "C" void loop(void) {
+void StateLedTest::loop(void) {
 	btn.update();
 	led.update();
 	if (btn.isPressed())
 		led.nextState();
 }
-
-#endif

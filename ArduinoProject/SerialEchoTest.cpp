@@ -1,11 +1,13 @@
-#include "SerialEchoTest.h"
+#include "Arduino.h"
+#include "utils.h"
+#include "SerialReader.h"
 
-void SerialEchoTest::setup() {
-	reader.initialize(9600, size(buf), buf);
-	Serial.println("Done.");
-}
+DefineClass(SerialEchoTest);
 
-void SerialEchoTest::processReader() {
+static SerialReader reader;
+static char buf[200];
+
+static void processReader() {
 	char *c;
 	Serial.println(reader.bufferFull);
 	reader.update();
@@ -14,6 +16,11 @@ void SerialEchoTest::processReader() {
 	}
 	c = reader.readln();
 	Serial.println(c);
+}
+
+void SerialEchoTest::setup() {
+	reader.initialize(9600, size(buf), buf);
+	Serial.println("Done.");
 }
 
 void SerialEchoTest::loop() {

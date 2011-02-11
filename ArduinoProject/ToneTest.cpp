@@ -1,30 +1,27 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
-//#include <avr/pgmspace.h>
+#include "Arduino.h"
 #include <pins_arduino.h>
-//#include <stdint.h>
 #include "utils.h"
 #include "Button.h"
 #include "RotorAcelleration.h"
 
-const int buttonPin = 4;	// the number of the pushbutton pin
-const int rotorPinA = 2;	// One quadrature pin
-const int rotorPinB = 3;	// the other quadrature pin
-const int ledPin =  13;      // the number of the LED pin
-const int speakerPin = 8;
+DefineClass(ToneTest);
 
-const int coilPins[] = { 5, 6, 7 };
-const int coilCount = size(coilPins);
+static const int buttonPin = 4;	// the number of the pushbutton pin
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
+static const int ledPin =  13;      // the number of the LED pin
+static const int speakerPin = 8;
 
-const byte coilStates1[][coilCount] = {
+static const int coilPins[] = { 5, 6, 7 };
+static const int coilCount = size(coilPins);
+
+static const byte coilStates1[][coilCount] = {
 		{1, 0, 0},
 		{0, 1, 0},
 		{0, 0, 1}
 };
 
-const byte coilStates[][coilCount] = {
+static const byte coilStates[][coilCount] = {
 		{1, 0, 0},
 		{1, 1, 0},
 		{0, 1, 0},
@@ -33,7 +30,7 @@ const byte coilStates[][coilCount] = {
 		{1, 0, 1}
 };
 
-const byte coilStates3[][coilCount] = {
+static const byte coilStates3[][coilCount] = {
 		{1, 0, 0},
 		{0, 0, 0},
 		{0, 1, 0},
@@ -43,21 +40,21 @@ const byte coilStates3[][coilCount] = {
 };
 
 
-const int coilStatesCount = size(coilStates);
-int activeCoilState = 0;
+static const int coilStatesCount = size(coilStates);
+static int activeCoilState = 0;
 
-struct pinDesc {
+static struct pinDesc {
 	volatile uint8_t *port;
 	volatile uint8_t mask;
 } coilPorts[coilCount], speakerPort;
 
-volatile uint8_t *coilPinPorts[coilCount];
-volatile uint8_t coilPinMaks[coilCount];
+static volatile uint8_t *coilPinPorts[coilCount];
+static volatile uint8_t coilPinMaks[coilCount];
 
-Button btn;
+static Button btn;
 
 // frequency in Hertz
-void playTimer1(uint16_t frequency) {
+static void playTimer1(uint16_t frequency) {
 	// two choices for the 16 bit timers: ck/1 or ck/64
 	uint32_t ocr = F_CPU / frequency / 2 - 1;
 	uint8_t prescalarbits = 0b001;
@@ -72,7 +69,7 @@ void playTimer1(uint16_t frequency) {
 }
 
 
-void stopTimer1() {
+static void stopTimer1() {
 	TIMSK1 &= ~(1 << OCIE1A);
 	pinDesc *pd = coilPorts;
 	for (int i = 0; i < coilCount; i++, pd++) {
@@ -80,7 +77,7 @@ void stopTimer1() {
 	}
 }
 
-bool isPlaying(void) {
+static bool isPlaying(void) {
   return TIMSK1 & (1 << OCIE1A);
 }
 
@@ -105,7 +102,7 @@ ISR(TIMER1_COMPA_vect) {
 
 /////////////////////////////////
 
-extern "C" void setup() {
+void ToneTest::setup() {
 	pinDesc *pd = coilPorts;
 	for (int i = 0; i < coilCount; i++) {
 		pinMode(coilPins[i], OUTPUT);
@@ -141,10 +138,10 @@ extern "C" void setup() {
 	Serial.begin(9600);
 }
 
-long curPosition = 0;
-boolean enabled = false;
+static long curPosition = 0;
+static boolean enabled = false;
 
-extern "C" void loop() {
+void ToneTest::loop() {
 	btn.update();
 	rotor.update();
 
@@ -164,5 +161,3 @@ extern "C" void loop() {
 		activeCoilState = curPosition = 0;
 	}
 }
-
-#endif

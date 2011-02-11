@@ -1,26 +1,23 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
 #include "Button.h"
 
-const int buttonPin = 4; // the number of the pushbutton pin
-const int ledPin = 13; // the number of the LED pin
+DefineClass(ButtonTest);
 
-Button btn;
-boolean lightOn = false;
+static const int buttonPin = 4; // the number of the pushbutton pin
+static const int ledPin = 13; // the number of the LED pin
 
-extern "C" void setup() {
+static Button btn;
+static boolean lightOn = false;
+
+void ButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
 	btn.initialize(buttonPin);
 }
 
-extern "C" void loop() {
+void ButtonTest::loop() {
 	btn.update();
 	if (btn.isPressed()) {
 		lightOn = !lightOn;
 		digitalWrite(ledPin, lightOn ? HIGH : LOW);
 	}
 }
-
-#endif

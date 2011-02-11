@@ -1,32 +1,33 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
 #include "utils.h"
+#include "RPS.h"
 #include "BlinkingLed.h"
 #include "SerialReader.h"
 #include "SmoothValue.h"
 
-const int ledPin = 13;			// the number of the LED pin
-const int numberOfSensors = 1;
-const int sensorPins[numberOfSensors] = { 1 };
+DefineClass(AnalogSensorTest);
 
-const int smoothBufferSize = 20;
-int smoothBuffer[numberOfSensors][smoothBufferSize];
+static const int ledPin = 13;			// the number of the LED pin
+static const int numberOfSensors = 1;
+static const int sensorPins[numberOfSensors] = { 1 };
 
-SmoothValue sval[numberOfSensors];
+static const int smoothBufferSize = 20;
+static int smoothBuffer[numberOfSensors][smoothBufferSize];
 
-RPS rps;
-BlinkingLed led;
-SerialReader reader;
+static SmoothValue sval[numberOfSensors];
 
-char readerBuffer[200];
+static RPS rps;
+static BlinkingLed led;
+static SerialReader reader;
 
-long lastTime;
+static char readerBuffer[200];
 
-float mySmoothVal;
+static long lastTime;
 
-extern "C" void setup() {
+static float mySmoothVal;
+static int smoothedVal = 0;
+
+void AnalogSensorTest::setup() {
 	rps.initialize();
 	led.initialize(ledPin);
 	led.playBlink(BLINK_FAST, -1);
@@ -40,9 +41,7 @@ extern "C" void setup() {
 	lastTime = millis();
 }
 
-int smoothedVal = 0;
-
-void showStatus() {
+static void showStatus() {
 	Serial.print(rps.rps);
 	Serial.print("\t");
 	for (int i = 0; i < numberOfSensors; i++) {
@@ -80,7 +79,7 @@ void processReader() {
 }
 */
 
-int smooth(int data, float filterVal, float smoothedVal) {
+static int smooth(int data, float filterVal, float smoothedVal) {
 	if (filterVal > 1) { // check to make sure param's are within range
 		filterVal = .99;
 	} else if (filterVal <= 0) {
@@ -90,7 +89,7 @@ int smooth(int data, float filterVal, float smoothedVal) {
 	return (int) smoothedVal;
 }
 
-extern "C" void loop() {
+void AnalogSensorTest::loop() {
 	led.update();
 	rps.update();
 	int val;
@@ -112,5 +111,3 @@ extern "C" void loop() {
 		}
 	}
 }
-
-#endif

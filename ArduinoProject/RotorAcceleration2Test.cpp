@@ -1,32 +1,31 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
+#include "utils.h"
 #include "Button.h"
 #include "StateLed.h"
 #include "RotorAcelleration2.h"
 
-const int buttonPin = 4;	// the number of the pushbutton pin
-const int ledPin =  13;		// the number of the LED pin
-const int speakerPin = 8;
-const int rotorPinA = 2;	// One quadrature pin
-const int rotorPinB = 3;	// the other quadrature pin
+DefineClass(RotorAcceleration2Test);
 
-Button btn;
-StateLed led;
-boolean speakerOn = false;
-RotorAcelleration2 rotor;
+static const int buttonPin = 4;	// the number of the pushbutton pin
+static const int ledPin =  13;		// the number of the LED pin
+static const int speakerPin = 8;
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
 
-const unsigned int *states[] = {
+static Button btn;
+static StateLed led;
+static boolean speakerOn = false;
+static RotorAcelleration2 rotor;
+
+static const unsigned int *states[] = {
 		BLINK_FAST,
 		BLINK_MEDIUM,
 		BLINK_SLOW
 };
 
+static long lastRotor;
 
-long lastRotor;
-
-extern "C" void setup() {
+void RotorAcceleration2Test::setup() {
 	pinMode(speakerPin, OUTPUT);
 
 	btn.initialize(buttonPin);
@@ -40,7 +39,7 @@ extern "C" void setup() {
     Serial.begin(9600);
 }
 
-extern "C" void loop() {
+void RotorAcceleration2Test::loop() {
 	btn.update();
 	led.update();
 	rotor.update();
@@ -65,5 +64,3 @@ extern "C" void loop() {
 		lastRotor = pitch;
 	}
 }
-
-#endif

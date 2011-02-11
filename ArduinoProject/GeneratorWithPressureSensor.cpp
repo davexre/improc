@@ -1,59 +1,50 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
 #include "utils.h"
+#include "RPS.h"
 #include "BlinkingLed.h"
 #include "SerialReader.h"
 
+DefineClass(GeneratorWithPressureSensor);
+
 // analog pins
-const int pressurePin = 0;				// pin of the pressre sensor
-const int cellTemperaturePin = 1;		// pin of the CELL temperature sensor
-const int mosfetTemperaturePin = 2;		// pin of the MOSFET temperature sensor
-const int ambientTemperaturePin = 3;	// pin of the AMBIENT temperature sensor
-const int currentPin = 4;				// pin of the CURRENT sensor
+static const int pressurePin = 0;				// pin of the pressre sensor
+static const int cellTemperaturePin = 1;		// pin of the CELL temperature sensor
+static const int mosfetTemperaturePin = 2;		// pin of the MOSFET temperature sensor
+static const int ambientTemperaturePin = 3;		// pin of the AMBIENT temperature sensor
+static const int currentPin = 4;				// pin of the CURRENT sensor
 
 // digital pins
-const int mosfetPin = 8;
-const int ledPin = 13;					// LED pin
+static const int mosfetPin = 8;
+static const int ledPin = 13;					// LED pin
 
-const float shuntResistance = 0.275;	// Shunt resistance in Ohms
-const float analogReadingToVoltage = 5.0 / 1024.0;
+static const float shuntResistance = 0.275;	// Shunt resistance in Ohms
+static const float analogReadingToVoltage = 5.0 / 1024.0;
 
-float pressure = 0.0;
-float cellTemperature = 0.0;
-float mosfetTemperature = 0.0;
-float ambientTemperature = 0.0;
-float current = 0.0;
+static float pressure = 0.0;
+static float cellTemperature = 0.0;
+static float mosfetTemperature = 0.0;
+static float ambientTemperature = 0.0;
+static float current = 0.0;
 
-int pressureTreshold = 140;
-int cellTemperatureThreshold = (int) (60 / analogReadingToVoltage / 100.0);		// 60 degrees
-int mosfetTemperatureThreshold = (int) (80 / analogReadingToVoltage / 100.0);	// 80 degrees
-int currentMaxThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
-int currentMinThreshold = (int) (0.020 * shuntResistance / analogReadingToVoltage);	// 0.020 amps
+static int pressureTreshold = 140;
+static int cellTemperatureThreshold = (int) (60 / analogReadingToVoltage / 100.0);		// 60 degrees
+static int mosfetTemperatureThreshold = (int) (80 / analogReadingToVoltage / 100.0);	// 80 degrees
+static int currentMaxThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
+static int currentMinThreshold = (int) (0.020 * shuntResistance / analogReadingToVoltage);	// 0.020 amps
 
-boolean isPlaying = false;
-int maxPressure = 0;
-int maxCurrent = 0;
+static boolean isPlaying = false;
+static int maxPressure = 0;
+static int maxCurrent = 0;
 
-BlinkingLed led;
+static BlinkingLed led;
 
-char buf[20];
+static char buf[20];
 
-SerialReader reader;
-RPS rps;
-RPS currentRPS;
+static SerialReader reader;
+static RPS rps;
+static RPS currentRPS;
 
-extern "C" void setup() {
-	noTone(mosfetPin);
-	pinMode(mosfetPin, OUTPUT);
-	rps.initialize();
-	currentRPS.initialize();
-	led.initialize(ledPin);
-	reader.initialize(9600, size(buf), buf);
-}
-
-void showStatus(boolean aborting) {
+static void showStatus(boolean aborting) {
 	Serial.print(isPlaying ? "1" : "0");
 	Serial.print("\t");
 	Serial.print(aborting ? "1" : "0");
@@ -74,7 +65,7 @@ void showStatus(boolean aborting) {
 	Serial.println();
 }
 
-boolean checkThresholdsExceeded() {
+static boolean checkThresholdsExceeded() {
 	return (
 		(pressure >= pressureTreshold) |
 		(cellTemperature >= cellTemperatureThreshold) |
@@ -82,9 +73,9 @@ boolean checkThresholdsExceeded() {
 		(current >= currentMaxThreshold) );
 }
 
-long frequency;
-long temp;
-void processReader() {
+static long frequency;
+static long temp;
+static void processReader() {
 	char *c;
 	int lightOn;
 	reader.update();
@@ -147,8 +138,18 @@ void processReader() {
 	}
 }
 
-int tempCurrent;
-extern "C" void loop() {
+static int tempCurrent;
+
+void GeneratorWithPressureSensor::setup() {
+	noTone(mosfetPin);
+	pinMode(mosfetPin, OUTPUT);
+	rps.initialize();
+	currentRPS.initialize();
+	led.initialize(ledPin);
+	reader.initialize(9600, size(buf), buf);
+}
+
+void GeneratorWithPressureSensor::loop() {
 	rps.update();
 	led.update();
 
@@ -177,5 +178,3 @@ extern "C" void loop() {
 		}
 	}
 }
-
-#endif

@@ -1,27 +1,26 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
-
-#include <WProgram.h>
+#include "Arduino.h"
 #include "utils.h"
 #include "Button.h"
 #include "RotorAcelleration.h"
 
-const int buttonPin = 4;	// the number of the pushbutton pin
-const int rotorPinA = 2;	// One quadrature pin
-const int rotorPinB = 3;	// the other quadrature pin
-const int speakerPin = 8;
-const int ledPin = 13;
+DefineClass(TPU);
 
-const int coilPins[] = { 5, 6, 7 };
-const int coilCount = size(coilPins);
+static const int buttonPin = 4;	// the number of the pushbutton pin
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
+static const int speakerPin = 8;
+static const int ledPin = 13;
 
-const byte coilStates1[][coilCount] = {
+static const int coilPins[] = { 5, 6, 7 };
+static const int coilCount = size(coilPins);
+
+static const byte coilStates1[][coilCount] = {
 		{1, 0, 0},
 		{0, 1, 0},
 		{0, 0, 1}
 };
 
-const byte coilStates2[][coilCount] = {
+static const byte coilStates2[][coilCount] = {
 		{1, 0, 0},
 		{1, 1, 0},
 		{0, 1, 0},
@@ -30,7 +29,7 @@ const byte coilStates2[][coilCount] = {
 		{1, 0, 1}
 };
 
-const byte coilStates[][coilCount] = {
+static const byte coilStates[][coilCount] = {
 		{1, 0, 0},
 		{0, 0, 0},
 		{0, 1, 0},
@@ -39,14 +38,14 @@ const byte coilStates[][coilCount] = {
 		{0, 0, 0}
 };
 
-const int coilStatesCount = size(coilStates);
-int activeCoilState = 0;
+static const int coilStatesCount = size(coilStates);
+static int activeCoilState = 0;
 
-Button btn;
-boolean enabled = false;
-boolean speakerState = false;
+static Button btn;
+static boolean enabled = false;
+static boolean speakerState = false;
 
-extern "C" void setup() {
+void TPU::setup() {
 	for (int i = 0; i < coilCount; i++) {
 		pinMode(coilPins[i], OUTPUT);
 		digitalWrite(coilPins[i], 0);
@@ -66,7 +65,7 @@ extern "C" void setup() {
 	rotor.maxValue = 100;
 }
 
-extern "C" void loop() {
+void TPU::loop() {
 	btn.update();
 	rotor.update();
 
@@ -95,5 +94,3 @@ extern "C" void loop() {
 
 	delay(curDelay);
 }
-
-#endif
