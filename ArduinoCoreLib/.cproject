@@ -48,6 +48,7 @@
 								<option id="de.innot.avreclipse.compiler.option.incpath.275124568" name="Include Paths (-I)" superClass="de.innot.avreclipse.compiler.option.incpath" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Slavian}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Library}&quot;"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.allwarn.734970447" name="All Warnings (-Wall)" superClass="de.innot.avreclipse.compiler.option.allwarn" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.std.1617982184" name="Language Standard" superClass="de.innot.avreclipse.compiler.option.std" value="de.innot.avreclipse.compiler.option.std.default" valueType="enumerated"/>

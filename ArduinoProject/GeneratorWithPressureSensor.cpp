@@ -40,6 +40,8 @@ BlinkingLed led;
 
 char buf[20];
 
+SerialReader reader;
+RPS rps;
 RPS currentRPS;
 
 extern "C" void setup() {

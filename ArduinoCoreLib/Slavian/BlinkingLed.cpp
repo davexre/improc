@@ -19,14 +19,14 @@ void BlinkingLed::update() {
 	}
 }
 
-void BlinkingLed::stop() {
-	play(0);
-}
-
 void BlinkingLed::play(int playCount) {
-	this->playCount = playCount;
-	toggleTime = millis();
-	update();
+	if (delays != NULL) {
+		if (!isPlaying()) {
+			toggleTime = millis();
+		}
+		this->playCount = playCount;
+		update();
+	}
 }
 
 void BlinkingLed::initialize(uint8_t pin) {
@@ -64,6 +64,8 @@ unsigned int BlinkingLed::getNextDelay() {
 }
 
 void BlinkingLed::playBlink(const unsigned int *delays, int playCount) {
+	if (delays == NULL)
+		playCount = 0;
 	uint8_t oldSREG = SREG;
 	cli();
 	curDelay = 0;

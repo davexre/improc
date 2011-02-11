@@ -33,10 +33,6 @@ void SerialReader::update(void) {
 	}
 }
 
-boolean SerialReader::available(void) {
-	return eol;
-}
-
 char *SerialReader::readln() {
 	if (eol) {
 		eol = false;
@@ -45,5 +41,3 @@ char *SerialReader::readln() {
 	}
 	return NULL;
 }
-
-SerialReader reader;

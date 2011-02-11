@@ -1,4 +1,4 @@
-#define UseThisFileForMainProgram
+//#define UseThisFileForMainProgram
 #ifdef UseThisFileForMainProgram
 
 #include <WProgram.h>
@@ -18,6 +18,12 @@ const int speakerPin = 8;
 const int coilPins[] = { 5, 6, 7 };
 const int coilCount = size(coilPins);
 
+const byte coilStates1[][coilCount] = {
+		{1, 0, 0},
+		{0, 1, 0},
+		{0, 0, 1}
+};
+
 const byte coilStates[][coilCount] = {
 		{1, 0, 0},
 		{1, 1, 0},
@@ -26,6 +32,17 @@ const byte coilStates[][coilCount] = {
 		{0, 0, 1},
 		{1, 0, 1}
 };
+
+const byte coilStates3[][coilCount] = {
+		{1, 0, 0},
+		{0, 0, 0},
+		{0, 1, 0},
+		{0, 0, 0},
+		{0, 0, 1},
+		{0, 0, 0}
+};
+
+
 const int coilStatesCount = size(coilStates);
 int activeCoilState = 0;
 

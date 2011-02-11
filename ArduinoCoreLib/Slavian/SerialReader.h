@@ -15,10 +15,10 @@ public:
 	void initialize(int speed, int bufferSize, char *buffer);
 	void setBuffer(int bufferSize, char *buffer);
 	void update(void);
-	boolean available();
 	char *readln();
+	inline boolean available() {
+		return (eol);
+	};
 };
-
-extern SerialReader reader;
 
 #endif

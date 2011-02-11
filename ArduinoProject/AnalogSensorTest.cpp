@@ -16,7 +16,9 @@ int smoothBuffer[numberOfSensors][smoothBufferSize];
 
 SmoothValue sval[numberOfSensors];
 
+RPS rps;
 BlinkingLed led;
+SerialReader reader;
 
 char readerBuffer[200];
 

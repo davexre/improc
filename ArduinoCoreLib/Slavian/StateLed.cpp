@@ -34,7 +34,3 @@ void StateLed::setLooped(boolean looped) {
 		led.playBlink(stateDelays[state], looped ? -1 : 1);
 	}
 }
-
-void StateLed::update(void) {
-	led.update();
-}

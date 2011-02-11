@@ -1,7 +1,5 @@
 #include "utils.h"
 
-RPS rps;
-
 void RPS::initialize() {
 	lastTime = millis();
 	for (byte i = 0; i < RPS_TIMES_PER_SECOND; i++) {
@@ -12,10 +10,12 @@ void RPS::initialize() {
 	deltaTime = 1000 / RPS_TIMES_PER_SECOND;
 }
 
-void RPS::update() {
+void RPS::update(boolean tick) {
 	long now = millis();
-	for (byte i = 0; i < RPS_TIMES_PER_SECOND; i++) {
-		counters[i]++;
+	if (tick) {
+		for (byte i = 0; i < RPS_TIMES_PER_SECOND; i++) {
+			counters[i]++;
+		}
 	}
 	if (now - lastTime >= deltaTime) {
 		rps = (counters[curCounter] * 1000) / (now - started[curCounter]);

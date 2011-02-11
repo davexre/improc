@@ -30,8 +30,11 @@ public:
 	void setState(int state);
 	void nextState(void);
 	void previousState(void);
-	void update(void);
 	void setLooped(boolean looped);
+
+	inline void update(void) {
+		led.update();
+	}
 };
 
 #endif

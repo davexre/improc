@@ -4,6 +4,8 @@
 #include <wiring.h>
 
 #define size(arr) sizeof(arr) / sizeof(arr[0])
+#define disableInterrupts() uint8_t oldSREG = SREG; cli()
+#define restoreInterrupts() SREG = oldSREG
 
 /**
  * Converts string to int and forwards the pointer to the first non-digit symbol
@@ -34,7 +36,7 @@ private:
 public:
 	long rps;
 	void initialize();
-	void update();
+	void update(boolean tick = true);
 	/**
 	 * Smothes a value.
 	 * timesPerSecond - equvalent to making an average for all measurements timesPerSecond.
@@ -55,6 +57,5 @@ public:
 	 */
 	void smooth(int data, float *smoothedValue, int timesPerSecond = 4);
 };
-extern RPS rps;
 
 #endif

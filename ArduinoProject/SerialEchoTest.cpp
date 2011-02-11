@@ -1,18 +1,11 @@
-//#define UseThisFileForMainProgram
-#ifdef UseThisFileForMainProgram
+#include "SerialEchoTest.h"
 
-#include <WProgram.h>
-#include "utils.h"
-#include "SerialReader.h"
-
-char buf[200];
-
-extern "C" void setup() {
+void SerialEchoTest::setup() {
 	reader.initialize(9600, size(buf), buf);
 	Serial.println("Done.");
 }
 
-void processReader() {
+void SerialEchoTest::processReader() {
 	char *c;
 	Serial.println(reader.bufferFull);
 	reader.update();
@@ -23,9 +16,7 @@ void processReader() {
 	Serial.println(c);
 }
 
-extern "C" void loop() {
+void SerialEchoTest::loop() {
 	processReader();
 	delay(100);
 }
-
-#endif
