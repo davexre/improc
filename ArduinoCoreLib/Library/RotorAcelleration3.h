@@ -15,6 +15,8 @@
  * Uses:
  *   the timer0 via the millis() function.
  *   pinA, pinB can be connected to any digital pin.
+ *
+ *   http://hacks.ayars.org/2009/12/using-quadrature-encoder-rotary-switch.html
  */
 class RotorAcelleration3 {
 private:

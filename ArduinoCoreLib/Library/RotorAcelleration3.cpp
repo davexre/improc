@@ -1,9 +1,8 @@
 #include "RotorAcelleration3.h"
 
 void RotorAcelleration3::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
-	pinA.initialize(pinNumberA);
-	pinB.initialize(pinNumberB);
-	pinA.debounce = pinB.debounce = 1;
+	pinA.initialize(pinNumberA, 1);
+	pinB.initialize(pinNumberB, 1);
 
 	time0 = 10;
 	time1 = 60;
