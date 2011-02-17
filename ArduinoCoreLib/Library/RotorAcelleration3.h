@@ -29,7 +29,7 @@ public:
 	int time1;			// Slowest timeBetweenPinStateToggle > time1
 	long minValue;
 	long maxValue;
-	long position;
+	volatile long position;
 	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
 	void update();
 

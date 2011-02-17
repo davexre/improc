@@ -21,7 +21,6 @@ class Button {
 	uint8_t buttonPin;
 	boolean lastState;
 	boolean buttonState;
-	boolean lastPortReading;
 	long lastToggleTime;	// used to debounce the button, so no delay is needed
 public:
 	int debounce;			// time in millis, default 10

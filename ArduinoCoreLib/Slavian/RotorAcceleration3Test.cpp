@@ -41,10 +41,12 @@ void RotorAcceleration3Test::loop() {
 	btn.update();
 	led.update();
 	rotor.update();
+	long pos = rotor.position;
+	long now = millis();
 
 	if (btn.isPressed()) {
 		speakerOn = !speakerOn;
-		if (speakerOn) {
+		if (speakerOn && pos == 1 && now == 2) {
 			tone(speakerPin, rotor.position);
 			led.setState(0);
 		} else {
