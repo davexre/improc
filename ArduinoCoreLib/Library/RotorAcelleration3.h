@@ -2,6 +2,7 @@
 #define ROTORACELLERATION3_H_
 
 #include <WProgram.h>
+#include "TicksPerSecond.h"
 #include "Button.h"
 
 /**
@@ -20,16 +21,14 @@
  */
 class RotorAcelleration3 {
 private:
-	long lastTimeToggleA;
-public:
-	Button pinA;
-	Button pinB;
-	int steps[3];
-	int time0;			// Fastest debounce < timeBetweenPinStateToggle < time0
-	int time1;			// Slowest timeBetweenPinStateToggle > time1
 	long minValue;
 	long maxValue;
 	volatile long position;
+public:
+	Button pinA;
+	Button pinB;
+	TicksPerSecond tps;
+
 	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
 	void update();
 
@@ -39,6 +38,33 @@ public:
 
 	inline boolean isIncrementing() {
 		return pinB.isUp();
+	}
+
+	inline long getPosition_unsafe() {
+		return position;
+	}
+
+	inline void setPosition_unsafe(long newPosition) {
+		position = constrain(newPosition, minValue, maxValue);
+	}
+
+	inline long getPosition() {
+		disableInterrupts();
+		long result = position;
+		restoreInterrupts();
+		return result;
+	}
+
+	inline void setPosition(long newPosition) {
+		disableInterrupts();
+		setPosition_unsafe(newPosition);
+		restoreInterrupts();
+	}
+
+	inline void setMinMax(long newMinValue, long newMaxValue) {
+		minValue = newMinValue;
+		maxValue = newMaxValue;
+		setPosition_unsafe(position);
 	}
 };
 

@@ -30,9 +30,8 @@ void RotorAcceleration3Test::setup() {
 	led.initialize(ledPin, true, size(states), states);
 	led.setState(1);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.minValue = 0;
-	rotor.maxValue = 50000;
-	rotor.position = 500;
+	rotor.setMinMax(0, 50000);
+	rotor.setPosition(500);
 
     Serial.begin(9600);
 }
@@ -41,13 +40,12 @@ void RotorAcceleration3Test::loop() {
 	btn.update();
 	led.update();
 	rotor.update();
-	long pos = rotor.position;
-	long now = millis();
 
+	long pos = rotor.getPosition();
 	if (btn.isPressed()) {
 		speakerOn = !speakerOn;
-		if (speakerOn && pos == 1 && now == 2) {
-			tone(speakerPin, rotor.position);
+		if (speakerOn) {
+			tone(speakerPin, pos);
 			led.setState(0);
 		} else {
 			noTone(speakerPin);
@@ -57,8 +55,8 @@ void RotorAcceleration3Test::loop() {
 
 	if (rotor.isTicked()) {
 		if (speakerOn) {
-			tone(speakerPin, rotor.position);
+			tone(speakerPin, pos);
 		}
-		Serial.println(rotor.position);
+		Serial.println(pos);
 	}
 }
