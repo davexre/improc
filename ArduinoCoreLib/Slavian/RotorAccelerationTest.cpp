@@ -1,13 +1,13 @@
 #include "Arduino.h"
+#include "utils.h"
 #include "Button.h"
 #include "StateLed.h"
 #include "RotorAcelleration.h"
-#include "utils.h"
 
 DefineClass(RotorAccelerationTest);
 
 static const int buttonPin = 4;	// the number of the pushbutton pin
-static const int ledPin =  12;		// the number of the LED pin
+static const int ledPin =  13;		// the number of the LED pin
 static const int speakerPin = 8;
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
@@ -15,6 +15,7 @@ static const int rotorPinB = 3;	// the other quadrature pin
 static Button btn;
 static StateLed led;
 static boolean speakerOn = false;
+static RotorAcelleration rotor;
 
 static const unsigned int *states[] = {
 		BLINK_FAST,
@@ -22,31 +23,34 @@ static const unsigned int *states[] = {
 		BLINK_SLOW
 };
 
-static long lastRotor;
+void UpdateRotor() {
+	rotor.update();
+}
 
 void RotorAccelerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 
 	btn.initialize(buttonPin);
 	led.initialize(ledPin, true, size(states), states);
+	led.setState(1);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.minValue = 0;
-	rotor.maxValue = 50000;
-	lastRotor = rotor.position = 500;
-
+	rotor.setMinMax(0, 5000);
+	rotor.setPosition(500);
+	attachInterrupt(0, UpdateRotor, CHANGE);
     Serial.begin(9600);
 }
 
+long lastRotor = 0;
 void RotorAccelerationTest::loop() {
 	btn.update();
 	led.update();
-	rotor.update();
+//	rotor.update();
 
-	long pitch = rotor.position;
+	long pos = rotor.getPosition();
 	if (btn.isPressed()) {
 		speakerOn = !speakerOn;
 		if (speakerOn) {
-			tone(speakerPin, pitch);
+			tone(speakerPin, pos);
 			led.setState(0);
 		} else {
 			noTone(speakerPin);
@@ -54,12 +58,15 @@ void RotorAccelerationTest::loop() {
 		}
 	}
 
-	if (pitch != lastRotor) {
+//	if (rotor.isTicked()) {
+	if (lastRotor != pos) {
 		if (speakerOn) {
-			tone(speakerPin, pitch);
+			tone(speakerPin, pos);
 		}
-		Serial.println(pitch);
-		lastRotor = pitch;
+		float tps = rotor.tps.getTPS();
+		Serial.print(pos);
+		Serial.print(" ");
+		Serial.println(tps);
 	}
-	delay(10);
+	lastRotor = pos;
 }

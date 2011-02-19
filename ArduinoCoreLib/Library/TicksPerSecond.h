@@ -63,7 +63,7 @@ public:
 	 *   tps.smooth(analogRead(2), val2);
 	 * }
 	 */
-	void smooth(int data, float *smoothedValue, int timesPerSecond = 4);
+	void smooth(int data, float *smoothedValue, int timesPerSecond = TPS_TIMES_PER_SECOND);
 };
 
 #endif

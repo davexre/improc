@@ -2,41 +2,115 @@
 #define ROTORACELLERATION_H_
 
 #include <WProgram.h>
+#include "TicksPerSecond.h"
+#include "Button.h"
 
 /**
- * Quadrature (Rotor knob) sensitive to rotation speed.
+ * Minimum rotary knob tick per second to start acceleration.
+ * If the speed of ticking is below this value no acceleration
+ * is considered, i.e. ticking is by 1.
+ */
+#define MIN_TPS 5
+
+/**
+ * Maximum rotary knob tick per second when accelerating.
+ * If the speed of ticking is above this value then acceleration
+ * is considered at full speed.
+ */
+#define MAX_TPS 30
+
+/**
+ * The number of ticks that a rotary knob should make at full speed
+ * to go from minValue to maxValue. If rotary knob has 20 ticks for
+ * a 360 degrees rotation then 5 rotations at full speed will be needed
+ * to go from minValue to maxValue.
+ */
+#define TICKS_AT_MAX_SPEED_FOR_FULL_SPAN 100
+
+/**
+ * Quadrature (Rotary knob) sensitive to rotation speed.
  * When the quadrature is rotated a #position# variable is
  * incremented/decremented. If the quadrature is rotated fast
  * the increment/decrement step is increased.
  *
+ * Can be used with or without interrupt!
+ *
  * Uses:
  *   the timer0 via the millis() function.
- *   pinA of the quadrature must be connected
- *   		to pin0 or pin1 (hardware interrupt)
- *   pinB can be connected to any other digital pin.
+ *   pinA, pinB can be connected to any digital pin.
  *
- *
+ *   http://hacks.ayars.org/2009/12/using-quadrature-encoder-rotary-switch.html
  */
 class RotorAcelleration {
 private:
-	static void UpdateRotation();
-	int lastDirection;
-	long lastTime;
-public:
-	int pinA;
-	int pinB;
-	int steps[3];
-	int timeDebounce;	// Below this time will ignore interrupts
-	int time0;			// Fastest timeDebounce < timeBetweenInterrupts < time0
-	int time1;			// Slowest timeBetweenInterrupts > time1
 	long minValue;
 	long maxValue;
 	volatile long position;
-	void initialize(int pinA, int pinB);
+public:
+	Button pinA;
+	Button pinB;
+	TicksPerSecond tps;
+
+	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
 	void update();
 
-};
+	/**
+	 * Has the rotary knob been ticked at the last update
+	 */
+	inline boolean isTicked() {
+		return pinA.isPressed();
+	}
 
-extern RotorAcelleration rotor;
+	inline boolean isIncrementing() {
+		return pinB.isUp();
+	}
+
+	/**
+	 * Gets the position of the knob. If the update method is called from an
+	 * interrupt use the safe method getPosition() instead.
+	 */
+	inline long getPosition_unsafe() {
+		return position;
+	}
+
+	/**
+	 * Sets the position of the knob. If the update method is called from an
+	 * interrupt use the safe method getPosition() instead.
+	 */
+	inline void setPosition_unsafe(long newPosition) {
+		position = constrain(newPosition, minValue, maxValue);
+	}
+
+	/**
+	 * Gets the position of the knob.
+	 */
+	inline long getPosition() {
+		disableInterrupts();
+		long result = position;
+		restoreInterrupts();
+		return result;
+	}
+
+	/**
+	 * Sets the position of the knob.
+	 */
+	inline void setPosition(long newPosition) {
+		disableInterrupts();
+		setPosition_unsafe(newPosition);
+		restoreInterrupts();
+	}
+
+	/**
+	 * Sets the minValue and maxValue for the rotary knob and fixes
+	 * the position if it is out of bounds.
+	 */
+	inline void setMinMax(long newMinValue, long newMaxValue) {
+		disableInterrupts();
+		minValue = newMinValue;
+		maxValue = newMaxValue;
+		setPosition_unsafe(position);
+		restoreInterrupts();
+	}
+};
 
 #endif

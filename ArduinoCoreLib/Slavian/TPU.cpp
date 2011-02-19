@@ -42,6 +42,8 @@ static const int coilStatesCount = size(coilStates);
 static int activeCoilState = 0;
 
 static Button btn;
+static RotorAcelleration rotor;
+
 static boolean enabled = false;
 static boolean speakerState = false;
 
@@ -57,19 +59,14 @@ void TPU::setup() {
 
 	btn.initialize(buttonPin);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.steps[0] = 1;
-	rotor.steps[1] = 1;
-	rotor.steps[2] = 1;
-
-	rotor.minValue = 0;
-	rotor.maxValue = 100;
+	rotor.setMinMax(0, 100);
 }
 
 void TPU::loop() {
 	btn.update();
 	rotor.update();
 
-	long curDelay = rotor.position;
+	long curDelay = rotor.getPosition();
 	if (btn.isPressed()) {
 		enabled = !enabled;
 		digitalWrite(ledPin, enabled);

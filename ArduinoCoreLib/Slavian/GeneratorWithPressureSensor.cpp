@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "utils.h"
-#include "RPS.h"
+#include "TicksPerSecond.h"
 #include "BlinkingLed.h"
 #include "SerialReader.h"
 
@@ -41,8 +41,8 @@ static BlinkingLed led;
 static char buf[20];
 
 static SerialReader reader;
-static RPS rps;
-static RPS currentRPS;
+static TicksPerSecond tps;
+static TicksPerSecond currentTPS;
 
 static void showStatus(boolean aborting) {
 	Serial.print(isPlaying ? "1" : "0");
@@ -143,24 +143,24 @@ static int tempCurrent;
 void GeneratorWithPressureSensor::setup() {
 	noTone(mosfetPin);
 	pinMode(mosfetPin, OUTPUT);
-	rps.initialize();
-	currentRPS.initialize();
+	tps.initialize();
+	currentTPS.initialize();
 	led.initialize(ledPin);
 	reader.initialize(9600, size(buf), buf);
 }
 
 void GeneratorWithPressureSensor::loop() {
-	rps.update();
+	tps.update();
 	led.update();
 
-	rps.smooth(analogRead(pressurePin), &pressure, 4);
-	rps.smooth(analogRead(cellTemperaturePin), &cellTemperature, 4);
-	rps.smooth(analogRead(mosfetTemperaturePin), &mosfetTemperature, 4);
-	rps.smooth(analogRead(ambientTemperaturePin), &ambientTemperature, 4);
+	tps.smooth(analogRead(pressurePin), &pressure, 4);
+	tps.smooth(analogRead(cellTemperaturePin), &cellTemperature, 4);
+	tps.smooth(analogRead(mosfetTemperaturePin), &mosfetTemperature, 4);
+	tps.smooth(analogRead(ambientTemperaturePin), &ambientTemperature, 4);
 	tempCurrent = analogRead(currentPin);
 	if (tempCurrent > currentMinThreshold) {
-		currentRPS.update();
-		currentRPS.smooth(tempCurrent, &current, 4);
+		currentTPS.update();
+		currentTPS.smooth(tempCurrent, &current, 4);
 	}
 
 	processReader();

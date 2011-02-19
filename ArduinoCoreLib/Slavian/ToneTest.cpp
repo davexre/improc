@@ -52,6 +52,7 @@ static volatile uint8_t *coilPinPorts[coilCount];
 static volatile uint8_t coilPinMaks[coilCount];
 
 static Button btn;
+static RotorAcelleration rotor;
 
 // frequency in Hertz
 static void playTimer1(uint16_t frequency) {
@@ -130,34 +131,35 @@ void ToneTest::setup() {
 
 	btn.initialize(buttonPin);
 	rotor.initialize(rotorPinA, rotorPinB);
-
-	rotor.minValue = 50;
-	rotor.maxValue = 50000;
-	rotor.position = 100;
+	rotor.setMinMax(50, 50000);
+	rotor.setPosition(100);
 
 	Serial.begin(9600);
 }
 
 static long curPosition = 0;
+static long lastPosition = -1;
 static boolean enabled = false;
 
 void ToneTest::loop() {
 	btn.update();
 	rotor.update();
 
+	curPosition = rotor.getPosition();
 	if (btn.isPressed()) {
 		enabled = !enabled;
 		digitalWrite(ledPin, enabled);
 	}
 
 	if (enabled) {
-		if (curPosition != rotor.position) {
-			curPosition = rotor.position;
+		if (curPosition != lastPosition) {
+			lastPosition = curPosition;
 			playTimer1(curPosition);
 			Serial.println(curPosition);
 		}
 	} else {
 		stopTimer1();
-		activeCoilState = curPosition = 0;
+		activeCoilState = 0;
+		lastPosition = -1;
 	}
 }

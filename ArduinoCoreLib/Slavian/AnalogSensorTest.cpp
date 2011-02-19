@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "utils.h"
-#include "RPS.h"
+#include "TicksPerSecond.h"
 #include "BlinkingLed.h"
 #include "SerialReader.h"
 #include "SmoothValue.h"
@@ -16,7 +16,7 @@ static int smoothBuffer[numberOfSensors][smoothBufferSize];
 
 static SmoothValue sval[numberOfSensors];
 
-static RPS rps;
+static TicksPerSecond tps;
 static BlinkingLed led;
 static SerialReader reader;
 
@@ -28,7 +28,7 @@ static float mySmoothVal;
 static int smoothedVal = 0;
 
 void AnalogSensorTest::setup() {
-	rps.initialize();
+	tps.initialize();
 	led.initialize(ledPin);
 	led.playBlink(BLINK_FAST, -1);
 	reader.initialize(9600, size(readerBuffer), readerBuffer);
@@ -42,7 +42,7 @@ void AnalogSensorTest::setup() {
 }
 
 static void showStatus() {
-	Serial.print(rps.rps);
+	Serial.print(tps.getTPS());
 	Serial.print("\t");
 	for (int i = 0; i < numberOfSensors; i++) {
 			Serial.print("\t");
@@ -91,14 +91,14 @@ static int smooth(int data, float filterVal, float smoothedVal) {
 
 void AnalogSensorTest::loop() {
 	led.update();
-	rps.update();
+	tps.update();
 	int val;
 	for (int i = 0; i < numberOfSensors; i++) {
 		val = analogRead(sensorPins[i]);
 		sval[i].addValue(val);
 	}
 	smoothedVal =  smooth(val, 0.95, smoothedVal);
-	rps.smooth(val, &mySmoothVal);
+	tps.smooth(val, &mySmoothVal);
 
 //	processReader();
 	if (millis() - lastTime > 500) {

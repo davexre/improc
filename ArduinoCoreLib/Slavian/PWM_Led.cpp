@@ -12,6 +12,7 @@ static const int rotorPinA = 2;		// One quadrature pin
 static const int rotorPinB = 3;		// the other quadrature pin
 
 static Button btn;
+static RotorAcelleration rotor;
 static boolean speakerOn = false;
 
 void PWM_Led::setup() {
@@ -20,9 +21,8 @@ void PWM_Led::setup() {
 
 	btn.initialize(buttonPin);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.minValue = 0;
-	rotor.maxValue = 255;
-	rotor.position = 1;
+	rotor.setMinMax(0, 255);
+	rotor.setPosition(1);
 
     Serial.begin(9600);
 }
@@ -33,7 +33,7 @@ void PWM_Led::loop() {
 	btn.update();
 	rotor.update();
 
-	int pwm = (int) rotor.position;
+	int pwm = (int) rotor.getPosition();
 
 	if (btn.isPressed()) {
 		speakerOn = !speakerOn;

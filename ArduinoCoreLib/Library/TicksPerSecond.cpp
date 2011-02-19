@@ -12,7 +12,7 @@ void TicksPerSecond::initialize(int holdLastTimeoutMillis) {
 
 void TicksPerSecond::update(boolean tick) {
 	long now = millis();
-	if (now - lastTime > deltaTime) {
+	if (now - lastTime >= deltaTime) {
 		counters[curCounter] = 0;
 		lastTime = started[curCounter++] = now;
 		if (curCounter >= TPS_TIMES_PER_SECOND)
@@ -23,7 +23,10 @@ void TicksPerSecond::update(boolean tick) {
 			counters[i]++;
 		}
 	}
-	tps = (counters[curCounter] * 1000.0) / (now - started[curCounter] + 1);
+	now -= started[curCounter];
+	if (now <= 0)
+		now = 1;
+	tps = (counters[curCounter] * 1000.0) / now;
 }
 
 void TicksPerSecond::smooth(int data, float *smoothedValue, int timesPerSecond) {
