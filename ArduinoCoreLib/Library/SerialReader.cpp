@@ -1,7 +1,7 @@
 #include "SerialReader.h"
 
-void SerialReader::initialize(int speed, int bufferSize, char *buffer) {
-	Serial.begin(speed);
+void SerialReader::initialize(int serialBoudRate, int bufferSize, char *buffer) {
+	Serial.begin(serialBoudRate);
 	setBuffer(bufferSize, buffer);
 }
 

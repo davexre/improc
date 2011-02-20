@@ -1,7 +1,8 @@
 #ifndef STATELED_H_
 #define STATELED_H_
 
-#include "BlinkingLed.h"
+#include <wiring.h>
+#include <BlinkingLed.h>
 
 /**
  * Show different states via blinking a led.

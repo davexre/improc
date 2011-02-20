@@ -46,12 +46,22 @@ private:
 	long minValue;
 	long maxValue;
 	volatile long position;
+
 public:
 	Button pinA;
 	Button pinB;
 	TicksPerSecond tps;
 
+	/**
+	 * Initializes the class, sets ports (pinA and pinB) to output mode.
+	 */
 	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
+
+	/**
+	 * Updates the state of the rotary knob.
+	 * This method should be placed in the main loop of the program or
+	 * might be invoked from an interrupt.
+	 */
 	void update();
 
 	/**
@@ -61,6 +71,10 @@ public:
 		return pinA.isPressed();
 	}
 
+	/**
+	 * Has the rotary knob been rotated in incrementing direction at the last update.
+	 * If the method returns TRUE the direction is incrementing.
+	 */
 	inline boolean isIncrementing() {
 		return pinB.isUp();
 	}
