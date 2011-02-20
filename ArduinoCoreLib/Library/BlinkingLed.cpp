@@ -1,5 +1,15 @@
 #include "BlinkingLed.h"
 
+void BlinkingLed::initialize(uint8_t pin) {
+	this->pin = pin;
+	this->delays = NULL;
+	curDelay = 0;
+	lightOn = false;
+	playCount = 0;
+	toggleTime = 0;
+	pinMode(pin, OUTPUT);
+}
+
 void BlinkingLed::update() {
 	if (isPlaying()) {
 		long cur = millis();
@@ -19,7 +29,7 @@ void BlinkingLed::update() {
 	}
 }
 
-void BlinkingLed::play(int playCount) {
+void BlinkingLed::play(signed short int playCount) {
 	if (delays != NULL) {
 		if (!isPlaying()) {
 			toggleTime = millis();
@@ -27,16 +37,6 @@ void BlinkingLed::play(int playCount) {
 		this->playCount = playCount;
 		update();
 	}
-}
-
-void BlinkingLed::initialize(uint8_t pin) {
-	this->pin = pin;
-	this->delays = NULL;
-	curDelay = 0;
-	lightOn = false;
-	playCount = 0;
-	toggleTime = 0;
-	pinMode(pin, OUTPUT);
 }
 
 unsigned int BlinkingLed::getNextDelay() {
@@ -63,7 +63,7 @@ unsigned int BlinkingLed::getNextDelay() {
 	return result;
 }
 
-void BlinkingLed::playBlink(const unsigned int *delays, int playCount) {
+void BlinkingLed::playBlink(const unsigned int *delays, signed short int playCount) {
 	if (delays == NULL)
 		playCount = 0;
 	uint8_t oldSREG = SREG;

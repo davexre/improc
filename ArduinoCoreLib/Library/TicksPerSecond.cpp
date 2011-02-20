@@ -2,12 +2,12 @@
 
 void TicksPerSecond::initialize(int holdLastTimeoutMillis) {
 	lastTime = millis();
-	for (byte i = 0; i < TPS_TIMES_PER_SECOND; i++) {
+	for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
 		counters[i] = 0;
 		started[i] = lastTime;
 	}
 	curCounter = 0;
-	deltaTime = holdLastTimeoutMillis / TPS_TIMES_PER_SECOND;
+	deltaTime = holdLastTimeoutMillis / TPS_TIMES_PER_PERIOD;
 }
 
 void TicksPerSecond::update(boolean tick) {
@@ -15,17 +15,17 @@ void TicksPerSecond::update(boolean tick) {
 	if (now - lastTime >= deltaTime) {
 		counters[curCounter] = 0;
 		lastTime = started[curCounter++] = now;
-		if (curCounter >= TPS_TIMES_PER_SECOND)
+		if (curCounter >= TPS_TIMES_PER_PERIOD)
 			curCounter = 0;
 	}
 	if (tick) {
-		for (byte i = 0; i < TPS_TIMES_PER_SECOND; i++) {
+		for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
 			counters[i]++;
 		}
 	}
 	now -= started[curCounter];
 	if (now <= 0)
-		now = 1;
+		now = 1; // This is a division by zero protection.
 	tps = (counters[curCounter] * 1000.0) / now;
 }
 

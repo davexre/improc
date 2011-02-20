@@ -10,34 +10,100 @@
  */
 class BlinkingLed {
 private:
-public:
-	unsigned int getNextDelay(void);
-	uint8_t curDelay;
-	long toggleTime;
-	const unsigned int *delays;
-
 	uint8_t pin;
+
+	const unsigned int *delays;
+	uint8_t curDelay;
+
+	long toggleTime;
+	signed short int playCount;
 	boolean lightOn;
-	int playCount;
-	void play(int playCount);
+
+	unsigned int getNextDelay(void);
+public:
+	/**
+	 * Initializes the class.
+	 *
+	 * pin	The pin number the led is attached to.
+	 */
 	void initialize(uint8_t pin);
-	void playBlink(const unsigned int *delays, int playCount);
+
+	/**
+	 * Updates the on/off state of the led. This method should be
+	 * placed in the main loop of the program or might be invoked
+	 * from an interrupt.
+	 */
 	void update(void);
 
+	/**
+	 * Starts playing the current blink sequence of led on/offs.
+	 * This method is "thread safe"
+	 *
+	 * playCount
+	 * 			The number of play backs to be performed on the
+	 * 			current blink sequence. A negative value -1 means
+	 * 			loop forever.
+	 */
+	void play(signed short int playCount);
+
+	/**
+	 * Starts playing the current blink sequence of led on/offs.
+	 * This method is "thread safe"
+	 *
+	 * delays
+	 * 			Pointer to the blink sequence of led on/offs.
+	 * 			A blink sequence must be terminated by a 0 value.
+	 * playCount
+	 * 			The number of play backs to be performed on the
+	 * 			current blink sequence. A negative value -1 means
+	 * 			loop forever.
+	 */
+	void playBlink(const unsigned int *delays, signed short int playCount);
+
+	/**
+	 * Starts playing the current blink sequence.
+	 * This method is "thread safe"
+	 */
 	inline void start() {
 		play(-1);
 	}
 
+	/**
+	 * Stops playing the current blink sequence.
+	 * This method is "thread safe"
+	 */
 	inline void stop() {
 		play(0);
 	}
 
+	/**
+	 * Returns TRUE if blink sequence is currently playing.
+	 * This method is "thread safe"
+	 */
 	inline boolean isPlaying() {
 		return (playCount); // (playCount != 0)
 	};
+
+	/**
+	 * Returns the state of the led.
+	 * This method is "thread safe"
+	 */
+	inline boolean isLedOn() {
+		return (lightOn);
+	}
+
+	/**
+	 * Returns the remaining number of loops for the current
+	 * blink sequence. If the value is negative the blink
+	 * sequence is looped.
+	 * This method is "thread safe"
+	 */
+	inline signed short int getPlayCount() {
+		return (playCount);
+	}
 };
 
-// Blinking is defined as sequence of led on/off times (in millis)
+// Blinking is defined as sequence of led on/off times (in milliseconds)
 // LedOn, LedOff, LedOn, LedOff, 0
 const unsigned int BLINK_DELAY_LONG = 500;
 const unsigned int BLINK_DELAY_MEDIUM = 250;

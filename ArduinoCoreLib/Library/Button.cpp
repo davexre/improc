@@ -15,7 +15,7 @@ void Button::update() {
 	lastState = buttonState;
 	if (curReading != buttonState) {
 		if (now - lastToggleTime >= debounce) {
-			// Button state has not changed for #debounce# millis. Consider it is stable.
+			// Button state has not changed for #debounce# milliseconds. Consider it is stable.
 			buttonState = curReading;
 		}
 		lastToggleTime = now;

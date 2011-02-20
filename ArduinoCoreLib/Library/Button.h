@@ -4,27 +4,36 @@
 #include "WProgram.h"
 
 /**
- *  The cirtuit: push button attached to pin_X from ground
- *  http://www.arduino.cc/en/Tutorial/Debounce
+ * A debounced button class.
  *
- *  Optional components to hardware debounce a button:
- *  http://www.ganssle.com/debouncing-pt2.htm
+ * The debouncing is done via tracking the time of last
+ * button toggle and not by delaying. This button class
+ * uses the ATMEGA's internal pull-up resistors.
  *
- *      (internal 20k)       10k
- *  pin:<---/\/\--------*----/\/\----|
- *                      |            |
- *               0.1uf ===            / switch
- *                      |            /
- *  gnd:<---------------*------------|
+ * The circuit: push button attached to pin_X from ground
+ * http://www.arduino.cc/en/Tutorial/Debounce
+ *
+ * Optional components to hardware debounce a button:
+ * http://www.ganssle.com/debouncing-pt2.htm
+ *
+ *     (internal 20k)       10k
+ * pin:<---/\/\--------*----/\/\----|
+ *                     |            |
+ *              0.1uf ===            / switch
+ *                     |            /
+ * gnd:<---------------*------------|
  */
 class Button {
 	uint8_t buttonPin;
 	boolean lastState;
 	boolean buttonState;
-	long lastToggleTime;	// used to debounce the button, so no delay is needed
-public:
-	int debounce;			// time in millis, default 10
+	long lastToggleTime;	// used to debounce the button
 
+	/**
+	 * Debounce time in milliseconds, default 10
+	 */
+	int debounce;
+public:
 	void initialize(uint8_t pin, int debounceMillis = 10);
 	void update(void);
 

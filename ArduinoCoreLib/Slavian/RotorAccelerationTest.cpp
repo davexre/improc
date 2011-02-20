@@ -31,7 +31,7 @@ void RotorAccelerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 
 	btn.initialize(buttonPin);
-	led.initialize(ledPin, true, size(states), states);
+	led.initialize(ledPin, size(states), states, true);
 	led.setState(1);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.setMinMax(0, 5000);

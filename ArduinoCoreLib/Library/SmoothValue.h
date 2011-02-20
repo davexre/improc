@@ -4,7 +4,7 @@
 #include <WProgram.h>
 
 /**
- * Smooths a value by averaging.
+ * Smoothes a value by averaging.
  * Usage: In analogRead() to avoid value bouncing
  */
 class SmoothValue {
