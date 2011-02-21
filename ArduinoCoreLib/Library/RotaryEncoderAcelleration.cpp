@@ -1,6 +1,6 @@
-#include "RotorAcelleration.h"
+#include "RotaryEncoderAcelleration.h"
 
-void RotorAcelleration::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
+void RotaryEncoderAcelleration::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
 	pinA.initialize(pinNumberA, 1);
 	pinB.initialize(pinNumberB, 1);
 	tps.initialize();
@@ -10,7 +10,7 @@ void RotorAcelleration::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
 	maxValue = 1000;
 }
 
-void RotorAcelleration::update() {
+void RotaryEncoderAcelleration::update() {
 	pinA.update(); // toggle
 	pinB.update(); // direction
 

@@ -9,7 +9,7 @@ static char buf[200];
 
 static void processReader() {
 	char *c;
-	Serial.println(reader.bufferFull);
+//	Serial.println(reader.bufferFull);
 	reader.update();
 	if (!reader.available()) {
 		return;

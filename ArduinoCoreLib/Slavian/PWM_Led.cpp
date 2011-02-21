@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "Button.h"
-#include "RotorAcelleration.h"
+#include "RotaryEncoderAcelleration.h"
 
 DefineClass(PWM_Led);
 
@@ -12,7 +12,7 @@ static const int rotorPinA = 2;		// One quadrature pin
 static const int rotorPinB = 3;		// the other quadrature pin
 
 static Button btn;
-static RotorAcelleration rotor;
+static RotaryEncoderAcelleration rotor;
 static boolean speakerOn = false;
 
 void PWM_Led::setup() {

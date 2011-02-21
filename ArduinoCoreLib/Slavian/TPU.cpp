@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "Button.h"
-#include "RotorAcelleration.h"
+#include "RotaryEncoderAcelleration.h"
 
 DefineClass(TPU);
 
@@ -42,7 +42,7 @@ static const int coilStatesCount = size(coilStates);
 static int activeCoilState = 0;
 
 static Button btn;
-static RotorAcelleration rotor;
+static RotaryEncoderAcelleration rotor;
 
 static boolean enabled = false;
 static boolean speakerState = false;

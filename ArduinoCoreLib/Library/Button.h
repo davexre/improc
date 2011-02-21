@@ -1,7 +1,7 @@
 #ifndef Button_h
 #define Button_h
 
-#include "WProgram.h"
+#include <wiring.h>
 
 /**
  * A debounced button class.

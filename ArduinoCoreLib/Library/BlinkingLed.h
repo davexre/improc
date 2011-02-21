@@ -1,7 +1,9 @@
 #ifndef BLINKINGLED_H_
 #define BLINKINGLED_H_
 
-#include <WProgram.h>
+#include <stddef.h>
+#include <wiring.h>
+#include <avr/interrupt.h>
 
 /**
  * Blinks a led.

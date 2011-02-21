@@ -2,10 +2,7 @@
 #define ARDUINO_H_
 
 #include <WProgram.h>
-
-#define size(arr) sizeof(arr) / sizeof(arr[0])
-#define disableInterrupts() uint8_t oldSREG = SREG; cli()
-#define restoreInterrupts() SREG = oldSREG
+#include <utils.h>
 
 #define DefineClass(className) \
 class className { \

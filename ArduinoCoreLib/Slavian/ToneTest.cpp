@@ -2,7 +2,7 @@
 #include <pins_arduino.h>
 #include "utils.h"
 #include "Button.h"
-#include "RotorAcelleration.h"
+#include "RotaryEncoderAcelleration.h"
 
 DefineClass(ToneTest);
 
@@ -52,7 +52,7 @@ static volatile uint8_t *coilPinPorts[coilCount];
 static volatile uint8_t coilPinMaks[coilCount];
 
 static Button btn;
-static RotorAcelleration rotor;
+static RotaryEncoderAcelleration rotor;
 
 // frequency in Hertz
 static void playTimer1(uint16_t frequency) {

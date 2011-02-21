@@ -1,13 +1,14 @@
 #ifndef TicksPerSecond_h
 #define TicksPerSecond_h
 
-#include "Arduino.h"
 #include <wiring.h>
+#include <utils.h>
 
 /**
  * Used to compute the looping speed of the main loop
  * TPS - Ticks Per Second.
  * Speed is measured TPS_TIMES_PER_PERIOD times.
+ * This value should be atleast 2.
  */
 #define TPS_TIMES_PER_PERIOD 3
 
