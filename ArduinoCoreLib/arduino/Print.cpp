@@ -19,8 +19,9 @@
  Modified 23 November 2006 by David A. Mellis
  */
 
+#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+//SPP: #include <string.h>
 #include <math.h>
 #include "wiring.h"
 
@@ -41,7 +42,14 @@ void Print::write(const uint8_t *buffer, size_t size)
   while (size--)
     write(*buffer++);
 }
-
+/*SPP:
+void Print::print(const String &s)
+{
+  for (int i = 0; i < s.length(); i++) {
+    write(s[i]);
+  }
+}
+*/
 void Print::print(const char str[])
 {
   write(str);
@@ -98,7 +106,13 @@ void Print::println(void)
   print('\r');
   print('\n');  
 }
-
+/*SPP:
+void Print::println(const String &s)
+{
+  print(s);
+  println();
+}
+*/
 void Print::println(const char c[])
 {
   print(c);
