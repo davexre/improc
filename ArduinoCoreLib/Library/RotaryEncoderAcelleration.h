@@ -45,7 +45,8 @@ private:
 	long minValue;
 	long maxValue;
 	volatile long position;
-
+	boolean valueChangeEnabled;
+	boolean isValueLooped;
 public:
 	Button pinA;
 	Button pinB;
@@ -62,6 +63,14 @@ public:
 	 * might be invoked from an interrupt.
 	 */
 	void update();
+
+	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
+		valueChangeEnabled = newValueChengeEnabled;
+	}
+
+	inline boolean isValueChangeEnabled() {
+		return valueChangeEnabled;
+	}
 
 	/**
 	 * Has the rotary encoder been ticked at the last update
@@ -90,9 +99,7 @@ public:
 	 * Sets the position of the encoder. If the update method is called from an
 	 * interrupt use the safe method getPosition() instead.
 	 */
-	inline void setPosition_unsafe(long newPosition) {
-		position = constrain(newPosition, minValue, maxValue);
-	}
+	void setPosition_unsafe(long newPosition);
 
 	/**
 	 * Gets the position of the encoder.
@@ -117,13 +124,7 @@ public:
 	 * Sets the minValue and maxValue for the rotary encoder and fixes
 	 * the position if it is out of bounds.
 	 */
-	inline void setMinMax(long newMinValue, long newMaxValue) {
-		disableInterrupts();
-		minValue = newMinValue;
-		maxValue = newMaxValue;
-		setPosition_unsafe(position);
-		restoreInterrupts();
-	}
+	void setMinMax(long newMinValue, long newMaxValue);
 };
 
 #endif

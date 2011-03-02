@@ -81,6 +81,13 @@ public:
 	inline boolean isUp(void) {
 		return (buttonState);
 	}
+
+	/**
+	 * Has the state changed from up to down or vice versa.
+	 */
+	inline boolean isToggled(void) {
+		return (buttonState != lastState);
+	}
 };
 
 #endif
