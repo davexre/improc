@@ -37,6 +37,7 @@ void AdvButtonTest::loop() {
 		Serial.println("Double click");
 		btn.setAutoRepeatEnabled(!btn.isAutoRepeatEnabled());
 		led.setState(btn.isAutoRepeatEnabled());
+		Serial.println(btn.isAutoRepeatEnabled() ? "Autorepeat ON" : "Long clicks ON");
 	} else if (btn.isClicked()) {
 		Serial.println("Click");
 	}

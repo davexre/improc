@@ -5,9 +5,8 @@ void StateLed::initialize(uint8_t pin, short int numberOfStates,
 	this->looped = looped;
 	this->numberOfStates = numberOfStates;
 	this->stateDelays = stateDelays;
-	state = 0;
 	led.initialize(pin);
-	led.playBlink(stateDelays[state], 0);
+	setState(0);
 }
 
 void StateLed::setState(short int state) {
