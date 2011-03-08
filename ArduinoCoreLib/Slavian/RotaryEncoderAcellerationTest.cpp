@@ -25,7 +25,7 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static RotaryEncoderState ledState = RotaryEncoderState(0, size(states), true);
+static RotaryEncoderState ledState = RotaryEncoderState(0, size(states) - 1, true);
 static RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
 
 static void UpdateRotor() {

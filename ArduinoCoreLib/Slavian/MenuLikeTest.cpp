@@ -62,21 +62,42 @@ static MenuItemEnum menuEnumOnOff = MenuItemEnum("on/off", enumItemsOnOff, size(
 static const MenuItem menuListItems[] = { simpleValue1, simpleValue2, menuEnum1, menuEnumOnOff };
 static MenuList menuList = MenuList("Main menu", menuListItems, size(menuListItems));
 
-static void menuInitialize() {
-	btn.initialize(buttonPin, false);
-	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.setState(&menuList.encoderState);
+class Menu {
+public:
+	const MenuItem *menuItems;
+	unsigned int itemsCount;
+	RotaryEncoderState *encoderState;
+
+	RotaryEncoderAcelleration rotor;
+	AdvButton button;
+
+
+	void initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin, const MenuItem* MenuItems, unsigned int ItemsCount);
+
+	void update();
+
+	inline void updateRotaryEncoder(void) {
+		rotor.update();
+	}
+};
+
+void Menu::initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin, const MenuItem* MenuItems, unsigned int ItemsCount) {
+	button.initialize(buttonPin, false);
+	rotor.initialize(encoderPinA, encoderPinB);
+	encoderState = rotor.getState();
+	itemsCount = ItemsCount;
+	menuItems = MenuItems;
 }
 
-static void UpdateRotor() {
-	rotor.update();
-}
-
-static void menuUpdate() {
+void Menu::update(void) {
 	btn.update();
 	if (btn.isClicked()) {
 
 	}
+}
+
+static void UpdateRotor() {
+	rotor.update();
 }
 
 
@@ -90,7 +111,7 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static RotaryEncoderState ledState = RotaryEncoderState(0, size(states), true);
+static RotaryEncoderState ledState = RotaryEncoderState(0, size(states) - 1, true);
 static RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
 
 

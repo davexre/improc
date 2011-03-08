@@ -47,13 +47,14 @@ RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped)
 
 void RotaryEncoderState::setValue_unsafe(long newValue) {
 	if (_isValueLooped) {
-		long delta = maxValue - minValue;
-		if (delta == 0)
+		long delta = maxValue - minValue + 1;
+		if (delta <= 0)
 			delta = 1;
-		while (value > maxValue)
-			value -= delta;
-		while (value < minValue)
-			value += delta;
+		while (newValue > maxValue)
+			newValue -= delta;
+		while (newValue < minValue)
+			newValue += delta;
+		value = newValue;
 	} else {
 		value = constrain(newValue, minValue, maxValue);
 	}
