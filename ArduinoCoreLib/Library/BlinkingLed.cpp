@@ -1,4 +1,5 @@
 #include "BlinkingLed.h"
+#include "utils.h"
 
 void BlinkingLed::initialize(uint8_t pin) {
 	this->pin = pin;
@@ -66,13 +67,17 @@ unsigned int BlinkingLed::getNextDelay() {
 void BlinkingLed::playBlink(const unsigned int *delays, signed short int playCount) {
 	if (delays == NULL)
 		playCount = 0;
-	uint8_t oldSREG = SREG;
-	cli();
-	curDelay = 0;
-	this->delays = delays;
-	this->playCount = playCount;
-	lightOn = false;
-	SREG = oldSREG;
-	toggleTime = millis();
+	if (delays == this->delays) {
+		this->playCount = playCount;
+	} else {
+		disableInterrupts();
+		curDelay = 0;
+		this->delays = delays;
+		this->playCount = playCount;
+		lightOn = false;
+		SREG = oldSREG;
+		toggleTime = millis();
+		restoreInterrupts();
+	}
 	update();
 }
