@@ -26,21 +26,10 @@
  */
 #define TICKS_AT_MAX_SPEED_FOR_FULL_SPAN 100
 
-/**
- * Quadrature (Rotary encoder) sensitive to rotation speed.
- * When the quadrature is rotated a #position# variable is
- * incremented/decremented. If the quadrature is rotated fast
- * the increment/decrement step is increased.
- *
- * Can be used with or without interrupt!
- *
- * Uses:
- *   the timer0 via the millis() function.
- *   pinA, pinB can be connected to any digital pin.
- *
- *   http://hacks.ayars.org/2009/12/using-quadrature-encoder-rotary-switch.html
- */
-class RotaryEncoderAcelleration {
+class RotaryEncoderAcelleration;
+
+class RotaryEncoderState {
+	friend class RotaryEncoderAcelleration;
 private:
 	long minValue;
 	long maxValue;
@@ -48,21 +37,9 @@ private:
 	boolean valueChangeEnabled;
 	boolean isValueLooped;
 public:
-	Button pinA;
-	Button pinB;
-	TicksPerSecond tps;
+	RotaryEncoderState(long minVal = 0, long maxVal = 1000, boolean looped = false);
 
-	/**
-	 * Initializes the class, sets ports (pinA and pinB) to output mode.
-	 */
-	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
-
-	/**
-	 * Updates the state of the rotary encoder.
-	 * This method should be placed in the main loop of the program or
-	 * might be invoked from an interrupt.
-	 */
-	void update();
+	void initialize();
 
 	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
 		valueChangeEnabled = newValueChengeEnabled;
@@ -70,21 +47,6 @@ public:
 
 	inline boolean isValueChangeEnabled() {
 		return valueChangeEnabled;
-	}
-
-	/**
-	 * Has the rotary encoder been ticked at the last update
-	 */
-	inline boolean isTicked() {
-		return pinA.isPressed();
-	}
-
-	/**
-	 * Has the rotary encoder been rotated in incrementing direction at the last update.
-	 * If the method returns TRUE the direction is incrementing.
-	 */
-	inline boolean isIncrementing() {
-		return pinB.isUp();
 	}
 
 	/**
@@ -123,8 +85,94 @@ public:
 	/**
 	 * Sets the minValue and maxValue for the rotary encoder and fixes
 	 * the position if it is out of bounds.
+
 	 */
 	void setMinMax(long newMinValue, long newMaxValue);
+};
+
+/**
+ * Quadrature (Rotary encoder) sensitive to rotation speed.
+ * When the quadrature is rotated a #position# variable is
+ * incremented/decremented. If the quadrature is rotated fast
+ * the increment/decrement step is increased.
+ *
+ * Can be used with or without interrupt!
+ *
+ * Uses:
+ *   the timer0 via the millis() function.
+ *   pinA, pinB can be connected to any digital pin.
+ *
+ *   http://hacks.ayars.org/2009/12/using-quadrature-encoder-rotary-switch.html
+ */
+class RotaryEncoderAcelleration {
+private:
+	RotaryEncoderState initialState;
+	RotaryEncoderState *state;
+public:
+	Button pinA;
+	Button pinB;
+	TicksPerSecond tps;
+
+	RotaryEncoderAcelleration();
+
+	/**
+	 * Initializes the class, sets ports (pinA and pinB) to output mode.
+	 */
+	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
+
+	/**
+	 * Updates the state of the rotary encoder.
+	 * This method should be placed in the main loop of the program or
+	 * might be invoked from an interrupt.
+	 */
+	void update();
+
+	/**
+	 * Has the rotary encoder been ticked at the last update
+	 */
+	inline boolean isTicked() {
+		return pinA.isPressed();
+	}
+
+	/**
+	 * Has the rotary encoder been rotated in incrementing direction at the last update.
+	 * If the method returns TRUE the direction is incrementing.
+	 */
+	inline boolean isIncrementing() {
+		return pinB.isUp();
+	}
+
+	inline RotaryEncoderState* getState() {
+		return state;
+	}
+
+	inline void setState(RotaryEncoderState* newState) {
+		if (newState != NULL) {
+			disableInterrupts();
+			state = newState;
+			restoreInterrupts();
+		}
+	}
+
+	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
+		state->setValueChangeEnabled(newValueChengeEnabled);
+	}
+
+	inline boolean isValueChangeEnabled() {
+		return state->isValueChangeEnabled();
+	}
+
+	inline long getPosition() {
+		return state->getPosition();
+	}
+
+	inline void setPosition(long newPosition) {
+		state->setPosition(newPosition);
+	}
+
+	inline void setMinMax(long newMinValue, long newMaxValue) {
+		state->setMinMax(newMinValue, newMaxValue);
+	}
 };
 
 #endif

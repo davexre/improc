@@ -1,6 +1,6 @@
 #include "Arduino.h"
 #include "utils.h"
-#include "Button.h"
+#include "AdvButton.h"
 #include "RotaryEncoderAcelleration.h"
 #include "StateLed.h"
 
@@ -12,19 +12,21 @@ static const int ledPin = 13; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
-static Button btn;
+static AdvButton btn;
 static boolean speakerOn = true;
 static RotaryEncoderAcelleration rotor;
 static StateLed led;
 
 static const unsigned int *states[] = {
 		BLINK_SLOW,
+		BLINK_MEDIUM,
 		BLINK_OFF,
-//		BLINK_MEDIUM,
-//		BLINK_MEDIUM,
-//		BLINK_FAST,
-//		BLINK1, BLINK2, BLINK3
+		BLINK_FAST,
+		BLINK1, BLINK2, BLINK3
 };
+
+RotaryEncoderState ledState = RotaryEncoderState(0, size(states), true);
+RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
 
 void UpdateRotor() {
 	rotor.update();
@@ -34,38 +36,51 @@ void RotaryEncoderAcellerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	btn.initialize(buttonPin);
 	led.initialize(ledPin, size(states), states, true);
+	toneState.setPosition(500);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.setMinMax(0, 5000);
-	rotor.setPosition(500);
+	rotor.setState(&toneState);
 	attachInterrupt(0, UpdateRotor, CHANGE);
     Serial.begin(9600);
+    Serial.println("Push the encoder button to switch between changing pitch and blink");
 }
 
-long lastRotor = 0;
+long lastTone = 0;
+int lastLed = 0;
+
 void RotaryEncoderAcellerationTest::loop() {
 	btn.update();
 	led.update();
 
-	long pos = rotor.getPosition();
-	if (btn.isPressed()) {
+	long newTone = toneState.getPosition();
+	int newLed = (int) ledState.getPosition();
+
+	if (btn.isLongClicked()) {
 		speakerOn = !speakerOn;
 		if (speakerOn) {
-			tone(speakerPin, pos);
-			led.setState(1);
+			tone(speakerPin, newTone);
 		} else {
 			noTone(speakerPin);
-			led.setState(0);
 		}
+	} else if (btn.isClicked()) {
+		rotor.setState(rotor.getState() == &toneState ? &ledState : &toneState);
 	}
 
-	if (lastRotor != pos) {
+	if (lastTone != newTone) {
 		if (speakerOn) {
-			tone(speakerPin, pos);
+			tone(speakerPin, newTone);
 		}
 		float tps = rotor.tps.getTPS();
-		Serial.print(pos);
+		Serial.print("Tone ");
+		Serial.print(newTone);
 		Serial.print(" ");
 		Serial.println(tps);
+		lastTone = newTone;
 	}
-	lastRotor = pos;
+
+	if (lastLed != newLed) {
+		led.setState(newLed);
+		Serial.print("Led ");
+		Serial.println(newLed);
+		lastLed = newLed;
+	}
 }
