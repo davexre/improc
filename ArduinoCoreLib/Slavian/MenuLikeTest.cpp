@@ -4,7 +4,7 @@
 #include "RotaryEncoderAcelleration.h"
 #include "StateLed.h"
 
-DefineClass(RotaryEncoderAcellerationTest);
+DefineClass(MenuLikeTest);
 
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int speakerPin = 8;
@@ -17,6 +17,71 @@ static boolean speakerOn = true;
 static RotaryEncoderAcelleration rotor;
 static StateLed led;
 
+class MenuItem {
+public:
+	const char *title;
+	RotaryEncoderState encoderState;
+
+	MenuItem(const char *Title, long minValue, long maxValue, boolean looped = false) :
+		title(Title), encoderState(minValue, maxValue, looped) {
+	}
+};
+
+class MenuItemEnum : public MenuItem {
+public:
+	const char **items;
+
+	MenuItemEnum(const char *Title, const char **Items, unsigned int ItemsCount, boolean looped = true) :
+		MenuItem(Title, 0, ItemsCount, looped), items(Items) {
+	}
+};
+
+class MenuList : public MenuItem {
+public:
+	const MenuItem *menuItems;
+
+	MenuList(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped = true) :
+		MenuItem(Title, 0, ItemsCount, looped), menuItems(MenuItems) {
+	}
+};
+
+static MenuItem simpleValue1 = MenuItem("simple value 1", 0, 10, false);
+static MenuItem simpleValue2 = MenuItem("simple value 2", -50, 50, true);
+
+static const char *enumItems[] = {
+	"a1", "a2", "a3"
+};
+
+static const char *enumItemsOnOff[] = {
+	"On", "Off"
+};
+
+static MenuItemEnum menuEnum1 = MenuItemEnum("enum", enumItems, size(enumItems));
+static MenuItemEnum menuEnumOnOff = MenuItemEnum("on/off", enumItemsOnOff, size(enumItemsOnOff));
+
+static const MenuItem menuListItems[] = { simpleValue1, simpleValue2, menuEnum1, menuEnumOnOff };
+static MenuList menuList = MenuList("Main menu", menuListItems, size(menuListItems));
+
+static void menuInitialize() {
+	btn.initialize(buttonPin, false);
+	rotor.initialize(rotorPinA, rotorPinB);
+	rotor.setState(&menuList.encoderState);
+}
+
+static void UpdateRotor() {
+	rotor.update();
+}
+
+static void menuUpdate() {
+	btn.update();
+	if (btn.isClicked()) {
+
+	}
+}
+
+
+
+
 static const unsigned int *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
@@ -28,11 +93,8 @@ static const unsigned int *states[] = {
 static RotaryEncoderState ledState = RotaryEncoderState(0, size(states), true);
 static RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
 
-static void UpdateRotor() {
-	rotor.update();
-}
 
-void RotaryEncoderAcellerationTest::setup() {
+void MenuLikeTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	btn.initialize(buttonPin, false);
 	led.initialize(ledPin, size(states), states, true);
@@ -44,7 +106,7 @@ void RotaryEncoderAcellerationTest::setup() {
     Serial.println("Push the encoder button to switch between changing pitch and blink");
 }
 
-void RotaryEncoderAcellerationTest::loop() {
+void MenuLikeTest::loop() {
 	btn.update();
 	led.update();
 

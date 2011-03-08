@@ -28,7 +28,7 @@ class AdvButton {
 public:
 	Button button;
 
-	void initialize(uint8_t pin, int debounceMillis = 10);
+	void initialize(uint8_t pin, boolean autoRepeatEnabled, int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {

@@ -1,7 +1,8 @@
 #include "AdvButton.h"
 
-void AdvButton::initialize(uint8_t pin, int debounceMillis) {
+void AdvButton::initialize(uint8_t pin, boolean autoRepeatEnabled, int debounceMillis) {
 	button.initialize(pin, debounceMillis);
+	this->autoRepeatEnabled = autoRepeatEnabled;
 	timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
 	autoButtonStarted = false;
 	buttonState = AdvButtonState_NONE;

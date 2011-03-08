@@ -18,11 +18,10 @@ static const unsigned int *states[] = {
 
 void AdvButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(buttonPin);
+	btn.initialize(buttonPin, false);
 	led.initialize(ledPin, size(states), states, true);
 	Serial.begin(9600);
 
-	btn.setAutoRepeatEnabled(false);
 	led.setState(btn.isAutoRepeatEnabled());
 	Serial.println("Double click to toggle [Long clicks]/[Auto repeat clicks]");
 }

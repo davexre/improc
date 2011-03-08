@@ -37,7 +37,8 @@ void RotaryEncoderAcelleration::update() {
 }
 
 RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped) :
-		isValueLooped(looped),
+		_isValueLooped(looped),
+		_hasValueChanged(true),
 		valueChangeEnabled(true),
 		value(0),
 		minValue(minVal),
@@ -45,7 +46,7 @@ RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped)
 }
 
 void RotaryEncoderState::setValue_unsafe(long newValue) {
-	if (isValueLooped) {
+	if (_isValueLooped) {
 		long delta = maxValue - minValue;
 		if (delta == 0)
 			delta = 1;

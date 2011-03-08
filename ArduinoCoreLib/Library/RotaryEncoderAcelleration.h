@@ -35,7 +35,7 @@ private:
 	long maxValue;
 	volatile long value;
 	boolean valueChangeEnabled;
-	boolean isValueLooped;
+	boolean _isValueLooped;
 	boolean _hasValueChanged;
 public:
 	RotaryEncoderState(long minVal = 0, long maxVal = 1000, boolean looped = false);
@@ -48,6 +48,14 @@ public:
 
 	inline boolean isValueChangeEnabled() {
 		return valueChangeEnabled;
+	}
+
+	inline void setValueLooped(boolean newIsValueLooped) {
+		_isValueLooped = newIsValueLooped;
+	}
+
+	inline boolean isValueLooped() {
+		return _isValueLooped;
 	}
 
 	/**
