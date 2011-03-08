@@ -22,38 +22,34 @@ void PWM_Led::setup() {
 	btn.initialize(buttonPin);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.setMinMax(0, 255);
-	rotor.setPosition(1);
+	rotor.setValue(1);
 
     Serial.begin(9600);
 }
 
-static long lastPWM = -1;
+static void doPlay(int pwm) {
+	unsigned int pitch = 10 + (pwm << 1);
+	tone(speakerPin, pitch, 0);
+	analogWrite(ledPin, pwm);
+}
 
 void PWM_Led::loop() {
 	btn.update();
 	rotor.update();
 
-	int pwm = (int) rotor.getPosition();
-
 	if (btn.isPressed()) {
 		speakerOn = !speakerOn;
 		if (speakerOn) {
-			lastPWM = -1;
+			doPlay(rotor.getValue());
 		} else {
 			digitalWrite(ledPin, 0);
 			noTone(speakerPin);
 		}
 	}
 
-	if (speakerOn) {
-		if (pwm != lastPWM) {
-			unsigned int pitch = 10 + (pwm << 1);
-			tone(speakerPin, pitch, 0);
-			analogWrite(ledPin, pwm);
-			lastPWM = pwm;
-			Serial.print(pwm);
-			Serial.print("  ");
-			Serial.println(pitch);
-		}
+	if (speakerOn && rotor.hasValueChanged()) {
+		int pwm = (int) rotor.getValue();
+		doPlay(pwm);
+		Serial.println(pwm);
 	}
 }

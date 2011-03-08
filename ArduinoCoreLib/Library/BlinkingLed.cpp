@@ -75,9 +75,8 @@ void BlinkingLed::playBlink(const unsigned int *delays, signed short int playCou
 		this->delays = delays;
 		this->playCount = playCount;
 		lightOn = false;
-		SREG = oldSREG;
-		toggleTime = millis();
 		restoreInterrupts();
+		toggleTime = millis();
 	}
 	update();
 }

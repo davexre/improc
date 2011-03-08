@@ -136,33 +136,35 @@ void TPU::setup() {
 	btn.initialize(buttonPin);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.setMinMax(50, 50000);
-	rotor.setPosition(100);
+	rotor.setValue(100);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 	Serial.begin(9600);
 }
 
-static long curPosition = 0;
-static long lastPosition = -1;
+static long curValue = 0;
+static long lastValue = -1;
 static boolean enabled = false;
 
 void TPU::loop() {
 	btn.update();
 
-	curPosition = rotor.getPosition();
 	if (btn.isPressed()) {
 		enabled = !enabled;
 		digitalWrite(ledPin, enabled);
+
+		long curValue = rotor.getValue();
+		playTimer1(curValue);
+		Serial.println(curValue);
 	}
 
 	if (enabled) {
-		if (curPosition != lastPosition) {
-			lastPosition = curPosition;
-			playTimer1(curPosition);
-			Serial.println(curPosition);
+		if (rotor.hasValueChanged()) {
+			long curValue = rotor.getValue();
+			playTimer1(curValue);
+			Serial.println(curValue);
 		}
 	} else {
 		stopTimer1();
 		activeCoilState = 0;
-		lastPosition = -1;
 	}
 }

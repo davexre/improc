@@ -33,9 +33,10 @@ class RotaryEncoderState {
 private:
 	long minValue;
 	long maxValue;
-	volatile long position;
+	volatile long value;
 	boolean valueChangeEnabled;
 	boolean isValueLooped;
+	boolean _hasValueChanged;
 public:
 	RotaryEncoderState(long minVal = 0, long maxVal = 1000, boolean looped = false);
 
@@ -50,41 +51,50 @@ public:
 	}
 
 	/**
-	 * Gets the position of the encoder. If the update method is called from an
-	 * interrupt use the safe method getPosition() instead.
+	 * Returns true if the value has changed since the last call to getValue().
 	 */
-	inline long getPosition_unsafe() {
-		return position;
+	inline boolean hasValueChanged() {
+		return _hasValueChanged;
 	}
 
 	/**
-	 * Sets the position of the encoder. If the update method is called from an
-	 * interrupt use the safe method getPosition() instead.
+	 * Gets the #value# of the encoder. If the update method is called from an
+	 * interrupt use the safe method getValue() instead. This method does not
+	 * alter the state of the hasValueChanged flag.
 	 */
-	void setPosition_unsafe(long newPosition);
+	inline long getValue_unsafe() {
+		return value;
+	}
 
 	/**
-	 * Gets the position of the encoder.
+	 * Sets the #value# of the encoder. If the update method is called from an
+	 * interrupt use the safe method getValue() instead.
 	 */
-	inline long getPosition() {
+	void setValue_unsafe(long newValue);
+
+	/**
+	 * Gets the #value# of the encoder.
+	 */
+	inline long getValue() {
 		disableInterrupts();
-		long result = position;
+		_hasValueChanged = false;
+		long result = value;
 		restoreInterrupts();
 		return result;
 	}
 
 	/**
-	 * Sets the position of the encoder.
+	 * Sets the #value# of the encoder.
 	 */
-	inline void setPosition(long newPosition) {
+	inline void setValue(long newValue) {
 		disableInterrupts();
-		setPosition_unsafe(newPosition);
+		setValue_unsafe(newValue);
 		restoreInterrupts();
 	}
 
 	/**
 	 * Sets the minValue and maxValue for the rotary encoder and fixes
-	 * the position if it is out of bounds.
+	 * the #value# if it is out of bounds.
 
 	 */
 	void setMinMax(long newMinValue, long newMaxValue);
@@ -92,7 +102,7 @@ public:
 
 /**
  * Quadrature (Rotary encoder) sensitive to rotation speed.
- * When the quadrature is rotated a #position# variable is
+ * When the quadrature is rotated a #value# variable is
  * incremented/decremented. If the quadrature is rotated fast
  * the increment/decrement step is increased.
  *
@@ -162,12 +172,16 @@ public:
 		return state->isValueChangeEnabled();
 	}
 
-	inline long getPosition() {
-		return state->getPosition();
+	inline boolean hasValueChanged() {
+		return state->hasValueChanged();
 	}
 
-	inline void setPosition(long newPosition) {
-		state->setPosition(newPosition);
+	inline long getValue() {
+		return state->getValue();
+	}
+
+	inline void setValue(long newValue) {
+		state->setValue(newValue);
 	}
 
 	inline void setMinMax(long newMinValue, long newMaxValue) {

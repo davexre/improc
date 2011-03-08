@@ -30,7 +30,7 @@ void RotaryEncoderAcelleration::update() {
 		long step = 1 + delta * speed * speed * speed /
 				((MAX_TPS - MIN_TPS) * (MAX_TPS - MIN_TPS) * (MAX_TPS - MIN_TPS));
 
-		state->setPosition_unsafe(state->position + (isIncrementing() ? step : -step));
+		state->setValue_unsafe(state->getValue_unsafe() + (isIncrementing() ? step : -step));
 	} else {
 		tps.update(false);
 	}
@@ -39,29 +39,30 @@ void RotaryEncoderAcelleration::update() {
 RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped) :
 		isValueLooped(looped),
 		valueChangeEnabled(true),
-		position(0),
+		value(0),
 		minValue(minVal),
 		maxValue(maxVal) {
 }
 
-void RotaryEncoderState::setPosition_unsafe(long newPosition) {
+void RotaryEncoderState::setValue_unsafe(long newValue) {
 	if (isValueLooped) {
 		long delta = maxValue - minValue;
 		if (delta == 0)
 			delta = 1;
-		while (position > maxValue)
-			position -= delta;
-		while (position < minValue)
-			position += delta;
+		while (value > maxValue)
+			value -= delta;
+		while (value < minValue)
+			value += delta;
 	} else {
-		position = constrain(newPosition, minValue, maxValue);
+		value = constrain(newValue, minValue, maxValue);
 	}
+	_hasValueChanged = true;
 }
 
 void RotaryEncoderState::setMinMax(long newMinValue, long newMaxValue) {
 	disableInterrupts();
 	minValue = newMinValue;
 	maxValue = newMaxValue;
-	setPosition_unsafe(position);
+	setValue_unsafe(value);
 	restoreInterrupts();
 }

@@ -36,7 +36,7 @@ void RotaryEncoderAcellerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	btn.initialize(buttonPin);
 	led.initialize(ledPin, size(states), states, true);
-	toneState.setPosition(500);
+	toneState.setValue(500);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.setState(&toneState);
 	attachInterrupt(0, UpdateRotor, CHANGE);
@@ -44,20 +44,14 @@ void RotaryEncoderAcellerationTest::setup() {
     Serial.println("Push the encoder button to switch between changing pitch and blink");
 }
 
-long lastTone = 0;
-int lastLed = 0;
-
 void RotaryEncoderAcellerationTest::loop() {
 	btn.update();
 	led.update();
 
-	long newTone = toneState.getPosition();
-	int newLed = (int) ledState.getPosition();
-
 	if (btn.isLongClicked()) {
 		speakerOn = !speakerOn;
 		if (speakerOn) {
-			tone(speakerPin, newTone);
+			tone(speakerPin, toneState.getValue());
 		} else {
 			noTone(speakerPin);
 		}
@@ -65,7 +59,8 @@ void RotaryEncoderAcellerationTest::loop() {
 		rotor.setState(rotor.getState() == &toneState ? &ledState : &toneState);
 	}
 
-	if (lastTone != newTone) {
+	if (toneState.hasValueChanged()) {
+		long newTone = toneState.getValue();
 		if (speakerOn) {
 			tone(speakerPin, newTone);
 		}
@@ -74,13 +69,12 @@ void RotaryEncoderAcellerationTest::loop() {
 		Serial.print(newTone);
 		Serial.print(" ");
 		Serial.println(tps);
-		lastTone = newTone;
 	}
 
-	if (lastLed != newLed) {
+	if (ledState.hasValueChanged()) {
+		int newLed = (int) ledState.getValue();
 		led.setState(newLed);
 		Serial.print("Led ");
 		Serial.println(newLed);
-		lastLed = newLed;
 	}
 }
