@@ -53,7 +53,7 @@ public:
 
 class SimpleMenu {
 protected:
-	MenuItem *menuItems;
+	MenuItem **menuItems;
 	short int itemsCount;
 	short int currentMenu;
 	boolean _hasMenuChanged;
@@ -62,7 +62,7 @@ public:
 	AdvButton button;
 
 	void initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin,
-			MenuItem* MenuItems, short int ItemsCount);
+			MenuItem **MenuItems, short int ItemsCount);
 
 	void update();
 
@@ -91,7 +91,7 @@ public:
 	boolean hasChanged();
 };
 
-class SimpleMenuWithSerialPrint : SimpleMenu {
+class SimpleMenuWithSerialPrint : public SimpleMenu {
 public:
 	void update();
 };

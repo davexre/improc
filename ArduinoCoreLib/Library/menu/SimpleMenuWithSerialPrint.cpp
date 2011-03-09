@@ -4,7 +4,7 @@
 void SimpleMenuWithSerialPrint::update(void) {
 	SimpleMenu::update();
 	if (hasChanged()) {
-		MenuItem *cur = &menuItems[currentMenu];
+		MenuItem *cur = menuItems[currentMenu];
 		long curValue = cur->encoderState.peekValue();
 		Serial.print(cur->title);
 		Serial.print(": ");

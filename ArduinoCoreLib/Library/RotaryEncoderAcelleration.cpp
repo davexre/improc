@@ -40,7 +40,7 @@ RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped)
 		_isValueLooped(looped),
 		_hasValueChanged(true),
 		valueChangeEnabled(true),
-		value(0),
+		value(minVal),
 		minValue(minVal),
 		maxValue(maxVal) {
 }

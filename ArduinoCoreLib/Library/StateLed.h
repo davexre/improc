@@ -61,8 +61,8 @@ public:
 	 * 		Specifies how states will be shown - a single blink
 	 * 		or via a continuous blinking loop.
 	 */
-	void initialize(uint8_t pin, short int numberOfStates,
-			const unsigned int *(*stateDelays), boolean looped = true);
+	void initialize(uint8_t pin, const unsigned int *(*stateDelays),
+			short int numberOfStates, boolean looped = true);
 
 	/**
 	 * Updates the on/off state of the led. This method should be

@@ -19,7 +19,7 @@ static const unsigned int *states[] = {
 void AdvButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
 	btn.initialize(buttonPin, false);
-	led.initialize(ledPin, size(states), states, true);
+	led.initialize(ledPin, states, size(states), true);
 	Serial.begin(9600);
 
 	led.setState(btn.isAutoRepeatEnabled());

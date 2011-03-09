@@ -1,7 +1,7 @@
 #include "StateLed.h"
 
-void StateLed::initialize(uint8_t pin, short int numberOfStates,
-		const unsigned int *(*stateDelays), boolean looped) {
+void StateLed::initialize(uint8_t pin, const unsigned int *(*stateDelays),
+		short int numberOfStates, boolean looped) {
 	this->looped = looped;
 	this->numberOfStates = numberOfStates;
 	this->stateDelays = stateDelays;

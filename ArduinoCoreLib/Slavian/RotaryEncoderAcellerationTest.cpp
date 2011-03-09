@@ -35,7 +35,7 @@ static void UpdateRotor() {
 void RotaryEncoderAcellerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	btn.initialize(buttonPin, false);
-	led.initialize(ledPin, size(states), states, true);
+	led.initialize(ledPin, states, size(states), true);
 	toneState.setValue(500);
 	rotor.initialize(rotorPinA, rotorPinB);
 	rotor.setState(&toneState);

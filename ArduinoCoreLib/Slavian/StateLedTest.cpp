@@ -21,7 +21,7 @@ static const unsigned int *states[] = {
 
 void StateLedTest::setup(void) {
 	btn.initialize(buttonPin);
-	led.initialize(ledPin, size(states), states, true);
+	led.initialize(ledPin, states, size(states), true);
 }
 
 void StateLedTest::loop(void) {
