@@ -80,6 +80,13 @@ public:
 	 */
 	void setValue_unsafe(long newValue);
 
+	inline long peekValue() {
+		disableInterrupts();
+		long result = value;
+		restoreInterrupts();
+		return result;
+	}
+
 	/**
 	 * Gets the #value# of the encoder.
 	 */

@@ -3,6 +3,7 @@
 #include "AdvButton.h"
 #include "RotaryEncoderAcelleration.h"
 #include "StateLed.h"
+#include "menu/Menu.h"
 
 DefineClass(MenuLikeTest);
 
@@ -12,98 +13,9 @@ static const int ledPin = 13; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
-static AdvButton btn;
-static boolean speakerOn = true;
-static RotaryEncoderAcelleration rotor;
-static StateLed led;
+static const char *speakerStates[] = { "ON", "OFF" };
 
-class MenuItem {
-public:
-	const char *title;
-	RotaryEncoderState encoderState;
-
-	MenuItem(const char *Title, long minValue, long maxValue, boolean looped = false) :
-		title(Title), encoderState(minValue, maxValue, looped) {
-	}
-};
-
-class MenuItemEnum : public MenuItem {
-public:
-	const char **items;
-
-	MenuItemEnum(const char *Title, const char **Items, unsigned int ItemsCount, boolean looped = true) :
-		MenuItem(Title, 0, ItemsCount, looped), items(Items) {
-	}
-};
-
-class MenuList : public MenuItem {
-public:
-	const MenuItem *menuItems;
-
-	MenuList(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped = true) :
-		MenuItem(Title, 0, ItemsCount, looped), menuItems(MenuItems) {
-	}
-};
-
-static MenuItem simpleValue1 = MenuItem("simple value 1", 0, 10, false);
-static MenuItem simpleValue2 = MenuItem("simple value 2", -50, 50, true);
-
-static const char *enumItems[] = {
-	"a1", "a2", "a3"
-};
-
-static const char *enumItemsOnOff[] = {
-	"On", "Off"
-};
-
-static MenuItemEnum menuEnum1 = MenuItemEnum("enum", enumItems, size(enumItems));
-static MenuItemEnum menuEnumOnOff = MenuItemEnum("on/off", enumItemsOnOff, size(enumItemsOnOff));
-
-static const MenuItem menuListItems[] = { simpleValue1, simpleValue2, menuEnum1, menuEnumOnOff };
-static MenuList menuList = MenuList("Main menu", menuListItems, size(menuListItems));
-
-class Menu {
-public:
-	const MenuItem *menuItems;
-	unsigned int itemsCount;
-	RotaryEncoderState *encoderState;
-
-	RotaryEncoderAcelleration rotor;
-	AdvButton button;
-
-
-	void initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin, const MenuItem* MenuItems, unsigned int ItemsCount);
-
-	void update();
-
-	inline void updateRotaryEncoder(void) {
-		rotor.update();
-	}
-};
-
-void Menu::initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin, const MenuItem* MenuItems, unsigned int ItemsCount) {
-	button.initialize(buttonPin, false);
-	rotor.initialize(encoderPinA, encoderPinB);
-	encoderState = rotor.getState();
-	itemsCount = ItemsCount;
-	menuItems = MenuItems;
-}
-
-void Menu::update(void) {
-	btn.update();
-	if (btn.isClicked()) {
-
-	}
-}
-
-static void UpdateRotor() {
-	rotor.update();
-}
-
-
-
-
-static const unsigned int *states[] = {
+static const unsigned int *ledStates[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,
@@ -111,25 +23,66 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static RotaryEncoderState ledState = RotaryEncoderState(0, size(states) - 1, true);
-static RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
+static MenuItemEnum speakerMenu = MenuItemEnum("Speaker", speakerStates, size(speakerStates), false);
+static MenuItem ledStatesMenu = MenuItem("Led state", 0, size(ledStates) - 1, true);
+static MenuItem tonePitchMenu = MenuItem("Pitch", 50, 5000, false);
+
+static MenuItem menuItems[] { speakerMenu, ledStatesMenu, tonePitchMenu }
+
+static SimpleMenu menu;
+static StateLed led;
+
+static void updateRotaryEncoder() {
+	menu.updateRotaryEncoder();
+}
+
+
+
+//static boolean speakerOn = true;
+//static AdvButton btn;
+//static RotaryEncoderAcelleration rotor;
+//
+//static MenuItem simpleValue3 = MenuItem("simple value 3", 0, 100, true);
+//
+//static const char *enumItems[] = {
+//	"a1", "a2", "a3"
+//};
+//
+//static const char *enumItemsOnOff[] = {
+//	"On", "Off"
+//};
+//
+//static MenuItemEnum menuEnum1 = MenuItemEnum("enum", enumItems, size(enumItems));
+//static MenuItemEnum menuEnumOnOff = MenuItemEnum("on/off", enumItemsOnOff, size(enumItemsOnOff));
+//static MenuItemEnum menuEnumOnOff2 = MenuItemEnum("on/off2", enumItemsOnOff, size(enumItemsOnOff));
+//static MenuItem menuListItems[] = { simpleValue1, simpleValue2, simpleValue3 };
+//static MenuList menuList = MenuList("Main menu", menuListItems, size(menuListItems));
 
 
 void MenuLikeTest::setup() {
 	pinMode(speakerPin, OUTPUT);
-	btn.initialize(buttonPin, false);
 	led.initialize(ledPin, size(states), states, true);
-	toneState.setValue(500);
-	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.setState(&toneState);
-	attachInterrupt(0, UpdateRotor, CHANGE);
+	menu.initialize(rotorPinA, rotorPinB, buttonPin, menuItems, size(menuItems));
+	attachInterrupt(0, updateRotaryEncoder, CHANGE);
     Serial.begin(9600);
-    Serial.println("Push the encoder button to switch between changing pitch and blink");
+    Serial.println("Push the encoder button to switch between menus");
 }
 
 void MenuLikeTest::loop() {
-	btn.update();
 	led.update();
+	menu.update();
+
+	if (ledStatesMenu.hasValueChanged()) {
+		led.setState(ledStatesMenu.getValue());
+	}
+	if (speakerMenu.hasValueChanged()) {
+		if (speakerMenu.getValue() == 0) {
+			tone
+		}
+	}
+
+	if (menu.hasChanged()) {
+	}
 
 	if (btn.isLongClicked()) {
 		speakerOn = !speakerOn;
