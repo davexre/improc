@@ -14,7 +14,7 @@ void __cxa_guard_abort (__guard *) {};
 //#define MAINCLASS AnalogSensorTest
 //#define MAINCLASS RotaryEncoderAcellerationTest
 //#define MAINCLASS PWM_Led
-#define MAINCLASS AdvButtonTest
+#define MAINCLASS MenuLikeTest
 
 DefineClass(MAINCLASS);
 MAINCLASS mainClass;
@@ -24,9 +24,9 @@ extern "C" int main(void)
 	init();
 
 	mainClass.setup();
-    
+
 	for (;;)
 		mainClass.loop();
-        
+
 	return 0;
 }

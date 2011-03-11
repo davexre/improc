@@ -1,3 +1,7 @@
+Parametrs to pass to the avr-g++ (compiler AND linker) http://gcc.gnu.org/ml/gcc-help/2003-08/msg00128.html
+-Wl,-static -fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,-s
+
+
 NAME:
 Build & Upload ArduinoProject
 

@@ -1,7 +1,8 @@
 #include "Menu.h"
 
-MenuItemEnum::MenuItemEnum(const char *Title, const char **Items, unsigned int ItemsCount, boolean looped) :
-	MenuItem(Title, 0, ItemsCount - 1, looped), items(Items) {
+void MenuItemEnum::initialize(const char *Title, const char **Items, unsigned int ItemsCount, boolean looped) {
+	items = Items;
+	MenuItem::initialize(Title, 0, ItemsCount - 1, looped);
 }
 
 byte MenuItemEnum::getMenuItemType(void) {

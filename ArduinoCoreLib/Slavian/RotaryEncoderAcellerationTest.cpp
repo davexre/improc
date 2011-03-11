@@ -25,8 +25,8 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static RotaryEncoderState ledState = RotaryEncoderState(0, size(states) - 1, true);
-static RotaryEncoderState toneState = RotaryEncoderState(50, 5000, false);
+static RotaryEncoderState ledState;
+static RotaryEncoderState toneState;
 
 static void UpdateRotor() {
 	rotor.update();
@@ -42,6 +42,9 @@ void RotaryEncoderAcellerationTest::setup() {
 	attachInterrupt(0, UpdateRotor, CHANGE);
     Serial.begin(9600);
     Serial.println("Push the encoder button to switch between changing pitch and blink");
+
+    ledState.initialize(0, size(states) - 1, true);
+    toneState.initialize(50, 5000, false);
 }
 
 void RotaryEncoderAcellerationTest::loop() {

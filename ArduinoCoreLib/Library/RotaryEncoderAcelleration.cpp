@@ -1,11 +1,8 @@
 #include "RotaryEncoderAcelleration.h"
 
-RotaryEncoderAcelleration::RotaryEncoderAcelleration(void) :
-	initialState(RotaryEncoderState(0, 1000, false)),
-	state(&initialState) {
-}
-
 void RotaryEncoderAcelleration::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
+	initialState.initialize(0, 1000, false);
+	state = &initialState;
 	pinA.initialize(pinNumberA, 1);
 	pinB.initialize(pinNumberB, 1);
 	tps.initialize();
@@ -36,13 +33,13 @@ void RotaryEncoderAcelleration::update() {
 	}
 }
 
-RotaryEncoderState::RotaryEncoderState(long minVal, long maxVal, boolean looped) :
-		_isValueLooped(looped),
-		_hasValueChanged(true),
-		valueChangeEnabled(true),
-		value(minVal),
-		minValue(minVal),
-		maxValue(maxVal) {
+void RotaryEncoderState::initialize(long minVal, long maxVal, boolean looped) {
+	_isValueLooped = looped;
+	_hasValueChanged = true;
+	valueChangeEnabled = true;
+	value = minVal;
+	minValue = minVal;
+	maxValue = maxVal;
 }
 
 void RotaryEncoderState::setValue_unsafe(long newValue) {

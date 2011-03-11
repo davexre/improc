@@ -23,9 +23,9 @@ static const unsigned int *ledStates[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static MenuItemEnum speakerMenu = MenuItemEnum("Speaker", speakerStates, size(speakerStates), false);
-static MenuItem ledStatesMenu = MenuItem("Led state", 0, size(ledStates) - 1, true);
-static MenuItem tonePitchMenu = MenuItem("Pitch", 50, 5000, false);
+static MenuItemEnum speakerMenu;
+static MenuItem ledStatesMenu;
+static MenuItem tonePitchMenu;
 
 static MenuItem *menuItems[] = { &speakerMenu, &ledStatesMenu, &tonePitchMenu };
 
@@ -39,6 +39,12 @@ static void updateRotaryEncoder() {
 void MenuLikeTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	led.initialize(ledPin, ledStates, size(ledStates), true);
+
+	// Init menus
+	speakerMenu.initialize("Speaker", speakerStates, size(speakerStates), false);
+	ledStatesMenu.initialize("Led state", 0, size(ledStates) - 1, true);
+	tonePitchMenu.initialize("Pitch", 50, 5000, false);
+
 	menu.initialize(rotorPinA, rotorPinB, buttonPin, menuItems, size(menuItems));
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);
     Serial.begin(115200);

@@ -38,9 +38,7 @@ private:
 	boolean _isValueLooped;
 	boolean _hasValueChanged;
 public:
-	RotaryEncoderState(long minVal = 0, long maxVal = 1000, boolean looped = false);
-
-	void initialize();
+	void initialize(long minVal = 0, long maxVal = 1000, boolean looped = false);
 
 	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
 		valueChangeEnabled = newValueChengeEnabled;
@@ -137,8 +135,6 @@ public:
 	Button pinA;
 	Button pinB;
 	TicksPerSecond tps;
-
-	RotaryEncoderAcelleration();
 
 	/**
 	 * Initializes the class, sets ports (pinA and pinB) to output mode.

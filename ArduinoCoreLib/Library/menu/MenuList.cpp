@@ -1,7 +1,8 @@
 #include "Menu.h"
 
-MenuList::MenuList(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped) :
-	MenuItem(Title, 0, ItemsCount, looped), menuItems(MenuItems) {
+void MenuList::initialize(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped) {
+	menuItems = MenuItems;
+	MenuItem::initialize(Title, 0, ItemsCount, looped);
 }
 
 byte MenuList::getMenuItemType(void) {
