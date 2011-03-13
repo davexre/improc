@@ -48,7 +48,7 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.662881994" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.25200421" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.763801476" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="true" valueType="boolean"/>
-								<option id="de.innot.avreclipse.compiler.option.optimize.other.842965010" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-Wl,-static -fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,-s" valueType="string"/>
+								<option id="de.innot.avreclipse.compiler.option.optimize.other.842965010" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.147511324" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.1258885126" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
@@ -63,7 +63,7 @@
 									<listOptionValue builtIn="false" value="ArduinoCoreLib"/>
 								</option>
 								<option id="de.innot.avreclipse.linker.option.nosyms.715274508" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.linker.option.nosyms" value="false" valueType="boolean"/>
-								<option id="de.innot.avreclipse.linker.option.otherlinkargs.2086310124" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="-Wl,-static -fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,-s" valueType="string"/>
+								<option id="de.innot.avreclipse.linker.option.otherlinkargs.2086310124" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.linker.input.1503643778" name="OBJ Files" superClass="de.innot.avreclipse.tool.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
