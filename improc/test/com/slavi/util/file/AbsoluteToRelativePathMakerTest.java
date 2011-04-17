@@ -1,11 +1,15 @@
-package com.unitTest;
+package com.slavi.util.file;
 
 import java.io.File;
 
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
+import org.junit.Test;
 
-public class UT_AbsoluteToRelativePathMaker {
+import com.slavi.util.file.AbsoluteToRelativePathMaker;
+import com.unitTest.TestUtils;
+
+public class AbsoluteToRelativePathMakerTest {
 	
+	@Test
 	public void testAbsoluteToRelativePath() throws Exception {
 		String curDir = "c:/data/sample/test";
 		String prev = ".." + File.separator;
@@ -27,11 +31,5 @@ public class UT_AbsoluteToRelativePathMaker {
 			File f2 = am.getFullPathFile(rel);
 			TestUtils.assertEqual("comparing full paths", f1.getCanonicalPath(), f2.getCanonicalPath());
 		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		UT_AbsoluteToRelativePathMaker test = new UT_AbsoluteToRelativePathMaker();
-		test.testAbsoluteToRelativePath();
-		System.out.println("Done.");
 	}
 }

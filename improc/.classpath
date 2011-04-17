@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
 	<classpathentry kind="lib" path="/home/slavian/S/java/jar/swt-3.5.1-gtk-linux-x86/swt.jar" sourcepath="/home/slavian/S/java/jar/swt-3.5.1-gtk-linux-x86/src.zip"/>
@@ -12,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/javazoom.net/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/tritonus_share.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/vorbisspi1.0.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

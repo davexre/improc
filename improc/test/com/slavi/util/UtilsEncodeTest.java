@@ -1,9 +1,10 @@
-package com.unitTest;
+package com.slavi.util;
 
-import com.slavi.util.Util;
+import org.junit.Test;
+
 import com.slavi.util.Util.CENCODE;
 
-public class UT_UtilEncode {
+public class UtilsEncodeTest {
 
 	static final String testStr[] = {
 		"Това е на кирилица",
@@ -13,7 +14,7 @@ public class UT_UtilEncode {
 		"\\\b\t\f\r\"\''\u1234\\'\\xabfd",
 		"\u0003g"
 	};
-	
+
 	void singleTestStr(CENCODE cencode) {
 		int i = 0;
 		for (String s : testStr) {
@@ -30,15 +31,11 @@ public class UT_UtilEncode {
 			i++;
 		}
 	}
-	
-	void testStrEncodeDecode() {
+
+	@Test
+	public void testEncodeDecode() throws Exception {
 		for (CENCODE c : CENCODE.values()) {
 			singleTestStr(c);
 		}
-	}
-	
-	public static void main(String[] args) {
-		new UT_UtilEncode().testStrEncodeDecode();
-		System.out.println("Done.");
 	}
 }
