@@ -1,4 +1,4 @@
-package com.unitTest;
+package com.slavi;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
@@ -29,6 +29,17 @@ public class TestUtils {
 		throw new RuntimeException("Failed");
 	}
 	
+	public static void assertEqualIgnoreCase(String msg, String strA, String strB) {
+		if ((strA == null) && (strB == null))
+			return;
+		if ((strA != null) && strA.equalsIgnoreCase(strB))
+			return;
+		System.out.println("Strings not equal: " + msg);
+		System.out.println(strA);
+		System.out.println(strB);
+		throw new RuntimeException("Failed");
+	}
+
 	public static void assertEqual(String msg, String strA, String strB) {
 		if ((strA == null) && (strB == null))
 			return;

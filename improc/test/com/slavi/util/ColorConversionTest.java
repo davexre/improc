@@ -1,10 +1,11 @@
-package com.unitTest;
+package com.slavi.util;
 
+import org.junit.Test;
+
+import com.slavi.TestUtils;
 import com.slavi.math.MathUtil;
-import com.slavi.util.ColorConversion;
 
-public class UT_ColorConversion {
-
+public class ColorConversionTest {
 	public static class Data {
 		public double R, G, B, H, H2, C, C2, V, L, I, Y601, SHSV, SHSL, SHSI;
 
@@ -47,7 +48,8 @@ public class UT_ColorConversion {
 			new Data(0.211, 0.149, 0.597, 248.3, 247.3, 0.448, 0.42, 0.597, 0.373, 0.319, 0.219, 0.75, 0.601, 0.533),
 			new Data(0.495, 0.493, 0.721, 240.5, 240.4, 0.228, 0.227, 0.721, 0.607, 0.57, 0.52, 0.316, 0.29, 0.135),
 	};
-	
+
+	@Test
 	public void testHSV2() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
@@ -80,6 +82,7 @@ public class UT_ColorConversion {
 		}
 	}
 	
+	@Test
 	public void testHSV() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
@@ -109,6 +112,7 @@ public class UT_ColorConversion {
 		}
 	}
 	
+	@Test
 	public void testHSL2() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
@@ -142,6 +146,7 @@ public class UT_ColorConversion {
 		}
 	}
 	
+	@Test
 	public void testHSL() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
@@ -169,14 +174,5 @@ public class UT_ColorConversion {
 				}
 			}			
 		}
-	}
-	
-	public static void main(String[] args) {
-		UT_ColorConversion test = new UT_ColorConversion();
-//		test.testHSV2();
-//		test.testHSV();
-		test.testHSL();
-		test.testHSL2();
-		System.out.println("Done.");
 	}
 }

@@ -1,7 +1,10 @@
-package com.unitTest;
+package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 
+import org.junit.Test;
+
+import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
@@ -13,28 +16,36 @@ import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.matrix.Matrix;
 
-public class UT_SpherePanoTransformer2 {
+public class SpherePanoTransformer2Test {
 
-	KeyPoint p1;
-	KeyPointList kpl1;
-	
-	public UT_SpherePanoTransformer2() {
-		kpl1 = new KeyPointList();
-		kpl1.cameraOriginX = 1001;
-		kpl1.cameraOriginY = 2002;
-		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
-		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		kpl1.sphereRZ1 = 10 * MathUtil.deg2rad;
-		kpl1.sphereRY = 20 * MathUtil.deg2rad;
-		kpl1.sphereRZ2 = 30 * MathUtil.deg2rad;
+	@Test
+	public void testRotationZYZ() {
+		double rot[] = new double[3];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
+		double dest3[] = new double[3];
+		rot[0] = 10 * MathUtil.deg2rad;
+		rot[1] = 20 * MathUtil.deg2rad;
+		rot[2] = 30 * MathUtil.deg2rad;
+		dest1[0] = 40 * MathUtil.deg2rad;
+		dest1[1] = 50 * MathUtil.deg2rad;
+		dest1[2] = 1;
 		
-		p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1234;
-		p1.doubleY = 2345;
+		SphericalCoordsLongZen.polarToCartesian(dest1[0], dest1[1], dest1[2], dest2);
+		Matrix m = RotationZYZ.instance.makeAngles(rot);
+		RotationZYZ.instance.transformForward(m, dest2, dest3);
+		SphericalCoordsLongZen.cartesianToPolar(dest3[0], dest3[1], dest3[2], dest3);
+		
+		TestUtils.dumpAngles("dest1", dest1);
+		TestUtils.dumpAngles("dest3", dest3);
+		
+		TestUtils.assertEqualAngle("0", dest1[0], dest3[0]);
+		TestUtils.assertEqualAngle("1", dest1[1], dest3[1]);
+		TestUtils.assertEqualAngle("2", dest1[2], dest3[2]);
 	}
-	
-	void testSpherePanoTransformerRotate() {
+
+	@Test
+	public void testSpherePanoTransformerRotate() {
 		double rot[] = new double[3];
 		double dest1[] = new double[2];
 		double dest2[] = new double[2];
@@ -66,7 +77,8 @@ public class UT_SpherePanoTransformer2 {
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 	}
 	
-	void testSpherePanoTransformer() {
+	@Test
+	public void testSpherePanoTransformer() {
 		KeyPointList kpl1 = new KeyPointList();
 		kpl1.cameraOriginX = 1001;
 		kpl1.cameraOriginY = 2002;
@@ -105,7 +117,8 @@ public class UT_SpherePanoTransformer2 {
 		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
 	}
 
-	void testSphericalDistance() {
+	@Test
+	public void testSphericalDistance() {
 		double delta = 2 * MathUtil.deg2rad;
 		double rx1 = 10 * MathUtil.deg2rad;
 		double ry1 = 89 * MathUtil.deg2rad;
@@ -122,7 +135,77 @@ public class UT_SpherePanoTransformer2 {
 		d = SphericalCoordsLongZen.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
 		TestUtils.assertEqualAngle("", d, delta);
 	}
-	
+
+	private static void checkNorm0(KeyPoint kp, double dX, double dY, double dZ, double dF) {
+		double dest0[] = new double[3];
+		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest0);
+		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
+		pd.setKeyPoint(kp);
+		
+		TestUtils.assertEqualAngle("", dest0[0], pd.tx);
+		TestUtils.assertEqualAngle("", dest0[1], pd.ty);
+		
+		double dest2[] = new double[2];
+		dest2[0] = dest0[0] + pd.dTX_dR1 * dX + pd.dTX_dR2 * dY + pd.dTX_dR3 * dZ + pd.dTX_dF * dF;
+		dest2[1] = dest0[1] + pd.dTY_dR1 * dX + pd.dTY_dR2 * dY + pd.dTY_dR3 * dZ + pd.dTY_dF * dF;
+		
+		kp.keyPointList.sphereRZ1 += dX;
+		kp.keyPointList.sphereRY += dY;
+		kp.keyPointList.sphereRZ2 += dZ;
+		kp.keyPointList.scaleZ += dF;
+
+		double dest1[] = new double[3];
+		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest1);
+		
+		kp.keyPointList.sphereRZ1 -= dX;
+		kp.keyPointList.sphereRY -= dY;
+		kp.keyPointList.sphereRZ2 -= dZ;
+		kp.keyPointList.scaleZ -= dF;
+		
+		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
+		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
+	}
+
+	@Test
+	public void testNorm0() {
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1136;
+		kpl1.cameraOriginY = 856;
+		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
+		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
+		kpl1.sphereRZ1 = -178 * MathUtil.deg2rad;
+		kpl1.sphereRY = 30 * MathUtil.deg2rad;
+		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
+		
+		KeyPoint p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = 1881;
+		p1.doubleY = 897;
+
+		double delta = 0.1 * MathUtil.deg2rad;
+		int parts = 16;
+		for (int x = 0; x < parts; x++) {
+			double rx = x * MathUtil.C2PI / parts;
+			for (int y = 0; y < parts; y++) {
+				double ry = y * MathUtil.C2PI / parts;
+				for (int z = 0; z < parts; z++) {
+					double rz = z * MathUtil.C2PI / parts;
+					p1.keyPointList.sphereRZ1 = rx;
+					p1.keyPointList.sphereRY = ry;
+					p1.keyPointList.sphereRZ2 = rz;
+					try {
+						checkNorm0(p1, delta, delta, delta, delta);
+					} catch (RuntimeException e) {
+						System.out.println("RX=" + MathUtil.rad2degStr(rx));
+						System.out.println("RY=" + MathUtil.rad2degStr(ry));
+						System.out.println("RZ=" + MathUtil.rad2degStr(rz));
+						throw e;
+					}
+				}
+			}
+		}
+	}
+
 	private static void checkNorm(KeyPointPair kpp, 
 			double dX1, double dY1, double dZ1, double dF1, 
 			double dX2, double dY2, double dZ2, double dF2) {
@@ -171,8 +254,9 @@ public class UT_SpherePanoTransformer2 {
 		
 		TestUtils.assertEqualAngle("", dist2, dist1);
 	}
-	
-	void testSphereNorm() {
+
+	@Test
+	public void testSphereNorm() {
 		KeyPointList kpl1 = new KeyPointList();
 		kpl1.cameraOriginX = 1136;
 		kpl1.cameraOriginY = 856;
@@ -182,7 +266,7 @@ public class UT_SpherePanoTransformer2 {
 		kpl1.sphereRY = 30 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
 		
-		p1 = new KeyPoint();
+		KeyPoint p1 = new KeyPoint();
 		p1.keyPointList = kpl1;
 		p1.doubleX = 1881;
 		p1.doubleY = 897;
@@ -247,7 +331,8 @@ public class UT_SpherePanoTransformer2 {
 		}
 	}
 
-	void testCalcPrims() {
+	@Test
+	public void testCalcPrims() {
 		KeyPointList origin = new KeyPointList();
 		origin.cameraOriginX = 1100;
 		origin.cameraOriginY = 2200;
@@ -323,106 +408,5 @@ public class UT_SpherePanoTransformer2 {
 		dump("delta", pKPL);*/
 		TestUtils.assertEqualAngle("", pWorld1[0], pWorld2[0]);
 		TestUtils.assertEqualAngle("", pWorld1[1], pWorld2[1]);
-	}
-	
-	private static void checkNorm0(KeyPoint kp, double dX, double dY, double dZ, double dF) {
-		double dest0[] = new double[3];
-		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest0);
-		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
-		pd.setKeyPoint(kp);
-		
-		TestUtils.assertEqualAngle("", dest0[0], pd.tx);
-		TestUtils.assertEqualAngle("", dest0[1], pd.ty);
-		
-		double dest2[] = new double[2];
-		dest2[0] = dest0[0] + pd.dTX_dR1 * dX + pd.dTX_dR2 * dY + pd.dTX_dR3 * dZ + pd.dTX_dF * dF;
-		dest2[1] = dest0[1] + pd.dTY_dR1 * dX + pd.dTY_dR2 * dY + pd.dTY_dR3 * dZ + pd.dTY_dF * dF;
-		
-		kp.keyPointList.sphereRZ1 += dX;
-		kp.keyPointList.sphereRY += dY;
-		kp.keyPointList.sphereRZ2 += dZ;
-		kp.keyPointList.scaleZ += dF;
-
-		double dest1[] = new double[3];
-		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest1);
-		
-		kp.keyPointList.sphereRZ1 -= dX;
-		kp.keyPointList.sphereRY -= dY;
-		kp.keyPointList.sphereRZ2 -= dZ;
-		kp.keyPointList.scaleZ -= dF;
-		
-		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
-		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
-	}
-	
-	void testNorm0() {
-		KeyPointList kpl1 = new KeyPointList();
-		kpl1.cameraOriginX = 1136;
-		kpl1.cameraOriginY = 856;
-		kpl1.cameraScale = 1.0 / (2.0 * Math.max(kpl1.cameraOriginX, kpl1.cameraOriginY));
-		kpl1.scaleZ = KeyPointList.defaultCameraFOV_to_ScaleZ;
-		kpl1.sphereRZ1 = -178 * MathUtil.deg2rad;
-		kpl1.sphereRY = 30 * MathUtil.deg2rad;
-		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
-		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1881;
-		p1.doubleY = 897;
-
-		double delta = 0.1 * MathUtil.deg2rad;
-		int parts = 16;
-		for (int x = 0; x < parts; x++) {
-			double rx = x * MathUtil.C2PI / parts;
-			for (int y = 0; y < parts; y++) {
-				double ry = y * MathUtil.C2PI / parts;
-				for (int z = 0; z < parts; z++) {
-					double rz = z * MathUtil.C2PI / parts;
-					p1.keyPointList.sphereRZ1 = rx;
-					p1.keyPointList.sphereRY = ry;
-					p1.keyPointList.sphereRZ2 = rz;
-					try {
-						checkNorm0(p1, delta, delta, delta, delta);
-					} catch (RuntimeException e) {
-						System.out.println("RX=" + MathUtil.rad2degStr(rx));
-						System.out.println("RY=" + MathUtil.rad2degStr(ry));
-						System.out.println("RZ=" + MathUtil.rad2degStr(rz));
-						throw e;
-					}
-				}
-			}
-		}
-	}
-	
-	void testRotationZYZ() {
-		double rot[] = new double[3];
-		double dest1[] = new double[3];
-		double dest2[] = new double[3];
-		double dest3[] = new double[3];
-		rot[0] = 10 * MathUtil.deg2rad;
-		rot[1] = 20 * MathUtil.deg2rad;
-		rot[2] = 30 * MathUtil.deg2rad;
-		dest1[0] = 40 * MathUtil.deg2rad;
-		dest1[1] = 50 * MathUtil.deg2rad;
-		dest1[2] = 1;
-		
-		SphericalCoordsLongZen.polarToCartesian(dest1[0], dest1[1], dest1[2], dest2);
-		Matrix m = RotationZYZ.instance.makeAngles(rot);
-		RotationZYZ.instance.transformForward(m, dest2, dest3);
-		SphericalCoordsLongZen.cartesianToPolar(dest3[0], dest3[1], dest3[2], dest3);
-		TestUtils.dumpAngles("dest1", dest1);
-		TestUtils.dumpAngles("dest3", dest3);
-	}
-	
-	public static void main(String[] args) {
-		UT_SpherePanoTransformer2 test = new UT_SpherePanoTransformer2();
-//		test.testRotationZYZ();
-		test.testSpherePanoTransformerRotate();
-		test.testSpherePanoTransformer();
-		test.testSphericalDistance();
-		test.testNorm0();
-		test.testSphereNorm();
-		test.testCalcPrims();
-		System.out.println("Done");
 	}
 }

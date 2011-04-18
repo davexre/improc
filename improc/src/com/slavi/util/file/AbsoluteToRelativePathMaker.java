@@ -113,8 +113,6 @@ public class AbsoluteToRelativePathMaker {
 		} catch (IOException e) {
 			fname = file.getPath();
 		}
-		String fullName = fname;
-
 		File f = new File(fname);
 		int elementIndex = 0;
 		StringBuilder trimmed = new StringBuilder();
@@ -126,9 +124,17 @@ public class AbsoluteToRelativePathMaker {
 				trimmed.insert(0, f.getName());
 				//trimmed = f.getName() + prefix + trimmed;
 				prefix = "/";
-				f = f.getParentFile();
-				if (f == null)
-					return fullName;
+				File parent = f.getParentFile();
+				if (parent == null) {
+					String str = f.toString();
+					if (str.indexOf('\\') != 0) {
+						trimmed.insert(0, str, 0, str.lastIndexOf('\\'));
+					} else {
+						trimmed.insert(0, f);
+					}
+					return trimmed.toString();
+				}
+				f = parent;
 				fname = (f == null) ? "" : f.getPath();
 			}
 			if (useCaseSensitiveCompare) {

@@ -1,4 +1,4 @@
-package com.test.improc;
+package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
 import java.util.concurrent.Callable;
@@ -6,9 +6,6 @@ import java.util.concurrent.Callable;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
-import com.slavi.improc.parallel.PComputeDirection;
-import com.slavi.improc.parallel.PComputeMagnitude;
-import com.slavi.improc.parallel.PFastGaussianFilter;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;

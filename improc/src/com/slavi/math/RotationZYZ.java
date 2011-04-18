@@ -5,7 +5,7 @@ import com.slavi.math.matrix.Matrix;
 /**
  * http://en.wikipedia.org/wiki/Euler_angles 
  */
-public class RotationZYZ {
+public class RotationZYZ implements Rotation3D {
 	public static final RotationZYZ instance = new RotationZYZ();
 
 	private static final double threshold = Math.cos(MathUtil.epsAngle * 10);

@@ -1,22 +1,27 @@
-package com.test.math;
+package com.slavi.math.matrix;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.StringTokenizer;
+
+import org.junit.Test;
 
 import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SVD_Obsolete;
+import com.test.math.TestMatrix2;
 
-public class MatrixSvdTest {
-	public static void main(String[] args) throws Exception {
-		BufferedReader fin = new BufferedReader(new FileReader(
-				TestMatrix2.class.getResource(
-					"SVD-A.txt").getFile()));
+public class JLapackMySvdTest {
+	
+	@Test
+	public void testMySvd() throws Exception {
+		BufferedReader fin = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("MatrixTest.txt")));
 		StringTokenizer stt = new StringTokenizer(fin.readLine());
 		SVD_Obsolete a = new SVD_Obsolete(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
 		a.load(fin);
 		fin.close();
+		
 		SVD_Obsolete at = new SVD_Obsolete(a.getSizeX(), a.getSizeY());
 		a.transpose(at);
 		Matrix b = a.makeCopy();

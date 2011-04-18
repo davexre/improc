@@ -2,7 +2,7 @@ package com.slavi.math;
 
 import com.slavi.math.matrix.Matrix;
 
-public class RotationXYZ {
+public class RotationXYZ implements Rotation3D {
 	public static final RotationXYZ instance = new RotationXYZ();
 	
 	/**

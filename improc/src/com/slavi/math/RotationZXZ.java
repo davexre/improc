@@ -24,7 +24,7 @@ import com.slavi.math.matrix.Matrix;
  * <ol>Rotate the xyz-system a third time about the new z-axis by γ.</ol>
  * </li>
  */
-public class RotationZXZ {
+public class RotationZXZ implements Rotation3D {
 	public static final RotationZXZ instance = new RotationZXZ();
 
 	private static final double threshold = Math.cos(MathUtil.epsAngle * 10);

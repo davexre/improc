@@ -70,7 +70,7 @@ import com.slavi.math.matrix.Matrix;
  *   <p style="text-align: center">Positive Z rotation</p>
  * </div><br>
  */
-public class RotationZYX {
+public class RotationZYX implements Rotation3D {
 	public static final RotationZYX instance = new RotationZYX();
 
 	/**

@@ -1,7 +1,10 @@
-package com.unitTest;
+package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 
+import org.junit.Test;
+
+import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
@@ -12,28 +15,10 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.SphericalCoordsLongLat;
 import com.slavi.math.SphericalCoordsLongZen;
 
-public class UT_SpherePanoTransformer {
+public class SpherePanoTransformLearnerTest {
 
-	KeyPoint p1;
-	KeyPointList kpl1;
-	static SpherePanoTransformLearner panoTransform = new SpherePanoTransformLearner();
-	
-	public UT_SpherePanoTransformer() {
-		kpl1 = new KeyPointList();
-		kpl1.cameraOriginX = 1001;
-		kpl1.cameraOriginY = 2002;
-		kpl1.scaleZ = 3003;
-		kpl1.rx = 10 * MathUtil.deg2rad;
-		kpl1.ry = 20 * MathUtil.deg2rad;
-		kpl1.rz = 30 * MathUtil.deg2rad;
-		
-		p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1234;
-		p1.doubleY = 2345;
-	}
-	
-	void testSpherePanoTransformerRotate() {
+	@Test
+	public void testSpherePanoTransformerRotate() {
 		double rot[] = new double[3];
 		double dest1[] = new double[2];
 		double dest2[] = new double[2];
@@ -65,9 +50,24 @@ public class UT_SpherePanoTransformer {
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 	}
 	
-	void testSpherePanoTransformer() {
-		double dest[] = new double[2];
-		double dest2[] = new double[2];
+	@Test
+	public void testSpherePanoTransformer() {
+		SpherePanoTransformLearner panoTransform = new SpherePanoTransformLearner();
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1001;
+		kpl1.cameraOriginY = 2002;
+		kpl1.scaleZ = 3003;
+		kpl1.rx = 10 * MathUtil.deg2rad;
+		kpl1.ry = 20 * MathUtil.deg2rad;
+		kpl1.rz = 30 * MathUtil.deg2rad;
+		
+		KeyPoint p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = 1234;
+		p1.doubleY = 2345;
+		
+		double dest[] = new double[3];
+		double dest2[] = new double[3];
 		panoTransform.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
 		panoTransform.transformBackward(dest[0], dest[1], kpl1, dest2);
 		TestUtils.assertEqualAngle("", dest2[0], p1.doubleX);
@@ -77,7 +77,8 @@ public class UT_SpherePanoTransformer {
 		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
 	}
 
-	void testSphericalDistance() {
+	@Test
+	public void testSphericalDistance() {
 		double delta = 2 * MathUtil.deg2rad;
 		double rx1 = 180 * MathUtil.deg2rad;
 		double ry1 = 89 * MathUtil.deg2rad;
@@ -95,11 +96,11 @@ public class UT_SpherePanoTransformer {
 		TestUtils.assertEqual("", d, delta);
 	}
 	
-	private static void checkNorm(KeyPointPair kpp, 
+	private static void checkNorm(SpherePanoTransformLearner panoTransform, KeyPointPair kpp, 
 			double dX1, double dY1, double dZ1, double dF1, 
 			double dX2, double dY2, double dZ2, double dF2) {
-		double dest1[] = new double[2];
-		double dest2[] = new double[2];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
 		SphereNorm sn = new SphereNorm();
 		sn.setKeyPointPair(kpp);
 		
@@ -147,7 +148,22 @@ public class UT_SpherePanoTransformer {
 		System.out.println(MathUtil.d20(dist1));
 	}
 	
-	void testSphereNorm() {
+	@Test
+	public void testSphereNorm() {
+		SpherePanoTransformLearner panoTransform = new SpherePanoTransformLearner();
+		KeyPointList kpl1 = new KeyPointList();
+		kpl1.cameraOriginX = 1001;
+		kpl1.cameraOriginY = 2002;
+		kpl1.scaleZ = 3003;
+		kpl1.rx = 10 * MathUtil.deg2rad;
+		kpl1.ry = 20 * MathUtil.deg2rad;
+		kpl1.rz = 30 * MathUtil.deg2rad;
+		
+		KeyPoint p1 = new KeyPoint();
+		p1.keyPointList = kpl1;
+		p1.doubleX = 1234;
+		p1.doubleY = 2345;
+		
 		KeyPointList kpl2 = new KeyPointList();
 		kpl2.cameraOriginX = 1100;
 		kpl2.cameraOriginY = 2200;
@@ -156,8 +172,8 @@ public class UT_SpherePanoTransformer {
 		kpl2.ry = 30 * MathUtil.deg2rad;
 		kpl2.rz = 40 * MathUtil.deg2rad;
 
-		double dest1[] = new double[2];
-		double dest2[] = new double[2];
+		double dest1[] = new double[3];
+		double dest2[] = new double[3];
 		panoTransform.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
 		panoTransform.transformBackward(dest1[0] + 10 * MathUtil.deg2rad, dest1[1], kpl2, dest2);
 
@@ -171,7 +187,7 @@ public class UT_SpherePanoTransformer {
 		kpp.targetSP = p2;
 		
 		double delta = 0.1 * MathUtil.deg2rad;
-		checkNorm(kpp, delta, delta, delta, delta, delta, delta, delta, delta);
+		checkNorm(panoTransform, kpp, delta, delta, delta, delta, delta, delta, delta, delta);
 		
 		panoTransform.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
 		double dist0 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
@@ -204,15 +220,16 @@ public class UT_SpherePanoTransformer {
 		TestUtils.assertEqualAngle("", dist0, dist1);
 	}
 
-	void dump(String str, double dest[]) {
+	private void dump(String str, double dest[]) {
 		double x = dest[0]; 
 		double y = dest[1];
 		x = MathUtil.fixAngle2PI(x);
 		y = MathUtil.fixAngle2PI(y);
 		System.out.println(str + "\t" + MathUtil.rad2degStr(x) + "\t" + MathUtil.rad2degStr(y));
 	}
-	
-	void testCalcPrims() {
+
+	@Test
+	public void testCalcPrims() {
 		KeyPointList origin = new KeyPointList();
 		origin.cameraOriginX = 1100;
 		origin.cameraOriginY = 2200;
@@ -288,13 +305,5 @@ public class UT_SpherePanoTransformer {
 		dump("delta", pKPL);
 	}
 	
-	public static void main(String[] args) {
-		UT_SpherePanoTransformer test = new UT_SpherePanoTransformer();
-		test.testSpherePanoTransformerRotate();
-		test.testSpherePanoTransformer();
-		test.testSphericalDistance();
-		test.testSphereNorm();
-//		test.testCalcPrims();
-		System.out.println("Done");
-	}
+
 }

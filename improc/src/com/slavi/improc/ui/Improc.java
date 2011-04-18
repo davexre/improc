@@ -62,7 +62,7 @@ public class Improc {
 		SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
 	
-		if (true) {
+/*		if (true) {
 			for (String image : images) {
 				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
 				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));
@@ -82,13 +82,14 @@ public class Improc {
 			}
 			return;
 		}
-		
+*/		
 		ArrayList<KeyPointPairList> kppl;
 	
 		if (true) {
 			KeyPointBigTree bigTree = SwtUtil.openWaitDialog(parent, "Generating key point BIG tree", 
 					new GenerateKeyPointPairBigTree(exec, images, imagesRoot, keyPointFileRoot), 
 					images.size() - 1);
+			bigTree.balance();
 			System.out.println("Tree size  : " + bigTree.getSize());
 			System.out.println("Tree depth : " + bigTree.getTreeDepth());
 			System.out.println("Tree size          : " + bigTree.getSize());
@@ -171,8 +172,8 @@ public class Improc {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
 //		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors + 1, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors, new MyThreadFactory());
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
 
 		Improc application = new Improc();
 		try {
