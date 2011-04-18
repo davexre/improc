@@ -18,8 +18,6 @@ public class MatrixLqDecompositionTest {
 		a.load(fin);
 		fin.close();
 		
-		Matrix at = new Matrix();
-		a.transpose(at);
 		Matrix b = a.makeCopy();
 		Matrix tmp = new Matrix();
 

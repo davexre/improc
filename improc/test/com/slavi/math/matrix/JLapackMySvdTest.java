@@ -1,16 +1,12 @@
 package com.slavi.math.matrix;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
 
-import com.slavi.math.matrix.JLapack;
-import com.slavi.math.matrix.Matrix;
-import com.slavi.math.matrix.SVD_Obsolete;
-import com.test.math.TestMatrix2;
+import com.slavi.TestUtils;
 
 public class JLapackMySvdTest {
 	
@@ -18,82 +14,22 @@ public class JLapackMySvdTest {
 	public void testMySvd() throws Exception {
 		BufferedReader fin = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("MatrixTest.txt")));
 		StringTokenizer stt = new StringTokenizer(fin.readLine());
-		SVD_Obsolete a = new SVD_Obsolete(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
+		Matrix a = new Matrix(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
 		a.load(fin);
 		fin.close();
 		
-		SVD_Obsolete at = new SVD_Obsolete(a.getSizeX(), a.getSizeY());
-		a.transpose(at);
-		Matrix b = a.makeCopy();
-//		Matrix bt = at.makeCopy();
-		
+		Matrix copyA = a.makeCopy();
 		Matrix tmp = new Matrix();
-
 		Matrix u = new Matrix();
 		Matrix v = new Matrix(a.getSizeX(), a.getSizeX());
 		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
-
-		Matrix ut = new Matrix();
-		Matrix vt = new Matrix();
-		Matrix st = new Matrix();
-
-		
-		a.svd(s, v);
-		a.copyTo(ut);
-		s.copyTo(st);
-		v.copyTo(vt);
-		b.copyTo(a);
 		
 		JLapack jl = new JLapack();
 		jl.mysvd(a, u, v, s);
-//		at.mysvd(ut, vt, st);
-
-		
-		ut.printM("U1");
-		u.printM("U2");
-		vt.printM("V1");
-		v.printM("V2");
-		st.printM("S1");
-		s.printM("S2");
-				
-		
-		
-//		u.printM("U !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//		v.printM("V");
-//		s.printM("S");
-		
 		Matrix checkA = new Matrix();
-//		Matrix checkAt = new Matrix();
-
-//		ut.printM("UT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//		vt.printM("VT");
-//		st.printM("ST");
-		
 		u.mMul(s, tmp);
 		tmp.mMul(v, checkA);
-		checkA.mSub(b, a);
-		a.printM("Diff A");
-
-//		ut.mMul(st, tmp);
-//		tmp.mMul(vt, checkAt);
-//		checkAt.mSub(bt, at);
-//		at.printM("Diff AT");
-		
-//		ut.termMul(ut, ut);
-//		vt.termMul(vt, vt);
-//		u.termMul(u, u);
-//		v.termMul(v, v);
-//				
-//		vt.transpose(tmp);
-//		tmp.mSub(u, tmp);
-//		tmp.printM("Diff U");
-//
-//		ut.transpose(tmp);
-//		tmp.mSub(v, tmp);
-//		tmp.printM("Diff V");
-//
-//		st.transpose(tmp);
-//		tmp.mSub(s, tmp);
-//		tmp.printM("Diff S");
+		checkA.mSub(copyA, a);
+		TestUtils.assertMatrix0("", a);
 	}
 }
