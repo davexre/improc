@@ -4,9 +4,9 @@ import org.junit.Test;
 
 import com.slavi.util.Util.CENCODE;
 
-public class UtilsEncodeTest {
+public class UtilEncodeTest {
 
-	static final String testStr[] = {
+	private static final String testStr[] = {
 		"Това е на кирилица",
 		"\n",
 		"",
@@ -15,7 +15,7 @@ public class UtilsEncodeTest {
 		"\u0003g"
 	};
 
-	void singleTestStr(CENCODE cencode) {
+	private void singleTestStr(CENCODE cencode) {
 		int i = 0;
 		for (String s : testStr) {
 			String e = Util.cEncode(s, cencode);

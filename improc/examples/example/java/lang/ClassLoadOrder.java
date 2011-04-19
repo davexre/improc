@@ -1,4 +1,4 @@
-package com.test;
+package example.java.lang;
 
 public class ClassLoadOrder {
 

@@ -1,7 +1,6 @@
-package com.test;
+package example.java.lang;
 
-@SuppressWarnings("all")
-public class TestPrivateMethodInheritance {
+public class PrivateMethodInheritance {
 
 	public static class Base {
 		public void exec() {

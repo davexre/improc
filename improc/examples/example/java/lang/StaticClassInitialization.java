@@ -1,6 +1,6 @@
-package com.test;
+package example.java.lang;
 
-public class StaticClassInitializator {
+public class StaticClassInitialization {
 
 	public static class ClassA {
 		static {

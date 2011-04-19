@@ -1,9 +1,9 @@
-package com.test.concurrent;
+package example.java.util.concurrent;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class BlockingQueueDemo {
+public class BlockingQueueExample {
 
 	public static class Task {
 		final String taskId;
@@ -81,7 +81,7 @@ public class BlockingQueueDemo {
 	}
 	
 	public static void main(String[] args) {
-		BlockingQueueDemo test = new BlockingQueueDemo();
+		BlockingQueueExample test = new BlockingQueueExample();
 		test.doIt();
 	}
 }

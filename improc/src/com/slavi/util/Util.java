@@ -6,7 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -805,5 +807,51 @@ public class Util {
 			result[i] = v;
 		}
 		return result;
+	}
+
+	 /**
+	   * Treat an {@link Enumeration} as an {@link Iterable} so it can be used in an enhanced for-loop.
+	   * Bear in mind that the enumeration is "consumed" by the loop and so should be used only once.
+	   * Generally it is best to put the code which obtains the enumeration inside the loop header.
+	   * <div class="nonnormative">
+	   * <p>Example of correct usage:</p>
+	   * <pre>
+	   * ClassLoader loader = ...;
+	   * String name = ...;
+	   * for (URL resource : NbCollections.iterable(loader.{@link ClassLoader#getResources getResources}(name))) {
+	   *     // ...
+	   * }
+	   * </pre>
+	   * </div>
+	   * @param enumeration an enumeration
+	   * @return an iterable wrapper which will traverse the enumeration once
+	   *         ({@link Iterator#remove} is not supported)
+	   * @throws NullPointerException if the enumeration is null
+	   * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6349852">Java bug #6349852</a>
+	   * @since org.openide.util 7.5
+	   * 
+	   * Code borrowed from http://www.java2s.com/Code/Java/Collections-Data-Structure/TreatanEnumerationasanIterable.htm
+	   */
+	public static <E> Iterable<E> iterable(final Enumeration<E> enumeration) {
+		if (enumeration == null) {
+			throw new NullPointerException();
+		}
+		return new Iterable<E>() {
+			public Iterator<E> iterator() {
+				return new Iterator<E>() {
+					public boolean hasNext() {
+						return enumeration.hasMoreElements();
+					}
+
+					public E next() {
+						return enumeration.nextElement();
+					}
+
+					public void remove() {
+						throw new UnsupportedOperationException("Not applicable");
+					}
+				};
+			}
+		};
 	}
 }
