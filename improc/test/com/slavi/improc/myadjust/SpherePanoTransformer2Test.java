@@ -19,32 +19,6 @@ import com.slavi.math.matrix.Matrix;
 public class SpherePanoTransformer2Test {
 
 	@Test
-	public void testRotationZYZ() {
-		double rot[] = new double[3];
-		double dest1[] = new double[3];
-		double dest2[] = new double[3];
-		double dest3[] = new double[3];
-		rot[0] = 10 * MathUtil.deg2rad;
-		rot[1] = 20 * MathUtil.deg2rad;
-		rot[2] = 30 * MathUtil.deg2rad;
-		dest1[0] = 40 * MathUtil.deg2rad;
-		dest1[1] = 50 * MathUtil.deg2rad;
-		dest1[2] = 1;
-		
-		SphericalCoordsLongZen.polarToCartesian(dest1[0], dest1[1], dest1[2], dest2);
-		Matrix m = RotationZYZ.instance.makeAngles(rot);
-		RotationZYZ.instance.transformForward(m, dest2, dest3);
-		SphericalCoordsLongZen.cartesianToPolar(dest3[0], dest3[1], dest3[2], dest3);
-		
-		TestUtils.dumpAngles("dest1", dest1);
-		TestUtils.dumpAngles("dest3", dest3);
-		
-		TestUtils.assertEqualAngle("0", dest1[0], dest3[0]);
-		TestUtils.assertEqualAngle("1", dest1[1], dest3[1]);
-		TestUtils.assertEqualAngle("2", dest1[2], dest3[2]);
-	}
-
-	@Test
 	public void testSpherePanoTransformer() {
 		KeyPointList kpl1 = new KeyPointList();
 		kpl1.cameraOriginX = 1001;
