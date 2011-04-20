@@ -14,7 +14,8 @@ public class UtilIterableTest {
 		String str = "a b c d e";
 		int count = 0;
 		for (Object i : Util.iterable(new StringTokenizer(str))) {
-			count++;
+			if (i != null)
+				count++;
 		}
 		TestUtils.assertTrue("", count == 5);
 	}

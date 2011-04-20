@@ -33,19 +33,15 @@ public class SpherePanoTransformLearnerTest {
 		TestUtils.assertEqualAngle("", dest1[0], dest3[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest3[1]);
 
-		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 180 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 
-		SphericalCoordsLongZen.rotateBackward(dest1[0], dest1[1], 0, 90 * MathUtil.deg2rad, 180 * MathUtil.deg2rad, dest2);
+		SphericalCoordsLongZen.rotateBackward(dest1[0], dest1[1], 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, dest2);
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 
-		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 
-				45 * MathUtil.deg2rad, 
-				90 * MathUtil.deg2rad, 
-				(180 + 45) * MathUtil.deg2rad, 
-				dest2);
+		SphericalCoordsLongZen.rotateForeward(dest1[0], dest1[1], 45 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, -45 * MathUtil.deg2rad, dest2);
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
 	}

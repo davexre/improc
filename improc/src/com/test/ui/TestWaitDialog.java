@@ -9,9 +9,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.util.Util;
+import com.slavi.util.concurrent.FakeThreadExecutor;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
-import com.test.concurrent.FakeThreadExecutor;
 
 public class TestWaitDialog {
 

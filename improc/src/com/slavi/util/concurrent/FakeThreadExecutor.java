@@ -1,4 +1,4 @@
-package com.test.concurrent;
+package com.slavi.util.concurrent;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +12,10 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Implements the ExecutorService interface without using any threads, instead
+ * all tasks are executed immedeately as they are submitted for execution.
+ */
 public class FakeThreadExecutor implements ExecutorService {
 
 	boolean shutdown = false;
@@ -111,7 +115,11 @@ public class FakeThreadExecutor implements ExecutorService {
 		if (shutdown || Thread.currentThread().isInterrupted())
 			throw new RejectedExecutionException();
 		FutureTask<T> result = new FutureTask<T>(task);
-		result.run();
+		try {
+			result.run();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 		return result;
 	}
 
@@ -125,7 +133,11 @@ public class FakeThreadExecutor implements ExecutorService {
 		if (shutdown || Thread.currentThread().isInterrupted())
 			throw new RejectedExecutionException();
 		FutureTask<T> result = new FutureTask<T>(task, resultType);
-		result.run();
+		try {
+			result.run();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 		return result;
 	}
 

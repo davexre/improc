@@ -1,4 +1,4 @@
-package example.slavi.concurrent;
+package manualTest.slavi.ui;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -7,7 +7,9 @@ import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
-public class TaskSetExecutorUIExample {
+import example.slavi.concurrent.ExampleTask;
+
+public class TaskSetExecutorUITest {
 	static class MyJob implements Callable<Void> {
 		ExecutorService exec;
 		int taskCount;
