@@ -90,8 +90,15 @@ public class TaskSetExecutor {
 	
 	public TaskSetExecutor(ExecutorService exec, List<?> tasks) {
 		this(exec);
-		for (Object task : tasks)
-			internalAdd(task);
+		for (Object task : tasks) {
+			if (task instanceof Callable) {
+				add((Callable<?>) task);
+			} else if (task instanceof Runnable){
+				add((Runnable) task);
+			} else {
+				throw new RuntimeException("Unsupported task type " + task);
+			}
+		}
 		addFinished();
 	}
 
@@ -114,36 +121,33 @@ public class TaskSetExecutor {
 	}
 	
 	boolean onFinallyInvoked = false;
-	private void invokeOnFinally() {
-		if (onFinallyInvoked)
-			return;
-		onFinallyInvoked = true;
-		try {
-			onFinally();
-		} catch (Throwable t) {
-		}
-	}
-	
 	public boolean isDone() {
+		// The onFinally() must be called outside a synchronized block 
+		boolean localOnFinallyInvoked = false;
 		synchronized (tasks) {
-			if (!addingFinished)
+			if (!addingFinished) {
 				return false;
+			}
 			if (aborted) {
-				if (runningTasks != 0)
+				if (runningTasks != 0) {
 					return false;
-				invokeOnFinally();
-				return true;
+				}
 			}
 			if (exec.isShutdown()) {
 				abort();
-				invokeOnFinally();
-				return true;
-			}
-			if (finishedTasks != tasks.size())
+			} else if (finishedTasks != tasks.size()) {
 				return false;
-			invokeOnFinally();
-			return true;
+			}
+			localOnFinallyInvoked = onFinallyInvoked;
+			onFinallyInvoked = true;
 		}
+		// Invoke onFinally if not already invoked.
+		try {
+			if (!localOnFinallyInvoked)
+				onFinally();
+		} catch (Throwable t) {
+		}
+		return true;
 	}
 	
 	public boolean isCanceled() {
@@ -185,6 +189,8 @@ public class TaskSetExecutor {
 				}
 				tasks.add(future);
 			}
+		} catch (RejectedExecutionException e) {
+			throw e;
 		} catch (Throwable t) {
 			abort();
 			throw new RejectedExecutionException(t);
@@ -215,21 +221,24 @@ public class TaskSetExecutor {
 	}
 	
 	public void get(long timeoutMillis) throws InterruptedException, ExecutionException, TimeoutException {
-		synchronized (tasks) {
-			long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
-			long timeToWait = timeoutMillis > 500 ? 500 : (timeoutMillis <= 0 ? 500 : timeoutMillis);
-			if (Thread.currentThread().isInterrupted())
-				abort();
-			while (!isDone()) {
-				if ((timeoutMillis > 0) && (System.currentTimeMillis() > maxTimeMillis))
-					throw new TimeoutException();
-				try {
+		final long sleepTimeoutMillis = 100;
+		long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
+		long timeToWait = timeoutMillis > sleepTimeoutMillis ? sleepTimeoutMillis : (timeoutMillis <= 0 ? sleepTimeoutMillis : timeoutMillis);
+		if (Thread.currentThread().isInterrupted())
+			abort();
+		while (!isDone()) {
+			if ((timeoutMillis > 0) && (System.currentTimeMillis() > maxTimeMillis))
+				throw new TimeoutException();
+			try {
+				synchronized (tasks) {
 					tasks.wait(timeToWait);
-				} catch (InterruptedException e) {
-					abort();
-					throw e;
 				}
+			} catch (InterruptedException e) {
+				abort();
+				throw e;
 			}
+		}
+		synchronized (tasks) {
 			if (firstExceptionThatOccured != null)
 				throw new ExecutionException(firstExceptionThatOccured);
 			if (aborted) 

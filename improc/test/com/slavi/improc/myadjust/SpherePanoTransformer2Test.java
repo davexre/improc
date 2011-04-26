@@ -7,7 +7,6 @@ import org.junit.Test;
 import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.sphere2.SphereNorm2;
 import com.slavi.improc.myadjust.sphere2.SpherePanoTransformLearner2;
@@ -146,7 +145,7 @@ public class SpherePanoTransformer2Test {
 			}
 		}
 	}
-
+/*
 	private static void checkNorm(KeyPointPair kpp, 
 			double dX1, double dY1, double dZ1, double dF1, 
 			double dX2, double dY2, double dZ2, double dF2) {
@@ -271,7 +270,7 @@ public class SpherePanoTransformer2Test {
 			}
 		}
 	}
-
+*/
 	@Test
 	public void testCalcPrims() {
 		KeyPointList origin = new KeyPointList();

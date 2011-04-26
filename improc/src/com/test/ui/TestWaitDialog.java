@@ -9,7 +9,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.FakeThreadExecutor;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
@@ -101,8 +100,8 @@ public class TestWaitDialog {
 		} finally {
 			parent.close();
 //			SwtUtil.closeTaskManager();
-			System.out.println("Done.");
 		}
+		System.out.println("Done.");
 	}
 
 	public static void main(String[] args) throws Exception {
