@@ -51,6 +51,15 @@ public class TestUtils {
 		throw new RuntimeException("Failed");
 	}
 	
+	public static void assertEqual(String msg, int a, int b) {
+		if (a == b)
+			return;
+		System.out.println("Values not equal: " + msg);
+		System.out.println(a);
+		System.out.println(b);
+		throw new RuntimeException("Failed");
+	}
+	
 	public static void assertEqual(String msg, double a, double b) {
 		if (equal(a, b)) 
 			return;
