@@ -234,8 +234,8 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 				KeyPoint source = item.getKey();
 				KeyPoint target = item.getValue();
 				
-				transformForeward(source.doubleX, source.doubleY, source.keyPointList, PW1);
-				transformForeward(target.doubleX, target.doubleY, target.keyPointList, PW2);
+				transformForeward(source.getDoubleX(), source.getDoubleY(), source.getKeyPointList(), PW1);
+				transformForeward(target.getDoubleX(), target.getDoubleY(), target.getKeyPointList(), PW2);
 				
 				int srcIndex = images.indexOf(pairList.source) * 4;
 				int destIndex = images.indexOf(pairList.target) * 4;
@@ -243,14 +243,14 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 				coefs.make0();
 				double L = PW1[0] - PW2[0];
 				if (srcIndex >= 0) {
-					coefs.setItem(srcIndex + 0, 0, source.doubleX);
-					coefs.setItem(srcIndex + 1, 0, -source.doubleY);
+					coefs.setItem(srcIndex + 0, 0, source.getDoubleX());
+					coefs.setItem(srcIndex + 1, 0, -source.getDoubleY());
 					coefs.setItem(srcIndex + 2, 0, 1.0);
 					coefs.setItem(srcIndex + 3, 0, 0);
 				}
 				if (destIndex >= 0) {
-					coefs.setItem(destIndex + 0, 0, -target.doubleX);
-					coefs.setItem(destIndex + 1, 0, target.doubleY);
+					coefs.setItem(destIndex + 0, 0, -target.getDoubleX());
+					coefs.setItem(destIndex + 1, 0, target.getDoubleY());
 					coefs.setItem(destIndex + 2, 0, -1.0);
 					coefs.setItem(destIndex + 3, 0, 0);
 				}
@@ -259,14 +259,14 @@ public class HelmertPanoTransformLearner extends PanoTransformer {
 
 				L = PW1[1] - PW2[1];
 				if (srcIndex >= 0) {
-					coefs.setItem(srcIndex + 0, 0, source.doubleY);
-					coefs.setItem(srcIndex + 1, 0, source.doubleX);
+					coefs.setItem(srcIndex + 0, 0, source.getDoubleY());
+					coefs.setItem(srcIndex + 1, 0, source.getDoubleX());
 					coefs.setItem(srcIndex + 2, 0, 0);
 					coefs.setItem(srcIndex + 3, 0, 1.0);
 				}
 				if (destIndex >= 0) {
-					coefs.setItem(destIndex + 0, 0, -target.doubleY);
-					coefs.setItem(destIndex + 1, 0, -target.doubleX);
+					coefs.setItem(destIndex + 0, 0, -target.getDoubleY());
+					coefs.setItem(destIndex + 1, 0, -target.getDoubleX());
 					coefs.setItem(destIndex + 2, 0, 0);
 					coefs.setItem(destIndex + 3, 0, -1.0);
 				}

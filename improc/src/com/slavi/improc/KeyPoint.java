@@ -3,13 +3,17 @@ package com.slavi.improc;
 import java.util.StringTokenizer;
 
 public class KeyPoint {
-	public KeyPointList keyPointList = null;
-	
 	public static final int numDirections = 4;	// originally 8
 
 	public static final int descriptorSize = 4;	// originally 4
 
 	public static final int featureVectorLinearSize = descriptorSize * descriptorSize * numDirections;
+
+	private final KeyPointList keyPointList;
+	
+	private double doubleX;
+
+	private double doubleY;
 
 	public int imgX;		// TODO: Obsolete
 
@@ -17,10 +21,6 @@ public class KeyPoint {
 
 	public double imgScale; // TODO: Obsolete
 	
-	public double doubleX;
-
-	public double doubleY;
-
 	public int dogLevel; 	// TODO: Obsolete
 
 	public double adjS;		// TODO: Obsolete
@@ -31,6 +31,12 @@ public class KeyPoint {
 	
 	byte[] featureVector = new byte[featureVectorLinearSize];
 
+	public KeyPoint(KeyPointList keyPointList, double doubleX, double doubleY) {
+		this.keyPointList = keyPointList;
+		this.doubleX = doubleX;
+		this.doubleY = doubleY;
+	}
+	
 	public byte getItem(int atX, int atY, int atOrientation) {
 		if ((atX < 0) || (atX >= descriptorSize) || 
 			(atY < 0) || (atY >= descriptorSize) ||
@@ -76,9 +82,9 @@ public class KeyPoint {
 		result.append("\t");
 		result.append(Double.toString(imgScale));
 		result.append("\t");
-		result.append(Double.toString(doubleX));
+		result.append(Double.toString(getDoubleX()));
 		result.append("\t");
-		result.append(Double.toString(doubleY));
+		result.append(Double.toString(getDoubleY()));
 		result.append("\t");
 		result.append(Double.toString(dogLevel));
 		result.append("\t");
@@ -104,16 +110,20 @@ public class KeyPoint {
 		return result.toString();
 	}
 
-	public static KeyPoint fromString(String str) {
+	public static KeyPoint fromString(KeyPointList keyPointList, String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		if (st.countTokens() != 9 + featureVectorLinearSize)
 			throw new IllegalArgumentException("KeyPoint.fromString: Malformed source string.");
-		KeyPoint r = new KeyPoint();
-		r.imgX = Integer.parseInt(st.nextToken());
-		r.imgY = Integer.parseInt(st.nextToken());
-		r.imgScale = Double.parseDouble(st.nextToken());
-		r.doubleX = Double.parseDouble(st.nextToken());
-		r.doubleY = Double.parseDouble(st.nextToken());
+		int imgX = Integer.parseInt(st.nextToken());
+		int imgY = Integer.parseInt(st.nextToken());
+		double imgScale = Double.parseDouble(st.nextToken());
+		double doubleX = Double.parseDouble(st.nextToken());
+		double doubleY = Double.parseDouble(st.nextToken());
+		
+		KeyPoint r = new KeyPoint(keyPointList, doubleX, doubleY);
+		r.imgX = imgX;
+		r.imgY = imgY;
+		r.imgScale = imgScale;
 		r.dogLevel = (int) Double.parseDouble(st.nextToken());
 		r.adjS = Double.parseDouble(st.nextToken());
 		r.kpScale = Double.parseDouble(st.nextToken());
@@ -155,8 +165,8 @@ public class KeyPoint {
 			(sp.dogLevel != dogLevel) || 
 			((int)(sp.degree * multiply) != (int)(degree * multiply)) ||
 			((int)(sp.kpScale * multiply) != (int)(kpScale * multiply)) || 
-			((int)(sp.doubleX * multiply) != (int)(doubleX * multiply)) ||
-			((int)(sp.doubleY * multiply) != (int)(doubleY * multiply)) )
+			((int)(sp.getDoubleX() * multiply) != (int)(getDoubleX() * multiply)) ||
+			((int)(sp.getDoubleY() * multiply) != (int)(getDoubleY() * multiply)) )
 			return false;
 		return equalsFeatureVector(sp);
 	}
@@ -167,5 +177,25 @@ public class KeyPoint {
 
 	public double getValue(int dimensionIndex) {
 		return featureVector[dimensionIndex];
+	}
+
+	public KeyPointList getKeyPointList() {
+		return keyPointList;
+	}
+
+	public void setDoubleX(double doubleX) {
+		this.doubleX = doubleX;
+	}
+
+	public double getDoubleX() {
+		return doubleX;
+	}
+
+	public void setDoubleY(double doubleY) {
+		this.doubleY = doubleY;
+	}
+
+	public double getDoubleY() {
+		return doubleY;
 	}
 }

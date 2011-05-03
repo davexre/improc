@@ -227,8 +227,8 @@ public class MyPanoPairTransformLearner extends PanoTransformer {
 	}
 
 	protected double computeOneDiscrepancy(KeyPointPair item, double PW1[], double PW2[]) {
-		transformForeward(item.sourceSP.doubleX, item.sourceSP.doubleY, item.sourceSP.keyPointList, PW1);
-		transformForeward(item.targetSP.doubleX, item.targetSP.doubleY, item.targetSP.keyPointList, PW2);
+		transformForeward(item.sourceSP.getDoubleX(), item.sourceSP.getDoubleY(), item.sourceSP.getKeyPointList(), PW1);
+		transformForeward(item.targetSP.getDoubleX(), item.targetSP.getDoubleY(), item.targetSP.getKeyPointList(), PW2);
 		return SphericalCoordsLongLat.getSphericalDistance(PW1[0], PW1[1], PW2[0], PW2[1]) * MathUtil.rad2deg;
 	}
 	

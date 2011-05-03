@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
+import com.slavi.improc.KeyPointList;
 import com.slavi.image.DImageWrapper;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
@@ -16,9 +17,11 @@ public class PDLoweDetector implements Callable<Void> {
 		public void keyPointCreated(KeyPoint scalePoint);
 	}
 	
+	public static final int defaultScaleSpaceLevels = 3;
+
 	public Hook hook = null;
 
-	public static final int defaultScaleSpaceLevels = 3;
+	final KeyPointList keyPointList;
 
 	DWindowedImage src;
 	
@@ -30,7 +33,8 @@ public class PDLoweDetector implements Callable<Void> {
 
 	Rectangle dloweExtent;
 	
-	public PDLoweDetector(DWindowedImage src, Rectangle dloweExtent, DWindowedImage nextLevelBlurredImage, int scale, int scaleSpaceLevels) {
+	public PDLoweDetector(KeyPointList keyPointList, DWindowedImage src, Rectangle dloweExtent, DWindowedImage nextLevelBlurredImage, int scale, int scaleSpaceLevels) {
+		this.keyPointList = keyPointList;
 		this.src = src;
 		this.scale = scale;
 		this.scaleSpaceLevels = scaleSpaceLevels;
@@ -282,8 +286,8 @@ public class PDLoweDetector implements Callable<Void> {
 				if (Math.abs(current.getPixel(x, y)) > dValueLowThresh) {
 					sp.imgX = x;
 					sp.imgY = y;
-					sp.doubleX = x + adjX;
-					sp.doubleY = y + adjY;
+					sp.setDoubleX(x + adjX);
+					sp.setDoubleY(y + adjY);
 					sp.adjS = adjS; // ??? Who uses this (adjust scale) ???!!!???
 					return false;
 				}
@@ -339,8 +343,8 @@ public class PDLoweDetector implements Callable<Void> {
 					xR <= -(dDim05 + 0.5) || yR <= -(dDim05 + 0.5))
 					continue;
 
-				int currentX = (int) (x + sp.doubleX + 0.5);
-				int currentY = (int) (y + sp.doubleY + 0.5);
+				int currentX = (int) (x + sp.getDoubleX() + 0.5);
+				int currentY = (int) (y + sp.getDoubleY() + 0.5);
 				if (currentX < minX || currentX > maxX ||
 					currentY < minY || currentY > maxY)
 					continue;
@@ -465,8 +469,8 @@ public class PDLoweDetector implements Callable<Void> {
 				for (int k = 0 ; k < KeyPoint.numDirections; k++)
 					sp.setItem(i, j, k, (byte)(255.0 * featureVector[i][j][k] / norm - Byte.MIN_VALUE));
 
-		sp.doubleX *= sp.imgScale;
-		sp.doubleY *= sp.imgScale;
+		sp.setDoubleX(sp.getDoubleX() * sp.imgScale);
+		sp.setDoubleY(sp.getDoubleY() * sp.imgScale);
 		sp.kpScale *= sp.imgScale;
 	}
 	
@@ -608,11 +612,9 @@ public class PDLoweDetector implements Callable<Void> {
 				sp.kpScale = kpScale;
 				sp.degree = degree;
 				
-				KeyPoint sp2 = new KeyPoint();
+				KeyPoint sp2 = new KeyPoint(keyPointList, sp.getDoubleX(), sp.getDoubleY());
 				sp2.adjS = sp.adjS;
 				sp2.degree = sp.degree;
-				sp2.doubleX = sp.doubleX;
-				sp2.doubleY = sp.doubleY;
 				sp2.imgX = sp.imgX;
 				sp2.imgY = sp.imgY;
 				sp2.kpScale = sp.kpScale;
@@ -653,7 +655,7 @@ public class PDLoweDetector implements Callable<Void> {
 				// When the localization hits some problem, i.e. while
 				// moving the
 				// point a border is reached, then skip this point.
-				KeyPoint tempKeyPoint = new KeyPoint();
+				KeyPoint tempKeyPoint = new KeyPoint(keyPointList, 0, 0);
 				if (localizeIsWeak(DOGs, i, j, tempKeyPoint))
 					continue;
 				localizeIsWeakCount++;

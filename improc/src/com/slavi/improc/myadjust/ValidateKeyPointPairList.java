@@ -177,12 +177,12 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		public double getX() {
 			KeyPointPair pair = pairList.items.get(curPoint);
-			return calcSourceArea ? pair.sourceSP.doubleX : pair.targetSP.doubleX;
+			return calcSourceArea ? pair.sourceSP.getDoubleX() : pair.targetSP.getDoubleX();
 		}
 
 		public double getY() {
 			KeyPointPair pair = pairList.items.get(curPoint);
-			return calcSourceArea ? pair.sourceSP.doubleY : pair.targetSP.doubleY;
+			return calcSourceArea ? pair.sourceSP.getDoubleY() : pair.targetSP.getDoubleY();
 		}
 	}
 
@@ -213,8 +213,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 		public Void call() throws Exception {
 			pairList.items.clear();
-			KeyPoint tmpKP = new KeyPoint();
-			tmpKP.keyPointList = pairList.target;
+			KeyPoint tmpKP = new KeyPoint(pairList.target, 0, 0);
 			KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
 			tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
 

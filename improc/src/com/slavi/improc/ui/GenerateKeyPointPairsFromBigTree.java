@@ -68,18 +68,18 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 				KeyPoint kp2 = nnlst.getItem(0);
 				String pairId;
 				KeyPoint kpS, kpT;
-				if (image.imageId > kp2.keyPointList.imageId) {
-					pairId = strImageId + "-" + Integer.toString(kp2.keyPointList.imageId);
+				if (image.imageId > kp2.getKeyPointList().imageId) {
+					pairId = strImageId + "-" + Integer.toString(kp2.getKeyPointList().imageId);
 					kpS = kp;
 					kpT = kp2;
 				} else {
-					pairId = Integer.toString(kp2.keyPointList.imageId) + "-" + strImageId;
+					pairId = Integer.toString(kp2.getKeyPointList().imageId) + "-" + strImageId;
 					kpS = kp2;
 					kpT = kp;
 //					continue;
 				}
 
-				KeyPointPairList kppl = getKeyPointPairList(pairId, kpS.keyPointList, kpT.keyPointList);
+				KeyPointPairList kppl = getKeyPointPairList(pairId, kpS.getKeyPointList(), kpT.getKeyPointList());
 				totalPairCount++;
 				synchronized (kppl) {
 					// Find if this Source point is already in the list

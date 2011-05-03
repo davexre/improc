@@ -71,8 +71,8 @@ public class SphereNorm {
 	public void setKeyPointPair(KeyPointPair kpp) {
 		double source[] = new double[3];
 		double target[] = new double[3];
-		transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, source);
-		transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, target);
+		transformForeward(kpp.sourceSP.getDoubleX(), kpp.sourceSP.getDoubleY(), kpp.sourceSP.getKeyPointList(), source);
+		transformForeward(kpp.targetSP.getDoubleX(), kpp.targetSP.getDoubleY(), kpp.targetSP.getKeyPointList(), target);
 		dist0 = SphericalCoordsLongZen.getSphericalDistance(source[0], source[1], target[0], target[1]);
 
 		p1.setKeyPoint(kpp.sourceSP);
@@ -143,12 +143,12 @@ public class SphereNorm {
 		}
 		
 		private void calcTargetSphericalCoords() {
-			double sinDSX = Math.sin(sx - kp.keyPointList.sphereRZ1);
-			double cosDSX = Math.cos(sx - kp.keyPointList.sphereRZ1);
+			double sinDSX = Math.sin(sx - kp.getKeyPointList().sphereRZ1);
+			double cosDSX = Math.cos(sx - kp.getKeyPointList().sphereRZ1);
 			double sinSY = Math.sin(sy);
 			double cosSY = Math.cos(sy);
-			double sinR2 = Math.sin(kp.keyPointList.sphereRY);
-			double cosR2 = Math.cos(kp.keyPointList.sphereRY);
+			double sinR2 = Math.sin(kp.getKeyPointList().sphereRY);
+			double cosR2 = Math.cos(kp.getKeyPointList().sphereRY);
 
 			// dTY
 			double I = sinSY * sinR2 * cosDSX;
@@ -199,7 +199,7 @@ public class SphereNorm {
 			double dA_dR2 = (dB_dR2 * C - B * dC_dR2) / (C*C);
 			double dA_dF = (dB_dF * C - B * dC_dF) / (C*C);
 			
-			tx = Math.atan2(B, C) - kp.keyPointList.sphereRZ2;
+			tx = Math.atan2(B, C) - kp.getKeyPointList().sphereRZ2;
 			tmp = 1 + A * A;
 			dTX_dR1 = dA_dR1 / tmp;
 			dTX_dR2 = dA_dR2 / tmp;
@@ -217,15 +217,15 @@ public class SphereNorm {
 			// kp.keyPointList.scaleZ = Math.max(kp.keyPointList.imageSizeX, kp.keyPointList.imageSizeY) / 
 			// 			(2.0 * Math.tan(kp.keyPointList.fov / 2.0));
 			// sy = Math.acos(kp.keyPointList.scaleZ / Math.sqrt(tmpx*tmpx + tmpy*tmpy + kp.keyPointList.scaleZ*kp.keyPointList.scaleZ));
-			double tmpx = kp.doubleX - kp.keyPointList.cameraOriginX;
-			double tmpy = kp.doubleY - kp.keyPointList.cameraOriginY;
+			double tmpx = kp.getDoubleX() - kp.getKeyPointList().cameraOriginX;
+			double tmpy = kp.getDoubleY() - kp.getKeyPointList().cameraOriginY;
 			
-			double E = kp.keyPointList.fov / 2.0;
+			double E = kp.getKeyPointList().fov / 2.0;
 			double dEdF = 0.5;
 			double D = Math.tan(E);
 			double tmp = Math.cos(E);
 			double dDdF = dEdF / (tmp * tmp);
-			double B = 0.5 * Math.max(kp.keyPointList.imageSizeX, kp.keyPointList.imageSizeY) / D;
+			double B = 0.5 * Math.max(kp.getKeyPointList().imageSizeX, kp.getKeyPointList().imageSizeY) / D;
 			double dBdF = - dDdF * B / D;
 			
 			double G = tmpx * tmpx + tmpy * tmpy + B * B;
@@ -296,19 +296,19 @@ public class SphereNorm {
 		return 
 		"Dist=" + MathUtil.rad2degStr(Dist) +
 		"\td=" + MathUtil.rad2degStr(dist0) + 
-		"\tiSX=" + p1.kp.doubleX + 
-		"\tiSY=" + p1.kp.doubleY + 
+		"\tiSX=" + p1.kp.getDoubleX() + 
+		"\tiSY=" + p1.kp.getDoubleY() + 
 //		"\tSCamX=" + p1.kp.keyPointList.cameraOriginX + 
 //		"\tSCamY=" + p1.kp.keyPointList.cameraOriginY + 
-		"\tiTX=" + p2.kp.doubleX + 
-		"\tiTY=" + p2.kp.doubleY + 
+		"\tiTX=" + p2.kp.getDoubleX() + 
+		"\tiTY=" + p2.kp.getDoubleY() + 
 //		"\tTCamX=" + p2.kp.keyPointList.cameraOriginX + 
 //		"\tTCamY=" + p2.kp.keyPointList.cameraOriginY + 
-		"\tSR1=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRZ1) + 
-		"\tSR2=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRY) + 
-		"\tSR3=" + MathUtil.rad2degStr(p1.kp.keyPointList.sphereRZ2) + 
-		"\tTR1=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRZ1) + 
-		"\tTR2=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRY) + 
-		"\tTR3=" + MathUtil.rad2degStr(p2.kp.keyPointList.sphereRZ2);
+		"\tSR1=" + MathUtil.rad2degStr(p1.kp.getKeyPointList().sphereRZ1) + 
+		"\tSR2=" + MathUtil.rad2degStr(p1.kp.getKeyPointList().sphereRY) + 
+		"\tSR3=" + MathUtil.rad2degStr(p1.kp.getKeyPointList().sphereRZ2) + 
+		"\tTR1=" + MathUtil.rad2degStr(p2.kp.getKeyPointList().sphereRZ1) + 
+		"\tTR2=" + MathUtil.rad2degStr(p2.kp.getKeyPointList().sphereRY) + 
+		"\tTR3=" + MathUtil.rad2degStr(p2.kp.getKeyPointList().sphereRZ2);
 	}
 }

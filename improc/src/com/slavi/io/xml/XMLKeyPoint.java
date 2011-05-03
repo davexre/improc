@@ -6,6 +6,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.improc.KeyPoint;
+import com.slavi.improc.KeyPointList;
 
 public class XMLKeyPoint {
 	
@@ -14,8 +15,8 @@ public class XMLKeyPoint {
 	public void toXML(KeyPoint item, Element dest) {
 		dest.addContent(XMLHelper.makeAttrEl("imgX", Integer.toString(item.imgX)));
 		dest.addContent(XMLHelper.makeAttrEl("imgY", Integer.toString(item.imgY)));
-		dest.addContent(XMLHelper.makeAttrEl("doubleX", Double.toString(item.doubleX)));
-		dest.addContent(XMLHelper.makeAttrEl("doubleY", Double.toString(item.doubleY)));
+		dest.addContent(XMLHelper.makeAttrEl("doubleX", Double.toString(item.getDoubleX())));
+		dest.addContent(XMLHelper.makeAttrEl("doubleY", Double.toString(item.getDoubleY())));
 		dest.addContent(XMLHelper.makeAttrEl("dogLevel", Double.toString(item.dogLevel)));
 		dest.addContent(XMLHelper.makeAttrEl("adjS", Double.toString(item.adjS)));
 		dest.addContent(XMLHelper.makeAttrEl("kpScale", Double.toString(item.kpScale)));
@@ -26,12 +27,12 @@ public class XMLKeyPoint {
 					dest.addContent(XMLHelper.makeEl("f", Integer.toString(item.getItem(i, j, k))));
 	}
 
-	public KeyPoint fromXML(Element source) throws JDOMException {
-		KeyPoint r = new KeyPoint();
+	public KeyPoint fromXML(KeyPointList keyPointList, Element source) throws JDOMException {
+		double doubleX = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleX"));
+		double doubleY = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleY"));
+		KeyPoint r = new KeyPoint(keyPointList, doubleX, doubleY);
 		r.imgX = Integer.parseInt(XMLHelper.getAttrEl(source, "imgX"));
 		r.imgY = Integer.parseInt(XMLHelper.getAttrEl(source, "imgY"));
-		r.doubleX = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleX"));
-		r.doubleY = Double.parseDouble(XMLHelper.getAttrEl(source, "doubleY"));
 		r.dogLevel = Integer.parseInt(XMLHelper.getAttrEl(source, "dogLevel"));
 		r.adjS = Double.parseDouble(XMLHelper.getAttrEl(source, "adjS"));
 		r.kpScale = Double.parseDouble(XMLHelper.getAttrEl(source, "kpScale"));

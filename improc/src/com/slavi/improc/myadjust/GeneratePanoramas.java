@@ -408,10 +408,10 @@ public class GeneratePanoramas implements Callable<Void> {
 
 			for (KeyPointPair pair : pairList.items) {
 				if (!pair.panoBad) {
-					transformCameraToWorld(pair.sourceSP.doubleX, pair.sourceSP.doubleY, pairList.source, d);
+					transformCameraToWorld(pair.sourceSP.getDoubleX(), pair.sourceSP.getDoubleY(), pairList.source, d);
 					int x1 = (int)d[0];
 					int y1 = (int)d[1];
-					transformCameraToWorld(pair.targetSP.doubleX, pair.targetSP.doubleY, pairList.target, d);
+					transformCameraToWorld(pair.targetSP.getDoubleX(), pair.targetSP.getDoubleY(), pairList.target, d);
 					int x2 = (int)d[0];
 					int y2 = (int)d[1];
 					oi.pinPair(x1, y1, x2, y2, colorCross, colorX);
@@ -639,12 +639,12 @@ public class GeneratePanoramas implements Callable<Void> {
 
 		public double getX() {
 			KeyPointPair pair = pairList.items.get(curPoint); 
-			return calcSourceArea ? pair.sourceSP.doubleX : pair.targetSP.doubleX;
+			return calcSourceArea ? pair.sourceSP.getDoubleX() : pair.targetSP.getDoubleX();
 		}
 
 		public double getY() {
 			KeyPointPair pair = pairList.items.get(curPoint); 
-			return calcSourceArea ? pair.sourceSP.doubleY : pair.targetSP.doubleY;
+			return calcSourceArea ? pair.sourceSP.getDoubleY() : pair.targetSP.getDoubleY();
 		}
 	}
 	
@@ -690,8 +690,7 @@ public class GeneratePanoramas implements Callable<Void> {
 				int helmGoodPanoBad = 0;
 				double maxHelmertDiscrepancy = Double.MIN_VALUE;
 
-				KeyPoint tmpKP = new KeyPoint();
-				tmpKP.keyPointList = pairList.target;
+				KeyPoint tmpKP = new KeyPoint(pairList.target, 0, 0);
 				KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
 				tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
 				
@@ -704,7 +703,7 @@ public class GeneratePanoramas implements Callable<Void> {
 						}
 					} else {
 						tr.transform(pair.sourceSP, tmpKP);
-						double d = Math.hypot(tmpKP.doubleX - pair.targetSP.doubleX, tmpKP.doubleY - pair.targetSP.doubleY);
+						double d = Math.hypot(tmpKP.getDoubleX() - pair.targetSP.getDoubleX(), tmpKP.getDoubleY() - pair.targetSP.getDoubleY());
 						if (maxHelmertDiscrepancy < d) 
 							maxHelmertDiscrepancy = d;
 						if (pair.validatePairBad) {

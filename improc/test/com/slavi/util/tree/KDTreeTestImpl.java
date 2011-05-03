@@ -1,6 +1,9 @@
 package com.slavi.util.tree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class KDTreeTestImpl extends KDTree<KDTreeTestData> {
@@ -96,7 +99,7 @@ public class KDTreeTestImpl extends KDTree<KDTreeTestData> {
      *	       second.
      * @see Comparator.compare()
 	 */
-	private int compare(KDTreeTestData i1, KDTreeTestData i2, int dimension) {
+	int compare(KDTreeTestData i1, KDTreeTestData i2, int dimension) {
 		for (int i = 0; i < dimensions; i++) {
 			double v1 = getValue(i1, dimension);
 			double v2 = getValue(i2, dimension);
@@ -109,6 +112,75 @@ public class KDTreeTestImpl extends KDTree<KDTreeTestData> {
 		return 0;
 	}
 
+	///////////////////////////////
+
+	private void balanceSegment4(Object items[], final int dimensions, final int left, final int right, final int curDimension, int depthLevel) {
+		if (left > right)
+			return;
+		Arrays.sort(items, left, right, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return KDTreeTestImpl.this.compare((KDTreeTestData) o1, (KDTreeTestData) o2, curDimension);
+			}
+		});
+		int midIndex = (left + right) >> 1;
+		System.out.println("segment L=" + left + " R=" + right + " DIM=" + curDimension + " MID=" + midIndex);
+
+		int nextDimension = (curDimension + 1) % dimensions;
+		depthLevel++;
+		if (depthLevel > treeDepth)
+			treeDepth = depthLevel;
+//		TreeNode<KDTreeTestData> result = new TreeNode<KDTreeTestData>((KDTreeTestData) items[midIndex]);
+//		result.left = balanceSegment4(items, dimensions, left, midIndex - 1, nextDimension, depthLevel);
+//		result.right = balanceSegment4(items, dimensions, midIndex + 1, right, nextDimension, depthLevel);
+
+		add((KDTreeTestData) items[midIndex]);
+		balanceSegment4(items, dimensions, midIndex + 1, right, nextDimension, depthLevel);
+		balanceSegment4(items, dimensions, left, midIndex - 1, nextDimension, depthLevel);
+	}
+	
+	public void balance4() {
+		ArrayList<KDTreeTestData>list = toList();
+		Object arr[] = list.toArray();
+		
+		treeDepth = 0;
+		mutations++;
+		root = null;
+		dumpItemList("before", list);
+//		root = 
+			balanceSegment4(arr, dimensions, 0, arr.length - 1, 0, 0);
+		for (int i = 0; i < arr.length; i++)
+			list.set(i, (KDTreeTestData) arr[i]);
+		dumpItemList("after", list);
+	}
+	
+	///////////////////////////////
+
+	private void addMiddleRecursive(ArrayList<KDTreeTestData>list, int start, int end) {
+		if (start > end)
+			return;
+		int middle = (start + end) >> 1;
+		add(list.get(middle));
+		addMiddleRecursive(list, start, middle - 1);
+		addMiddleRecursive(list, middle + 1, end);
+	}
+	
+	public void balance3() {
+		ArrayList<KDTreeTestData>list = toList();
+		treeDepth = 0;
+		mutations++;
+		root = null;
+		dumpItemList("before", list);
+		Collections.sort(list, new Comparator<KDTreeTestData>() {
+			public int compare(KDTreeTestData o1, KDTreeTestData o2) {
+				return KDTreeTestImpl.this.compare(o1, o2, 0);
+			}
+		});
+		dumpItemList("after", list);
+		addMiddleRecursive(list, 0, list.size() - 1);
+	}
+	
+	///////////////////////////////
+	
 	private int deepSort2(ArrayList<KDTreeTestData> items, int left, int right, int curDimension) {
 		if (left > right)
 			return -1;

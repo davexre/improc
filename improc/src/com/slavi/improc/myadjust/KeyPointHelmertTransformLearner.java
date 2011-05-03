@@ -19,9 +19,7 @@ public class KeyPointHelmertTransformLearner extends Helmert2DTransformLearner<K
 	}
 
 	public KeyPoint createTemporaryTargetObject() {
-		KeyPoint result = new KeyPoint();
-		result.keyPointList = pairList.target;
-		return result; 
+		return new KeyPoint(pairList.target, 0, 0);
 	}
 
 	public double getDiscrepancy(Entry<KeyPoint, KeyPoint> item) {

@@ -28,17 +28,14 @@ public class SpherePanoTransformLearnerTest {
 		kpl1.ry = 20 * MathUtil.deg2rad;
 		kpl1.rz = 30 * MathUtil.deg2rad;
 		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1234;
-		p1.doubleY = 2345;
+		KeyPoint p1 = new KeyPoint(kpl1, 1234, 2345);
 		
 		double dest[] = new double[3];
 		double dest2[] = new double[3];
-		panoTransform.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		panoTransform.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		panoTransform.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqualAngle("", dest2[0], p1.doubleX);
-		TestUtils.assertEqualAngle("", dest2[1], p1.doubleY);
+		TestUtils.assertEqualAngle("", dest2[0], p1.getDoubleX());
+		TestUtils.assertEqualAngle("", dest2[1], p1.getDoubleY());
 		panoTransform.transformForeward(dest2[0], dest2[1], kpl1, dest2);
 		TestUtils.assertEqualAngle("", dest2[0], dest[0]);
 		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
@@ -71,8 +68,8 @@ public class SpherePanoTransformLearnerTest {
 		SphereNorm sn = new SphereNorm();
 		sn.setKeyPointPair(kpp);
 		
-		panoTransform.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, dest1);
-		panoTransform.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
+		panoTransform.transformForeward(kpp.sourceSP.getDoubleX(), kpp.sourceSP.getDoubleY(), kpp.sourceSP.getKeyPointList(), dest1);
+		panoTransform.transformForeward(kpp.targetSP.getDoubleX(), kpp.targetSP.getDoubleY(), kpp.targetSP.getKeyPointList(), dest2);
 		double dist0 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 		dist0 -= sn.dDist_dSR1 * dX1;
 		dist0 -= sn.dDist_dSR2 * dY1;
@@ -84,29 +81,29 @@ public class SpherePanoTransformLearnerTest {
 		dist0 -= sn.dDist_dTR3 * dZ2;
 		dist0 -= sn.dDist_dTF * dF2;
 
-		kpp.sourceSP.keyPointList.sphereRZ1 += dX1;
-		kpp.sourceSP.keyPointList.sphereRY += dY1;
-		kpp.sourceSP.keyPointList.sphereRZ2 += dZ1;
-		kpp.sourceSP.keyPointList.scaleZ += dF1;
+		kpp.sourceSP.getKeyPointList().sphereRZ1 += dX1;
+		kpp.sourceSP.getKeyPointList().sphereRY += dY1;
+		kpp.sourceSP.getKeyPointList().sphereRZ2 += dZ1;
+		kpp.sourceSP.getKeyPointList().scaleZ += dF1;
 
-		kpp.targetSP.keyPointList.sphereRZ1 += dX2;
-		kpp.targetSP.keyPointList.sphereRY += dY2;
-		kpp.targetSP.keyPointList.sphereRZ2 += dZ2;
-		kpp.targetSP.keyPointList.scaleZ += dF2;
+		kpp.targetSP.getKeyPointList().sphereRZ1 += dX2;
+		kpp.targetSP.getKeyPointList().sphereRY += dY2;
+		kpp.targetSP.getKeyPointList().sphereRZ2 += dZ2;
+		kpp.targetSP.getKeyPointList().scaleZ += dF2;
 		
-		panoTransform.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, dest1);
-		panoTransform.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
+		panoTransform.transformForeward(kpp.sourceSP.getDoubleX(), kpp.sourceSP.getDoubleY(), kpp.sourceSP.getKeyPointList(), dest1);
+		panoTransform.transformForeward(kpp.targetSP.getDoubleX(), kpp.targetSP.getDoubleY(), kpp.targetSP.getKeyPointList(), dest2);
 		double dist1 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 
-		kpp.sourceSP.keyPointList.sphereRZ1 -= dX1;
-		kpp.sourceSP.keyPointList.sphereRY -= dY1;
-		kpp.sourceSP.keyPointList.sphereRZ2 -= dZ1;
-		kpp.sourceSP.keyPointList.scaleZ -= dF1;
+		kpp.sourceSP.getKeyPointList().sphereRZ1 -= dX1;
+		kpp.sourceSP.getKeyPointList().sphereRY -= dY1;
+		kpp.sourceSP.getKeyPointList().sphereRZ2 -= dZ1;
+		kpp.sourceSP.getKeyPointList().scaleZ -= dF1;
 
-		kpp.targetSP.keyPointList.sphereRZ1 -= dX2;
-		kpp.targetSP.keyPointList.sphereRY -= dY2;
-		kpp.targetSP.keyPointList.sphereRZ2 -= dZ2;
-		kpp.targetSP.keyPointList.scaleZ -= dF2;
+		kpp.targetSP.getKeyPointList().sphereRZ1 -= dX2;
+		kpp.targetSP.getKeyPointList().sphereRY -= dY2;
+		kpp.targetSP.getKeyPointList().sphereRZ2 -= dZ2;
+		kpp.targetSP.getKeyPointList().scaleZ -= dF2;
 		
 		TestUtils.assertEqualAngle("", dist0, dist1);
 		System.out.println(MathUtil.rad2degStr(dist0));
@@ -126,10 +123,7 @@ public class SpherePanoTransformLearnerTest {
 		kpl1.ry = 20 * MathUtil.deg2rad;
 		kpl1.rz = 30 * MathUtil.deg2rad;
 		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1234;
-		p1.doubleY = 2345;
+		KeyPoint p1 = new KeyPoint(kpl1, 1234, 2345);
 		
 		KeyPointList kpl2 = new KeyPointList();
 		kpl2.cameraOriginX = 1100;
@@ -141,13 +135,10 @@ public class SpherePanoTransformLearnerTest {
 
 		double dest1[] = new double[3];
 		double dest2[] = new double[3];
-		panoTransform.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
+		panoTransform.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest1);
 		panoTransform.transformBackward(dest1[0] + 10 * MathUtil.deg2rad, dest1[1], kpl2, dest2);
 
-		KeyPoint p2 = new KeyPoint();
-		p2.keyPointList = kpl2;
-		p2.doubleX = dest2[0];
-		p2.doubleY = dest2[1];
+		KeyPoint p2 = new KeyPoint(kpl2, dest2[0], dest2[1]);
 
 		KeyPointPair kpp = new KeyPointPair();
 		kpp.sourceSP = p1;
@@ -156,7 +147,7 @@ public class SpherePanoTransformLearnerTest {
 		double delta = 0.1 * MathUtil.deg2rad;
 		checkNorm(panoTransform, kpp, delta, delta, delta, delta, delta, delta, delta, delta);
 		
-		panoTransform.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
+		panoTransform.transformForeward(p2.getDoubleX(), p2.getDoubleY(), kpl2, dest2);
 		double dist0 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 		kpl1.rx += delta;
 		kpl1.ry += delta;
@@ -169,8 +160,8 @@ public class SpherePanoTransformLearnerTest {
 		SphereNorm sn = new SphereNorm();
 		sn.setKeyPointPair(kpp);
 		
-		panoTransform.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
-		panoTransform.transformForeward(p2.doubleX, p2.doubleY, kpl2, dest2);
+		panoTransform.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest1);
+		panoTransform.transformForeward(p2.getDoubleX(), p2.getDoubleY(), kpl2, dest2);
 		double dist1 = SphericalCoordsLongLat.getSphericalDistance(dest1[0], dest1[1], dest2[0], dest2[1]);
 		dist1 -= sn.dDist_dSR1 * delta;
 		dist1 -= sn.dDist_dSR2 * delta;

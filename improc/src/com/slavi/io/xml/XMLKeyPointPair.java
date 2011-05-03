@@ -3,6 +3,7 @@ package com.slavi.io.xml;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
+import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 
 public class XMLKeyPointPair {
@@ -24,7 +25,7 @@ public class XMLKeyPointPair {
 		dest.addContent(e);
 	}
 	
-	public static KeyPointPair fromXML(Element source) throws JDOMException {
+	public static KeyPointPair fromXML(KeyPointList kpplSource, KeyPointList kpplTarget, Element source) throws JDOMException {
 		KeyPointPair r = new KeyPointPair();
 		Element e;
 
@@ -32,10 +33,10 @@ public class XMLKeyPointPair {
 		r.distanceToNearest2 = Double.parseDouble(XMLHelper.getAttrEl(source, "dist2"));
 		
 		e = source.getChild("sourceSP");
-		r.sourceSP = XMLKeyPoint.instance.fromXML(e);
+		r.sourceSP = XMLKeyPoint.instance.fromXML(kpplSource, e);
 
 		e = source.getChild("targetSP");
-		r.targetSP = XMLKeyPoint.instance.fromXML(e);
+		r.targetSP = XMLKeyPoint.instance.fromXML(kpplTarget, e);
 		return r;
 	}
 }

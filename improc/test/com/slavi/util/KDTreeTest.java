@@ -127,7 +127,7 @@ public class KDTreeTest {
 		TestUtils.assertTrue("Tree is broken", tree.isValidTree());
 		System.out.println("Tree BEFORE balance");
 		tree.printTree();
-		tree.balance2();
+		tree.balance();
 		System.out.println("Tree AFTER balance");
 		tree.printTree();
 		TestUtils.assertTrue("Tree is broken", tree.isValidTree());

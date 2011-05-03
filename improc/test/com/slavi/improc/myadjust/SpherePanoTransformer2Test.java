@@ -28,25 +28,22 @@ public class SpherePanoTransformer2Test {
 		kpl1.sphereRY = 20 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 30 * MathUtil.deg2rad;
 
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = p1.keyPointList.cameraOriginX;
-		p1.doubleY = p1.keyPointList.cameraOriginY + 1000;
+		KeyPoint p1 = new KeyPoint(kpl1, kpl1.cameraOriginX, kpl1.cameraOriginY + 1000);
 
 		double dest[] = new double[3];
 		double dest2[] = new double[3];
-		SphereNorm2.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		SphereNorm2.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		SphereNorm2.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqual("", dest2[0], p1.doubleX);
-		TestUtils.assertEqual("", dest2[1], p1.doubleY);
+		TestUtils.assertEqual("", dest2[0], p1.getDoubleX());
+		TestUtils.assertEqual("", dest2[1], p1.getDoubleY());
 		
 		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
 		double d1[] = new double[3];
 		double d2[] = new double[3];
 
-		d1[0] = (p1.doubleX - p1.keyPointList.cameraOriginX) * p1.keyPointList.cameraScale;
-		d1[1] = (p1.doubleY - p1.keyPointList.cameraOriginY) * p1.keyPointList.cameraScale;
-		d1[2] = p1.keyPointList.scaleZ;
+		d1[0] = (p1.getDoubleX() - p1.getKeyPointList().cameraOriginX) * p1.getKeyPointList().cameraScale;
+		d1[1] = (p1.getDoubleY() - p1.getKeyPointList().cameraOriginY) * p1.getKeyPointList().cameraScale;
+		d1[2] = p1.getKeyPointList().scaleZ;
 		RotationZYZ.instance.transformForward(m, d1, d2);
 		SphericalCoordsLongZen.cartesianToPolar(d2[0], d2[1], d2[2], d2);
 		TestUtils.assertEqualAngle("", dest[0], d2[0]);
@@ -78,7 +75,7 @@ public class SpherePanoTransformer2Test {
 
 	private static void checkNorm0(KeyPoint kp, double dX, double dY, double dZ, double dF) {
 		double dest0[] = new double[3];
-		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest0);
+		SphereNorm2.transformForeward(kp.getDoubleX(), kp.getDoubleY(), kp.getKeyPointList(), dest0);
 		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
 		pd.setKeyPoint(kp);
 		
@@ -89,18 +86,18 @@ public class SpherePanoTransformer2Test {
 		dest2[0] = dest0[0] + pd.dTX_dR1 * dX + pd.dTX_dR2 * dY + pd.dTX_dR3 * dZ + pd.dTX_dF * dF;
 		dest2[1] = dest0[1] + pd.dTY_dR1 * dX + pd.dTY_dR2 * dY + pd.dTY_dR3 * dZ + pd.dTY_dF * dF;
 		
-		kp.keyPointList.sphereRZ1 += dX;
-		kp.keyPointList.sphereRY += dY;
-		kp.keyPointList.sphereRZ2 += dZ;
-		kp.keyPointList.scaleZ += dF;
+		kp.getKeyPointList().sphereRZ1 += dX;
+		kp.getKeyPointList().sphereRY += dY;
+		kp.getKeyPointList().sphereRZ2 += dZ;
+		kp.getKeyPointList().scaleZ += dF;
 
 		double dest1[] = new double[3];
-		SphereNorm2.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest1);
+		SphereNorm2.transformForeward(kp.getDoubleX(), kp.getDoubleY(), kp.getKeyPointList(), dest1);
 		
-		kp.keyPointList.sphereRZ1 -= dX;
-		kp.keyPointList.sphereRY -= dY;
-		kp.keyPointList.sphereRZ2 -= dZ;
-		kp.keyPointList.scaleZ -= dF;
+		kp.getKeyPointList().sphereRZ1 -= dX;
+		kp.getKeyPointList().sphereRY -= dY;
+		kp.getKeyPointList().sphereRZ2 -= dZ;
+		kp.getKeyPointList().scaleZ -= dF;
 		
 		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
 		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
@@ -117,10 +114,7 @@ public class SpherePanoTransformer2Test {
 		kpl1.sphereRY = 30 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
 		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1881;
-		p1.doubleY = 897;
+		KeyPoint p1 = new KeyPoint(kpl1, 1881, 897);
 
 		double delta = 0.1 * MathUtil.deg2rad;
 		int parts = 16;
@@ -130,9 +124,9 @@ public class SpherePanoTransformer2Test {
 				double ry = y * MathUtil.C2PI / parts;
 				for (int z = 0; z < parts; z++) {
 					double rz = z * MathUtil.C2PI / parts;
-					p1.keyPointList.sphereRZ1 = rx;
-					p1.keyPointList.sphereRY = ry;
-					p1.keyPointList.sphereRZ2 = rz;
+					p1.getKeyPointList().sphereRZ1 = rx;
+					p1.getKeyPointList().sphereRY = ry;
+					p1.getKeyPointList().sphereRZ2 = rz;
 					try {
 						checkNorm0(p1, delta, delta, delta, delta);
 					} catch (RuntimeException e) {

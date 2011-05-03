@@ -78,18 +78,18 @@ public class ZYZ_7ParamsNorm {
 		public double dPdTZ[] = new double[3];
 		
 		public void setKeyPoint(KeyPoint kp) {
-			double sx = (kp.doubleX - kp.keyPointList.cameraOriginX) * kp.keyPointList.cameraScale;
-			double sy = (kp.doubleY - kp.keyPointList.cameraOriginY) * kp.keyPointList.cameraScale;
-			double sz = kp.keyPointList.scaleZ;
+			double sx = (kp.getDoubleX() - kp.getKeyPointList().cameraOriginX) * kp.getKeyPointList().cameraScale;
+			double sy = (kp.getDoubleY() - kp.getKeyPointList().cameraOriginY) * kp.getKeyPointList().cameraScale;
+			double sz = kp.getKeyPointList().scaleZ;
 			
-			rot.transformForward(kp.keyPointList.dMdX, sx, sy, sz, dPdZ1);
-			rot.transformForward(kp.keyPointList.dMdY, sx, sy, sz, dPdY);
-			rot.transformForward(kp.keyPointList.dMdZ, sx, sy, sz, dPdZ2);
-			rot.transformForward(kp.keyPointList.camera2real, 0, 0, 1, dPdS);
-			rot.transformForward(kp.keyPointList.camera2real, sx, sy, sz, P);
-			P[0] += kp.keyPointList.tx;
-			P[1] += kp.keyPointList.ty;
-			P[2] += kp.keyPointList.tz;
+			rot.transformForward(kp.getKeyPointList().dMdX, sx, sy, sz, dPdZ1);
+			rot.transformForward(kp.getKeyPointList().dMdY, sx, sy, sz, dPdY);
+			rot.transformForward(kp.getKeyPointList().dMdZ, sx, sy, sz, dPdZ2);
+			rot.transformForward(kp.getKeyPointList().camera2real, 0, 0, 1, dPdS);
+			rot.transformForward(kp.getKeyPointList().camera2real, sx, sy, sz, P);
+			P[0] += kp.getKeyPointList().tx;
+			P[1] += kp.getKeyPointList().ty;
+			P[2] += kp.getKeyPointList().tz;
 			
 			dPdTX[0] = 1;
 			dPdTX[1] = 0;

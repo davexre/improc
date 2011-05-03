@@ -129,8 +129,7 @@ public class KeyPointList {
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {
-				KeyPoint kp = KeyPoint.fromString(str);
-				kp.keyPointList = r;
+				KeyPoint kp = KeyPoint.fromString(r, str);
 				r.items.add(kp);
 			}
 		}

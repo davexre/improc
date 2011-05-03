@@ -13,7 +13,7 @@ public class KeyPointTreeImageSpace extends KDTree<KeyPoint> {
 
 	public double getValue(KeyPoint node, int dimensionIndex) {
 		return dimensionIndex == 0 ? 
-			node.doubleX - node.keyPointList.cameraOriginX : 
-			node.doubleY - node.keyPointList.cameraOriginY;
+			node.getDoubleX() - node.getKeyPointList().cameraOriginX : 
+			node.getDoubleY() - node.getKeyPointList().cameraOriginY;
 	}
 }

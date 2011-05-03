@@ -37,9 +37,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	}
 
 	public KeyPoint nodeFromString(String source) {
-		KeyPoint result = KeyPoint.fromString(source);
-		result.keyPointList = keyPointList;
-		return result;
+		return KeyPoint.fromString(keyPointList, source);
 	}
 
 	public String nodeToString(KeyPoint node) {
@@ -141,7 +139,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 							throw new RuntimeException("empty");
 						}
 						DImageWrapper srcW = new DImageWrapper(source, srcR);
-						PDLoweDetector2 task = new PDLoweDetector2(srcW, destR, scale, PDLoweDetector.defaultScaleSpaceLevels);
+						PDLoweDetector2 task = new PDLoweDetector2(result, srcW, destR, scale, PDLoweDetector.defaultScaleSpaceLevels);
 						task.hook = hook;
 						ts.add(task);
 					}

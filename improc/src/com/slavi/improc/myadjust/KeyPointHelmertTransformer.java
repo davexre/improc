@@ -8,15 +8,15 @@ public class KeyPointHelmertTransformer extends Helmert2DTransformer<KeyPoint, K
 	public double getCoord(KeyPoint item, int coordIndex) {
 		switch (coordIndex) {
 		case 0:
-			if (item.keyPointList == null)
-				return item.doubleX;
+			if (item.getKeyPointList() == null)
+				return item.getDoubleX();
 			else 
-				return item.doubleX - item.keyPointList.cameraOriginX;
+				return item.getDoubleX() - item.getKeyPointList().cameraOriginX;
 		case 1: 
-			if (item.keyPointList == null)
-				return item.doubleY;
+			if (item.getKeyPointList() == null)
+				return item.getDoubleY();
 			else
-				return item.doubleY - item.keyPointList.cameraOriginY;
+				return item.getDoubleY() - item.getKeyPointList().cameraOriginY;
 		default:
 			throw new IllegalArgumentException();
 		}
@@ -33,14 +33,16 @@ public class KeyPointHelmertTransformer extends Helmert2DTransformer<KeyPoint, K
 	public void setCoord(KeyPoint item, int coordIndex, double value) {
 		switch (coordIndex) {
 		case 0: 
-			item.doubleX = value;
-			if (item.keyPointList != null)
-				item.doubleX += item.keyPointList.cameraOriginX; 
+			if (item.getKeyPointList() == null)
+				item.setDoubleX(value);
+			else
+				item.setDoubleX(value + item.getKeyPointList().cameraOriginX); 
 			break;
 		case 1: 
-			item.doubleY = value;
-			if (item.keyPointList != null)
-				item.doubleY += item.keyPointList.cameraOriginY; 
+			if (item.getKeyPointList() == null)
+				item.setDoubleY(value);
+			else
+				item.setDoubleY(value + item.getKeyPointList().cameraOriginY); 
 			break;
 		default:
 			throw new IllegalArgumentException();

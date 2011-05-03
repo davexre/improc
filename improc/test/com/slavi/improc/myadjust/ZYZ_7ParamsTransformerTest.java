@@ -32,50 +32,50 @@ public class ZYZ_7ParamsTransformerTest {
 		//if (kpp.)
 		
 		ZYZ_7ParamsNorm norm = new ZYZ_7ParamsNorm();
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.getKeyPointList());
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.getKeyPointList());
 		norm.setKeyPointPair(kpp);
 		
-		kpp.sourceSP.keyPointList.sphereRZ1 += dSRZ1;
-		kpp.sourceSP.keyPointList.sphereRY += dSRY;
-		kpp.sourceSP.keyPointList.sphereRZ2 += dSRZ2;
-		kpp.sourceSP.keyPointList.scaleZ += dSS;
-		kpp.sourceSP.keyPointList.tx += dSTX;
-		kpp.sourceSP.keyPointList.ty += dSTY;
-		kpp.sourceSP.keyPointList.tz += dSTZ;
+		kpp.sourceSP.getKeyPointList().sphereRZ1 += dSRZ1;
+		kpp.sourceSP.getKeyPointList().sphereRY += dSRY;
+		kpp.sourceSP.getKeyPointList().sphereRZ2 += dSRZ2;
+		kpp.sourceSP.getKeyPointList().scaleZ += dSS;
+		kpp.sourceSP.getKeyPointList().tx += dSTX;
+		kpp.sourceSP.getKeyPointList().ty += dSTY;
+		kpp.sourceSP.getKeyPointList().tz += dSTZ;
 
-		kpp.targetSP.keyPointList.sphereRZ1 += dTRZ1;
-		kpp.targetSP.keyPointList.sphereRY += dTRY;
-		kpp.targetSP.keyPointList.sphereRZ2 += dTRZ2;
-		kpp.targetSP.keyPointList.scaleZ += dTS;
-		kpp.targetSP.keyPointList.tx += dTTX;
-		kpp.targetSP.keyPointList.ty += dTTY;
-		kpp.targetSP.keyPointList.tz += dTTZ;
+		kpp.targetSP.getKeyPointList().sphereRZ1 += dTRZ1;
+		kpp.targetSP.getKeyPointList().sphereRY += dTRY;
+		kpp.targetSP.getKeyPointList().sphereRZ2 += dTRZ2;
+		kpp.targetSP.getKeyPointList().scaleZ += dTS;
+		kpp.targetSP.getKeyPointList().tx += dTTX;
+		kpp.targetSP.getKeyPointList().ty += dTTY;
+		kpp.targetSP.getKeyPointList().tz += dTTZ;
 		
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.getKeyPointList());
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.getKeyPointList());
 
-		ZYZ_7ParamsNorm.transformForeward(kpp.sourceSP.doubleX, kpp.sourceSP.doubleY, kpp.sourceSP.keyPointList, dest1);
-		ZYZ_7ParamsNorm.transformForeward(kpp.targetSP.doubleX, kpp.targetSP.doubleY, kpp.targetSP.keyPointList, dest2);
+		ZYZ_7ParamsNorm.transformForeward(kpp.sourceSP.getDoubleX(), kpp.sourceSP.getDoubleY(), kpp.sourceSP.getKeyPointList(), dest1);
+		ZYZ_7ParamsNorm.transformForeward(kpp.targetSP.getDoubleX(), kpp.targetSP.getDoubleY(), kpp.targetSP.getKeyPointList(), dest2);
 
-		kpp.sourceSP.keyPointList.sphereRZ1 -= dSRZ1;
-		kpp.sourceSP.keyPointList.sphereRY -= dSRY;
-		kpp.sourceSP.keyPointList.sphereRZ2 -= dSRZ2;
-		kpp.sourceSP.keyPointList.scaleZ -= dSS;
-		kpp.sourceSP.keyPointList.tx -= dSTX;
-		kpp.sourceSP.keyPointList.ty -= dSTY;
-		kpp.sourceSP.keyPointList.tz -= dSTZ;
+		kpp.sourceSP.getKeyPointList().sphereRZ1 -= dSRZ1;
+		kpp.sourceSP.getKeyPointList().sphereRY -= dSRY;
+		kpp.sourceSP.getKeyPointList().sphereRZ2 -= dSRZ2;
+		kpp.sourceSP.getKeyPointList().scaleZ -= dSS;
+		kpp.sourceSP.getKeyPointList().tx -= dSTX;
+		kpp.sourceSP.getKeyPointList().ty -= dSTY;
+		kpp.sourceSP.getKeyPointList().tz -= dSTZ;
 
-		kpp.targetSP.keyPointList.sphereRZ1 -= dTRZ1;
-		kpp.targetSP.keyPointList.sphereRY -= dTRY;
-		kpp.targetSP.keyPointList.sphereRZ2 -= dTRZ2;
-		kpp.targetSP.keyPointList.scaleZ -= dTS;
-		kpp.targetSP.keyPointList.tx -= dTTX;
-		kpp.targetSP.keyPointList.ty -= dTTY;
-		kpp.targetSP.keyPointList.tz -= dTTZ;
+		kpp.targetSP.getKeyPointList().sphereRZ1 -= dTRZ1;
+		kpp.targetSP.getKeyPointList().sphereRY -= dTRY;
+		kpp.targetSP.getKeyPointList().sphereRZ2 -= dTRZ2;
+		kpp.targetSP.getKeyPointList().scaleZ -= dTS;
+		kpp.targetSP.getKeyPointList().tx -= dTTX;
+		kpp.targetSP.getKeyPointList().ty -= dTTY;
+		kpp.targetSP.getKeyPointList().tz -= dTTZ;
 		
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.getKeyPointList());
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.getKeyPointList());
 
 		for (int c1 = 0; c1 < 3; c1++) {
 			int c2 = (c1 + 1) % 3;
@@ -90,8 +90,8 @@ public class ZYZ_7ParamsTransformerTest {
 
 	private static void checkNorm0(KeyPoint kp, double dZ1, double dY, double dZ2, double dTX, double dTY, double dTZ, double dS) {
 		double dest0[] = new double[3];
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.keyPointList);
-		ZYZ_7ParamsNorm.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest0);
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.getKeyPointList());
+		ZYZ_7ParamsNorm.transformForeward(kp.getDoubleX(), kp.getDoubleY(), kp.getKeyPointList(), dest0);
 		ZYZ_7ParamsNorm.PointDerivatives pd = new ZYZ_7ParamsNorm.PointDerivatives();
 		pd.setKeyPoint(kp);
 		
@@ -99,26 +99,26 @@ public class ZYZ_7ParamsTransformerTest {
 		for (int coord = 0; coord < 3; coord++)
 			dest2[coord] = dest0[coord] + calcSum(coord, pd, dZ1, dY, dZ2, dTX, dTY, dTZ, dS);
 		
-		kp.keyPointList.sphereRZ1 += dZ1;
-		kp.keyPointList.sphereRY += dY;
-		kp.keyPointList.sphereRZ2 += dZ2;
-		kp.keyPointList.scaleZ += dS;
-		kp.keyPointList.tx += dTX;
-		kp.keyPointList.ty += dTY;
-		kp.keyPointList.tz += dTZ;
+		kp.getKeyPointList().sphereRZ1 += dZ1;
+		kp.getKeyPointList().sphereRY += dY;
+		kp.getKeyPointList().sphereRZ2 += dZ2;
+		kp.getKeyPointList().scaleZ += dS;
+		kp.getKeyPointList().tx += dTX;
+		kp.getKeyPointList().ty += dTY;
+		kp.getKeyPointList().tz += dTZ;
 
 		double dest1[] = new double[3];
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.keyPointList);
-		ZYZ_7ParamsNorm.transformForeward(kp.doubleX, kp.doubleY, kp.keyPointList, dest1);
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.getKeyPointList());
+		ZYZ_7ParamsNorm.transformForeward(kp.getDoubleX(), kp.getDoubleY(), kp.getKeyPointList(), dest1);
 		
-		kp.keyPointList.sphereRZ1 -= dZ1;
-		kp.keyPointList.sphereRY -= dY;
-		kp.keyPointList.sphereRZ2 -= dZ2;
-		kp.keyPointList.scaleZ -= dS;
-		kp.keyPointList.tx -= dTX;
-		kp.keyPointList.ty -= dTY;
-		kp.keyPointList.tz -= dTZ;
-		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.keyPointList);
+		kp.getKeyPointList().sphereRZ1 -= dZ1;
+		kp.getKeyPointList().sphereRY -= dY;
+		kp.getKeyPointList().sphereRZ2 -= dZ2;
+		kp.getKeyPointList().scaleZ -= dS;
+		kp.getKeyPointList().tx -= dTX;
+		kp.getKeyPointList().ty -= dTY;
+		kp.getKeyPointList().tz -= dTZ;
+		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.getKeyPointList());
 		
 		TestUtils.assertEqual("", dest1[0], dest2[0]);
 		TestUtils.assertEqual("", dest1[1], dest2[1]);
@@ -138,24 +138,21 @@ public class ZYZ_7ParamsTransformerTest {
 		kpl1.ty = 20;
 		kpl1.tz = 30;
 
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = p1.keyPointList.cameraOriginX;
-		p1.doubleY = p1.keyPointList.cameraOriginY;
+		KeyPoint p1 = new KeyPoint(kpl1, kpl1.cameraOriginX, kpl1.cameraOriginY);
 
 		double dest[] = new double[3];
 		double dest2[] = new double[3];
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpl1);
-		ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		ZYZ_7ParamsNorm.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], kpl1, dest2);
-		TestUtils.assertEqual("norm.transform.x", dest2[0], p1.doubleX);
-		TestUtils.assertEqual("norm.transform.y", dest2[1], p1.doubleY);
+		TestUtils.assertEqual("norm.transform.x", dest2[0], p1.getDoubleX());
+		TestUtils.assertEqual("norm.transform.y", dest2[1], p1.getDoubleY());
 
 		ZYZ_7ParamsLearner tr = new ZYZ_7ParamsLearner();
-		tr.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest);
+		tr.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		tr.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqual("X", dest2[0], p1.doubleX);
-		TestUtils.assertEqual("Y", dest2[1], p1.doubleY);
+		TestUtils.assertEqual("X", dest2[0], p1.getDoubleX());
+		TestUtils.assertEqual("Y", dest2[1], p1.getDoubleY());
 	}
 
 	@Test
@@ -169,10 +166,7 @@ public class ZYZ_7ParamsTransformerTest {
 		kpl1.sphereRY = 30 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
 		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1881;
-		p1.doubleY = 897;
+		KeyPoint p1 = new KeyPoint(kpl1, 1881, 897);
 
 //		double delta = 0.1 * MathUtil.deg2rad;
 		double delta = 0.00001;
@@ -183,9 +177,9 @@ public class ZYZ_7ParamsTransformerTest {
 				double ry = y * MathUtil.C2PI / parts;
 				for (int z = 0; z < parts; z++) {
 					double rz = z * MathUtil.C2PI / parts;
-					p1.keyPointList.sphereRZ1 = rx;
-					p1.keyPointList.sphereRY = ry;
-					p1.keyPointList.sphereRZ2 = rz;
+					p1.getKeyPointList().sphereRZ1 = rx;
+					p1.getKeyPointList().sphereRY = ry;
+					p1.getKeyPointList().sphereRZ2 = rz;
 					try {
 //						checkNorm0(p1, delta, 0, 0, 0, 0, 0, 0); // ok
 //						checkNorm0(p1, 0, delta, 0, 0, 0, 0, 0); // ok
@@ -220,10 +214,7 @@ public class ZYZ_7ParamsTransformerTest {
 		kpl1.sphereRY = 30 * MathUtil.deg2rad;
 		kpl1.sphereRZ2 = 178 * MathUtil.deg2rad;
 		
-		KeyPoint p1 = new KeyPoint();
-		p1.keyPointList = kpl1;
-		p1.doubleX = 1881;
-		p1.doubleY = 897;
+		KeyPoint p1 = new KeyPoint(kpl1, 1881, 897);
 		
 		KeyPointList kpl2 = new KeyPointList();
 		kpl2.cameraOriginX = 1136;
@@ -236,8 +227,7 @@ public class ZYZ_7ParamsTransformerTest {
 		
 		double dest1[] = new double[3];
 		double dest2[] = new double[3];
-		KeyPoint p2 = new KeyPoint();
-		p2.keyPointList = kpl2;
+		KeyPoint p2 = new KeyPoint(kpl2, 0, 0);
 
 		KeyPointPair kpp = new KeyPointPair();
 		kpp.sourceSP = p1;
@@ -259,16 +249,16 @@ public class ZYZ_7ParamsTransformerTest {
 							for (int z2 = 0; z2 < parts; z2++) {
 								kpl2.sphereRZ2 = z2 * MathUtil.C2PI / parts;
 								
-								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.keyPointList);
-								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.keyPointList);
+								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.sourceSP.getKeyPointList());
+								ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpp.targetSP.getKeyPointList());
 
-								ZYZ_7ParamsNorm.transformForeward(p1.doubleX, p1.doubleY, kpl1, dest1);
+								ZYZ_7ParamsNorm.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest1);
 								ZYZ_7ParamsNorm.transformBackward(dest1[0] + 1 * MathUtil.deg2rad, dest1[1], dest1[2], kpl2, dest2);
 								if (dest2[2] <= 0.0)
 									continue;
 
-								p2.doubleX = dest2[0];
-								p2.doubleY = dest2[1];
+								p2.setDoubleX(dest2[0]);
+								p2.setDoubleY(dest2[1]);
 								try {
 									checkNorm(kpp, 
 											delta, delta, delta, delta, delta, delta, delta, 
