@@ -29,6 +29,7 @@ import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
 
 import com.slavi.util.ColorConversion;
+import com.slavi.util.Const;
 import com.slavi.util.Marker;
 import com.slavi.util.file.FindFileIterator;
 import com.slavi.util.ui.SwtUtil;
@@ -255,7 +256,8 @@ public class ImageHistogram2 {
 //		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/";
 //		String finDir = "D:/Users/S/Java/Images/Image data/Beli plast";
 //		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2";
-		String finDir = "/home/slavian/S/temp/1";
+//		String finDir = "/home/slavian/S/temp/1";
+		String finDir = Const.workDir;
 		
 		t.createWidgets();
 		t.setFiles(finDir);

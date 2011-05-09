@@ -2,21 +2,21 @@ package com.test.image;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
 import com.slavi.util.ColorConversion;
+import com.slavi.util.Const;
 
 public class ImageHistogram {
 		
 	public static void makeHistogram(BufferedImage bi, int lightHist[], int saturationHist[]) {
 		int sizeX = bi.getWidth();
 		int sizeY = bi.getHeight();
-		int sizeL = lightHist.length;
-		int sizeS = saturationHist.length;
+		int maxL = lightHist.length - 1;
+		int maxS = saturationHist.length - 1;
 		double DRGB[] = new double[3];
 		double HSL[] = new double[3];
 		Arrays.fill(lightHist, 0);
@@ -25,8 +25,8 @@ public class ImageHistogram {
 				int color = bi.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, DRGB);
 				ColorConversion.HSL.fromDRGB(DRGB, HSL);
-				lightHist[(int) (HSL[2] * sizeL)]++;
-				saturationHist[(int) (HSL[1] * sizeS)]++;
+				lightHist[(int) (HSL[2] * maxL)]++;
+				saturationHist[(int) (HSL[1] * maxS)]++;
 			}
 		}
 	}
@@ -36,11 +36,11 @@ public class ImageHistogram {
 		if (size != dest.length) {
 			throw new Error("Invalid argument");
 		}
-		double sum = 0.0;
+		double sum = 0;
 		for (int i = 0; i < size; i++) {
 			sum += histogram[i];
 		}
-		double c = 0.0;
+		double c = 0;
 		for (int i = 0; i < size; i++) {
 			c += histogram[i];
 			dest[i] = c / sum;
@@ -67,7 +67,7 @@ public class ImageHistogram {
 		}
 		return res;
 	}
-	
+/*	
 	public static void main(String[] args) throws IOException {
 		String thedir = "c:/users/s/java/images/";
 		
@@ -101,5 +101,44 @@ public class ImageHistogram {
 
 		ImageIO.write(bo1, "jpg", new File(thedir + "a/i1o.jpg"));
 		ImageIO.write(bo2, "jpg", new File(thedir + "a/i2o.jpg"));
+	}
+*/
+	
+	
+	
+	public static void main(String[] args) throws Exception {
+		String finName = Const.sourceImage;
+		String fouDir = Const.workDir;
+		
+		BufferedImage bi = ImageIO.read(new File(finName));
+		BufferedImage bo = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
+		
+		int lightHist[] = new int[256]; 
+		int saturationHist[] = new int[256];
+		makeHistogram(bi, lightHist, saturationHist);
+
+		double lightCDF[] = new double[256]; 
+		double saturationCDF[] = new double[256]; 
+		makeCDF(lightHist, lightCDF);
+		makeCDF(saturationHist, saturationCDF);
+		
+		double DRGB[] = new double[3];
+		double HSL[] = new double[3];
+		for (int j = bi.getHeight() - 1; j >= 0; j--) {
+			for (int i = bi.getWidth() - 1; i >= 0; i--) {
+				int color = bi.getRGB(i, j);
+				ColorConversion.RGB.fromRGB(color, DRGB);
+				ColorConversion.HSL.fromDRGB(DRGB, HSL);
+				double l = HSL[2];
+				double l2 = lightCDF[(int) (l * 255.0)];
+				HSL[2] = (l + l2) / 2.0;
+				ColorConversion.HSL.toDRGB(HSL, DRGB);
+				color = ColorConversion.RGB.toRGB(DRGB);
+				bo.setRGB(i, j, color);
+			}
+		}
+		
+		ImageIO.write(bi, "jpg", new File(fouDir + "/imageHistogram-source.jpg"));
+		ImageIO.write(bo, "jpg", new File(fouDir + "/imageHistogram-transformed.jpg"));
 	}
 }
