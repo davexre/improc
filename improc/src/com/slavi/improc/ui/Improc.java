@@ -157,23 +157,12 @@ public class Improc {
 		System.out.println("Done.");
 	}
 	
-	public static class MyThreadFactory implements ThreadFactory {
-		AtomicInteger threadCounter = new AtomicInteger(0);
-		
-		public Thread newThread(Runnable r) {
-			Thread thread = new Thread(r);
-			thread.setName("Worker thread " + threadCounter.incrementAndGet());
-			thread.setPriority(Thread.MIN_PRIORITY);
-			return thread;
-		}
-	}
-	
 	public static void main(String[] args) throws Exception {
 		Runtime runtime = Runtime.getRuntime();
 		int numberOfProcessors = runtime.availableProcessors();
-//		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors, new MyThreadFactory());
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors, new MyThreadFactory());
-//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1, new MyThreadFactory());
+//		ExecutorService exec = Executors.newFixedThreadPool(numberOfProcessors);
+		ExecutorService exec = Util.newBlockingThreadPoolExecutor(numberOfProcessors);
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(1);
 
 		Improc application = new Improc();
 		try {

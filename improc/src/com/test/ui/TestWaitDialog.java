@@ -2,7 +2,6 @@ package com.test.ui;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.SWT;
@@ -14,17 +13,6 @@ import com.slavi.util.ui.SwtUtil;
 
 public class TestWaitDialog {
 
-	public static class MyThreadFactory implements ThreadFactory {
-		AtomicInteger threadCounter = new AtomicInteger(0);
-		
-		public Thread newThread(Runnable r) {
-			Thread thread = new Thread(r);
-			thread.setName("Worker thread " + threadCounter.incrementAndGet());
-			thread.setPriority(Thread.MIN_PRIORITY);
-			return thread;
-		}
-	}
-	
 	AtomicInteger counter = new AtomicInteger();
 	
 	public class ProcessOne implements Callable<Void> {
@@ -51,7 +39,7 @@ public class TestWaitDialog {
 	
 	public class ProcessAll implements Callable<Void> {
 		public Void call() throws Exception {
-			ExecutorService exec = Util.newBlockingThreadPoolExecutor(30, new MyThreadFactory());
+			ExecutorService exec = Util.newBlockingThreadPoolExecutor(30);
 //			ExecutorService exec = new FakeThreadExecutor();
 			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 			try {

@@ -160,7 +160,7 @@ public class ImageHistogram2 {
 	
 	private void setFiles(String finDir) {
 		fdir = finDir;
-		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir + "/*.jpg", true, true);
+		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir + "/*.png", true, true);
 		fileList.removeAll();
 		ArrayList<String> files = new ArrayList<String>();
 		while (ff.hasNext()) {

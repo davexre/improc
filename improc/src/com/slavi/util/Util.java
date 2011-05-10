@@ -20,6 +20,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -594,6 +595,33 @@ public class Util {
 		}
 	}
 
+	private static class WorkerThreadFactory implements ThreadFactory {
+		static final AtomicInteger threadCounter = new AtomicInteger(0);
+		
+		public Thread newThread(Runnable r) {
+			Thread thread = new Thread(r);
+			thread.setName("Worker thread " + threadCounter.incrementAndGet());
+			thread.setPriority(Thread.MIN_PRIORITY);
+			return thread;
+		}
+	}
+
+	/**
+	 * Creates a Blocking thread pool with fixed size.
+	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 */
+	public static ExecutorService newBlockingThreadPoolExecutor() {
+		Runtime runtime = Runtime.getRuntime();
+		int nThreads = runtime.availableProcessors();
+		if (nThreads < 2)
+			nThreads = 2;
+		return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new ArrayBlockingQueue<Runnable>(1),
+                                      new WorkerThreadFactory(),
+                                      new BlockingQueuePut());
+	}
+	
 	/**
 	 * Creates a Blocking thread pool with fixed size.
 	 * @see java.util.concurrent.Executors.newFixedThreadPool 
@@ -602,6 +630,7 @@ public class Util {
 		return new ThreadPoolExecutor(nThreads, nThreads,
                                       0L, TimeUnit.MILLISECONDS,
                                       new ArrayBlockingQueue<Runnable>(1),
+                                      new WorkerThreadFactory(),
                                       new BlockingQueuePut());
 	}
 	
