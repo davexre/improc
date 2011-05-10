@@ -140,6 +140,18 @@ public class ImageAdjust {
 			}
 		});*/
 
+		taskSet.add(new ProcessImage(bi, fouBaseName, "_CDF_SL50") {
+			double lightPercent = 0.5;
+			double saturationPercent = 0.8;
+			public void transform(double[] srcDRGB, double[] destDRGB) {
+				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+				destDRGB[1] = saturationPercent * destDRGB[1] + (1.0 - saturationPercent) * saturationCumul[(int)(destDRGB[1] * 255)];
+				destDRGB[2] = lightPercent * destDRGB[2] + (1.0 - lightPercent) * lightCumul[(int)(destDRGB[2] * 255)];
+				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+			}
+		});
+
+		
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_CDF_L") {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
@@ -147,6 +159,18 @@ public class ImageAdjust {
 				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
 			}
 		});
+
+		for (int i = 0; i <= 10; i++) {
+			final double percent = i / 10.0;
+		taskSet.add(new ProcessImage(bi, fouBaseName, "_CDF_L" + i) {
+			public void transform(double[] srcDRGB, double[] destDRGB) {
+				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+				destDRGB[2] = percent * destDRGB[2] + (1 - percent) * lightCumul[(int)(destDRGB[2] * 255)];
+				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+			}
+		});
+		}
+		
 		
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_CDF_S") {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
@@ -176,35 +200,7 @@ public class ImageAdjust {
 		
 		final double scaleL = 0.8;
 		final double scaleS = scaleL;
-		
-/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_L2") {
-			public void transform(double[] srcDRGB, double[] destDRGB) {
-				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
-				double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
-				destDRGB[2] += delta * scaleL;
-				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
-			}
-		});*/
-
-/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_S2") {
-			public void transform(double[] srcDRGB, double[] destDRGB) {
-				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
-				double delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
-				destDRGB[1] += delta * scaleS;
-				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
-			}
-		});*/
-
-/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_SL2") {
-			public void transform(double[] srcDRGB, double[] destDRGB) {
-				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
-				double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
-				destDRGB[2] += delta * scaleL;
-				delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
-				destDRGB[1] += delta * scaleS;
-				ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
-			}
-		});*/
+		/***		
 
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_L") {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
@@ -214,20 +210,49 @@ public class ImageAdjust {
 			}
 		});
 
-/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_S_BW") {
-			public void transform(double[] srcDRGB, double[] destDRGB) {
-				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
-				destDRGB[0] = destDRGB[2] = destDRGB[1];
-			}
-		});*/
-		
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_L_BW") {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
 				destDRGB[0] = destDRGB[1] = destDRGB[2];
 			}
 		});
+***/
+/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_L2") {
+		public void transform(double[] srcDRGB, double[] destDRGB) {
+			ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+			double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
+			destDRGB[2] += delta * scaleL;
+			ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+		}
+	});*/
+
+/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_S2") {
+		public void transform(double[] srcDRGB, double[] destDRGB) {
+			ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+			double delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
+			destDRGB[1] += delta * scaleS;
+			ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+		}
+	});*/
+
+/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_SL2") {
+		public void transform(double[] srcDRGB, double[] destDRGB) {
+			ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+			double delta = ((double) light[(int) (destDRGB[2] * 255.0)]) / 255.0 - destDRGB[2];
+			destDRGB[2] += delta * scaleL;
+			delta = ((double) saturation[(int) (destDRGB[1] * 255.0)]) / 255.0 - destDRGB[1];
+			destDRGB[1] += delta * scaleS;
+			ColorConversion.HSL.toDRGB(destDRGB, destDRGB);
+		}
+	});*/
 		
+/*		taskSet.add(new ProcessImage(bi, fouBaseName, "_S_BW") {
+		public void transform(double[] srcDRGB, double[] destDRGB) {
+			ColorConversion.HSL.fromDRGB(srcDRGB, destDRGB);
+			destDRGB[0] = destDRGB[2] = destDRGB[1];
+		}
+		});*/
+	
 		taskSet.addFinished();
 		taskSet.get();
 	}
@@ -238,8 +263,9 @@ public class ImageAdjust {
 		String fouDir = Const.workDir + "/ImageAdjust";
 //		String fouDir = "/home/slavian/S/temp/1";
 		
-		String finDir = "C:/Users/i047367/S/java/Images/Image data/20090801 Vodopad Skaklia/1/*.jpg";
-//		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2/*.jpg";
+//		String finDir = "C:/Users/i047367/S/java/Images/Image data/20090801 Vodopad Skaklia/1/*.jpg";
+//		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/1/P1100403.jpg";
+		String finDir = "/home/slavian/Pictures/2011/20110508 Edna godina po-kusno (Koprinka)/P1140226*";
 		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir, true, true);
 		
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor();
