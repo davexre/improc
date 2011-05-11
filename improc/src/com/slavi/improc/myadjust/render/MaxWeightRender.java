@@ -20,11 +20,6 @@ public class MaxWeightRender extends AbstractParallelRender {
 	public void renderRow(int row) throws Exception {
 		for (int col = 0; col < outImageColor.sizeX; col++) {
 			double curMaxWeight = 0.0;
-			double sumWeight = 0.0;
-			double sumLight = 0.0;
-			double sumSaturation = 0.0;
-			double curLightDiv = 0.0;
-			double curSaturationDiv = 0.0;
 			int color = 0;
 			KeyPointList maxWeightImage = null;
 
@@ -55,42 +50,31 @@ public class MaxWeightRender extends AbstractParallelRender {
 
 				double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 				double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
-				double weight = 2.2 - MathUtil.hypot(dx, dy);
+				double weight = 1.5 - MathUtil.hypot(dx, dy);
 				
-				ox /= image.pixelsPerDivision;
-				oy /= image.pixelsPerDivision;
-				sumWeight += weight;
-				sumLight += weight * image.lightDiv[ox][oy];
-				sumSaturation += weight * image.saturationDiv[ox][oy];
-										
 				// Calculate the color image
 				if (curMaxWeight < weight) {
 					maxWeightImage = image;
 					curMaxWeight = weight;
-					curLightDiv = image.lightDiv[ox][oy];
-					curSaturationDiv = image.saturationDiv[ox][oy];
 					color = curColor;
 				}
 			}
+
+			final double lightPercent = 0.5;
+			final double saturationPercent = 0.8;
 
 			int color2 = color;
 			if (maxWeightImage != null) {
 				ColorConversion.RGB.fromRGB(color, DRGB);
 				ColorConversion.HSL.fromDRGB(DRGB, HSL);
-				int sizeL = maxWeightImage.lightCDF.length - 1;
-				int sizeS = maxWeightImage.saturationCDF.length - 1;
-				double delta;
-//				delta = maxWeightImage.saturationCDF[(int) (HSL[1] * sizeS)] - HSL[1];
-//				HSL[1] += delta * scale;
-				delta = maxWeightImage.lightCDF[(int) (HSL[2] * sizeL)] - HSL[2];
-				HSL[2] += delta * scale;
-//				HSL[2] *= (sumLight ) / (sumWeight * curLightDiv);
+				HSL[1] = saturationPercent * HSL[1] + (1.0 - saturationPercent) * maxWeightImage.saturationCDF[(int) Math.round(HSL[1] * 255.0)];
+				HSL[2] = lightPercent * HSL[2] + (1.0 - lightPercent) * maxWeightImage.lightCDF[(int) Math.round(HSL[2] * 255.0)];
 				ColorConversion.HSL.toDRGB(HSL, DRGB);
 				color2 = ColorConversion.RGB.toRGB(DRGB);
 			}
-			
 			outImageColor.setRGB(col, row, color);
 			outImageColor2.setRGB(col, row, color2);
+			
 			if (maxWeightImage == null) {
 				color = 0;
 			} else {

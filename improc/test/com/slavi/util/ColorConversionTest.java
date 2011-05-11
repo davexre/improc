@@ -155,16 +155,27 @@ public class ColorConversionTest {
 		for (int r = 0; r <= 255; r++) {
 			for (int g = 0; g <= 255; g++) {
 				for (int b = 0; b <= 255; b++) {
-					dest0[0] = r;
-					dest0[1] = g;
-					dest0[2] = b;
-					ColorConversion.RGB.toDRGB(dest0, dest1);
-					ColorConversion.HSL.fromDRGB(dest1, dest1);
-					ColorConversion.HSL.toDRGB(dest1, dest2);
-					ColorConversion.RGB.fromDRGB(dest2, dest2);
 					try {
-						TestUtils.assertEqual("Color not matched", dest0, dest2);
+						int color = r << 16 | g << 8 | b;
+						dest0[0] = r;
+						dest0[1] = g;
+						dest0[2] = b;
+
+						ColorConversion.RGB.toDRGB(dest0, dest1);
+						ColorConversion.RGB.fromRGB(color, dest2);
+						TestUtils.assertEqual("Color not matched 1", dest1, dest2);
+
+						ColorConversion.HSL.fromDRGB(dest1, dest1);
+						ColorConversion.HSL.toDRGB(dest1, dest1);
+						ColorConversion.RGB.fromDRGB(dest1, dest2);
+						TestUtils.assertEqual("Color not matched 2", dest0, dest2);
+
+						int color2 = ColorConversion.RGB.toRGB(dest1);
+						TestUtils.assertEqual("Color not matched 3", color, color2);
 					} catch (RuntimeException e) {
+						System.out.println("R=" + r);
+						System.out.println("G=" + g);
+						System.out.println("B=" + b);
 						TestUtils.dumpArray("", dest0);
 						TestUtils.dumpArray("", dest1);
 						TestUtils.dumpArray("", dest2);

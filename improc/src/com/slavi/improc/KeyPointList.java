@@ -17,7 +17,7 @@ import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 
 public class KeyPointList {
-	public static final String fileHeader = "KeyPoint file version 1.27";
+	public static final String fileHeader = "KeyPoint file version 1.28";
 	
 	public final ArrayList<KeyPoint> items = new ArrayList<KeyPoint>();
 	
@@ -88,11 +88,11 @@ public class KeyPointList {
 	
 	// Image histograms 
 	public static final int histogramSize = 256;
+	public int lightHistogram[];
+	public int saturationHistogram[];
+
 	public double lightCDF[];
 	public double saturationCDF[];
-	public int pixelsPerDivision;
-	public int lightDiv[][];
-	public int saturationDiv[][];
 	
 	public static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
@@ -105,26 +105,9 @@ public class KeyPointList {
 		r.cameraScale = 1.0 / Math.max(r.imageSizeX, r.imageSizeY);
 		r.scaleZ = defaultCameraFOV_to_ScaleZ;
 		
-		r.lightCDF = Util.stringToDoubleArray(fin.readLine()); 
-		r.saturationCDF = Util.stringToDoubleArray(fin.readLine()); 
-		r.pixelsPerDivision = Integer.parseInt(fin.readLine());
-		int divX = (int) Math.ceil((double) r.imageSizeX / r.pixelsPerDivision); 
-		int divY = (int) Math.ceil((double) r.imageSizeY / r.pixelsPerDivision);
-		r.lightDiv = new int[divX][divY];
-		r.saturationDiv = new int[divX][divY];
-
-		st = new StringTokenizer(fin.readLine(), "\t");
-		for (int j = 0; j < divY; j++) {
-			for (int i = 0; i < divX; i++) {
-				r.lightDiv[i][j] = Integer.parseInt(st.nextToken());
-			}
-		}
-		st = new StringTokenizer(fin.readLine(), "\t");
-		for (int j = 0; j < divY; j++) {
-			for (int i = 0; i < divX; i++) {
-				r.saturationDiv[i][j] = Integer.parseInt(st.nextToken());
-			}
-		}
+		r.lightHistogram = Util.stringToIntArray(fin.readLine()); 
+		r.saturationHistogram = Util.stringToIntArray(fin.readLine()); 
+		r.buildCDFfromHistograms();
 		
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
@@ -139,76 +122,40 @@ public class KeyPointList {
 	public void toTextStream(PrintWriter fou) {
 		fou.println(imageFileStamp.toString());
 		fou.println(imageSizeX + "\t" + imageSizeY);
-		fou.println(Util.arrayToString(lightCDF));
-		fou.println(Util.arrayToString(saturationCDF));
-		fou.println(pixelsPerDivision);
-		
-		int divX = (int) Math.ceil((double) imageSizeX / pixelsPerDivision); 
-		int divY = (int) Math.ceil((double) imageSizeY / pixelsPerDivision);
-
-		for (int j = 0; j < divY; j++) {
-			for (int i = 0; i < divX; i++) {
-				fou.print(lightDiv[i][j]);
-				fou.print("\t");
-			}
-		}
-		fou.println();
-		for (int j = 0; j < divY; j++) {
-			for (int i = 0; i < divX; i++) {
-				fou.print(saturationDiv[i][j]);
-				fou.print("\t");
-			}
-		}
-		fou.println();
-		
+		fou.println(Util.arrayToString(lightHistogram));
+		fou.println(Util.arrayToString(saturationHistogram));
 		for (KeyPoint item : items)
 			fou.println(item.toString());
 	}
 
 	public void makeHistogram(BufferedImage bi) {
-		pixelsPerDivision = Math.max(20, Math.max(imageSizeX, imageSizeY) / 100);
-		int divX = (int) Math.ceil((double) imageSizeX / pixelsPerDivision); 
-		int divY = (int) Math.ceil((double) imageSizeY / pixelsPerDivision);
-		lightDiv = new int[divX][divY];
-		saturationDiv = new int[divX][divY];
-		int divCount[][] = new int[divX][divY];
-
-		int lightHist[] = new int[histogramSize];
-		int saturationHist[] = new int[histogramSize];
+		lightHistogram = new int[histogramSize];
+		saturationHistogram = new int[histogramSize];
 
 		int sizeX = bi.getWidth() - 1;
 		int sizeY = bi.getHeight() - 1;
-		int sizeL = lightHist.length - 1;
-		int sizeS = saturationHist.length - 1;
+		int sizeL = lightHistogram.length - 1;
+		int sizeS = saturationHistogram.length - 1;
 		double DRGB[] = new double[3];
 		double HSL[] = new double[3];
-		Arrays.fill(lightHist, 0);
+		Arrays.fill(lightHistogram, 0);
 		for (int j = sizeY; j >= 0; j--) {
-			int atDivY = j / pixelsPerDivision;
 			for (int i = sizeX; i >= 0; i--) {
 				int color = bi.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, DRGB);
 				ColorConversion.HSL.fromDRGB(DRGB, HSL);
-				lightHist[(int) (HSL[2] * sizeL)]++;
-				saturationHist[(int) (HSL[1] * sizeS)]++;
-				
-				int atDivX = i / pixelsPerDivision;
-				saturationDiv[atDivX][atDivY] += HSL[1] * histogramSize;
-				lightDiv[atDivX][atDivY] += HSL[2] * histogramSize;
-				divCount[atDivX][atDivY]++;
+				lightHistogram[(int) (HSL[2] * sizeL)]++;
+				saturationHistogram[(int) (HSL[1] * sizeS)]++;
 			}
 		}
-		
-		for (int i = 0; i < divX; i++)
-			for (int j = 0; j < divY; j++) {
-				lightDiv[i][j] /= divCount[i][j];
-				saturationDiv[i][j] /= divCount[i][j];
-			}				
+		buildCDFfromHistograms();
+	}
 
+	private void buildCDFfromHistograms() {
 		lightCDF = new double[histogramSize]; 
 		saturationCDF = new double[histogramSize];
-		makeCDF(lightHist, lightCDF);
-		makeCDF(saturationHist, saturationCDF);
+		makeCDF(lightHistogram, lightCDF);
+		makeCDF(saturationHistogram, saturationCDF);
 	}
 	
 	public static void makeCDF(int histogram[], double dest[]) {

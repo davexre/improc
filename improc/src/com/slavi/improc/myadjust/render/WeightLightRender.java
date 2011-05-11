@@ -54,8 +54,8 @@ public class WeightLightRender extends AbstractParallelRender {
 				
 				double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 				double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
-				double weight = 2.2 - MathUtil.hypot(dx, dy);
-//				weight *= weight;
+				double weight = 1.5 - MathUtil.hypot(dx, dy);
+				weight *= weight;
 				
 				// Calculate the average HSL in a region around the current point
 				int radius = 1;
@@ -122,12 +122,12 @@ public class WeightLightRender extends AbstractParallelRender {
 //			if (maxSumHue != 0) {
 //				HSL[0] *= sumHue / maxSumHue;
 //			}
-			if (maxSumSaturation != 0) {
-				HSL[1] *= sumSaturation / maxSumSaturation;
-			}
-//			if (maxSumLight != 0) {
-//				HSL[2] *= sumLight / maxSumLight;
+//			if (maxSumSaturation != 0) {
+//				HSL[1] *= sumSaturation / maxSumSaturation;
 //			}
+			if (maxSumLight != 0) {
+				HSL[2] *= sumLight / maxSumLight;
+			}
 			ColorConversion.HSL.toDRGB(HSL, DRGB);
 			outImageColor.setRGB(col, row, ColorConversion.RGB.toRGB(DRGB));
 

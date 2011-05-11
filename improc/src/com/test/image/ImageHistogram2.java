@@ -96,14 +96,14 @@ public class ImageHistogram2 {
 				if (color == 0xffffff)
 					ffcount++;
 				ColorConversion.RGB.fromRGB(color, DRGB);
-				r[(int) (DRGB[0] * 255)]++;
-				g[(int) (DRGB[1] * 255)]++;
-				b[(int) (DRGB[2] * 255)]++;
+				r[(int) Math.round(DRGB[0] * 255.0)]++;
+				g[(int) Math.round(DRGB[1] * 255.0)]++;
+				b[(int) Math.round(DRGB[2] * 255.0)]++;
 				ColorConversion.HSL.fromDRGB(DRGB, HSL);
-				s[(int) (HSL[1] * 255)]++;
-				l[(int) (HSL[2] * 255)]++;
+				s[(int) Math.round(HSL[1] * 255.0)]++;
+				l[(int) Math.round(HSL[2] * 255.0)]++;
 //				ColorConversion.HSV.fromDRGB(DRGB, HSV);
-//				v[(int) (HSV[2] * 255)]++;
+//				v[(int) Math.round(HSV[2] * 255.0)]++;
 			}
 		}
 		

@@ -51,17 +51,14 @@ public class ColorConversion {
 		}
 		
 		public static int toRGB(double DRGB[]) {
-			return (int) (
-					((int) MathUtil.clipValue(DRGB[0] * 255.0, 0.0, 255.0) << 16) | 
-					((int) MathUtil.clipValue(DRGB[1] * 255.0, 0.0, 255.0) << 8) | 
-					((int) MathUtil.clipValue(DRGB[2] * 255.0, 0.0, 255.0)));
+			return toRGB(DRGB[0], DRGB[1], DRGB[2]);
 		}
 		
 		public static int toRGB(double DR, double DG, double DB) {
 			return (int) (
-				((int) MathUtil.clipValue(DR * 255.0, 0.0, 255.0) << 16) | 
-				((int) MathUtil.clipValue(DG * 255.0, 0.0, 255.0) << 8) | 
-				((int) MathUtil.clipValue(DB * 255.0, 0.0, 255.0)));
+				((int) MathUtil.clipValue(Math.round(DR * 255.0), 0.0, 255.0) << 16) | 
+				((int) MathUtil.clipValue(Math.round(DG * 255.0), 0.0, 255.0) << 8) | 
+				((int) MathUtil.clipValue(Math.round(DB * 255.0), 0.0, 255.0)));
 		}
 		
 		public static void fromRGB(int rgb, double DRGB[]) {
