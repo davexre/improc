@@ -291,8 +291,8 @@ public class ImageRot {
 		ry = ry + MathUtil.PIover2;
 		
 		int offset = 7;
-		int sizeX = targetImg.sizeX - offset*2;
-		int sizeY = targetImg.sizeY - offset*2;
+		int sizeX = targetImg.imageSizeX - offset*2;
+		int sizeY = targetImg.imageSizeY - offset*2;
 		
 		dest.x = offset + rx * sizeX / (MathUtil.C2PI);
 		dest.y = offset + ry * sizeY / Math.PI;
@@ -391,8 +391,8 @@ public class ImageRot {
 	public static void drawWorldMesh(SafeImage img, ImageRotationTransformLearer learner) {
 		int numDivisionsX = 24;
 		int numDivisionsY = 8;
-		int scaleX = img.sizeX * 3;
-		int scaleY = img.sizeY * 3;
+		int scaleX = img.imageSizeX * 3;
+		int scaleY = img.imageSizeY * 3;
 
 		Point2D.Double dest = new Point2D.Double();
 		// draw meridians

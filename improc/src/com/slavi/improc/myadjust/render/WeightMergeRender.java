@@ -24,7 +24,7 @@ public class WeightMergeRender extends AbstractParallelRender {
 	
 	double d[] = new double[3];
 	public void renderRow(int row) throws Exception {
-		for (int col = 0; col < outImageColor.sizeX; col++) {
+		for (int col = 0; col < outImageColor.imageSizeX; col++) {
 			long colorR = 0;
 			long colorG = 0;
 			long colorB = 0;

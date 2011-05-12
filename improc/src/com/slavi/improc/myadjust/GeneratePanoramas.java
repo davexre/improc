@@ -539,16 +539,27 @@ public class GeneratePanoramas implements Callable<Void> {
 			outImageColor2 = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
 			imageData = new HashMap<KeyPointList, SafeImage>();
+			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
 			for (int index = 0; index < images.size(); index++) {
-				KeyPointList image = images.get(index);
-				SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
-				imageData.put(image, im);
+				final KeyPointList image = images.get(index);
+				taskSet.add(new Callable<Void>() {
+					public Void call() throws Exception {
+						SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
+						im.populateStatistics();
+						synchronized (imageData) {
+							imageData.put(image, im);
+						}
+						return null;
+					}
+				});
 			}
+			taskSet.addFinished();
+			taskSet.get();
 			
 			Runtime runtime = Runtime.getRuntime();
 			int numberOfProcessors = runtime.availableProcessors();
 			
-			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+			taskSet = new TaskSetExecutor(exec);
 			rowsProcessed = new AtomicInteger(0);
 			for (int i = 0; i < numberOfProcessors; i++) {
 				if (useImageMaxWeight) {

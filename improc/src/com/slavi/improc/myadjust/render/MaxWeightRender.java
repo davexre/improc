@@ -18,7 +18,7 @@ public class MaxWeightRender extends AbstractParallelRender {
 	double scale = 1.0;
 
 	public void renderRow(int row) throws Exception {
-		for (int col = 0; col < outImageColor.sizeX; col++) {
+		for (int col = 0; col < outImageColor.imageSizeX; col++) {
 			double curMaxWeight = 0.0;
 			int color = 0;
 			KeyPointList maxWeightImage = null;

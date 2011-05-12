@@ -18,21 +18,12 @@ public class WeightLightRender extends AbstractParallelRender {
 	double scale = 1.0;
 
 	public void renderRow(int row) throws Exception {
-		for (int col = 0; col < outImageColor.sizeX; col++) {
+		for (int col = 0; col < outImageColor.imageSizeX; col++) {
 			double maxWeight = 0.0;
-			
-			double sumWeight = 0.0;
-			double sumHue = 0.0;
-			double sumSaturation = 0.0;
-			double sumLight = 0.0;
-
-			double maxSumWeight = 0.0;
-			double maxSumHue = 0.0;
-			double maxSumSaturation = 0.0;
-			double maxSumLight = 0.0;
 			
 			int color = 0;
 			KeyPointList maxWeightImage = null;
+			double maxWeightLight = 0;
 
 			for (KeyPointList image : imageData.keySet()) {
 				if (Thread.currentThread().isInterrupted())
@@ -57,32 +48,6 @@ public class WeightLightRender extends AbstractParallelRender {
 				double weight = 1.5 - MathUtil.hypot(dx, dy);
 				weight *= weight;
 				
-				// Calculate the average HSL in a region around the current point
-				int radius = 1;
-				double curSumWeight = 0.0;
-				double curSumHue = 0.0;
-				double curSumSaturation = 0.0;
-				double curSumLight = 0.0;
-				
-				for (int i = -radius; i <= radius; i++) {
-					for (int j = -radius; j <= radius; j++) {
-						int tmpColor = im.getRGB(ox + i, oy + j);
-						if (tmpColor < 0)
-							continue;
-						ColorConversion.RGB.fromRGB(tmpColor, DRGB);
-						ColorConversion.HSL.fromDRGB(DRGB, HSL);
-						
-						curSumWeight += weight;
-						curSumHue += weight * HSL[0];
-						curSumSaturation += weight * HSL[1];
-						curSumLight += weight * HSL[2];
-					}					
-				}
-				sumWeight += curSumWeight;
-				sumHue += curSumHue;
-				sumSaturation += curSumSaturation;
-				sumLight += curSumLight;
-
 				int curColor = im.getRGB(ox, oy);
 				if (curColor < 0)
 					continue;
@@ -90,13 +55,11 @@ public class WeightLightRender extends AbstractParallelRender {
 				// Calculate the color image
 				if (maxWeight < weight) {
 					maxWeightImage = image;
+					ColorConversion.RGB.fromRGB(color, DRGB);
+					ColorConversion.HSL.fromDRGB(DRGB, HSL);
+					maxWeightLight = im.getStatLight(ox, oy);
 					maxWeight = weight;
 					
-					maxSumWeight = curSumWeight;
-					maxSumHue = curSumHue;
-					maxSumSaturation = curSumSaturation;
-					maxSumLight = curSumLight;
-
 					color = curColor;
 				}
 			}
@@ -108,26 +71,46 @@ public class WeightLightRender extends AbstractParallelRender {
 				continue;
 			}
 
-			maxSumHue /= maxSumWeight;
-			maxSumSaturation /= maxSumWeight;
-			maxSumLight /= maxSumWeight;
-			
-			sumHue /= sumWeight;
-			sumSaturation /= sumWeight;
-			sumLight /= sumWeight;
-
 			// Calc the output image 1 color
 			ColorConversion.RGB.fromRGB(color, DRGB);
 			ColorConversion.HSL.fromDRGB(DRGB, HSL);
-//			if (maxSumHue != 0) {
-//				HSL[0] *= sumHue / maxSumHue;
-//			}
-//			if (maxSumSaturation != 0) {
-//				HSL[1] *= sumSaturation / maxSumSaturation;
-//			}
-			if (maxSumLight != 0) {
-				HSL[2] *= sumLight / maxSumLight;
+			double hue = HSL[0];
+			double sumWeight = 0.0;
+			double sumLight = 0.0;
+			for (KeyPointList image : imageData.keySet()) {
+				parent.transformWorldToCamera(col, row, image, d);
+				if (d[2] < 0)
+					continue;
+				
+				SafeImage im = imageData.get(image);
+				int ox = (int)d[0];
+				int oy = (int)d[1];
+				
+				double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
+				double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
+				double weight = 1.5 - MathUtil.hypot(dx, dy);
+				weight *= weight;
+				
+				int curColor = im.getRGB(ox, oy);
+				if (curColor < 0)
+					continue;
+				sumLight += weight * im.getStatLight(ox, oy);
+				sumWeight += weight;
 			}
+			
+			if (sumWeight == 0 || sumLight == 0.0) {
+				HSL[0] = 1;
+				HSL[1] = 1;
+				HSL[2] = 1;
+			} else 
+			if ((maxWeightLight != 0.0) && (sumWeight != 0)) {
+				HSL[2] *= (sumLight / sumWeight) / maxWeightLight;
+			} else {
+				HSL[0] = 0;
+				HSL[1] = 0;
+				HSL[2] = 0;
+			}
+				
 			ColorConversion.HSL.toDRGB(HSL, DRGB);
 			outImageColor.setRGB(col, row, ColorConversion.RGB.toRGB(DRGB));
 

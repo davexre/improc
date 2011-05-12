@@ -30,10 +30,10 @@ public abstract class AbstractParallelRender implements Callable<Void> {
 	public abstract void renderRow(int row) throws Exception;
 	
 	public Void call() throws Exception {
-		for (int row = rowsProcessed.getAndIncrement(); row < outImageColor.sizeY; row = rowsProcessed.getAndIncrement()) {
+		for (int row = rowsProcessed.getAndIncrement(); row < outImageColor.imageSizeY; row = rowsProcessed.getAndIncrement()) {
 			renderRow(row);
 			if (row % 10 == 0) {
-				SwtUtil.activeWaitDialogSetStatus(null, (100 * row) / outImageColor.sizeY);
+				SwtUtil.activeWaitDialogSetStatus(null, (100 * row) / outImageColor.imageSizeY);
 			}				
 		}
 		return null;

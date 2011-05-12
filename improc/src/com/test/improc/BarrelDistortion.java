@@ -52,17 +52,17 @@ public class BarrelDistortion {
 		FileInputStream fin = new FileInputStream(Const.sourceImage);
 		SafeImage img = new SafeImage(fin);
 		fin.close();
-		SafeImage oi = new SafeImage(img.sizeX, img.sizeY);
+		SafeImage oi = new SafeImage(img.imageSizeX, img.imageSizeY);
 //		BarrelDistroctionFilter f = new BarrelDistroctionFilter(1.1, 0, 0);
 		BarrelDistroctionFilter f = new BarrelDistroctionFilter(2, -1.1, 0.5, 0);
 		
-		double centerX = img.sizeX / 2.0;
-		double centerY = img.sizeY / 2.0;
+		double centerX = img.imageSizeX / 2.0;
+		double centerY = img.imageSizeY / 2.0;
 		double scale = Math.max(centerX, centerY);
 		
 		Point2D.Double d = new Point2D.Double();
-		for (int atX = 0; atX < oi.sizeX; atX++) {
-			for (int atY = 0; atY < oi.sizeY; atY++) {
+		for (int atX = 0; atX < oi.imageSizeX; atX++) {
+			for (int atY = 0; atY < oi.imageSizeY; atY++) {
 				d.x = atX - centerX;
 				d.y = atY - centerY;
 				
