@@ -137,7 +137,7 @@ public:
 	TicksPerSecond tps;
 
 	/**
-	 * Initializes the class, sets ports (pinA and pinB) to output mode.
+	 * Initializes the class, sets ports (pinA and pinB) to input mode.
 	 */
 	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
 
