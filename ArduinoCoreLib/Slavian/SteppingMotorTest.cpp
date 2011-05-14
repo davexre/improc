@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "AdvButton.h"
 #include "RotaryEncoderAcelleration.h"
+#include "SteppingMotor.h"
 #include "StateLed.h"
 
 DefineClass(SteppingMotorTest);
@@ -11,14 +12,15 @@ static const int ledPin = 13; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
-static const int stepperPin11 = 7;	// BA6845FS Stepper motor driver OUT11 pin
-static const int stepperPin12 = 8;	// BA6845FS Stepper motor driver OUT12 pin
-static const int stepperPin21 = 9;	// BA6845FS Stepper motor driver OUT21 pin
-static const int stepperPin22 = 10;	// BA6845FS Stepper motor driver OUT22 pin
+static const int stepperPin11 = 8;	// BA6845FS Stepper motor driver OUT11 pin
+static const int stepperPin12 = 9;	// BA6845FS Stepper motor driver OUT12 pin
+static const int stepperPin21 = 10;	// BA6845FS Stepper motor driver OUT21 pin
+static const int stepperPin22 = 11;	// BA6845FS Stepper motor driver OUT22 pin
 
 static AdvButton btn;
 static RotaryEncoderAcelleration rotor;
 static StateLed led;
+static SteppingMotor motor;
 
 static const unsigned int *states[] = {
 		BLINK_SLOW,
@@ -32,48 +34,53 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
-long lastRotor;
+static boolean motorAutoRunning = false;
+static boolean motorForward = true;
+
 void SteppingMotorTest::setup() {
 	btn.initialize(buttonPin, false);
 	led.initialize(ledPin, states, size(states), true);
-	toneState.setValue(500);
 	rotor.initialize(rotorPinA, rotorPinB);
-	rotor.setState(&toneState);
+	rotor.setMinMax(100, 5000);
+	rotor.setValue(1000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-    Serial.begin(9600);
-    Serial.println("Push the encoder button to switch between changing pitch and blink");
+	motor.initialize(stepperPin11, stepperPin12, stepperPin21, stepperPin22);
 
-    ledState.initialize(0, size(states) - 1, true);
-    toneState.initialize(50, 5000, false);
+    Serial.begin(115200);
+    Serial.println("Initialized");
 }
 
 
 void SteppingMotorTest::loop() {
 	btn.update();
 	led.update();
+//	rotor.update();
+	motor.update();
 
 	if (btn.isLongClicked()) {
-
+		motorAutoRunning = !motorAutoRunning;
+		if (motorAutoRunning) {
+			motor.rotate(motorForward);
+		} else {
+			motor.resetStepTo(rotor.getValue());
+		}
+		Serial.print("RUNNING ");
+		Serial.print((int)motorAutoRunning);
+		Serial.print(" DELAY ");
+		Serial.println(rotor.getValue());
 	} else if (btn.isClicked()) {
-		rotor.setState(rotor.getState() == &toneState ? &ledState : &toneState);
+		motorForward = !motorForward;
+		if (motorAutoRunning) {
+			motor.rotate(motorForward);
+		}
+		Serial.print("FORWARD ");
+		Serial.print((int)motorForward);
+		Serial.print(" DELAY ");
+		Serial.println(rotor.getValue());
 	}
 
-	if (rotor.hasValueChanged()) {
-
-	}
-	if (toneState.hasValueChanged()) {
-		long newTone = toneState.getValue();
-		float tps = rotor.tps.getTPS();
-		Serial.print("Tone ");
-		Serial.print(newTone);
-		Serial.print(" ");
-		Serial.println(tps);
-	}
-
-	if (ledState.hasValueChanged()) {
-		int newLed = (int) ledState.getValue();
-		led.setState(newLed);
-		Serial.print("Led ");
-		Serial.println(newLed);
+	if ((!motorAutoRunning) && rotor.hasValueChanged()) {
+		//motor.motorCoilTurnOffMicros = rotor.getValue();
+		motor.gotoStep(rotor.getValue());
 	}
 }

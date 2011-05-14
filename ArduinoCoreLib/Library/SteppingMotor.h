@@ -6,16 +6,26 @@
 
 class SteppingMotor {
 private:
-	signed int currentState;
+	signed char currentState;
+
+	byte movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+
+	long targetStep;
+
+	long step;
 
 	void setState(const uint8_t *state);
+
+	boolean isMotorOn;
+	long motorOnMicros;
 public:
 	uint8_t out11pin;
 	uint8_t out12pin;
 	uint8_t out21pin;
 	uint8_t out22pin;
 
-	int step;
+	long motorCoilTurnOffMicros;
+	long motorCoilDelayBetweenStepsMicros;
 
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
@@ -29,9 +39,17 @@ public:
 	 */
 	void update();
 
-	void previousStep();
-	void nextStep();
+	void gotoStep(long step);
+
+	void rotate(boolean forward);
+
 	void stop();
+
+	void resetStepTo(long step);
+
+	inline long getStep(void) {
+		return step;
+	}
 };
 
 #endif
