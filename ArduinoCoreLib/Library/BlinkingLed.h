@@ -28,7 +28,7 @@ public:
 	 *
 	 * pin	The pin number the led is attached to.
 	 */
-	void initialize(uint8_t pin);
+	void initialize(const uint8_t pin);
 
 	/**
 	 * Updates the on/off state of the led. This method should be
@@ -46,7 +46,7 @@ public:
 	 * 			current blink sequence. A negative value -1 means
 	 * 			loop forever.
 	 */
-	void play(signed short int playCount);
+	void play(const signed short int playCount);
 
 	/**
 	 * Starts playing the current blink sequence of led on/offs.

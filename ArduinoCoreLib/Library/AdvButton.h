@@ -28,7 +28,7 @@ class AdvButton {
 public:
 	Button button;
 
-	void initialize(uint8_t pin, boolean autoRepeatEnabled, int debounceMillis = 10);
+	void initialize(const uint8_t pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {
@@ -39,7 +39,7 @@ public:
 		return autoRepeatEnabled;
 	}
 
-	inline boolean setAutoRepeatEnabled(boolean newAutoRepeatEnabled) {
+	inline boolean setAutoRepeatEnabled(const boolean newAutoRepeatEnabled) {
 		autoRepeatEnabled = newAutoRepeatEnabled;
 	}
 

@@ -16,11 +16,11 @@ private:
 	int max;
 	long sum;
 public:
-	void initialize(int *buffer, int bufferSize, int defaultValue = 0);
+	void initialize(int *buffer, const int bufferSize, const int defaultValue = 0);
 
-	void addValue(int value);
+	void addValue(const int value);
 
-	void reset(int defaultValue = 0);
+	void reset(const int defaultValue = 0);
 
 	inline int getAvg() {
 		return sum / bufSize;

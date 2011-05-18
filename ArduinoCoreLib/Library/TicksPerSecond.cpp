@@ -1,6 +1,6 @@
 #include "TicksPerSecond.h"
 
-void TicksPerSecond::initialize(int holdLastTimeoutMillis) {
+void TicksPerSecond::initialize(const int holdLastTimeoutMillis) {
 	lastTime = millis();
 	for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
 		counters[i] = 0;
@@ -10,7 +10,7 @@ void TicksPerSecond::initialize(int holdLastTimeoutMillis) {
 	deltaTime = holdLastTimeoutMillis / TPS_TIMES_PER_PERIOD;
 }
 
-void TicksPerSecond::update(boolean tick) {
+void TicksPerSecond::update(const boolean tick) {
 	long now = millis();
 	if (now - lastTime >= deltaTime) {
 		counters[curCounter] = 0;
@@ -29,7 +29,7 @@ void TicksPerSecond::update(boolean tick) {
 	tps = (counters[curCounter] * 1000.0) / now;
 }
 
-void TicksPerSecond::smooth(int data, float *smoothedValue, int timesPerSecond) {
+void TicksPerSecond::smooth(const int data, float *smoothedValue, const int timesPerSecond) {
 	float scale = getTPS() / timesPerSecond;
 	*smoothedValue = (data + (*smoothedValue) * scale) / (scale + 1);
 }

@@ -43,7 +43,7 @@ public:
 	 * debounceMillis
 	 * 			The button debounce time in milliseconds.
 	 */
-	void initialize(uint8_t pin, int debounceMillis = 10);
+	void initialize(const uint8_t pin, const int debounceMillis = 10);
 
 	/**
 	 * Updates the state of the rotary knob.

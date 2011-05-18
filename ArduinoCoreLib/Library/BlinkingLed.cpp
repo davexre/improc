@@ -1,7 +1,7 @@
 #include "BlinkingLed.h"
 #include "utils.h"
 
-void BlinkingLed::initialize(uint8_t pin) {
+void BlinkingLed::initialize(const uint8_t pin) {
 	this->pin = pin;
 	this->delays = NULL;
 	curDelay = 0;
@@ -30,7 +30,7 @@ void BlinkingLed::update() {
 	}
 }
 
-void BlinkingLed::play(signed short int playCount) {
+void BlinkingLed::play(const signed short int playCount) {
 	if (delays != NULL) {
 		if (!isPlaying()) {
 			toggleTime = millis();

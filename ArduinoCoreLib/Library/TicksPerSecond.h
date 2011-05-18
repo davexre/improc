@@ -54,7 +54,7 @@ public:
 	 * 		This means that for 1/2 second all ticks will be counted and the value
 	 * 		for ticks per second will be calculated.
 	 */
-	void initialize(int holdLastTimeoutMillis = 500);
+	void initialize(const int holdLastTimeoutMillis = 500);
 
 	/**
 	 * Calculates and updates the ticks per second value.
@@ -67,7 +67,7 @@ public:
 	 * 		Indicates if the invocation of the method should cause a ticking or
 	 * 		is just to update the ticks per second value.
 	 */
-	void update(boolean tick = true);
+	void update(const boolean tick = true);
 
 	/**
 	 * Returns the ticks per second value.
@@ -131,7 +131,7 @@ public:
 	 *   tps.smooth(analogRead(2), val2);
 	 * }
 	 */
-	void smooth(int data, float *smoothedValue, int timesPerSecond = 1);
+	void smooth(const int data, float *smoothedValue, const int timesPerSecond = 1);
 };
 
 #endif

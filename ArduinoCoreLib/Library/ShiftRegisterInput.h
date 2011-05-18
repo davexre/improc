@@ -3,7 +3,7 @@
 
 #include <wiring.h>
 
-#define ShiftRegisterInputPinsCount (8*2)
+#define ShiftRegisterInputPinsCount (8*2+1)
 
 class ShiftRegisterInput {
 private:
@@ -26,7 +26,7 @@ public:
 	 */
 	void update();
 
-	boolean getState(const uint8_t shifRegisterPin);
+	boolean getState(const uint8_t shiftRegisterPin);
 };
 
 #endif

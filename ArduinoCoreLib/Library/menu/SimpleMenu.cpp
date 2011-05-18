@@ -1,7 +1,7 @@
 #include "Menu.h"
 
-void SimpleMenu::initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin,
-		MenuItem **MenuItems, short int ItemsCount) {
+void SimpleMenu::initialize(const uint8_t encoderPinA, const uint8_t encoderPinB, const uint8_t buttonPin,
+		MenuItem **MenuItems, const short int ItemsCount) {
 	button.initialize(buttonPin, false);
 	rotor.initialize(encoderPinA, encoderPinB);
 	menuItems = MenuItems;

@@ -13,7 +13,7 @@ public:
 	const char *title;
 	RotaryEncoderState encoderState;
 
-	void initialize(const char *Title, long minValue, long maxValue, boolean looped = false);
+	void initialize(const char *Title, const long minValue, const long maxValue, const boolean looped = false);
 
 	/**
 	 * Returns true if the value has changed since the last call to getValue().
@@ -37,7 +37,7 @@ class MenuItemEnum : public MenuItem {
 public:
 	const char **items;
 
-	void initialize(const char *Title, const char **Items, unsigned int ItemsCount, boolean looped = true);
+	void initialize(const char *Title, const char **Items, const unsigned int ItemsCount, const boolean looped = true);
 
 	virtual byte getMenuItemType(void);
 };
@@ -46,7 +46,7 @@ class MenuList : public MenuItem {
 public:
 	const MenuItem *menuItems;
 
-	void initialize(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped = true);
+	void initialize(const char *Title, const MenuItem* MenuItems, const unsigned int ItemsCount, const boolean looped = true);
 
 	virtual byte getMenuItemType(void);
 };
@@ -61,8 +61,8 @@ public:
 	RotaryEncoderAcelleration rotor;
 	AdvButton button;
 
-	void initialize(uint8_t encoderPinA, uint8_t encoderPinB, uint8_t buttonPin,
-			MenuItem **MenuItems, short int ItemsCount);
+	void initialize(const uint8_t encoderPinA, const uint8_t encoderPinB, const uint8_t buttonPin,
+			MenuItem **MenuItems, const short int ItemsCount);
 
 	void update();
 

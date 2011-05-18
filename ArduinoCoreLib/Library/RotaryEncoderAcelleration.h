@@ -38,9 +38,9 @@ private:
 	boolean _isValueLooped;
 	boolean _hasValueChanged;
 public:
-	void initialize(long minVal = 0, long maxVal = 1000, boolean looped = false);
+	void initialize(const long minVal = 0, const long maxVal = 1000, const boolean looped = false);
 
-	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
+	inline void setValueChangeEnabled(const boolean newValueChengeEnabled) {
 		valueChangeEnabled = newValueChengeEnabled;
 	}
 
@@ -48,7 +48,7 @@ public:
 		return valueChangeEnabled;
 	}
 
-	inline void setValueLooped(boolean newIsValueLooped) {
+	inline void setValueLooped(const boolean newIsValueLooped) {
 		_isValueLooped = newIsValueLooped;
 	}
 
@@ -76,7 +76,7 @@ public:
 	 * Sets the #value# of the encoder. If the update method is called from an
 	 * interrupt use the safe method getValue() instead.
 	 */
-	void setValue_unsafe(long newValue);
+	void setValue_unsafe(const long newValue);
 
 	inline long peekValue() {
 		disableInterrupts();
@@ -99,7 +99,7 @@ public:
 	/**
 	 * Sets the #value# of the encoder.
 	 */
-	inline void setValue(long newValue) {
+	inline void setValue(const long newValue) {
 		disableInterrupts();
 		setValue_unsafe(newValue);
 		restoreInterrupts();
@@ -110,7 +110,7 @@ public:
 	 * the #value# if it is out of bounds.
 
 	 */
-	void setMinMax(long newMinValue, long newMaxValue);
+	void setMinMax(const long newMinValue, const long newMaxValue);
 };
 
 /**
@@ -139,7 +139,7 @@ public:
 	/**
 	 * Initializes the class, sets ports (pinA and pinB) to input mode.
 	 */
-	void initialize(uint8_t pinNumberA, uint8_t pinNumberB);
+	void initialize(const uint8_t pinNumberA, const uint8_t pinNumberB);
 
 	/**
 	 * Updates the state of the rotary encoder.
@@ -175,7 +175,7 @@ public:
 		}
 	}
 
-	inline void setValueChangeEnabled(boolean newValueChengeEnabled) {
+	inline void setValueChangeEnabled(const boolean newValueChengeEnabled) {
 		state->setValueChangeEnabled(newValueChengeEnabled);
 	}
 
@@ -191,11 +191,11 @@ public:
 		return state->getValue();
 	}
 
-	inline void setValue(long newValue) {
+	inline void setValue(const long newValue) {
 		state->setValue(newValue);
 	}
 
-	inline void setMinMax(long newMinValue, long newMaxValue) {
+	inline void setMinMax(const long newMinValue, const long newMaxValue) {
 		state->setMinMax(newMinValue, newMaxValue);
 	}
 };

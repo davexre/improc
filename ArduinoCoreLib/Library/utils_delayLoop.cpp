@@ -6,7 +6,7 @@
 #define delayLoopExtraCalculations 52
 #define delayLoopCPUCyclesPerIteration 10
 
-void delayLoop(unsigned long millis) {
+void delayLoop(const unsigned long millis) {
 	unsigned long loop = ((F_CPU / 1000) / delayLoopCPUCyclesPerIteration)
 			* millis - delayLoopExtraCalculations;
 	while (loop > 0) {

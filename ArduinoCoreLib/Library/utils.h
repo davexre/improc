@@ -18,6 +18,6 @@
 int myatoi(char **string);
 long myatol(char **string);
 
-void delayLoop(unsigned long millis);
+void delayLoop(const unsigned long millis);
 
 #endif

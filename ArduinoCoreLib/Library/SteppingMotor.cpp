@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "SteppingMotor.h"
 
-void SteppingMotor::initialize(uint8_t out11pin, uint8_t out12pin, uint8_t out21pin, uint8_t out22pin) {
+void SteppingMotor::initialize(const uint8_t out11pin, const uint8_t out12pin, const uint8_t out21pin, const uint8_t out22pin) {
 	this->out11pin = out11pin;
 	this->out12pin = out12pin;
 	this->out21pin = out21pin;
@@ -50,16 +50,16 @@ void SteppingMotor::stop() {
 	targetStep = step;
 }
 
-void SteppingMotor::gotoStep(long step) {
+void SteppingMotor::gotoStep(const long step) {
 	movementMode = 0;
 	targetStep = step;
 }
 
-void SteppingMotor::rotate(boolean forward) {
+void SteppingMotor::rotate(const boolean forward) {
 	movementMode = forward ? 1 : 2;
 }
 
-void SteppingMotor::resetStepTo(long step) {
+void SteppingMotor::resetStepTo(const long step) {
 	this->movementMode = 0;
 	this->step = this->targetStep = step;
 }

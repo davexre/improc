@@ -30,7 +30,7 @@ public:
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
 	 */
-	void initialize(uint8_t out11pin, uint8_t out12pin, uint8_t out21pin, uint8_t out22pin);
+	void initialize(const uint8_t out11pin, const uint8_t out12pin, const uint8_t out21pin, const uint8_t out22pin);
 
 	/**
 	 * Updates the state of the rotary encoder.
@@ -39,13 +39,13 @@ public:
 	 */
 	void update();
 
-	void gotoStep(long step);
+	void gotoStep(const long step);
 
-	void rotate(boolean forward);
+	void rotate(const boolean forward);
 
 	void stop();
 
-	void resetStepTo(long step);
+	void resetStepTo(const long step);
 
 	inline long getStep(void) {
 		return step;

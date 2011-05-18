@@ -1,13 +1,13 @@
 #include "SmoothValue.h"
 
-void SmoothValue::initialize(int buffer[], int bufferSize, int defaultValue) {
+void SmoothValue::initialize(int buffer[], const int bufferSize, const int defaultValue) {
 	buf = buffer;
 	bufSize = bufferSize;
 	index = 0;
 	reset(defaultValue);
 }
 
-void SmoothValue::reset(int defaultValue) {
+void SmoothValue::reset(const int defaultValue) {
 	min = max = defaultValue;
 	sum = 0;
 	for (int i = 0; i < bufSize; i++) {
@@ -15,7 +15,7 @@ void SmoothValue::reset(int defaultValue) {
 	}
 }
 
-void SmoothValue::addValue(int value) {
+void SmoothValue::addValue(const int value) {
 	sum -= buf[index];
 	sum += buf[index++] = value;
 	if (value > max)

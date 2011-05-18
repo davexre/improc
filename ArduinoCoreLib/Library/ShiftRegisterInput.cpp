@@ -19,9 +19,9 @@ void ShiftRegisterInput::initialize(const uint8_t PE_pin, const uint8_t CP_pin, 
 	}
 }
 
-boolean ShiftRegisterInput::getState(const uint8_t shifRegisterPin) {
-	return shifRegisterPin >= ShiftRegisterInputPinsCount ? 0 :
-		buffer[shifRegisterPin >> 3] & (1 << (shifRegisterPin & 0b0111));
+boolean ShiftRegisterInput::getState(const uint8_t shiftRegisterPin) {
+	return shiftRegisterPin >= ShiftRegisterInputPinsCount ? 0 :
+		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
 }
 
 void ShiftRegisterInput::update() {
@@ -43,8 +43,10 @@ void ShiftRegisterInput::update() {
 		digitalWrite(CP_pin, LOW);
 		digitalWrite(CP_pin, HIGH);
 		mask <<= 1;
-		if (mask == 0)
+		if (mask == 0) {
 			buf++;
+			mask = 1;
+		}
 	}
 
 	digitalWrite(PE_pin, LOW);

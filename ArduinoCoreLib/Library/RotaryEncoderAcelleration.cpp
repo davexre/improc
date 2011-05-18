@@ -1,6 +1,6 @@
 #include "RotaryEncoderAcelleration.h"
 
-void RotaryEncoderAcelleration::initialize(uint8_t pinNumberA, uint8_t pinNumberB) {
+void RotaryEncoderAcelleration::initialize(const uint8_t pinNumberA, const uint8_t pinNumberB) {
 	initialState.initialize(0, 1000, false);
 	state = &initialState;
 	pinA.initialize(pinNumberA, 1);
@@ -33,7 +33,7 @@ void RotaryEncoderAcelleration::update() {
 	}
 }
 
-void RotaryEncoderState::initialize(long minVal, long maxVal, boolean looped) {
+void RotaryEncoderState::initialize(const long minVal, const long maxVal, const boolean looped) {
 	_isValueLooped = looped;
 	_hasValueChanged = true;
 	valueChangeEnabled = true;
@@ -58,7 +58,7 @@ void RotaryEncoderState::setValue_unsafe(long newValue) {
 	_hasValueChanged = true;
 }
 
-void RotaryEncoderState::setMinMax(long newMinValue, long newMaxValue) {
+void RotaryEncoderState::setMinMax(const long newMinValue, const long newMaxValue) {
 	disableInterrupts();
 	minValue = newMinValue;
 	maxValue = newMaxValue;

@@ -1,6 +1,6 @@
 #include "Button.h"
 
-void Button::initialize(uint8_t pin, int debounceMillis) {
+void Button::initialize(const uint8_t pin, const int debounceMillis) {
 	buttonPin = pin;
 	debounce = debounceMillis;
 	pinMode(pin, INPUT);

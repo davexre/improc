@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-void MenuList::initialize(const char *Title, const MenuItem* MenuItems, unsigned int ItemsCount, boolean looped) {
+void MenuList::initialize(const char *Title, const MenuItem* MenuItems, const unsigned int ItemsCount, const boolean looped) {
 	menuItems = MenuItems;
 	MenuItem::initialize(Title, 0, ItemsCount, looped);
 }

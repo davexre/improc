@@ -1,11 +1,11 @@
 #include "SerialReader.h"
 
-void SerialReader::initialize(int serialBoudRate, int bufferSize, char *buffer) {
+void SerialReader::initialize(const int serialBoudRate,const  int bufferSize, char *buffer) {
 	Serial.begin(serialBoudRate);
 	setBuffer(bufferSize, buffer);
 }
 
-void SerialReader::setBuffer(int bufferSize, char *buffer) {
+void SerialReader::setBuffer(const int bufferSize, char *buffer) {
 	this->bufferFull = 0;
 	this->bufferSize = bufferSize;
 	this->buffer = buffer;
