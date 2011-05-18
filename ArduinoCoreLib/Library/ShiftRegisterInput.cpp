@@ -34,7 +34,7 @@ void ShiftRegisterInput::update() {
 	digitalWrite(PE_pin, HIGH);
 	uint8_t mask = 1;
 	uint8_t *buf = buffer;
-	for (uint8_t i = ShiftRegisterInputPinsCount - 1; i >= 0; i--) {
+	for (uint8_t i = 0; i < ShiftRegisterInputPinsCount; i++) {
 		if (digitalRead(Q7_pin)) {
 			*buf |= mask;
 		} else {

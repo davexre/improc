@@ -3,7 +3,7 @@
 
 #include <wiring.h>
 
-#define ShiftRegisterInputPinsCount 8
+#define ShiftRegisterInputPinsCount (8*2)
 
 class ShiftRegisterInput {
 private:
