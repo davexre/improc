@@ -14,7 +14,7 @@ private:
 
 	long step;
 
-	void setState(const uint8_t *state);
+	void setState(const uint8_t state);
 
 	boolean isMotorOn;
 	long motorOnMicros;

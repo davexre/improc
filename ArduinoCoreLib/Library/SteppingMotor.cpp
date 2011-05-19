@@ -27,20 +27,55 @@ void SteppingMotor::initialize(const uint8_t out11pin, const uint8_t out12pin, c
 	digitalWrite(out22pin, LOW);
 }
 
-static const uint8_t motorStates[][4] = {
-		{ LOW,  LOW,  LOW,  LOW  },
-		{ LOW,  HIGH, LOW,  LOW  },
-		{ LOW,  LOW,  LOW,  HIGH },
-		{ HIGH, HIGH, LOW,  LOW  },
-		{ LOW,  LOW,  HIGH, HIGH },
+// http://www.engineersgarage.com/articles/stepper-motors
 
+/*
+	BA6845FS Truth table
+	IN11/21  IN12/22  OUT11/21  OUT12/22  MODE
+	LOW      HIGH     HIGH      LOW       Forward
+	HIGH     HIGH     LOW       HIGH      Reverse
+	LOW      LOW      OPEN      OPEN      Stop
+	HIGH     HIGH     OPEN      OPEN      Stop
+*/
+
+// Wave drive
+static const uint8_t motorStates[] = {
+		0b00000, // OFF
+		0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
+		0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
+		0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
+		0b00011  // H-bridge 1 - Stop,    H-bridge 2 - Reverse
 };
 
-void SteppingMotor::setState(const uint8_t *state) {
-	digitalWrite(out11pin, *(state++));
-	digitalWrite(out12pin, *(state++));
-	digitalWrite(out21pin, *(state++));
-	digitalWrite(out22pin, *(state++));
+/*
+// Full drive
+static const uint8_t motorStates[] = {
+		0b00000, // OFF
+		0b00111, // H-bridge 1 - Forward, H-bridge 2 - Reverse
+		0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
+		0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
+		0b01111  // H-bridge 1 - Reverse, H-bridge 2 - Reverse
+};
+
+// Half drive
+static const uint8_t motorStates[] = {
+		0b00000, // OFF
+		0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
+		0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
+		0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
+		0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
+		0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
+		0b01111  // H-bridge 1 - Reverse, H-bridge 2 - Reverse
+		0b00011  // H-bridge 1 - Stop,    H-bridge 2 - Reverse
+		0b00111, // H-bridge 1 - Forward, H-bridge 2 - Reverse
+};
+
+*/
+void SteppingMotor::setState(const uint8_t state) {
+	digitalWrite(out11pin, state & 0b01000);
+	digitalWrite(out12pin, state & 0b00100);
+	digitalWrite(out21pin, state & 0b00010);
+	digitalWrite(out22pin, state & 0b00001);
 }
 
 void SteppingMotor::stop() {
