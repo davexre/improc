@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "StateLed.h"
-#include "ShiftRegisterInput.h"
+#include "DigitalIO.h"
 
 DefineClass(ShiftRegisterInputTest);
 
@@ -21,25 +21,28 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static ShiftRegisterInput shiftRegisterInput;
+static DigitalInputShiftRegister shiftRegisterInput;
 
 void ShiftRegisterInputTest::setup() {
-	led.initialize(ledPin, states, size(states), true);
+	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 
-	shiftRegisterInput.initialize(shiftRegisterInputPinPE, shiftRegisterInputPinCP, shiftRegisterInputPinQ7);
+	shiftRegisterInput.initialize(
+			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
+			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
+			new DigitalInputArduinoPin(shiftRegisterInputPinQ7));
 
     Serial.begin(115200);
     Serial.println("Initialized");
 }
 
-boolean prevBuffer[ShiftRegisterInputPinsCount];
+boolean prevBuffer[DigitalInputShiftRegisterPinsCount];
 
 void ShiftRegisterInputTest::loop() {
 	led.update();
 	shiftRegisterInput.update();
 
 	boolean show = false;
-	for (int i = 0; i < ShiftRegisterInputPinsCount; i++) {
+	for (int i = 0; i < DigitalInputShiftRegisterPinsCount; i++) {
 		boolean val = shiftRegisterInput.getState(i);
 		if (val != prevBuffer[i]) {
 			show = true;
@@ -48,7 +51,7 @@ void ShiftRegisterInputTest::loop() {
 	}
 
 	if (show) {
-		for (int i = 0; i < ShiftRegisterInputPinsCount; i++) {
+		for (int i = 0; i < DigitalInputShiftRegisterPinsCount; i++) {
 			boolean val = shiftRegisterInput.getState(i);
 			Serial.print(val ? '1' : '0');
 			if (i % 4 == 3)

@@ -20,8 +20,8 @@ static const unsigned int *states[] = {
 };
 
 void StateLedTest::setup(void) {
-	btn.initialize(buttonPin);
-	led.initialize(ledPin, states, size(states), true);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 }
 
 void StateLedTest::loop(void) {

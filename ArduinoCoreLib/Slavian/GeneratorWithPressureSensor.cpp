@@ -145,7 +145,7 @@ void GeneratorWithPressureSensor::setup() {
 	pinMode(mosfetPin, OUTPUT);
 	tps.initialize();
 	currentTPS.initialize();
-	led.initialize(ledPin);
+	led.initialize(new DigitalOutputArduinoPin(ledPin));
 	reader.initialize(9600, size(buf), buf);
 }
 

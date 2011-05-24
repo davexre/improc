@@ -1,6 +1,7 @@
 #ifndef BLINKINGLED_H_
 #define BLINKINGLED_H_
 
+#include "DigitalIO.h"
 #include <stddef.h>
 #include <wiring.h>
 #include <avr/interrupt.h>
@@ -12,7 +13,7 @@
  */
 class BlinkingLed {
 private:
-	uint8_t pin;
+	DigitalOutputPin *pin;
 
 	const unsigned int *delays;
 	uint8_t curDelay;
@@ -28,7 +29,7 @@ public:
 	 *
 	 * pin	The pin number the led is attached to.
 	 */
-	void initialize(const uint8_t pin);
+	void initialize(DigitalOutputPin *pin);
 
 	/**
 	 * Updates the on/off state of the led. This method should be

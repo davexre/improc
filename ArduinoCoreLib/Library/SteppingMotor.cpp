@@ -1,7 +1,11 @@
 #include "Arduino.h"
 #include "SteppingMotor.h"
 
-void SteppingMotor::initialize(const uint8_t out11pin, const uint8_t out12pin, const uint8_t out21pin, const uint8_t out22pin) {
+void SteppingMotor::initialize(
+		DigitalOutputPin *out11pin,
+		DigitalOutputPin *out12pin,
+		DigitalOutputPin *out21pin,
+		DigitalOutputPin *out22pin) {
 	this->out11pin = out11pin;
 	this->out12pin = out12pin;
 	this->out21pin = out21pin;
@@ -9,22 +13,10 @@ void SteppingMotor::initialize(const uint8_t out11pin, const uint8_t out12pin, c
 
 	motorCoilTurnOffMicros = 1000;
 	motorCoilDelayBetweenStepsMicros = 2000;
-	isMotorOn = false;
 	motorOnMicros = 0;
 	currentState = 0;
 	step = 0;
-
-	pinMode(out11pin, OUTPUT);
-	digitalWrite(out11pin, LOW);
-
-	pinMode(out12pin, OUTPUT);
-	digitalWrite(out12pin, LOW);
-
-	pinMode(out21pin, OUTPUT);
-	digitalWrite(out21pin, LOW);
-
-	pinMode(out22pin, OUTPUT);
-	digitalWrite(out22pin, LOW);
+	stop();
 }
 
 // http://www.engineersgarage.com/articles/stepper-motors
@@ -72,10 +64,10 @@ static const uint8_t motorStates[] = {
 
 */
 void SteppingMotor::setState(const uint8_t state) {
-	digitalWrite(out11pin, state & 0b01000);
-	digitalWrite(out12pin, state & 0b00100);
-	digitalWrite(out21pin, state & 0b00010);
-	digitalWrite(out22pin, state & 0b00001);
+	out11pin->setState(state & 0b01000);
+	out12pin->setState(state & 0b00100);
+	out21pin->setState(state & 0b00010);
+	out22pin->setState(state & 0b00001);
 }
 
 void SteppingMotor::stop() {
@@ -97,6 +89,13 @@ void SteppingMotor::rotate(const boolean forward) {
 void SteppingMotor::resetStepTo(const long step) {
 	this->movementMode = 0;
 	this->step = this->targetStep = step;
+}
+
+boolean SteppingMotor::isMoving() {
+	return (
+		((movementMode == 0) && (targetStep != step)) ||
+		(movementMode == 1) ||
+		(movementMode == 2));
 }
 
 void SteppingMotor::update() {

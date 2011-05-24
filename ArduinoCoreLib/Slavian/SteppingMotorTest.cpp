@@ -38,13 +38,19 @@ static boolean motorAutoRunning = false;
 static boolean motorForward = true;
 
 void SteppingMotorTest::setup() {
-	btn.initialize(buttonPin, false);
-	led.initialize(ledPin, states, size(states), true);
-	rotor.initialize(rotorPinA, rotorPinB);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	rotor.initialize(
+			new DigitalInputArduinoPin(rotorPinA, true),
+			new DigitalInputArduinoPin(rotorPinB, true));
 	rotor.setMinMax(100, 5000);
 	rotor.setValue(1000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-	motor.initialize(stepperPin11, stepperPin12, stepperPin21, stepperPin22);
+	motor.initialize(
+			new DigitalOutputArduinoPin(stepperPin11),
+			new DigitalOutputArduinoPin(stepperPin12),
+			new DigitalOutputArduinoPin(stepperPin21),
+			new DigitalOutputArduinoPin(stepperPin22));
 
     Serial.begin(115200);
     Serial.println("Initialized");

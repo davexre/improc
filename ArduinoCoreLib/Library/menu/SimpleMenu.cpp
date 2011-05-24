@@ -2,8 +2,10 @@
 
 void SimpleMenu::initialize(const uint8_t encoderPinA, const uint8_t encoderPinB, const uint8_t buttonPin,
 		MenuItem **MenuItems, const short int ItemsCount) {
-	button.initialize(buttonPin, false);
-	rotor.initialize(encoderPinA, encoderPinB);
+	button.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	rotor.initialize(
+			new DigitalInputArduinoPin(encoderPinA, true),
+			new DigitalInputArduinoPin(encoderPinB, true));
 	menuItems = MenuItems;
 	itemsCount = ItemsCount;
 	activateMenuItem(0);

@@ -133,8 +133,10 @@ void TPU::setup() {
 	digitalWrite(speakerPin, 0);
 	digitalWrite(ledPin, 0);
 
-	btn.initialize(buttonPin);
-	rotor.initialize(rotorPinA, rotorPinB);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	rotor.initialize(
+			new DigitalInputArduinoPin(rotorPinA, true),
+			new DigitalInputArduinoPin(rotorPinB, true));
 	rotor.setMinMax(50, 50000);
 	rotor.setValue(100);
 	attachInterrupt(0, UpdateRotor, CHANGE);

@@ -1,14 +1,13 @@
 #include "BlinkingLed.h"
 #include "utils.h"
 
-void BlinkingLed::initialize(const uint8_t pin) {
+void BlinkingLed::initialize(DigitalOutputPin *pin) {
 	this->pin = pin;
 	this->delays = NULL;
 	curDelay = 0;
 	lightOn = false;
 	playCount = 0;
 	toggleTime = 0;
-	pinMode(pin, OUTPUT);
 }
 
 void BlinkingLed::update() {
@@ -22,11 +21,11 @@ void BlinkingLed::update() {
 				lightOn = !lightOn;
 			}
 			toggleTime = cur + delta;
-			digitalWrite(pin, lightOn ? HIGH : LOW);
+			pin->setState(lightOn);
 		}
 	} else {
 		lightOn = false;
-		digitalWrite(pin, LOW);
+		pin->setState(false);
 	}
 }
 

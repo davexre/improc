@@ -18,7 +18,7 @@ enum AdvButtonState {
 	AdvButtonState_AUTOREPEAT_CLICK
 };
 
-class AdvButton : Button {
+class AdvButton {
 	long previousTimeButtonUp;
 	long timeButtonDown;
 	long timeNextAutorepeatToggle;
@@ -26,7 +26,9 @@ class AdvButton : Button {
 	boolean autoButtonStarted;
 	byte buttonState;
 public:
-	void initialize(DigitalInputArduinoPin *pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
+	Button button;
+
+	void initialize(const uint8_t pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {

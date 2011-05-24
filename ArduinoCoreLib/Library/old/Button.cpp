@@ -1,20 +1,22 @@
 #include "Button.h"
 
-void Button::initialize(DigitalInputPin *pin, const int debounceMillis) {
+void Button::initialize(const uint8_t pin, const int debounceMillis) {
 	buttonPin = pin;
 	debounce = debounceMillis;
+	pinMode(pin, INPUT);
+	digitalWrite(pin, HIGH);
 	lastToggleTime = millis();
-	lastState = currentState = buttonPin->getState();
+	lastState = buttonState = digitalRead(buttonPin);
 }
 
 void Button::update() {
-	boolean curReading = buttonPin->getState();
+	boolean curReading = digitalRead(buttonPin);
 	long now = millis();
-	lastState = currentState;
-	if (curReading != currentState) {
+	lastState = buttonState;
+	if (curReading != buttonState) {
 		if (now - lastToggleTime >= debounce) {
 			// Button state has not changed for #debounce# milliseconds. Consider it is stable.
-			currentState = curReading;
+			buttonState = curReading;
 		}
 		lastToggleTime = now;
 	} else if (now - lastToggleTime >= debounce) {

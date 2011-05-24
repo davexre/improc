@@ -1,7 +1,7 @@
 #include "AdvButton.h"
 
-void AdvButton::initialize(DigitalInputArduinoPin *pin, const boolean autoRepeatEnabled, const int debounceMillis) {
-	Button::initialize(pin, debounceMillis);
+void AdvButton::initialize(const uint8_t pin, const boolean autoRepeatEnabled, const int debounceMillis) {
+	button.initialize(pin, debounceMillis);
 	this->autoRepeatEnabled = autoRepeatEnabled;
 	timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
 	autoButtonStarted = false;
@@ -9,11 +9,11 @@ void AdvButton::initialize(DigitalInputArduinoPin *pin, const boolean autoRepeat
 }
 
 void AdvButton::update(void) {
-	Button::update();
 	buttonState = AdvButtonState_NONE;
+	button.update();
 	long now = millis();
-	if (isToggled()) {
-		if (isDown()) {
+	if (button.isToggled()) {
+		if (button.isDown()) {
 			// Just pressed
 			timeButtonDown = now;
 			timeNextAutorepeatToggle = now + ADV_BUTTON_REPEAT_DELAY_MILLIS;
@@ -34,7 +34,7 @@ void AdvButton::update(void) {
 				previousTimeButtonUp = now;
 			}
 		}
-	} else if (isDown()) {
+	} else if (button.isDown()) {
 		if (autoRepeatEnabled) {
 			if (now >= timeNextAutorepeatToggle) {
 				timeNextAutorepeatToggle = now + ADV_BUTTON_REPEAT_RATE_MILLIES;

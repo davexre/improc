@@ -35,7 +35,7 @@ public:
 	 * 		The user provided buffer for character data. The buffer is considered
 	 * 		empty once the method readln() is invoked.
 	 */
-	void initialize(const int serialBoudRate, const int bufferSize, char *buffer);
+	void initialize(const long serialBoudRate, const int bufferSize, char *buffer);
 
 	/**
 	 * Reads any data available on the Serial port.

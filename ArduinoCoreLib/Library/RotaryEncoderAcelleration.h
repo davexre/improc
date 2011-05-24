@@ -139,7 +139,7 @@ public:
 	/**
 	 * Initializes the class, sets ports (pinA and pinB) to input mode.
 	 */
-	void initialize(const uint8_t pinNumberA, const uint8_t pinNumberB);
+	void initialize(DigitalInputArduinoPin *pinA, DigitalInputArduinoPin *pinB);
 
 	/**
 	 * Updates the state of the rotary encoder.

@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "StateLed.h"
 #include "AdvButton.h"
-#include "ShiftRegisterOutput.h"
+#include "DigitalIO.h"
 
 DefineClass(ShiftRegisterOutputTest);
 
@@ -23,13 +23,15 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static ShiftRegisterOutput shiftRegisterOutput;
+static DigitalOutputShiftRegister shiftRegisterOutput;
 
 void ShiftRegisterOutputTest::setup() {
-	btn.initialize(buttonPin, false);
-	led.initialize(ledPin, states, size(states), true);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 
-	shiftRegisterOutput.initialize(shiftRegisterOutputPinCP, shiftRegisterOutputPinDS);
+	shiftRegisterOutput.initialize(
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinCP),
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
 
     Serial.begin(115200);
     Serial.println("Initialized");
@@ -43,11 +45,11 @@ void ShiftRegisterOutputTest::loop() {
 
 	if (btn.isDoubleClicked()) {
 		pinsOn = !pinsOn;
-		for (int i = 0; i < ShiftRegisterOutputPinsCount; i++) {
+		for (int i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
 			shiftRegisterOutput.setState(i, (i & 1) && pinsOn);
 		}
 	} else if (btn.isClicked()) {
-		for (int i = 0; i < ShiftRegisterOutputPinsCount; i++) {
+		for (int i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
 			shiftRegisterOutput.setState(i, !shiftRegisterOutput.getState(i));
 		}
 	}

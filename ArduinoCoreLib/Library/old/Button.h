@@ -1,7 +1,6 @@
 #ifndef Button_h
 #define Button_h
 
-#include "DigitalIO.h"
 #include <wiring.h>
 
 /**
@@ -25,9 +24,9 @@
  * gnd:<---------------*------------|
  */
 class Button {
-	DigitalInputPin *buttonPin;
+	uint8_t buttonPin;
 	boolean lastState;
-	boolean currentState;
+	boolean buttonState;
 	long lastToggleTime;	// used to debounce the button
 
 	/**
@@ -44,7 +43,7 @@ public:
 	 * debounceMillis
 	 * 			The button debounce time in milliseconds.
 	 */
-	void initialize(DigitalInputPin *pin, const int debounceMillis = 10);
+	void initialize(const uint8_t pin, const int debounceMillis = 10);
 
 	/**
 	 * Updates the state of the rotary knob.
@@ -58,7 +57,7 @@ public:
 	 * This is to be used like an OnKeyDown.
 	 */
 	inline boolean isPressed(void) {
-		return ((!currentState) && lastState);
+		return ((!buttonState) && lastState);
 	}
 
 	/**
@@ -66,28 +65,28 @@ public:
 	 * This is to be used like an OnKeyUp.
 	 */
 	inline boolean isReleased(void) {
-		return (currentState && (!lastState));
+		return (buttonState && (!lastState));
 	}
 
 	/**
 	 * Is the button down (pushed).
 	 */
 	inline boolean isDown(void) {
-		return (!currentState);
+		return (!buttonState);
 	}
 
 	/**
 	 * Is the button up.
 	 */
 	inline boolean isUp(void) {
-		return (currentState);
+		return (buttonState);
 	}
 
 	/**
 	 * Has the state changed from up to down or vice versa.
 	 */
 	inline boolean isToggled(void) {
-		return (currentState != lastState);
+		return (buttonState != lastState);
 	}
 };
 

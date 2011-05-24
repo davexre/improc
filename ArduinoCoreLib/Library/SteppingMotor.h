@@ -1,8 +1,7 @@
 #ifndef SteppingMotor_h
 #define SteppingMotor_h
 
-#include "TicksPerSecond.h"
-#include "Button.h"
+#include "DigitalIO.h"
 
 class SteppingMotor {
 private:
@@ -18,11 +17,12 @@ private:
 
 	boolean isMotorOn;
 	long motorOnMicros;
+
+	DigitalOutputPin *out11pin;
+	DigitalOutputPin *out12pin;
+	DigitalOutputPin *out21pin;
+	DigitalOutputPin *out22pin;
 public:
-	uint8_t out11pin;
-	uint8_t out12pin;
-	uint8_t out21pin;
-	uint8_t out22pin;
 
 	long motorCoilTurnOffMicros;
 	long motorCoilDelayBetweenStepsMicros;
@@ -30,7 +30,11 @@ public:
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
 	 */
-	void initialize(const uint8_t out11pin, const uint8_t out12pin, const uint8_t out21pin, const uint8_t out22pin);
+	void initialize(
+			DigitalOutputPin *out11pin,
+			DigitalOutputPin *out12pin,
+			DigitalOutputPin *out21pin,
+			DigitalOutputPin *out22pin);
 
 	/**
 	 * Updates the state of the rotary encoder.
@@ -46,6 +50,8 @@ public:
 	void stop();
 
 	void resetStepTo(const long step);
+
+	boolean isMoving();
 
 	inline long getStep(void) {
 		return step;

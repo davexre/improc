@@ -34,17 +34,19 @@ static void UpdateRotor() {
 
 void RotaryEncoderAcellerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
-	btn.initialize(buttonPin, false);
-	led.initialize(ledPin, states, size(states), true);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 	toneState.setValue(500);
-	rotor.initialize(rotorPinA, rotorPinB);
+	rotor.initialize(
+			new DigitalInputArduinoPin(rotorPinA, true),
+			new DigitalInputArduinoPin(rotorPinB, true));
 	rotor.setState(&toneState);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println("Push the encoder button to switch between changing pitch and blink");
 
     ledState.initialize(0, size(states) - 1, true);
-    toneState.initialize(50, 5000, false);
+    toneState.initialize(50, 15000, false);
 }
 
 void RotaryEncoderAcellerationTest::loop() {

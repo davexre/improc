@@ -13,7 +13,7 @@ static TicksPerSecond tps;
 
 void TicksPerSecondTest::setup() {
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(buttonPin);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
 	tps.initialize();
 	Serial.begin(9600);
 }

@@ -11,8 +11,8 @@ static Button btn;
 static BlinkingLed led;
 
 void BlinkingLedTest::setup(void) {
-	btn.initialize(buttonPin);
-	led.initialize(ledPin);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	led.initialize(new DigitalOutputArduinoPin(ledPin));
 }
 
 void BlinkingLedTest::loop(void) {

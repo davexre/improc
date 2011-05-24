@@ -29,7 +29,7 @@ static int smoothedVal = 0;
 
 void AnalogSensorTest::setup() {
 	tps.initialize();
-	led.initialize(ledPin);
+	led.initialize(new DigitalOutputArduinoPin(ledPin));
 	led.playBlink(BLINK_FAST, -1);
 	reader.initialize(9600, size(readerBuffer), readerBuffer);
 	delay(1000);

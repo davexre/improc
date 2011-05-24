@@ -1,10 +1,10 @@
 #include "RotaryEncoderAcelleration.h"
 
-void RotaryEncoderAcelleration::initialize(const uint8_t pinNumberA, const uint8_t pinNumberB) {
+void RotaryEncoderAcelleration::initialize(DigitalInputArduinoPin *pinA, DigitalInputArduinoPin *pinB) {
 	initialState.initialize(0, 1000, false);
 	state = &initialState;
-	pinA.initialize(pinNumberA, 1);
-	pinB.initialize(pinNumberB, 1);
+	this->pinA.initialize(pinA, 1);
+	this->pinB.initialize(pinB, 1);
 	tps.initialize();
 }
 

@@ -1,6 +1,6 @@
 #include "StateLed.h"
 
-void StateLed::initialize(const uint8_t pin, const unsigned int *(*stateDelays),
+void StateLed::initialize(DigitalOutputArduinoPin *pin, const unsigned int *(*stateDelays),
 		const short int numberOfStates, const boolean looped) {
 	this->looped = looped;
 	this->numberOfStates = numberOfStates;

@@ -19,8 +19,10 @@ void PWM_Led::setup() {
 	pinMode(ledPin, OUTPUT);
 	pinMode(speakerPin, OUTPUT);
 
-	btn.initialize(buttonPin);
-	rotor.initialize(rotorPinA, rotorPinB);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	rotor.initialize(
+			new DigitalInputArduinoPin(rotorPinA, true),
+			new DigitalInputArduinoPin(rotorPinB, true));
 	rotor.setMinMax(0, 255);
 	rotor.setValue(1);
 

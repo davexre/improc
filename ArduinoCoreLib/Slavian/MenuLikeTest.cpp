@@ -38,7 +38,7 @@ static void updateRotaryEncoder() {
 
 void MenuLikeTest::setup() {
 	pinMode(speakerPin, OUTPUT);
-	led.initialize(ledPin, ledStates, size(ledStates), true);
+	led.initialize(new DigitalOutputArduinoPin(ledPin), ledStates, size(ledStates), true);
 
 	// Init menus
 	speakerMenu.initialize("Speaker", speakerStates, size(speakerStates), false);

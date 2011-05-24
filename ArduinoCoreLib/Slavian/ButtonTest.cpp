@@ -11,7 +11,7 @@ static boolean lightOn = false;
 
 void ButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(buttonPin);
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
 }
 
 void ButtonTest::loop() {
