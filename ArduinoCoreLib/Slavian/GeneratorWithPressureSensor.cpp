@@ -146,7 +146,7 @@ void GeneratorWithPressureSensor::setup() {
 	tps.initialize();
 	currentTPS.initialize();
 	led.initialize(new DigitalOutputArduinoPin(ledPin));
-	reader.initialize(9600, size(buf), buf);
+	reader.initialize(115200, size(buf), buf);
 }
 
 void GeneratorWithPressureSensor::loop() {

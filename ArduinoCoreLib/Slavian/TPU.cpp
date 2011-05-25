@@ -140,7 +140,7 @@ void TPU::setup() {
 	rotor.setMinMax(50, 50000);
 	rotor.setValue(100);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-	Serial.begin(9600);
+	Serial.begin(115200);
 }
 
 static long curValue = 0;

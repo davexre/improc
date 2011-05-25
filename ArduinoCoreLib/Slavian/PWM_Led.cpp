@@ -26,7 +26,7 @@ void PWM_Led::setup() {
 	rotor.setMinMax(0, 255);
 	rotor.setValue(1);
 
-    Serial.begin(9600);
+    Serial.begin(115200);
 }
 
 static void doPlay(int pwm) {

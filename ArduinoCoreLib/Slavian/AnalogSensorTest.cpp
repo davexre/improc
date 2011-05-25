@@ -31,7 +31,7 @@ void AnalogSensorTest::setup() {
 	tps.initialize();
 	led.initialize(new DigitalOutputArduinoPin(ledPin));
 	led.playBlink(BLINK_FAST, -1);
-	reader.initialize(9600, size(readerBuffer), readerBuffer);
+	reader.initialize(115200, size(readerBuffer), readerBuffer);
 	delay(1000);
 	for (int i = 0; i < numberOfSensors; i++) {
 		int val = analogRead(sensorPins[i]);

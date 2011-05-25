@@ -31,7 +31,7 @@ DigitalOutputArduinoPin::DigitalOutputArduinoPin(const uint8_t arduinoPin, const
 	bit = digitalPinToBitMask(arduinoPin);
 	uint8_t port = digitalPinToPort(arduinoPin);
 	outputRegister = portOutputRegister(port);
-	pinMode(arduinoPin, INPUT);
+	pinMode(arduinoPin, OUTPUT);
 	setState(initialValue);
 }
 

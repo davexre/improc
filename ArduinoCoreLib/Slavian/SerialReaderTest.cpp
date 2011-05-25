@@ -8,7 +8,7 @@ static SerialReader reader;
 static char buf[200];
 
 void SerialReaderTest::setup() {
-	reader.initialize(9600, size(buf), buf);
+	reader.initialize(115200, size(buf), buf);
 }
 
 void SerialReaderTest::loop() {

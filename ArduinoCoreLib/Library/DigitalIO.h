@@ -15,7 +15,7 @@ public:
 };
 
 
-class DigitalOutputPin : public DigitalInputPin {
+class DigitalOutputPin { //: public DigitalInputPin {
 public:
 	virtual boolean getState() = 0;
 
@@ -30,7 +30,7 @@ private:
 
 	volatile uint8_t *inputRegister;
 public:
-	DigitalInputArduinoPin(const uint8_t arduinoPin, const boolean enablePullup = false);
+	DigitalInputArduinoPin(const uint8_t arduinoPin, const boolean enablePullup);
 
 	virtual boolean getState();
 };

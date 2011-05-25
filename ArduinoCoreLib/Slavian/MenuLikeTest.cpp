@@ -45,8 +45,8 @@ void MenuLikeTest::setup() {
 	ledStatesMenu.initialize("Led state", 0, size(ledStates) - 1, true);
 	tonePitchMenu.initialize("Pitch", 50, 5000, false);
 
-	menu.initialize(new DigitalInputArduinoPin(rotorPinA), new DigitalInputArduinoPin(rotorPinB),
-			new DigitalInputArduinoPin(buttonPin), menuItems, size(menuItems));
+	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
+			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);
     Serial.begin(115200);
     Serial.println("Push the encoder button to switch between menus");

@@ -29,7 +29,7 @@ void ShiftRegisterInputTest::setup() {
 	shiftRegisterInput.initialize(
 			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
 			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7));
+			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
     Serial.begin(115200);
     Serial.println("Initialized");

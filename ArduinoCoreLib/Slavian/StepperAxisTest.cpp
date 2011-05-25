@@ -11,7 +11,7 @@ static const int rotorPinB = 3;	// the other quadrature pin
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int ledPin = 13; // the number of the LED pin
 
-static const int endPositionButtonPin = buttonPin;
+static const int endPositionButtonPin = 5;
 static const int stepMotor11pin = 8;
 static const int stepMotor12pin = 9;
 static const int stepMotor21pin = 10;
@@ -21,7 +21,12 @@ StepperAxis axis;
 
 static const char *axisMenuItems[] = { "Determine available steps", "Initialize to zero position" };
 static MenuItemEnum axisMenu;
-static MenuItem *menuItems[] = { &axisMenu };
+
+static const char *speakerStates[] = { "ON", "OFF" };
+static MenuItemEnum speakerMenu;
+
+
+static MenuItem *menuItems[] = { &axisMenu, &speakerMenu };
 static SimpleMenuWithSerialPrint menu;
 static StateLed led;
 
@@ -47,15 +52,16 @@ void StepperAxisTest::setup() {
 			new DigitalOutputArduinoPin(stepMotor22pin, 0));
 
 	axisMenu.initialize("Axis", axisMenuItems, size(axisMenuItems), false);
-	menu.initialize(new DigitalInputArduinoPin(rotorPinA), new DigitalInputArduinoPin(rotorPinB),
-			new DigitalInputArduinoPin(buttonPin), menuItems, size(menuItems));
-	attachInterrupt(0, updateRotaryEncoder, CHANGE);
+	speakerMenu.initialize("Speaker", speakerStates, size(speakerStates), false);
+	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
+			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
 	Serial.begin(115200);
     Serial.println("Long click the encoder button to select method.");
+	attachInterrupt(0, updateRotaryEncoder, CHANGE);
 }
 
-byte mode = 0;
-byte modeState = 0;
+static byte mode = 0;
+static byte modeState = 0;
 
 void doDetermineAvailableSteps() {
 	switch (modeState) {
@@ -94,6 +100,9 @@ void StepperAxisTest::loop() {
 	led.update();
 	axis.update();
 	menu.update();
+
+	speakerMenu.getValue();
+	axisMenu.getValue();
 
 	if (menu.button.isLongClicked()) {
 		if (mode == 0) {

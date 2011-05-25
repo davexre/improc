@@ -20,7 +20,7 @@ void AdvButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	led.setState(btn.isAutoRepeatEnabled());
 	Serial.println("Double click to toggle [Long clicks]/[Auto repeat clicks]");
