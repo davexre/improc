@@ -26,7 +26,7 @@ class AdvButton : Button {
 	boolean autoButtonStarted;
 	byte buttonState;
 public:
-	void initialize(DigitalInputArduinoPin *pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
+	void initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {

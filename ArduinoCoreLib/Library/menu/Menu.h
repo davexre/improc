@@ -1,6 +1,7 @@
 #ifndef Menu_h
 #define Menu_h
 
+#include "DigitalIO.h"
 #include "AdvButton.h"
 #include "RotaryEncoderAcelleration.h"
 
@@ -61,7 +62,7 @@ public:
 	RotaryEncoderAcelleration rotor;
 	AdvButton button;
 
-	void initialize(const uint8_t encoderPinA, const uint8_t encoderPinB, const uint8_t buttonPin,
+	void initialize(DigitalInputPin *encoderPinA, DigitalInputPin *encoderPinB, DigitalInputPin *buttonPin,
 			MenuItem **MenuItems, const short int ItemsCount);
 
 	void update();
@@ -82,6 +83,14 @@ public:
 
 	inline boolean hasMenuChanged() {
 		return _hasMenuChanged;
+	}
+
+	inline short int getCurrentMenu() {
+		return currentMenu;
+	}
+
+	inline short int getItemsCount() {
+		return itemsCount;
 	}
 
 	/**

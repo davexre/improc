@@ -42,6 +42,9 @@ public:
 	 */
 	void update(void);
 
+	inline byte getMode() { return mode; }
+	inline long getMaxStep() { return maxStep; }
+
 	void determineAvailableSteps(void);
 	void initializeToStartingPosition(void);
 	void moveToPositionFast(long position);

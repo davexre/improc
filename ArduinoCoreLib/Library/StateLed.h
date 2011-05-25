@@ -61,7 +61,7 @@ public:
 	 * 		Specifies how states will be shown - a single blink
 	 * 		or via a continuous blinking loop.
 	 */
-	void initialize(DigitalOutputArduinoPin *pin, const unsigned int *(*stateDelays),
+	void initialize(DigitalOutputPin *pin, const unsigned int *(*stateDelays),
 			const short int numberOfStates, const boolean looped = true);
 
 	/**

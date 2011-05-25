@@ -1,6 +1,6 @@
 #include "RotaryEncoderAcelleration.h"
 
-void RotaryEncoderAcelleration::initialize(DigitalInputArduinoPin *pinA, DigitalInputArduinoPin *pinB) {
+void RotaryEncoderAcelleration::initialize(DigitalInputPin *pinA, DigitalInputPin *pinB) {
 	initialState.initialize(0, 1000, false);
 	state = &initialState;
 	this->pinA.initialize(pinA, 1);

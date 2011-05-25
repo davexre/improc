@@ -1,11 +1,9 @@
 #include "Menu.h"
 
-void SimpleMenu::initialize(const uint8_t encoderPinA, const uint8_t encoderPinB, const uint8_t buttonPin,
+void SimpleMenu::initialize(DigitalInputPin *encoderPinA, DigitalInputPin *encoderPinB, DigitalInputPin *buttonPin,
 		MenuItem **MenuItems, const short int ItemsCount) {
-	button.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	rotor.initialize(
-			new DigitalInputArduinoPin(encoderPinA, true),
-			new DigitalInputArduinoPin(encoderPinB, true));
+	button.initialize(buttonPin, false);
+	rotor.initialize(encoderPinA, encoderPinB);
 	menuItems = MenuItems;
 	itemsCount = ItemsCount;
 	activateMenuItem(0);

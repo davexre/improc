@@ -7,11 +7,11 @@
 
 DefineClass(MenuLikeTest);
 
-static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int speakerPin = 8;
 static const int ledPin = 13; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
+static const int buttonPin = 4;	// the number of the pushbutton pin
 
 static const char *speakerStates[] = { "ON", "OFF" };
 
@@ -45,7 +45,8 @@ void MenuLikeTest::setup() {
 	ledStatesMenu.initialize("Led state", 0, size(ledStates) - 1, true);
 	tonePitchMenu.initialize("Pitch", 50, 5000, false);
 
-	menu.initialize(rotorPinA, rotorPinB, buttonPin, menuItems, size(menuItems));
+	menu.initialize(new DigitalInputArduinoPin(rotorPinA), new DigitalInputArduinoPin(rotorPinB),
+			new DigitalInputArduinoPin(buttonPin), menuItems, size(menuItems));
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);
     Serial.begin(115200);
     Serial.println("Push the encoder button to switch between menus");

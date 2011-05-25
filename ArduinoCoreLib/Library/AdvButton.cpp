@@ -1,6 +1,6 @@
 #include "AdvButton.h"
 
-void AdvButton::initialize(DigitalInputArduinoPin *pin, const boolean autoRepeatEnabled, const int debounceMillis) {
+void AdvButton::initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const int debounceMillis) {
 	Button::initialize(pin, debounceMillis);
 	this->autoRepeatEnabled = autoRepeatEnabled;
 	timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
