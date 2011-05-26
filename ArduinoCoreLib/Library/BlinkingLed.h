@@ -18,7 +18,7 @@ private:
 	const unsigned int *delays;
 	uint8_t curDelay;
 
-	long toggleTime;
+	unsigned long toggleTime;
 	signed short int playCount;
 	boolean lightOn;
 

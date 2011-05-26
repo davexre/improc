@@ -22,11 +22,7 @@ StepperAxis axis;
 static const char *axisMenuItems[] = { "Determine available steps", "Initialize to zero position" };
 static MenuItemEnum axisMenu;
 
-static const char *speakerStates[] = { "ON", "OFF" };
-static MenuItemEnum speakerMenu;
-
-
-static MenuItem *menuItems[] = { &axisMenu, &speakerMenu };
+static MenuItem *menuItems[] = { &axisMenu };
 static SimpleMenuWithSerialPrint menu;
 static StateLed led;
 
@@ -52,7 +48,6 @@ void StepperAxisTest::setup() {
 			new DigitalOutputArduinoPin(stepMotor22pin, 0));
 
 	axisMenu.initialize("Axis", axisMenuItems, size(axisMenuItems), false);
-	speakerMenu.initialize("Speaker", speakerStates, size(speakerStates), false);
 	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
 			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
 	Serial.begin(115200);
@@ -101,12 +96,10 @@ void StepperAxisTest::loop() {
 	axis.update();
 	menu.update();
 
-	speakerMenu.getValue();
-	axisMenu.getValue();
-
+	int selectedMenu = (int) axisMenu.getValue();
 	if (menu.button.isLongClicked()) {
 		if (mode == 0) {
-			mode = menu.getCurrentMenu() + 1;
+			mode = selectedMenu + 1;
 			modeState = 0;
 		}
 	}

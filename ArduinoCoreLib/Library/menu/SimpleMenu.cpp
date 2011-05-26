@@ -10,10 +10,11 @@ void SimpleMenu::initialize(DigitalInputPin *encoderPinA, DigitalInputPin *encod
 }
 
 void SimpleMenu::update(void) {
-	_hasMenuChanged = false;
 	button.update();
 	if (button.getButtonState() == AdvButtonState_CLICK) {
 		activateNextMenuItem();
+	} else {
+		_hasMenuChanged = false;
 	}
 }
 

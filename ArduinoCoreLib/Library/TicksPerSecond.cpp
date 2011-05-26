@@ -1,6 +1,6 @@
 #include "TicksPerSecond.h"
 
-void TicksPerSecond::initialize(const int holdLastTimeoutMillis) {
+void TicksPerSecond::initialize(const unsigned int holdLastTimeoutMillis) {
 	lastTime = millis();
 	for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
 		counters[i] = 0;
@@ -11,7 +11,7 @@ void TicksPerSecond::initialize(const int holdLastTimeoutMillis) {
 }
 
 void TicksPerSecond::update(const boolean tick) {
-	long now = millis();
+	unsigned long now = millis();
 	if (now - lastTime >= deltaTime) {
 		counters[curCounter] = 0;
 		lastTime = started[curCounter++] = now;

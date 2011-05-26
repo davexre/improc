@@ -1,6 +1,6 @@
 #include "Button.h"
 
-void Button::initialize(DigitalInputPin *pin, const int debounceMillis) {
+void Button::initialize(DigitalInputPin *pin, const unsigned int debounceMillis) {
 	buttonPin = pin;
 	debounce = debounceMillis;
 	lastToggleTime = millis();
@@ -9,7 +9,7 @@ void Button::initialize(DigitalInputPin *pin, const int debounceMillis) {
 
 void Button::update() {
 	boolean curReading = buttonPin->getState();
-	long now = millis();
+	unsigned long now = millis();
 	lastState = currentState;
 	if (curReading != currentState) {
 		if (now - lastToggleTime >= debounce) {

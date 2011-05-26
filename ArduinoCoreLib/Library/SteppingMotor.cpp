@@ -13,7 +13,7 @@ void SteppingMotor::initialize(
 
 	motorCoilTurnOffMicros = 1000;
 	motorCoilDelayBetweenStepsMicros = 2000;
-	motorOnMicros = 0;
+	motorCoilOnMicros = 0;
 	currentState = 0;
 	step = 0;
 	stop();
@@ -72,7 +72,7 @@ void SteppingMotor::setState(const uint8_t state) {
 
 void SteppingMotor::stop() {
 	setState(motorStates[0]);
-	isMotorOn = false;
+	isMotorCoilOn = false;
 	movementMode = 0;
 	targetStep = step;
 }
@@ -127,8 +127,8 @@ void SteppingMotor::update() {
 		break;
 	}
 
-	long now = micros();
-	if (now - motorOnMicros >= motorCoilDelayBetweenStepsMicros) {
+	unsigned long now = micros();
+	if (now - motorCoilOnMicros > motorCoilDelayBetweenStepsMicros) {
 		if (shallMove) {
 			if (forward) {
 				step++;
@@ -142,17 +142,17 @@ void SteppingMotor::update() {
 					currentState = size(motorStates) - 1;
 			}
 			setState(motorStates[currentState]);
-			isMotorOn = true;
-			motorOnMicros = now;
+			isMotorCoilOn = true;
+			motorCoilOnMicros = now;
 		} else {
-			motorOnMicros = now - motorCoilDelayBetweenStepsMicros;
+			motorCoilOnMicros = now - motorCoilDelayBetweenStepsMicros;
 		}
 	}
 
-	if (isMotorOn && (motorCoilTurnOffMicros > 0)) {
-		if (now - motorOnMicros >= motorCoilTurnOffMicros) {
+	if (isMotorCoilOn && (motorCoilTurnOffMicros > 0)) {
+		if (now - motorCoilOnMicros > motorCoilTurnOffMicros) {
 			setState(motorStates[0]);
-			isMotorOn = false;
+			isMotorCoilOn = false;
 		}
 	}
 }

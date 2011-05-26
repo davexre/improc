@@ -28,12 +28,12 @@ class Button {
 	DigitalInputPin *buttonPin;
 	boolean lastState;
 	boolean currentState;
-	long lastToggleTime;	// used to debounce the button
+	unsigned long lastToggleTime;	// used to debounce the button
 
 	/**
 	 * Debounce time in milliseconds, default 10
 	 */
-	int debounce;
+	unsigned int debounce;
 
 public:
 	/**
@@ -44,7 +44,7 @@ public:
 	 * debounceMillis
 	 * 			The button debounce time in milliseconds.
 	 */
-	void initialize(DigitalInputPin *pin, const int debounceMillis = 10);
+	void initialize(DigitalInputPin *pin, const unsigned int debounceMillis = 10);
 
 	/**
 	 * Updates the state of the rotary knob.

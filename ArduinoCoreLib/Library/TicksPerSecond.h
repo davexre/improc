@@ -22,7 +22,7 @@ private:
 	/**
 	 * Tick counter start times
 	 */
-	long started[TPS_TIMES_PER_PERIOD];
+	unsigned long started[TPS_TIMES_PER_PERIOD];
 
 	/**
 	 * Shows the current started/counters pair in use for calculating the
@@ -33,12 +33,12 @@ private:
 	/**
 	 * The last time the update() method was invoked
 	 */
-	long lastTime;
+	unsigned long lastTime;
 
 	/**
 	 * After deltaTime milliseconds the next strated/counters pair will be used
 	 */
-	int deltaTime;
+	unsigned int deltaTime;
 
 	/**
 	 * Ticks per second. Gets updated by update() method.
@@ -54,7 +54,7 @@ public:
 	 * 		This means that for 1/2 second all ticks will be counted and the value
 	 * 		for ticks per second will be calculated.
 	 */
-	void initialize(const int holdLastTimeoutMillis = 500);
+	void initialize(const unsigned int holdLastTimeoutMillis = 500);
 
 	/**
 	 * Calculates and updates the ticks per second value.

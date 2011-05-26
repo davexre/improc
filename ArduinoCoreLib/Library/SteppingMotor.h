@@ -15,8 +15,8 @@ private:
 
 	void setState(const uint8_t state);
 
-	boolean isMotorOn;
-	long motorOnMicros;
+	boolean isMotorCoilOn;
+	unsigned long motorCoilOnMicros;
 
 	DigitalOutputPin *out11pin;
 	DigitalOutputPin *out12pin;
@@ -24,8 +24,8 @@ private:
 	DigitalOutputPin *out22pin;
 public:
 
-	long motorCoilTurnOffMicros;
-	long motorCoilDelayBetweenStepsMicros;
+	unsigned long motorCoilTurnOffMicros;
+	unsigned long motorCoilDelayBetweenStepsMicros;
 
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.

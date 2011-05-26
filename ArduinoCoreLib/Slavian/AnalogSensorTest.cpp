@@ -22,7 +22,7 @@ static SerialReader reader;
 
 static char readerBuffer[200];
 
-static long lastTime;
+static unsigned long lastTime;
 
 static float mySmoothVal;
 static int smoothedVal = 0;

@@ -12,7 +12,7 @@ void BlinkingLed::initialize(DigitalOutputPin *pin) {
 
 void BlinkingLed::update() {
 	if (isPlaying()) {
-		long cur = millis();
+		unsigned long cur = millis();
 		if (cur - toggleTime >= 0) {
 			unsigned int delta = getNextDelay();
 			if (delta == 0) {

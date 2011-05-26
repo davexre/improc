@@ -19,14 +19,14 @@ enum AdvButtonState {
 };
 
 class AdvButton : Button {
-	long previousTimeButtonUp;
-	long timeButtonDown;
-	long timeNextAutorepeatToggle;
+	unsigned long previousTimeButtonUp;
+	unsigned long timeButtonDown;
+	unsigned long timeNextAutorepeatToggle;
 	boolean autoRepeatEnabled;
 	boolean autoButtonStarted;
 	byte buttonState;
 public:
-	void initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const int debounceMillis = 10);
+	void initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const unsigned int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {

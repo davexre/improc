@@ -1,6 +1,6 @@
 #include "AdvButton.h"
 
-void AdvButton::initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const int debounceMillis) {
+void AdvButton::initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const unsigned int debounceMillis) {
 	Button::initialize(pin, debounceMillis);
 	this->autoRepeatEnabled = autoRepeatEnabled;
 	timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
@@ -11,7 +11,7 @@ void AdvButton::initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled
 void AdvButton::update(void) {
 	Button::update();
 	buttonState = AdvButtonState_NONE;
-	long now = millis();
+	unsigned long now = millis();
 	if (isToggled()) {
 		if (isDown()) {
 			// Just pressed
