@@ -99,36 +99,36 @@ boolean SteppingMotor::isMoving() {
 }
 
 void SteppingMotor::update() {
-	boolean shallMove;
-	boolean forward;
-
-	switch (movementMode) {
-	case 1:
-		shallMove = true;
-		forward = true;
-		break;
-	case 2:
-		shallMove = true;
-		forward = false;
-		break;
-	default: //	case 0:
-		long tmp = targetStep - step;
-		if (tmp == 0) {
-			shallMove = false;
-			forward = false;
-		} else {
-			shallMove = true;
-			if (tmp > 0) {
-				forward = true;
-			} else {
-				forward = false;
-			}
-		}
-		break;
-	}
-
 	unsigned long now = micros();
 	if (now - motorCoilOnMicros > motorCoilDelayBetweenStepsMicros) {
+		boolean shallMove;
+		boolean forward;
+
+		switch (movementMode) {
+		case 1:
+			shallMove = true;
+			forward = true;
+			break;
+		case 2:
+			shallMove = true;
+			forward = false;
+			break;
+		default: //	case 0:
+			long tmp = targetStep - step;
+			if (tmp == 0) {
+				shallMove = false;
+				forward = false;
+			} else {
+				shallMove = true;
+				if (tmp > 0) {
+					forward = true;
+				} else {
+					forward = false;
+				}
+			}
+			break;
+		}
+
 		if (shallMove) {
 			if (forward) {
 				step++;

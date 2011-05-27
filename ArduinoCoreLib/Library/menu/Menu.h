@@ -81,10 +81,6 @@ public:
 		activateMenuItem(currentMenu - 1);
 	}
 
-	inline boolean hasMenuChanged() {
-		return _hasMenuChanged;
-	}
-
 	inline short int getCurrentMenu() {
 		return currentMenu;
 	}

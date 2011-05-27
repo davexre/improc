@@ -29,7 +29,7 @@ void SimpleMenu::activateMenuItem(short int menuItem) {
 }
 
 boolean SimpleMenu::hasChanged() {
-	if (hasMenuChanged())
+	if (_hasMenuChanged)
 		return true;
 	for (int i = itemsCount - 1; i >= 0; i--)
 		if (menuItems[i]->hasValueChanged())
