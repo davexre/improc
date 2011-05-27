@@ -6,8 +6,11 @@ TemperatureSensor_TC1047::TemperatureSensor_TC1047(const uint8_t analogArduinoPi
 	this->analogArduinoPin = analogArduinoPin;
 }
 
-float TemperatureSensor_TC1047::getTemperatureCelsius() {
-	return analogRead(analogArduinoPin) * (1024.0 / (5.0 * 100.0));
+int TemperatureSensor_TC1047::getTemperatureCelsius() {
+	long result = analogRead(analogArduinoPin);
+	result *= 1024;
+	return result / 500L;
+//	return analogRead(analogArduinoPin) * (1024.0 / (5.0 * 100.0));
 }
 
 ////////// TemperatureControl
@@ -21,7 +24,7 @@ void TemperatureControl::initialize(TemperatureSensor *temperatureSensor, Digita
 }
 
 void TemperatureControl::update() {
-	int curTemp = (int) temperatureSensor->getTemperature();
+	int curTemp = temperatureSensor->getTemperatureCelsius();
 	int error = targetTemperatureCelsius - curTemp;
 	if ((targetTemperatureCelsius <= 0) || (error < 0)) {
 		spwm.setValue(0);
@@ -36,4 +39,8 @@ void TemperatureControl::update() {
 
 void TemperatureControl::setTargetTemperature(int targetTemperatureCelsius) {
 	this->targetTemperatureCelsius = targetTemperatureCelsius;
+}
+
+void TemperatureControl::stop(void) {
+	targetTemperatureCelsius = 0;
 }

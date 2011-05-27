@@ -8,7 +8,7 @@
 
 class TemperatureSensor {
 public:
-	virtual float getTemperature() = 0;
+	virtual int getTemperatureCelsius() = 0;
 };
 
 ////////// TemperatureSensor_TC1047
@@ -18,7 +18,7 @@ class TemperatureSensor_TC1047 : public TemperatureSensor {
 public:
 	TemperatureSensor_TC1047(const uint8_t analogArduinoPin);
 
-	virtual float getTemperatureCelsius();
+	virtual int getTemperatureCelsius();
 };
 
 ////////// TemperatureControl
@@ -42,6 +42,8 @@ public:
 	void update(void);
 
 	void setTargetTemperature(int targetTemperatureCelsius);
+
+	void stop(void);
 };
 
 #endif

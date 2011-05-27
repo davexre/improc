@@ -18,15 +18,13 @@ void SerialReader::update(void) {
 		return;
 	while ((bufferSize > bufferFull + 1) && (Serial.available() > 0)) {
 		char c = Serial.read();
-		if (c == '\n') {
+		if ((c == '\n') || (c == '\r')) {
 			eol = true;
 			buffer[bufferFull] = 0;
 			break;
 		}
-		if (c != '\r') {	// Ignore carriage return
-			buffer[bufferFull++] = c;
-			buffer[bufferFull] = 0;
-		}
+		buffer[bufferFull++] = c;
+		buffer[bufferFull] = 0;
 	}
 	if (bufferSize <= bufferFull + 1) {
 		eol = true;

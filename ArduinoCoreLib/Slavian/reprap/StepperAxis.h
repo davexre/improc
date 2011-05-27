@@ -48,6 +48,8 @@ public:
 	void determineAvailableSteps(void);
 	void initializeToStartingPosition(void);
 	void moveToPositionFast(long position);
+
+	void stop(void);
 };
 
 #endif

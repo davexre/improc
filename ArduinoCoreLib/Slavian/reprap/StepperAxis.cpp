@@ -153,3 +153,9 @@ void StepperAxis::determineAvailableSteps() {
 	mode = StepperAxisModeDetermineAvailableSteps;
 	modeState = 0;
 }
+
+void StepperAxis::stop(void) {
+	motor.stop();
+	mode = StepperAxisModeIdle;
+	modeState = 0;
+}

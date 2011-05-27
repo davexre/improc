@@ -17,7 +17,7 @@ private:
 	/**
 	 * Tick counters
 	 */
-	long counters[TPS_TIMES_PER_PERIOD];
+	unsigned long counters[TPS_TIMES_PER_PERIOD];
 
 	/**
 	 * Tick counter start times
@@ -35,16 +35,12 @@ private:
 	 */
 	unsigned long lastTime;
 
+	unsigned long dT;
+
 	/**
 	 * After deltaTime milliseconds the next strated/counters pair will be used
 	 */
 	unsigned int deltaTime;
-
-	/**
-	 * Ticks per second. Gets updated by update() method.
-	 */
-	volatile float tps;
-
 public:
 	/**
 	 * Initializes the class.
@@ -84,9 +80,7 @@ public:
 	 * Returns the ticks per second value.
 	 * This is "thread unsafe" method.
 	 */
-	inline float getTPS_unsafe() {
-		return tps;
-	}
+	float getTPS_unsafe();
 
 	/**
 	 * Returns the ticks per second value as integer.
@@ -94,7 +88,7 @@ public:
 	 */
 	inline int getIntTPS() {
 		disableInterrupts();
-		int result = (int) tps;
+		int result = getIntTPS_unsafe();
 		restoreInterrupts();
 		return result;
 	}
@@ -103,9 +97,7 @@ public:
 	 * Returns the ticks per second value as integer.
 	 * This is "thread unsafe" method.
 	 */
-	inline int getIntTPS_unsafe() {
-		return (int) tps;
-	}
+	int getIntTPS_unsafe();
 
 	/**
 	 * Smoothes a value.
