@@ -10,7 +10,7 @@
 #define StepperAxisModeError 1
 #define StepperAxisModeDetermineAvailableSteps 10
 #define StepperAxisModeInitializeToStartinPosition 11
-#define StepperAxisModeMoveToPositionFast 12
+#define StepperAxisModeMoveToPosition 12
 
 class StepperAxis {
 private:
@@ -19,10 +19,11 @@ private:
 	byte modeState;
 
 	long maxStep;
+	float axisStepsPerMM;
 
 	void doDetermineAvailableSteps();
 	void doInitializeToStartingPosition();
-	void doModeMoveToPositionFast();
+	void doModeMoveToPosition();
 public:
 	Button endPositionButton;
 	SteppingMotor motor;
@@ -43,11 +44,20 @@ public:
 	void update(void);
 
 	inline byte getMode() { return mode; }
+
+	void setMaxStep(long maxStep);
 	inline long getMaxStep() { return maxStep; }
+
+	void setAxisStepsPerMM(float axisStepsPer);
+	inline float getAxisStepsPerMM() {
+		return axisStepsPerMM;
+	}
 
 	void determineAvailableSteps(void);
 	void initializeToStartingPosition(void);
 	void moveToPositionFast(long position);
+	void moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis);
+	float getAbsolutePositionMM();
 
 	void stop(void);
 };

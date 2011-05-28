@@ -8,6 +8,8 @@ void StepperAxis::initialize(
 		DigitalOutputPin *stepMotor22pin) {
 	endPositionButton.initialize(endPositionButtonPin);
 	motor.initialize(stepMotor11pin, stepMotor12pin, stepMotor21pin, stepMotor22pin);
+	maxStep = 100;
+	axisStepsPerMM = 1.0;
 }
 
 void StepperAxis::update() {
@@ -21,8 +23,8 @@ void StepperAxis::update() {
 	case StepperAxisModeInitializeToStartinPosition:
 		doInitializeToStartingPosition();
 		break;
-	case StepperAxisModeMoveToPositionFast:
-		doModeMoveToPositionFast();
+	case StepperAxisModeMoveToPosition:
+		doModeMoveToPosition();
 		break;
 
 	case StepperAxisModeIdle:
@@ -31,6 +33,7 @@ void StepperAxis::update() {
 		if (motor.isMoving()) {
 			motor.stop();
 			mode = StepperAxisModeError;
+			modeState = 0;
 		}
 		break;
 	}
@@ -122,9 +125,10 @@ void StepperAxis::doInitializeToStartingPosition() {
 	}
 }
 
-void StepperAxis::doModeMoveToPositionFast() {
+void StepperAxis::doModeMoveToPosition() {
 	if (!motor.isMoving()) {
 		mode = StepperAxisModeIdle;
+		modeState = 0;
 	} else if (endPositionButton.isDown()) {
 		long atStep = motor.getStep();
 		if ((atStep != 0) && (atStep != maxStep)) {
@@ -137,8 +141,9 @@ void StepperAxis::doModeMoveToPositionFast() {
 
 void StepperAxis::moveToPositionFast(long position) {
 	position = constrain(position, 0, maxStep);
+	motor.motorCoilDelayBetweenStepsMicros = 2000;
 	motor.gotoStep(position);
-	mode = StepperAxisModeMoveToPositionFast;
+	mode = StepperAxisModeMoveToPosition;
 	modeState = 0;
 }
 
@@ -158,4 +163,30 @@ void StepperAxis::stop(void) {
 	motor.stop();
 	mode = StepperAxisModeIdle;
 	modeState = 0;
+}
+
+void StepperAxis::setMaxStep(long maxStep) {
+	this->maxStep = maxStep;
+}
+
+void StepperAxis::setAxisStepsPerMM(float axisStepsPerMM) {
+	if (axisStepsPerMM < 1)
+		this->axisStepsPerMM = 1.0;
+	else
+		this->axisStepsPerMM = axisStepsPerMM;
+}
+
+void StepperAxis::moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis) {
+	long targetStep = absolutePositionMM / axisStepsPerMM;
+	unsigned long deltaSteps = abs(targetStep - motor.getStep());
+	if (deltaSteps > 0) {
+		motor.motorCoilDelayBetweenStepsMicros = (deltaSteps <= 1) ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1);
+		motor.gotoStep(targetStep);
+		mode = StepperAxisModeMoveToPosition;
+		modeState = 0;
+	}
+}
+
+float StepperAxis::getAbsolutePositionMM() {
+	return ((float) motor.getStep()) * axisStepsPerMM;
 }

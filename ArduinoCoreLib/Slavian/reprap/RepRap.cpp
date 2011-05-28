@@ -85,11 +85,6 @@ byte calculateChecksum(char *line) {
 void gCodeProcessLine(char *line) {
 	char cmd = *(line++);
 	switch (cmd) {
-	case ';':
-	case '/':
-		// This is comment ignore till the end of line
-		return;
-
 	case 'G':
 		lastGCode = (int) strtol(line, &line, 10);
 		break;
@@ -154,6 +149,9 @@ void gCodeProcessLine(char *line) {
 		strtol(line, &line, 10);
 		break;
 
+	case ';': // This is comment ignore till the end of line
+	case '/':
+	case 0: // Empty string
 	default:
 		break;
 	}
