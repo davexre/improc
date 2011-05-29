@@ -9,7 +9,7 @@
 #define StepperAxisModeIdle 0
 #define StepperAxisModeError 1
 #define StepperAxisModeDetermineAvailableSteps 10
-#define StepperAxisModeInitializeToStartinPosition 11
+#define StepperAxisModeInitializeToStartingPosition 11
 #define StepperAxisModeMoveToPosition 12
 
 class StepperAxis {
@@ -18,6 +18,7 @@ private:
 	byte mode;
 	byte modeState;
 
+	unsigned long timestamp;
 	long maxStep;
 	float axisStepsPerMM;
 
@@ -60,6 +61,10 @@ public:
 	float getAbsolutePositionMM();
 
 	void stop(void);
+
+	boolean isBuzy() {
+		return mode != StepperAxisModeIdle;
+	}
 };
 
 #endif

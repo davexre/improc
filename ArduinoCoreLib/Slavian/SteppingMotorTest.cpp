@@ -39,7 +39,7 @@ static boolean motorForward = true;
 
 void SteppingMotorTest::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
 	rotor.initialize(
 			new DigitalInputArduinoPin(rotorPinA, true),
 			new DigitalInputArduinoPin(rotorPinB, true));
@@ -60,7 +60,6 @@ void SteppingMotorTest::setup() {
 void SteppingMotorTest::loop() {
 	btn.update();
 	led.update();
-//	rotor.update();
 	motor.update();
 
 	if (btn.isLongClicked()) {

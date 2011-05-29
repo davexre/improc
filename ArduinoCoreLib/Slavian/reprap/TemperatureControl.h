@@ -4,6 +4,8 @@
 #include "DigitalIO.h"
 #include "SoftwarePWM.h"
 
+#define InvalidTemperature -300
+
 ////////// TemperatureSensor
 
 class TemperatureSensor {
@@ -42,6 +44,14 @@ public:
 	void update(void);
 
 	void setTargetTemperature(int targetTemperatureCelsius);
+
+	inline int getTargetTemperature() {
+		return targetTemperatureCelsius;
+	}
+
+	inline int getTemperature() {
+		return temperatureSensor->getTemperatureCelsius();
+	}
 
 	void stop(void);
 };

@@ -12,15 +12,15 @@ void BlinkingLed::initialize(DigitalOutputPin *pin) {
 
 void BlinkingLed::update() {
 	if (isPlaying()) {
-		unsigned long cur = millis();
-		if (cur - toggleTime >= 0) {
+		unsigned long now = millis();
+		if ((signed long) (now - toggleTime) >= 0) {
 			unsigned int delta = getNextDelay();
 			if (delta == 0) {
 				lightOn = false;
 			} else {
 				lightOn = !lightOn;
 			}
-			toggleTime = cur + delta;
+			toggleTime = now + delta;
 			pin->setState(lightOn);
 		}
 	} else {

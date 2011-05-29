@@ -17,7 +17,7 @@ int TemperatureSensor_TC1047::getTemperatureCelsius() {
 
 void TemperatureControl::initialize(TemperatureSensor *temperatureSensor, DigitalOutputPin *heaterPin) {
 	this->temperatureSensor = temperatureSensor;
-	this->targetTemperatureCelsius = 0;
+	this->targetTemperatureCelsius = InvalidTemperature;
 	fullPowerHeatBand = 4;
 	spwm.initialize(heaterPin, 1);
 	spwm.setValue(0);
@@ -26,7 +26,7 @@ void TemperatureControl::initialize(TemperatureSensor *temperatureSensor, Digita
 void TemperatureControl::update() {
 	int curTemp = temperatureSensor->getTemperatureCelsius();
 	int error = targetTemperatureCelsius - curTemp;
-	if ((targetTemperatureCelsius <= 0) || (error < 0)) {
+	if ((targetTemperatureCelsius <= InvalidTemperature) || (error < 0)) {
 		spwm.setValue(0);
 	} else if (error > fullPowerHeatBand) {
 		spwm.setValue(255);

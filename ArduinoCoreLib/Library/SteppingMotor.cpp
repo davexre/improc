@@ -92,7 +92,7 @@ void SteppingMotor::resetStepTo(const long step) {
 }
 
 boolean SteppingMotor::isMoving() {
-	return (
+	return (isMotorCoilOn || // TODO: Дали винаги е така? Ако моторът е в режим "задържане"?
 		((movementMode == 0) && (targetStep != step)) ||
 		(movementMode == 1) ||
 		(movementMode == 2));

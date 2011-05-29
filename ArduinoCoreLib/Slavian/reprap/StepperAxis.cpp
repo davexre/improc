@@ -20,7 +20,7 @@ void StepperAxis::update() {
 	case StepperAxisModeDetermineAvailableSteps:
 		doDetermineAvailableSteps();
 		break;
-	case StepperAxisModeInitializeToStartinPosition:
+	case StepperAxisModeInitializeToStartingPosition:
 		doInitializeToStartingPosition();
 		break;
 	case StepperAxisModeMoveToPosition:
@@ -57,12 +57,19 @@ void StepperAxis::doDetermineAvailableSteps() {
 			// The end position moving forward is reached.
 			motor.stop();
 			maxStep = motor.getStep();
+			timestamp = millis();
 			motor.rotate(false);
 			modeState = 7;
 		}
 		break;
 	case 7:
-		if (!endPositionButton.isDown()) {
+		if (millis() - timestamp > 100) {
+			// Wait for 100 millis for the motor to move and release the button
+			modeState = 8;
+		}
+		break;
+	case 8:
+		if (endPositionButton.isDown()) {
 			// The end position moving backward is reached.
 			motor.stop();
 			maxStep -= motor.getStep();
@@ -149,7 +156,7 @@ void StepperAxis::moveToPositionFast(long position) {
 
 void StepperAxis::initializeToStartingPosition() {
 	motor.stop();
-	mode = StepperAxisModeInitializeToStartinPosition;
+	mode = StepperAxisModeInitializeToStartingPosition;
 	modeState = 0;
 }
 

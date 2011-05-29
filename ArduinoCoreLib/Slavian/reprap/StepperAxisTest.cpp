@@ -15,11 +15,11 @@ static const int endPositionButtonPin = 5;
 static const int stepMotor11pin = 8;
 static const int stepMotor12pin = 9;
 static const int stepMotor21pin = 10;
-static const int stepMotor22pin = 10;
+static const int stepMotor22pin = 11;
 
 StepperAxis axis;
 
-static const char *axisMenuItems[] = { "Determine available steps", "Initialize to zero position" };
+static const char *axisMenuItems[] = { "Determine available steps", "Initialize to zero position", "Stop" };
 static MenuItemEnum axisMenu;
 
 static MenuItem *menuItems[] = { &axisMenu };
@@ -83,7 +83,8 @@ void doInitializeToStartingPosition() {
 		modeState = 1;
 		break;
 	case 1:
-		if (axis.getMode() == StepperAxisModeIdle) {
+		if ((axis.getMode() == StepperAxisModeIdle) ||
+			(axis.getMode() == StepperAxisModeError)) {
 			Serial.println("Done");
 			mode = 0;
 		}
@@ -91,6 +92,7 @@ void doInitializeToStartingPosition() {
 	}
 }
 
+boolean dummy = false;
 void StepperAxisTest::loop() {
 	led.update();
 	axis.update();
@@ -98,7 +100,7 @@ void StepperAxisTest::loop() {
 
 	int selectedMenu = (int) axisMenu.getValue();
 	if (menu.button.isLongClicked()) {
-		if (mode == 0) {
+		if ((mode == 0) || (selectedMenu == 2)) {
 			mode = selectedMenu + 1;
 			modeState = 0;
 		}
@@ -112,6 +114,12 @@ void StepperAxisTest::loop() {
 		break;
 	case 2:
 		doInitializeToStartingPosition();
+		break;
+	case 3:
+//		axis.stop();
+		axis.motor.rotate(dummy);
+		dummy != dummy;
+		mode = 0;
 		break;
 	}
 }
