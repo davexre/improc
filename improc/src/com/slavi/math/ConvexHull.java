@@ -2,6 +2,7 @@ package com.slavi.math;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class ConvexHull {
 
@@ -9,26 +10,30 @@ public class ConvexHull {
 	 * See
 	 * http://en.wikipedia.org/wiki/Polygon_area 
 	 */
-	public static double getPolygonArea(ArrayList<Point.Double> polygon) {
-		if (polygon == null || polygon.size() <= 1)
+	public static double getPolygonArea(Iterator<Point.Double> polygon) {
+		if (polygon == null || (!polygon.hasNext()))
 			return 0.0;
 		double result = 0.0;
-		Point.Double curPoint = polygon.get(0);
-		for (int i = 1; i < polygon.size(); i++) {
-			Point.Double nextPoint = polygon.get(i);
+		Point.Double firstPoint, curPoint;
+		firstPoint = curPoint = polygon.next();
+		while (polygon.hasNext()) {
+			Point.Double nextPoint = polygon.next();
 			result += curPoint.x * nextPoint.y - nextPoint.x * curPoint.y;
 			curPoint = nextPoint;
 		}
-		Point.Double nextPoint = polygon.get(0);
-		result += curPoint.x * nextPoint.y - nextPoint.x * curPoint.y;
+		result += curPoint.x * firstPoint.y - firstPoint.x * curPoint.y;
 		return result * 0.5;
+	}
+	
+	public static double getPolygonArea(Iterable<Point.Double> polygon) {
+		return getPolygonArea(polygon.iterator());
 	}
 	
 	/**
 	 * Ideas borrowed from
 	 * http://www.dr-mikes-maths.com/DotPlacer.html 
 	 */
-	public static ArrayList<Point.Double> makeConvexHull(ArrayList<Point.Double> points) {
+	public static ArrayList<Point.Double> makeConvexHull(Iterable<Point.Double> points) {
 		ArrayList<Point.Double> result = new ArrayList<Point.Double>();
 		
 		// Find the left-most point, i.e. min X
@@ -88,7 +93,7 @@ public class ConvexHull {
 	 * Ideas borrowed from
 	 * http://www.dr-mikes-maths.com/DotPlacer.html 
 	 */
-	public static double getConvexHullArea(ArrayList<Point.Double> points) {
+	public static double getConvexHullArea(Iterable<Point.Double> points) {
 		double result = 0.0;
 		
 		// Find the left-most point, i.e. min X
@@ -166,47 +171,5 @@ public class ConvexHull {
 		public double getY() {
 			return points.get(curPoint).y;
 		}
-	}
-	
-	public static void main(String[] args) {
-		ArrayList<Point.Double> points = new ArrayList<Point.Double>();
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 3));
-
-		points.add(new Point.Double(1, 2));
-		points.add(new Point.Double(1, 3));
-
-		points.add(new Point.Double(2, 1));
-		points.add(new Point.Double(2, 2));
-		points.add(new Point.Double(2, 3));
-
-		points.add(new Point.Double(3, 1));
-		points.add(new Point.Double(3, 2));
-		points.add(new Point.Double(3, 3));
-		
-		points.add(new Point.Double(1, 1));
-		points.add(new Point.Double(1, 2));
-		points.add(new Point.Double(1, 3));
-
-		points.add(new Point.Double(2, 1));
-		points.add(new Point.Double(2, 2));
-		points.add(new Point.Double(2, 3));
-
-		points.add(new Point.Double(3, 1));
-		points.add(new Point.Double(3, 2));
-		points.add(new Point.Double(3, 3));
-
-		ArrayList<Point.Double> result = makeConvexHull(points);
-		System.out.println(result.size());
-		for (int i = 0; i < result.size(); i++) {
-			System.out.println(result.get(i));
-		}
-		System.out.println(getPolygonArea(result));
-		System.out.println(getConvexHullArea(points));
-		System.out.println(new ConvexHullArea(points).getConvexHullArea());
 	}
 }
