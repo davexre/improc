@@ -739,6 +739,51 @@ public class Util {
 		return str;
 	}
 	
+	/**
+	 * Remove a directory and all of its contents.
+	 * 
+	 * The results of executing File.delete() on a File object that represents a
+	 * directory seems to be platform dependent. This method removes the
+	 * directory and all of its contents.
+	 * 
+	 * Code borrowed from:
+	 * http://www.java2s.com/Tutorial/Java/0180__File/Removeadirectoryandallofitscontents.htm
+	 * 
+	 * @return true if the complete directory was removed, false if it could not
+	 *         be. If false is returned then some of the files in the directory
+	 *         may have been removed.
+	 */
+	public static boolean removeDirectory(File directory) {
+		if (directory == null)
+			return false;
+		if (!directory.exists())
+			return true;
+		if (!directory.isDirectory()) {
+			return directory.delete(); // This is a file. Delete it.
+		}
+
+		File[] list = directory.listFiles();
+		// On error continue removing files - remove as many as possible files
+		boolean result = true; 
+		// Some JVMs return null for File.list() when the
+		// directory is empty.
+		if (list != null) {
+			for (int i = 0; i < list.length; i++) {
+				File entry = list[i];
+				if (entry.isDirectory()) {
+					if (!removeDirectory(entry)) {
+						result = false;
+					}
+				} else if (!entry.delete()) {
+					result = false;
+				}
+			}
+		}
+
+		result &= directory.delete();
+		return result;
+	}
+	
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
 		byte buf[] = new byte[256];
 		int len;
