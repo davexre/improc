@@ -6,10 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Formatter;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
+import sun.applet.Main;
+
+import com.slavi.util.Const;
 import com.slavi.util.Util;
 
 public class VisualizeGCode {
@@ -205,7 +209,7 @@ public class VisualizeGCode {
 			if ((cmd.commandOccuraceFlag & GCodeCommand.CommandFlad_Z) != 0) {
 				int newZ = (int) (cmd.Z * 10);
 				if (newZ > curZ) {
-					String fouName = outputDir + "/layer_" + Integer.toString(curZ) + ".png";
+					String fouName = String.format("%s/layer_%05d.png", outputDir, curZ);
 					gr.dispose();
 					ImageIO.write(bi, "png", new File(fouName));
 					curZ = newZ;
@@ -227,8 +231,8 @@ public class VisualizeGCode {
 			}			
 
 			if ((cmd.commandOccuraceFlag & GCodeCommand.CommandFlad_G) != 0) {
-				if (cmd.gCode == 1) { // Controlled move
-					boolean isExtruding = cmd.feedRate > 1000;
+				if (cmd.gCode == 1 || cmd.gCode == 0) { // Controlled move
+					boolean isExtruding = cmd.feedRate > 0;
 					if (isExtruding) {
 						gr.drawLine(curX, curY, newX, newY);
 					}
@@ -236,8 +240,8 @@ public class VisualizeGCode {
 				curX = newX;
 				curY = newY;
 			}
-		}		
-		String fouName = outputDir + "/layer_" + Integer.toString(curZ) + ".png";
+		}
+		String fouName = String.format("%s/layer_%05d.png", outputDir, curZ);
 		gr.dispose();
 		ImageIO.write(bi, "png", new File(fouName));
 		
@@ -246,8 +250,9 @@ public class VisualizeGCode {
 		
 	public static void main(String[] args) throws Exception {
 		VisualizeGCode g = new VisualizeGCode();
-		String finName = g.getClass().getResource("VisualizeGCode-drive-gear.gcode").getFile();
-		String outputDir = "C:\\Users\\i047367\\Temp" + "/gcode";
+//		String finName = g.getClass().getResource("VisualizeGCode-drive-gear.gcode").getFile();
+		String finName = g.getClass().getResource("qube10.gcode").getFile();
+		String outputDir = Const.workDir + "/gcode";
 		File outputDirFile = new File(outputDir);
 		Util.removeDirectory(outputDirFile);
 		outputDirFile.mkdirs();
