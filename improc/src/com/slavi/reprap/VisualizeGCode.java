@@ -6,12 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Formatter;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
-
-import sun.applet.Main;
 
 import com.slavi.util.Const;
 import com.slavi.util.Util;
@@ -197,9 +194,11 @@ public class VisualizeGCode {
 		int curZ = (int) (Z.min * 10);
 		int curX = 0;
 		int curY = 0;
+		int curE = 0;
+		boolean isExtruding = false;
 		BufferedImage bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
 		Graphics2D gr = bi.createGraphics();
-		gr.setColor(Color.red);
+		gr.setColor(Color.yellow);
 		
 		reader = new BufferedReader(new FileReader(finName));
 		while (reader.ready()) {
@@ -216,11 +215,18 @@ public class VisualizeGCode {
 					bi = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_INT_RGB);
 					gr = bi.createGraphics();
 					gr.setColor(Color.red);
+					isExtruding = false;
 				} else if (newZ < curZ) {
 					throw new Exception("newZ < curZ");
 				}
 			}
 
+			if ((cmd.commandOccuraceFlag & GCodeCommand.CommandFlad_E) != 0) {
+				int newE = (int) (cmd.E * 10); 
+				isExtruding = (newE > curE);
+				curE = newE;
+				gr.setColor(isExtruding ? Color.red : Color.yellow);
+			}
 			int newX = curX;
 			int newY = curY;
 			if ((cmd.commandOccuraceFlag & GCodeCommand.CommandFlad_X) != 0) {
@@ -232,10 +238,7 @@ public class VisualizeGCode {
 
 			if ((cmd.commandOccuraceFlag & GCodeCommand.CommandFlad_G) != 0) {
 				if (cmd.gCode == 1 || cmd.gCode == 0) { // Controlled move
-					boolean isExtruding = cmd.feedRate > 0;
-					if (isExtruding) {
-						gr.drawLine(curX, curY, newX, newY);
-					}
+					gr.drawLine(curX, curY, newX, newY);
 				}
 				curX = newX;
 				curY = newY;
@@ -250,8 +253,8 @@ public class VisualizeGCode {
 		
 	public static void main(String[] args) throws Exception {
 		VisualizeGCode g = new VisualizeGCode();
-//		String finName = g.getClass().getResource("VisualizeGCode-drive-gear.gcode").getFile();
-		String finName = g.getClass().getResource("qube10.gcode").getFile();
+		String finName = g.getClass().getResource("VisualizeGCode-drive-gear.gcode").getFile();
+//		String finName = g.getClass().getResource("qube10.gcode").getFile();
 		String outputDir = Const.workDir + "/gcode";
 		File outputDirFile = new File(outputDir);
 		Util.removeDirectory(outputDirFile);
