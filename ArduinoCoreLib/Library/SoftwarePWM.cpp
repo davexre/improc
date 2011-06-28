@@ -22,8 +22,8 @@ void SoftwarePWM::update() {
 		if (!state)
 			pin->setState(true);
 	} else {
-		unsigned long toggleDelayMillis = ((unsigned long)(state ? value : 255 - value) * 60 * 1000) /
-				((unsigned long) frequencyCyclesPerMinute * 255);
+		unsigned long toggleDelayMillis = ((unsigned long)(state ? value : 255 - value) * 60000UL) /
+				((unsigned long) frequencyCyclesPerMinute * 255UL);
 		if (now - toggleTime >= toggleDelayMillis) {
 			pin->setState(!state);
 			toggleTime = now;

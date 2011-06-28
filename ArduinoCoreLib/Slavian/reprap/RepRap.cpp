@@ -2,6 +2,7 @@
 
 void RepRap::initialize(SerialReader *reader) {
 	this->reader = reader;
+	gCodeParser.initialize();
 	isPositioningAbsolute = true;
 	gCodeUnitsToMM = 1.0;
 	originX = originY = originZ = originE = 0;
@@ -115,6 +116,13 @@ void RepRap::update() {
 
 	case RepRap_Idle:
 	default:
+		if (reader->available()) {
+			if (gCodeParser.parse(reader->readln())) {
+				executeGCode(&gCodeParser);
+			} else {
+				// TODO: Error parsing
+			}
+		}
 		break;
 	}
 }

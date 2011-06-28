@@ -20,8 +20,7 @@
 
 class RepRap {
 private:
-	void gCodeProcessLine(char *line);
-
+	GCodeParser gCodeParser;
 	void executeGCode(GCodeParser *gCode);
 
 	TemperatureControl *extruderTemperatureControl;

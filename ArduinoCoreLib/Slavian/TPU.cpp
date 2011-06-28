@@ -3,6 +3,8 @@
 #include "utils.h"
 #include "Button.h"
 #include "RotaryEncoderAcelleration.h"
+#include "DigitalIO.h"
+#include "TimerOne.h"
 
 DefineClass(TPU);
 
@@ -43,95 +45,40 @@ static const byte coilStates3[][coilCount] = {
 static const int coilStatesCount = size(coilStates);
 static int activeCoilState = 0;
 
-static struct pinDesc {
-	volatile uint8_t *port;
-	volatile uint8_t mask;
-} coilPorts[coilCount], speakerPort;
-
-static volatile uint8_t *coilPinPorts[coilCount];
-static volatile uint8_t coilPinMaks[coilCount];
+static DigitalOutputArduinoPin *coilPorts[coilCount];
+static DigitalOutputArduinoPin *speakerPort;
+static DigitalOutputArduinoPin *led;
 
 static Button btn;
 static RotaryEncoderAcelleration rotor;
 
-// frequency in Hertz
-static void playTimer1(uint16_t frequency) {
-	// two choices for the 16 bit timers: ck/1 or ck/64
-	uint32_t ocr = F_CPU / frequency / 2 - 1;
-	uint8_t prescalarbits = 0b001;
-	if (ocr > 0xffff) {
-		ocr = F_CPU / frequency / 2 / 64 - 1;
-		prescalarbits = 0b011;
-	}
-	TCCR1B = (TCCR1B & 0b11111000) | prescalarbits;
-    OCR1A = ocr;
-    // then turn on the interrupts
-    bitWrite(TIMSK1, OCIE1A, 1);
-}
-
-
-static void stopTimer1() {
-	TIMSK1 &= ~(1 << OCIE1A);
-	pinDesc *pd = coilPorts;
-	for (int i = 0; i < coilCount; i++, pd++) {
-		*pd->port &= ~(pd->mask);
-	}
-}
-
-static bool isPlaying(void) {
-  return TIMSK1 & (1 << OCIE1A);
-}
-
-ISR(TIMER1_COMPA_vect) {
+static void UpdateOnTimer1() {
 	const byte *states = coilStates[activeCoilState++];
-	pinDesc *pd = coilPorts;
+	DigitalOutputArduinoPin **pd = coilPorts;
 	for (int i = 0; i < coilCount; i++, pd++) {
 	    // set the pin
-		if (*(states++)) {
-			// set bit
-			*pd->port |= pd->mask;
-		} else {
-			// clear bit
-			*pd->port &= ~(pd->mask);
-		}
+		(*pd)->setState(*(states++));
 	}
 	if (activeCoilState >= coilStatesCount) {
 		activeCoilState = 0;
-		*speakerPort.port ^= speakerPort.mask;
+		speakerPort->setState(!speakerPort->getState());
 	}
 }
 
 /////////////////////////////////
 
-void UpdateRotor(void) {
+static void UpdateRotor(void) {
 	rotor.update();
 }
 
 void TPU::setup() {
-	pinDesc *pd = coilPorts;
 	for (int i = 0; i < coilCount; i++) {
-		pinMode(coilPins[i], OUTPUT);
-
-		coilPinPorts[i] = portOutputRegister(digitalPinToPort(coilPins[i]));
-		coilPinMaks[i] = digitalPinToBitMask(coilPins[i]);
-
-		pd->port = portOutputRegister(digitalPinToPort(coilPins[i]));
-		pd->mask = digitalPinToBitMask(coilPins[i]);
-		pd++;
+		coilPorts[i] = new DigitalOutputArduinoPin(coilPins[i], false);
 	}
-
-    // 16 bit timer
-    TCCR1A = 0;
-    TCCR1B = 0;
-    bitWrite(TCCR1B, WGM12, 1);
-    bitWrite(TCCR1B, CS10, 1);
-
-	speakerPort.port = portOutputRegister(digitalPinToPort(speakerPin));
-	speakerPort.mask = digitalPinToBitMask(speakerPin);
-	pinMode(speakerPin, OUTPUT);
-	pinMode(ledPin, OUTPUT);
-	digitalWrite(speakerPin, 0);
-	digitalWrite(ledPin, 0);
+	speakerPort = new DigitalOutputArduinoPin(speakerPin, false);
+	led = new DigitalOutputArduinoPin(ledPin, false);
+	Timer1.initialize();
+	Timer1.attachInterrupt(UpdateOnTimer1);
 
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
 	rotor.initialize(
@@ -145,28 +92,30 @@ void TPU::setup() {
 
 static long curValue = 0;
 static long lastValue = -1;
-static boolean enabled = false;
 
 void TPU::loop() {
 	btn.update();
 
 	if (btn.isPressed()) {
-		enabled = !enabled;
-		digitalWrite(ledPin, enabled);
+		led->setState(!led->getState());
 
 		long curValue = rotor.getValue();
-		playTimer1(curValue);
+		Timer1.startWithFrequency(curValue);
 		Serial.println(curValue);
 	}
 
-	if (enabled) {
+	if (led->getState()) {
 		if (rotor.hasValueChanged()) {
 			long curValue = rotor.getValue();
-			playTimer1(curValue);
+			Timer1.startWithFrequency(curValue);
 			Serial.println(curValue);
 		}
 	} else {
-		stopTimer1();
+		Timer1.stop();
+		DigitalOutputArduinoPin **pd = coilPorts;
+		for (int i = 0; i < coilCount; i++, pd++) {
+			(*pd)->setState(false);
+		}
 		activeCoilState = 0;
 	}
 }

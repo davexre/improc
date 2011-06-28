@@ -5,24 +5,35 @@
 #include <avr/interrupt.h>
 
 class TimerOne {
-private:
 public:
 	void initialize();
 
-	inline void attachInterrupt(void (*timerCallback)()) {
-		this->timerCallback = timerCallback;
+	void attachInterrupt(void (*timerCallbackRoutine)()) {
+		timerCallback = timerCallbackRoutine;
 	}
 
 	void detachInterrupt();
 
-	inline void stop() {
+	static inline void stop() {
 		TCCR1B = 0;
 	}
 
-	void startWithDelayInCycles(unsigned long delayInCycles);
+	static bool isPlaying(void) {
+		return TIMSK1 & _BV(OCIE1A);
+	}
 
-	inline void startWithDelayInMicros(unsigned long delayInMicros) {
-		startWithDelayInCycles(F_CPU);
+	static void startWithDelayInCycles(unsigned long delayInCycles);
+
+	static inline void startWithDelayInMicros(const unsigned long delayInMicros) {
+		startWithDelayInCycles(delayInMicros * (F_CPU / 1000000UL));
+	}
+
+	static inline void startWithDelayInMillis(const unsigned long delayInMillis) {
+		startWithDelayInCycles(delayInMillis * (F_CPU / 1000UL));
+	}
+
+	static inline void startWithFrequency(const unsigned int frequencyInHertz) {
+		startWithDelayInCycles(F_CPU / frequencyInHertz - 1);
 	}
 
 	void (*timerCallback)();
