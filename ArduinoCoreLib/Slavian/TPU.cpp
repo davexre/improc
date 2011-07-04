@@ -8,6 +8,8 @@
 
 DefineClass(TPU);
 
+//#define USE_ARRAYS
+
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
@@ -112,10 +114,17 @@ void TPU::loop() {
 		}
 	} else {
 		Timer1.stop();
+		sei();
+#ifdef USE_ARRAYS
+		for (int i = 0; i < coilCount; i++) {
+			coilPorts[i]->setState(false);
+		}
+#else
 		DigitalOutputArduinoPin **pd = coilPorts;
 		for (int i = 0; i < coilCount; i++, pd++) {
 			(*pd)->setState(false);
 		}
+#endif
 		activeCoilState = 0;
 	}
 }

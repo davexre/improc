@@ -68,7 +68,9 @@
 
 class GCodeParser {
 public:
+	float gCodeUnitsToMM;
 	int gCode;
+
 	int mCode;
 	float X, Y, Z, E;
 	float feedRate;		// command F
@@ -84,7 +86,7 @@ public:
 	int commandOccuraceFlag;
 
 	void initialize();
-	void assignFrom(GCodeParser *master);
+	void initVars();
 	boolean parse(char *line);
 };
 

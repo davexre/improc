@@ -2,21 +2,15 @@
 
 void GCodeParser::initialize() {
 	gCode = CodeG_NoCommand;
-	mCode = CodeM_NoCommand;
-	X = Y = Z = E = 0;
-	P = 0;
+	gCodeUnitsToMM = 1.0;
+	initVars();
 }
 
-void GCodeParser::assignFrom(GCodeParser *master) {
-	gCode = master->gCode;
+void GCodeParser::initVars() {
+	commandOccuraceFlag = 0;
 	mCode = CodeM_NoCommand;
-	X = master->X;
-	Y = master->Y;
-	Z = master->Z;
-	E = master->E;
-	feedRate = master->feedRate;
-	P = master->P;
-
+	X = Y = Z = E = 0;
+	feedRate = P = T = S = I = J = R = Q = N = 0;
 }
 
 static byte calculateChecksum(char *line) {
@@ -30,10 +24,8 @@ static byte calculateChecksum(char *line) {
 }
 
 boolean GCodeParser::parse(char *line) {
+	initVars();
 	byte checksum = calculateChecksum(line);
-	commandOccuraceFlag = 0;
-	mCode = CodeM_NoCommand;
-
 	char cmd = *(line++);
 	switch (cmd) {
 	case 'G':
@@ -62,19 +54,19 @@ boolean GCodeParser::parse(char *line) {
 		break;
 
 	case 'X':
-		X = strtod(line, &line);
+		X = gCodeUnitsToMM * strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_X;
 		break;
 	case 'Y':
-		Y = strtod(line, &line);
+		Y = gCodeUnitsToMM * strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_Y;
 		break;
 	case 'Z':
-		Z = strtod(line, &line);
+		Z = gCodeUnitsToMM * strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_Z;
 		break;
 	case 'E':
-		E = strtod(line, &line);
+		E = gCodeUnitsToMM * strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_E;
 		break;
 

@@ -51,10 +51,14 @@ public:
 	DigitalOutputPin *fan;
 
 	boolean isPositioningAbsolute;
-	float gCodeUnitsToMM;
 
 	float originX, originY, originZ, originE;
+	/**
+	 * positionX = originX + gCode.X
+	 */
 	float positionX, positionY, positionZ, positionE;
+
+	float feedRate;
 
 	/**
 	 * Initializes the class.

@@ -4,9 +4,9 @@ void RepRap::initialize(SerialReader *reader) {
 	this->reader = reader;
 	gCodeParser.initialize();
 	isPositioningAbsolute = true;
-	gCodeUnitsToMM = 1.0;
 	originX = originY = originZ = originE = 0;
 	positionX = positionY = positionZ = positionE = 0;
+	feedRate = 0;
 //	extruderTemperatureControl = NULL;
 	setMode(RepRap_Idle);
 }
@@ -128,28 +128,42 @@ void RepRap::update() {
 }
 
 void RepRap::executeGCode(GCodeParser *gCode) {
-/*	if (gCode->commandOccuraceFlag & CommandFlad_G) {
+	if (gCode->commandOccuraceFlag & CommandFlad_G) {
 		if (gCode->commandOccuraceFlag & CommandFlad_X) {
-			positionX = (isPositioningAbsolute ? positionX : 0) + gCode->X;
+			if (isPositioningAbsolute)
+				positionX = gCode->X;
+			else
+				positionX += gCode->X;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_Y) {
-			positionY = (isPositioningAbsolute ? positionY : 0) + gCode->Y;
+			if (isPositioningAbsolute)
+				positionY = gCode->Y;
+			else
+				positionY += gCode->Y;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_Z) {
-			positionZ = (isPositioningAbsolute ? positionZ : 0) + gCode->Z;
+			if (isPositioningAbsolute)
+				positionZ = gCode->Z;
+			else
+				positionZ += gCode->Z;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_E) {
-			positionE = (isPositioningAbsolute ? positionE : 0) + gCode->E;
+			if (isPositioningAbsolute)
+				positionE = gCode->E;
+			else
+				positionE += gCode->E;
 		}
 	}
-*/
+
+	if (gCode->commandOccuraceFlag & CommandFlad_F) {
+		feedRate = gCode->feedRate;
+	}
+
 	switch (gCode->gCode) {
 	case CodeG_MoveRapid:
-		//????
 		setMode(RepRap_MoveRapid);
 		break;
 	case CodeG_ControlledMove:
-		//????
 		setMode(RepRap_ControlledMove);
 		break;
 	case CodeG_GoHome: {
@@ -163,10 +177,10 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 		setMode(RepRap_Sleep200Millis);
 		break;
 	case CodeG_UnitsInches:
-		gCodeUnitsToMM = 25.4;
+		gCode->gCodeUnitsToMM = 25.4;
 		break;
 	case CodeG_UnitsMM:
-		gCodeUnitsToMM = 1.0;
+		gCode->gCodeUnitsToMM = 1.0;
 		break;
 	case CodeG_PositioningAbsolute:
 		isPositioningAbsolute = true;
@@ -176,19 +190,19 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 		break;
 	case CodeG_SetPosition: {
 		if (gCode->commandOccuraceFlag & CommandFlad_X)	{
-			originX = gCode->X - positionX;
+			originX = positionX - gCode->X;
 			positionX = gCode->X;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_Y)	{
-			originY = gCode->Y - positionY;
+			originY = positionY - gCode->Y;
 			positionY = gCode->Y;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_Z)	{
-			originZ = gCode->Z - positionZ;
+			originZ = positionZ - gCode->Z;
 			positionZ = gCode->Z;
 		}
 		if (gCode->commandOccuraceFlag & CommandFlad_E)	{
-			originE = gCode->E - positionE;
+			originE = positionE - gCode->E;
 			positionE = gCode->E;
 		}
 		break;
@@ -233,13 +247,13 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 		break;
 	case CodeM_GetPosition:
 		Serial.print("ok C: X:");
-		Serial.print(positionX / gCodeUnitsToMM);
+		Serial.print((positionX - originX) / gCode->gCodeUnitsToMM);
 		Serial.print(" Y:");
-		Serial.print(positionY / gCodeUnitsToMM);
+		Serial.print((positionY - originY) / gCode->gCodeUnitsToMM);
 		Serial.print(" Z:");
-		Serial.print(positionZ / gCodeUnitsToMM);
+		Serial.print((positionZ - originZ) / gCode->gCodeUnitsToMM);
 		Serial.print(" E:");
-		Serial.println(positionE / gCodeUnitsToMM);
+		Serial.println((positionE - originE) / gCode->gCodeUnitsToMM);
 		break;
 	case CodeM_GetCapabilities:
 		break;
