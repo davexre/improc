@@ -56,14 +56,22 @@ public:
 
 	void determineAvailableSteps(void);
 	void initializeToStartingPosition(void);
-	void moveToPositionFast(long position);
+	void moveToPositionMMFast(float absolutePositionMM);
 	void moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis);
+	void rotate(boolean direction, float speedMMperMin);
 	float getAbsolutePositionMM();
+	inline long getStepPosition() {
+		motor.getStep();
+	}
 
 	void stop(void);
 
-	boolean isBuzy() {
-		return mode != StepperAxisModeIdle;
+	inline boolean isMoving() {
+		return (mode != StepperAxisModeIdle) && (mode != StepperAxisModeError);
+	}
+
+	inline boolean isOk() {
+		return mode != StepperAxisModeError;
 	}
 };
 

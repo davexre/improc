@@ -14,9 +14,15 @@
 #define RepRap_Stop 5
 #define RepRap_WaitForTemperature 6
 
-//////////
+// Feedrates in mm/minute
 #define SLOW_XY_FEEDRATE 1000.0
 #define FAST_XY_FEEDRATE 3000.0
+#define SLOW_Z_FEEDRATE 20
+#define FAST_Z_FEEDRATE  50.0
+#define FAST_E_FEEDRATE  1000.0
+
+#define SMALL_DISTANCE 0.01
+#define SMALL_DISTANCE2 (SMALL_DISTANCE*SMALL_DISTANCE)
 
 class RepRap {
 private:
@@ -63,7 +69,9 @@ public:
 	/**
 	 * Initializes the class.
 	 */
-	void initialize(SerialReader *reader);
+	void initialize(SerialReader *reader,
+			TemperatureControl *extruderTemperatureControl,
+			TemperatureControl *bedTemperatureControl);
 
 	/**
 	 * This method should be placed in the main loop of the program.

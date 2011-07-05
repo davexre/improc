@@ -146,14 +146,6 @@ void StepperAxis::doModeMoveToPosition() {
 	}
 }
 
-void StepperAxis::moveToPositionFast(long position) {
-	position = constrain(position, 0, maxStep);
-	motor.motorCoilDelayBetweenStepsMicros = 2000;
-	motor.gotoStep(position);
-	mode = StepperAxisModeMoveToPosition;
-	modeState = 0;
-}
-
 void StepperAxis::initializeToStartingPosition() {
 	motor.stop();
 	mode = StepperAxisModeInitializeToStartingPosition;
@@ -183,15 +175,28 @@ void StepperAxis::setAxisStepsPerMM(float axisStepsPerMM) {
 		this->axisStepsPerMM = axisStepsPerMM;
 }
 
+void StepperAxis::moveToPositionMMFast(float absolutePositionMM) {
+	long targetStep = absolutePositionMM / axisStepsPerMM;
+	targetStep = constrain(targetStep, 0, maxStep);
+	motor.motorCoilDelayBetweenStepsMicros = 2000;
+	motor.gotoStep(targetStep);
+	mode = StepperAxisModeMoveToPosition;
+	modeState = 0;
+}
+
 void StepperAxis::moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis) {
 	long targetStep = absolutePositionMM / axisStepsPerMM;
 	unsigned long deltaSteps = abs(targetStep - motor.getStep());
-	if (deltaSteps > 0) {
-		motor.motorCoilDelayBetweenStepsMicros = (deltaSteps <= 1) ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1);
-		motor.gotoStep(targetStep);
-		mode = StepperAxisModeMoveToPosition;
-		modeState = 0;
-	}
+	motor.motorCoilDelayBetweenStepsMicros = (deltaSteps <= 1) ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1);
+	motor.gotoStep(targetStep);
+	mode = StepperAxisModeMoveToPosition;
+	modeState = 0;
+}
+
+void StepperAxis::rotate(boolean direction, float speedMMperMin) {
+	unsigned long delay = 60000.0f * axisStepsPerMM / speedMMperMin;
+	motor.motorCoilDelayBetweenStepsMicros = constrain(delay, 5UL, 20000UL);
+	motor.rotate(direction);
 }
 
 float StepperAxis::getAbsolutePositionMM() {

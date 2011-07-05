@@ -1,13 +1,16 @@
 #include "RepRap.h"
 
-void RepRap::initialize(SerialReader *reader) {
+void RepRap::initialize(SerialReader *reader,
+		TemperatureControl *extruderTemperatureControl,
+		TemperatureControl *bedTemperatureControl) {
 	this->reader = reader;
+	this->extruderTemperatureControl = extruderTemperatureControl;
+	this->bedTemperatureControl = bedTemperatureControl;
 	gCodeParser.initialize();
 	isPositioningAbsolute = true;
 	originX = originY = originZ = originE = 0;
 	positionX = positionY = positionZ = positionE = 0;
 	feedRate = 0;
-//	extruderTemperatureControl = NULL;
 	setMode(RepRap_Idle);
 }
 
@@ -47,11 +50,11 @@ void RepRap::doRepRap_InitializeToStartingPosition() {
 		modeState = 1;
 		break;
 	case 1:
-		if ((axesSelected & CommandFlad_X) && (axisX->isBuzy()))
+		if ((axesSelected & CommandFlad_X) && (axisX->isMoving()))
 			break;
-		if ((axesSelected & CommandFlad_Y) && (axisY->isBuzy()))
+		if ((axesSelected & CommandFlad_Y) && (axisY->isMoving()))
 			break;
-		if ((axesSelected & CommandFlad_Z) && (axisZ->isBuzy()))
+		if ((axesSelected & CommandFlad_Z) && (axisZ->isMoving()))
 			break;
 		Serial.println("ok");
 		setMode(RepRap_Idle);
@@ -62,20 +65,64 @@ void RepRap::doRepRap_InitializeToStartingPosition() {
 void RepRap::doRepRap_MoveRapid() {
 	switch(modeState) {
 	case 0:
+		axisX->moveToPositionMMFast(gCodeParser.X);
+		axisY->moveToPositionMMFast(gCodeParser.Y);
+		axisZ->moveToPositionMMFast(gCodeParser.Z);
+		axisE->moveToPositionMMFast(gCodeParser.E);
+		modeState = 1;
+		break;
+	case 1:
+		if (!(axisX->isMoving() || axisY->isMoving() || axisZ->isMoving() || axisE->isMoving())) {
+			Serial.println("ok");
+			setMode(RepRap_Idle);
+		}
 		break;
 	}
 }
 
 void RepRap::doRepRap_ControlledMove() {
 	switch(modeState) {
-	case 0:
+	case 0: {
+		float maxd = abs(axisX->getAbsolutePositionMM() - gCodeParser.X);
+		maxd = max(abs(axisY->getAbsolutePositionMM() - gCodeParser.Y), maxd);
+		maxd = max(abs(axisZ->getAbsolutePositionMM() - gCodeParser.Z), maxd);
+		maxd = max(abs(axisE->getAbsolutePositionMM() - gCodeParser.E), maxd);
+		float timeMillis = 60000 * (maxd / feedRate);
+		axisX->moveToPositionMM(gCodeParser.X, timeMillis);
+		axisY->moveToPositionMM(gCodeParser.Y, timeMillis);
+		axisZ->moveToPositionMM(gCodeParser.Z, timeMillis);
+		axisE->moveToPositionMM(gCodeParser.E, timeMillis);
+		modeState = 1;
 		break;
+	}
+	case 1: {
+		if (!(axisX->isMoving() || axisY->isMoving() || axisZ->isMoving() || axisE->isMoving())) {
+			Serial.println("ok");
+			setMode(RepRap_Idle);
+		}
+		break;
+	}
 	}
 }
 
 void RepRap::doRepRap_Stop() {
 	switch(modeState) {
 	case 0:
+		axisX->stop();
+		axisY->stop();
+		axisZ->stop();
+		axisE->stop();
+		extruderTemperatureControl->stop();
+		bedTemperatureControl->stop();
+		fan->setState(true);
+		modeState = 1;
+		break;
+	case 1:
+		if (extruderTemperatureControl->getTemperature() < 60) {
+			fan->setState(false);
+			Serial.println("ok");
+			setMode(RepRap_Idle);
+		}
 		break;
 	}
 }
@@ -263,8 +310,10 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 	case CodeM_GetZeroPosition:
 		break;
 	case CodeM_ExtruderOpenValve:
+		axisE->rotate(true, FAST_E_FEEDRATE);
 		break;
 	case CodeM_ExtruderCloseValve:
+		axisE->moveToPositionMMFast(axisE->getAbsolutePositionMM() - 1); // move extruder 1 mm backwards
 		break;
 	case CodeM_ExtruderSetTemperature2:
 		if (gCode->commandOccuraceFlag & CommandFlad_S) {
