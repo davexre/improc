@@ -6,6 +6,7 @@
 #include "TemperatureControl.h"
 #include "StepperAxis.h"
 #include "RepRap.h"
+#include "RotaryEncoderAcelleration.h"
 
 DefineClass(RepRapMain);
 
@@ -14,6 +15,8 @@ static const int extruderTemperatureSensorPin = 0;
 static const int bedTemperatureSensorPin = 1;
 
 // Arduino Digital pins
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
 static const int buttonPin = 4; // the number of the pushbutton pin
 static const int ledPin = 13; // the number of the LED pin
 static const int shiftRegisterOutputPinCP = 8;
@@ -52,6 +55,7 @@ static const int axisE_motor22Pin = 17;
 
 static StateLed led;
 static AdvButton btn;
+static RotaryEncoderAcelleration rotor;
 static boolean lightOn = false;
 
 static const unsigned int *states[] = {
@@ -76,6 +80,10 @@ static StepperAxis axisZ;
 static StepperAxis axisE;
 
 static RepRap reprap;
+
+static void UpdateRotor() {
+	rotor.update();
+}
 
 void RepRapMain::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
@@ -119,6 +127,11 @@ void RepRapMain::setup() {
 	reprap.fan = expanderOutput.createPinHandler(extruderFanPin);
 
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	rotor.initialize(
+			new DigitalInputArduinoPin(rotorPinA, true),
+			new DigitalInputArduinoPin(rotorPinB, true));
+	attachInterrupt(0, UpdateRotor, CHANGE);
+
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 	led.setState(btn.isAutoRepeatEnabled());
 

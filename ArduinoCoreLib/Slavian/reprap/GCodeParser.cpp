@@ -48,7 +48,7 @@ boolean GCodeParser::parse(char *line) {
 		S = strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_S;
 		break;
-/*
+
 	case 'P':
 		P = strtod(line, &line);
 		commandOccuraceFlag |= CommandFlad_P;
@@ -106,7 +106,7 @@ boolean GCodeParser::parse(char *line) {
 			return false;
 //		commandOccuraceFlag |= CommandFlad_CHECKSUM;
 		break;
-*/
+
 	case ';': // This is comment ignore till the end of line
 	case '/':
 	case 0: // Empty string

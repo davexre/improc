@@ -116,7 +116,8 @@ public:
 ///////// DigitalOutputShiftRegister
 
 /**
- * Based on the datasheet for 74HC164.
+ * Based on the datasheet for 74HC164 - No output latch - output data is shifted "on the fly".
+ * The 74HC595 Has output latches
  */
 class DigitalOutputShiftRegister {
 private:
