@@ -58,8 +58,8 @@ protected:
 	short int itemsCount;
 	short int currentMenu;
 	bool _hasMenuChanged;
-public:
 	RotaryEncoderAcelleration rotor;
+public:
 	AdvButton button;
 
 	void initialize(DigitalInputPin *encoderPinA, DigitalInputPin *encoderPinB, DigitalInputPin *buttonPin,

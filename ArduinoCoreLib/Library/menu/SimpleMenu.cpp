@@ -13,6 +13,11 @@ void SimpleMenu::update(void) {
 	button.update();
 	if (button.getButtonState() == AdvButtonState_CLICK) {
 		activateNextMenuItem();
+	} else if (button.getButtonState() == AdvButtonState_DOUBLE_CLICK) {
+		// Every a double click is preceeded by a single click and this
+		// means that the activateNextMenuItem is already invoked but
+		// a double click was ment instead.
+		activatePreviousMenuItem();
 	} else {
 		_hasMenuChanged = false;
 	}
