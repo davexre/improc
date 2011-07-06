@@ -9,7 +9,7 @@ static const int ledPin = 13; // the number of the LED pin
 
 static StateLed led;
 static AdvButton btn;
-static boolean lightOn = false;
+static bool lightOn = false;
 
 static const unsigned int *states[] = {
 		BLINK_SLOW,

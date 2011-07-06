@@ -56,7 +56,7 @@ public:
 	StepperAxis *axisE;
 	DigitalOutputPin *fan;
 
-	boolean isPositioningAbsolute;
+	bool isPositioningAbsolute;
 
 	float originX, originY, originZ, originE;
 	/**

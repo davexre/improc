@@ -16,7 +16,7 @@ static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
 static AdvButton btn;
-static boolean speakerOn = false;
+static bool speakerOn = false;
 static RotaryEncoderAcelleration rotor;
 static StateLed led;
 

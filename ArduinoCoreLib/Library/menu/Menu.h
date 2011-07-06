@@ -14,12 +14,12 @@ public:
 	const char *title;
 	RotaryEncoderState encoderState;
 
-	void initialize(const char *Title, const long minValue, const long maxValue, const boolean looped = false);
+	void initialize(const char *Title, const long minValue, const long maxValue, const bool looped = false);
 
 	/**
 	 * Returns true if the value has changed since the last call to getValue().
 	 */
-	inline boolean hasValueChanged() {
+	inline bool hasValueChanged() {
 		return encoderState.hasValueChanged();
 	}
 
@@ -38,7 +38,7 @@ class MenuItemEnum : public MenuItem {
 public:
 	const char **items;
 
-	void initialize(const char *Title, const char **Items, const unsigned int ItemsCount, const boolean looped = true);
+	void initialize(const char *Title, const char **Items, const unsigned int ItemsCount, const bool looped = true);
 
 	virtual byte getMenuItemType(void);
 };
@@ -47,7 +47,7 @@ class MenuList : public MenuItem {
 public:
 	const MenuItem *menuItems;
 
-	void initialize(const char *Title, const MenuItem* MenuItems, const unsigned int ItemsCount, const boolean looped = true);
+	void initialize(const char *Title, const MenuItem* MenuItems, const unsigned int ItemsCount, const bool looped = true);
 
 	virtual byte getMenuItemType(void);
 };
@@ -57,7 +57,7 @@ protected:
 	MenuItem **menuItems;
 	short int itemsCount;
 	short int currentMenu;
-	boolean _hasMenuChanged;
+	bool _hasMenuChanged;
 public:
 	RotaryEncoderAcelleration rotor;
 	AdvButton button;
@@ -93,7 +93,7 @@ public:
 	 * Returns true if a menu has changed OR any of the
 	 * #MenuItems.hasValueChanged()# returns true.
 	 */
-	boolean hasChanged();
+	bool hasChanged();
 };
 
 class SimpleMenuWithSerialPrint : public SimpleMenu {

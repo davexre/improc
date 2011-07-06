@@ -37,7 +37,7 @@ void ShiftRegisterOutputTest::setup() {
     Serial.println("Initialized");
 }
 
-boolean pinsOn = false;
+bool pinsOn = false;
 void ShiftRegisterOutputTest::loop() {
 	btn.update();
 	led.update();

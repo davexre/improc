@@ -88,7 +88,7 @@ public:
 
 	void initialize();
 	void initVars();
-	boolean parse(char *line);
+	bool parse(char *line);
 };
 
 #endif

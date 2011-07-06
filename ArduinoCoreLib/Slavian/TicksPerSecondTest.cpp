@@ -8,7 +8,7 @@ static const int buttonPin = 4; // the number of the pushbutton pin
 static const int ledPin = 13; // the number of the LED pin
 
 static Button btn;
-static boolean lightOn = false;
+static bool lightOn = false;
 static TicksPerSecond tps;
 
 unsigned long start, count;

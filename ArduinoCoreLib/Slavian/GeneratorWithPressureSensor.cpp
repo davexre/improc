@@ -32,7 +32,7 @@ static int mosfetTemperatureThreshold = (int) (80 / analogReadingToVoltage / 100
 static int currentMaxThreshold = (int) (10 * shuntResistance / analogReadingToVoltage);	// 10 amps
 static int currentMinThreshold = (int) (0.020 * shuntResistance / analogReadingToVoltage);	// 0.020 amps
 
-static boolean isPlaying = false;
+static bool isPlaying = false;
 static int maxPressure = 0;
 static int maxCurrent = 0;
 
@@ -44,7 +44,7 @@ static SerialReader reader;
 static TicksPerSecond tps;
 static TicksPerSecond currentTPS;
 
-static void showStatus(boolean aborting) {
+static void showStatus(bool aborting) {
 	Serial.print(isPlaying ? "1" : "0");
 	Serial.print("\t");
 	Serial.print(aborting ? "1" : "0");
@@ -65,7 +65,7 @@ static void showStatus(boolean aborting) {
 	Serial.println();
 }
 
-static boolean checkThresholdsExceeded() {
+static bool checkThresholdsExceeded() {
 	return (
 		(pressure >= pressureTreshold) |
 		(cellTemperature >= cellTemperatureThreshold) |

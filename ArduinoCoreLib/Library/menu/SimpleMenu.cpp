@@ -28,7 +28,7 @@ void SimpleMenu::activateMenuItem(short int menuItem) {
 	rotor.setState(&menuItems[currentMenu]->encoderState);
 }
 
-boolean SimpleMenu::hasChanged() {
+bool SimpleMenu::hasChanged() {
 	if (_hasMenuChanged)
 		return true;
 	for (int i = itemsCount - 1; i >= 0; i--)

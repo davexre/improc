@@ -193,7 +193,7 @@ void StepperAxis::moveToPositionMM(float absolutePositionMM, unsigned long timeT
 	modeState = 0;
 }
 
-void StepperAxis::rotate(boolean direction, float speedMMperMin) {
+void StepperAxis::rotate(bool direction, float speedMMperMin) {
 	unsigned long delay = 60000.0f * axisStepsPerMM / speedMMperMin;
 	motor.motorCoilDelayBetweenStepsMicros = constrain(delay, 5UL, 20000UL);
 	motor.rotate(direction);

@@ -24,7 +24,7 @@ static byte calculateChecksum(char *line) {
 	}
 }
 
-boolean GCodeParser::parse(char *line) {
+bool GCodeParser::parse(char *line) {
 	initVars();
 	byte checksum = calculateChecksum(line);
 	char cmd = *(line++);

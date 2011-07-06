@@ -11,15 +11,15 @@
 
 class DigitalInputPin {
 public:
-	virtual boolean getState() = 0;
+	virtual bool getState() = 0;
 };
 
 
 class DigitalOutputPin { //: public DigitalInputPin {
 public:
-	virtual boolean getState() = 0;
+	virtual bool getState() = 0;
 
-	virtual void setState(const boolean value) = 0;
+	virtual void setState(const bool value) = 0;
 };
 
 ///////// DigitalInputArduinoPin
@@ -30,9 +30,9 @@ private:
 
 	volatile uint8_t *inputRegister;
 public:
-	DigitalInputArduinoPin(const uint8_t arduinoPin, const boolean enablePullup);
+	DigitalInputArduinoPin(const uint8_t arduinoPin, const bool enablePullup);
 
-	virtual boolean getState();
+	virtual bool getState();
 };
 
 ///////// DigitalOutputArduinoPin
@@ -43,13 +43,13 @@ private:
 
 	volatile uint8_t *outputRegister;
 
-	boolean lastState;
+	bool lastState;
 public:
-	DigitalOutputArduinoPin(const uint8_t arduinoPin, const boolean initialValue = 0);
+	DigitalOutputArduinoPin(const uint8_t arduinoPin, const bool initialValue = 0);
 
-	virtual boolean getState();
+	virtual bool getState();
 
-	virtual void setState(const boolean value);
+	virtual void setState(const bool value);
 };
 
 ///////// DigitalInputShiftRegisterPin
@@ -63,7 +63,7 @@ private:
 public:
 	DigitalInputShiftRegisterPin(DigitalInputShiftRegister *parent, const uint8_t devicePin);
 
-	virtual boolean getState();
+	virtual bool getState();
 };
 
 ///////// DigitalInputShiftRegister
@@ -92,7 +92,7 @@ public:
 	 */
 	void update();
 
-	boolean getState(const uint8_t shiftRegisterPin);
+	bool getState(const uint8_t shiftRegisterPin);
 
 	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin);
 };
@@ -108,9 +108,9 @@ private:
 public:
 	DigitalOutputShiftRegisterPin(DigitalOutputShiftRegister *parent, const uint8_t devicePin);
 
-	virtual boolean getState();
+	virtual bool getState();
 
-	virtual void setState(const boolean value);
+	virtual void setState(const bool value);
 };
 
 ///////// DigitalOutputShiftRegister
@@ -124,7 +124,7 @@ private:
 	uint8_t buffer[(DigitalOutputShiftRegisterPinsCount + 7) / 8];
 	DigitalOutputPin *CP_pin;
 	DigitalOutputPin *DS_pin;
-	boolean modified;
+	bool modified;
 public:
 
 	/**
@@ -138,9 +138,9 @@ public:
 	 */
 	void update();
 
-	boolean getState(const uint8_t shiftRegisterPin);
+	bool getState(const uint8_t shiftRegisterPin);
 
-	void setState(const uint8_t shiftRegisterPin, const boolean value);
+	void setState(const uint8_t shiftRegisterPin, const bool value);
 
 	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin);
 };

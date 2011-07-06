@@ -20,7 +20,7 @@ private:
 
 	unsigned long toggleTime;
 	signed short int playCount;
-	boolean lightOn;
+	bool lightOn;
 
 	unsigned int getNextDelay(void);
 public:
@@ -83,7 +83,7 @@ public:
 	 * Returns TRUE if blink sequence is currently playing.
 	 * This method is "thread safe"
 	 */
-	inline boolean isPlaying() {
+	inline bool isPlaying() {
 		return (playCount); // (playCount != 0)
 	};
 
@@ -91,7 +91,7 @@ public:
 	 * Returns the state of the led.
 	 * This method is "thread safe"
 	 */
-	inline boolean isLedOn() {
+	inline bool isLedOn() {
 		return (lightOn);
 	}
 

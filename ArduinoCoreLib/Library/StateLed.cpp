@@ -1,7 +1,7 @@
 #include "StateLed.h"
 
 void StateLed::initialize(DigitalOutputPin *pin, const unsigned int *(*stateDelays),
-		const short int numberOfStates, const boolean looped) {
+		const short int numberOfStates, const bool looped) {
 	this->looped = looped;
 	this->numberOfStates = numberOfStates;
 	this->stateDelays = stateDelays;
@@ -20,7 +20,7 @@ void StateLed::setState(short int state) {
 	}
 }
 
-void StateLed::setLooped(const boolean looped) {
+void StateLed::setLooped(const bool looped) {
 	if (this->looped != looped) {
 		this->looped = looped;
 		led.playBlink(stateDelays[state], looped ? -1 : 1);

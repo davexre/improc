@@ -22,22 +22,22 @@ class AdvButton : Button {
 	unsigned long previousTimeButtonUp;
 	unsigned long timeButtonDown;
 	unsigned long timeNextAutorepeatToggle;
-	boolean autoRepeatEnabled;
-	boolean autoButtonStarted;
+	bool autoRepeatEnabled;
+	bool autoButtonStarted;
 	byte buttonState;
 public:
-	void initialize(DigitalInputPin *pin, const boolean autoRepeatEnabled, const unsigned int debounceMillis = 10);
+	void initialize(DigitalInputPin *pin, const bool autoRepeatEnabled, const unsigned int debounceMillis = 10);
 	void update(void);
 
 	inline byte getButtonState() {
 		return buttonState;
 	}
 
-	inline boolean isAutoRepeatEnabled() {
+	inline bool isAutoRepeatEnabled() {
 		return autoRepeatEnabled;
 	}
 
-	inline boolean setAutoRepeatEnabled(const boolean newAutoRepeatEnabled) {
+	inline bool setAutoRepeatEnabled(const bool newAutoRepeatEnabled) {
 		autoRepeatEnabled = newAutoRepeatEnabled;
 	}
 
@@ -45,7 +45,7 @@ public:
 	 * True if double click is detected.
 	 * When this method returns true the method isClicked() will ALSO be true.
 	 */
-	inline boolean isDoubleClicked() {
+	inline bool isDoubleClicked() {
 		return (buttonState == AdvButtonState_DOUBLE_CLICK);
 	}
 
@@ -53,14 +53,14 @@ public:
 	 * True if long click is detected.
 	 * When this method returns true the method isClicked() will ALSO be true.
 	 */
-	inline boolean isLongClicked() {
+	inline bool isLongClicked() {
 		return (buttonState == AdvButtonState_LONG_CLICK);
 	}
 
 	/**
 	 * Returns true if buttonState is anything else but AdvButtonState_DOUBLE_CLICK.
 	 */
-	inline boolean isClicked() {
+	inline bool isClicked() {
 		return (buttonState != AdvButtonState_NONE);
 	}
 };

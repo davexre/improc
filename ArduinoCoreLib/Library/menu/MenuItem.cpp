@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-void MenuItem::initialize(const char *Title, const long minValue, const long maxValue, const boolean looped) {
+void MenuItem::initialize(const char *Title, const long minValue, const long maxValue, const bool looped) {
 	title = Title;
 	encoderState.initialize();
 	encoderState.setMinMax(minValue, maxValue);

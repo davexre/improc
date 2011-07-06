@@ -82,7 +82,7 @@ void SteppingMotor::gotoStep(const long step) {
 	targetStep = step;
 }
 
-void SteppingMotor::rotate(const boolean forward) {
+void SteppingMotor::rotate(const bool forward) {
 	movementMode = forward ? 1 : 2;
 }
 
@@ -91,7 +91,7 @@ void SteppingMotor::resetStepTo(const long step) {
 	this->step = this->targetStep = step;
 }
 
-boolean SteppingMotor::isMoving() {
+bool SteppingMotor::isMoving() {
 	return (isMotorCoilOn || // TODO: Дали винаги е така? Ако моторът е в режим "задържане"?
 		((movementMode == 0) && (targetStep != step)) ||
 		(movementMode == 1) ||
@@ -101,8 +101,8 @@ boolean SteppingMotor::isMoving() {
 void SteppingMotor::update() {
 	unsigned long now = micros();
 	if (now - motorCoilOnMicros > motorCoilDelayBetweenStepsMicros) {
-		boolean shallMove;
-		boolean forward;
+		bool shallMove;
+		bool forward;
 
 		switch (movementMode) {
 		case 1:

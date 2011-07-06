@@ -3,7 +3,7 @@
 
 ///////// DigitalInputArduinoPin
 
-DigitalInputArduinoPin::DigitalInputArduinoPin(const uint8_t arduinoPin, const boolean enablePullup) {
+DigitalInputArduinoPin::DigitalInputArduinoPin(const uint8_t arduinoPin, const bool enablePullup) {
 	bit = digitalPinToBitMask(arduinoPin);
 	uint8_t port = digitalPinToPort(arduinoPin);
 	inputRegister = portInputRegister(port);
@@ -21,13 +21,13 @@ DigitalInputArduinoPin::DigitalInputArduinoPin(const uint8_t arduinoPin, const b
 	}
 }
 
-boolean DigitalInputArduinoPin::getState() {
+bool DigitalInputArduinoPin::getState() {
 	return (*inputRegister & bit);
 }
 
 ///////// DigitalOutputArduinoPin
 
-DigitalOutputArduinoPin::DigitalOutputArduinoPin(const uint8_t arduinoPin, const boolean initialValue) {
+DigitalOutputArduinoPin::DigitalOutputArduinoPin(const uint8_t arduinoPin, const bool initialValue) {
 	bit = digitalPinToBitMask(arduinoPin);
 	uint8_t port = digitalPinToPort(arduinoPin);
 	outputRegister = portOutputRegister(port);
@@ -35,11 +35,11 @@ DigitalOutputArduinoPin::DigitalOutputArduinoPin(const uint8_t arduinoPin, const
 	setState(initialValue);
 }
 
-boolean DigitalOutputArduinoPin::getState() {
+bool DigitalOutputArduinoPin::getState() {
 	return lastState;
 }
 
-void DigitalOutputArduinoPin::setState(const boolean value) {
+void DigitalOutputArduinoPin::setState(const bool value) {
 	lastState = value;
 	if (value) {
 		disableInterrupts();
@@ -59,7 +59,7 @@ DigitalInputShiftRegisterPin::DigitalInputShiftRegisterPin(DigitalInputShiftRegi
 	this->devicePin = devicePin;
 }
 
-boolean DigitalInputShiftRegisterPin::getState() {
+bool DigitalInputShiftRegisterPin::getState() {
 	return parent->getState(devicePin);
 }
 
@@ -107,7 +107,7 @@ void DigitalInputShiftRegister::update() {
 	CP_pin->setState(false);
 }
 
-boolean DigitalInputShiftRegister::getState(const uint8_t shiftRegisterPin) {
+bool DigitalInputShiftRegister::getState(const uint8_t shiftRegisterPin) {
 	return shiftRegisterPin >= DigitalInputShiftRegisterPinsCount ? 0 :
 		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
 }
@@ -123,11 +123,11 @@ DigitalOutputShiftRegisterPin::DigitalOutputShiftRegisterPin(DigitalOutputShiftR
 	this->devicePin = devicePin;
 }
 
-boolean DigitalOutputShiftRegisterPin::getState() {
+bool DigitalOutputShiftRegisterPin::getState() {
 	return parent->getState(devicePin);
 }
 
-void DigitalOutputShiftRegisterPin::setState(const boolean value) {
+void DigitalOutputShiftRegisterPin::setState(const bool value) {
 	parent->setState(devicePin, value);
 }
 
@@ -146,12 +146,12 @@ void DigitalOutputShiftRegister::initialize(DigitalOutputPin *CP_pin, DigitalOut
 	}
 }
 
-boolean DigitalOutputShiftRegister::getState(const uint8_t shiftRegisterPin) {
+bool DigitalOutputShiftRegister::getState(const uint8_t shiftRegisterPin) {
 	return shiftRegisterPin >= DigitalOutputShiftRegisterPinsCount ? 0 :
 		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
 }
 
-void DigitalOutputShiftRegister::setState(const uint8_t shiftRegisterPin, const boolean value) {
+void DigitalOutputShiftRegister::setState(const uint8_t shiftRegisterPin, const bool value) {
 	if (shiftRegisterPin < DigitalOutputShiftRegisterPinsCount) {
 		uint8_t mask = 1 << (shiftRegisterPin & 0b0111);
 		uint8_t *buf = &buffer[shiftRegisterPin >> 3];

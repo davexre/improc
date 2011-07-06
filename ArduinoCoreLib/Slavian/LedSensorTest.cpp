@@ -7,7 +7,7 @@ static const int ledPin = 13;
 static const int ledSensorPinN = 8;
 static const int ledSensorPinP = 9;
 
-static boolean isLedOn = false;
+static bool isLedOn = false;
 static unsigned long time;
 static TicksPerSecond tps;
 static float light;

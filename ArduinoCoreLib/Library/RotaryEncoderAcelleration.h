@@ -34,32 +34,32 @@ private:
 	long minValue;
 	long maxValue;
 	volatile long value;
-	boolean valueChangeEnabled;
-	boolean _isValueLooped;
-	boolean _hasValueChanged;
+	bool valueChangeEnabled;
+	bool _isValueLooped;
+	bool _hasValueChanged;
 public:
-	void initialize(const long minVal = 0, const long maxVal = 1000, const boolean looped = false);
+	void initialize(const long minVal = 0, const long maxVal = 1000, const bool looped = false);
 
-	inline void setValueChangeEnabled(const boolean newValueChengeEnabled) {
+	inline void setValueChangeEnabled(const bool newValueChengeEnabled) {
 		valueChangeEnabled = newValueChengeEnabled;
 	}
 
-	inline boolean isValueChangeEnabled() {
+	inline bool isValueChangeEnabled() {
 		return valueChangeEnabled;
 	}
 
-	inline void setValueLooped(const boolean newIsValueLooped) {
+	inline void setValueLooped(const bool newIsValueLooped) {
 		_isValueLooped = newIsValueLooped;
 	}
 
-	inline boolean isValueLooped() {
+	inline bool isValueLooped() {
 		return _isValueLooped;
 	}
 
 	/**
 	 * Returns true if the value has changed since the last call to getValue().
 	 */
-	inline boolean hasValueChanged() {
+	inline bool hasValueChanged() {
 		return _hasValueChanged;
 	}
 
@@ -151,7 +151,7 @@ public:
 	/**
 	 * Has the rotary encoder been ticked at the last update
 	 */
-	inline boolean isTicked() {
+	inline bool isTicked() {
 		return pinA.isPressed();
 	}
 
@@ -159,7 +159,7 @@ public:
 	 * Has the rotary encoder been rotated in incrementing direction at the last update.
 	 * If the method returns TRUE the direction is incrementing.
 	 */
-	inline boolean isIncrementing() {
+	inline bool isIncrementing() {
 		return pinB.isUp();
 	}
 
@@ -175,15 +175,15 @@ public:
 		}
 	}
 
-	inline void setValueChangeEnabled(const boolean newValueChengeEnabled) {
+	inline void setValueChangeEnabled(const bool newValueChengeEnabled) {
 		state->setValueChangeEnabled(newValueChengeEnabled);
 	}
 
-	inline boolean isValueChangeEnabled() {
+	inline bool isValueChangeEnabled() {
 		return state->isValueChangeEnabled();
 	}
 
-	inline boolean hasValueChanged() {
+	inline bool hasValueChanged() {
 		return state->hasValueChanged();
 	}
 

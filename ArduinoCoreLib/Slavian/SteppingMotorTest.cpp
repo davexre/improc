@@ -34,8 +34,8 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
-static boolean motorAutoRunning = false;
-static boolean motorForward = true;
+static bool motorAutoRunning = false;
+static bool motorForward = true;
 
 void SteppingMotorTest::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);

@@ -11,7 +11,7 @@ void SoftwarePWM::initialize(DigitalOutputPin *pin, unsigned int frequencyCycles
 }
 
 void SoftwarePWM::update() {
-	boolean state = pin->getState();
+	bool state = pin->getState();
 	unsigned long now = millis();
 	if ((value == 0) || (frequencyCyclesPerMinute == 0)) {
 		toggleTime = now - MaxPeriodMillis;

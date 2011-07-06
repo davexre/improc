@@ -16,7 +16,7 @@ private:
 	int bufferSize;
 	int bufferFull;
 	char *buffer;
-	boolean eol;
+	bool eol;
 
 public:
 	/**
@@ -61,7 +61,7 @@ public:
 	 * The CR (Carriage Return) character is ignored. The reading of
 	 * data is discontinued until the readln() is invoked.
 	 */
-	inline boolean available() {
+	inline bool available() {
 		return (eol);
 	};
 };

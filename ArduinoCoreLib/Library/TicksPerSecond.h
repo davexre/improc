@@ -63,7 +63,7 @@ public:
 	 * 		Indicates if the invocation of the method should cause a ticking or
 	 * 		is just to update the ticks per second value.
 	 */
-	void update(const boolean tick = true);
+	void update(const bool tick = true);
 
 	/**
 	 * Returns the ticks per second value.

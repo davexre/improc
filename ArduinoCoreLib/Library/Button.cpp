@@ -8,7 +8,7 @@ void Button::initialize(DigitalInputPin *pin, const unsigned int debounceMillis)
 }
 
 void Button::update() {
-	boolean curReading = buttonPin->getState();
+	bool curReading = buttonPin->getState();
 	unsigned long now = millis();
 	lastState = currentState;
 	if (curReading != currentState) {

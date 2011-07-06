@@ -35,15 +35,15 @@ void ShiftRegisterInputTest::setup() {
     Serial.println("Initialized");
 }
 
-boolean prevBuffer[DigitalInputShiftRegisterPinsCount];
+bool prevBuffer[DigitalInputShiftRegisterPinsCount];
 
 void ShiftRegisterInputTest::loop() {
 	led.update();
 	shiftRegisterInput.update();
 
-	boolean show = false;
+	bool show = false;
 	for (int i = 0; i < DigitalInputShiftRegisterPinsCount; i++) {
-		boolean val = shiftRegisterInput.getState(i);
+		bool val = shiftRegisterInput.getState(i);
 		if (val != prevBuffer[i]) {
 			show = true;
 			prevBuffer[i] = val;
@@ -52,7 +52,7 @@ void ShiftRegisterInputTest::loop() {
 
 	if (show) {
 		for (int i = 0; i < DigitalInputShiftRegisterPinsCount; i++) {
-			boolean val = shiftRegisterInput.getState(i);
+			bool val = shiftRegisterInput.getState(i);
 			Serial.print(val ? '1' : '0');
 			if (i % 4 == 3)
 				Serial.print(' ');

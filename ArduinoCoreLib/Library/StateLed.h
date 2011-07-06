@@ -28,7 +28,7 @@ private:
 	 * of the appropriate blink sequence after a call to setState(),
 	 * nextState(), previousState().
 	 */
-	boolean looped;
+	bool looped;
 
 	/**
 	 * The currently set state.
@@ -62,7 +62,7 @@ public:
 	 * 		or via a continuous blinking loop.
 	 */
 	void initialize(DigitalOutputPin *pin, const unsigned int *(*stateDelays),
-			const short int numberOfStates, const boolean looped = true);
+			const short int numberOfStates, const bool looped = true);
 
 	/**
 	 * Updates the on/off state of the led. This method should be
@@ -76,7 +76,7 @@ public:
 	/**
 	 * Sets looped state of the blinking led.
 	 */
-	void setLooped(const boolean looped);
+	void setLooped(const bool looped);
 
 	/**
 	 * Sets the led blink sequence to the new state.
@@ -103,7 +103,7 @@ public:
 	/**
 	 * Returns the state of the led.
 	 */
-	inline boolean isLedOn() {
+	inline bool isLedOn() {
 		return (led.isLedOn());
 	}
 };

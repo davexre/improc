@@ -13,7 +13,7 @@ static const int rotorPinB = 3;		// the other quadrature pin
 
 static Button btn;
 static RotaryEncoderAcelleration rotor;
-static boolean speakerOn = false;
+static bool speakerOn = false;
 
 void PWM_Led::setup() {
 	pinMode(ledPin, OUTPUT);

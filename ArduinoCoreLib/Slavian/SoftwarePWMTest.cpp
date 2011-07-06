@@ -13,7 +13,7 @@ static const int speakerPin = 8;
 static const int ledPin = 13; // the number of the LED pin
 
 static AdvButton btn;
-static boolean speakerOn = true;
+static bool speakerOn = true;
 
 static MenuItem frequencyCyclesPerMinuteMenu;
 static MenuItem pulseWidthMenu;

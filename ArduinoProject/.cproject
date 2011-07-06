@@ -24,7 +24,7 @@
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.size.app.release.613409869" name="Print Size" superClass="de.innot.avreclipse.toolchain.options.toolchain.size.app.release"/>
 							<option id="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.release.1932661406" name="AVRDude" superClass="de.innot.avreclipse.toolchain.options.toolchain.avrdude.app.release" value="false" valueType="boolean"/>
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="de.innot.avreclipse.targetplatform.winavr.app.release.2053955318" name="AVR Cross-Target" superClass="de.innot.avreclipse.targetplatform.winavr.app.release"/>
-							<builder buildPath="${workspace_loc:/${ProjName}/Release}" enableAutoBuild="false" id="de.innot.avreclipse.target.builder.winavr.app.release.2060456680" keepEnvironmentInBuildfile="false" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.release">
+							<builder buildPath="${workspace_loc:/${ProjName}/Release}" enableAutoBuild="false" enableCleanBuild="false" id="de.innot.avreclipse.target.builder.winavr.app.release.2060456680" keepEnvironmentInBuildfile="false" name="AVR GNU Make Builder" superClass="de.innot.avreclipse.target.builder.winavr.app.release">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
 								</outputEntries>

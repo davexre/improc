@@ -26,8 +26,8 @@
  */
 class Button {
 	DigitalInputPin *buttonPin;
-	boolean lastState;
-	boolean currentState;
+	bool lastState;
+	bool currentState;
 	unsigned long lastToggleTime;	// used to debounce the button
 
 	/**
@@ -57,7 +57,7 @@ public:
 	 * Has the button stated changed from isUp to isDown at the last update.
 	 * This is to be used like an OnKeyDown.
 	 */
-	inline boolean isPressed(void) {
+	inline bool isPressed(void) {
 		return ((!currentState) && lastState);
 	}
 
@@ -65,28 +65,28 @@ public:
 	 * Has the button stated changed from isDown to isUp at the last update.
 	 * This is to be used like an OnKeyUp.
 	 */
-	inline boolean isReleased(void) {
+	inline bool isReleased(void) {
 		return (currentState && (!lastState));
 	}
 
 	/**
 	 * Is the button down (pushed).
 	 */
-	inline boolean isDown(void) {
+	inline bool isDown(void) {
 		return (!currentState);
 	}
 
 	/**
 	 * Is the button up.
 	 */
-	inline boolean isUp(void) {
+	inline bool isUp(void) {
 		return (currentState);
 	}
 
 	/**
 	 * Has the state changed from up to down or vice versa.
 	 */
-	inline boolean isToggled(void) {
+	inline bool isToggled(void) {
 		return (currentState != lastState);
 	}
 };

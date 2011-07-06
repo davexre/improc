@@ -92,7 +92,7 @@ void doInitializeToStartingPosition() {
 	}
 }
 
-boolean dummy = false;
+bool dummy = false;
 void StepperAxisTest::loop() {
 	led.update();
 	axis.update();

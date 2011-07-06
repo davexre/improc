@@ -47,7 +47,7 @@ public:
 		return frequencyCyclesPerMinute;
 	}
 
-	inline boolean isPinOn() {
+	inline bool isPinOn() {
 		return pin->getState();
 	}
 };

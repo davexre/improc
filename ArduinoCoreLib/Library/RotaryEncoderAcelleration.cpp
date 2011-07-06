@@ -33,7 +33,7 @@ void RotaryEncoderAcelleration::update() {
 	}
 }
 
-void RotaryEncoderState::initialize(const long minVal, const long maxVal, const boolean looped) {
+void RotaryEncoderState::initialize(const long minVal, const long maxVal, const bool looped) {
 	_isValueLooped = looped;
 	_hasValueChanged = true;
 	valueChangeEnabled = true;

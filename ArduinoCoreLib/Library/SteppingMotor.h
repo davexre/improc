@@ -15,7 +15,7 @@ private:
 
 	void setState(const uint8_t state);
 
-	boolean isMotorCoilOn;
+	bool isMotorCoilOn;
 	unsigned long motorCoilOnMicros;
 
 	DigitalOutputPin *out11pin;
@@ -45,13 +45,13 @@ public:
 
 	void gotoStep(const long step);
 
-	void rotate(const boolean forward);
+	void rotate(const bool forward);
 
 	void stop();
 
 	void resetStepTo(const long step);
 
-	boolean isMoving();
+	bool isMoving();
 
 	inline long getStep(void) {
 		return step;
