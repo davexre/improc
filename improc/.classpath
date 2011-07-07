@@ -14,6 +14,9 @@
 	<classpathentry kind="lib" path="lib/javazoom.net/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/tritonus_share.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/vorbisspi1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/j3d-org-java3d-all.jar"/>
+	<classpathentry kind="lib" path="lib/j3dcore.jar"/>
+	<classpathentry kind="lib" path="lib/j3dutils.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
