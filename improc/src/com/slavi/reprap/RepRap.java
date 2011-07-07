@@ -16,6 +16,7 @@ public class RepRap {
 	void loadSTL(Reader stl) throws FileNotFoundException, IncorrectFormatException, ParsingErrorException {
 		STLLoader loader = new STLLoader();
 		Scene scene = loader.load(stl);
+		// STLObject.loadSingleSTL
 	}
 	
 	void doIt() throws Exception {
