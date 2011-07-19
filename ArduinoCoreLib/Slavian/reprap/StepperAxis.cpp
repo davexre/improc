@@ -1,20 +1,16 @@
 #include "StepperAxis.h"
 
-void StepperAxis::initialize(
-		DigitalInputPin  *endPositionButtonPin,
-		DigitalOutputPin *stepMotor11pin,
-		DigitalOutputPin *stepMotor12pin,
-		DigitalOutputPin *stepMotor21pin,
-		DigitalOutputPin *stepMotor22pin) {
+void StepperAxis::initialize(SteppingMotor *motor,
+		DigitalInputPin *endPositionButtonPin) {
+	motorControl.initialize(motor);
 	endPositionButton.initialize(endPositionButtonPin);
-	motor.initialize(stepMotor11pin, stepMotor12pin, stepMotor21pin, stepMotor22pin);
 	maxStep = 100;
 	axisStepsPerMM = 1.0;
 }
 
 void StepperAxis::update() {
 	endPositionButton.update();
-	motor.update();
+	motorControl.update();
 
 	switch (mode) {
 	case StepperAxisModeDetermineAvailableSteps:
@@ -30,8 +26,8 @@ void StepperAxis::update() {
 	case StepperAxisModeIdle:
 	case StepperAxisModeError:
 	default:
-		if (motor.isMoving()) {
-			motor.stop();
+		if (motorControl.isMoving()) {
+			motorControl.stop();
 			mode = StepperAxisModeError;
 			modeState = 0;
 		}
@@ -49,16 +45,16 @@ void StepperAxis::doDetermineAvailableSteps() {
 		break;
 	case 5:
 		// Rotate forward till the button gets pressed.
-		motor.rotate(true);
+		motorControl.rotate(true);
 		modeState = 6;
 		break;
 	case 6:
 		if (endPositionButton.isDown()) {
 			// The end position moving forward is reached.
-			motor.stop();
-			maxStep = motor.getStep();
+			motorControl.stop();
+			maxStep = motorControl.getStep();
 			timestamp = millis();
-			motor.rotate(false);
+			motorControl.rotate(false);
 			modeState = 7;
 		}
 		break;
@@ -71,9 +67,9 @@ void StepperAxis::doDetermineAvailableSteps() {
 	case 8:
 		if (endPositionButton.isDown()) {
 			// The end position moving backward is reached.
-			motor.stop();
-			maxStep -= motor.getStep();
-			motor.resetStepTo(0);
+			motorControl.stop();
+			maxStep -= motorControl.getStep();
+			motorControl.resetStepTo(0);
 			mode = StepperAxisModeIdle;
 			modeState = 0;
 		}
@@ -84,20 +80,20 @@ void StepperAxis::doDetermineAvailableSteps() {
 void StepperAxis::doInitializeToStartingPosition() {
 	switch (modeState) {
 	case 0:
-		motor.resetStepTo(0);
+		motorControl.resetStepTo(0);
 		if (endPositionButton.isDown()) {
 			// The motor is in some end position. Try moving forward a bit to release the button
-			motor.gotoStep(5);
+			motorControl.gotoStep(5);
 			modeState = 1;
 		} else {
 			modeState = 5;
 		}
 		break;
 	case 1:
-		if (!motor.isMoving()) {
+		if (!motorControl.isMoving()) {
 			if (endPositionButton.isDown()) {
 				// The button is still pressed. Try moving backward a bit.
-				motor.gotoStep(0);
+				motorControl.gotoStep(0);
 				modeState = 2;
 			} else {
 				modeState = 5;
@@ -105,7 +101,7 @@ void StepperAxis::doInitializeToStartingPosition() {
 		}
 		break;
 	case 2:
-		if (!motor.isMoving()) {
+		if (!motorControl.isMoving()) {
 			if (endPositionButton.isDown()) {
 				// The button is still pressed. The motor might be blocked.
 				mode = StepperAxisModeError;
@@ -117,14 +113,14 @@ void StepperAxis::doInitializeToStartingPosition() {
 		break;
 	case 5:
 		// Rotate backward till the button gets pressed.
-		motor.rotate(false);
+		motorControl.rotate(false);
 		modeState = 6;
 		break;
 	case 6:
 		if (endPositionButton.isDown()) {
 			// The end position moving backward is reached.
-			motor.stop();
-			motor.resetStepTo(0);
+			motorControl.stop();
+			motorControl.resetStepTo(0);
 			mode = StepperAxisModeIdle;
 			modeState = 0;
 		}
@@ -133,13 +129,13 @@ void StepperAxis::doInitializeToStartingPosition() {
 }
 
 void StepperAxis::doModeMoveToPosition() {
-	if (!motor.isMoving()) {
+	if (!motorControl.isMoving()) {
 		mode = StepperAxisModeIdle;
 		modeState = 0;
 	} else if (endPositionButton.isDown()) {
-		long atStep = motor.getStep();
+		long atStep = motorControl.getStep();
 		if ((atStep != 0) && (atStep != maxStep)) {
-			motor.stop();
+			motorControl.stop();
 			mode = StepperAxisModeError;
 			modeState = 0;
 		}
@@ -147,19 +143,19 @@ void StepperAxis::doModeMoveToPosition() {
 }
 
 void StepperAxis::initializeToStartingPosition() {
-	motor.stop();
+	motorControl.stop();
 	mode = StepperAxisModeInitializeToStartingPosition;
 	modeState = 0;
 }
 
 void StepperAxis::determineAvailableSteps() {
-	motor.stop();
+	motorControl.stop();
 	mode = StepperAxisModeDetermineAvailableSteps;
 	modeState = 0;
 }
 
 void StepperAxis::stop(void) {
-	motor.stop();
+	motorControl.stop();
 	mode = StepperAxisModeIdle;
 	modeState = 0;
 }
@@ -178,27 +174,27 @@ void StepperAxis::setAxisStepsPerMM(float axisStepsPerMM) {
 void StepperAxis::moveToPositionMMFast(float absolutePositionMM) {
 	long targetStep = absolutePositionMM / axisStepsPerMM;
 	targetStep = constrain(targetStep, 0, maxStep);
-	motor.motorCoilDelayBetweenStepsMicros = 2000;
-	motor.gotoStep(targetStep);
+	motorControl.motorCoilDelayBetweenStepsMicros = 2000;
+	motorControl.gotoStep(targetStep);
 	mode = StepperAxisModeMoveToPosition;
 	modeState = 0;
 }
 
 void StepperAxis::moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis) {
 	long targetStep = absolutePositionMM / axisStepsPerMM;
-	unsigned long deltaSteps = abs(targetStep - motor.getStep());
-	motor.motorCoilDelayBetweenStepsMicros = (deltaSteps <= 1) ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1);
-	motor.gotoStep(targetStep);
+	unsigned long deltaSteps = abs(targetStep - motorControl.getStep());
+	motorControl.motorCoilDelayBetweenStepsMicros = (deltaSteps <= 1) ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1);
+	motorControl.gotoStep(targetStep);
 	mode = StepperAxisModeMoveToPosition;
 	modeState = 0;
 }
 
 void StepperAxis::rotate(bool direction, float speedMMperMin) {
 	unsigned long delay = 60000.0f * axisStepsPerMM / speedMMperMin;
-	motor.motorCoilDelayBetweenStepsMicros = constrain(delay, 5UL, 20000UL);
-	motor.rotate(direction);
+	motorControl.motorCoilDelayBetweenStepsMicros = constrain(delay, 5UL, 20000UL);
+	motorControl.rotate(direction);
 }
 
 float StepperAxis::getAbsolutePositionMM() {
-	return ((float) motor.getStep()) * axisStepsPerMM;
+	return ((float) motorControl.getStep()) * axisStepsPerMM;
 }

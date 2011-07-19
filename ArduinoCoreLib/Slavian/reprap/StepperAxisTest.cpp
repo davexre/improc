@@ -17,7 +17,8 @@ static const int stepMotor12pin = 9;
 static const int stepMotor21pin = 10;
 static const int stepMotor22pin = 11;
 
-StepperAxis axis;
+static SteppingMotor_MosfetHBridge motor;
+static StepperAxis axis;
 
 static const char *axisMenuItems[] = { "Determine available steps", "Initialize to zero position", "Stop" };
 static MenuItemEnum axisMenu;
@@ -40,12 +41,12 @@ static void updateRotaryEncoder() {
 
 void StepperAxisTest::setup() {
 	led.initialize(new DigitalOutputArduinoPin(ledPin), ledStates, size(ledStates), true);
-	axis.initialize(
-			new DigitalInputArduinoPin(endPositionButtonPin, true),
+	motor.initialize(
 			new DigitalOutputArduinoPin(stepMotor11pin, 0),
 			new DigitalOutputArduinoPin(stepMotor12pin, 0),
 			new DigitalOutputArduinoPin(stepMotor21pin, 0),
 			new DigitalOutputArduinoPin(stepMotor22pin, 0));
+	axis.initialize(&motor, new DigitalInputArduinoPin(endPositionButtonPin, true));
 
 	axisMenu.initialize("Axis", axisMenuItems, size(axisMenuItems), false);
 	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
@@ -95,6 +96,7 @@ void doInitializeToStartingPosition() {
 bool dummy = false;
 void StepperAxisTest::loop() {
 	led.update();
+	motor.update();
 	axis.update();
 	menu.update();
 
@@ -117,7 +119,7 @@ void StepperAxisTest::loop() {
 		break;
 	case 3:
 //		axis.stop();
-		axis.motor.rotate(dummy);
+		axis.motorControl.rotate(dummy);
 		dummy != dummy;
 		mode = 0;
 		break;

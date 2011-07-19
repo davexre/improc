@@ -1,21 +1,19 @@
 #include "Arduino.h"
 #include "SteppingMotor.h"
 
-void SteppingMotor::initialize(
-		DigitalOutputPin *out11pin,
-		DigitalOutputPin *out12pin,
-		DigitalOutputPin *out21pin,
-		DigitalOutputPin *out22pin) {
+void SteppingMotor_BA6845FS::initialize(
+			DigitalOutputPin *out11pin,
+			DigitalOutputPin *out12pin,
+			DigitalOutputPin *out21pin,
+			DigitalOutputPin *out22pin) {
 	this->out11pin = out11pin;
 	this->out12pin = out12pin;
 	this->out21pin = out21pin;
 	this->out22pin = out22pin;
-
-	motorCoilTurnOffMicros = 1000;
-	motorCoilDelayBetweenStepsMicros = 2000;
-	motorCoilOnMicros = 0;
 	currentState = 0;
-	step = 0;
+	motorCoilTurnOffMicros = 1000;
+	motorCoilOnMicros = 0;
+	isMotorCoilOn = false;
 	stop();
 }
 
@@ -63,42 +61,154 @@ static const uint8_t motorStates[] = {
 };
 
 */
-void SteppingMotor::setState(const uint8_t state) {
+
+void SteppingMotor_BA6845FS::setState(const uint8_t state) {
 	out11pin->setState(state & 0b01000);
 	out12pin->setState(state & 0b00100);
 	out21pin->setState(state & 0b00010);
 	out22pin->setState(state & 0b00001);
 }
 
-void SteppingMotor::stop() {
-	setState(motorStates[0]);
+void SteppingMotor_BA6845FS::step(const bool moveForward) {
+	if (moveForward) {
+		currentState++;
+		if (currentState >= size(motorStates))
+			currentState = 1;
+	} else {
+		currentState--;
+		if (currentState <= 0)
+			currentState = size(motorStates) - 1;
+	}
+	setState(motorStates[currentState]);
+	motorCoilOnMicros = micros();
+}
+
+void SteppingMotor_BA6845FS::stop() {
 	isMotorCoilOn = false;
+	setState(motorStates[0]);
+}
+
+void SteppingMotor_BA6845FS::update() {
+	if (isMotorCoilOn) {
+		if (micros() - motorCoilOnMicros > motorCoilTurnOffMicros) {
+			stop();
+		}
+	}
+}
+
+//////////
+
+void SteppingMotor_MosfetHBridge::initialize(
+			DigitalOutputPin *out11pin,
+			DigitalOutputPin *out12pin,
+			DigitalOutputPin *out21pin,
+			DigitalOutputPin *out22pin) {
+	this->out11pin = out11pin;
+	this->out12pin = out12pin;
+	this->out21pin = out21pin;
+	this->out22pin = out22pin;
+	currentState = 0;
+	motorCoilTurnOffMicros = 1000;
+	motorCoilOnMicros = 0;
+	mode = 0;
+	stop();
+}
+
+static const uint8_t motorStatesMosfetHBridge[] = {
+		0b00000, // OFF
+		0b00100,
+		0b00001,
+		0b01000,
+		0b00010
+};
+
+void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
+	out11pin->setState(state & 0b01000);
+	out12pin->setState(state & 0b00100);
+	out21pin->setState(state & 0b00010);
+	out22pin->setState(state & 0b00001);
+}
+
+void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
+	if (moveForward) {
+		currentState++;
+		if (currentState >= size(motorStates))
+			currentState = 1;
+	} else {
+		currentState--;
+		if (currentState <= 0)
+			currentState = size(motorStates) - 1;
+	}
+	mode = 1;
+}
+
+void SteppingMotor_MosfetHBridge::stop() {
+	mode = 0;
+	setState(motorStates[0]);
+}
+
+void SteppingMotor_MosfetHBridge::update() {
+	switch (mode) {
+	case 1:
+		// Before switching HBridge turn off all Mosfets
+		setState(motorStates[0]);
+		mode = 2;
+		break;
+	case 2:
+		setState(motorStates[currentState]);
+		motorCoilOnMicros = micros();
+		mode = 3;
+		break;
+	case 3:
+		if (micros() - motorCoilOnMicros > motorCoilTurnOffMicros) {
+			stop();
+			mode = 0;
+		}
+		break;
+	case 0:
+	default:
+		break; // do nothing
+	}
+}
+
+////////
+
+void SteppingMotorControl::initialize(SteppingMotor *motor) {
+	this->motor = motor;
+	motorCoilDelayBetweenStepsMicros = 2000;
+	motorCoilOnMicros = 0;
+	step = 0;
+	motor->stop();
+}
+
+void SteppingMotorControl::stop() {
+	motor->stop();
 	movementMode = 0;
 	targetStep = step;
 }
 
-void SteppingMotor::gotoStep(const long step) {
+void SteppingMotorControl::gotoStep(const long step) {
 	movementMode = 0;
 	targetStep = step;
 }
 
-void SteppingMotor::rotate(const bool forward) {
+void SteppingMotorControl::rotate(const bool forward) {
 	movementMode = forward ? 1 : 2;
 }
 
-void SteppingMotor::resetStepTo(const long step) {
+void SteppingMotorControl::resetStepTo(const long step) {
 	this->movementMode = 0;
 	this->step = this->targetStep = step;
 }
 
-bool SteppingMotor::isMoving() {
-	return (isMotorCoilOn || // TODO: Дали винаги е така? Ако моторът е в режим "задържане"?
-		((movementMode == 0) && (targetStep != step)) ||
-		(movementMode == 1) ||
-		(movementMode == 2));
+bool SteppingMotorControl::isMoving() {
+	return !(
+		(movementMode == 0) &&
+		(targetStep == step) &&
+		(micros() - motorCoilOnMicros <= motorCoilDelayBetweenStepsMicros));
 }
 
-void SteppingMotor::update() {
+void SteppingMotorControl::update() {
 	unsigned long now = micros();
 	if (now - motorCoilOnMicros > motorCoilDelayBetweenStepsMicros) {
 		bool shallMove;
@@ -132,27 +242,13 @@ void SteppingMotor::update() {
 		if (shallMove) {
 			if (forward) {
 				step++;
-				currentState++;
-				if (currentState >= size(motorStates))
-					currentState = 1;
 			} else {
 				step--;
-				currentState--;
-				if (currentState <= 0)
-					currentState = size(motorStates) - 1;
 			}
-			setState(motorStates[currentState]);
-			isMotorCoilOn = true;
+			motor->step(forward);
 			motorCoilOnMicros = now;
 		} else {
 			motorCoilOnMicros = now - motorCoilDelayBetweenStepsMicros;
-		}
-	}
-
-	if (isMotorCoilOn && (motorCoilTurnOffMicros > 0)) {
-		if (now - motorCoilOnMicros > motorCoilTurnOffMicros) {
-			setState(motorStates[0]);
-			isMotorCoilOn = false;
 		}
 	}
 }

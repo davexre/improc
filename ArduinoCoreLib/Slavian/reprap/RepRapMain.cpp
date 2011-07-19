@@ -74,6 +74,11 @@ static TemperatureSensor *bedTemperatureSensor;
 static TemperatureControl extruderTemperatureControl;
 static TemperatureControl bedTemperatureControl;
 
+static SteppingMotor_MosfetHBridge motorX;
+static SteppingMotor_MosfetHBridge motorY;
+static SteppingMotor_MosfetHBridge motorZ;
+static SteppingMotor_MosfetHBridge motorE;
+
 static StepperAxis axisX;
 static StepperAxis axisY;
 static StepperAxis axisZ;
@@ -98,26 +103,31 @@ void RepRapMain::setup() {
 	bedTemperatureSensor = new TemperatureSensor_TC1047(bedTemperatureSensorPin);
 	bedTemperatureControl.initialize(bedTemperatureSensor, expanderOutput.createPinHandler(bedHeaterPin));
 
-	axisX.initialize(new DigitalInputArduinoPin(axisX_EndPositionButtonPin, true),
+	motorX.initialize(
 			expanderOutput.createPinHandler(axisX_motor11Pin),
 			expanderOutput.createPinHandler(axisX_motor12Pin),
 			expanderOutput.createPinHandler(axisX_motor21Pin),
 			expanderOutput.createPinHandler(axisX_motor22Pin));
-	axisY.initialize(new DigitalInputArduinoPin(axisY_EndPositionButtonPin, true),
+	motorY.initialize(
 			expanderOutput.createPinHandler(axisY_motor11Pin),
 			expanderOutput.createPinHandler(axisY_motor12Pin),
 			expanderOutput.createPinHandler(axisY_motor21Pin),
 			expanderOutput.createPinHandler(axisY_motor22Pin));
-	axisZ.initialize(new DigitalInputArduinoPin(axisZ_EndPositionButtonPin, true),
+	motorZ.initialize(
 			expanderOutput.createPinHandler(axisZ_motor11Pin),
 			expanderOutput.createPinHandler(axisZ_motor12Pin),
 			expanderOutput.createPinHandler(axisZ_motor21Pin),
 			expanderOutput.createPinHandler(axisZ_motor22Pin));
-	axisE.initialize(new DigitalInputArduinoPin(axisE_EndPositionButtonPin, true),
+	motorE.initialize(
 			expanderOutput.createPinHandler(axisE_motor11Pin),
 			expanderOutput.createPinHandler(axisE_motor12Pin),
 			expanderOutput.createPinHandler(axisE_motor21Pin),
 			expanderOutput.createPinHandler(axisE_motor22Pin));
+
+	axisX.initialize(&motorX, new DigitalInputArduinoPin(axisX_EndPositionButtonPin, true));
+	axisY.initialize(&motorY, new DigitalInputArduinoPin(axisY_EndPositionButtonPin, true));
+	axisZ.initialize(&motorZ, new DigitalInputArduinoPin(axisZ_EndPositionButtonPin, true));
+	axisE.initialize(&motorE, new DigitalInputArduinoPin(axisE_EndPositionButtonPin, true));
 
 	reprap.initialize(&reader, &extruderTemperatureControl, &bedTemperatureControl);
 	reprap.axisX = &axisX;
@@ -145,6 +155,11 @@ void RepRapMain::loop() {
 	bedTemperatureControl.update();
 	led.update();
 	btn.update();
+
+	motorX.update();
+	motorY.update();
+	motorZ.update();
+	motorE.update();
 
 	axisX.update();
 	axisY.update();

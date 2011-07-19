@@ -20,7 +20,8 @@ static const int stepperPin22 = 11;	// BA6845FS Stepper motor driver OUT22 pin
 static AdvButton btn;
 static RotaryEncoderAcelleration rotor;
 static StateLed led;
-static SteppingMotor motor;
+static SteppingMotor_MosfetHBridge motor;
+static SteppingMotorControl motorControl;
 
 static const unsigned int *states[] = {
 		BLINK_SLOW,
@@ -51,6 +52,7 @@ void SteppingMotorTest::setup() {
 			new DigitalOutputArduinoPin(stepperPin12),
 			new DigitalOutputArduinoPin(stepperPin21),
 			new DigitalOutputArduinoPin(stepperPin22));
+	motorControl.initialize(&motor);
 
     Serial.begin(115200);
     Serial.println("Initialized");
@@ -61,13 +63,14 @@ void SteppingMotorTest::loop() {
 	btn.update();
 	led.update();
 	motor.update();
+	motorControl.update();
 
 	if (btn.isLongClicked()) {
 		motorAutoRunning = !motorAutoRunning;
 		if (motorAutoRunning) {
-			motor.rotate(motorForward);
+			motorControl.rotate(motorForward);
 		} else {
-			motor.resetStepTo(rotor.getValue());
+			motorControl.resetStepTo(rotor.getValue());
 		}
 		Serial.print("RUNNING ");
 		Serial.print((int)motorAutoRunning);
@@ -76,7 +79,7 @@ void SteppingMotorTest::loop() {
 	} else if (btn.isClicked()) {
 		motorForward = !motorForward;
 		if (motorAutoRunning) {
-			motor.rotate(motorForward);
+			motorControl.rotate(motorForward);
 		}
 		Serial.print("FORWARD ");
 		Serial.print((int)motorForward);
@@ -86,6 +89,6 @@ void SteppingMotorTest::loop() {
 
 	if ((!motorAutoRunning) && rotor.hasValueChanged()) {
 		//motor.motorCoilTurnOffMicros = rotor.getValue();
-		motor.gotoStep(rotor.getValue());
+		motorControl.gotoStep(rotor.getValue());
 	}
 }

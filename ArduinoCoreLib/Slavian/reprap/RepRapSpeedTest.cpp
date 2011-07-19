@@ -30,6 +30,11 @@ static DigitalOutputShiftRegister outputShiftRegister;
 static DigitalInputShiftRegister inputShiftRegister;
 static TicksPerSecond tps;
 
+static SteppingMotor_MosfetHBridge motorX;
+static SteppingMotor_MosfetHBridge motorY;
+static SteppingMotor_MosfetHBridge motorZ;
+static SteppingMotor_MosfetHBridge motorE;
+
 static StepperAxis stepperAxisX, stepperAxisY, stepperAxisZ, stepperAxisE;
 static TemperatureControl temperatureControl;
 
@@ -55,26 +60,31 @@ void RepRapSpeedTest::setup() {
 
 	tps.initialize(500);
 
-	stepperAxisX.initialize(inputShiftRegister.createPinHandler(0),
+	motorX.initialize(
 			outputShiftRegister.createPinHandler(0),
 			outputShiftRegister.createPinHandler(1),
 			outputShiftRegister.createPinHandler(2),
 			outputShiftRegister.createPinHandler(3));
-	stepperAxisY.initialize(inputShiftRegister.createPinHandler(1),
+	motorY.initialize(
 			outputShiftRegister.createPinHandler(4),
 			outputShiftRegister.createPinHandler(5),
 			outputShiftRegister.createPinHandler(6),
 			outputShiftRegister.createPinHandler(7));
-	stepperAxisZ.initialize(inputShiftRegister.createPinHandler(2),
+	motorZ.initialize(
 			outputShiftRegister.createPinHandler(8),
 			outputShiftRegister.createPinHandler(9),
 			outputShiftRegister.createPinHandler(10),
 			outputShiftRegister.createPinHandler(11));
-	stepperAxisE.initialize(inputShiftRegister.createPinHandler(3),
+	motorE.initialize(
 			outputShiftRegister.createPinHandler(12),
 			outputShiftRegister.createPinHandler(13),
 			outputShiftRegister.createPinHandler(14),
 			outputShiftRegister.createPinHandler(15));
+
+	stepperAxisX.initialize(&motorX, inputShiftRegister.createPinHandler(0));
+	stepperAxisY.initialize(&motorY, inputShiftRegister.createPinHandler(1));
+	stepperAxisZ.initialize(&motorZ, inputShiftRegister.createPinHandler(2));
+	stepperAxisE.initialize(&motorE, inputShiftRegister.createPinHandler(3));
 	temperatureControl.initialize(new TemperatureSensor_TC1047(0), outputShiftRegister.createPinHandler(16));
 
 	serialReader.initialize(115200, sizeof(serialReaderBuffer), serialReaderBuffer);
@@ -87,6 +97,12 @@ void RepRapSpeedTest::loop() {
 	serialReader.update();
 	outputShiftRegister.update();
 	inputShiftRegister.update();
+
+	motorX.update();
+	motorY.update();
+	motorZ.update();
+	motorE.update();
+
 	stepperAxisX.update();
 	stepperAxisY.update();
 	stepperAxisZ.update();

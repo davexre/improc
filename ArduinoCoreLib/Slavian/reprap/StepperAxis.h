@@ -27,17 +27,13 @@ private:
 	void doModeMoveToPosition();
 public:
 	Button endPositionButton;
-	SteppingMotor motor;
+	SteppingMotorControl motorControl;
 
 	/**
 	 * Initializes the class.
 	 */
-	void initialize(
-			DigitalInputPin *endPositionButtonPin,
-			DigitalOutputPin *stepMotor11pin,
-			DigitalOutputPin *stepMotor12pin,
-			DigitalOutputPin *stepMotor21pin,
-			DigitalOutputPin *stepMotor22pin);
+	void initialize(SteppingMotor *motor,
+			DigitalInputPin *endPositionButtonPin);
 
 	/**
 	 * This method should be placed in the main loop of the program.
@@ -61,7 +57,7 @@ public:
 	void rotate(bool direction, float speedMMperMin);
 	float getAbsolutePositionMM();
 	inline long getStepPosition() {
-		motor.getStep();
+		motorControl.getStep();
 	}
 
 	void stop(void);
