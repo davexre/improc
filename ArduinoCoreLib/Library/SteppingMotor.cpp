@@ -87,7 +87,6 @@ void SteppingMotor_BA6845FS::step(const bool moveForward) {
 void SteppingMotor_BA6845FS::stop() {
 	isMotorCoilOn = false;
 	setState(motorStates[0]);
-	Serial.print(".");
 }
 
 void SteppingMotor_BA6845FS::update() {
@@ -118,10 +117,10 @@ void SteppingMotor_MosfetHBridge::initialize(
 
 static const uint8_t motorStatesMosfetHBridge[] = {
 		0b00000, // OFF
-		0b00100,
-		0b00001,
 		0b01000,
 		0b00010,
+		0b00100,
+		0b00001
 };
 
 void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
