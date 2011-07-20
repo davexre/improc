@@ -79,6 +79,7 @@ void SteppingMotor_BA6845FS::step(const bool moveForward) {
 		if (currentState <= 0)
 			currentState = size(motorStates) - 1;
 	}
+	isMotorCoilOn = true;
 	setState(motorStates[currentState]);
 	motorCoilOnMicros = micros();
 }
@@ -86,6 +87,7 @@ void SteppingMotor_BA6845FS::step(const bool moveForward) {
 void SteppingMotor_BA6845FS::stop() {
 	isMotorCoilOn = false;
 	setState(motorStates[0]);
+	Serial.print(".");
 }
 
 void SteppingMotor_BA6845FS::update() {
@@ -119,7 +121,7 @@ static const uint8_t motorStatesMosfetHBridge[] = {
 		0b00100,
 		0b00001,
 		0b01000,
-		0b00010
+		0b00010,
 };
 
 void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
@@ -132,30 +134,30 @@ void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
 void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
 	if (moveForward) {
 		currentState++;
-		if (currentState >= size(motorStates))
+		if (currentState >= size(motorStatesMosfetHBridge))
 			currentState = 1;
 	} else {
 		currentState--;
 		if (currentState <= 0)
-			currentState = size(motorStates) - 1;
+			currentState = size(motorStatesMosfetHBridge) - 1;
 	}
 	mode = 1;
 }
 
 void SteppingMotor_MosfetHBridge::stop() {
 	mode = 0;
-	setState(motorStates[0]);
+	setState(motorStatesMosfetHBridge[0]);
 }
 
 void SteppingMotor_MosfetHBridge::update() {
 	switch (mode) {
 	case 1:
 		// Before switching HBridge turn off all Mosfets
-		setState(motorStates[0]);
+		setState(motorStatesMosfetHBridge[0]);
 		mode = 2;
 		break;
 	case 2:
-		setState(motorStates[currentState]);
+		setState(motorStatesMosfetHBridge[currentState]);
 		motorCoilOnMicros = micros();
 		mode = 3;
 		break;

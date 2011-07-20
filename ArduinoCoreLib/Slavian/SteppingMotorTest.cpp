@@ -4,6 +4,7 @@
 #include "RotaryEncoderAcelleration.h"
 #include "SteppingMotor.h"
 #include "StateLed.h"
+#include "menu/Menu.h"
 
 DefineClass(SteppingMotorTest);
 
@@ -53,11 +54,12 @@ void SteppingMotorTest::setup() {
 			new DigitalOutputArduinoPin(stepperPin21),
 			new DigitalOutputArduinoPin(stepperPin22));
 	motorControl.initialize(&motor);
+	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
+	motor.motorCoilTurnOffMicros = 5000;
 
     Serial.begin(115200);
     Serial.println("Initialized");
 }
-
 
 void SteppingMotorTest::loop() {
 	btn.update();
@@ -70,7 +72,7 @@ void SteppingMotorTest::loop() {
 		if (motorAutoRunning) {
 			motorControl.rotate(motorForward);
 		} else {
-			motorControl.resetStepTo(rotor.getValue());
+			motorControl.stop(); //resetStepTo(rotor.getValue());
 		}
 		Serial.print("RUNNING ");
 		Serial.print((int)motorAutoRunning);
@@ -87,7 +89,7 @@ void SteppingMotorTest::loop() {
 		Serial.println(rotor.getValue());
 	}
 
-	if ((!motorAutoRunning) && rotor.hasValueChanged()) {
+	if (rotor.hasValueChanged()) {
 		//motor.motorCoilTurnOffMicros = rotor.getValue();
 		motorControl.gotoStep(rotor.getValue());
 	}
