@@ -54,8 +54,9 @@ void SteppingMotorTest::setup() {
 			new DigitalOutputArduinoPin(stepperPin21),
 			new DigitalOutputArduinoPin(stepperPin22));
 	motorControl.initialize(&motor);
+	motorControl.resetStepTo(rotor.getValue());
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor.motorCoilTurnOffMicros = 5000;
+	motor.motorCoilTurnOffMicros = 100000;
 
     Serial.begin(115200);
     Serial.println("Initialized");
@@ -90,7 +91,9 @@ void SteppingMotorTest::loop() {
 	}
 
 	if (rotor.hasValueChanged()) {
+		long val = rotor.getValue();
 		//motor.motorCoilTurnOffMicros = rotor.getValue();
-		motorControl.gotoStep(rotor.getValue());
+		motorControl.gotoStep(val);
+		Serial.println(val);
 	}
 }

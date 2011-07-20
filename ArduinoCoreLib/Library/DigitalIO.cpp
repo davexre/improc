@@ -1,6 +1,10 @@
 #include "DigitalIO.h"
 #include "utils.h"
 
+bool DigitalInvertingInputPin::getState() {
+	return !inputPin->getState();
+}
+
 ///////// DigitalInputArduinoPin
 
 DigitalInputArduinoPin::DigitalInputArduinoPin(const uint8_t arduinoPin, const bool enablePullup) {

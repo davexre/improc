@@ -14,12 +14,30 @@ public:
 	virtual bool getState() = 0;
 };
 
-
 class DigitalOutputPin { //: public DigitalInputPin {
 public:
 	virtual bool getState() = 0;
 
 	virtual void setState(const bool value) = 0;
+};
+
+class DigitalInvertingInputPin {
+private:
+	DigitalInputPin *inputPin;
+public:
+	inline DigitalInvertingInputPin() {
+		initialize(NULL);
+	};
+
+	inline DigitalInvertingInputPin(DigitalInputPin *inputPin) {
+		initialize(inputPin);
+	}
+
+	inline void initialize(DigitalInputPin *inputPin) {
+		this->inputPin = inputPin;
+	}
+
+	virtual bool getState();
 };
 
 ///////// DigitalInputArduinoPin
