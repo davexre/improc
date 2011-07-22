@@ -8,9 +8,9 @@
 DefineClass(SteppingMotorWithEndButtonsTest);
 
 static const int buttonPin = 4;	// the number of the pushbutton pin
-static const int ledPin = 13; // the number of the LED pin
-static const int startButtonPin = 5;
-static const int endButtonPin = 6;
+static const int ledPin = 5; // the number of the LED pin
+static const int startButtonPin = 12;
+static const int endButtonPin = 13;
 
 static const int stepperPin11 = 8;	// BA6845FS Stepper motor driver OUT11 pin
 static const int stepperPin12 = 9;	// BA6845FS Stepper motor driver OUT12 pin
@@ -44,11 +44,11 @@ static void doTest() {
 	case 0:
 		motorControl.resetStepTo(0);
 		if (btnStart.isDown()) {
-			modeState = 1;
 			motorControl.stop();
 		} else {
 			motorControl.rotate(false);
 		}
+		modeState = 1;
 		break;
 	case 1:
 		if (btnStart.isDown()) {
