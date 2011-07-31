@@ -9,11 +9,11 @@ DefineClass(SteppingMotorWithEndButtonsTest);
 
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int ledPin = 5; // the number of the LED pin
-static const int startButtonPin = 12;
-static const int endButtonPin = 13;
+static const int startButtonPin = 8;
+static const int endButtonPin = 9;
 
-static const int stepperPin11 = 8;	// BA6845FS Stepper motor driver OUT11 pin
-static const int stepperPin12 = 9;	// BA6845FS Stepper motor driver OUT12 pin
+static const int stepperPin11 = 12;	// BA6845FS Stepper motor driver OUT11 pin
+static const int stepperPin12 = 13;	// BA6845FS Stepper motor driver OUT12 pin
 static const int stepperPin21 = 10;	// BA6845FS Stepper motor driver OUT21 pin
 static const int stepperPin22 = 11;	// BA6845FS Stepper motor driver OUT22 pin
 
