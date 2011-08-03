@@ -66,7 +66,7 @@ static const unsigned int *states[] = {
 static char readerBuffer[200];
 static SerialReader reader;
 
-static DigitalOutputShiftRegister expanderOutput;
+static DigitalOutputShiftRegister_74HC164 expanderOutput;
 
 static TemperatureSensor *extruderTemperatureSensor;
 static TemperatureSensor *bedTemperatureSensor;

@@ -133,18 +133,27 @@ public:
 
 ///////// DigitalOutputShiftRegister
 
+class DigitalOutputShiftRegister {
+protected:
+	uint8_t buffer[(DigitalOutputShiftRegisterPinsCount + 7) / 8];
+	bool modified;
+public:
+	bool getState(const uint8_t shiftRegisterPin);
+
+	void setState(const uint8_t shiftRegisterPin, const bool value);
+
+	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin);
+};
+
 /**
  * Based on the datasheet for 74HC164 - No output latch - output data is shifted "on the fly".
  * The 74HC595 Has output latches
  */
-class DigitalOutputShiftRegister {
-private:
-	uint8_t buffer[(DigitalOutputShiftRegisterPinsCount + 7) / 8];
+class DigitalOutputShiftRegister_74HC164 : public DigitalOutputShiftRegister {
+protected:
 	DigitalOutputPin *CP_pin;
 	DigitalOutputPin *DS_pin;
-	bool modified;
 public:
-
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
 	 */
@@ -155,12 +164,27 @@ public:
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
+};
 
-	bool getState(const uint8_t shiftRegisterPin);
+/**
+ * Based on the datasheet for 74HC595 - Has output latch.
+ */
+class DigitalOutputShiftRegister_74HC595 : public DigitalOutputShiftRegister {
+protected:
+	DigitalOutputPin *SH_pin;
+	DigitalOutputPin *ST_pin;
+	DigitalOutputPin *DS_pin;
+public:
+	/**
+	 * Initializes the class. Should be invoked from the setup() method.
+	 */
+	void initialize(DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
 
-	void setState(const uint8_t shiftRegisterPin, const bool value);
-
-	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin);
+	/**
+	 * Updates the state of the shift register.
+	 * This method should be placed in the main loop of the program.
+	 */
+	void update();
 };
 
 #endif

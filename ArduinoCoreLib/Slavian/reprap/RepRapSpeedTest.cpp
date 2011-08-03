@@ -26,7 +26,7 @@ static MenuItem *menuItems[] = { &pulseWidthMenu, &frequencyCyclesPerMinuteMenu 
 static SimpleMenuWithSerialPrint menu;
 
 static SoftwarePWM spwm;
-static DigitalOutputShiftRegister outputShiftRegister;
+static DigitalOutputShiftRegister_74HC164 outputShiftRegister;
 static DigitalInputShiftRegister inputShiftRegister;
 static TicksPerSecond tps;
 

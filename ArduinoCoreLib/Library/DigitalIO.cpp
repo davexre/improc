@@ -137,19 +137,6 @@ void DigitalOutputShiftRegisterPin::setState(const bool value) {
 
 ///////// DigitalOutputShiftRegister
 
-void DigitalOutputShiftRegister::initialize(DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin) {
-	this->CP_pin = CP_pin;
-	this->DS_pin = DS_pin;
-	modified = true;
-
-	CP_pin->setState(false);
-	DS_pin->setState(false);
-
-	for (int i = sizeof(buffer) - 1; i >= 0; i--) {
-		buffer[i] = 0;
-	}
-}
-
 bool DigitalOutputShiftRegister::getState(const uint8_t shiftRegisterPin) {
 	return shiftRegisterPin >= DigitalOutputShiftRegisterPinsCount ? 0 :
 		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
@@ -169,7 +156,27 @@ void DigitalOutputShiftRegister::setState(const uint8_t shiftRegisterPin, const 
 	}
 }
 
-void DigitalOutputShiftRegister::update() {
+DigitalOutputPin *DigitalOutputShiftRegister::createPinHandler(const uint8_t shiftRegisterPin) {
+	return new DigitalOutputShiftRegisterPin(this, shiftRegisterPin);
+}
+
+///////// DigitalOutputShiftRegister_74HC164
+
+void DigitalOutputShiftRegister_74HC164::initialize(DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin) {
+	this->CP_pin = CP_pin;
+	this->DS_pin = DS_pin;
+	modified = true;
+
+	CP_pin->setState(false);
+	DS_pin->setState(false);
+
+	for (int i = sizeof(buffer) - 1; i >= 0; i--) {
+		buffer[i] = 0;
+	}
+	update();
+}
+
+void DigitalOutputShiftRegister_74HC164::update() {
 	if (modified) {
 		uint8_t mask = 1;
 		uint8_t *buf = buffer;
@@ -188,6 +195,42 @@ void DigitalOutputShiftRegister::update() {
 	}
 }
 
-DigitalOutputPin *DigitalOutputShiftRegister::createPinHandler(const uint8_t shiftRegisterPin) {
-	return new DigitalOutputShiftRegisterPin(this, shiftRegisterPin);
+///////// DigitalOutputShiftRegister_74HC595
+
+void DigitalOutputShiftRegister_74HC595::initialize(DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin) {
+	this->SH_pin = SH_pin;
+	this->ST_pin = ST_pin;
+	this->DS_pin = DS_pin;
+	modified = true;
+
+	SH_pin->setState(false);
+	ST_pin->setState(false);
+	DS_pin->setState(false);
+
+	for (int i = sizeof(buffer) - 1; i >= 0; i--) {
+		buffer[i] = 0;
+	}
+	update();
+}
+
+void DigitalOutputShiftRegister_74HC595::update() {
+	if (modified) {
+		uint8_t mask = 1;
+		uint8_t *buf = buffer;
+		ST_pin->setState(false);
+		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
+			SH_pin->setState(false);
+			DS_pin->setState(*buf & mask);
+			SH_pin->setState(true);
+			mask <<= 1;
+			if (mask == 0) {
+				buf++;
+				mask = 1;
+			}
+		}
+		SH_pin->setState(false);
+		DS_pin->setState(false);
+		ST_pin->setState(true);
+		ST_pin->setState(false);
+	}
 }

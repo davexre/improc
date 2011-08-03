@@ -23,7 +23,7 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static DigitalOutputShiftRegister shiftRegisterOutput;
+static DigitalOutputShiftRegister_74HC164 shiftRegisterOutput;
 
 void ShiftRegisterOutputTest::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
