@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include "utils.h"
+#include "DigitalIO.h"
 #include "AdvButton.h"
 #include "RotaryEncoderAcelleration.h"
 #include "SteppingMotor.h"

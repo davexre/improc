@@ -5,10 +5,10 @@
 
 DefineClass(ShiftRegisterInputTest);
 
-static const int ledPin = 13; // the number of the LED pin
+static const int ledPin = 6; // the number of the LED pin
 
-static const int shiftRegisterInputPinPE = 8;
-static const int shiftRegisterInputPinCP = 9;
+static const int shiftRegisterInputPinPE = 9;
+static const int shiftRegisterInputPinCP = 8;
 static const int shiftRegisterInputPinQ7 = 10;
 
 static StateLed led;

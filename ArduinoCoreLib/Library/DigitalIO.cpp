@@ -178,6 +178,7 @@ void DigitalOutputShiftRegister_74HC164::initialize(DigitalOutputPin *CP_pin, Di
 
 void DigitalOutputShiftRegister_74HC164::update() {
 	if (modified) {
+		modified = false;
 		uint8_t mask = 1;
 		uint8_t *buf = buffer;
 		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
@@ -212,9 +213,10 @@ void DigitalOutputShiftRegister_74HC595::initialize(DigitalOutputPin *SH_pin, Di
 	}
 	update();
 }
-
+/*
 void DigitalOutputShiftRegister_74HC595::update() {
 	if (modified) {
+		modified = false;
 		uint8_t mask = 1;
 		uint8_t *buf = buffer;
 		ST_pin->setState(false);
@@ -234,3 +236,27 @@ void DigitalOutputShiftRegister_74HC595::update() {
 		ST_pin->setState(false);
 	}
 }
+*/
+void DigitalOutputShiftRegister_74HC595::update() {
+	if (modified) {
+		modified = false;
+		uint8_t mask = 1;
+		uint8_t *buf = &buffer[sizeof(buffer) - 1];
+		ST_pin->setState(false);
+		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
+			SH_pin->setState(false);
+			DS_pin->setState(*buf & mask);
+			SH_pin->setState(true);
+			mask <<= 1;
+			if (mask == 0) {
+				buf--;
+				mask = 1;
+			}
+		}
+		SH_pin->setState(false);
+		DS_pin->setState(false);
+		ST_pin->setState(true);
+		ST_pin->setState(false);
+	}
+}
+

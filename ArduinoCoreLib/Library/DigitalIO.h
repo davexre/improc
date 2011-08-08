@@ -4,7 +4,7 @@
 #include <wiring.h>
 #include <pins_arduino.h>
 
-#define DigitalInputShiftRegisterPinsCount (8*2+1)
+#define DigitalInputShiftRegisterPinsCount (8*1+1)
 
 #define DigitalOutputShiftRegisterPinsCount (8*2+1)
 
