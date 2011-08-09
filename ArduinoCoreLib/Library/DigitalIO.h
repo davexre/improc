@@ -4,7 +4,7 @@
 #include <wiring.h>
 #include <pins_arduino.h>
 
-#define DigitalInputShiftRegisterPinsCount (8*1+1)
+#define DigitalInputShiftRegisterPinsCount (8*2+1)
 
 #define DigitalOutputShiftRegisterPinsCount (8*2+1)
 
@@ -86,18 +86,51 @@ public:
 
 ///////// DigitalInputShiftRegister
 
+class DigitalInputShiftRegister {
+protected:
+	uint8_t buffer[(DigitalInputShiftRegisterPinsCount + 7) / 8];
+public:
+	friend class DigitalInputShiftRegisterPin;
+
+	bool getState(const uint8_t shiftRegisterPin);
+
+	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin);
+};
+
 /**
  * Based on the datasheet for 74F166.
+ *
+ * Pins on the chip D0-D7 are numbered in REVERSE order by the software, i.e.
+ * port D7->DigitalInputPin(0), D6->DigitalInputPin(1),
+ * D0->DigitalInputPin(7), DS->DigitalInputPin(8).
+ * This reverse numbering allows for adding a new chip to the chip chain and not
+ * re-numbering all the other pins.
+ *
+ * Example (2 chips):
+ * DigitalInputPin(0) -> Chip 1, pin D7
+ * DigitalInputPin(1) -> Chip 1, pin D6
+ * DigitalInputPin(2) -> Chip 1, pin D5
+ * DigitalInputPin(3) -> Chip 1, pin D4
+ * DigitalInputPin(4) -> Chip 1, pin D3
+ * DigitalInputPin(5) -> Chip 1, pin D2
+ * DigitalInputPin(6) -> Chip 1, pin D1
+ * DigitalInputPin(7) -> Chip 1, pin D0
+ * DigitalInputPin(8) -> Chip 2, pin D7
+ * DigitalInputPin(9) -> Chip 2, pin D6
+ * DigitalInputPin(10)-> Chip 2, pin D5
+ * DigitalInputPin(11)-> Chip 2, pin D4
+ * DigitalInputPin(12)-> Chip 2, pin D3
+ * DigitalInputPin(13)-> Chip 2, pin D2
+ * DigitalInputPin(14)-> Chip 2, pin D1
+ * DigitalInputPin(15)-> Chip 2, pin D0
+ * DigitalInputPin(16)-> Chip 2, pin DS
  */
-class DigitalInputShiftRegister {
-private:
-	uint8_t buffer[(DigitalInputShiftRegisterPinsCount + 7) / 8];
+class DigitalInputShiftRegister_74HC166 : public DigitalInputShiftRegister {
+protected:
 	DigitalOutputPin *PE_pin;
 	DigitalOutputPin *CP_pin;
 	DigitalInputPin *Q7_pin;
 public:
-	friend class DigitalInputShiftRegisterPin;
-
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
 	 * The Q7_pin should be with a disabled internal pull-up resistor.
@@ -109,10 +142,6 @@ public:
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
-
-	bool getState(const uint8_t shiftRegisterPin);
-
-	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin);
 };
 
 ///////// DigitalOutputShiftRegisterPin

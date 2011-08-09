@@ -21,7 +21,7 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static DigitalInputShiftRegister shiftRegisterInput;
+static DigitalInputShiftRegister_74HC166 shiftRegisterInput;
 
 void ShiftRegisterInputTest::setup() {
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);

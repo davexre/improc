@@ -69,7 +69,18 @@ bool DigitalInputShiftRegisterPin::getState() {
 
 ///////// DigitalInputShiftRegister
 
-void DigitalInputShiftRegister::initialize(DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin) {
+bool DigitalInputShiftRegister::getState(const uint8_t shiftRegisterPin) {
+	return shiftRegisterPin >= DigitalInputShiftRegisterPinsCount ? 0 :
+		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
+}
+
+DigitalInputPin *DigitalInputShiftRegister::createPinHandler(const uint8_t shiftRegisterPin) {
+	return new DigitalInputShiftRegisterPin(this, shiftRegisterPin);
+}
+
+///////// DigitalInputShiftRegister_74HC166
+
+void DigitalInputShiftRegister_74HC166::initialize(DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin) {
 	this->PE_pin = PE_pin;
 	this->CP_pin = CP_pin;
 	this->Q7_pin = Q7_pin;
@@ -82,7 +93,7 @@ void DigitalInputShiftRegister::initialize(DigitalOutputPin *PE_pin, DigitalOutp
 	}
 }
 
-void DigitalInputShiftRegister::update() {
+void DigitalInputShiftRegister_74HC166::update() {
 	// Load data into register
 	CP_pin->setState(false);
 	PE_pin->setState(false);
@@ -90,8 +101,8 @@ void DigitalInputShiftRegister::update() {
 
 	// Start reading
 	PE_pin->setState(true);
-	uint8_t mask = 1;
-	uint8_t *buf = buffer;
+	uint8_t mask = 1 << ((DigitalInputShiftRegisterPinsCount - 1) & 0b0111);
+	uint8_t *buf = &buffer[(DigitalInputShiftRegisterPinsCount - 1) >> 3];
 	for (uint8_t i = 0; i < DigitalInputShiftRegisterPinsCount; i++) {
 		if (Q7_pin->getState()) {
 			*buf |= mask;
@@ -100,24 +111,15 @@ void DigitalInputShiftRegister::update() {
 		}
 		CP_pin->setState(false);
 		CP_pin->setState(true);
-		mask <<= 1;
+		mask >>= 1;
 		if (mask == 0) {
-			buf++;
-			mask = 1;
+			buf--;
+			mask = 0x80;
 		}
 	}
 
 	PE_pin->setState(false);
 	CP_pin->setState(false);
-}
-
-bool DigitalInputShiftRegister::getState(const uint8_t shiftRegisterPin) {
-	return shiftRegisterPin >= DigitalInputShiftRegisterPinsCount ? 0 :
-		buffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
-}
-
-DigitalInputPin *DigitalInputShiftRegister::createPinHandler(const uint8_t shiftRegisterPin) {
-	return new DigitalInputShiftRegisterPin(this, shiftRegisterPin);
 }
 
 ///////// DigitalOutputShiftRegisterPin
@@ -179,16 +181,16 @@ void DigitalOutputShiftRegister_74HC164::initialize(DigitalOutputPin *CP_pin, Di
 void DigitalOutputShiftRegister_74HC164::update() {
 	if (modified) {
 		modified = false;
-		uint8_t mask = 1;
-		uint8_t *buf = buffer;
+		uint8_t mask = 1 << ((DigitalOutputShiftRegisterPinsCount - 1) & 0b0111);
+		uint8_t *buf = &buffer[(DigitalOutputShiftRegisterPinsCount - 1) >> 3];
 		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
 			CP_pin->setState(false);
 			DS_pin->setState(*buf & mask);
 			CP_pin->setState(true);
-			mask <<= 1;
+			mask >>= 1;
 			if (mask == 0) {
-				buf++;
-				mask = 1;
+				buf--;
+				mask = 0x80;
 			}
 		}
 		CP_pin->setState(false);
@@ -213,44 +215,21 @@ void DigitalOutputShiftRegister_74HC595::initialize(DigitalOutputPin *SH_pin, Di
 	}
 	update();
 }
-/*
+
 void DigitalOutputShiftRegister_74HC595::update() {
 	if (modified) {
 		modified = false;
-		uint8_t mask = 1;
-		uint8_t *buf = buffer;
+		uint8_t mask = 1 << ((DigitalOutputShiftRegisterPinsCount - 1) & 0b0111);
+		uint8_t *buf = &buffer[(DigitalOutputShiftRegisterPinsCount - 1) >> 3];
 		ST_pin->setState(false);
 		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
 			SH_pin->setState(false);
 			DS_pin->setState(*buf & mask);
 			SH_pin->setState(true);
-			mask <<= 1;
-			if (mask == 0) {
-				buf++;
-				mask = 1;
-			}
-		}
-		SH_pin->setState(false);
-		DS_pin->setState(false);
-		ST_pin->setState(true);
-		ST_pin->setState(false);
-	}
-}
-*/
-void DigitalOutputShiftRegister_74HC595::update() {
-	if (modified) {
-		modified = false;
-		uint8_t mask = 1;
-		uint8_t *buf = &buffer[sizeof(buffer) - 1];
-		ST_pin->setState(false);
-		for (uint8_t i = 0; i < DigitalOutputShiftRegisterPinsCount; i++) {
-			SH_pin->setState(false);
-			DS_pin->setState(*buf & mask);
-			SH_pin->setState(true);
-			mask <<= 1;
+			mask >>= 1;
 			if (mask == 0) {
 				buf--;
-				mask = 1;
+				mask = 0x80;
 			}
 		}
 		SH_pin->setState(false);

@@ -27,7 +27,7 @@ static SimpleMenuWithSerialPrint menu;
 
 static SoftwarePWM spwm;
 static DigitalOutputShiftRegister_74HC164 outputShiftRegister;
-static DigitalInputShiftRegister inputShiftRegister;
+static DigitalInputShiftRegister_74HC166 inputShiftRegister;
 static TicksPerSecond tps;
 
 static SteppingMotor_MosfetHBridge motorX;
