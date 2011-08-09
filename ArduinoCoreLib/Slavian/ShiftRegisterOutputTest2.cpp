@@ -33,6 +33,8 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
+#define DigitalOutputShiftRegisterPinsCount 16
+
 static DigitalOutputShiftRegister_74HC595 extenderOut;
 
 void ShiftRegisterOutputTest2::setup() {
@@ -46,7 +48,7 @@ void ShiftRegisterOutputTest2::setup() {
 	rotor.setValue(-1);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 
-	extenderOut.initialize(
+	extenderOut.initialize(DigitalOutputShiftRegisterPinsCount,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));

@@ -46,8 +46,8 @@ static void updateRotaryEncoder() {
 }
 
 void RepRapSpeedTest::setup() {
-	inputShiftRegister.initialize(new DigitalOutputArduinoPin(9), new DigitalOutputArduinoPin(10), new DigitalInputArduinoPin(11, false));
-	outputShiftRegister.initialize(new DigitalOutputArduinoPin(8), new DigitalOutputArduinoPin(9));
+	inputShiftRegister.initialize(16, new DigitalOutputArduinoPin(9), new DigitalOutputArduinoPin(10), new DigitalInputArduinoPin(11, false));
+	outputShiftRegister.initialize(16, new DigitalOutputArduinoPin(8), new DigitalOutputArduinoPin(9));
 	// Init menus
 	frequencyCyclesPerMinuteMenu.initialize("Frequency", 0, 2000, false);
 	pulseWidthMenu.initialize("Pulse Width", 0, 255, false);

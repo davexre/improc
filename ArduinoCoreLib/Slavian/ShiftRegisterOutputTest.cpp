@@ -25,11 +25,13 @@ static const unsigned int *states[] = {
 
 static DigitalOutputShiftRegister_74HC164 shiftRegisterOutput;
 
+#define DigitalOutputShiftRegisterPinsCount 16
+
 void ShiftRegisterOutputTest::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 
-	shiftRegisterOutput.initialize(
+	shiftRegisterOutput.initialize(DigitalOutputShiftRegisterPinsCount,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinCP),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
 

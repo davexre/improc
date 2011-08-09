@@ -93,7 +93,7 @@ static void UpdateRotor() {
 void RepRapMain::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 
-	expanderOutput.initialize(
+	expanderOutput.initialize(16,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinCP),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
 

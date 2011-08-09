@@ -4,10 +4,9 @@
 #include <wiring.h>
 #include <pins_arduino.h>
 
-#define DigitalInputShiftRegisterPinsCount (8*2+1)
+#define DigitalInputShiftRegisterBufferSize 4
 
-#define DigitalOutputShiftRegisterPinsCount (8*2+1)
-
+#define DigitalOutputShiftRegisterBufferSize 4
 
 class DigitalInputPin {
 public:
@@ -88,11 +87,16 @@ public:
 
 class DigitalInputShiftRegister {
 protected:
-	uint8_t buffer[(DigitalInputShiftRegisterPinsCount + 7) / 8];
+	uint8_t inputBuffer[DigitalInputShiftRegisterBufferSize];
+	uint8_t inputPinsCount;
 public:
 	friend class DigitalInputShiftRegisterPin;
 
 	bool getState(const uint8_t shiftRegisterPin);
+
+	inline uint8_t getInputPinsCount() {
+		return inputPinsCount;
+	}
 
 	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin);
 };
@@ -135,7 +139,7 @@ public:
 	 * Initializes the class. Should be invoked from the setup() method.
 	 * The Q7_pin should be with a disabled internal pull-up resistor.
 	 */
-	void initialize(DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin);
+	void initialize(uint8_t inputPinsCount, DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin);
 
 	/**
 	 * Updates the state of the shift register.
@@ -164,12 +168,17 @@ public:
 
 class DigitalOutputShiftRegister {
 protected:
-	uint8_t buffer[(DigitalOutputShiftRegisterPinsCount + 7) / 8];
+	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
+	uint8_t outputPinsCount;
 	bool modified;
 public:
 	bool getState(const uint8_t shiftRegisterPin);
 
 	void setState(const uint8_t shiftRegisterPin, const bool value);
+
+	inline uint8_t getOutputPinsCount() {
+		return outputPinsCount;
+	}
 
 	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin);
 };
@@ -186,7 +195,7 @@ public:
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
 	 */
-	void initialize(DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin);
+	void initialize(uint8_t outputPinsCount, DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin);
 
 	/**
 	 * Updates the state of the shift register.
@@ -207,7 +216,7 @@ public:
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
 	 */
-	void initialize(DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
+	void initialize(uint8_t outputPinsCount, DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
 
 	/**
 	 * Updates the state of the shift register.

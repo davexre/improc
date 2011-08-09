@@ -23,10 +23,12 @@ static const unsigned int *states[] = {
 
 static DigitalInputShiftRegister_74HC166 shiftRegisterInput;
 
+#define DigitalInputShiftRegisterPinsCount 16
+
 void ShiftRegisterInputTest::setup() {
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
 
-	shiftRegisterInput.initialize(
+	shiftRegisterInput.initialize(DigitalInputShiftRegisterPinsCount,
 			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
 			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
 			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));

@@ -57,7 +57,7 @@ void SteppingMotorTest2::setup() {
 	rotor.setMinMax(100, 5000);
 	rotor.setValue(1000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-	extenderOut.initialize(
+	extenderOut.initialize(16,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
