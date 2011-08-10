@@ -7,8 +7,47 @@
 
 DefineClass(SteppingMotorWithEndButtonsTest);
 
-static const int buttonPin = 4;	// the number of the pushbutton pin
-static const int ledPin = 5; // the number of the LED pin
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
+static const int buttonPin = 4;
+static const int ledPin = 6;
+
+static const int shiftRegisterInputPinCP = 8;
+static const int shiftRegisterInputPinPE = 9;
+static const int shiftRegisterInputPinQ7 = 10;
+static const int shiftRegisterOutputPinDS = 11;
+static const int shiftRegisterOutputPinSH = 12;
+static const int shiftRegisterOutputPinST = 13;
+
+static DigitalOutputShiftRegister_74HC595 extenderOutput;
+static DigitalInputShiftRegister_74HC166 extenderInput;
+
+static SteppingMotor_MosfetHBridge motor1;
+static SteppingMotor_MosfetHBridge motor2;
+static SteppingMotor_MosfetHBridge motor3;
+static SteppingMotor_MosfetHBridge motor4;
+
+static SteppingMotorControl motorControl1;
+static SteppingMotorControl motorControl2;
+static SteppingMotorControl motorControl3;
+static SteppingMotorControl motorControl4;
+
+static Button btnStartMotor1;
+static Button btnStartMotor2;
+static Button btnStartMotor3;
+static Button btnStartMotor4;
+
+static Button btnEndMotor1;
+static Button btnEndMotor2;
+static Button btnEndMotor3;
+static Button btnEndMotor4;
+
+
+
+
+
+
+
 static const int startButtonPin = 8;
 static const int endButtonPin = 9;
 
@@ -77,19 +116,58 @@ static void doTest() {
 }
 
 void SteppingMotorWithEndButtonsTest::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	btnStart.initialize(new DigitalInputArduinoPin(startButtonPin, true), false);
-	btnEnd.initialize(new DigitalInputArduinoPin(endButtonPin, true), false);
+	extenderOutput.initialize(16,
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+	extenderInput.initialize(DigitalInputShiftRegisterPinsCount,
+			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
+			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
+			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
-	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
-	motor.initialize(
-			new DigitalOutputArduinoPin(stepperPin11),
-			new DigitalOutputArduinoPin(stepperPin12),
-			new DigitalOutputArduinoPin(stepperPin21),
-			new DigitalOutputArduinoPin(stepperPin22));
-	motorControl.initialize(&motor);
+	motor1.initialize(
+			extenderOutput.createPinHandler(0),
+			extenderOutput.createPinHandler(1),
+			extenderOutput.createPinHandler(2),
+			extenderOutput.createPinHandler(3));
+	motor2.initialize(
+			extenderOutput.createPinHandler(4),
+			extenderOutput.createPinHandler(5),
+			extenderOutput.createPinHandler(6),
+			extenderOutput.createPinHandler(7));
+	motor3.initialize(
+			extenderOutput.createPinHandler(8),
+			extenderOutput.createPinHandler(9),
+			extenderOutput.createPinHandler(10),
+			extenderOutput.createPinHandler(11));
+	motor4.initialize(
+			extenderOutput.createPinHandler(12),
+			extenderOutput.createPinHandler(13),
+			extenderOutput.createPinHandler(14),
+			extenderOutput.createPinHandler(15));
+
+	motorControl1.initialize(&motor1);
+	motorControl2.initialize(&motor2);
+	motorControl3.initialize(&motor3);
+	motorControl4.initialize(&motor4);
+
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor.motorCoilTurnOffMicros = 100000;
+	//motor.motorCoilTurnOffMicros = 100000;
+
+	btnStartMotor1.initialize(extenderInput.createPinHandler(0));
+	btnEndMotor1.initialize(extenderInput.createPinHandler(1));
+
+	btnStartMotor2.initialize(extenderInput.createPinHandler(2));
+	btnEndMotor2.initialize(extenderInput.createPinHandler(3));
+
+	btnStartMotor3.initialize(extenderInput.createPinHandler(4));
+	btnEndMotor3.initialize(extenderInput.createPinHandler(5));
+
+	btnStartMotor4.initialize(extenderInput.createPinHandler(6));
+	btnEndMotor4.initialize(extenderInput.createPinHandler(7));
+
+	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
+	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
 
     Serial.begin(115200);
     Serial.println("Initialized");
@@ -100,13 +178,35 @@ void SteppingMotorWithEndButtonsTest::setup() {
 }
 
 void SteppingMotorWithEndButtonsTest::loop() {
-	btn.update();
-	btnStart.update();
-	btnEnd.update();
+	extenderInput.update();
+	extenderOutput.update();
 
+	btnStartMotor1.update();
+	btnStartMotor2.update();
+	btnStartMotor3.update();
+	btnStartMotor4.update();
+
+	btnEndMotor1.update();
+	btnEndMotor2.update();
+	btnEndMotor3.update();
+	btnEndMotor4.update();
+
+	motor1.update();
+	motor2.update();
+	motor3.update();
+	motor4.update();
+
+	motorControl1.update();
+	motorControl2.update();
+	motorControl3.update();
+	motorControl4.update();
+
+	btn.update();
 	led.update();
-	motor.update();
-	motorControl.update();
+
+
+
+
 
 	if (btn.isClicked()) {
 		paused = !paused;
