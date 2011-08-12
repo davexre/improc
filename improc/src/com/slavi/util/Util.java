@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.Iterator;
@@ -442,6 +445,79 @@ public class Util {
 		return b.toString();
 	}
 
+	public static void unzipToFolder(String zip, String destinationFolder) throws IOException {
+		FileInputStream fin = new FileInputStream(zip);
+		try {
+			unzipToFolder(fin, new File(destinationFolder));
+		} finally {
+			fin.close();
+		}
+	}
+
+	public static void unzipToFolder(InputStream is, File destinationFolder) throws IOException {
+		ZipInputStream zin = new ZipInputStream(is);
+		ZipEntry entry = null;
+		while ((entry = zin.getNextEntry()) != null) {
+			File f = new File(destinationFolder, entry.getName());
+			File dir = entry.isDirectory() ? f : f.getParentFile();
+			if (!dir.mkdirs())
+				throw new IOException("Could not create directory " + dir.getPath());
+
+			if (!entry.isDirectory()) {
+				FileOutputStream fou = new FileOutputStream(f);
+				try {
+					copyStream(zin, fou);
+				} finally {
+					fou.close();
+				}
+			}
+		}
+	}
+
+	public static void zipTo(OutputStream os, File file) throws IOException {
+		file = file.getCanonicalFile();
+		ZipOutputStream zos = new ZipOutputStream(os);
+		URI root;
+		if (file.isDirectory())
+			root = file.toURI();
+		else
+			root = file.getParentFile().toURI();
+		recursiveZipFile(zos, root, file);
+		zos.finish();
+	}
+
+	private static void recursiveZipFile(ZipOutputStream zos, URI root, File file) throws IOException {
+		URI fileURI = file.toURI();
+		URI rel = root.relativize(fileURI);
+		String relativeFileName = rel.getPath();
+
+		if (file.isDirectory()) {
+			if (!"".equals(relativeFileName)) {
+				// An empty relativeFileName means archive root
+				ZipEntry entry = new ZipEntry(relativeFileName);
+				zos.putNextEntry(entry);
+				zos.closeEntry();
+			}
+			for (File f : file.listFiles()) {
+				recursiveZipFile(zos, root, f);
+			}
+			return;
+		}
+
+		InputStream is = null;
+		try {
+			ZipEntry entry = new ZipEntry(relativeFileName);
+			zos.putNextEntry(entry);
+			is = new FileInputStream(file);
+			copyStream(is, zos);
+			zos.closeEntry();
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+		}
+	}
+		  
 	/**
 	 * Replaces a set of files in a zip file in one zip copy operation.
 	 * If zipfin = null then a new zip file is generated in zipfou.
@@ -883,29 +959,37 @@ public class Util {
 		return result;
 	}
 
-	 /**
-	   * Treat an {@link Enumeration} as an {@link Iterable} so it can be used in an enhanced for-loop.
-	   * Bear in mind that the enumeration is "consumed" by the loop and so should be used only once.
-	   * Generally it is best to put the code which obtains the enumeration inside the loop header.
-	   * <div class="nonnormative">
-	   * <p>Example of correct usage:</p>
-	   * <pre>
-	   * ClassLoader loader = ...;
-	   * String name = ...;
-	   * for (URL resource : NbCollections.iterable(loader.{@link ClassLoader#getResources getResources}(name))) {
-	   *     // ...
-	   * }
-	   * </pre>
-	   * </div>
-	   * @param enumeration an enumeration
-	   * @return an iterable wrapper which will traverse the enumeration once
-	   *         ({@link Iterator#remove} is not supported)
-	   * @throws NullPointerException if the enumeration is null
-	   * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6349852">Java bug #6349852</a>
-	   * @since org.openide.util 7.5
-	   * 
-	   * Code borrowed from http://www.java2s.com/Code/Java/Collections-Data-Structure/TreatanEnumerationasanIterable.htm
-	   */
+	public static String exceptionToString(Throwable t) {
+		StringWriter result = new StringWriter();
+		PrintWriter out = new PrintWriter(result);
+		t.printStackTrace(out);
+		out.close();
+		return result.toString();
+	}
+	
+	/**
+	 * Treat an {@link Enumeration} as an {@link Iterable} so it can be used in an enhanced for-loop.
+	 * Bear in mind that the enumeration is "consumed" by the loop and so should be used only once.
+	 * Generally it is best to put the code which obtains the enumeration inside the loop header.
+	 * <div class="nonnormative">
+	 * <p>Example of correct usage:</p>
+	 * <pre>
+	 * ClassLoader loader = ...;
+	 * String name = ...;
+	 * for (URL resource : NbCollections.iterable(loader.{@link ClassLoader#getResources getResources}(name))) {
+	 *     // ...
+	 * }
+	 * </pre>
+	 * </div>
+	 * @param enumeration an enumeration
+	 * @return an iterable wrapper which will traverse the enumeration once
+	 *         ({@link Iterator#remove} is not supported)
+	 * @throws NullPointerException if the enumeration is null
+	 * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6349852">Java bug #6349852</a>
+	 * @since org.openide.util 7.5
+	 * 
+	 * Code borrowed from http://www.java2s.com/Code/Java/Collections-Data-Structure/TreatanEnumerationasanIterable.htm
+	 */
 	public static <E> Iterable<E> iterable(final Enumeration<E> enumeration) {
 		if (enumeration == null) {
 			throw new NullPointerException();
