@@ -13,6 +13,7 @@ import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.file.FileUtil;
 import com.slavi.util.file.FindFileIterator;
 
 public class ImageAdjust {
@@ -91,7 +92,7 @@ public class ImageAdjust {
 		
 		public ProcessImage(BufferedImage bi, String fouBaseName, String fouNameEnding) {
 			this.bi = bi;
-			this.fouName = Util.changeFileExtension(fouBaseName, fouNameEnding + ".png");
+			this.fouName = FileUtil.changeFileExtension(fouBaseName, fouNameEnding + ".png");
 		}
 
 		public abstract void transform(double srcDRGB[], double destDRGB[]);

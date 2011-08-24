@@ -21,13 +21,13 @@ import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.parallel.PDLoweDetector;
-import com.slavi.improc.parallel.PDLoweDetector2;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
+import com.slavi.improc.parallel.PDLoweDetector2;
 import com.slavi.io.txt.TXTKDTree;
-import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
+import com.slavi.util.file.FileUtil;
 
 public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	final KeyPointList keyPointList;
@@ -67,7 +67,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) {
-		return new File(Util.changeFileExtension(
+		return new File(FileUtil.changeFileExtension(
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image, false)), ".spf.z"));
 	}

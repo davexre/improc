@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.slavi.util.Util;
-
 /**
  * This class is used for generating file paths relative to
  * a specified root (base) directory.
@@ -40,7 +38,7 @@ public class AbsoluteToRelativePathMaker {
 	 * application.
 	 */
 	public AbsoluteToRelativePathMaker() {
-		this(Util.getCurrentDir());
+		this(FileUtil.getCurrentDir());
 	}
 	
 	public AbsoluteToRelativePathMaker(String rootDir) {

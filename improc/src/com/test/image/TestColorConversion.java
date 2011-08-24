@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 
 import com.slavi.math.MathUtil;
 import com.slavi.util.ColorConversion;
-import com.slavi.util.Util;
+import com.slavi.util.file.FileUtil;
 
 public class TestColorConversion {
 
@@ -35,7 +35,7 @@ public class TestColorConversion {
 
 	public static void processOneImage(String fname, String fouDir) throws IOException {
 		File fin = new File(fname);
-		String baseName = Util.changeFileExtension(fin.getName(), "");
+		String baseName = FileUtil.changeFileExtension(fin.getName(), "");
 		
 		BufferedImage bi = ImageIO.read(fin);
 		BufferedImage bo = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);

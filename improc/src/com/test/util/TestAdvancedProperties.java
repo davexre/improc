@@ -2,12 +2,12 @@ package com.test.util;
 
 import java.util.Properties;
 
-import com.slavi.util.Util;
+import com.slavi.util.PropertyUtil;
 
 public class TestAdvancedProperties {
 
 	public static void main(String[] args) {
-		Properties init = Util.makeProperties();
+		Properties init = PropertyUtil.makeProperties();
 		Properties p = new Properties();
 	    p.setProperty("V.0", "Value 0");
 		p.setProperty("V.1", "Value 1");
@@ -19,10 +19,10 @@ public class TestAdvancedProperties {
 		p.setProperty("UseVal", "1");
 		p.setProperty("Z", "${ Кирилица$${UseVal} }");
 		p.setProperty("W", "${ V.${UseVal} }");
-		Util.mergeProperties(init, p);
+		PropertyUtil.mergeProperties(init, p);
 		System.out.println(p);
 
-		System.out.println("Z=" + Util.substituteVars("${Z}", p));
+		System.out.println("Z=" + PropertyUtil.substituteVars("${Z}", p));
 		System.out.println("Z=" + init.getProperty("Z"));
 		System.out.println("W=" + init.getProperty("W"));
 	}

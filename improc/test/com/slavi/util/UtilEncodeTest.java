@@ -2,7 +2,8 @@ package com.slavi.util;
 
 import org.junit.Test;
 
-import com.slavi.util.Util.CENCODE;
+import com.slavi.util.CEncoder;
+import com.slavi.util.CEncoder.CENCODE;
 
 public class UtilEncodeTest {
 
@@ -18,8 +19,8 @@ public class UtilEncodeTest {
 	private void singleTestStr(CENCODE cencode) {
 		int i = 0;
 		for (String s : testStr) {
-			String e = Util.cEncode(s, cencode);
-			String d = Util.cDecode(e);
+			String e = CEncoder.encode(s, cencode);
+			String d = CEncoder.decode(e);
 			if (!s.equals(d)) {
 				System.out.println("Failed test string " + i);
 				System.out.println("ENCODING " + cencode);

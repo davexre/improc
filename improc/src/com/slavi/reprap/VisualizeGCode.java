@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 import javax.imageio.ImageIO;
 
 import com.slavi.util.Const;
-import com.slavi.util.Util;
+import com.slavi.util.file.FileUtil;
 
 public class VisualizeGCode {
 
@@ -257,7 +257,7 @@ public class VisualizeGCode {
 //		String finName = g.getClass().getResource("qube10.gcode").getFile();
 		String outputDir = Const.workDir + "/gcode";
 		File outputDirFile = new File(outputDir);
-		Util.removeDirectory(outputDirFile);
+		FileUtil.removeDirectory(outputDirFile);
 		outputDirFile.mkdirs();
 		
 		g.doIt(outputDir, finName);
