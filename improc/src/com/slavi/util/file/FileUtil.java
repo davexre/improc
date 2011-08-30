@@ -179,11 +179,21 @@ public class FileUtil {
 		file = file.getCanonicalFile();
 		ZipOutputStream zos = new ZipOutputStream(os);
 		URI root;
-		if (file.isDirectory())
-			root = file.toURI();
-		else
+	    if (file.isDirectory()) {
+			File[] files = file.listFiles();
+			if ((files == null) || (files.length == 0)) {
+		        // Add a fake entry in order to produce a valid zip file
+				ZipEntry entry = new ZipEntry("./");
+				zos.putNextEntry(entry);
+				zos.closeEntry();
+				root = null;
+			} else {
+				root = file.toURI();
+			}
+		} else
 			root = file.getParentFile().toURI();
-		recursiveZipFile(zos, root, file);
+		if (root != null)
+			recursiveZipFile(zos, root, file);
 		zos.finish();
 	}
 

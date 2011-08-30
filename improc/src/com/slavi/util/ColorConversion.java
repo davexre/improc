@@ -253,4 +253,53 @@ public class ColorConversion {
 			}
 		}
 	}
+	
+	/**
+	 * http://bytes.com/topic/java/answers/16180-rgb-cmyk
+	 * 
+	 * C - Cyan [0..1]
+	 * M - Magenta [0..1]
+	 * Y - Yellow [0..1]
+	 * K - Key (blacK) [0..1]
+	 * 
+	 * DR - Red [0..1]
+	 * DG - Green [0..1]
+	 * DB - Blue [0..1]
+	 */
+	public static class CMYK {
+		public static void fromDRGB(double DRGB[], double cmyk[]) {
+			fromDRGB(DRGB[0], DRGB[1], DRGB[2], cmyk);
+		}
+		
+		public static void toDRGB(double cmyk[], double DRGB[]) {
+			toDRGB(cmyk[0], cmyk[1], cmyk[2], cmyk[3], DRGB);
+		}
+		
+		/**
+		 * @param cmyk	dest[0] = Cyan
+		 * 				dest[1] = Magenta
+		 * 				dest[2] = Yellow
+		 * 				dest[3] = Key/blacK
+		 */
+		public static void fromDRGB(double DR, double DG, double DB, double cmyk[]) {
+			clipDRGB(1.0 - DR, 1.0 - DG, 1.0 - DB, cmyk);
+			cmyk[3] = Math.min(cmyk[0], Math.min(cmyk[1], cmyk[2]));
+			if (cmyk[3] != 1.0) {
+				double scale = 1.0 - cmyk[3];
+				cmyk[0] *= scale;  
+				cmyk[1] *= scale;  
+				cmyk[2] *= scale;  
+			}
+		}
+		
+		public static void toDRGB(double c, double m, double y, double k, double DRGB[]) {
+			c = MathUtil.clipValue(1.0 - c, 0.0, 1.0);
+			m = MathUtil.clipValue(1.0 - m, 0.0, 1.0);
+			y = MathUtil.clipValue(1.0 - y, 0.0, 1.0);
+			k = MathUtil.clipValue(1.0 - k, 0.0, 1.0);
+			DRGB[0] = k * c;
+			DRGB[1] = k * m;
+			DRGB[2] = k * y;
+		}
+	}
 }
