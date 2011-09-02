@@ -195,9 +195,9 @@ public class ColorConversionTest {
 		double drgb2[] = new double[3];
 		double rgb2[] = new double[3];
 		
-		for (int r = 1; r <= 255; r++) {
-			for (int g = 1; g <= 255; g++) {
-				for (int b = 1; b <= 255; b++) {
+		for (int r = 0; r <= 255; r++) {
+			for (int g = 0; g <= 255; g++) {
+				for (int b = 0; b <= 255; b++) {
 					try {
 						int color = r << 16 | g << 8 | b;
 						rgb[0] = r;
@@ -208,10 +208,9 @@ public class ColorConversionTest {
 						ColorConversion.CMYK.fromDRGB(drgb, cmyk);
 						ColorConversion.CMYK.toDRGB(cmyk, drgb2);
 						ColorConversion.RGB.fromDRGB(drgb2, rgb2);
-						TestUtils.assertEqual("Color not matched 1", rgb, rgb2);
 
 						int color2 = ColorConversion.RGB.toRGB(drgb2);
-						TestUtils.assertEqual("Color not matched 3", color, color2);
+						TestUtils.assertEqual("Color not matched", color, color2);
 					} catch (RuntimeException e) {
 						System.out.println("R=" + r);
 						System.out.println("G=" + g);

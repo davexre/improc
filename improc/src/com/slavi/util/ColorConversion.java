@@ -284,11 +284,13 @@ public class ColorConversion {
 		public static void fromDRGB(double DR, double DG, double DB, double cmyk[]) {
 			clipDRGB(1.0 - DR, 1.0 - DG, 1.0 - DB, cmyk);
 			cmyk[3] = Math.min(cmyk[0], Math.min(cmyk[1], cmyk[2]));
-			if (cmyk[3] != 1.0) {
-				double scale = 1.0 - cmyk[3];
-				cmyk[0] *= scale;  
-				cmyk[1] *= scale;  
-				cmyk[2] *= scale;  
+			if (cmyk[3] == 1.0) {
+				cmyk[0] = cmyk[1] = cmyk[2] = 0.0;
+			} else {
+				double scale = 1.0 / (1.0 - cmyk[3]);
+				cmyk[0] = scale * (cmyk[0] - cmyk[3]);  
+				cmyk[1] = scale * (cmyk[1] - cmyk[3]);  
+				cmyk[2] = scale * (cmyk[2] - cmyk[3]);  
 			}
 		}
 		
