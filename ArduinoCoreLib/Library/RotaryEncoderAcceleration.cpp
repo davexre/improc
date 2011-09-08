@@ -1,6 +1,6 @@
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 
-void RotaryEncoderAcelleration::initialize(DigitalInputPin *pinA, DigitalInputPin *pinB) {
+void RotaryEncoderAcceleration::initialize(DigitalInputPin *pinA, DigitalInputPin *pinB) {
 	initialState.initialize(0, 1000, false);
 	state = &initialState;
 	this->pinA.initialize(pinA, 1);
@@ -8,7 +8,7 @@ void RotaryEncoderAcelleration::initialize(DigitalInputPin *pinA, DigitalInputPi
 	tps.initialize();
 }
 
-void RotaryEncoderAcelleration::update() {
+void RotaryEncoderAcceleration::update() {
 	pinA.update(); // toggle
 	pinB.update(); // direction
 

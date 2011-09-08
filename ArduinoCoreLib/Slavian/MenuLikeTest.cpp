@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "StateLed.h"
 #include "menu/Menu.h"
 

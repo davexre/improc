@@ -6,7 +6,7 @@
 #include "TemperatureControl.h"
 #include "StepperAxis.h"
 #include "RepRap.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 
 DefineClass(RepRapMain);
 
@@ -55,7 +55,7 @@ static const int axisE_motor22Pin = 17;
 
 static StateLed led;
 static AdvButton btn;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 static bool lightOn = false;
 
 static const unsigned int *states[] = {

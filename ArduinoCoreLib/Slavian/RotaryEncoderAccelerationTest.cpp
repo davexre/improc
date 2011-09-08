@@ -1,10 +1,10 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "StateLed.h"
 
-DefineClass(RotaryEncoderAcellerationTest);
+DefineClass(RotaryEncoderAccelerationTest);
 
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int speakerPin = 8;
@@ -14,7 +14,7 @@ static const int rotorPinB = 3;	// the other quadrature pin
 
 static AdvButton btn;
 static bool speakerOn = true;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 static StateLed led;
 
 static const unsigned int *states[] = {
@@ -32,7 +32,7 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
-void RotaryEncoderAcellerationTest::setup() {
+void RotaryEncoderAccelerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
@@ -49,7 +49,7 @@ void RotaryEncoderAcellerationTest::setup() {
     toneState.initialize(50, 15000, false);
 }
 
-void RotaryEncoderAcellerationTest::loop() {
+void RotaryEncoderAccelerationTest::loop() {
 	btn.update();
 	led.update();
 

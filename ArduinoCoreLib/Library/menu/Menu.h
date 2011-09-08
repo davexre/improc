@@ -3,7 +3,7 @@
 
 #include "DigitalIO.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 
 enum MenuItemType {
 	MENU_ITEM, MENU_ITEM_ENUM, MENU_LIST
@@ -58,7 +58,7 @@ protected:
 	short int itemsCount;
 	short int currentMenu;
 	bool _hasMenuChanged;
-	RotaryEncoderAcelleration rotor;
+	RotaryEncoderAcceleration rotor;
 public:
 	AdvButton button;
 

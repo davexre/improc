@@ -7,6 +7,8 @@
 
 DefineClass(SteppingMotorWithEndButtonsTest);
 
+#define DigitalInputShiftRegisterPinsCount 16
+
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 static const int buttonPin = 4;

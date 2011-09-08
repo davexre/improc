@@ -2,7 +2,7 @@
 #include <pins_arduino.h>
 #include "utils.h"
 #include "Button.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "DigitalIO.h"
 #include "TimerOne.h"
 
@@ -52,7 +52,7 @@ static DigitalOutputArduinoPin *speakerPort;
 static DigitalOutputArduinoPin *led;
 
 static Button btn;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 
 static void UpdateOnTimer1() {
 	const byte *states = coilStates[activeCoilState++];

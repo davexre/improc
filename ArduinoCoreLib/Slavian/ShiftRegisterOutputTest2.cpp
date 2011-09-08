@@ -3,7 +3,7 @@
 #include "StateLed.h"
 #include "AdvButton.h"
 #include "DigitalIO.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 
 DefineClass(ShiftRegisterOutputTest2);
 
@@ -16,7 +16,7 @@ static const int shiftRegisterOutputPinSH = 12;
 static const int shiftRegisterOutputPinST = 13;
 static const int shiftRegisterOutputPinDS = 11;
 
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 
 static StateLed led;
 static AdvButton btn;

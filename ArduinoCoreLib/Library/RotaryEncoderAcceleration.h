@@ -1,5 +1,5 @@
-#ifndef RotaryEncoderAcelleration_h
-#define RotaryEncoderAcelleration_h
+#ifndef RotaryEncoderAcceleration_h
+#define RotaryEncoderAcceleration_h
 
 #include "TicksPerSecond.h"
 #include "Button.h"
@@ -26,10 +26,10 @@
  */
 #define TICKS_AT_MAX_SPEED_FOR_FULL_SPAN 100
 
-class RotaryEncoderAcelleration;
+class RotaryEncoderAcceleration;
 
 class RotaryEncoderState {
-	friend class RotaryEncoderAcelleration;
+	friend class RotaryEncoderAcceleration;
 private:
 	long minValue;
 	long maxValue;
@@ -127,7 +127,7 @@ public:
  *
  *   http://hacks.ayars.org/2009/12/using-quadrature-encoder-rotary-switch.html
  */
-class RotaryEncoderAcelleration {
+class RotaryEncoderAcceleration {
 private:
 	RotaryEncoderState initialState;
 	RotaryEncoderState *state;

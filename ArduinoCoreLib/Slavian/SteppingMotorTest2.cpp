@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "DigitalIO.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "SteppingMotor.h"
 #include "StateLed.h"
 #include "menu/Menu.h"
@@ -19,7 +19,7 @@ static const int shiftRegisterOutputPinST = 13;
 static const int shiftRegisterOutputPinDS = 11;
 
 static AdvButton btn;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 static StateLed led;
 static DigitalOutputShiftRegister_74HC595 extenderOut;
 

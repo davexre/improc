@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "StateLed.h"
 #include "TimerOne.h"
 #include "DigitalIO.h"
@@ -17,7 +17,7 @@ static const int rotorPinB = 3;	// the other quadrature pin
 
 static AdvButton btn;
 static bool speakerOn = false;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 static StateLed led;
 
 static const unsigned int *states[] = {

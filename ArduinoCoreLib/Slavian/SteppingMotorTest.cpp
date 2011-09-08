@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "DigitalIO.h"
 #include "AdvButton.h"
-#include "RotaryEncoderAcelleration.h"
+#include "RotaryEncoderAcceleration.h"
 #include "SteppingMotor.h"
 #include "StateLed.h"
 #include "menu/Menu.h"
@@ -20,7 +20,7 @@ static const int stepperPin21 = 10;	// BA6845FS Stepper motor driver OUT21 pin
 static const int stepperPin22 = 11;	// BA6845FS Stepper motor driver OUT22 pin
 
 static AdvButton btn;
-static RotaryEncoderAcelleration rotor;
+static RotaryEncoderAcceleration rotor;
 static StateLed led;
 static SteppingMotor_MosfetHBridge motor;
 static SteppingMotorControl motorControl;
