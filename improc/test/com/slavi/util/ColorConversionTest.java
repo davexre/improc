@@ -96,6 +96,7 @@ public class ColorConversionTest {
 					dest0[2] = b;
 					ColorConversion.RGB.toDRGB(dest0, dest1);
 					ColorConversion.HSV.fromDRGB(dest1, dest1);
+					TestUtils.assertEqualAngle("Hue not matched", dest1[0], MathUtil.fixAngle2PI(dest1[0]));
 					ColorConversion.HSV.toDRGB(dest1, dest2);
 					ColorConversion.RGB.fromDRGB(dest2, dest2);
 					try {
@@ -218,6 +219,47 @@ public class ColorConversionTest {
 						TestUtils.dumpArray("rgb", rgb);
 						TestUtils.dumpArray("drgb", drgb);
 						TestUtils.dumpArray("cmyk", cmyk);
+						TestUtils.dumpArray("drgb2", drgb2);
+						TestUtils.dumpArray("rgb2", rgb2);
+						System.out.println("----");
+						throw e;
+					}
+				}
+			}			
+		}
+	}
+	
+	@Test
+	public void testRBW() {
+		double rgb[] = new double[3];
+		double drgb[] = new double[3];
+		double rbw[] = new double[3];
+		double drgb2[] = new double[3];
+		double rgb2[] = new double[3];
+		
+		for (int r = 0; r <= 255; r++) {
+			for (int g = 0; g <= 255; g++) {
+				for (int b = 0; b <= 255; b++) {
+					try {
+						int color = r << 16 | g << 8 | b;
+						rgb[0] = r;
+						rgb[1] = g;
+						rgb[2] = b;
+
+						ColorConversion.RGB.toDRGB(rgb, drgb);
+						ColorConversion.RBW.fromDRGB(drgb, rbw);
+						ColorConversion.RBW.toDRGB(rbw, drgb2);
+						ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+
+						int color2 = ColorConversion.RGB.toRGB(drgb2);
+						TestUtils.assertEqual("Color not matched", color, color2);
+					} catch (RuntimeException e) {
+						System.out.println("R=" + r);
+						System.out.println("G=" + g);
+						System.out.println("B=" + b);
+						TestUtils.dumpArray("rgb", rgb);
+						TestUtils.dumpArray("drgb", drgb);
+						TestUtils.dumpArray("rbw", rbw);
 						TestUtils.dumpArray("drgb2", drgb2);
 						TestUtils.dumpArray("rgb2", rgb2);
 						System.out.println("----");

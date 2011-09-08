@@ -111,6 +111,7 @@ public class ColorConversion {
 			} else {
 				hsv[0] = piOver3 * (4.0 + (hsv[0] - hsv[1]) / chroma);
 			}
+			hsv[0] = MathUtil.fixAngle2PI(hsv[0]); // TODO: Obsolete
 			hsv[1] = chroma / max;
 			hsv[2] = max;
 		}
@@ -302,6 +303,181 @@ public class ColorConversion {
 			DRGB[0] = k * c;
 			DRGB[1] = k * m;
 			DRGB[2] = k * y;
+		}
+	}
+	
+	/**
+	 * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.4151&rep=rep1&type=pdf
+	 * R - Red (1) /green (-1)
+	 * B - Blue (1) /yellow (-1)
+	 * W - White (1) /black (-1)
+	 */
+	public static class RBW {
+		public static void fromDRGB(double DRGB[], double rbw[]) {
+			fromDRGB(DRGB[0], DRGB[1], DRGB[2], rbw);
+		}
+		
+		public static void toDRGB(double rbw[], double DRGB[]) {
+			toDRGB(rbw[0], rbw[1], rbw[2], DRGB);
+		}
+		
+		/**
+		 * @param rbw	dest[0] = Red
+		 * 				dest[1] = Blue
+		 * 				dest[2] = White
+		 */
+		public static void fromDRGB(double DR, double DG, double DB, double rbw[]) {
+			HSV.fromDRGB(DR, DG, DB, rbw);
+			double h = 6.0 * rbw[0] / MathUtil.C2PI;
+			double s = rbw[1];
+			double v = rbw[2];
+			
+			double a, r, b, w;
+			if (v * (2 - s) > 1) {
+				a = 1.5 - v + v * s;
+				w = 1;
+			} else {
+				a = 0.5 + v;
+				w = -1;
+			}
+			double t = Math.sqrt(a*a - 2*v*s);
+			double c = a - t;
+			w = w * (2-a-t);
+			
+			if (c == 0) {
+				r = 0;
+				b = 0;
+			} else {
+				double f;
+				if (h <= 1) {
+					f = 2*h-1;
+					r = c;
+					b = -c;
+				} else if (h <= 2) {
+					f = 3-2*h;
+					r = -c;
+					b = -c;
+				} else if (h <= 4) {
+					f = h-3;
+					r = -c;
+					b = c;
+				} else {
+					f = 5-h;
+					r = c;
+					b = c;
+				}
+				if (f >= 0) {
+					r = (1-f)*r;
+				} else {
+					b = (1+f)*b;
+				}
+			}
+			rbw[0] = r;
+			rbw[1] = b;
+			rbw[2] = w;
+		}
+		
+		public static void fromDRGB_NO(double DR, double DG, double DB, double rbw[]) {
+			HSV.fromDRGB(DR, DG, DB, rbw);
+			double h, s, v;
+			double a, k, t, c, vs, f = 0, sr = 0, sb = 0, r, b;
+			h = rbw[0] / MathUtil.C2PI;
+			s = rbw[1];
+			v = rbw[2];
+			
+			vs = v * s;
+			if (v - .5 > vs / 2) {
+				a = 1.5 + vs - v;
+				k = 1;
+			} else {
+				a = .5 + v;
+				k = -1;
+			}
+			t = Math.sqrt(a * a - 2 * vs);
+			c = a - t;
+			k = k * (2 - a - t);
+			h = h * 6;
+
+			/*
+			 * Figure out the hue.
+			 */
+			if (h <= 1) {
+				sr = 1;
+				sb = -1;
+				f = 2 * h - 1;
+			} else if (h <= 2) {
+				sr = -1;
+				sb = -1;
+				f = 3 - 2 * h;
+			} else if (h <= 4) {
+				sr = -1;
+				sb = 1;
+				f = h - 3;
+			} else if (h <= 6) {
+				sr = 1;
+				sb = 1;
+				f = 5 - h;
+			}
+			if (f >= 0) {
+				b = sb;
+				r = (1 - f) * sr;
+			} else {
+				r = sr;
+				b = (f + 1) * sb;
+			}
+
+			rbw[0] = r * c / 2.0;
+			rbw[1] = b * c / 2.0;
+			rbw[2] = k;
+		}
+		
+		public static void toDRGB(double r, double b, double w, double DRGB[]) {
+			r = MathUtil.clipValue(r, -1.0, 1.0);
+			b = MathUtil.clipValue(b, -1.0, 1.0);
+			w = MathUtil.clipValue(w, -1.0, 1.0);
+
+			double h;
+			if (r == 0 && b == 0) {
+				h = 0;
+			} else {
+				double f;
+				if (Math.abs(b) > Math.abs(r)) {
+					f = 1 - Math.abs(r / b);
+				} else {
+					f = Math.abs(b / r) - 1;
+				}
+				if (r >= 0 && b <= 0) {
+					h = 0.5 + f / 2;
+				} else if (r <= 0 && b <= 0) {
+					h = 1.5 - f / 2;
+				} else if (r <= 0 && b >= 0) {
+					h = 3 + f;
+				} else {
+					h = 5 - f;
+				}
+			}
+			h /= 6.;
+			/*
+			 * Figure out the value and saturation.
+			 */
+			double v, vs, s;
+			double c = Math.max(Math.abs(r), Math.abs(b));
+			if (w >= 0) {
+				v = (w + 1 + c * (1 - w)) / 2;
+				vs = c * (2 - w) / 2;
+			} else {
+				v = (w + 1 + c) / 2;
+				vs = c * (w + 2) / 2;
+			}
+			if (v == 0) {
+				s = 0;
+			} else {
+				s = vs / v;
+			}
+			DRGB[0] = h * MathUtil.C2PI;
+			DRGB[1] = s;
+			DRGB[2] = v;
+			HSV.toDRGB(DRGB, DRGB);
 		}
 	}
 }
