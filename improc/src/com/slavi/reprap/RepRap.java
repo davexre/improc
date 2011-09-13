@@ -36,7 +36,8 @@ RrPolygon.simplify
 			res.addAll(points);
 			return;
 		}
-		
+		double d2 = d*d;
+
 	}
 	
 	void calcBoundingBox(ArrayList<Point2D> points, Rectangle2D bbox) {
