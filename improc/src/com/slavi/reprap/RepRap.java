@@ -1,13 +1,17 @@
 package com.slavi.reprap;
 
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Shape3D;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import org.j3d.renderer.java3d.loaders.STLLoader;
@@ -26,6 +30,35 @@ RrPolygon.simplify
 
  */
 
+	void simplify(ArrayList<Point2D> points, double d) {
+		ArrayList<Point2D> res = new ArrayList<Point2D>();
+		if (points.size() <= 3) {
+			res.addAll(points);
+			return;
+		}
+		
+	}
+	
+	void calcBoundingBox(ArrayList<Point2D> points, Rectangle2D bbox) {
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		
+		double maxX = Double.MIN_VALUE;
+		double maxY = Double.MIN_VALUE;
+		
+		for (Point2D p : points) {
+			if (minX > p.getX())
+				minX = p.getX();
+			if (maxX < p.getX())
+				maxX = p.getX();
+
+			if (minY > p.getY())
+				minY = p.getY();
+			if (maxY < p.getY())
+				maxY = p.getY();
+		}
+	}
+	
 	void loadSTL(URL fin) throws FileNotFoundException, IncorrectFormatException, ParsingErrorException {
 		STLLoader loader = new STLLoader();
 		Scene scene = loader.load(fin);
