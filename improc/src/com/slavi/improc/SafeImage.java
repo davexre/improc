@@ -9,8 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.imageio.ImageIO;
 
-import sun.security.action.GetLongAction;
-
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 

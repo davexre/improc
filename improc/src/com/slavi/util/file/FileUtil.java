@@ -58,6 +58,65 @@ public class FileUtil {
 		return result;
 	}
 	
+	public static boolean areFilesIdentical(File file1, File file2, boolean compareFileContent) throws IOException {
+		if ((file1 == null) || (file2 == null))
+			return false;
+		if ((!file1.exists()) || (!file2.exists()))
+			return false;
+
+		if ((!file1.isDirectory()) && (!file2.isDirectory())) {
+			// Compare real files
+			if ((!file1.getName().equals(file2.getName())) || (file1.length() != file2.length()) ||
+				(Math.abs(file1.lastModified() - file2.lastModified()) > 2000))
+				return false;
+			if (compareFileContent) {
+				FileInputStream fs1 = new FileInputStream(file1);
+				FileInputStream fs2 = new FileInputStream(file2);
+				byte buf1[] = new byte[256];
+				byte buf2[] = new byte[256];
+				int len1;
+				while ((len1 = fs1.read(buf1)) >= 0) {
+					int len2;
+					while ((len1 > 0) && ((len2 = fs2.read(buf2, 0, len1)) >= 0)) {
+						len1 -= len2;
+						for (int i = 0; i < len2; i++) {
+							if (buf1[i] != buf2[i])
+								return false;
+						}
+					}
+				}
+				fs1.close();
+				fs2.close();
+			}
+			return true;
+		} else if (file1.isDirectory() && file2.isDirectory()) {
+			// Compare folders
+			File[] list1 = file1.listFiles();
+			File[] list2 = file2.listFiles();
+			if ((list1 == null) || (list2 == null) || (list1.length != list2.length))
+				return false;
+			for (int i = 0; i < list1.length; i++) {
+				File f1 = list1[i];
+				String f1Name = f1.getName();
+				File f2 = null;
+				for (int j = 0; j < list2.length; j++) {
+					File tmp = list2[j];
+					if (f1Name.equals(tmp.getName())) {
+						f2 = tmp;
+						break;
+					}
+				}
+				if (!areFilesIdentical(f1, f2, compareFileContent)) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			// One is file the other is folder
+			return false;
+		}
+	}
+
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
 		byte buf[] = new byte[256];
 		int len;

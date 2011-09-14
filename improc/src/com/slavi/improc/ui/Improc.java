@@ -1,28 +1,17 @@
 package com.slavi.improc.ui;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
-import com.slavi.image.DWindowedImageUtils;
-import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
-import com.slavi.improc.KeyPointList;
-import com.slavi.improc.KeyPointListSaver;
-import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.SafeImage;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
 import com.slavi.improc.myadjust.ValidateKeyPointPairList;
-import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
