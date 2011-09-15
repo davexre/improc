@@ -2,41 +2,13 @@ package example.java.awt;
 
 import java.awt.Polygon;
 import java.awt.geom.Area;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
+
+import com.slavi.math.GeometryUtil;
 
 public class PolygonIntersection {
 
-	public static void printPathIterator(PathIterator iter) {
-		double coords[] = new double[6];
-		while (!iter.isDone()) {
-			int seg = iter.currentSegment(coords);
-			String type;
-			switch (seg) {
-			case PathIterator.SEG_MOVETO:
-				type = "MOVETO";
-				break;
-			case PathIterator.SEG_LINETO:
-				type = "LINETO";
-				break;
-			case PathIterator.SEG_QUADTO:
-				type = "QUADTO";
-				break;
-			case PathIterator.SEG_CUBICTO:
-				type = "CUBICTO";
-				break;
-			case PathIterator.SEG_CLOSE:
-				type = "CLOSE";
-				break;
-			default:
-				type = "<N/A>";
-				break;
-			}
-			System.out.println(type + "\t" + coords[0] + "\t" + coords[1]);
-			iter.next();
-		}
-	}
-	
 	public static void main(String[] args) {
 		Path2D.Double p1 = new Path2D.Double();
 		p1.moveTo(0, 0);
@@ -55,8 +27,15 @@ public class PolygonIntersection {
 		Area intersect = new Area();
 		intersect.add(a1);
 		intersect.add(a2);
+
+		System.out.println(GeometryUtil.pathIteratorToString(intersect.getPathIterator(null)));
+		System.out.println("-------");
+		Area l = new Area(new Line2D.Double(0, -0.5, 2, 2));
+		intersect.reset();
+		intersect.add(a1);
+		intersect.intersect(l);
+		System.out.println(GeometryUtil.pathIteratorToString(intersect.getPathIterator(null)));
 		
-		printPathIterator(intersect.getPathIterator(null));
 		System.out.println("Done.");
 	}
 }

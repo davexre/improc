@@ -1,6 +1,7 @@
 package com.slavi.math;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -183,5 +184,69 @@ public class GeometryUtil {
 			}
 		}
 		return result;
+	}
+	
+	public static String pathIteratorToString(PathIterator iter) {
+		StringBuilder result = new StringBuilder();
+		double coords[] = new double[6];
+		while (!iter.isDone()) {
+			int seg = iter.currentSegment(coords);
+			int points;
+			switch (seg) {
+			case PathIterator.SEG_MOVETO:
+				result.append("MOVETO");
+				points = 2;
+				break;
+			case PathIterator.SEG_LINETO: 
+				result.append("LINETO");
+				points = 2;
+				break;
+			case PathIterator.SEG_QUADTO:
+				result.append("QUADTO");
+				points = 4;
+				break;
+			case PathIterator.SEG_CUBICTO:
+				result.append("CUBICTO");
+				points = 6;
+				break;
+			case PathIterator.SEG_CLOSE:
+				result.append("CLOSE");
+				points = 2;
+				break;
+			default:
+				result.append("<N/A>");
+				points = 6;
+				break;
+			}
+			for (int i = 0; i < points; i++) {
+				result.append("\t");
+				result.append(coords[i]);
+			}
+			result.append("\n");
+			iter.next();
+		}
+		return result.toString();
+	}
+	
+	/**
+	 * Code borrowed from http://www.java.net/node/673604
+	 * More info at http://paulbourke.net/geometry/
+	 */
+	public static Point2D lineIntersectsLine(Line2D line1, Line2D line2) {
+		double a1, b1, c1, a2, b2, c2, denom;
+		a1 = line1.getY2() - line1.getY1();
+		b1 = line1.getX1() - line1.getX2();
+		c1 = line1.getX2() * line1.getY1() - line1.getX1() * line1.getY2();
+		// a1x + b1y + c1 = 0 line1 eq
+		a2 = line2.getY2() - line2.getY1();
+		b2 = line2.getX1() - line2.getX2();
+		c2 = line2.getX2() * line2.getY1() - line2.getX1() * line2.getY2();
+		// a2x + b2y + c2 = 0 line2 eq
+		denom = a1 * b2 - a2 * b1;
+		if (denom == 0)
+			return null;
+		return new Point2D.Double(
+				(b1 * c2 - b2 * c1) / denom, 
+				(a2 * c1 - a1 * c2) / denom);
 	}
 }
