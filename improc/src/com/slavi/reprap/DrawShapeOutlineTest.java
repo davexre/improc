@@ -7,14 +7,14 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import com.slavi.math.MathUtil;
 import com.slavi.util.Const;
 
 public class DrawShapeOutlineTest {
@@ -27,11 +27,11 @@ public class DrawShapeOutlineTest {
 	Area union;
 	Area xor;
 	
-	static final int offset = 250; 
-	int offsetX;
+	static final int cellOffset = 250; 
+	int cumulativeCellOffsetX;
 	
 	public DrawShapeOutlineTest() {
-		bi = new BufferedImage(1400, 1600, BufferedImage.TYPE_INT_RGB);
+		bi = new BufferedImage(1400, 1800, BufferedImage.TYPE_INT_RGB);
 		g = (Graphics2D)bi.getGraphics();
 		
 		square = new Area(new Rectangle(-100, -100, 200, 200));
@@ -55,187 +55,82 @@ public class DrawShapeOutlineTest {
 		xor.exclusiveOr(triangle2);
 
 		g.translate(120, 120);
-		offsetX = 0;
+		cumulativeCellOffsetX = 0;
 	}
 	
 	private void nextCell() {
-		g.translate(offset, 0);
-		offsetX += offset;
+		g.translate(cellOffset, 0);
+		cumulativeCellOffsetX += cellOffset;
+		if ((cumulativeCellOffsetX + cellOffset) > bi.getWidth())
+			nextRow();
 	}
 	
 	private void nextRow() {
-		g.translate(-offsetX, offset);
-		offsetX = 0;
+		if (cumulativeCellOffsetX != 0) {
+			g.translate(-cumulativeCellOffsetX, cellOffset);
+			cumulativeCellOffsetX = 0;
+		}
 	}
 	
-	public void drawFigures() {
-		g.setColor(Color.white);
-		g.draw(square);
-
-		nextCell();
-		g.setColor(Color.green);
-		g.draw(triangle1);
-
-		nextCell();
-		g.setColor(Color.green);
-		g.draw(triangle2);
-		
-		nextCell();
+	private void drawArea(Area a) {
 		g.setColor(Color.blue);
-		g.fill(xor);
-
+		g.fill(a);
+		g.setColor(Color.red);
+		g.draw(a);
 		nextCell();
+	}
+	
+	private void drawHatchedArea(Area a, Path2D hatch) {
+		g.setColor(Color.blue);
+		g.fill(a);
+		g.setColor(Color.red);
+		g.draw(a);
 		g.setColor(Color.white);
-		g.fill(union);
-		
+		g.draw(hatch);
+		nextCell();
+	}
+
+	public void drawFigures() {
+		drawArea(square);
+		drawArea(triangle1);
+		drawArea(triangle2);
+		drawArea(xor);
+		drawArea(union);
 		nextRow();
 	}
 	
 	public void drawPositiveOffset() {
-		Stroke oldStroke = g.getStroke();
-		g.setStroke(new BasicStroke(20));
-
-		g.setColor(Color.white);
-		g.fill(square);
-		g.draw(square);
-
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(triangle1);
-		g.draw(triangle1);
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(triangle2);
-		g.draw(triangle2);
-		
-		nextCell();
-		g.setColor(Color.blue);
-		g.fill(xor);
-		g.draw(xor);
-		
-		nextCell();
-		g.setColor(Color.white);
-		g.fill(union);
-		g.draw(union);
-
+		Stroke stroke = new BasicStroke(20);
+		drawArea(RepRapRoutines.areaExpandWithBrushWidth(stroke, square));
+		drawArea(RepRapRoutines.areaExpandWithBrushWidth(stroke, triangle1));
+		drawArea(RepRapRoutines.areaExpandWithBrushWidth(stroke, triangle2));
+		drawArea(RepRapRoutines.areaExpandWithBrushWidth(stroke, xor));
+		drawArea(RepRapRoutines.areaExpandWithBrushWidth(stroke, union));
 		nextRow();
-		g.setStroke(oldStroke);
 	}
-	
+
 	public void drawNegativeOffset() {
-		Stroke oldStroke = g.getStroke();
-		g.setStroke(new BasicStroke(20));
-
-		g.setColor(Color.white);
-		g.fill(square);
-		g.setColor(Color.black);
-		g.draw(square);
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(triangle1);
-		g.setColor(Color.black);
-		g.draw(triangle1);
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(triangle2);
-		g.setColor(Color.black);
-		g.draw(triangle2);
-		
-		nextCell();
-		g.setColor(Color.blue);
-		g.fill(xor);
-		g.setColor(Color.black);
-		g.draw(xor);
-		
-		nextCell();
-		g.setColor(Color.white);
-		g.fill(union);
-		g.setColor(Color.black);
-		g.draw(union);
-		
-		nextRow();
-		g.setStroke(oldStroke);
-	}
-	
-	private Area positiveOffset(Stroke stroke, Area area) {
-		Area result = new Area();
-		result.add(area);
-		result.add(new Area(stroke.createStrokedShape(area)));
-		return result;
-	}
-	
-	public void drawPositiveOffset2() {
 		Stroke stroke = new BasicStroke(20);
-
-		g.setColor(Color.white);
-		g.fill(positiveOffset(stroke, square));
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(positiveOffset(stroke, triangle1));
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(positiveOffset(stroke, triangle2));
-		
-		nextCell();
-		g.setColor(Color.blue);
-		g.fill(positiveOffset(stroke, xor));
-		
-		nextCell();
-		g.setColor(Color.white);
-		g.fill(positiveOffset(stroke, union));
-		
-		nextRow();
-	}
-
-	private Area negativeOffset(Stroke stroke, Area area) {
-		Area result = new Area();
-		result.add(area);
-		result.subtract(new Area(stroke.createStrokedShape(area)));
-		return result;
-	}
-	
-	public void drawNegativeOffset2() {
-		Stroke stroke = new BasicStroke(20);
-
-		g.setColor(Color.white);
-		g.fill(negativeOffset(stroke, square));
-
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(negativeOffset(stroke, triangle1));
-		
-		nextCell();
-		g.setColor(Color.green);
-		g.fill(negativeOffset(stroke, triangle2));
-		
-		nextCell();
-		g.setColor(Color.blue);
-		g.fill(negativeOffset(stroke, xor));
-		
-		nextCell();
-		g.setColor(Color.white);
-		g.fill(negativeOffset(stroke, union));
-		
+		drawArea(RepRapRoutines.areaShrinkWithBrushWidth(stroke, square));
+		drawArea(RepRapRoutines.areaShrinkWithBrushWidth(stroke, triangle1));
+		drawArea(RepRapRoutines.areaShrinkWithBrushWidth(stroke, triangle2));
+		drawArea(RepRapRoutines.areaShrinkWithBrushWidth(stroke, xor));
+		drawArea(RepRapRoutines.areaShrinkWithBrushWidth(stroke, union));
 		nextRow();
 	}
 
 	public void drawHatched() {
-		Area area = square;
-		g.setColor(Color.white);
-		Line2D.Double l = new Line2D.Double();
-		Rectangle2D r = area.getBounds2D();
-		l.setLine(r.getMinX(), r.getMinY(), r.getMaxX(), r.getMaxY());
-		
-		Area tmp = new Area(l);
-		g.fill(tmp);
-		
+		Stroke stroke = new BasicStroke(20);
+//		Area area = RepRapRoutines.areaShrinkWithBrushWidth(stroke, xor);
+		Area area = RepRapRoutines.areaExpandWithBrushWidth(stroke, xor);
+		Path2D path;
+		for (int i = 0; i <= 16; i++) {
+			path = RepRapRoutines.hatchArea(100, 100, 5, i * 22.5 * MathUtil.deg2rad, area);
+			drawHatchedArea(area, path);
+		}
 		nextRow();
 	}
+	
 	
 	public void save() throws IOException {
 		File fou = new File(Const.tempDir, "output.png");
@@ -246,10 +141,8 @@ public class DrawShapeOutlineTest {
 	public static void main(String[] args) throws IOException {
 		DrawShapeOutlineTest t = new DrawShapeOutlineTest();
 		t.drawFigures();
-//		t.drawPositiveOffset();
-//		t.drawNegativeOffset();
-		t.drawPositiveOffset2();
-		t.drawNegativeOffset2();
+		t.drawPositiveOffset();
+		t.drawNegativeOffset();
 		t.drawHatched();
 		t.save();
 	}

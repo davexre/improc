@@ -1,6 +1,7 @@
 package com.slavi.math;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -127,19 +128,21 @@ public class GeometryUtil {
 	 * Extracts a polygon from a list of lines. The lines that are used in the
 	 * extracted polygon are removed from the supplied list.
 	 */
-	public static ArrayList<Point2D> extractPolygon(ArrayList<Line2D> lines) {
+	public static Path2D extractPolygon(ArrayList<Line2D> lines) {
 		if (lines.size() < 1)
 			return null;
-		ArrayList<Point2D> result = new ArrayList<Point2D>();
+		Path2D result = new Path2D.Double();
 		Line2D line = lines.remove(0);
-		Point2D start = line.getP1();
-		Point2D end = line.getP2();
-		result.add(start);
-		result.add(end);
+		double startX = line.getX1();
+		double startY = line.getY1();
+		double endX = line.getX2();
+		double endY = line.getY2();
+		result.moveTo(startX, startY);
+		result.lineTo(endX, endY);
 		
 		boolean first = true;
 		while(lines.size() > 0) {
-			double d2 = distanceSquared(start.getX(), start.getY(), end.getX(), end.getY());
+			double d2 = distanceSquared(startX, startY, endX, endY);
 			if(first)
 				d2 = Math.max(d2, 1);
 
@@ -148,13 +151,13 @@ public class GeometryUtil {
 			int index = -1;
 			for(int i = 0; i < lines.size(); i++) {
 				line = lines.get(i);
-				double dd = distanceSquared(end.getX(), end.getY(), line.getX1(), line.getY1());
+				double dd = distanceSquared(endX, endY, line.getX1(), line.getY1());
 				if(dd < d2) {
 					d2 = dd;
 					aEnd = true;
 					index = i;
 				}
-				dd = distanceSquared(end.getX(), end.getY(), line.getX2(), line.getY2());
+				dd = distanceSquared(endX, endY, line.getX2(), line.getY2());
 				if(dd < d2) {
 					d2 = dd;
 					aEnd = false;
@@ -165,20 +168,15 @@ public class GeometryUtil {
 			if(index >= 0) {
 				line = lines.get(index);
 				lines.remove(index);
-				Point2D p1;
-				Point2D p2;
 				if(aEnd) {
-					p1 = line.getP1();
-					p2 = line.getP2();
+					result.lineTo(0.5 * (endX + line.getX1()), 0.5 * (endY + line.getY1()));
+					endX = line.getX2();
+					endY = line.getY2();
 				} else {
-					p2 = line.getP1();
-					p1 = line.getP2();
+					result.lineTo(0.5 * (endX + line.getX2()), 0.5 * (endY + line.getY2()));
+					endX = line.getX1();
+					endY = line.getY1();
 				}
-				end.setLocation(
-						0.5 * (end.getX() + p1.getX()), 
-						0.5 * (end.getY() + p1.getY()));
-				end = p2;
-				result.add(end);
 			} else {
 				break;
 			}
