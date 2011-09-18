@@ -118,7 +118,9 @@ RrPolygon.simplify
 			outfills.add(adjacentSlices);
 			outfills.intersect(adjacentSlices);
 			outfills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, outfills));
-			
+
+			Area outline = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap computeOutlines - offset(outline=true, shell=1)
+			// computeOutlines - middleStart
 
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
 		}
