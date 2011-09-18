@@ -120,8 +120,16 @@ RrPolygon.simplify
 			outfills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, outfills));
 
 			Area outline = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap computeOutlines - offset(outline=true, shell=1)
-			// computeOutlines - middleStart
+			// computeOutlines - middleStart - change the starting point of polygons... this seem to me to be obsolete
 
+			// nearEnds - change the starting point of polygons so that the next 
+			// polygon to print is the closest one to the last polygon that finished printing 
+			
+			// reprap - computeSupport
+			Area support = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap uses the constant -3
+			support.add(layers.get(3)); // layer+1
+			
+			
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
 		}
 	}
