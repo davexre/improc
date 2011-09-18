@@ -1,11 +1,11 @@
 package com.slavi.reprap;
 
 public class Bounds3d {
-	public double originX;
-	public double originY;
-	public double originZ;
+	public double minX = Double.MAX_VALUE;
+	public double minY = Double.MAX_VALUE;
+	public double minZ = Double.MAX_VALUE;
 	
-	public double sizeX;
-	public double sizeY;
-	public double sizeZ;
+	public double maxX = Double.MIN_VALUE;
+	public double maxY = Double.MIN_VALUE;
+	public double maxZ = Double.MIN_VALUE;
 }

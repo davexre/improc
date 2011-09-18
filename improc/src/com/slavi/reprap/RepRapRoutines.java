@@ -249,14 +249,14 @@ public class RepRapRoutines {
 		return shapes;
 	}
 
-	private static Path2D makePath(ArrayList points, Area area) {
+	private static Path2D makePath(ArrayList shapes, Area area) {
 		Path2D result = new Path2D.Double();
-		if (points.size() < 2)
+		if (shapes.size() < 2)
 			return result;
 		int curPoint = 0;
 		Point2D p1;
 		Point2D prev;
-		Object o = points.get(curPoint++);
+		Object o = shapes.get(curPoint++);
 		if (o instanceof Point2D) {
 			p1 = null;
 			prev = (Point2D) o;
@@ -266,8 +266,8 @@ public class RepRapRoutines {
 			prev = l.getP2();
 		}
 		
-		while (curPoint < points.size()) {
-			o = points.get(curPoint++);
+		while (curPoint < shapes.size()) {
+			o = shapes.get(curPoint++);
 			if (o instanceof Point2D) {
 				Point2D cur = (Point2D) o;
 				boolean curLineIsInside = area.contains(
@@ -340,8 +340,8 @@ public class RepRapRoutines {
 		
 		double curC = minC + (startC - minC) % rayOffset;
 		while (curC <= maxC) {
-			ArrayList<Point2D> points = calcRayToPathIntersectionPoints(rayA, rayB, curC, area.getPathIterator(null));
-			Path2D path = makePath(points, area);
+			ArrayList shapes = calcRayToPathIntersectionPoints(rayA, rayB, curC, area.getPathIterator(null));
+			Path2D path = makePath(shapes, area);
 			result.append(path.getPathIterator(null), false);
 			curC += rayOffset;
 		}
@@ -434,13 +434,13 @@ public class RepRapRoutines {
 			}
 		} else if (object instanceof Group) {
 			Group group = (Group) object;
-			Enumeration<?> children = group.getAllChildren();
+			Enumeration children = group.getAllChildren();
 			while (children.hasMoreElements())
 				calcShape3DtoPlaneZIntersectionEdges(edges, planeZ, children.nextElement());
 		}
 	}
 	
-	private static void calcShapeBounds(Object object, Point3d min, Point3d max) {
+	public static void calcShapeBounds(Object object, Bounds3d bounds) {
 		if (object instanceof Shape3D) {
 			Shape3D shape = (Shape3D) object;
 			GeometryArray g = (GeometryArray)shape.getGeometry();
@@ -449,35 +449,19 @@ public class RepRapRoutines {
 			int i = 0;
 			while (i < count) {
 	            g.getCoordinate(i++, p);
-	            min.x = Math.min(min.x, p.x);
-	            min.y = Math.min(min.y, p.y);
-	            min.z = Math.min(min.z, p.z);
+	            bounds.minX = Math.min(bounds.minX, p.x);
+	            bounds.minY = Math.min(bounds.minY, p.y);
+	            bounds.minZ = Math.min(bounds.minZ, p.z);
 	            
-	            max.x = Math.max(max.x, p.x);
-	            max.y = Math.max(max.y, p.y);
-	            max.z = Math.max(max.z, p.z);
+	            bounds.maxX = Math.max(bounds.maxX, p.x);
+	            bounds.maxY = Math.max(bounds.maxY, p.y);
+	            bounds.maxZ = Math.max(bounds.maxZ, p.z);
 			}
 		} else if (object instanceof Group) {
 			Group group = (Group) object;
-			Enumeration<?> children = group.getAllChildren();
+			Enumeration children = group.getAllChildren();
 			while (children.hasMoreElements())
-				calcShapeBounds(children.nextElement(), min, max);
+				calcShapeBounds(children.nextElement(), bounds);
 		}
-	}
-
-	public static Bounds3d calcShapeBounds(Object object) {
-		Point3d min = new Point3d(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE); 
-		Point3d max = new Point3d(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
-		calcShapeBounds(object, min, max);
-		
-		Bounds3d result = new Bounds3d();
-		result.originX = min.x;
-		result.originY = min.y;
-		result.originZ = min.z;
-		
-		result.sizeX = max.x - min.x;
-		result.sizeY = max.y - min.y;
-		result.sizeZ = max.z - min.z;
-		return result;
 	}
 }

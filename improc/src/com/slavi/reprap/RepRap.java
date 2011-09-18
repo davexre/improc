@@ -1,5 +1,8 @@
 package com.slavi.reprap;
 
+import java.awt.BasicStroke;
+import java.awt.Stroke;
+import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.io.FileNotFoundException;
@@ -15,6 +18,7 @@ import javax.vecmath.Point3d;
 import org.j3d.renderer.java3d.loaders.STLLoader;
 
 import com.slavi.math.GeometryUtil;
+import com.slavi.math.MathUtil;
 import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
@@ -50,12 +54,73 @@ RrPolygon.simplify
 		}
 	}
 	
-	void computeFills(Object object, double planeZ) {
+	/**
+	 *  reprap - slice
+	 */
+	Area calcPolygonsForLayer(ArrayList objects, double z) {
+		Area result = new Area();
 		ArrayList<Line2D> edges = new ArrayList<Line2D>();
-		RepRapRoutines.calcShape3DtoPlaneZIntersectionEdges(edges, planeZ, object);
-		while (edges.size() > 1) {
-			Path2D path = GeometryUtil.extractPolygon(edges);
-			System.out.println(GeometryUtil.pathIteratorToString(path.getPathIterator(null)));
+		for (Object object : objects) {
+			edges.clear();
+			RepRapRoutines.calcShape3DtoPlaneZIntersectionEdges(edges, z, object);
+			while (edges.size() > 1) {
+				Path2D path = GeometryUtil.extractPolygon(edges);
+				Area area = new Area(path);
+				result.add(area);
+			}
+		}
+		return result;
+	}
+	
+	void produceAdditiveTopDown(ArrayList objects) {
+		double densityWidthInsideFill = 5;
+		double densityWidthSurfaceFill = 2;
+		double layersWidth = 0.56;
+		double hatchAngleIncrease = 73 * MathUtil.deg2rad;
+		
+		Bounds3d bounds = new Bounds3d(); 
+		for (Object object : objects)
+			RepRapRoutines.calcShapeBounds(object, bounds);
+
+		double curHatchAngle = 0;
+		Stroke stroke = new BasicStroke((float) layersWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
+		ArrayList<Area> layers = new ArrayList<Area>(5);
+		layers.add(new Area());
+		layers.add(new Area());
+		double calcZ = bounds.maxZ - (bounds.maxZ - bounds.minZ + layersWidth * 0.5) % layersWidth;
+		double minZ = bounds.minZ - layersWidth - layersWidth;
+		while (calcZ >= minZ) {
+			Area calcLayer = calcPolygonsForLayer(objects, calcZ);
+			calcZ -= layersWidth;
+			if (layers.size() < 5) {
+				layers.add(0, calcLayer);
+				continue;
+			}
+			layers.remove(5);
+			layers.add(0, calcLayer);
+			
+			// Compute infills
+			Area curLayer = layers.get(3);
+			Area adjacentSlices = new Area();
+			adjacentSlices.add(layers.get(0));			// curLayer -2
+			adjacentSlices.intersect(layers.get(1));	// curLayer -1
+			adjacentSlices.intersect(layers.get(3));	// curLayer +1
+			adjacentSlices.intersect(layers.get(4));	// curLayer +2
+			
+			Area infills = new Area();
+			infills.add(curLayer);
+			infills.intersect(adjacentSlices);
+			infills = RepRapRoutines.areaShrinkWithBrushWidth(stroke, infills); // reprap offset( outline=false )
+			infills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthInsideFill, curHatchAngle, infills));
+
+			Area outfills = new Area(); // reprap computeInfill - @see java.util.BitSet.andNot()
+			outfills.add(curLayer);
+			outfills.add(adjacentSlices);
+			outfills.intersect(adjacentSlices);
+			outfills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, outfills));
+			
+
+			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
 		}
 	}
 	
