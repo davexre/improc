@@ -1,10 +1,12 @@
 package com.slavi.math;
 
+import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class GeometryUtil {
 	/**
@@ -61,7 +63,7 @@ public class GeometryUtil {
 	public static double distanceSquared(double x1, double y1, double x2, double y2) {
 		x1 -= x2;
 		y1 -= y2;
-		return x1*x1 + y1*y2;
+		return x1*x1 + y1*y1;
 	}
 	
 	/**
@@ -128,17 +130,17 @@ public class GeometryUtil {
 	 * Extracts a polygon from a list of lines. The lines that are used in the
 	 * extracted polygon are removed from the supplied list.
 	 */
-	public static Path2D extractPolygon(ArrayList<Line2D> lines) {
+	public static Area extractPolygon(ArrayList<Line2D> lines) {
 		if (lines.size() < 1)
 			return null;
-		Path2D result = new Path2D.Double();
+		Path2D path = new Path2D.Double();
 		Line2D line = lines.remove(0);
 		double startX = line.getX1();
 		double startY = line.getY1();
 		double endX = line.getX2();
 		double endY = line.getY2();
-		result.moveTo(startX, startY);
-		result.lineTo(endX, endY);
+		path.moveTo(startX, startY);
+		path.lineTo(endX, endY);
 		
 		boolean first = true;
 		while(lines.size() > 0) {
@@ -166,14 +168,13 @@ public class GeometryUtil {
 			}
 
 			if(index >= 0) {
-				line = lines.get(index);
-				lines.remove(index);
+				line = lines.remove(index);
 				if(aEnd) {
-					result.lineTo(0.5 * (endX + line.getX1()), 0.5 * (endY + line.getY1()));
+					path.lineTo(0.5 * (endX + line.getX1()), 0.5 * (endY + line.getY1()));
 					endX = line.getX2();
 					endY = line.getY2();
 				} else {
-					result.lineTo(0.5 * (endX + line.getX2()), 0.5 * (endY + line.getY2()));
+					path.lineTo(0.5 * (endX + line.getX2()), 0.5 * (endY + line.getY2()));
 					endX = line.getX1();
 					endY = line.getY1();
 				}
@@ -181,7 +182,28 @@ public class GeometryUtil {
 				break;
 			}
 		}
-		return result;
+		return new Area(path);
+	}
+	
+	static final String coordinateFormat = "%8.2f";
+	static final String pointFormat = "P(" + 
+			coordinateFormat + ", " + coordinateFormat + ")";
+	static final String lineFormat = "L(" + 
+			coordinateFormat + ", " + coordinateFormat + ", " + 
+			coordinateFormat + ", " + coordinateFormat + ")";
+	
+	public static String shapeToString(Object o) {
+		if (o == null) {
+			return "NULL";
+		} else if (o instanceof Point2D) {
+			Point2D p = (Point2D) o;
+			return String.format(Locale.US, pointFormat, p.getX(), p.getY());
+		} else if (o instanceof Line2D) {
+			Line2D l = (Line2D) o;
+			return String.format(Locale.US, lineFormat, l.getX1(), l.getY1(), l.getX2(), l.getY2());
+		} else {
+			return o.toString();
+		}
 	}
 	
 	public static String pathIteratorToString(PathIterator iter) {
@@ -209,7 +231,7 @@ public class GeometryUtil {
 				break;
 			case PathIterator.SEG_CLOSE:
 				result.append("CLOSE");
-				points = 2;
+				points = 0;
 				break;
 			default:
 				result.append("<N/A>");

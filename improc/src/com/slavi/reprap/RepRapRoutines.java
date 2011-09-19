@@ -437,6 +437,8 @@ public class RepRapRoutines {
 			Enumeration children = group.getAllChildren();
 			while (children.hasMoreElements())
 				calcShape3DtoPlaneZIntersectionEdges(edges, planeZ, children.nextElement());
+		} else {
+			System.out.println("Unsupported object " + object);
 		}
 	}
 	

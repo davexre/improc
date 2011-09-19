@@ -1,170 +1,170 @@
 solid "Cube_1"; Produced by Art of Illusion 2.8.1, Tue Jun 07 07:27:38 EEST 2011
 facet normal  0 -1 0
   outer loop
-    vertex  10 0 10
+    vertex  100 0 10
     vertex  0 0 10
-    vertex  5 0 5
+    vertex  50 0 5
   endloop
 endfacet
 facet normal  0 -1 0
   outer loop
-    vertex  10 0 0
-    vertex  10 0 10
-    vertex  5 0 5
+    vertex  100 0 0
+    vertex  100 0 10
+    vertex  50 0 5
   endloop
 endfacet
 facet normal  0 -1 0
   outer loop
     vertex  0 0 0
-    vertex  10 0 0
-    vertex  5 0 5
+    vertex  100 0 0
+    vertex  50 0 5
   endloop
 endfacet
 facet normal  0 -1 0
   outer loop
     vertex  0 0 10
     vertex  0 0 0
-    vertex  5 0 5
+    vertex  50 0 5
   endloop
 endfacet
 facet normal  1 0 0
   outer loop
-    vertex  10 0 10
-    vertex  10 0 0
-    vertex  10 5 5
+    vertex  100 0 10
+    vertex  100 0 0
+    vertex  100 50 5
   endloop
 endfacet
 facet normal  1 0 0
   outer loop
-    vertex  10 0 0
-    vertex  10 10 0
-    vertex  10 5 5
+    vertex  100 0 0
+    vertex  100 100 0
+    vertex  100 50 5
   endloop
 endfacet
 facet normal  1 0 0
   outer loop
-    vertex  10 10 0
-    vertex  10 10 10
-    vertex  10 5 5
+    vertex  100 100 0
+    vertex  100 100 10
+    vertex  100 50 5
   endloop
 endfacet
 facet normal  1 0 0
   outer loop
-    vertex  10 10 10
-    vertex  10 0 10
-    vertex  10 5 5
+    vertex  100 100 10
+    vertex  100 0 10
+    vertex  100 50 5
   endloop
 endfacet
 facet normal  0 0 1
   outer loop
     vertex  0 0 10
-    vertex  10 0 10
-    vertex  5 5 10
+    vertex  100 0 10
+    vertex  50 50 10
   endloop
 endfacet
 facet normal  0 0 1
   outer loop
-    vertex  10 0 10
-    vertex  10 10 10
-    vertex  5 5 10
+    vertex  100 0 10
+    vertex  100 100 10
+    vertex  50 50 10
   endloop
 endfacet
 facet normal  0 0 1
   outer loop
-    vertex  10 10 10
-    vertex  0 10 10
-    vertex  5 5 10
+    vertex  100 100 10
+    vertex  0 100 10
+    vertex  50 50 10
   endloop
 endfacet
 facet normal  0 0 1
   outer loop
-    vertex  0 10 10
+    vertex  0 100 10
     vertex  0 0 10
-    vertex  5 5 10
+    vertex  50 50 10
   endloop
 endfacet
 facet normal  -1 0 0
   outer loop
     vertex  0 0 0
     vertex  0 0 10
-    vertex  0 5 5
+    vertex  0 50 5
   endloop
 endfacet
 facet normal  -1 0 0
   outer loop
     vertex  0 0 10
-    vertex  0 10 10
-    vertex  0 5 5
+    vertex  0 100 10
+    vertex  0 50 5
   endloop
 endfacet
 facet normal  -1 0 0
   outer loop
-    vertex  0 10 10
-    vertex  0 10 0
-    vertex  0 5 5
+    vertex  0 100 10
+    vertex  0 100 0
+    vertex  0 50 5
   endloop
 endfacet
 facet normal  -1 0 0
   outer loop
-    vertex  0 10 0
+    vertex  0 100 0
     vertex  0 0 0
-    vertex  0 5 5
+    vertex  0 50 5
   endloop
 endfacet
 facet normal  0 1 0
   outer loop
-    vertex  0 10 10
-    vertex  10 10 10
-    vertex  5 10 5
+    vertex  0 100 10
+    vertex  100 100 10
+    vertex  50 100 5
   endloop
 endfacet
 facet normal  0 1 0
   outer loop
-    vertex  10 10 10
-    vertex  10 10 0
-    vertex  5 10 5
+    vertex  100 100 10
+    vertex  100 100 0
+    vertex  50 100 5
   endloop
 endfacet
 facet normal  0 1 0
   outer loop
-    vertex  10 10 0
-    vertex  0 10 0
-    vertex  5 10 5
+    vertex  100 100 0
+    vertex  0 100 0
+    vertex  50 100 5
   endloop
 endfacet
 facet normal  0 1 0
   outer loop
-    vertex  0 10 0
-    vertex  0 10 10
-    vertex  5 10 5
+    vertex  0 100 0
+    vertex  0 100 10
+    vertex  50 100 5
   endloop
 endfacet
 facet normal  0 0 -1
   outer loop
-    vertex  10 0 0
+    vertex  100 0 0
     vertex  0 0 0
-    vertex  5 5 0
+    vertex  50 50 0
   endloop
 endfacet
 facet normal  0 0 -1
   outer loop
     vertex  0 0 0
-    vertex  0 10 0
-    vertex  5 5 0
+    vertex  0 100 0
+    vertex  50 50 0
   endloop
 endfacet
 facet normal  0 0 -1
   outer loop
-    vertex  0 10 0
-    vertex  10 10 0
-    vertex  5 5 0
+    vertex  0 100 0
+    vertex  100 100 0
+    vertex  50 50 0
   endloop
 endfacet
 facet normal  0 0 -1
   outer loop
-    vertex  10 10 0
-    vertex  10 0 0
-    vertex  5 5 0
+    vertex  100 100 0
+    vertex  100 0 0
+    vertex  50 50 0
   endloop
 endfacet
 endsolid
