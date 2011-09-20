@@ -11,7 +11,6 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -88,6 +87,13 @@ RrPolygon.simplify
 		return result;
 	}
 	
+	public static class Layer {
+		double z;
+		int layerNumber;
+		
+		
+	}
+	
 	void produceAdditiveTopDown(ArrayList objects) throws Exception {
 		File outputDir = new File(Const.tempDir, "layers");
 		FileUtil.removeDirectory(outputDir);
@@ -101,6 +107,7 @@ RrPolygon.simplify
 		Bounds3d bounds = new Bounds3d(); 
 		for (Object object : objects)
 			RepRapRoutines.calcShapeBounds(object, bounds);
+		System.out.println(bounds);
 		
 		double scale = 30;
 		BufferedImage bi = new BufferedImage(
@@ -166,7 +173,7 @@ RrPolygon.simplify
 			unionOfAllAbove.add(curLayer);
 			Area support = new Area();
 			support.add(unionOfAllAbove);
-			support.intersect(curLayer);
+			support.exclusiveOr(curLayer);
 			Path2D supportHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, support);
 			
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
@@ -184,8 +191,8 @@ RrPolygon.simplify
 			g.draw(infillsPath);
 			g.setColor(Color.green);
 			g.draw(outfillsHatch);
-			g.setColor(Color.red);
-			g.draw(support);
+			g.setColor(Color.blue);
+			g.draw(supportHatch);
 //			g.setColor(Color.white);
 //			g.draw(outline);
 						
@@ -193,105 +200,6 @@ RrPolygon.simplify
 			System.out.println(fou + " " + calcZ);
 			ImageIO.write(bi, "png", fou);
 		}
-	}
-
-	void testSlice() throws Exception {
-		/*		
-		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
-		URL fin = new File(fname).toURL();
-		 */
-
-		String fname = "qube10.stl";
-		URL fin = getClass().getResource(fname);
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
-		BranchGroup object = scene.getSceneGroup();
-		
-		Bounds3d bounds = new Bounds3d(); 
-		RepRapRoutines.calcShapeBounds(object, bounds);
-		System.out.println(bounds);
-
-		BufferedImage bi = new BufferedImage(
-				1200, 1200,
-//				(int) (bounds.maxX - bounds.minX) + 1, 
-//				(int) (bounds.maxY - bounds.minY) + 1,
-				BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = (Graphics2D) bi.getGraphics();
-		
-//		g.translate(-bounds.minX, -bounds.minY);
-		g.translate(100, 100);
-		
-		g.setColor(Color.blue);
-
-		ArrayList<Line2D> edges = new ArrayList<Line2D>();
-		RepRapRoutines.calcShape3DtoPlaneZIntersectionEdges(edges, 5, object);
-		for (Line2D l : edges) {
-			System.out.println(GeometryUtil.shapeToString(l));
-			g.draw(l);
-		}
-//		g.translate(200, 0);
-		g.setColor(Color.yellow);
-
-		Area curLayer = new Area();
-		while (edges.size() > 1) {
-			System.out.println(edges.size());
-			Area area = new Area(GeometryUtil.extractPolygon(edges));
-			System.out.println(GeometryUtil.pathIteratorToString(area.getPathIterator(null)));
-			g.draw(area);
-//			g.fill(area);
-			g.translate(120, 0);
-			curLayer.add(area);
-		}
-		
-//		g.translate(0, 100);
-		g.setColor(Color.red);
-		g.fill(curLayer);
-
-		g.translate(bounds.minX, bounds.minY);
-		File fou = new File(Const.tempDir, "output3.png");
-		ImageIO.write(bi, "png", fou);
-	}
-
-	
-	void doIt2() throws Exception {
-		String fname = "pulley-4.5-6-8-40.stl";
-//		String fname = "qube10.stl";
-//		String fname = "small-qube10.stl";
-		URL fin = getClass().getResource(fname);
-/*
-		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
-		URL fin = new File(fname).toURL();
-*/
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
-		BranchGroup stl = scene.getSceneGroup();
-		ArrayList objects = new ArrayList();
-		objects.add(stl);
-//		produceAdditiveTopDown(objects);
-		AffineTransform transformObjects = new AffineTransform();
-		Area layer = calcPolygonsForLayer(objects, 10.7, transformObjects);
-		
-		BufferedImage bi = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = (Graphics2D) bi.getGraphics();
-
-		double scale = 15;
-		AffineTransform tr = new AffineTransform();
-		tr.translate(250, 250);
-		tr.scale(scale, scale);
-		Path2D path = new Path2D.Double();
-		path.append(layer.getPathIterator(tr), true);
-		Area layerTr = new Area(path);
-		
-//		g.transform(tr);
-		g.scale(2, 2);
-		
-		g.setColor(Color.green);
-		g.fill(layerTr);
-		g.setColor(Color.white);
-		g.draw(layerTr);
-
-		File fou = new File(Const.tempDir, "output.png");
-		ImageIO.write(bi, "png", fou);
 	}
 
 	void doIt() throws Exception {
