@@ -7,6 +7,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -66,14 +67,17 @@ RrPolygon.simplify
 	/**
 	 *  reprap - slice
 	 */
-	Area calcPolygonsForLayer(ArrayList objects, double z) {
+	Area calcPolygonsForLayer(ArrayList objects, double z, AffineTransform tranfsormObjects) {
 		Area result = new Area();
 		ArrayList<Line2D> edges = new ArrayList<Line2D>();
 		for (Object object : objects) {
 			edges.clear();
 			RepRapRoutines.calcShape3DtoPlaneZIntersectionEdges(edges, z, object);
 			while (edges.size() > 1) {
-				Area area = GeometryUtil.extractPolygon(edges);
+				Path2D path = GeometryUtil.extractPolygon(edges);
+				Path2D transformedPath = new Path2D.Double();
+				transformedPath.append(path.getPathIterator(tranfsormObjects), true);
+				Area area = new Area(transformedPath);
 				result.add(area);
 			}
 			/*
@@ -84,13 +88,13 @@ RrPolygon.simplify
 		return result;
 	}
 	
-	void produceAdditiveTopDown(ArrayList objects) throws IOException {
+	void produceAdditiveTopDown(ArrayList objects) throws Exception {
 		File outputDir = new File(Const.tempDir, "layers");
 		FileUtil.removeDirectory(outputDir);
 		outputDir.mkdirs();
 		
-		double densityWidthInsideFill = 5;
-		double densityWidthSurfaceFill = 2;
+		double densityWidthInsideFill = 10;
+		double densityWidthSurfaceFill = 5;
 		double layersWidth = 0.56;
 		double hatchAngleIncrease = 73 * MathUtil.deg2rad;
 		
@@ -104,11 +108,10 @@ RrPolygon.simplify
 				(int) (scale * ((bounds.maxY - bounds.minY) + 1)),
 				BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = (Graphics2D) bi.getGraphics();
-		AffineTransform tr = new AffineTransform();
-		tr.scale(scale, scale);
-		g.transform(tr);
-		g.translate(-bounds.minX, -bounds.minY);
-		
+		AffineTransform transformObjects = new AffineTransform();
+		transformObjects.scale(scale, scale);
+		transformObjects.translate(-bounds.minX, -bounds.minY);
+
 		double curHatchAngle = 0;
 		Stroke stroke = new BasicStroke((float) layersWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
 		ArrayList<Area> layers = new ArrayList<Area>(5);
@@ -119,7 +122,7 @@ RrPolygon.simplify
 		double minZ = bounds.minZ - layersWidth - layersWidth;
 		int curLayerNumber = 0;
 		while (calcZ >= minZ) {
-			Area calcLayer = calcPolygonsForLayer(objects, calcZ);
+			Area calcLayer = calcPolygonsForLayer(objects, calcZ, transformObjects);
 			calcZ -= layersWidth;
 			if (layers.size() < 5) {
 				layers.add(0, calcLayer);
@@ -142,16 +145,16 @@ RrPolygon.simplify
 			infills.add(curLayer);
 			infills.intersect(adjacentSlices);
 			infills = RepRapRoutines.areaShrinkWithBrushWidth(stroke, infills); // reprap offset( outline=false )
-//			infills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthInsideFill, curHatchAngle, infills));
+			Path2D infillsPath = RepRapRoutines.hatchArea(0, 0, densityWidthInsideFill, curHatchAngle, infills);
 
 			// Calc the surface polygons - higher hatch density
 			Area outfills = new Area(); // reprap computeInfill - @see java.util.BitSet.andNot()
 			outfills.add(curLayer);
 			outfills.add(adjacentSlices);
-			outfills.intersect(adjacentSlices);
-//			outfills = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, outfills));
+			outfills.exclusiveOr(adjacentSlices);
+			Path2D outfillsHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, outfills);
 
-			Area outline = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap computeOutlines - offset(outline=true, shell=1)
+//			Area outline = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap computeOutlines - offset(outline=true, shell=1)
 			// computeOutlines - middleStart - change the starting point of polygons... this seem to me to be obsolete
 
 			// nearEnds - change the starting point of polygons so that the next 
@@ -164,48 +167,32 @@ RrPolygon.simplify
 			Area support = new Area();
 			support.add(unionOfAllAbove);
 			support.intersect(curLayer);
-			support = new Area(RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, support));
+			Path2D supportHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, support);
 			
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
 			
 			curLayerNumber++;
 			g.setColor(Color.black);
 			g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-/*			
-			g.setColor(Color.blue);
-			g.fill(curLayer);
-*/
 			
-			g.setColor(Color.blue);
-			g.fill(infills);
+//			g.setColor(Color.blue);
+//			g.fill(curLayer);
+			g.setColor(Color.red);
+			g.draw(curLayer);
+
+			g.setColor(Color.yellow);
+			g.draw(infillsPath);
 			g.setColor(Color.green);
-			g.fill(outfills);
+			g.draw(outfillsHatch);
 			g.setColor(Color.red);
 			g.draw(support);
-			g.setColor(Color.white);
-			g.draw(outline);
+//			g.setColor(Color.white);
+//			g.draw(outline);
 						
 			File fou = new File(outputDir, String.format(Locale.US, "layer_%04d.png", curLayerNumber));
-			System.out.println(fou);
+			System.out.println(fou + " " + calcZ);
 			ImageIO.write(bi, "png", fou);
 		}
-	}
-	
-	void doIt() throws Exception {
-		String fname = "pulley-4.5-6-8-40.stl";
-//		String fname = "qube10.stl";
-//		String fname = "small-qube10.stl";
-		URL fin = getClass().getResource(fname);
-/*
-		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
-		URL fin = new File(fname).toURL();
-*/
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
-		BranchGroup stl = scene.getSceneGroup();
-		ArrayList objects = new ArrayList();
-		objects.add(stl);
-		produceAdditiveTopDown(objects);
 	}
 
 	void testSlice() throws Exception {
@@ -248,7 +235,7 @@ RrPolygon.simplify
 		Area curLayer = new Area();
 		while (edges.size() > 1) {
 			System.out.println(edges.size());
-			Area area = GeometryUtil.extractPolygon(edges);
+			Area area = new Area(GeometryUtil.extractPolygon(edges));
 			System.out.println(GeometryUtil.pathIteratorToString(area.getPathIterator(null)));
 			g.draw(area);
 //			g.fill(area);
@@ -263,6 +250,65 @@ RrPolygon.simplify
 		g.translate(bounds.minX, bounds.minY);
 		File fou = new File(Const.tempDir, "output3.png");
 		ImageIO.write(bi, "png", fou);
+	}
+
+	
+	void doIt2() throws Exception {
+		String fname = "pulley-4.5-6-8-40.stl";
+//		String fname = "qube10.stl";
+//		String fname = "small-qube10.stl";
+		URL fin = getClass().getResource(fname);
+/*
+		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
+		URL fin = new File(fname).toURL();
+*/
+		STLLoader loader = new STLLoader();
+		Scene scene = loader.load(fin);
+		BranchGroup stl = scene.getSceneGroup();
+		ArrayList objects = new ArrayList();
+		objects.add(stl);
+//		produceAdditiveTopDown(objects);
+		AffineTransform transformObjects = new AffineTransform();
+		Area layer = calcPolygonsForLayer(objects, 10.7, transformObjects);
+		
+		BufferedImage bi = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = (Graphics2D) bi.getGraphics();
+
+		double scale = 15;
+		AffineTransform tr = new AffineTransform();
+		tr.translate(250, 250);
+		tr.scale(scale, scale);
+		Path2D path = new Path2D.Double();
+		path.append(layer.getPathIterator(tr), true);
+		Area layerTr = new Area(path);
+		
+//		g.transform(tr);
+		g.scale(2, 2);
+		
+		g.setColor(Color.green);
+		g.fill(layerTr);
+		g.setColor(Color.white);
+		g.draw(layerTr);
+
+		File fou = new File(Const.tempDir, "output.png");
+		ImageIO.write(bi, "png", fou);
+	}
+
+	void doIt() throws Exception {
+		String fname = "pulley-4.5-6-8-40.stl";
+//		String fname = "qube10.stl";
+//		String fname = "small-qube10.stl";
+		URL fin = getClass().getResource(fname);
+/*
+		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
+		URL fin = new File(fname).toURL();
+*/
+		STLLoader loader = new STLLoader();
+		Scene scene = loader.load(fin);
+		BranchGroup stl = scene.getSceneGroup();
+		ArrayList objects = new ArrayList();
+		objects.add(stl);
+		produceAdditiveTopDown(objects);
 	}
 
 	public static void main(String[] args) throws Exception {

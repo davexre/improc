@@ -130,7 +130,7 @@ public class GeometryUtil {
 	 * Extracts a polygon from a list of lines. The lines that are used in the
 	 * extracted polygon are removed from the supplied list.
 	 */
-	public static Area extractPolygon(ArrayList<Line2D> lines) {
+	public static Path2D extractPolygon(ArrayList<Line2D> lines) {
 		if (lines.size() < 1)
 			return null;
 		Path2D path = new Path2D.Double();
@@ -182,7 +182,8 @@ public class GeometryUtil {
 				break;
 			}
 		}
-		return new Area(path);
+		path.closePath();
+		return path;
 	}
 	
 	static final String coordinateFormat = "%8.2f";
