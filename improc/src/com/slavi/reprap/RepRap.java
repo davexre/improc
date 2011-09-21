@@ -1,22 +1,10 @@
 package com.slavi.reprap;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Locale;
 
-import javax.imageio.ImageIO;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Shape3D;
@@ -24,10 +12,6 @@ import javax.vecmath.Point3d;
 
 import org.j3d.renderer.java3d.loaders.STLLoader;
 
-import com.slavi.math.GeometryUtil;
-import com.slavi.math.MathUtil;
-import com.slavi.util.Const;
-import com.slavi.util.file.FileUtil;
 import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
@@ -80,7 +64,7 @@ RrPolygon.simplify
 
 		PrintJob job = new PrintJob();
 		job.initialize(objects);
-		job.print(new RepRapPrinter());
+		job.print(new RepRapPrintToImagePrinter());
 	}
 
 	public static void main(String[] args) throws Exception {

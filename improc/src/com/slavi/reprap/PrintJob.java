@@ -6,6 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -19,7 +20,8 @@ import com.slavi.math.MathUtil;
 
 public class PrintJob {
 	public ArrayList<Layer> layers = new ArrayList<Layer>();
-	Bounds3d bounds = new Bounds3d();
+	Bounds3d objectsBounds = new Bounds3d();
+	Rectangle2D layerBounds = new Rectangle2D.Double();
 
 	double layersWidth = 0.56;
 
@@ -67,43 +69,30 @@ public class PrintJob {
 		}
 		return result;
 	}
-		
-	boolean isFirstAdjecentSlice;
-	private void addAdjecentSlice(Area adjacentSlices, int layerToAdd) {
-		if ((layerToAdd >= 0) && (layerToAdd < layers.size())) {
-			if (isFirstAdjecentSlice)
-				adjacentSlices.add(layers.get(layerToAdd).slice);
-			else
-				adjacentSlices.intersect(layers.get(layerToAdd).slice);
-			isFirstAdjecentSlice = false;
-		}
-	}
 	
 	// produceAdditiveTopDown
-	public void print(RepRapPrinter printer) throws Exception {
+	public void print(RepRapPrintToImagePrinter printer) throws Exception {
 		double densityWidthInsideFill = 10;
 		double densityWidthSurfaceFill = 5;
 		double layersWidth = 0.56;
 		double hatchAngleIncrease = 73 * MathUtil.deg2rad;
 		double curHatchAngle = 0;
 		Stroke stroke = new BasicStroke((float) layersWidth, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL);
-		Area unionOfLayersAbove = new Area();
 
 		Area tmp = new Area();
 		Area adjacentSlices = new Area();
-		printer.startPrinting(bounds);
-		for (int curLayerNumber = layers.size() - 1; curLayerNumber >= 0; curLayerNumber--) {
+		printer.startPrinting(layerBounds);
+		for (int curLayerNumber = 0; curLayerNumber < layers.size(); curLayerNumber++) {
 			Layer curLayer = layers.get(curLayerNumber);
 			adjacentSlices.reset();
-			isFirstAdjecentSlice = true;
 
-			unionOfLayersAbove.add(curLayer.slice);
-			
-			addAdjecentSlice(adjacentSlices, curLayerNumber + 2);
-			addAdjecentSlice(adjacentSlices, curLayerNumber + 1);
-			addAdjecentSlice(adjacentSlices, curLayerNumber - 1);
-			addAdjecentSlice(adjacentSlices, curLayerNumber - 2);
-			
+			if ((curLayerNumber - 2 >= 0) && (curLayerNumber + 2 < layers.size())) {
+				adjacentSlices.add(layers.get(curLayerNumber + 2).slice);
+				adjacentSlices.intersect(layers.get(curLayerNumber + 1).slice);
+				adjacentSlices.intersect(layers.get(curLayerNumber - 1).slice);
+				adjacentSlices.intersect(layers.get(curLayerNumber - 2).slice);
+			}
+
 			PrintLayer printLayer = new PrintLayer(curLayer);
 			// Calc the "inside" filled polygons, i.e. the "not a surface" areas that are with less dense fill.
 			tmp.reset();
@@ -130,9 +119,6 @@ public class PrintJob {
 //			Area support = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap uses the constant -3
 //			support.add(layers.get(3)); // layer+1
 
-			printLayer.support = new Area();
-			printLayer.support.add(unionOfLayersAbove);
-			printLayer.support.exclusiveOr(curLayer.slice);
 			printLayer.supportHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, printLayer.support);
 			
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
@@ -143,18 +129,32 @@ public class PrintJob {
 	
 	public void initialize(ArrayList objects) {
 		for (Object object : objects)
-			calcShapeBounds(object, bounds);
+			calcShapeBounds(object, objectsBounds);
 
 		AffineTransform transformObjects = new AffineTransform();
 		transformObjects.scale(30, 30);
-		transformObjects.translate(-bounds.minX, -bounds.minY);
+		transformObjects.translate(-objectsBounds.minX, -objectsBounds.minY);
 		int curLayerNumber = 0;
-		for (double curZ = bounds.minZ + layersWidth *0.5; curZ <= bounds.maxZ; curZ += layersWidth) {
-			Layer layer = new Layer();
-			layer.z = curZ;
-			layer.slice = PrintJob.calcPolygonsForLayer(objects, curZ, transformObjects);
-			layer.layerNumber = curLayerNumber++;
-			layers.add(layer);
+
+		Area unionOfLayersAbove = new Area();
+		double startZ = objectsBounds.minZ + layersWidth *0.5;
+		for (double curZ = startZ; curZ <= objectsBounds.maxZ; curZ += layersWidth) {
+			Layer curLayer = new Layer();
+			curLayer.objectZ = curZ;
+			curLayer.reprapZ = curZ - startZ;
+			curLayer.slice = PrintJob.calcPolygonsForLayer(objects, curZ, transformObjects);
+			unionOfLayersAbove.add(curLayer.slice);
+			curLayer.support = new Area();
+			curLayer.support.add(unionOfLayersAbove);
+			curLayer.support.exclusiveOr(curLayer.slice);
+
+			Rectangle2D curBounds = curLayer.slice.getBounds2D();
+			if (layers.size() == 0)
+				layerBounds.setFrame(curBounds);
+			else
+				Rectangle2D.union(layerBounds, curBounds, layerBounds);
+			curLayer.layerNumber = curLayerNumber++;
+			layers.add(curLayer);
 		}
 	}
 }

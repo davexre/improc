@@ -1,6 +1,5 @@
 package com.slavi.math;
 
-import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
