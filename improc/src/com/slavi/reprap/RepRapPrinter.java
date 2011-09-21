@@ -1,47 +1,62 @@
 package com.slavi.reprap;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Locale;
+
+import javax.imageio.ImageIO;
+
+import com.slavi.util.Const;
+import com.slavi.util.file.FileUtil;
 
 public class RepRapPrinter {
 	
-	public void cmd(String cmd) throws Exception {
-		System.out.println(cmd);
+	File outputDir;
+	BufferedImage bi;
+	Graphics2D g;
+	
+	public RepRapPrinter() {
+		outputDir = new File(Const.tempDir, "layers");
 	}
 	
-	
-	
-	public void stopMotor() throws Exception {
-		cmd("M103 ;extruder off");
-	}
-	
-	public void stopValve() throws Exception {
-		cmd("M126 P1 ;valve open");
-	}
-	
-	public void selectExtruder(int materialIndex) throws Exception {
-		cmd("T" + materialIndex + "; select new extruder");
-		double pwm = 0.5; // getExtruder().getPWM();
-		if(pwm >= 0)
-			cmd("M113 S" + pwm + "; set extruder PWM");
-		else
-			cmd("M113; set extruder to use pot for PWM");
-	}
-	
-	public void homeToZeroXYE() throws Exception {
-		stopValve();
-		cmd("G28 X0 Y0 Z0 ;set x,y,z 0");
-	}
-	
-	public void finishedLayer(/*LayerRules lc*/) throws Exception {
-		homeToZeroXYE();
-	}
-	
-	public void setBedTemperature(double temperature) throws Exception {
-		cmd("M140 S" + temperature + " ;set bed temperature and return");
-	}
-	
-	public void stabilise() throws Exception
-	{
-		cmd("M116 ;wait for stability then return");
-	}
+	public void startPrinting(Bounds3d bounds) throws Exception {
+		FileUtil.removeDirectory(outputDir);
+		outputDir.mkdirs();
 
+		bi = new BufferedImage(1200, 1200,
+//				(int)((bounds.maxX - bounds.minX) + 1), 
+//				(int)((bounds.maxY - bounds.minY) + 1),
+				BufferedImage.TYPE_INT_RGB);
+		g = (Graphics2D) bi.getGraphics();
+	}
+	
+	public void printLayer(PrintLayer layer) throws Exception {
+		g.setColor(Color.black);
+		g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
+		
+//		g.setColor(Color.blue);
+//		g.fill(layer.slice);
+		g.setColor(Color.red);
+		g.draw(layer.slice);
+
+		g.setColor(Color.yellow);
+		g.draw(layer.infillsHatch);
+		g.setColor(Color.green);
+		g.draw(layer.outfillsHatch);
+		g.setColor(Color.blue);
+		g.draw(layer.supportHatch);
+//		g.setColor(Color.white);
+//		g.draw(layer.outline);
+					
+		File fou = new File(outputDir, String.format(Locale.US, "layer_%04d.png", layer.layerNumber));
+		System.out.println(fou + " " + layer.z);
+		ImageIO.write(bi, "png", fou);
+	}
+	
+	public void stopPrinting() throws Exception {
+		g = null;
+		bi = null;
+	}
 }

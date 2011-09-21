@@ -441,29 +441,4 @@ public class RepRapRoutines {
 			System.out.println("Unsupported object " + object);
 		}
 	}
-	
-	public static void calcShapeBounds(Object object, Bounds3d bounds) {
-		if (object instanceof Shape3D) {
-			Shape3D shape = (Shape3D) object;
-			GeometryArray g = (GeometryArray)shape.getGeometry();
-			int count = g.getVertexCount();
-			Point3d p = new Point3d();
-			int i = 0;
-			while (i < count) {
-	            g.getCoordinate(i++, p);
-	            bounds.minX = Math.min(bounds.minX, p.x);
-	            bounds.minY = Math.min(bounds.minY, p.y);
-	            bounds.minZ = Math.min(bounds.minZ, p.z);
-	            
-	            bounds.maxX = Math.max(bounds.maxX, p.x);
-	            bounds.maxY = Math.max(bounds.maxY, p.y);
-	            bounds.maxZ = Math.max(bounds.maxZ, p.z);
-			}
-		} else if (object instanceof Group) {
-			Group group = (Group) object;
-			Enumeration children = group.getAllChildren();
-			while (children.hasMoreElements())
-				calcShapeBounds(children.nextElement(), bounds);
-		}
-	}
 }
