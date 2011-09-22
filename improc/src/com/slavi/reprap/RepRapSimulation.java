@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -44,24 +45,31 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 			this.layer = layer;
 			objectType = 0;
 			segmentType = 0;
-			iter = RepRapRoutines.reorderPath(startNearHere, layer.outline.getPathIterator(null)).getPathIterator(null);
+			ArrayList<Shape> shapes = new ArrayList<Shape>();
+//			shapes.add(layer.outline);
+//			shapes.add(layer.infills);
+//			shapes.add(layer.outfills);
+			iter = RepRapRoutines.reorderShapePaths(startNearHere, shapes).getPathIterator(null);
 		}
 		
 		public boolean getNext() {
 			while (iter.isDone()) {
+				ArrayList<Shape> shapes = new ArrayList<Shape>();
 				switch (objectType) {
 				case 0:
-					iter = RepRapRoutines.reorderPath(startNearHere, layer.outfillsHatch.getPathIterator(null)).getPathIterator(null);
+//					shapes.add(layer.outfillsHatch);
 					break;
 				case 1:
-					iter = RepRapRoutines.reorderPath(startNearHere, layer.infillsHatch.getPathIterator(null)).getPathIterator(null);
+//					shapes.add(layer.infillsHatch);
+//					shapes.add(layer.outfillsHatch);
 					break;
 				case 2:
-					iter = RepRapRoutines.reorderPath(startNearHere, layer.supportHatch.getPathIterator(null)).getPathIterator(null);
+//					shapes.add(layer.supportHatch);
 					break;
 				default:
 					return false;
 				}
+				iter = RepRapRoutines.reorderShapePaths(startNearHere, shapes).getPathIterator(null);
 				objectType++;
 			}
 			segmentType = iter.currentSegment(coords);
@@ -79,14 +87,12 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 	public void printLayer(PrintLayer layer) throws Exception {
 		System.out.println("Printing layer " + layer.layerNumber);
 		
-		if (layer.layerNumber < 3)
+		if (layer.layerNumber < 12)
 			return;
 		
 		Graphics2D g = (Graphics2D) biDraw.getGraphics();
 		g.setColor(Color.black);
 		g.fillRect(0, 0, biDraw.getWidth(), biDraw.getHeight());
-//		long startTime = System.currentTimeMillis();
-//		double drawnLength = 0;
 		
 		PointIterator iter = new PointIterator(layer);
 		iter.getNext();
@@ -149,7 +155,36 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 			g.drawLine(fromX, fromY, toX, toY);
 		}
 
+		
 		Thread.sleep(500);
+		
+		g = (Graphics2D) biDraw.getGraphics();
+		g.drawImage(biShow, 0, 0, biShow.getWidth(), biShow.getHeight(), null);
+		g.setColor(Color.yellow);
+		ArrayList<Shape> shapes = new ArrayList<Shape>();
+		shapes.add(layer.infillsHatch);
+		g.draw(RepRapRoutines.reorderShapePaths(startNearHere, shapes));
+		g.dispose();
+
+		BufferedImage tmp = biShow;
+		biShow = biDraw;
+		biDraw = tmp;
+		canvas.repaint();
+
+		Thread.sleep(3000);
+
+		g = (Graphics2D) biDraw.getGraphics();
+		g.drawImage(biShow, 0, 0, biShow.getWidth(), biShow.getHeight(), null);
+		g.setColor(Color.yellow);
+		g.draw(layer.infillsHatch);
+		g.dispose();
+
+		tmp = biShow;
+		biShow = biDraw;
+		biDraw = tmp;
+		canvas.repaint();
+		
+		Thread.sleep(3500);
 	}
 
 	public void stopPrinting() throws Exception {
@@ -190,7 +225,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 		Frame imageFrame = SWT_AWT.new_Frame(composite);
 		canvas = new Canvas() {
 			public void paint (Graphics g) {
-				g.drawImage(biDraw, 0, 0, biDraw.getWidth(), biDraw.getHeight(), null); 
+				g.drawImage(biShow, 0, 0, biShow.getWidth(), biShow.getHeight(), null); 
 			}
 			
 			public void update(Graphics g) {

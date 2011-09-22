@@ -1,5 +1,6 @@
 package com.slavi.reprap;
 
+import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
@@ -463,77 +464,110 @@ public class RepRapRoutines {
 		}
 	}
 	
-	public static Path2D reorderPath(Point2D startNearHere, PathIterator iter) {
+	public static Path2D reorderShapePaths(Point2D startNearHere, ArrayList<Shape> shapes) {
+		Path2D.Double result = new Path2D.Double();
+/*		for (Shape shape : shapes) {
+			PathIterator iter = shape.getPathIterator(null);
+			result.append(iter, false);
+			System.out.println(GeometryUtil.pathIteratorToString(shape.getPathIterator(null)));
+		}
+		if (true)
+			return result;
+*/		
 		ArrayList<SubPath> paths = new ArrayList<RepRapRoutines.SubPath>();
-		
 		double lastX = startNearHere.getX();
 		double lastY = startNearHere.getY();
 		double coords[] = new double[6];
 		SubPath cur = null;
-		
-		while (!iter.isDone()) {
-			int seg = iter.currentSegment(coords);
-			switch (seg) {
-			case PathIterator.SEG_MOVETO:
-				if (cur != null) { 
-					cur.endX = lastX;
-					cur.endY = lastY;
-					if (cur.points.size() >= 2)
-						paths.add(cur);
-				}
-				lastX = coords[0];
-				lastY = coords[1];
-				cur = new SubPath(lastX, lastY);
-				break;
-			case PathIterator.SEG_LINETO:
-				if (cur == null) {
+
+		for (Shape shape : shapes) {
+			PathIterator iter = shape.getPathIterator(null);
+			while (!iter.isDone()) {
+				int seg = iter.currentSegment(coords);
+				switch (seg) {
+				case PathIterator.SEG_MOVETO:
+					result.moveTo(coords[0], coords[1]);
+					if (cur != null) { 
+						cur.endX = lastX;
+						cur.endY = lastY;
+						if (cur.points.size() >= 2)
+							paths.add(cur);
+					}
+					lastX = coords[0];
+					lastY = coords[1];
 					cur = new SubPath(lastX, lastY);
+					break;
+				case PathIterator.SEG_LINETO:
+					result.lineTo(coords[0], coords[1]);
+					if (cur == null) {
+						cur = new SubPath(lastX, lastY);
+					}
+					cur.length += GeometryUtil.distanceSquared(lastX, lastY, coords[0], coords[1]);
+					lastX = coords[0];
+					lastY = coords[1];
+					cur.points.add(new Point2D.Double(lastX, lastY));
+					break;
+				case PathIterator.SEG_CLOSE:
+					result.closePath();
+					if (cur != null) { 
+						cur.closed = true;
+						cur.length += GeometryUtil.distanceSquared(lastX, lastY, cur.startX, cur.startY);
+						cur.endX = cur.startX;
+						cur.endY = cur.startY;
+						lastX = cur.startX;
+						lastY = cur.startY;
+						if (cur.points.size() >= 2)
+							paths.add(cur);
+						cur = null;
+					}
+					break;
+				default:
+					break;
 				}
-				cur.length += GeometryUtil.distanceSquared(lastX, lastY, coords[0], coords[1]);
-				lastX = coords[0];
-				lastY = coords[1];
-				cur.points.add(new Point2D.Double(lastX, lastY));
-				break;
-			case PathIterator.SEG_CLOSE:
-				if (cur != null) { 
-					cur.closed = true;
-					cur.length += GeometryUtil.distanceSquared(lastX, lastY, cur.startX, cur.startY);
-					cur.endX = cur.startX;
-					cur.endY = cur.startY;
-					lastX = cur.startX;
-					lastY = cur.startY;
-					paths.add(cur);
-					cur = null;
-				}
-				break;
+				iter.next();
 			}
-			iter.next();
 		}
+
+//		if (true) 
+//			return result;
+		result.reset();
 		
-		for (int i = paths.size() - 1; i >= 0; i--) {
-			SubPath p = paths.get(i);
-			if (p.length < 1)
-				paths.remove(i);
+//		for (int i = paths.size() - 1; i >= 0; i--) {
+//			SubPath p = paths.get(i);
+//			if (p.length < 1) {
+//				paths.remove(i);
+//			}
+//		}
+
+		for (int pathIndex = paths.size() - 1; pathIndex >= 0; pathIndex--) {
+			SubPath closestPath = paths.get(pathIndex);
+			Point2D p = closestPath.points.get(0);
+			result.moveTo(p.getX(), p.getY());
+			for (int i = 1; i < closestPath.points.size(); i++) {
+				p = closestPath.points.get(i);
+				result.lineTo(p.getX(), p.getY());
+			}
 		}
+		if (true)
+			return result; // TODO: there's a bug
 		
-		Path2D.Double result = new Path2D.Double();
 		while (paths.size() > 0) {
 			double minDist = Double.MAX_VALUE;
 			boolean startIsCloser = true;
 			int minIndex = -1;
 
-			for (int i = paths.size() - 1; i >= 0; i--) {
-				SubPath p = paths.get(i);
+			for (int pathIndex = paths.size() - 1; pathIndex >= 0; pathIndex--) {
+				SubPath p = paths.get(pathIndex);
 				double d = GeometryUtil.distanceSquared(startNearHere.getX(), startNearHere.getY(), p.startX, p.startY);
 				if (d < minDist) {
 					minDist = d;
-					minIndex = i;
+					minIndex = pathIndex;
 					startIsCloser = true;
 				}
 				d = GeometryUtil.distanceSquared(startNearHere.getX(), startNearHere.getY(), p.endX, p.endY);
 				if (d < minDist) {
 					minDist = d;
-					minIndex = i;
+					minIndex = pathIndex;
 					startIsCloser = false;
 				}
 			}

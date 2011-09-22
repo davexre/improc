@@ -137,17 +137,12 @@ public class PrintJob {
 		transformObjects.translate(-objectsBounds.minX, -objectsBounds.minY);
 		int curLayerNumber = 0;
 
-		Area unionOfLayersAbove = new Area();
 		double startZ = objectsBounds.minZ + layersWidth *0.5;
 		for (double curZ = startZ; curZ <= objectsBounds.maxZ; curZ += layersWidth) {
 			Layer curLayer = new Layer();
 			curLayer.objectZ = curZ;
 			curLayer.reprapZ = curZ - startZ;
 			curLayer.slice = PrintJob.calcPolygonsForLayer(objects, curZ, transformObjects);
-			unionOfLayersAbove.add(curLayer.slice);
-			curLayer.support = new Area();
-			curLayer.support.add(unionOfLayersAbove);
-			curLayer.support.exclusiveOr(curLayer.slice);
 
 			Rectangle2D curBounds = curLayer.slice.getBounds2D();
 			if (layers.size() == 0)
@@ -156,6 +151,15 @@ public class PrintJob {
 				Rectangle2D.union(layerBounds, curBounds, layerBounds);
 			curLayer.layerNumber = curLayerNumber++;
 			layers.add(curLayer);
+		}
+		
+		Area unionOfLayersAbove = new Area();
+		for (int i = layers.size() - 1; i >= 0; i--) {
+			Layer curLayer = layers.get(i);
+			unionOfLayersAbove.add(curLayer.slice);
+			curLayer.support = new Area();
+			curLayer.support.add(unionOfLayersAbove);
+			curLayer.support.exclusiveOr(curLayer.slice);
 		}
 	}
 }
