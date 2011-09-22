@@ -6,6 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -62,7 +63,7 @@ public class PrintJob {
 			while (edges.size() > 1) {
 				Path2D path = GeometryUtil.extractPolygon(edges);
 				Path2D transformedPath = new Path2D.Double();
-				transformedPath.append(path.getPathIterator(tranfsormObjects), true);
+				transformedPath.append(path.getPathIterator(tranfsormObjects), false);
 				Area area = new Area(transformedPath);
 				result.add(area);
 			}
@@ -71,7 +72,7 @@ public class PrintJob {
 	}
 	
 	// produceAdditiveTopDown
-	public void print(RepRapPrintToImagePrinter printer) throws Exception {
+	public void print(RepRapPrinter printer) throws Exception {
 		double densityWidthInsideFill = 10;
 		double densityWidthSurfaceFill = 5;
 		double layersWidth = 0.56;

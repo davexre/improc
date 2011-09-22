@@ -11,3 +11,7 @@
 
 * hatch or Line to Polygon Intersection
 ** http://worldwind31.arc.nasa.gov/svn/trunk/WorldWind/src/gov/nasa/worldwindx/examples/lineofsight/PolygonIntersection.java   
+
+* При започване на линия, т.е. при отвяряне на дюзата трябва да се изчака кратко време за да "потече" полимера.
+GenericRepRap.printStartDelay ~300-400ms ???
+

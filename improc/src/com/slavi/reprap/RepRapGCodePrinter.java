@@ -79,6 +79,7 @@ public class RepRapGCodePrinter implements RepRapPrinter {
 		out.println("G28 X0");	// set x 0
 		out.println("G28 Y0");	// set y 0
 		out.println("G92 E0");	// zero the extruded length
+		// Whipe the nozzle
 		
 		printPath(layer.outline.getPathIterator(null));
 		printPath(layer.infillsHatch.getPathIterator(null));

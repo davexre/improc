@@ -17,6 +17,8 @@ import javax.media.j3d.Group;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3d;
 
+import com.slavi.math.GeometryUtil;
+
 public class RepRapRoutines {
 	public static final double epsilon = 0.0000001;
 	
@@ -440,5 +442,123 @@ public class RepRapRoutines {
 		} else {
 			System.out.println("Unsupported object " + object);
 		}
+	}
+	
+	private static class SubPath {
+		double startX;
+		double startY;
+		double endX;
+		double endY;
+		boolean closed;
+		double length;
+		ArrayList<Point2D> points;
+		
+		public SubPath(double startX, double startY) {
+			this.startX = startX;
+			this.startY = startY;
+			closed = false;
+			points = new ArrayList<Point2D>();
+			points.add(new Point2D.Double(startX, startY));
+			length = 0;
+		}
+	}
+	
+	public static Path2D reorderPath(Point2D startNearHere, PathIterator iter) {
+		ArrayList<SubPath> paths = new ArrayList<RepRapRoutines.SubPath>();
+		
+		double lastX = startNearHere.getX();
+		double lastY = startNearHere.getY();
+		double coords[] = new double[6];
+		SubPath cur = null;
+		
+		while (!iter.isDone()) {
+			int seg = iter.currentSegment(coords);
+			switch (seg) {
+			case PathIterator.SEG_MOVETO:
+				if (cur != null) { 
+					cur.endX = lastX;
+					cur.endY = lastY;
+					if (cur.points.size() >= 2)
+						paths.add(cur);
+				}
+				lastX = coords[0];
+				lastY = coords[1];
+				cur = new SubPath(lastX, lastY);
+				break;
+			case PathIterator.SEG_LINETO:
+				if (cur == null) {
+					cur = new SubPath(lastX, lastY);
+				}
+				cur.length += GeometryUtil.distanceSquared(lastX, lastY, coords[0], coords[1]);
+				lastX = coords[0];
+				lastY = coords[1];
+				cur.points.add(new Point2D.Double(lastX, lastY));
+				break;
+			case PathIterator.SEG_CLOSE:
+				if (cur != null) { 
+					cur.closed = true;
+					cur.length += GeometryUtil.distanceSquared(lastX, lastY, cur.startX, cur.startY);
+					cur.endX = cur.startX;
+					cur.endY = cur.startY;
+					lastX = cur.startX;
+					lastY = cur.startY;
+					paths.add(cur);
+					cur = null;
+				}
+				break;
+			}
+			iter.next();
+		}
+		
+		for (int i = paths.size() - 1; i >= 0; i--) {
+			SubPath p = paths.get(i);
+			if (p.length < 1)
+				paths.remove(i);
+		}
+		
+		Path2D.Double result = new Path2D.Double();
+		while (paths.size() > 0) {
+			double minDist = Double.MAX_VALUE;
+			boolean startIsCloser = true;
+			int minIndex = -1;
+
+			for (int i = paths.size() - 1; i >= 0; i--) {
+				SubPath p = paths.get(i);
+				double d = GeometryUtil.distanceSquared(startNearHere.getX(), startNearHere.getY(), p.startX, p.startY);
+				if (d < minDist) {
+					minDist = d;
+					minIndex = i;
+					startIsCloser = true;
+				}
+				d = GeometryUtil.distanceSquared(startNearHere.getX(), startNearHere.getY(), p.endX, p.endY);
+				if (d < minDist) {
+					minDist = d;
+					minIndex = i;
+					startIsCloser = false;
+				}
+			}
+			
+			SubPath closestPath = paths.remove(minIndex);
+			if (startIsCloser) {
+				Point2D p = closestPath.points.get(0);
+				result.moveTo(p.getX(), p.getY());
+				for (int i = 1; i < closestPath.points.size(); i++) {
+					p = closestPath.points.get(i);
+					result.lineTo(p.getX(), p.getY());
+				}
+				startNearHere.setLocation(closestPath.endX, closestPath.endY);
+			} else {
+				Point2D p = closestPath.points.get(closestPath.points.size() - 1);
+				result.moveTo(p.getX(), p.getY());
+				for (int i = closestPath.points.size() - 2; i >= 0; i--) {
+					p = closestPath.points.get(i);
+					result.lineTo(p.getX(), p.getY());
+				}
+				startNearHere.setLocation(closestPath.startX, closestPath.startY);
+			}
+			if (closestPath.closed)
+				result.closePath();
+		}
+		return result;
 	}
 }
