@@ -46,7 +46,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 			objectType = 0;
 			segmentType = 0;
 			ArrayList<Shape> shapes = new ArrayList<Shape>();
-//			shapes.add(layer.outline);
+			shapes.add(layer.outline);
 //			shapes.add(layer.infills);
 //			shapes.add(layer.outfills);
 			iter = RepRapRoutines.reorderShapePaths(startNearHere, shapes).getPathIterator(null);
@@ -57,7 +57,8 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 				ArrayList<Shape> shapes = new ArrayList<Shape>();
 				switch (objectType) {
 				case 0:
-//					shapes.add(layer.outfillsHatch);
+					shapes.add(layer.outfillsHatch);
+					shapes.add(layer.infillsHatch);
 					break;
 				case 1:
 //					shapes.add(layer.infillsHatch);
@@ -87,7 +88,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 	public void printLayer(PrintLayer layer) throws Exception {
 		System.out.println("Printing layer " + layer.layerNumber);
 		
-		if (layer.layerNumber < 12)
+		if (layer.layerNumber < 18)
 			return;
 		
 		Graphics2D g = (Graphics2D) biDraw.getGraphics();
@@ -107,7 +108,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 			biDraw = tmp;
 			canvas.repaint();
 
-			Thread.sleep(20);
+			Thread.sleep(100);
 			if (!iter.getNext()) {
 				break;
 			}			
@@ -155,36 +156,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 			g.drawLine(fromX, fromY, toX, toY);
 		}
 
-		
-		Thread.sleep(500);
-		
-		g = (Graphics2D) biDraw.getGraphics();
-		g.drawImage(biShow, 0, 0, biShow.getWidth(), biShow.getHeight(), null);
-		g.setColor(Color.yellow);
-		ArrayList<Shape> shapes = new ArrayList<Shape>();
-		shapes.add(layer.infillsHatch);
-		g.draw(RepRapRoutines.reorderShapePaths(startNearHere, shapes));
-		g.dispose();
-
-		BufferedImage tmp = biShow;
-		biShow = biDraw;
-		biDraw = tmp;
-		canvas.repaint();
-
-		Thread.sleep(3000);
-
-		g = (Graphics2D) biDraw.getGraphics();
-		g.drawImage(biShow, 0, 0, biShow.getWidth(), biShow.getHeight(), null);
-		g.setColor(Color.yellow);
-		g.draw(layer.infillsHatch);
-		g.dispose();
-
-		tmp = biShow;
-		biShow = biDraw;
-		biDraw = tmp;
-		canvas.repaint();
-		
-		Thread.sleep(3500);
+		Thread.sleep(1500);
 	}
 
 	public void stopPrinting() throws Exception {

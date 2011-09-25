@@ -465,15 +465,6 @@ public class RepRapRoutines {
 	}
 	
 	public static Path2D reorderShapePaths(Point2D startNearHere, ArrayList<Shape> shapes) {
-		Path2D.Double result = new Path2D.Double();
-/*		for (Shape shape : shapes) {
-			PathIterator iter = shape.getPathIterator(null);
-			result.append(iter, false);
-			System.out.println(GeometryUtil.pathIteratorToString(shape.getPathIterator(null)));
-		}
-		if (true)
-			return result;
-*/		
 		ArrayList<SubPath> paths = new ArrayList<RepRapRoutines.SubPath>();
 		double lastX = startNearHere.getX();
 		double lastY = startNearHere.getY();
@@ -486,7 +477,6 @@ public class RepRapRoutines {
 				int seg = iter.currentSegment(coords);
 				switch (seg) {
 				case PathIterator.SEG_MOVETO:
-					result.moveTo(coords[0], coords[1]);
 					if (cur != null) { 
 						cur.endX = lastX;
 						cur.endY = lastY;
@@ -498,7 +488,6 @@ public class RepRapRoutines {
 					cur = new SubPath(lastX, lastY);
 					break;
 				case PathIterator.SEG_LINETO:
-					result.lineTo(coords[0], coords[1]);
 					if (cur == null) {
 						cur = new SubPath(lastX, lastY);
 					}
@@ -508,7 +497,6 @@ public class RepRapRoutines {
 					cur.points.add(new Point2D.Double(lastX, lastY));
 					break;
 				case PathIterator.SEG_CLOSE:
-					result.closePath();
 					if (cur != null) { 
 						cur.closed = true;
 						cur.length += GeometryUtil.distanceSquared(lastX, lastY, cur.startX, cur.startY);
@@ -527,30 +515,20 @@ public class RepRapRoutines {
 				iter.next();
 			}
 		}
+		if ((cur != null) && (cur.points.size() >= 2)) {
+			cur.endX = lastX;
+			cur.endY = lastY;
+			paths.add(cur);
+		}
 
-//		if (true) 
-//			return result;
-		result.reset();
-		
-//		for (int i = paths.size() - 1; i >= 0; i--) {
-//			SubPath p = paths.get(i);
-//			if (p.length < 1) {
-//				paths.remove(i);
-//			}
-//		}
-
-		for (int pathIndex = paths.size() - 1; pathIndex >= 0; pathIndex--) {
-			SubPath closestPath = paths.get(pathIndex);
-			Point2D p = closestPath.points.get(0);
-			result.moveTo(p.getX(), p.getY());
-			for (int i = 1; i < closestPath.points.size(); i++) {
-				p = closestPath.points.get(i);
-				result.lineTo(p.getX(), p.getY());
+		for (int i = paths.size() - 1; i >= 0; i--) {
+			SubPath p = paths.get(i);
+			if (p.length < 1) {
+				paths.remove(i);
 			}
 		}
-		if (true)
-			return result; // TODO: there's a bug
 		
+		Path2D.Double result = new Path2D.Double();
 		while (paths.size() > 0) {
 			double minDist = Double.MAX_VALUE;
 			boolean startIsCloser = true;
@@ -571,7 +549,7 @@ public class RepRapRoutines {
 					startIsCloser = false;
 				}
 			}
-			
+
 			SubPath closestPath = paths.remove(minIndex);
 			if (startIsCloser) {
 				Point2D p = closestPath.points.get(0);
@@ -580,7 +558,12 @@ public class RepRapRoutines {
 					p = closestPath.points.get(i);
 					result.lineTo(p.getX(), p.getY());
 				}
-				startNearHere.setLocation(closestPath.endX, closestPath.endY);
+				if (closestPath.closed) {
+					result.closePath();
+					startNearHere.setLocation(closestPath.startX, closestPath.startY);
+				} else {
+					startNearHere.setLocation(closestPath.endX, closestPath.endY);
+				}
 			} else {
 				Point2D p = closestPath.points.get(closestPath.points.size() - 1);
 				result.moveTo(p.getX(), p.getY());
@@ -588,10 +571,13 @@ public class RepRapRoutines {
 					p = closestPath.points.get(i);
 					result.lineTo(p.getX(), p.getY());
 				}
-				startNearHere.setLocation(closestPath.startX, closestPath.startY);
+				if (closestPath.closed) {
+					result.closePath();
+					startNearHere.setLocation(closestPath.endX, closestPath.endY);
+				} else {
+					startNearHere.setLocation(closestPath.startX, closestPath.startY);
+				}
 			}
-			if (closestPath.closed)
-				result.closePath();
 		}
 		return result;
 	}

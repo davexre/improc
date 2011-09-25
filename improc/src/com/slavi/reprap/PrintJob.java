@@ -6,7 +6,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -73,8 +72,8 @@ public class PrintJob {
 	
 	// produceAdditiveTopDown
 	public void print(RepRapPrinter printer) throws Exception {
-		double densityWidthInsideFill = 10;
-		double densityWidthSurfaceFill = 5;
+		double densityWidthInsideFill = 20;
+		double densityWidthSurfaceFill = 10;
 		double layersWidth = 0.56;
 		double hatchAngleIncrease = 73 * MathUtil.deg2rad;
 		double curHatchAngle = 0;
@@ -120,7 +119,7 @@ public class PrintJob {
 //			Area support = RepRapRoutines.areaShrinkWithBrushWidth(stroke, curLayer); // reprap uses the constant -3
 //			support.add(layers.get(3)); // layer+1
 
-			printLayer.supportHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle, printLayer.support);
+			printLayer.supportHatch = RepRapRoutines.hatchArea(0, 0, densityWidthSurfaceFill, curHatchAngle + Math.PI/2, printLayer.support);
 			
 			curHatchAngle = MathUtil.fixAngle2PI(curHatchAngle + hatchAngleIncrease);
 			printer.printLayer(printLayer);

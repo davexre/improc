@@ -37,20 +37,15 @@ public class RepRapPrintToImagePrinter implements RepRapPrinter {
 		g.setColor(Color.black);
 		g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
 		
-//		g.setColor(Color.blue);
-//		g.fill(layer.slice);
-		g.setColor(Color.red);
-		g.draw(layer.slice);
-
-		g.setColor(Color.yellow);
-		g.draw(layer.infillsHatch);
+		g.setColor(Color.blue);
+		g.draw(layer.outline);
 		g.setColor(Color.green);
 		g.draw(layer.outfillsHatch);
-		g.setColor(Color.blue);
+		g.setColor(Color.yellow);
+		g.draw(layer.infillsHatch);
+		g.setColor(Color.gray);
 		g.draw(layer.supportHatch);
-//		g.setColor(Color.white);
-//		g.draw(layer.outline);
-					
+
 		File fou = new File(outputDir, String.format(Locale.US, "layer_%04d.png", layer.layerNumber));
 		System.out.println(fou + " " + layer.objectZ);
 		ImageIO.write(bi, "png", fou);
