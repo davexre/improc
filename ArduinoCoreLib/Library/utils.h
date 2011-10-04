@@ -20,4 +20,32 @@ long myatol(char **string);
 
 void delayLoop(const unsigned long millis);
 
+#define DUMMY(type) \
+inline void MIN(type &variable, type value) { \
+	if (variable > value) \
+		variable = value; \
+}
+DUMMY(unsigned short int)
+DUMMY(signed short int)
+DUMMY(signed int)
+DUMMY(unsigned int)
+DUMMY(signed long)
+DUMMY(unsigned long)
+DUMMY(float)
+#undef DUMMY
+
+#define DUMMY(type) \
+inline void MAX(type &variable, type value) { \
+	if (variable < value) \
+		variable = value; \
+}
+DUMMY(unsigned short int)
+DUMMY(signed short int)
+DUMMY(signed int)
+DUMMY(unsigned int)
+DUMMY(signed long)
+DUMMY(unsigned long)
+DUMMY(float)
+#undef DUMMY
+
 #endif

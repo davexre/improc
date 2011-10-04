@@ -2,7 +2,6 @@
 #define SteppingMotorControl2_h
 
 #include "SteppingMotor.h"
-#include "Button.h"
 
 #define SteppingMotorControlIdle 0
 #define SteppingMotorControlError 1
@@ -11,13 +10,15 @@
 
 class SteppingMotorControlWithButtons : SteppingMotorControl {
 private:
-	Button startPositionButton;
+	DigitalInputPin *startPositionButton;
 
-	Button endPositionButton;
+	DigitalInputPin *endPositionButton;
 
 	uint8_t mode;
 
 	uint8_t modeState;
+
+	long minStep;
 
 	long maxStep;
 
@@ -37,6 +38,9 @@ public:
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
+
+	void initializeToStartingPosition();
+	void determineAvailableSteps();
 
 	void gotoStep(const long step);
 
@@ -59,6 +63,14 @@ public:
 
 	inline void resetStepsMadeSoFar(void) {
 		SteppingMotorControl::resetStepsMadeSoFar();
+	}
+
+	inline long getMinStep(void) {
+		return minStep;
+	}
+
+	inline long getMaxStep(void) {
+		return maxStep;
 	}
 };
 
