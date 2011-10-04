@@ -178,6 +178,7 @@ void SteppingMotorControl::initialize(SteppingMotor *motor) {
 	this->motor = motor;
 	motorCoilDelayBetweenStepsMicros = 2000;
 	motorCoilOnMicros = 0;
+	stepsMadeSoFar = 0;
 	step = 0;
 	motor->stop();
 }
@@ -247,6 +248,7 @@ void SteppingMotorControl::update() {
 				step--;
 			}
 			motor->step(forward);
+			stepsMadeSoFar++;
 			motorCoilOnMicros = now;
 		} else {
 			motorCoilOnMicros = now - motorCoilDelayBetweenStepsMicros;

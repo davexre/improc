@@ -73,6 +73,8 @@ private:
 
 	long step;
 
+	long stepsMadeSoFar;
+
 	unsigned long motorCoilOnMicros;
 
 	SteppingMotor *motor;
@@ -102,6 +104,15 @@ public:
 	inline long getStep(void) {
 		return step;
 	}
+
+	inline long getStepsMadeSoFar(void) {
+		return stepsMadeSoFar;
+	}
+
+	inline void resetStepsMadeSoFar(void) {
+		stepsMadeSoFar = 0;
+	}
+
 };
 
 #endif
