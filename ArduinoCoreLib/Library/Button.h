@@ -89,6 +89,8 @@ public:
 	inline bool isToggled(void) {
 		return (currentState != lastState);
 	}
+
+	void reset();
 };
 
 #endif

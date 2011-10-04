@@ -15,41 +15,20 @@ static const int extruderTemperatureSensorPin = 0;
 static const int bedTemperatureSensorPin = 1;
 
 // Arduino Digital pins
+static const int bedHeaterPin = 1;
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
-static const int buttonPin = 4; // the number of the pushbutton pin
-static const int ledPin = 13; // the number of the LED pin
-static const int shiftRegisterOutputPinCP = 8;
-static const int shiftRegisterOutputPinDS = 9;
-static const int axisX_EndPositionButtonPin = 10;
-static const int axisY_EndPositionButtonPin = 11;
-static const int axisZ_EndPositionButtonPin = 12;
-static const int axisE_EndPositionButtonPin = 7;
+static const int buttonPin = 4;	// the number of the pushbutton pin
+static const int extruderFanPin = 5;
+static const int extruderHeaterPin = 6;
+static const int ledPin = 7;	// the number of the LED pin
 
-// OUTPUT Expander Digital pins
-static const int extruderHeaterPin = 0;
-static const int bedHeaterPin = 1;
-static const int extruderFanPin = 18;
-
-static const int axisX_motor11Pin = 2;
-static const int axisX_motor12Pin = 3;
-static const int axisX_motor21Pin = 4;
-static const int axisX_motor22Pin = 5;
-
-static const int axisY_motor11Pin = 6;
-static const int axisY_motor12Pin = 7;
-static const int axisY_motor21Pin = 8;
-static const int axisY_motor22Pin = 9;
-
-static const int axisZ_motor11Pin = 10;
-static const int axisZ_motor12Pin = 11;
-static const int axisZ_motor21Pin = 12;
-static const int axisZ_motor22Pin = 13;
-
-static const int axisE_motor11Pin = 14;
-static const int axisE_motor12Pin = 15;
-static const int axisE_motor21Pin = 16;
-static const int axisE_motor22Pin = 17;
+static const int shiftRegisterInputPinCP = 8;
+static const int shiftRegisterInputPinPE = 9;
+static const int shiftRegisterInputPinQ7 = 10;
+static const int shiftRegisterOutputPinDS = 11;
+static const int shiftRegisterOutputPinSH = 12;
+static const int shiftRegisterOutputPinST = 13;
 
 ////////////////////////////////////////////
 
@@ -66,7 +45,8 @@ static const unsigned int *states[] = {
 static char readerBuffer[200];
 static SerialReader reader;
 
-static DigitalOutputShiftRegister_74HC164 expanderOutput;
+static DigitalOutputShiftRegister_74HC595 extenderOutput;
+static DigitalInputShiftRegister_74HC166 extenderInput;
 
 static TemperatureSensor *extruderTemperatureSensor;
 static TemperatureSensor *bedTemperatureSensor;
@@ -93,48 +73,53 @@ static void UpdateRotor() {
 void RepRapMain::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 
-	expanderOutput.initialize(16,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinCP),
+	extenderOutput.initialize(16,
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
+			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+	extenderInput.initialize(9,
+			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
+			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
+			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
 	extruderTemperatureSensor = new TemperatureSensor_TC1047(extruderTemperatureSensorPin);
-	extruderTemperatureControl.initialize(extruderTemperatureSensor, expanderOutput.createPinHandler(extruderHeaterPin));
+	extruderTemperatureControl.initialize(extruderTemperatureSensor, extenderOutput.createPinHandler(extruderHeaterPin));
 
 	bedTemperatureSensor = new TemperatureSensor_TC1047(bedTemperatureSensorPin);
-	bedTemperatureControl.initialize(bedTemperatureSensor, expanderOutput.createPinHandler(bedHeaterPin));
+	bedTemperatureControl.initialize(bedTemperatureSensor, extenderOutput.createPinHandler(bedHeaterPin));
 
 	motorX.initialize(
-			expanderOutput.createPinHandler(axisX_motor11Pin),
-			expanderOutput.createPinHandler(axisX_motor12Pin),
-			expanderOutput.createPinHandler(axisX_motor21Pin),
-			expanderOutput.createPinHandler(axisX_motor22Pin));
+			extenderOutput.createPinHandler(0),
+			extenderOutput.createPinHandler(1),
+			extenderOutput.createPinHandler(2),
+			extenderOutput.createPinHandler(3));
 	motorY.initialize(
-			expanderOutput.createPinHandler(axisY_motor11Pin),
-			expanderOutput.createPinHandler(axisY_motor12Pin),
-			expanderOutput.createPinHandler(axisY_motor21Pin),
-			expanderOutput.createPinHandler(axisY_motor22Pin));
+			extenderOutput.createPinHandler(4),
+			extenderOutput.createPinHandler(5),
+			extenderOutput.createPinHandler(6),
+			extenderOutput.createPinHandler(7));
 	motorZ.initialize(
-			expanderOutput.createPinHandler(axisZ_motor11Pin),
-			expanderOutput.createPinHandler(axisZ_motor12Pin),
-			expanderOutput.createPinHandler(axisZ_motor21Pin),
-			expanderOutput.createPinHandler(axisZ_motor22Pin));
+			extenderOutput.createPinHandler(8),
+			extenderOutput.createPinHandler(9),
+			extenderOutput.createPinHandler(10),
+			extenderOutput.createPinHandler(11));
 	motorE.initialize(
-			expanderOutput.createPinHandler(axisE_motor11Pin),
-			expanderOutput.createPinHandler(axisE_motor12Pin),
-			expanderOutput.createPinHandler(axisE_motor21Pin),
-			expanderOutput.createPinHandler(axisE_motor22Pin));
+			extenderOutput.createPinHandler(12),
+			extenderOutput.createPinHandler(13),
+			extenderOutput.createPinHandler(14),
+			extenderOutput.createPinHandler(15));
 
-	axisX.initialize(&motorX, new DigitalInputArduinoPin(axisX_EndPositionButtonPin, true));
-	axisY.initialize(&motorY, new DigitalInputArduinoPin(axisY_EndPositionButtonPin, true));
-	axisZ.initialize(&motorZ, new DigitalInputArduinoPin(axisZ_EndPositionButtonPin, true));
-	axisE.initialize(&motorE, new DigitalInputArduinoPin(axisE_EndPositionButtonPin, true));
+	axisX.initialize(&motorX, extenderInput.createPinHandler(0), extenderInput.createPinHandler(1));
+	axisY.initialize(&motorY, extenderInput.createPinHandler(2), extenderInput.createPinHandler(3));
+	axisZ.initialize(&motorZ, extenderInput.createPinHandler(4), extenderInput.createPinHandler(5));
+	axisE.initialize(&motorE, extenderInput.createPinHandler(6), extenderInput.createPinHandler(7));
 
 	reprap.initialize(&reader, &extruderTemperatureControl, &bedTemperatureControl);
 	reprap.axisX = &axisX;
 	reprap.axisY = &axisY;
 	reprap.axisZ = &axisZ;
 	reprap.axisE = &axisE;
-	reprap.fan = expanderOutput.createPinHandler(extruderFanPin);
+	reprap.fan = extenderOutput.createPinHandler(extruderFanPin);
 
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	rotor.initialize(
@@ -150,7 +135,7 @@ void RepRapMain::setup() {
 
 void RepRapMain::loop() {
 	reader.update();
-	expanderOutput.update();
+	extenderOutput.update();
 	extruderTemperatureControl.update();
 	bedTemperatureControl.update();
 	led.update();

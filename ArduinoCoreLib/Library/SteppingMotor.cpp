@@ -176,7 +176,7 @@ void SteppingMotor_MosfetHBridge::update() {
 
 void SteppingMotorControl::initialize(SteppingMotor *motor) {
 	this->motor = motor;
-	motorCoilDelayBetweenStepsMicros = 2000;
+	delayBetweenStepsMicros = 2000UL;
 	motorCoilOnMicros = 0;
 	stepsMadeSoFar = 0;
 	step = 0;
@@ -207,12 +207,12 @@ bool SteppingMotorControl::isMoving() {
 	return !(
 		(movementMode == 0) &&
 		(targetStep == step) &&
-		(micros() - motorCoilOnMicros <= motorCoilDelayBetweenStepsMicros));
+		(micros() - motorCoilOnMicros <= delayBetweenStepsMicros));
 }
 
 void SteppingMotorControl::update() {
 	unsigned long now = micros();
-	if (now - motorCoilOnMicros > motorCoilDelayBetweenStepsMicros) {
+	if (now - motorCoilOnMicros > delayBetweenStepsMicros) {
 		bool shallMove;
 		bool forward;
 
@@ -251,7 +251,153 @@ void SteppingMotorControl::update() {
 			stepsMadeSoFar++;
 			motorCoilOnMicros = now;
 		} else {
-			motorCoilOnMicros = now - motorCoilDelayBetweenStepsMicros;
+			motorCoilOnMicros = now - delayBetweenStepsMicros;
 		}
 	}
+}
+
+////////
+
+void SteppingMotorControlWithButtons::initialize(SteppingMotor *motor,
+		DigitalInputPin *startPositionButtonPin,
+		DigitalInputPin *endPositionButtonPin) {
+	motorControl.initialize(motor);
+	startPositionButton = startPositionButtonPin;
+	endPositionButton = endPositionButtonPin;
+	mode = SteppingMotorControlIdle;
+	modeState = 0;
+	minStep = 0;
+	maxStep = 0;
+}
+
+void SteppingMotorControlWithButtons::gotoStep(const long step) {
+	motorControl.gotoStep(step);
+	mode = SteppingMotorControlIdle;
+	modeState = 0;
+}
+
+void SteppingMotorControlWithButtons::rotate(const bool forward) {
+	motorControl.rotate(forward);
+	mode = SteppingMotorControlIdle;
+	modeState = 0;
+}
+
+void SteppingMotorControlWithButtons::stop() {
+	motorControl.stop();
+	mode = SteppingMotorControlIdle;
+	modeState = 0;
+}
+
+void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
+	switch (modeState) {
+	case 0:
+		// Start moving backward to begining
+		motorControl.resetStepTo(0);
+		if (startPositionButton->getState()) {
+			motorControl.stop();
+		} else {
+			motorControl.rotate(false);
+		}
+		minStep = maxStep = 0;
+		modeState = 1;
+		break;
+	case 1:
+		if (endPositionButton->getState() && (motorControl.getStep() < 10)) {
+			// The motor moved 10 steps and endButton is still down - error
+			mode = SteppingMotorControlError;
+			modeState = 0;
+			motorControl.stop();
+		} else if (startPositionButton->getState()) {
+			modeState = 2;
+			motorControl.stop();
+			motorControl.resetStepTo(0);
+		}
+		break;
+	case 2:
+		mode = SteppingMotorControlIdle;
+		modeState = 0;
+		break;
+	}
+}
+
+void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
+	switch (modeState) {
+	case 0:
+	case 1:
+		// These steps are absolutely the same.
+		doInitializeToStartingPosition();
+		break;
+	case 2:
+		// Rotate forward till the button gets pressed.
+		motorControl.rotate(true);
+		modeState = 3;
+		break;
+	case 3:
+		if (startPositionButton->getState() && (motorControl.getStep() > 10)) {
+			// The motor moved 10 steps and startButton is still down - error
+			mode = SteppingMotorControlError;
+			modeState = 0;
+			motorControl.stop();
+		} else if (endPositionButton->getState()) {
+			// The end position moving forward is reached.
+			maxStep = motorControl.getStep();
+			motorControl.stop();
+			motorControl.rotate(false);
+			modeState = 4;
+		}
+		break;
+	case 4:
+		if (endPositionButton->getState() && (maxStep - motorControl.getStep() > 10)) {
+			// The motor moved 10 steps and endButton is still down - error
+			mode = SteppingMotorControlError;
+			modeState = 0;
+			motorControl.stop();
+		} else if (startPositionButton->getState()) {
+			minStep = motorControl.getStep();
+			motorControl.stop();
+			motorControl.resetStepTo(0);
+			mode = SteppingMotorControlIdle;
+			modeState = 0;
+		}
+		break;
+	}
+}
+
+void SteppingMotorControlWithButtons::update() {
+	switch (mode) {
+	case SteppingMotorControlInitializeToStartingPosition:
+		doInitializeToStartingPosition();
+		break;
+	case SteppingMotorControlDetermineAvailableSteps:
+		doDetermineAvailableSteps();
+		break;
+	case SteppingMotorControlError:
+		if (motorControl.isMoving()) {
+			stop();
+		}
+		break;
+	default:
+		if (startPositionButton->getState() || endPositionButton->getState()) {
+			motorControl.stop();
+		}
+		MIN(minStep, motorControl.getStep());
+		MAX(maxStep, motorControl.getStep());
+		break;
+	}
+	motorControl.update();
+}
+
+void SteppingMotorControlWithButtons::initializeToStartingPosition() {
+	mode = SteppingMotorControlInitializeToStartingPosition;
+	modeState = 0;
+}
+
+void SteppingMotorControlWithButtons::determineAvailableSteps() {
+	mode = SteppingMotorControlDetermineAvailableSteps;
+	modeState = 0;
+}
+
+bool SteppingMotorControlWithButtons::isMoving() {
+	return ((mode != SteppingMotorControlIdle) && (mode != SteppingMotorControlError)) ||
+		(motorControl.isMoving());
 }

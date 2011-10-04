@@ -11,6 +11,7 @@ static const int rotorPinB = 3;	// the other quadrature pin
 static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int ledPin = 13; // the number of the LED pin
 
+static const int startPositionButtonPin = 6;
 static const int endPositionButtonPin = 5;
 static const int stepMotor11pin = 8;
 static const int stepMotor12pin = 9;
@@ -46,7 +47,7 @@ void StepperAxisTest::setup() {
 			new DigitalOutputArduinoPin(stepMotor12pin, 0),
 			new DigitalOutputArduinoPin(stepMotor21pin, 0),
 			new DigitalOutputArduinoPin(stepMotor22pin, 0));
-	axis.initialize(&motor, new DigitalInputArduinoPin(endPositionButtonPin, true));
+	axis.initialize(&motor, new DigitalInputArduinoPin(startPositionButtonPin, true), new DigitalInputArduinoPin(endPositionButtonPin, true));
 
 	axisMenu.initialize("Axis", axisMenuItems, size(axisMenuItems), false);
 	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
@@ -67,7 +68,7 @@ void doDetermineAvailableSteps() {
 		modeState = 1;
 		break;
 	case 1:
-		if (axis.getMode() == StepperAxisModeIdle) {
+		if (!axis.isMoving()) {
 			Serial.print("MaxStep=");
 			Serial.println(axis.getMaxStep());
 			mode = 0;
@@ -84,8 +85,7 @@ void doInitializeToStartingPosition() {
 		modeState = 1;
 		break;
 	case 1:
-		if ((axis.getMode() == StepperAxisModeIdle) ||
-			(axis.getMode() == StepperAxisModeError)) {
+		if (!axis.isMoving()) {
 			Serial.println("Done");
 			mode = 0;
 		}
@@ -93,7 +93,6 @@ void doInitializeToStartingPosition() {
 	}
 }
 
-bool dummy = false;
 void StepperAxisTest::loop() {
 	led.update();
 	motor.update();
@@ -118,9 +117,7 @@ void StepperAxisTest::loop() {
 		doInitializeToStartingPosition();
 		break;
 	case 3:
-//		axis.stop();
-		axis.motorControl.rotate(dummy);
-		dummy != dummy;
+		axis.stop();
 		mode = 0;
 		break;
 	}

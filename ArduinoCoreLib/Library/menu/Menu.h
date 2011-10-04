@@ -59,6 +59,9 @@ protected:
 	short int currentMenu;
 	bool _hasMenuChanged;
 	RotaryEncoderAcceleration rotor;
+	RotaryEncoderState *switchMenuEncoderState;
+	bool wasMenuSwitched;
+	void activateMenuItem(short int menuItem, bool setRotor);
 public:
 	AdvButton button;
 
@@ -71,14 +74,16 @@ public:
 		rotor.update();
 	}
 
-	void activateMenuItem(short int menuItem);
+	inline void activateMenuItem(short int menuItem) {
+		activateMenuItem(menuItem, true);
+	}
 
 	inline void activateNextMenuItem() {
-		activateMenuItem(currentMenu + 1);
+		activateMenuItem(currentMenu + 1, true);
 	}
 
 	inline void activatePreviousMenuItem() {
-		activateMenuItem(currentMenu - 1);
+		activateMenuItem(currentMenu - 1, true);
 	}
 
 	inline short int getCurrentMenu() {

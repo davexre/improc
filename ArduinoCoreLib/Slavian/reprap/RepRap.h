@@ -9,10 +9,11 @@
 #define RepRap_Idle 0
 #define RepRap_Sleep200Millis 1
 #define RepRap_InitializeToStartingPosition 2
-#define RepRap_MoveRapid 3
-#define RepRap_ControlledMove 4
-#define RepRap_Stop 5
-#define RepRap_WaitForTemperature 6
+#define RepRap_InitializeToStartingPositionForced 3
+#define RepRap_MoveRapid 4
+#define RepRap_ControlledMove 5
+#define RepRap_Stop 6
+#define RepRap_WaitForTemperature 7
 
 // Feedrates in mm/minute
 #define SLOW_XY_FEEDRATE 1000.0
@@ -44,10 +45,13 @@ private:
 
 	void doRepRap_Sleep200Millis();
 	void doRepRap_InitializeToStartingPosition();
+	void doRepRap_InitializeToStartingPositionForced();
 	void doRepRap_MoveRapid();
 	void doRepRap_ControlledMove();
 	void doRepRap_Stop();
 	void doRepRap_WaitForTemperature();
+
+	bool isInitializeToStartingPositionNeeded();
 public:
 	SerialReader *reader;
 	StepperAxis *axisX;

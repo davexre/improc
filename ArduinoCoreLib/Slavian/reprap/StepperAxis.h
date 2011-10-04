@@ -8,16 +8,11 @@
 
 #define StepperAxisModeIdle 0
 #define StepperAxisModeError 1
-#define StepperAxisModeDetermineAvailableSteps 10
-#define StepperAxisModeInitializeToStartingPosition 11
-#define StepperAxisModeMoveToPosition 12
+#define StepperAxisModeInitializeToStartingPosition 10
 
 class StepperAxis {
 private:
-
-	byte mode;
-	byte modeState;
-
+	SteppingMotorControlWithButtons motorControl;
 	unsigned long timestamp;
 	long maxStep;
 	float axisStepsPerMM;
@@ -25,22 +20,21 @@ private:
 	void doDetermineAvailableSteps();
 	void doInitializeToStartingPosition();
 	void doModeMoveToPosition();
-public:
-	Button endPositionButton;
-	SteppingMotorControl motorControl;
 
+	uint8_t mode;
+	uint8_t modeState;
+public:
 	/**
 	 * Initializes the class.
 	 */
 	void initialize(SteppingMotor *motor,
+			DigitalInputPin *startPositionButtonPin,
 			DigitalInputPin *endPositionButtonPin);
 
 	/**
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update(void);
-
-	inline byte getMode() { return mode; }
 
 	void setMaxStep(long maxStep);
 	inline long getMaxStep() { return maxStep; }
@@ -51,24 +45,28 @@ public:
 	}
 
 	void determineAvailableSteps(void);
-	void initializeToStartingPosition(void);
+
 	void moveToPositionMMFast(float absolutePositionMM);
 	void moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis);
-	void rotate(bool direction, float speedMMperMin);
 	float getAbsolutePositionMM();
 	inline long getStepPosition() {
 		motorControl.getStep();
 	}
 
-	void stop(void);
+	void stop(void) {
+		motorControl.stop();
+	}
 
 	inline bool isMoving() {
-		return (mode != StepperAxisModeIdle) && (mode != StepperAxisModeError);
+		motorControl.isMoving();
 	}
 
 	inline bool isOk() {
-		return mode != StepperAxisModeError;
+		return motorControl.isOk();
 	}
+
+	bool isInitializeToStartingPositionNeeded();
+	void initializeToStartingPosition();
 };
 
 #endif

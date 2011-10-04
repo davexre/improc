@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "Button.h"
 #include "AdvButton.h"
-#include "reprap/SteppingMotorControl2.h"
+#include "SteppingMotor.h"
 #include "StateLed.h"
 
 DefineClass(SteppingMotorWithEndButtonsTest);
@@ -24,8 +24,8 @@ static const int shiftRegisterOutputPinST = 13;
 static DigitalOutputShiftRegister_74HC595 extenderOutput;
 static DigitalInputShiftRegister_74HC166 extenderInput;
 
-static SteppingMotor_MosfetHBridge motor[4];
-static SteppingMotorControlWithButtons motorControl[4];
+static SteppingMotor_MosfetHBridge motor[3];
+static SteppingMotorControlWithButtons motorControl[3];
 
 static AdvButton btn;
 static StateLed led;
@@ -65,16 +65,16 @@ void SteppingMotorWithEndButtonsTest::setup() {
 			extenderOutput.createPinHandler(9),
 			extenderOutput.createPinHandler(10),
 			extenderOutput.createPinHandler(11));
-	motor[3].initialize(
-			extenderOutput.createPinHandler(12),
-			extenderOutput.createPinHandler(13),
-			extenderOutput.createPinHandler(14),
-			extenderOutput.createPinHandler(15));
+//	motor[3].initialize(
+//			extenderOutput.createPinHandler(12),
+//			extenderOutput.createPinHandler(13),
+//			extenderOutput.createPinHandler(14),
+//			extenderOutput.createPinHandler(15));
 
 	motorControl[0].initialize(&motor[0], extenderInput.createPinHandler(0), extenderInput.createPinHandler(1));
 	motorControl[1].initialize(&motor[1], extenderInput.createPinHandler(2), extenderInput.createPinHandler(3));
 	motorControl[2].initialize(&motor[2], extenderInput.createPinHandler(4), extenderInput.createPinHandler(5));
-	motorControl[3].initialize(&motor[3], extenderInput.createPinHandler(6), extenderInput.createPinHandler(7));
+//	motorControl[3].initialize(&motor[3], extenderInput.createPinHandler(6), extenderInput.createPinHandler(7));
 
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
 	//motor.motorCoilTurnOffMicros = 100000;
@@ -92,7 +92,7 @@ void SteppingMotorWithEndButtonsTest::loop() {
 	extenderInput.update();
 	extenderOutput.update();
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < size(motorControl); i++) {
 		motor[i].update();
 		motorControl[i].update();
 	}
@@ -103,23 +103,23 @@ void SteppingMotorWithEndButtonsTest::loop() {
 		paused = !paused;
 		if (paused) {
 			Serial.println("paused");
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < size(motorControl); i++)
 				motorControl[i].stop();
 		} else {
 			Serial.println("resumed");
-			for (int i = 0; i < 4; i++)
+			for (int i = 0; i < size(motorControl); i++)
 				motorControl[i].determineAvailableSteps();
 		}
 	}
 
 	if (!paused) {
 		bool isMoving = false;
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < size(motorControl); i++)
 			if (motorControl[i].isMoving())
 				isMoving = true;
 
 		if (!isMoving) {
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < size(motorControl); i++) {
 				Serial.print(motorControl[i].getMinStep());
 				Serial.print('\t');
 				Serial.println(motorControl[i].getMaxStep());

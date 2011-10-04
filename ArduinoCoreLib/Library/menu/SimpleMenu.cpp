@@ -4,33 +4,44 @@ void SimpleMenu::initialize(DigitalInputPin *encoderPinA, DigitalInputPin *encod
 		MenuItem **MenuItems, const short int ItemsCount) {
 	button.initialize(buttonPin, false);
 	rotor.initialize(encoderPinA, encoderPinB);
+	switchMenuEncoderState = rotor.getState();
+	switchMenuEncoderState->setValueLooped(false);
+	switchMenuEncoderState->setMinMax(0, ItemsCount - 1);
 	menuItems = MenuItems;
 	itemsCount = ItemsCount;
-	activateMenuItem(0);
+	wasMenuSwitched = false;
+	activateMenuItem(0, true);
 }
 
 void SimpleMenu::update(void) {
+	_hasMenuChanged = false;
 	button.update();
-	if (button.getButtonState() == AdvButtonState_CLICK) {
-		activateNextMenuItem();
-	} else if (button.getButtonState() == AdvButtonState_DOUBLE_CLICK) {
-		// Every a double click is preceeded by a single click and this
-		// means that the activateNextMenuItem is already invoked but
-		// a double click was ment instead.
-		activatePreviousMenuItem();
-	} else {
-		_hasMenuChanged = false;
+	if (switchMenuEncoderState->hasValueChanged()) {
+		wasMenuSwitched = true;
+		activateMenuItem(switchMenuEncoderState->getValue(), false);
+	}
+	if (button.isButtonPressed()) {
+		wasMenuSwitched = false;
+		rotor.setState(switchMenuEncoderState);
+	} else if (button.isButtonReleased()) {
+		rotor.setState(&menuItems[currentMenu]->encoderState);
+		if (wasMenuSwitched) {
+			button.reset();
+		}
 	}
 }
 
-void SimpleMenu::activateMenuItem(short int menuItem) {
+void SimpleMenu::activateMenuItem(short int menuItem, bool setRotor) {
 	if (menuItem >= itemsCount)
 		menuItem %= itemsCount;
 	if (menuItem < 0)
 		menuItem = itemsCount - 1 + menuItem % itemsCount;
-	_hasMenuChanged = true;
-	currentMenu = menuItem;
-	rotor.setState(&menuItems[currentMenu]->encoderState);
+	if (currentMenu != menuItem) {
+		_hasMenuChanged = true;
+		currentMenu = menuItem;
+	}
+	if (setRotor)
+		rotor.setState(&menuItems[currentMenu]->encoderState);
 }
 
 bool SimpleMenu::hasChanged() {

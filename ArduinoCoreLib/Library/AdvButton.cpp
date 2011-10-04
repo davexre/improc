@@ -1,7 +1,7 @@
 #include "AdvButton.h"
 
 void AdvButton::initialize(DigitalInputPin *pin, const bool autoRepeatEnabled, const unsigned int debounceMillis) {
-	Button::initialize(pin, debounceMillis);
+	button.initialize(pin, debounceMillis);
 	this->autoRepeatEnabled = autoRepeatEnabled;
 	timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
 	autoButtonStarted = false;
@@ -9,7 +9,7 @@ void AdvButton::initialize(DigitalInputPin *pin, const bool autoRepeatEnabled, c
 }
 
 void AdvButton::update(void) {
-	Button::update();
+	button.update();
 	buttonState = AdvButtonState_NONE;
 	unsigned long now = millis();
 	if (isToggled()) {
@@ -48,4 +48,12 @@ void AdvButton::update(void) {
 			}
 		}
 	}
+}
+
+void AdvButton::reset() {
+	button.reset();
+	autoButtonStarted = false;
+	timeButtonDown = millis();
+	timeNextAutorepeatToggle = timeButtonDown + ADV_BUTTON_REPEAT_DELAY_MILLIS;
+	buttonState = AdvButtonState_NONE;
 }

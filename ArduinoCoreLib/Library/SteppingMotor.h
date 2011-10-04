@@ -67,7 +67,7 @@ public:
 
 class SteppingMotorControl {
 private:
-	byte movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
 
 	long targetStep;
 
@@ -77,9 +77,10 @@ private:
 
 	unsigned long motorCoilOnMicros;
 
+	unsigned long delayBetweenStepsMicros;
+
 	SteppingMotor *motor;
 public:
-	unsigned long motorCoilDelayBetweenStepsMicros;
 
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
@@ -113,6 +114,95 @@ public:
 		stepsMadeSoFar = 0;
 	}
 
+	inline void setDelayBetweenStepsMicros(unsigned long delayBetweenStepsMicros) {
+		this->delayBetweenStepsMicros = delayBetweenStepsMicros;
+	}
+
+	inline unsigned long getDelayBetweenStepsMicros(void) {
+		return delayBetweenStepsMicros;
+	}
+};
+
+#define SteppingMotorControlIdle 0
+#define SteppingMotorControlError 1
+#define SteppingMotorControlDetermineAvailableSteps 10
+#define SteppingMotorControlInitializeToStartingPosition 11
+
+class SteppingMotorControlWithButtons {
+private:
+	SteppingMotorControl motorControl;
+
+	DigitalInputPin *startPositionButton;
+
+	DigitalInputPin *endPositionButton;
+
+	uint8_t mode;
+
+	uint8_t modeState;
+
+	long minStep;
+
+	long maxStep;
+
+	void doInitializeToStartingPosition();
+
+	void doDetermineAvailableSteps();
+
+public:
+	/**
+	 * Initializes the class, sets ports (outXXpin) to output mode.
+	 */
+	void initialize(SteppingMotor *motor,
+			DigitalInputPin *startPositionButtonPin,
+			DigitalInputPin *endPositionButtonPin);
+
+	/**
+	 * This method should be placed in the main loop of the program.
+	 */
+	void update();
+
+	void initializeToStartingPosition();
+	void determineAvailableSteps();
+
+	void gotoStep(const long step);
+
+	void rotate(const bool forward);
+
+	void stop();
+
+	bool isMoving();
+
+	inline long getStep(void) {
+		return motorControl.getStep();
+	}
+
+	inline long getMinStep(void) {
+		return minStep;
+	}
+
+	inline long getMaxStep(void) {
+		return maxStep;
+	}
+
+	inline bool isOk(void) {
+		return mode != SteppingMotorControlError;
+	}
+
+	inline long getStepsMadeSoFar(void) {
+		return motorControl.getStepsMadeSoFar();
+	}
+
+	inline void resetStepsMadeSoFar(void) {
+		motorControl.resetStepsMadeSoFar();
+	}
+
+	inline void setDelayBetweenStepsMicros(unsigned long motorCoilDelayBetweenStepsMicros) {
+		motorControl.setDelayBetweenStepsMicros(motorCoilDelayBetweenStepsMicros);
+	}
+
+	inline unsigned long getDelayBetweenStepsMicros(void) {
+		return motorControl.getDelayBetweenStepsMicros();
+	}
 };
 
 #endif

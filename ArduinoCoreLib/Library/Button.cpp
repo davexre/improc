@@ -22,3 +22,8 @@ void Button::update() {
 		lastToggleTime = now - debounce - 1;
 	}
 }
+
+void Button::reset() {
+	lastState = currentState;
+	lastToggleTime = millis() - debounce - 1;
+}

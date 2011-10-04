@@ -18,7 +18,8 @@ enum AdvButtonState {
 	AdvButtonState_AUTOREPEAT_CLICK
 };
 
-class AdvButton : Button {
+class AdvButton {
+	Button button;
 	unsigned long previousTimeButtonUp;
 	unsigned long timeButtonDown;
 	unsigned long timeNextAutorepeatToggle;
@@ -62,6 +63,31 @@ public:
 	 */
 	inline bool isClicked() {
 		return (buttonState != AdvButtonState_NONE);
+	}
+
+	/**
+	 * Resets the internal timestamps targeted at AutoRepeat, DoubleClick and LongClick
+	 */
+	void reset();
+
+	inline bool isButtonPressed(void) {
+		return button.isPressed();
+	}
+
+	inline bool isButtonReleased(void) {
+		return button.isReleased();
+	}
+
+	inline bool isButtonUp(void) {
+		return button.isUp();
+	}
+
+	inline bool isButtonDown(void) {
+		return button.isDown();
+	}
+
+	inline bool isButtonToggled(void) {
+		return button.isToggled();
 	}
 };
 

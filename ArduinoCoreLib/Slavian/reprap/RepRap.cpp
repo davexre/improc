@@ -14,6 +14,12 @@ void RepRap::initialize(SerialReader *reader,
 	setMode(RepRap_Idle);
 }
 
+bool RepRap::isInitializeToStartingPositionNeeded() {
+	return
+		axisX->isInitializeToStartingPositionNeeded() ||
+		axisY->isInitializeToStartingPositionNeeded();
+}
+
 void RepRap::doRepRap_Sleep200Millis() {
 	switch(modeState) {
 	case 0:
@@ -23,6 +29,21 @@ void RepRap::doRepRap_Sleep200Millis() {
 	case 1:
 		if (timeStamp - millis() >= 200) {
 			Serial.println("ok");
+			setMode(RepRap_Idle);
+		}
+		break;
+	}
+}
+
+void RepRap::doRepRap_InitializeToStartingPositionForced() {
+	switch(modeState) {
+	case 0:
+		axisX->initializeToStartingPosition();
+		axisY->initializeToStartingPosition();
+		break;
+	case 1:
+		if ((!axisX->isMoving()) &&
+			(!axisY->isMoving())) {
 			setMode(RepRap_Idle);
 		}
 		break;
@@ -143,6 +164,10 @@ void RepRap::update() {
 
 	case RepRap_InitializeToStartingPosition:
 		doRepRap_InitializeToStartingPosition();
+		break;
+
+	case RepRap_InitializeToStartingPositionForced:
+		doRepRap_InitializeToStartingPositionForced();
 		break;
 
 	case RepRap_MoveRapid:
@@ -310,10 +335,12 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 	case CodeM_GetZeroPosition:
 		break;
 	case CodeM_ExtruderOpenValve:
-		axisE->rotate(true, FAST_E_FEEDRATE);
+// TODO:		axisE->rotate(true, FAST_E_FEEDRATE);
 		break;
 	case CodeM_ExtruderCloseValve:
 		axisE->moveToPositionMMFast(axisE->getAbsolutePositionMM() - 1); // move extruder 1 mm backwards
+		if (isInitializeToStartingPositionNeeded())
+			setMode(RepRap_InitializeToStartingPositionForced);
 		break;
 	case CodeM_ExtruderSetTemperature2:
 		if (gCode->commandOccuraceFlag & CommandFlad_S) {
