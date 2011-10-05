@@ -12,8 +12,8 @@ void AdvButton::update(void) {
 	button.update();
 	buttonState = AdvButtonState_NONE;
 	unsigned long now = millis();
-	if (isToggled()) {
-		if (isDown()) {
+	if (button.isToggled()) {
+		if (button.isDown()) {
 			// Just pressed
 			timeButtonDown = now;
 			timeNextAutorepeatToggle = now + ADV_BUTTON_REPEAT_DELAY_MILLIS;
@@ -34,7 +34,7 @@ void AdvButton::update(void) {
 				previousTimeButtonUp = now;
 			}
 		}
-	} else if (isDown()) {
+	} else if (button.isDown()) {
 		if (autoRepeatEnabled) {
 			if (now >= timeNextAutorepeatToggle) {
 				timeNextAutorepeatToggle = now + ADV_BUTTON_REPEAT_RATE_MILLIES;

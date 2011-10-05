@@ -14,9 +14,9 @@ static const int ledPin = 6; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
+static const int shiftRegisterOutputPinDS = 11;
 static const int shiftRegisterOutputPinSH = 12;
 static const int shiftRegisterOutputPinST = 13;
-static const int shiftRegisterOutputPinDS = 11;
 
 static AdvButton btn;
 static RotaryEncoderAcceleration rotor;

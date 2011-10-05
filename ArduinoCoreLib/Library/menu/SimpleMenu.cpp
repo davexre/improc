@@ -20,14 +20,18 @@ void SimpleMenu::update(void) {
 		wasMenuSwitched = true;
 		activateMenuItem(switchMenuEncoderState->getValue(), false);
 	}
-	if (button.isButtonPressed()) {
-		wasMenuSwitched = false;
-		rotor.setState(switchMenuEncoderState);
-	} else if (button.isButtonReleased()) {
-		rotor.setState(&menuItems[currentMenu]->encoderState);
-		if (wasMenuSwitched) {
-			button.reset();
+	if (button.isButtonToggled()) {
+		if (button.isButtonDown()) {
+			rotor.setState(switchMenuEncoderState);
+		} else {
+			rotor.setState(&menuItems[currentMenu]->encoderState);
+			if (wasMenuSwitched) {
+				button.reset();
+			}
 		}
+		wasMenuSwitched = false;
+	} else if (wasMenuSwitched) {
+		button.reset();
 	}
 }
 

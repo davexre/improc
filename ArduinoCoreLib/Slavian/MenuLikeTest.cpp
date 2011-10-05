@@ -70,4 +70,13 @@ void MenuLikeTest::loop() {
 			noTone(speakerPin);
 		}
 	}
+
+	if (menu.button.isLongClicked()) {
+		Serial.println("LONG CLICK");
+	} else if (menu.button.isDoubleClicked()) {
+		Serial.println("DOUBLE CLICK");
+	} else if (menu.button.isClicked()) {
+		Serial.println("CLICK");
+	}
+
 }
