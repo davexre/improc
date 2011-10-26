@@ -113,6 +113,7 @@ void SteppingMotor_MosfetHBridge::initialize(
 	motorCoilOnMicros = 0;
 	mode = 0;
 	stop();
+	tps.initialize();
 }
 
 static const uint8_t motorStatesMosfetHBridge[] = {
@@ -123,6 +124,26 @@ static const uint8_t motorStatesMosfetHBridge[] = {
 		0b00001
 };
 
+static const uint8_t motorStatesMosfetHBridge3[] = {
+		0b00000, // OFF
+		0b01001,
+		0b01010,
+		0b00110,
+		0b00101
+};
+
+static const uint8_t motorStatesMosfetHBridge4[] = {
+		0b00000, // OFF
+		0b01000,
+		0b01001,
+		0b00010,
+		0b01010,
+		0b00100,
+		0b00110,
+		0b00001,
+		0b00101
+};
+
 void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
 	out11pin->setState(state & 0b01000);
 	out12pin->setState(state & 0b00100);
@@ -131,6 +152,7 @@ void SteppingMotor_MosfetHBridge::setState(const uint8_t state) {
 }
 
 void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
+	tps.update(true);
 	if (moveForward) {
 		currentState++;
 		if (currentState >= size(motorStatesMosfetHBridge))
@@ -140,7 +162,7 @@ void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
 		if (currentState <= 0)
 			currentState = size(motorStatesMosfetHBridge) - 1;
 	}
-	mode = 1;
+	mode = 2; // TODO: check me
 }
 
 void SteppingMotor_MosfetHBridge::stop() {
@@ -187,6 +209,7 @@ void SteppingMotorControl::stop() {
 	motor->stop();
 	movementMode = 0;
 	targetStep = step;
+	motorCoilOnMicros = micros() - delayBetweenStepsMicros;
 }
 
 void SteppingMotorControl::gotoStep(const long step) {
@@ -207,12 +230,12 @@ bool SteppingMotorControl::isMoving() {
 	return !(
 		(movementMode == 0) &&
 		(targetStep == step) &&
-		(micros() - motorCoilOnMicros <= delayBetweenStepsMicros));
+		(micros() - motorCoilOnMicros > delayBetweenStepsMicros));
 }
 
 void SteppingMotorControl::update() {
 	unsigned long now = micros();
-	if (now - motorCoilOnMicros > delayBetweenStepsMicros) {
+	if (now - motorCoilOnMicros >= delayBetweenStepsMicros) {
 		bool shallMove;
 		bool forward;
 
@@ -288,29 +311,40 @@ void SteppingMotorControlWithButtons::stop() {
 	modeState = 0;
 }
 
+#define MaxStepsWithWrongButtonDown 50
 void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
 	switch (modeState) {
 	case 0:
 		// Start moving backward to begining
 		motorControl.resetStepTo(0);
 		if (startPositionButton->getState()) {
-			motorControl.stop();
-		} else {
+			// button is up
 			motorControl.rotate(false);
+			Serial.print("start btn up step=");
+			Serial.println(motorControl.getStep());
+		} else {
+			// button is down
+			motorControl.stop();
+			Serial.print("start btn down step=");
+			Serial.println(motorControl.getStep());
 		}
 		minStep = maxStep = 0;
 		modeState = 1;
 		break;
 	case 1:
-		if (endPositionButton->getState() && (motorControl.getStep() < 10)) {
+		if ((!endPositionButton->getState()) && (motorControl.getStep() <= -MaxStepsWithWrongButtonDown)) {
 			// The motor moved 10 steps and endButton is still down - error
 			mode = SteppingMotorControlError;
 			modeState = 0;
 			motorControl.stop();
-		} else if (startPositionButton->getState()) {
+			Serial.println("err1 step=");
+			Serial.println(motorControl.getStep());
+		} else if (!startPositionButton->getState()) {
 			modeState = 2;
 			motorControl.stop();
 			motorControl.resetStepTo(0);
+			Serial.print("start btn down 2 step=");
+			Serial.println(motorControl.getStep());
 		}
 		break;
 	case 2:
@@ -333,31 +367,39 @@ void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
 		modeState = 3;
 		break;
 	case 3:
-		if (startPositionButton->getState() && (motorControl.getStep() > 10)) {
+		if ((!startPositionButton->getState()) && (motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
 			// The motor moved 10 steps and startButton is still down - error
 			mode = SteppingMotorControlError;
 			modeState = 0;
 			motorControl.stop();
-		} else if (endPositionButton->getState()) {
+			Serial.print("err2 step=");
+			Serial.println(motorControl.getStep());
+		} else if (!endPositionButton->getState()) {
 			// The end position moving forward is reached.
 			maxStep = motorControl.getStep();
 			motorControl.stop();
 			motorControl.rotate(false);
 			modeState = 4;
+			Serial.print("end btn down step=");
+			Serial.println(motorControl.getStep());
 		}
 		break;
 	case 4:
-		if (endPositionButton->getState() && (maxStep - motorControl.getStep() > 10)) {
+		if ((!endPositionButton->getState()) && (maxStep - motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
 			// The motor moved 10 steps and endButton is still down - error
 			mode = SteppingMotorControlError;
 			modeState = 0;
 			motorControl.stop();
-		} else if (startPositionButton->getState()) {
+			Serial.print("err3 step=");
+			Serial.println(motorControl.getStep());
+		} else if (!startPositionButton->getState()) {
 			minStep = motorControl.getStep();
 			motorControl.stop();
 			motorControl.resetStepTo(0);
 			mode = SteppingMotorControlIdle;
 			modeState = 0;
+			Serial.print("start btn down 3 step=");
+			Serial.println(motorControl.getStep());
 		}
 		break;
 	}
@@ -377,7 +419,8 @@ void SteppingMotorControlWithButtons::update() {
 		}
 		break;
 	default:
-		if (startPositionButton->getState() || endPositionButton->getState()) {
+		if ((!startPositionButton->getState()) || (!endPositionButton->getState())) {
+			// start or end button is down
 			motorControl.stop();
 		}
 		MIN(minStep, motorControl.getStep());

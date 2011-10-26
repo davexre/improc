@@ -14,6 +14,9 @@ static const int ledPin = 6; // the number of the LED pin
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
 
+static const int shiftRegisterInputPinCP = 8;
+static const int shiftRegisterInputPinPE = 9;
+static const int shiftRegisterInputPinQ7 = 10;
 static const int shiftRegisterOutputPinDS = 11;
 static const int shiftRegisterOutputPinSH = 12;
 static const int shiftRegisterOutputPinST = 13;
@@ -22,6 +25,7 @@ static AdvButton btn;
 static RotaryEncoderAcceleration rotor;
 static StateLed led;
 static DigitalOutputShiftRegister_74HC595 extenderOut;
+static DigitalInputShiftRegister_74HC166 extenderInput;
 
 static SteppingMotor_MosfetHBridge motor1;
 static SteppingMotor_MosfetHBridge motor2;
@@ -47,6 +51,7 @@ static void UpdateRotor() {
 
 static bool motorAutoRunning = false;
 static bool motorForward = true;
+unsigned long lastPrint;
 
 void SteppingMotorTest2::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
@@ -54,13 +59,17 @@ void SteppingMotorTest2::setup() {
 	rotor.initialize(
 			new DigitalInputArduinoPin(rotorPinA, true),
 			new DigitalInputArduinoPin(rotorPinB, true));
-	rotor.setMinMax(100, 5000);
-	rotor.setValue(1000);
+	rotor.setMinMax(100, 50000);
+	rotor.setValue(2000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 	extenderOut.initialize(16,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+	extenderInput.initialize(9,
+			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
+			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
+			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
 	motor1.initialize(
 			extenderOut.createPinHandler(0),
@@ -94,19 +103,24 @@ void SteppingMotorTest2::setup() {
 	motorControl4.resetStepTo(rotor.getValue());
 
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor1.motorCoilTurnOffMicros = 100000;
-	motor2.motorCoilTurnOffMicros = 100000;
-	motor3.motorCoilTurnOffMicros = 100000;
-	motor4.motorCoilTurnOffMicros = 100000;
+	motor1.motorCoilTurnOffMicros = 300000;
+	motor2.motorCoilTurnOffMicros = 300000;
+	motor3.motorCoilTurnOffMicros = 300000;
+	motor4.motorCoilTurnOffMicros = 300000;
 
     Serial.begin(115200);
     Serial.println("Initialized");
+    lastPrint = millis();
 }
+
+bool prevBuffer[9];
+
 
 void SteppingMotorTest2::loop() {
 	btn.update();
 	led.update();
 	extenderOut.update();
+	extenderInput.update();
 
 	motor1.update();
 	motor2.update();
@@ -117,6 +131,26 @@ void SteppingMotorTest2::loop() {
 	motorControl2.update();
 	motorControl3.update();
 	motorControl4.update();
+
+	bool show = false;
+	for (int i = 0; i < 9; i++) {
+		bool val = extenderInput.getState(i);
+		if (val != prevBuffer[i]) {
+			show = true;
+			prevBuffer[i] = val;
+		}
+	}
+
+	if (show) {
+		for (int i = 0; i < 9; i++) {
+			bool val = extenderInput.getState(i);
+			Serial.print(val ? '1' : '0');
+			if (i % 4 == 3)
+				Serial.print(' ');
+		}
+		Serial.println();
+	}
+
 
 	if (btn.isLongClicked()) {
 		motorAutoRunning = !motorAutoRunning;
@@ -152,10 +186,22 @@ void SteppingMotorTest2::loop() {
 	if (rotor.hasValueChanged()) {
 		long val = rotor.getValue();
 		//motor.motorCoilTurnOffMicros = rotor.getValue();
-		motorControl1.gotoStep(val);
+/*		motorControl1.gotoStep(val);
 		motorControl2.gotoStep(val);
 		motorControl3.gotoStep(val);
-		motorControl4.gotoStep(val);
+		motorControl4.gotoStep(val);*/
+
+		motorControl1.setDelayBetweenStepsMicros(val);
+		motorControl2.setDelayBetweenStepsMicros(val);
+		motorControl3.setDelayBetweenStepsMicros(val);
+		motorControl4.setDelayBetweenStepsMicros(val);
+		Serial.print("delay between steps=");
 		Serial.println(val);
+	}
+	if (millis() - lastPrint > 500) {
+		motor1.tps.update(false);
+		Serial.print("M1.tps=");
+		Serial.println(motor1.tps.getTPS());
+		lastPrint = millis();
 	}
 }

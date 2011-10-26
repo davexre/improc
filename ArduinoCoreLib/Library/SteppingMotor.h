@@ -2,6 +2,7 @@
 #define SteppingMotor_h
 
 #include "DigitalIO.h"
+#include "TicksPerSecond.h"
 
 class SteppingMotor {
 public:
@@ -49,6 +50,7 @@ class SteppingMotor_MosfetHBridge : public SteppingMotor {
 	unsigned long motorCoilOnMicros;
 	uint8_t mode;
 public:
+	TicksPerSecond tps;
 	unsigned long motorCoilTurnOffMicros;
 
 	void initialize(
@@ -67,6 +69,7 @@ public:
 
 class SteppingMotorControl {
 private:
+public:
 	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
 
 	long targetStep;
@@ -130,6 +133,7 @@ public:
 
 class SteppingMotorControlWithButtons {
 private:
+public:
 	SteppingMotorControl motorControl;
 
 	DigitalInputPin *startPositionButton;

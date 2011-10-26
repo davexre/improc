@@ -7,8 +7,8 @@ DefineClass(ShiftRegisterInputTest);
 
 static const int ledPin = 6; // the number of the LED pin
 
-static const int shiftRegisterInputPinPE = 9;
 static const int shiftRegisterInputPinCP = 8;
+static const int shiftRegisterInputPinPE = 9;
 static const int shiftRegisterInputPinQ7 = 10;
 
 static StateLed led;
@@ -23,7 +23,7 @@ static const unsigned int *states[] = {
 
 static DigitalInputShiftRegister_74HC166 shiftRegisterInput;
 
-#define DigitalInputShiftRegisterPinsCount 16
+#define DigitalInputShiftRegisterPinsCount 9
 
 void ShiftRegisterInputTest::setup() {
 	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
