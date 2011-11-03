@@ -118,6 +118,14 @@ void SteppingMotor_MosfetHBridge::initialize(
 
 static const uint8_t motorStatesMosfetHBridge[] = {
 		0b00000, // OFF
+		0b01010,
+		0b00110,
+		0b00101,
+		0b01001
+};
+
+static const uint8_t motorStatesMosfetHBridge_ORIG[] = {
+		0b00000, // OFF
 		0b01000,
 		0b00010,
 		0b00100,
@@ -162,7 +170,7 @@ void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
 		if (currentState <= 0)
 			currentState = size(motorStatesMosfetHBridge) - 1;
 	}
-	mode = 2; // TODO: check me
+	mode = 1; // TODO: check me
 }
 
 void SteppingMotor_MosfetHBridge::stop() {

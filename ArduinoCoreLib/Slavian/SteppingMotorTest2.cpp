@@ -103,10 +103,15 @@ void SteppingMotorTest2::setup() {
 	motorControl4.resetStepTo(rotor.getValue());
 
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor1.motorCoilTurnOffMicros = 300000;
-	motor2.motorCoilTurnOffMicros = 300000;
-	motor3.motorCoilTurnOffMicros = 300000;
-	motor4.motorCoilTurnOffMicros = 300000;
+	motor1.motorCoilTurnOffMicros = 3000000;
+	motor2.motorCoilTurnOffMicros = 3000000;
+	motor3.motorCoilTurnOffMicros = 3000000;
+	motor4.motorCoilTurnOffMicros = 3000000;
+
+	motorControl1.delayBetweenStepsMicros = 4000;
+	motorControl2.delayBetweenStepsMicros = 4000;
+	motorControl3.delayBetweenStepsMicros = 4000;
+	motorControl4.delayBetweenStepsMicros = 4000;
 
     Serial.begin(115200);
     Serial.println("Initialized");
