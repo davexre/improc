@@ -50,6 +50,8 @@ void SteppingMotorTest::setup() {
 	rotor.setValue(1000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 	motor.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			new DigitalOutputArduinoPin(stepperPin11),
 			new DigitalOutputArduinoPin(stepperPin12),
 			new DigitalOutputArduinoPin(stepperPin21),

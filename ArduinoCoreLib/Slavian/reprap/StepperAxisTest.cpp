@@ -43,6 +43,8 @@ static void updateRotaryEncoder() {
 void StepperAxisTest::setup() {
 	led.initialize(new DigitalOutputArduinoPin(ledPin), ledStates, size(ledStates), true);
 	motor.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			new DigitalOutputArduinoPin(stepMotor11pin, 0),
 			new DigitalOutputArduinoPin(stepMotor12pin, 0),
 			new DigitalOutputArduinoPin(stepMotor21pin, 0),

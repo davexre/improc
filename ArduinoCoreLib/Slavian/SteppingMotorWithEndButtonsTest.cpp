@@ -22,8 +22,8 @@ static const int shiftRegisterOutputPinST = 13;
 static DigitalOutputShiftRegister_74HC595 extenderOutput;
 static DigitalInputShiftRegister_74HC166 extenderInput;
 
-static SteppingMotor_MosfetHBridge motor[2];
-static SteppingMotorControlWithButtons motorControl[2];
+static SteppingMotor_MosfetHBridge motor[3];
+static SteppingMotorControlWithButtons motorControl[3];
 
 static AdvButton btn;
 static StateLed led;
@@ -39,7 +39,7 @@ static const unsigned int *states[] = {
 static bool paused;
 
 void SteppingMotorWithEndButtonsTest::setup() {
-	extenderOutput.initialize(16,
+	extenderOutput.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroOnlyModifiedOutputs,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
@@ -49,39 +49,48 @@ void SteppingMotorWithEndButtonsTest::setup() {
 			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
 	motor[0].initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOutput.createPinHandler(0),
 			extenderOutput.createPinHandler(1),
 			extenderOutput.createPinHandler(2),
 			extenderOutput.createPinHandler(3));
 	motor[1].initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOutput.createPinHandler(4),
 			extenderOutput.createPinHandler(5),
 			extenderOutput.createPinHandler(6),
 			extenderOutput.createPinHandler(7));
-/*	motor[2].initialize(
+	motor[2].initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOutput.createPinHandler(8),
 			extenderOutput.createPinHandler(9),
 			extenderOutput.createPinHandler(10),
-			extenderOutput.createPinHandler(11));*/
+			extenderOutput.createPinHandler(11));
 /*	motor[3].initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOutput.createPinHandler(12),
 			extenderOutput.createPinHandler(13),
 			extenderOutput.createPinHandler(14),
 			extenderOutput.createPinHandler(15));*/
 
-//	motor[0].motorCoilTurnOffMicros = 300000;
-//	motorControl[0].initialize(&motor[0], extenderInput.createPinHandler(1), extenderInput.createPinHandler(2));
-//	motorControl[0].setDelayBetweenStepsMicros(2000);
-
-	motorControl[0].initialize(&motor[0], extenderInput.createPinHandler(0), extenderInput.createPinHandler(8));
+	motorControl[0].initialize(&motor[0], extenderInput.createPinHandler(8), extenderInput.createPinHandler(0));
 	motorControl[1].initialize(&motor[1], extenderInput.createPinHandler(1), extenderInput.createPinHandler(2));
-//	motorControl[2].initialize(&motor[2], extenderInput.createPinHandler(4), extenderInput.createPinHandler(5));
-//	motorControl[3].initialize(&motor[3], extenderInput.createPinHandler(6), extenderInput.createPinHandler(7));
+	motorControl[2].initialize(&motor[2], extenderInput.createPinHandler(4), extenderInput.createPinHandler(3));
+//	motorControl[3].initialize(&motor[3], extenderInput.createPinHandler(5), extenderInput.createPinHandler(6));
 
-	for (int i = 0; i < size(motorControl); i++) {
-		motor[i].motorCoilTurnOffMicros = 300000;
-		motorControl[i].setDelayBetweenStepsMicros(2000);
-	}
+	motor[0].motorCoilTurnOffMicros = 40000;
+	motor[1].motorCoilTurnOffMicros = 40000;
+	motor[2].motorCoilTurnOffMicros = 40000;
+//	motor[3].motorCoilTurnOffMicros = 40000;
+
+	motorControl[0].setDelayBetweenStepsMicros(2000);
+	motorControl[1].setDelayBetweenStepsMicros(2000);
+	motorControl[2].setDelayBetweenStepsMicros(4000);
+//	motorControl[3].setDelayBetweenStepsMicros(2000);
 
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
@@ -98,7 +107,7 @@ bool prevBuffer[9];
 void SteppingMotorWithEndButtonsTest::loop() {
 	extenderInput.update();
 	extenderOutput.update();
-/*
+
 	bool show = false;
 	for (int i = 0; i < 9; i++) {
 		bool val = extenderInput.getState(i);
@@ -117,7 +126,7 @@ void SteppingMotorWithEndButtonsTest::loop() {
 		}
 		Serial.println();
 	}
-*/
+
 	for (int i = 0; i < size(motorControl); i++) {
 		motor[i].update();
 		motorControl[i].update();
@@ -144,18 +153,10 @@ void SteppingMotorWithEndButtonsTest::loop() {
 			Serial.print("  minStep:");
 			Serial.println(motorControl[i].minStep);
 
-			Serial.print("  mc.movementMode:");
-			Serial.println((int)motorControl[i].motorControl.movementMode);
-			Serial.print("  mc.step:");
-			Serial.println(motorControl[i].motorControl.step);
-			Serial.print("  mc.targetStep:");
-			Serial.println(motorControl[i].motorControl.targetStep);
 			Serial.print("  mc.stepsMadeSoFar:");
-			Serial.println(motorControl[i].motorControl.stepsMadeSoFar);
-			Serial.print("  mc.motorCoilOnMicros:");
-			Serial.println(motorControl[i].motorControl.motorCoilOnMicros);
+			Serial.println(motorControl[i].motorControl.getStepsMadeSoFar());
 			Serial.print("  mc.delayBetweenStepsMicros:");
-			Serial.println(motorControl[i].motorControl.delayBetweenStepsMicros);
+			Serial.println(motorControl[i].motorControl.getDelayBetweenStepsMicros());
 			Serial.print("  now:");
 			Serial.println(millis());
 		}

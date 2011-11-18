@@ -30,6 +30,10 @@ public:
 		return encoderState.getValue();
 	}
 
+	inline void setValue(const long newValue) {
+		encoderState.setValue(newValue);
+	}
+
 	virtual byte getMenuItemType(void);
 
 };

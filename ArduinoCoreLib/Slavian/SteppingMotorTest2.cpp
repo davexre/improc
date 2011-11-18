@@ -51,7 +51,8 @@ static void UpdateRotor() {
 
 static bool motorAutoRunning = false;
 static bool motorForward = true;
-unsigned long lastPrint;
+static unsigned long lastPrint;
+static TicksPerSecond tps;
 
 void SteppingMotorTest2::setup() {
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
@@ -59,10 +60,9 @@ void SteppingMotorTest2::setup() {
 	rotor.initialize(
 			new DigitalInputArduinoPin(rotorPinA, true),
 			new DigitalInputArduinoPin(rotorPinB, true));
-	rotor.setMinMax(100, 50000);
-	rotor.setValue(2000);
+	rotor.setMinMax(1000, 500000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-	extenderOut.initialize(16,
+	extenderOut.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
@@ -72,21 +72,29 @@ void SteppingMotorTest2::setup() {
 			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
 
 	motor1.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOut.createPinHandler(0),
 			extenderOut.createPinHandler(1),
 			extenderOut.createPinHandler(2),
 			extenderOut.createPinHandler(3));
 	motor2.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOut.createPinHandler(4),
 			extenderOut.createPinHandler(5),
 			extenderOut.createPinHandler(6),
 			extenderOut.createPinHandler(7));
 	motor3.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOut.createPinHandler(8),
 			extenderOut.createPinHandler(9),
 			extenderOut.createPinHandler(10),
 			extenderOut.createPinHandler(11));
 	motor4.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::DoNotTurnOff,
 			extenderOut.createPinHandler(12),
 			extenderOut.createPinHandler(13),
 			extenderOut.createPinHandler(14),
@@ -103,25 +111,31 @@ void SteppingMotorTest2::setup() {
 	motorControl4.resetStepTo(rotor.getValue());
 
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor1.motorCoilTurnOffMicros = 3000000;
-	motor2.motorCoilTurnOffMicros = 3000000;
-	motor3.motorCoilTurnOffMicros = 3000000;
-	motor4.motorCoilTurnOffMicros = 3000000;
+	motor1.motorCoilTurnOffMicros = 20000;
+	motor2.motorCoilTurnOffMicros = 20000;
+	motor3.motorCoilTurnOffMicros = 20000;
+	motor4.motorCoilTurnOffMicros = 20000;
 
-	motorControl1.delayBetweenStepsMicros = 4000;
-	motorControl2.delayBetweenStepsMicros = 4000;
-	motorControl3.delayBetweenStepsMicros = 4000;
-	motorControl4.delayBetweenStepsMicros = 4000;
+	rotor.setValue(400000);
+	motorControl1.setDelayBetweenStepsMicros(rotor.getValue());
+	motorControl2.setDelayBetweenStepsMicros(rotor.getValue());
+	motorControl3.setDelayBetweenStepsMicros(rotor.getValue());
+	motorControl4.setDelayBetweenStepsMicros(rotor.getValue());
+	rotor.setValue(motorControl1.getStep());
 
     Serial.begin(115200);
     Serial.println("Initialized");
     lastPrint = millis();
+    tps.initialize();
+
+    rotor.setValue(2000);
+    motor1.motorCoilTurnOffMicros = rotor.getValue();
 }
 
 bool prevBuffer[9];
 
-
 void SteppingMotorTest2::loop() {
+	tps.update(true);
 	btn.update();
 	led.update();
 	extenderOut.update();
@@ -156,7 +170,6 @@ void SteppingMotorTest2::loop() {
 		Serial.println();
 	}
 
-
 	if (btn.isLongClicked()) {
 		motorAutoRunning = !motorAutoRunning;
 		if (motorAutoRunning) {
@@ -190,23 +203,34 @@ void SteppingMotorTest2::loop() {
 
 	if (rotor.hasValueChanged()) {
 		long val = rotor.getValue();
-		//motor.motorCoilTurnOffMicros = rotor.getValue();
-/*		motorControl1.gotoStep(val);
-		motorControl2.gotoStep(val);
-		motorControl3.gotoStep(val);
-		motorControl4.gotoStep(val);*/
 
+	    motor1.motorCoilTurnOffMicros = val;
+	    motor2.motorCoilTurnOffMicros = val;
+	    motor3.motorCoilTurnOffMicros = val;
+	    motor4.motorCoilTurnOffMicros = val;
+
+		Serial.print("motorCoilTurnOffMicros=");
+		Serial.println(val);
+/*
 		motorControl1.setDelayBetweenStepsMicros(val);
 		motorControl2.setDelayBetweenStepsMicros(val);
 		motorControl3.setDelayBetweenStepsMicros(val);
 		motorControl4.setDelayBetweenStepsMicros(val);
 		Serial.print("delay between steps=");
 		Serial.println(val);
+*/
 	}
+
+/*
 	if (millis() - lastPrint > 500) {
 		motor1.tps.update(false);
 		Serial.print("M1.tps=");
-		Serial.println(motor1.tps.getTPS());
+		Serial.print(motor1.tps.getTPS());
+		Serial.print(' ');
+		Serial.print(tps.getTPS());
+		Serial.print(' ');
+		Serial.println(motorControl1.getStep());
 		lastPrint = millis();
 	}
+*/
 }

@@ -73,7 +73,7 @@ static void UpdateRotor() {
 void RepRapMain::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 
-	extenderOutput.initialize(16,
+	extenderOutput.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
 			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
@@ -89,21 +89,29 @@ void RepRapMain::setup() {
 	bedTemperatureControl.initialize(bedTemperatureSensor, extenderOutput.createPinHandler(bedHeaterPin));
 
 	motorX.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			extenderOutput.createPinHandler(0),
 			extenderOutput.createPinHandler(1),
 			extenderOutput.createPinHandler(2),
 			extenderOutput.createPinHandler(3));
 	motorY.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			extenderOutput.createPinHandler(4),
 			extenderOutput.createPinHandler(5),
 			extenderOutput.createPinHandler(6),
 			extenderOutput.createPinHandler(7));
 	motorZ.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			extenderOutput.createPinHandler(8),
 			extenderOutput.createPinHandler(9),
 			extenderOutput.createPinHandler(10),
 			extenderOutput.createPinHandler(11));
 	motorE.initialize(
+			SteppingMotor::FullPower,
+			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
 			extenderOutput.createPinHandler(12),
 			extenderOutput.createPinHandler(13),
 			extenderOutput.createPinHandler(14),

@@ -148,47 +148,31 @@ public:
 	void update();
 };
 
-///////// DigitalOutputShiftRegisterPin
+/**
+ * Based on the datasheet for 74HC164 - No output latch - output data is shifted "on the fly".
+ * The 74HC595 Has output latches
+ */
 
-class DigitalOutputShiftRegister;
-class DigitalOutputShiftRegisterPin : public DigitalOutputPin {
+class DigitalOutputShiftRegister_74HC164;
+class DigitalOutputShiftRegister_74HC164_Pin : public DigitalOutputPin {
 private:
-	DigitalOutputShiftRegister *parent;
+	DigitalOutputShiftRegister_74HC164 *parent;
 
 	uint8_t devicePin;
 public:
-	DigitalOutputShiftRegisterPin(DigitalOutputShiftRegister *parent, const uint8_t devicePin);
+	DigitalOutputShiftRegister_74HC164_Pin(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin);
 
 	virtual bool getState();
 
 	virtual void setState(const bool value);
 };
 
-///////// DigitalOutputShiftRegister
-
-class DigitalOutputShiftRegister {
+class DigitalOutputShiftRegister_74HC164 {
 protected:
 	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
 	uint8_t outputPinsCount;
 	bool modified;
-public:
-	bool getState(const uint8_t shiftRegisterPin);
 
-	void setState(const uint8_t shiftRegisterPin, const bool value);
-
-	inline uint8_t getOutputPinsCount() {
-		return outputPinsCount;
-	}
-
-	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin);
-};
-
-/**
- * Based on the datasheet for 74HC164 - No output latch - output data is shifted "on the fly".
- * The 74HC595 Has output latches
- */
-class DigitalOutputShiftRegister_74HC164 : public DigitalOutputShiftRegister {
-protected:
 	DigitalOutputPin *CP_pin;
 	DigitalOutputPin *DS_pin;
 public:
@@ -202,27 +186,99 @@ public:
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
+
+	bool getState(const uint8_t shiftRegisterPin);
+
+	void setState(const uint8_t shiftRegisterPin, const bool value);
+
+	inline uint8_t getOutputPinsCount() {
+		return outputPinsCount;
+	}
+
+	DigitalOutputShiftRegister_74HC164_Pin *createPinHandler(const uint8_t shiftRegisterPin);
 };
 
 /**
  * Based on the datasheet for 74HC595 - Has output latch.
  */
-class DigitalOutputShiftRegister_74HC595 : public DigitalOutputShiftRegister {
+class DigitalOutputShiftRegister_74HC595;
+class DigitalOutputShiftRegister_74HC595_Pin : public DigitalOutputPin {
+private:
+	DigitalOutputShiftRegister_74HC595 *parent;
+
+	uint8_t devicePin;
+public:
+	DigitalOutputShiftRegister_74HC595_Pin(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin);
+
+	virtual bool getState();
+
+	virtual void setState(const bool value);
+};
+
+class DigitalOutputShiftRegister_74HC595 {
 protected:
+	uint8_t writeOutputMode;
+	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
+	uint8_t fakeBuffer[DigitalOutputShiftRegisterBufferSize];
+	uint8_t outputPinsCount;
+	bool modified;
+
 	DigitalOutputPin *SH_pin;
 	DigitalOutputPin *ST_pin;
 	DigitalOutputPin *DS_pin;
 public:
+	enum WriteOutputMode {
+		/**
+		 * The content of outputBuffer is sent to the shift register(s) on every invokation of the update() method.
+		 */
+		WriteOnEveryUpdate = 0,
+
+		/**
+		 * The content of outputBuffer is sent to the shift register(s) only if
+		 * at least one pin has changed state since the last invokation of the
+		 * update() method.
+		 */
+		WriteOnlyIfModified = 1,
+
+		/**
+		 * Similar to WriteOnlyIfModified the content of the outputBuffer is sent
+		 * to the shift register(s) only if at least one pin has changed state since
+		 * the last invokation of the update() method.
+		 * Before the actual content of the outputBuffer is sent a "fake" outputBuffer
+		 * containing only zeros is sent.
+		 */
+		BeforeWriteZeroAllOutputs = 2,
+
+		/**
+		 * Similar to BeforeWriteZeroAllOutputs but only the content of the modified pins
+		 * is zeroed before writing the actual content.
+		 */
+		BeforeWriteZeroOnlyModifiedOutputs = 3
+	};
+
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
+	 * zeroOutputBeforeWrite	This is usefull when H-Bridges are connected to the outputs. All
+	 * 			outputs will be set to zero before the new values are written, i.e. this is the
+	 * 			timeout necessary for the MOSFETs in a H-Bridge to close and avoid shortcircuit.
 	 */
-	void initialize(uint8_t outputPinsCount, DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
+	void initialize(uint8_t outputPinsCount, WriteOutputMode writeOutputMode, DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
 
 	/**
 	 * Updates the state of the shift register.
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
+
+	bool getState(const uint8_t shiftRegisterPin);
+
+	void setState(uint8_t shiftRegisterPin, const bool value);
+
+	inline uint8_t getOutputPinsCount() {
+		return outputPinsCount;
+	}
+
+	DigitalOutputShiftRegister_74HC595_Pin *createPinHandler(const uint8_t shiftRegisterPin);
 };
 
 #endif
