@@ -71,8 +71,8 @@ void doDetermineAvailableSteps() {
 		break;
 	case 1:
 		if (!axis.isMoving()) {
-			Serial.print("MaxStep=");
-			Serial.println(axis.getMaxStep());
+			Serial.print("AxisStep=");
+			Serial.println(axis.getAxisSteps());
 			mode = 0;
 		}
 		break;
@@ -82,7 +82,7 @@ void doDetermineAvailableSteps() {
 void doInitializeToStartingPosition() {
 	switch (modeState) {
 	case 0:
-		axis.initializeToStartingPosition();
+		axis.initializePosition();
 		Serial.println("Started initializeToStartingPosition()");
 		modeState = 1;
 		break;

@@ -59,7 +59,7 @@ void SteppingMotorTest::setup() {
 	motorControl.initialize(&motor);
 	motorControl.resetStepTo(rotor.getValue());
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor.motorCoilTurnOffMicros = 100000;
+	motor.setMotorCoilTurnOffMicros(100000);
 
     Serial.begin(115200);
     Serial.println("Initialized");

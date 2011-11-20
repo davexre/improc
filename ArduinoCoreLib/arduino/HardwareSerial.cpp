@@ -18,6 +18,10 @@
   
   Modified 23 November 2006 by David A. Mellis
   Modified 28 September 2010 by Mark Sproul
+
+  Modified 18 November 2011 by Slavian Petrov, based on suggestions from
+    http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1265509976/3 and
+    source code from ftp://wookey.org.uk/arduino/
 */
 
 #include <stdlib.h>
@@ -39,33 +43,58 @@
 // is the index of the location from which to read.
 #if (RAMEND < 1000)
   #define RX_BUFFER_SIZE 32
+  #define TX_BUFFER_SIZE 32
 #else
-  #define RX_BUFFER_SIZE 128
+  #define RX_BUFFER_SIZE 64
+  #define TX_BUFFER_SIZE 64
 #endif
 
-struct ring_buffer
+#define BufferIndex unsigned char
+
+struct rx_ring_buffer
 {
   unsigned char buffer[RX_BUFFER_SIZE];
-  int head;
-  int tail;
+  BufferIndex head;
+  BufferIndex tail;
+};
+
+struct tx_ring_buffer
+{
+  unsigned char buffer[TX_BUFFER_SIZE];
+  BufferIndex head;
+  volatile BufferIndex tail;
 };
 
 #if defined(UBRRH) || defined(UBRR0H)
-  ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
+  rx_ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
+  #if defined (SERIAL_INTERRUPT_OUTPUT)
+     tx_ring_buffer tx_buffer  =  { { 0 }, 0, 0 };
+  #endif
 #endif
 #if defined(UBRR1H)
-  ring_buffer rx_buffer1  =  { { 0 }, 0, 0 };
+  rx_ring_buffer rx_buffer1  =  { { 0 }, 0, 0 };
+  #if defined (SERIAL_INTERRUPT_OUTPUT)
+     tx_ring_buffer tx_buffer1  =  { { 0 }, 0, 0 };
+  #endif
 #endif
 #if defined(UBRR2H)
-  ring_buffer rx_buffer2  =  { { 0 }, 0, 0 };
+  rx_ring_buffer rx_buffer2  =  { { 0 }, 0, 0 };
+  #if defined (SERIAL_INTERRUPT_OUTPUT)
+     tx_ring_buffer tx_buffer2  =  { { 0 }, 0, 0 };
+  #endif
 #endif
 #if defined(UBRR3H)
-  ring_buffer rx_buffer3  =  { { 0 }, 0, 0 };
+  rx_ring_buffer rx_buffer3  =  { { 0 }, 0, 0 };
+  #if defined (SERIAL_INTERRUPT_OUTPUT)
+     tx_ring_buffer tx_buffer3  =  { { 0 }, 0, 0 };
+  #endif
 #endif
 
-inline void store_char(unsigned char c, ring_buffer *rx_buffer)
+inline void store_char(unsigned char c, rx_ring_buffer *rx_buffer)
 {
-  int i = (unsigned int)(rx_buffer->head + 1) % RX_BUFFER_SIZE;
+	BufferIndex i = rx_buffer->head + 1;
+	if (i >= RX_BUFFER_SIZE)
+		i = 0;
 
   // if we should be storing the received character into the location
   // just before the tail (meaning that the head would advance to the
@@ -134,6 +163,79 @@ inline void store_char(unsigned char c, ring_buffer *rx_buffer)
   #error No interrupt handler for usart 0
 #endif
 
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+  ISR(FIRST_UDRE_vect)
+  {
+    if (tx_buffer.head == tx_buffer.tail) {
+  	// Buffer empty, so disable interrupts
+      cbi(UCSR0B, UDRIE0);
+    }
+    else {
+      // There is more data in the output buffer. Send the next byte
+      unsigned char c = tx_buffer.buffer[tx_buffer.tail];
+//      tx_buffer.tail = (tx_buffer.tail + 1) % TX_BUFFER_SIZE;
+      BufferIndex t = tx_buffer.tail + 1;
+      tx_buffer.tail = t >= TX_BUFFER_SIZE ? 0 : t;
+
+      UDR0 = c;
+    }
+  }
+
+  #if defined(SIG_USART1_DATA)
+    ISR(SIG_USART1_DATA)
+    {
+      if (tx_buffer1.head == tx_buffer1.tail) {
+    	// Buffer empty, so disable interrupts
+        cbi(UCSR1B, UDRIE1);
+      }
+      else {
+        // There is more data in the output buffer. Send the next byte
+        unsigned char c = tx_buffer1.buffer[tx_buffer1.tail];
+        BufferIndex t = tx_buffer1.tail + 1;
+        tx_buffer1.tail = t >= TX_BUFFER_SIZE ? 0 : t;
+        UDR1 = c;
+      }
+    }
+  #endif
+  
+  #if defined(SIG_USART2_DATA)
+    ISR(SIG_USART2_DATA)
+    {
+      if (tx_buffer2.head == tx_buffer2.tail) {
+    	// Buffer empty, so disable interrupts
+        cbi(UCSR2B, UDRIE2);
+      }
+      else {
+        // There is more data in the output buffer. Send the next byte
+        unsigned char c = tx_buffer2.buffer[tx_buffer2.tail];
+        BufferIndex t = tx_buffer2.tail + 1;
+        tx_buffer2.tail = t >= TX_BUFFER_SIZE ? 0 : t;
+    	
+        UDR2 = c;
+      }
+    }
+  #endif
+
+  #if defined(SIG_USART3_DATA)
+    ISR(SIG_USART3_DATA)
+    {
+      if (tx_buffer3.head == tx_buffer3.tail) {
+    	// Buffer empty, so disable interrupts
+        cbi(UCSR3B, UDRIE3);
+      }
+      else {
+        // There is more data in the output buffer. Send the next byte
+        unsigned char c = tx_buffer3.buffer[tx_buffer3.tail];
+        BufferIndex t = tx_buffer3.tail + 1;
+        tx_buffer3.tail = t >= TX_BUFFER_SIZE ? 0 : t;
+    	
+        UDR3 = c;
+      }
+    }
+  #endif
+#endif
+
+
 //#if defined(SIG_USART1_RECV)
 #if defined(USART1_RX_vect)
   //SIGNAL(SIG_USART1_RECV)
@@ -170,11 +272,18 @@ inline void store_char(unsigned char c, ring_buffer *rx_buffer)
 
 // Constructors ////////////////////////////////////////////////////////////////
 
-HardwareSerial::HardwareSerial(ring_buffer *rx_buffer,
+HardwareSerial::HardwareSerial(rx_ring_buffer *rx_buffer,
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+  tx_ring_buffer *tx_buffer,
+#endif
   volatile uint8_t *ubrrh, volatile uint8_t *ubrrl,
   volatile uint8_t *ucsra, volatile uint8_t *ucsrb,
   volatile uint8_t *udr,
-  uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udre, uint8_t u2x)
+  uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udre, uint8_t u2x
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+      , uint8_t udrie
+#endif
+  )
 {
   _rx_buffer = rx_buffer;
   _ubrrh = ubrrh;
@@ -187,6 +296,10 @@ HardwareSerial::HardwareSerial(ring_buffer *rx_buffer,
   _rxcie = rxcie;
   _udre = udre;
   _u2x = u2x;
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+  _tx_buffer = tx_buffer;
+  _udrie = udrie;
+#endif
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
@@ -220,6 +333,9 @@ void HardwareSerial::begin(long baud)
   sbi(*_ucsrb, _rxen);
   sbi(*_ucsrb, _txen);
   sbi(*_ucsrb, _rxcie);
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+  cbi(*_ucsrb, _udrie);
+#endif
 }
 
 void HardwareSerial::end()
@@ -227,11 +343,15 @@ void HardwareSerial::end()
   cbi(*_ucsrb, _rxen);
   cbi(*_ucsrb, _txen);
   cbi(*_ucsrb, _rxcie);  
+#if defined (SERIAL_INTERRUPT_OUTPUT)
+  cbi(*_ucsrb, _udrie);
+#endif
 }
 
 int HardwareSerial::available(void)
 {
-  return (unsigned int)(RX_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) % RX_BUFFER_SIZE;
+//  return (unsigned int)(RX_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) % RX_BUFFER_SIZE;
+	return _rx_buffer->head != _rx_buffer->tail;
 }
 
 int HardwareSerial::peek(void)
@@ -250,7 +370,8 @@ int HardwareSerial::read(void)
     return -1;
   } else {
     unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
-    _rx_buffer->tail = (unsigned int)(_rx_buffer->tail + 1) % RX_BUFFER_SIZE;
+    BufferIndex t = _rx_buffer->tail + 1;
+    _rx_buffer->tail = t >= RX_BUFFER_SIZE ? 0 : t;
     return c;
   }
 }
@@ -269,6 +390,30 @@ void HardwareSerial::flush()
   _rx_buffer->head = _rx_buffer->tail;
 }
 
+#if defined(SERIAL_INTERRUPT_OUTPUT)
+void HardwareSerial::write(uint8_t c)
+{
+//  bool empty = (_tx_buffer->head == _tx_buffer->tail);
+//  int i = (_tx_buffer->head + 1) % TX_BUFFER_SIZE;
+    BufferIndex i = _tx_buffer->head + 1;
+	if (i >= TX_BUFFER_SIZE)
+		i = 0;
+
+  // If the output buffer is full, there's nothing for it other than to
+  // wait for the interrupt handler to empty it a bit
+  while (i == _tx_buffer->tail)
+	  ;
+
+  _tx_buffer->buffer[_tx_buffer->head] = c;
+  _tx_buffer->head = i;
+
+//  if (empty) {
+    // The buffer was empty, so enable interrupt on
+    // USART Data Register empty. The interrupt handler will take it from there
+    sbi(*_ucsrb, _udrie);
+//  }
+}
+#else
 void HardwareSerial::write(uint8_t c)
 {
   while (!((*_ucsra) & (1 << _udre)))
@@ -276,13 +421,22 @@ void HardwareSerial::write(uint8_t c)
 
   *_udr = c;
 }
+#endif
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
 #if defined(UBRRH) && defined(UBRRL)
-  HardwareSerial Serial(&rx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRE, U2X);
+  #if defined(SERIAL_INTERRUPT_OUTPUT)
+    HardwareSerial Serial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRE, U2X, UDRIE);
+  #else
+    HardwareSerial Serial(&rx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRE, U2X);
+  #endif
 #elif defined(UBRR0H) && defined(UBRR0L)
-  HardwareSerial Serial(&rx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRE0, U2X0);
+  #if defined(SERIAL_INTERRUPT_OUTPUT)
+    HardwareSerial Serial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRE0, U2X0, UDRIE0);
+  #else
+    HardwareSerial Serial(&rx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRE0, U2X0);
+  #endif
 #elif defined(USBCON)
   #warning no serial port defined  (port 0)
 #else
@@ -290,14 +444,25 @@ void HardwareSerial::write(uint8_t c)
 #endif
 
 #if defined(UBRR1H)
-  HardwareSerial Serial1(&rx_buffer1, &UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UDR1, RXEN1, TXEN1, RXCIE1, UDRE1, U2X1);
+  #if defined(SERIAL_INTERRUPT_OUTPUT)
+    HardwareSerial Serial1(&rx_buffer1, &tx_buffer1, &UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UDR1, RXEN1, TXEN1, RXCIE1, UDRE1, U2X1, UDRIE01);
+  #else
+    HardwareSerial Serial1(&rx_buffer1, &UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UDR1, RXEN1, TXEN1, RXCIE1, UDRE1, U2X1);
+  #endif
 #endif
 #if defined(UBRR2H)
-  HardwareSerial Serial2(&rx_buffer2, &UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UDR2, RXEN2, TXEN2, RXCIE2, UDRE2, U2X2);
+  #if defined(SERIAL_INTERRUPT_OUTPUT)
+    HardwareSerial Serial2(&rx_buffer2, &tx_buffer2, &UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UDR2, RXEN2, TXEN2, RXCIE2, UDRE2, U2X2, UDRIE2);
+  #else
+    HardwareSerial Serial2(&rx_buffer2, &UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UDR2, RXEN2, TXEN2, RXCIE2, UDRE2, U2X2);
+  #endif
 #endif
 #if defined(UBRR3H)
-  HardwareSerial Serial3(&rx_buffer3, &UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UDR3, RXEN3, TXEN3, RXCIE3, UDRE3, U2X3);
+  #if defined(SERIAL_INTERRUPT_OUTPUT)
+    HardwareSerial Serial3(&rx_buffer3, &tx_buffer3, &UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UDR3, RXEN3, TXEN3, RXCIE3, UDRE3, U2X3, UDRIE3);
+  #else
+    HardwareSerial Serial3(&rx_buffer3, &UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UDR3, RXEN3, TXEN3, RXCIE3, UDRE3, U2X3);
+  #endif
 #endif
 
 #endif // whole file
-

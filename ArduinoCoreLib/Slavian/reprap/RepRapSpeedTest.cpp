@@ -4,8 +4,8 @@
 #include "SoftwarePWM.h"
 #include "TicksPerSecond.h"
 #include "SerialReader.h"
-#include "StepperAxis.h"
 #include "TemperatureControl.h"
+#include "RepRapPCB.h"
 
 DefineClass(RepRapSpeedTest);
 
@@ -15,13 +15,6 @@ static const int buttonPin = 4;	// the number of the pushbutton pin
 static const int speakerPin = 8;
 static const int ledPin = 6; // the number of the LED pin
 
-static const int shiftRegisterInputPinCP = 8;
-static const int shiftRegisterInputPinPE = 9;
-static const int shiftRegisterInputPinQ7 = 10;
-static const int shiftRegisterOutputPinDS = 11;
-static const int shiftRegisterOutputPinSH = 12;
-static const int shiftRegisterOutputPinST = 13;
-
 // OUTPUT Expander Digital pins
 static const int extruderHeaterPin = 0;
 static const int bedHeaterPin = 1;
@@ -29,51 +22,28 @@ static const int extruderFanPin = 18;
 
 ///////
 
-static AdvButton btn;
 static bool speakerOn = true;
 
 static MenuItem frequencyCyclesPerMinuteMenu;
 static MenuItem pulseWidthMenu;
-
 static MenuItem *menuItems[] = { &pulseWidthMenu, &frequencyCyclesPerMinuteMenu };
-
 static SimpleMenuWithSerialPrint menu;
 
 static SoftwarePWM spwm;
-
-static DigitalOutputShiftRegister_74HC595 extenderOutput;
-static DigitalInputShiftRegister_74HC166 extenderInput;
 static TicksPerSecond tps;
-
-static SteppingMotor_MosfetHBridge motorX;
-static SteppingMotor_MosfetHBridge motorY;
-static SteppingMotor_MosfetHBridge motorZ;
-static SteppingMotor_MosfetHBridge motorE;
-
-static StepperAxis axisX;
-static StepperAxis axisY;
-static StepperAxis axisZ;
-static StepperAxis axisE;
-
 static TemperatureControl temperatureControl;
 
 static char serialReaderBuffer[200];
 static SerialReader serialReader;
+
+static RepRapPCB pcb;
 
 static void updateRotaryEncoder() {
 	menu.updateRotaryEncoder();
 }
 
 void RepRapSpeedTest::setup() {
-	extenderOutput.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
-	extenderInput.initialize(9,
-			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
-			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
-
+	pcb.initialize();
 	// Init menus
 	frequencyCyclesPerMinuteMenu.initialize("Frequency", 0, 2000, false);
 	pulseWidthMenu.initialize("Pulse Width", 0, 255, false);
@@ -85,42 +55,7 @@ void RepRapSpeedTest::setup() {
 	spwm.setValue(pulseWidthMenu.getValue());
 
 	tps.initialize(500);
-
-	motorX.initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			extenderOutput.createPinHandler(0),
-			extenderOutput.createPinHandler(1),
-			extenderOutput.createPinHandler(2),
-			extenderOutput.createPinHandler(3));
-	motorY.initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			extenderOutput.createPinHandler(4),
-			extenderOutput.createPinHandler(5),
-			extenderOutput.createPinHandler(6),
-			extenderOutput.createPinHandler(7));
-	motorZ.initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			extenderOutput.createPinHandler(8),
-			extenderOutput.createPinHandler(9),
-			extenderOutput.createPinHandler(10),
-			extenderOutput.createPinHandler(11));
-	motorE.initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			extenderOutput.createPinHandler(12),
-			extenderOutput.createPinHandler(13),
-			extenderOutput.createPinHandler(14),
-			extenderOutput.createPinHandler(15));
-
-	axisX.initialize(&motorX, extenderInput.createPinHandler(0), extenderInput.createPinHandler(1));
-	axisY.initialize(&motorY, extenderInput.createPinHandler(2), extenderInput.createPinHandler(3));
-	axisZ.initialize(&motorZ, extenderInput.createPinHandler(4), extenderInput.createPinHandler(5));
-	axisE.initialize(&motorE, extenderInput.createPinHandler(6), extenderInput.createPinHandler(7));
-
-	temperatureControl.initialize(new TemperatureSensor_TC1047(0), extenderOutput.createPinHandler(16));
+	temperatureControl.initialize(new TemperatureSensor_TC1047(0), pcb.extenderOutput.createPinHandler(16));
 
 	serialReader.initialize(115200, sizeof(serialReaderBuffer), serialReaderBuffer);
     Serial.println("Push the encoder button to switch between menus");
@@ -129,21 +64,9 @@ void RepRapSpeedTest::setup() {
 bool allTurnedOn = false;
 
 void RepRapSpeedTest::loop() {
+	pcb.update();
 	serialReader.update();
-	extenderOutput.update();
-	extenderInput.update();
-
-	motorX.update();
-	motorY.update();
-	motorZ.update();
-	motorE.update();
-
-	axisX.update();
-	axisY.update();
-	axisZ.update();
-	axisE.update();
 	temperatureControl.update();
-
 	tps.update(true);
 	spwm.update();
 	menu.update();
@@ -169,16 +92,16 @@ void RepRapSpeedTest::loop() {
 
 		allTurnedOn = !allTurnedOn;
 		if (allTurnedOn) {
-			axisX.initializeToStartingPosition();
-			axisY.initializeToStartingPosition();
-			axisZ.initializeToStartingPosition();
-			axisE.initializeToStartingPosition();
+			pcb.axisX.initializePosition();
+			pcb.axisY.initializePosition();
+			pcb.axisZ.initializePosition();
+			pcb.axisE.initializePosition();
 			temperatureControl.setTargetTemperature(250);
 		} else {
-			axisX.stop();
-			axisY.stop();
-			axisZ.stop();
-			axisE.stop();
+			pcb.axisX.stop();
+			pcb.axisY.stop();
+			pcb.axisZ.stop();
+			pcb.axisE.stop();
 			temperatureControl.stop();
 		}
 	}

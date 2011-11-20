@@ -43,18 +43,6 @@ public:
 };
 
 class SteppingMotor_MosfetHBridge : public SteppingMotor {
-private:
-	signed char currentState;
-	DigitalOutputPin *out11pin;
-	DigitalOutputPin *out12pin;
-	DigitalOutputPin *out21pin;
-	DigitalOutputPin *out22pin;
-	uint8_t steppingMotorMode;
-	uint8_t stepSwitchingMode;
-	uint8_t mode;
-	unsigned long motorCoilOnMicros;
-
-	void setState(const uint8_t state);
 public:
 	enum StepSwitchingMode {
 		/**
@@ -89,10 +77,24 @@ public:
 		DoNotTurnOff = 3
 	};
 
+private:
+	signed char currentState;
+	DigitalOutputPin *out11pin;
+	DigitalOutputPin *out12pin;
+	DigitalOutputPin *out21pin;
+	DigitalOutputPin *out22pin;
+	uint8_t mode;
+	unsigned long motorCoilOnMicros;
+	SteppingMotor::SteppingMotorMode steppingMotorMode;
+
+	StepSwitchingMode stepSwitchingMode;
 	unsigned long motorCoilTurnOffMicros;
 
+	void setState(const uint8_t state);
+
+public:
 	void initialize(
-			SteppingMotorMode steppingMotorMode,
+			SteppingMotor::SteppingMotorMode steppingMotorMode,
 			StepSwitchingMode stepSwitchingMode,
 			DigitalOutputPin *out11pin,
 			DigitalOutputPin *out12pin,
@@ -105,11 +107,18 @@ public:
 	 * This method should be placed in the main loop of the program.
 	 */
 	void update();
+
+	inline void setMotorCoilTurnOffMicros(unsigned long motorCoilTurnOffMicros) {
+		this->motorCoilTurnOffMicros = motorCoilTurnOffMicros;
+	}
+	inline unsigned long getMotorCoilTurnOffMicros() {
+		return motorCoilTurnOffMicros;
+	}
 };
 
 class SteppingMotorControl {
 private:
-	static const unsigned long MinDelayBetweenStepsMicros = 1000UL;
+	int minDelayBetweenStepsMicros;
 
 	enum MovementMode {
 		Idle = 1,
@@ -120,11 +129,6 @@ private:
 		GotoStepInFixedTimeVariableSpeed = 6,
 		Stopping = 7
 	};
-	/**
-	 * 0 - goto step;
-	 * 1 - move forward;
-	 * 2 - move backward
-	 */
 	MovementMode movementMode;
 
 	long targetStep;
@@ -178,27 +182,32 @@ public:
 	inline void setDelayBetweenStepsMicros(unsigned long delayBetweenStepsMicros) {
 		this->delayBetweenStepsMicros = delayBetweenStepsMicros;
 	}
-
 	inline unsigned long getDelayBetweenStepsMicros(void) {
 		return delayBetweenStepsMicros;
 	}
-};
 
-#define SteppingMotorControlIdle 0
-#define SteppingMotorControlError 1
-#define SteppingMotorControlDetermineAvailableSteps 10
-#define SteppingMotorControlInitializeToStartingPosition 11
+	inline void setMinDelayBetweenStepsMicros(int minDelayBetweenStepsMicros) {
+		this->minDelayBetweenStepsMicros = minDelayBetweenStepsMicros;
+	}
+	inline int getMinDelayBetweenStepsMicros() {
+		return minDelayBetweenStepsMicros;
+	}
+};
 
 class SteppingMotorControlWithButtons {
 private:
-public:
-	SteppingMotorControl motorControl;
+	int maxStepsWithWrongButtonDown;
 
-	DigitalInputPin *startPositionButton;
+	enum MotorControlModes {
+		Idle = 0,
+		Error = 1,
+		Waiting = 2,
+		DetermineAvailableSteps = 10,
+		InitializeToStartPosition = 11,
+		InitializeToEndPosition = 12
+	};
 
-	DigitalInputPin *endPositionButton;
-
-	uint8_t mode;
+	MotorControlModes mode;
 
 	uint8_t modeState;
 
@@ -206,11 +215,18 @@ public:
 
 	long maxStep;
 
-	void doInitializeToStartingPosition();
+	void doInitializeToStartPosition();
+	void doInitializeToEndPosition();
 
 	void doDetermineAvailableSteps();
 
 public:
+	DigitalInputPin *startPositionButton;
+
+	DigitalInputPin *endPositionButton;
+
+	SteppingMotorControl motorControl;
+
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
 	 */
@@ -223,7 +239,8 @@ public:
 	 */
 	void update();
 
-	void initializeToStartingPosition();
+	void initializeToStartPosition();
+	void initializeToEndPosition();
 	void determineAvailableSteps();
 
 	void gotoStep(const long step);
@@ -246,8 +263,15 @@ public:
 		return maxStep;
 	}
 
+	inline void setMaxStepsWithWrongButtonDown(int maxStepsWithWrongButtonDown) {
+		this->maxStepsWithWrongButtonDown = maxStepsWithWrongButtonDown;
+	}
+	inline int getMaxStepsWithWrongButtonDown() {
+		return maxStepsWithWrongButtonDown;
+	}
+
 	inline bool isOk(void) {
-		return mode != SteppingMotorControlError;
+		return mode != SteppingMotorControlWithButtons::Error;
 	}
 
 	inline long getStepsMadeSoFar(void) {

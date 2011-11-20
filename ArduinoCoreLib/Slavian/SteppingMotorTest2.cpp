@@ -111,12 +111,12 @@ void SteppingMotorTest2::setup() {
 	motorControl4.resetStepTo(rotor.getValue());
 
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;
-	motor1.motorCoilTurnOffMicros = 20000;
-	motor2.motorCoilTurnOffMicros = 20000;
-	motor3.motorCoilTurnOffMicros = 20000;
-	motor4.motorCoilTurnOffMicros = 20000;
+	motor1.setMotorCoilTurnOffMicros(20000);
+	motor2.setMotorCoilTurnOffMicros(20000);
+	motor3.setMotorCoilTurnOffMicros(20000);
+	motor4.setMotorCoilTurnOffMicros(20000);
 
-	rotor.setValue(400000);
+	rotor.setValue(2000);
 	motorControl1.setDelayBetweenStepsMicros(rotor.getValue());
 	motorControl2.setDelayBetweenStepsMicros(rotor.getValue());
 	motorControl3.setDelayBetweenStepsMicros(rotor.getValue());
@@ -127,9 +127,6 @@ void SteppingMotorTest2::setup() {
     Serial.println("Initialized");
     lastPrint = millis();
     tps.initialize();
-
-    rotor.setValue(2000);
-    motor1.motorCoilTurnOffMicros = rotor.getValue();
 }
 
 bool prevBuffer[9];
@@ -204,10 +201,10 @@ void SteppingMotorTest2::loop() {
 	if (rotor.hasValueChanged()) {
 		long val = rotor.getValue();
 
-	    motor1.motorCoilTurnOffMicros = val;
-	    motor2.motorCoilTurnOffMicros = val;
-	    motor3.motorCoilTurnOffMicros = val;
-	    motor4.motorCoilTurnOffMicros = val;
+	    motor1.setMotorCoilTurnOffMicros(val);
+	    motor2.setMotorCoilTurnOffMicros(val);
+	    motor3.setMotorCoilTurnOffMicros(val);
+	    motor4.setMotorCoilTurnOffMicros(val);
 
 		Serial.print("motorCoilTurnOffMicros=");
 		Serial.println(val);

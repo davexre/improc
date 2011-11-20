@@ -25,6 +25,8 @@
 #ifndef Wiring_h
 #define Wiring_h
 
+#include <math.h>			// SPP: fixes a *.h bug
+
 #include <avr/io.h>
 #include <stdlib.h>
 #include "binary.h"

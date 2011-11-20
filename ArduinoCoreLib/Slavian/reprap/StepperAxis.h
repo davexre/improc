@@ -6,24 +6,30 @@
 #include "SteppingMotor.h"
 #include "utils.h"
 
-#define StepperAxisModeIdle 0
-#define StepperAxisModeError 1
-#define StepperAxisModeInitializeToStartingPosition 10
-
+/**
+ * StepperAxis uses MICRO meters for expressing lengths when working with stepper motors.
+ */
 class StepperAxis {
 private:
-	SteppingMotorControlWithButtons motorControl;
-	unsigned long timestamp;
-	long maxStep;
-	float axisStepsPerMM;
-
-	void doDetermineAvailableSteps();
-	void doInitializeToStartingPosition();
-	void doModeMoveToPosition();
-
-	uint8_t mode;
+	enum AxisModes {
+		Idle = 0,
+		Error = 1,
+		Waitings = 2,
+		InitializePosition = 3
+	};
+	AxisModes mode;
 	uint8_t modeState;
+
+	unsigned long timestamp;
+	long axisSteps;
+	long axisLengthInMicroM;
+	long axisHomePositionMicroM;
+	unsigned long delayBetweenStepsAtMaxSpeedMicros;
+	bool useStartPositionToInitialize; // True -> init to start, False -> init to end position
 public:
+	static const signed long StepperAxisMicroMToMoveBeforeInitialize = 1000000;
+	SteppingMotorControlWithButtons motorControl;
+
 	/**
 	 * Initializes the class.
 	 */
@@ -36,19 +42,44 @@ public:
 	 */
 	void update(void);
 
-	void setMaxStep(long maxStep);
-	inline long getMaxStep() { return maxStep; }
+	void setAxisSteps(long axisSteps);
+	inline long getAxisSteps() { return axisSteps; }
 
-	void setAxisStepsPerMM(float axisStepsPer);
-	inline float getAxisStepsPerMM() {
-		return axisStepsPerMM;
+	void setAxisLengthInMicroM(long axisLengthInMicroM);
+	inline long getAxisLengthInMicroM() {
+		return axisLengthInMicroM;
+	}
+
+	inline void setAxisHomePositionMicroM(long axisHomePositionMicroM) {
+		this->axisHomePositionMicroM = axisHomePositionMicroM;
+	}
+	inline long getAxisHomePositionMicroM() {
+		return axisHomePositionMicroM;
+	}
+
+	inline void setDelayBetweenStepsAtMaxSpeedMicros(unsigned long delayBetweenStepsAtMaxSpeedMicros) {
+		this->delayBetweenStepsAtMaxSpeedMicros = delayBetweenStepsAtMaxSpeedMicros;
+	}
+	inline unsigned long getDelayBetweenStepsAtMaxSpeedMicros() {
+		return delayBetweenStepsAtMaxSpeedMicros;
+	}
+
+	inline void setUseStartPositionToInitialize(bool useStartPositionToInitialize) {
+		this->useStartPositionToInitialize = useStartPositionToInitialize;
+	}
+	inline bool getUseStartPositionToInitialize() {
+		return useStartPositionToInitialize;
 	}
 
 	void determineAvailableSteps(void);
 
-	void moveToPositionMMFast(float absolutePositionMM);
-	void moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis);
-	float getAbsolutePositionMM();
+	inline void moveToHomePosition() {
+		moveToPositionMicroMFast(axisHomePositionMicroM);
+	}
+
+	void moveToPositionMicroMFast(long absolutePositionMicroM);
+	void moveToPositionMicroM(long absolutePositionMicroM, unsigned long timeToMoveMicros);
+	long getAbsolutePositionMicroM();
 	inline long getStepPosition() {
 		motorControl.getStep();
 	}
@@ -58,15 +89,15 @@ public:
 	}
 
 	inline bool isMoving() {
-		motorControl.isMoving();
+		return motorControl.isMoving();
 	}
 
 	inline bool isOk() {
 		return motorControl.isOk();
 	}
 
-	bool isInitializeToStartingPositionNeeded();
-	void initializeToStartingPosition();
+	bool isInitializePositionNeeded();
+	void initializePosition();
 };
 
 #endif

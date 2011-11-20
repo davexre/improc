@@ -4,72 +4,83 @@ void StepperAxis::initialize(SteppingMotor *motor,
 		DigitalInputPin *startPositionButtonPin,
 		DigitalInputPin *endPositionButtonPin) {
 	motorControl.initialize(motor, startPositionButtonPin, endPositionButtonPin);
-	axisStepsPerMM = 1.0;
-	mode = StepperAxisModeIdle;
+	axisSteps = -1;
+	axisLengthInMicroM = 1;
+	axisHomePositionMicroM = 0;
+	delayBetweenStepsAtMaxSpeedMicros = 2000;
+	useStartPositionToInitialize = true;
+	mode = StepperAxis::Idle;
 	modeState = 0;
 }
 
 void StepperAxis::update() {
 	motorControl.update();
 	switch (mode) {
-	case StepperAxisModeIdle:
+	case Idle:
 		break;
-	case StepperAxisModeInitializeToStartingPosition:
+	case InitializePosition:
 		if (!motorControl.isMoving()) {
 			motorControl.resetStepsMadeSoFar();
-			mode = StepperAxisModeIdle;
+			mode = StepperAxis::Idle;
 			modeState = 0;
 		}
 		break;
-	case StepperAxisModeError:
+	case Error:
 		break;
 	}
 }
 
-#define StepperAxisMMToMoveBeforeInitialize 500
-bool StepperAxis::isInitializeToStartingPositionNeeded() {
+bool StepperAxis::isInitializePositionNeeded() {
 	if (!motorControl.isOk())
 		return true;
-	if ((long) (motorControl.getStepsMadeSoFar() * axisStepsPerMM) > StepperAxisMMToMoveBeforeInitialize)
+	if ((long) (motorControl.getStepsMadeSoFar() * axisLengthInMicroM / axisSteps) > StepperAxisMicroMToMoveBeforeInitialize)
 		return true;
 	return false;
 }
 
-void StepperAxis::initializeToStartingPosition() {
-	mode = StepperAxisModeInitializeToStartingPosition;
+void StepperAxis::initializePosition() {
+	mode = StepperAxis::InitializePosition;
 	modeState = 0;
-	motorControl.initializeToStartingPosition();
-}
-
-void StepperAxis::setMaxStep(long maxStep) {
-	this->maxStep = maxStep;
-}
-
-void StepperAxis::setAxisStepsPerMM(float axisStepsPerMM) {
-	if (axisStepsPerMM < 1)
-		this->axisStepsPerMM = 1.0;
+	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsAtMaxSpeedMicros);
+	if (useStartPositionToInitialize)
+		motorControl.initializeToStartPosition();
 	else
-		this->axisStepsPerMM = axisStepsPerMM;
+		motorControl.initializeToEndPosition();
+}
+
+void StepperAxis::setAxisSteps(long axisSteps) {
+	this->axisSteps = axisSteps;
+}
+
+void StepperAxis::setAxisLengthInMicroM(long axisLengthInMicroM) {
+	this->axisLengthInMicroM = max(1, axisLengthInMicroM);
 }
 
 void StepperAxis::determineAvailableSteps(void) {
 	motorControl.determineAvailableSteps();
 }
 
-void StepperAxis::moveToPositionMMFast(float absolutePositionMM) {
-	long targetStep = absolutePositionMM / axisStepsPerMM;
-	targetStep = constrain(targetStep, 0, maxStep);
-	motorControl.setDelayBetweenStepsMicros(2000UL);
+void StepperAxis::moveToPositionMicroMFast(long absolutePositionMicroM) {
+	long targetStep = absolutePositionMicroM * axisSteps / axisLengthInMicroM;
+	targetStep = constrain(targetStep, 0, axisSteps);
+	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsAtMaxSpeedMicros);
 	motorControl.gotoStep(targetStep);
 }
 
-void StepperAxis::moveToPositionMM(float absolutePositionMM, unsigned long timeToMoveMillis) {
-	long targetStep = absolutePositionMM / axisStepsPerMM;
-	unsigned long deltaSteps = abs(targetStep - motorControl.getStep());
-	motorControl.setDelayBetweenStepsMicros(deltaSteps <= 1 ? 2000UL : (1000UL * timeToMoveMillis) / (deltaSteps - 1));
+void StepperAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigned long timeToMoveMicros) {
+	long targetStep = absolutePositionMicroM * axisSteps / axisLengthInMicroM;
+	unsigned long delta = abs(targetStep - motorControl.getStep());
+	if (delta <= 1) {
+		delta = delayBetweenStepsAtMaxSpeedMicros;
+	} else {
+		delta = timeToMoveMicros / (delta - 1);
+		if (delta < delayBetweenStepsAtMaxSpeedMicros)
+			delta = delayBetweenStepsAtMaxSpeedMicros;
+	}
+	motorControl.setDelayBetweenStepsMicros(delta);
 	motorControl.gotoStep(targetStep);
 }
 
-float StepperAxis::getAbsolutePositionMM() {
-	return ((float) motorControl.getStep()) * axisStepsPerMM;
+long StepperAxis::getAbsolutePositionMicroM() {
+	return motorControl.getStep() * axisLengthInMicroM / axisSteps;
 }

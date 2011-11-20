@@ -5,11 +5,12 @@
 #include "GCodeParser.h"
 #include "TemperatureControl.h"
 #include "StepperAxis.h"
+#include "RepRapPCB.h"
 
 #define RepRap_Idle 0
 #define RepRap_Sleep200Millis 1
-#define RepRap_InitializeToStartingPosition 2
-#define RepRap_InitializeToStartingPositionForced 3
+#define RepRap_InitializePosition 2
+#define RepRap_InitializePositionForced 3
 #define RepRap_MoveRapid 4
 #define RepRap_ControlledMove 5
 #define RepRap_Stop 6
@@ -44,21 +45,17 @@ private:
 	};
 
 	void doRepRap_Sleep200Millis();
-	void doRepRap_InitializeToStartingPosition();
-	void doRepRap_InitializeToStartingPositionForced();
+	void doRepRap_InitializePosition();
+	void doRepRap_InitializePositionForced();
 	void doRepRap_MoveRapid();
 	void doRepRap_ControlledMove();
 	void doRepRap_Stop();
 	void doRepRap_WaitForTemperature();
 
-	bool isInitializeToStartingPositionNeeded();
+	bool isInitializePositionNeeded();
 public:
 	SerialReader *reader;
-	StepperAxis *axisX;
-	StepperAxis *axisY;
-	StepperAxis *axisZ;
-	StepperAxis *axisE;
-	DigitalOutputPin *fan;
+	RepRapPCB pcb;
 
 	bool isPositioningAbsolute;
 

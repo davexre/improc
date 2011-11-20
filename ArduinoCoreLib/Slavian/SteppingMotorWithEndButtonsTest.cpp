@@ -4,6 +4,7 @@
 #include "AdvButton.h"
 #include "SteppingMotor.h"
 #include "StateLed.h"
+#include "reprap/RepRapPCB.h"
 
 DefineClass(SteppingMotorWithEndButtonsTest);
 
@@ -12,21 +13,10 @@ static const int rotorPinB = 3;	// the other quadrature pin
 static const int buttonPin = 4;
 static const int ledPin = 6;
 
-static const int shiftRegisterInputPinCP = 8;
-static const int shiftRegisterInputPinPE = 9;
-static const int shiftRegisterInputPinQ7 = 10;
-static const int shiftRegisterOutputPinDS = 11;
-static const int shiftRegisterOutputPinSH = 12;
-static const int shiftRegisterOutputPinST = 13;
-
-static DigitalOutputShiftRegister_74HC595 extenderOutput;
-static DigitalInputShiftRegister_74HC166 extenderInput;
-
-static SteppingMotor_MosfetHBridge motor[3];
-static SteppingMotorControlWithButtons motorControl[3];
-
 static AdvButton btn;
 static StateLed led;
+
+static RepRapPCB pcb;
 
 static const unsigned int *states[] = {
 		BLINK_SLOW,
@@ -39,59 +29,7 @@ static const unsigned int *states[] = {
 static bool paused;
 
 void SteppingMotorWithEndButtonsTest::setup() {
-	extenderOutput.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroOnlyModifiedOutputs,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
-	extenderInput.initialize(9,
-			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
-			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
-
-	motor[0].initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::DoNotTurnOff,
-			extenderOutput.createPinHandler(0),
-			extenderOutput.createPinHandler(1),
-			extenderOutput.createPinHandler(2),
-			extenderOutput.createPinHandler(3));
-	motor[1].initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::DoNotTurnOff,
-			extenderOutput.createPinHandler(4),
-			extenderOutput.createPinHandler(5),
-			extenderOutput.createPinHandler(6),
-			extenderOutput.createPinHandler(7));
-	motor[2].initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::DoNotTurnOff,
-			extenderOutput.createPinHandler(8),
-			extenderOutput.createPinHandler(9),
-			extenderOutput.createPinHandler(10),
-			extenderOutput.createPinHandler(11));
-/*	motor[3].initialize(
-			SteppingMotor::FullPower,
-			SteppingMotor_MosfetHBridge::DoNotTurnOff,
-			extenderOutput.createPinHandler(12),
-			extenderOutput.createPinHandler(13),
-			extenderOutput.createPinHandler(14),
-			extenderOutput.createPinHandler(15));*/
-
-	motorControl[0].initialize(&motor[0], extenderInput.createPinHandler(8), extenderInput.createPinHandler(0));
-	motorControl[1].initialize(&motor[1], extenderInput.createPinHandler(1), extenderInput.createPinHandler(2));
-	motorControl[2].initialize(&motor[2], extenderInput.createPinHandler(4), extenderInput.createPinHandler(3));
-//	motorControl[3].initialize(&motor[3], extenderInput.createPinHandler(5), extenderInput.createPinHandler(6));
-
-	motor[0].motorCoilTurnOffMicros = 40000;
-	motor[1].motorCoilTurnOffMicros = 40000;
-	motor[2].motorCoilTurnOffMicros = 40000;
-//	motor[3].motorCoilTurnOffMicros = 40000;
-
-	motorControl[0].setDelayBetweenStepsMicros(2000);
-	motorControl[1].setDelayBetweenStepsMicros(2000);
-	motorControl[2].setDelayBetweenStepsMicros(4000);
-//	motorControl[3].setDelayBetweenStepsMicros(2000);
-
+	pcb.initialize();
 	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
 	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
 
@@ -104,13 +42,56 @@ void SteppingMotorWithEndButtonsTest::setup() {
 unsigned long lastPrint;
 bool prevBuffer[9];
 
+static void dumpMotorControl(int i, SteppingMotorControlWithButtons &motorControl) {
+	Serial.print("motor[");
+	Serial.print(i);
+	Serial.println("]:");
+	Serial.print("  isMoving:");
+	Serial.println(motorControl.isMoving() ? "T": "F");
+
+/*			Serial.print("  mode:");
+	Serial.println((int)motorControl.mode);
+	Serial.print("  modeState:");
+	Serial.println((int)motorControl.modeState);
+	*/
+	Serial.print("  minStep:");
+	Serial.println(motorControl.getMinStep());
+	Serial.print("  maxStep:");
+	Serial.println(motorControl.getMaxStep());
+
+	Serial.print("  mc.stepsMadeSoFar:");
+	Serial.println(motorControl.motorControl.getStepsMadeSoFar());
+	Serial.print("  mc.delayBetweenStepsMicros:");
+	Serial.println(motorControl.motorControl.getDelayBetweenStepsMicros());
+	Serial.print("  now:");
+	Serial.println(millis());
+}
+static bool isOk = true;
+
+static void checkError(int i, SteppingMotorControlWithButtons &motorControl) {
+	if (!motorControl.isOk()) {
+		Serial.print("ERROR in motor ");
+		Serial.println(i);
+		isOk = false;
+		paused = true;
+	}
+}
+
+static void printMinMax(int i, SteppingMotorControlWithButtons &motorControl) {
+	Serial.print('\t');
+	Serial.print(motorControl.getMinStep());
+	Serial.print('\t');
+	Serial.println(motorControl.getMaxStep());
+	if (isOk)
+		motorControl.determineAvailableSteps();
+}
+
 void SteppingMotorWithEndButtonsTest::loop() {
-	extenderInput.update();
-	extenderOutput.update();
+	pcb.update();
 
 	bool show = false;
 	for (int i = 0; i < 9; i++) {
-		bool val = extenderInput.getState(i);
+		bool val = pcb.extenderInput.getState(i);
 		if (val != prevBuffer[i]) {
 			show = true;
 			prevBuffer[i] = val;
@@ -119,7 +100,7 @@ void SteppingMotorWithEndButtonsTest::loop() {
 
 	if (show) {
 		for (int i = 0; i < 9; i++) {
-			bool val = extenderInput.getState(i);
+			bool val = pcb.extenderInput.getState(i);
 			Serial.print(val ? '1' : '0');
 			if (i % 4 == 3)
 				Serial.print(' ');
@@ -127,78 +108,45 @@ void SteppingMotorWithEndButtonsTest::loop() {
 		Serial.println();
 	}
 
-	for (int i = 0; i < size(motorControl); i++) {
-		motor[i].update();
-		motorControl[i].update();
-	}
 	btn.update();
 	led.update();
 
 	if (btn.isLongClicked()) {
-		for (int i = 0; i < size(motorControl); i++) {
-			Serial.print("motor[");
-			Serial.print(i);
-			Serial.println("]:");
-			Serial.print("  isMoving:");
-			Serial.println(motorControl[i].isMoving() ? "T": "F");
-
-			Serial.print("  mode:");
-			Serial.println((int)motorControl[i].mode);
-			Serial.print("  modeState:");
-			Serial.println((int)motorControl[i].modeState);
-			Serial.print("  minStep:");
-			Serial.println(motorControl[i].minStep);
-			Serial.print("  maxStep:");
-			Serial.println(motorControl[i].maxStep);
-			Serial.print("  minStep:");
-			Serial.println(motorControl[i].minStep);
-
-			Serial.print("  mc.stepsMadeSoFar:");
-			Serial.println(motorControl[i].motorControl.getStepsMadeSoFar());
-			Serial.print("  mc.delayBetweenStepsMicros:");
-			Serial.println(motorControl[i].motorControl.getDelayBetweenStepsMicros());
-			Serial.print("  now:");
-			Serial.println(millis());
-		}
+		dumpMotorControl(0, pcb.axisX.motorControl);
+		dumpMotorControl(1, pcb.axisY.motorControl);
+		dumpMotorControl(2, pcb.axisZ.motorControl);
 	} else if (btn.isClicked()) {
 		paused = !paused;
 		if (paused) {
 			Serial.println("paused");
-			for (int i = 0; i < size(motorControl); i++)
-				motorControl[i].stop();
+			pcb.axisX.motorControl.stop();
+			pcb.axisY.motorControl.stop();
+			pcb.axisZ.motorControl.stop();
 		} else {
 			Serial.println("resumed");
-			for (int i = 0; i < size(motorControl); i++)
-				motorControl[i].determineAvailableSteps();
+			pcb.axisX.motorControl.determineAvailableSteps();
+			pcb.axisY.motorControl.determineAvailableSteps();
+			pcb.axisZ.motorControl.determineAvailableSteps();
 			lastPrint = millis();
 		}
 	}
 
 	if (!paused) {
 		bool isMoving = false;
-		for (int i = 0; i < size(motorControl); i++)
-			if (motorControl[i].isMoving())
-				isMoving = true;
+		if (pcb.axisX.motorControl.isMoving() ||
+			pcb.axisY.motorControl.isMoving() ||
+			pcb.axisZ.motorControl.isMoving())
+			isMoving = true;
 
 		if (!isMoving) {
-			bool isOk = true;
-			for (int i = 0; i < size(motorControl); i++)
-				if (!motorControl[i].isOk()) {
-					Serial.print("ERROR in motor ");
-					Serial.println(i);
-					isOk = false;
-					paused = true;
-				}
+			checkError(0, pcb.axisX.motorControl);
+			checkError(1, pcb.axisY.motorControl);
+			checkError(2, pcb.axisZ.motorControl);
 
-			Serial.print("min/max ");
-			for (int i = 0; i < size(motorControl); i++) {
-				Serial.print(motorControl[i].getMinStep());
-				Serial.print('\t');
-				Serial.println(motorControl[i].getMaxStep());
-				Serial.print('\t');
-				if (isOk)
-					motorControl[i].determineAvailableSteps();
-			}
+			Serial.println("min/max:");
+			printMinMax(0, pcb.axisX.motorControl);
+			printMinMax(1, pcb.axisY.motorControl);
+			printMinMax(2, pcb.axisZ.motorControl);
 			lastPrint = millis();
 		}
 /*		else if (millis() - lastPrint > 500) {

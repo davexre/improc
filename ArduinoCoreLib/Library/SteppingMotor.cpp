@@ -100,7 +100,7 @@ void SteppingMotor_BA6845FS::update() {
 //////////
 
 void SteppingMotor_MosfetHBridge::initialize(
-			SteppingMotorMode steppingMotorMode,
+			SteppingMotor::SteppingMotorMode steppingMotorMode,
 			StepSwitchingMode stepSwitchingMode,
 			DigitalOutputPin *out11pin,
 			DigitalOutputPin *out12pin,
@@ -181,7 +181,7 @@ void SteppingMotor_MosfetHBridge::step(const bool moveForward) {
 			currentState = 0;
 	} else {
 		currentState--;
-		if (currentState <= 0)
+		if (currentState < 0)
 			currentState = statesSize - 1;
 	}
 	switch (stepSwitchingMode) {
@@ -248,6 +248,7 @@ void SteppingMotor_MosfetHBridge::update() {
 void SteppingMotorControl::initialize(SteppingMotor *motor) {
 	this->motor = motor;
 	stepsMadeSoFar = 0;
+	minDelayBetweenStepsMicros = 1000;
 	step = 0;
 	motor->stop();
 }
@@ -257,7 +258,7 @@ void SteppingMotorControl::stop() {
 		(movementMode == SteppingMotorControl::Stopping))
 		return;
 	movementMode = SteppingMotorControl::Stopping;
-	stepAtMicros = micros() + MinDelayBetweenStepsMicros;
+	stepAtMicros = micros() + minDelayBetweenStepsMicros;
 }
 
 void SteppingMotorControl::gotoStep(const long step) {
@@ -354,7 +355,7 @@ void SteppingMotorControl::update() {
 
 	switch (movementMode) {
 	case GotoStepWithDelayBetweenSteps:
-		stepAtMicros += delayBetweenStepsMicros;
+		stepAtMicros = now + delayBetweenStepsMicros;
 		break;
 	case GotoStepWithTimePeriod:
 		timeMicros -= dt;
@@ -362,8 +363,8 @@ void SteppingMotorControl::update() {
 		break;
 	case GotoStepInFixedTimeVariableSpeed:
 		timeMicros += delayBetweenStepsMicros;
-		if (timeMicros - now < MinDelayBetweenStepsMicros)
-			stepAtMicros = timeMicros + MinDelayBetweenStepsMicros;
+		if (timeMicros - now < minDelayBetweenStepsMicros)
+			stepAtMicros = timeMicros + minDelayBetweenStepsMicros;
 		else
 			stepAtMicros = timeMicros;
 		break;
@@ -378,32 +379,33 @@ void SteppingMotorControlWithButtons::initialize(SteppingMotor *motor,
 	motorControl.initialize(motor);
 	startPositionButton = startPositionButtonPin;
 	endPositionButton = endPositionButtonPin;
-	mode = SteppingMotorControlIdle;
+	mode = SteppingMotorControlWithButtons::Idle;
 	modeState = 0;
 	minStep = 0;
 	maxStep = 0;
+	maxStepsWithWrongButtonDown = 50;
 }
 
 void SteppingMotorControlWithButtons::gotoStep(const long step) {
+//	motorControl.gotoStepInFixedTimeVariableSpeed(step);
 	motorControl.gotoStep(step);
-	mode = SteppingMotorControlIdle;
+	mode = SteppingMotorControlWithButtons::Waiting;
 	modeState = 0;
 }
 
 void SteppingMotorControlWithButtons::rotate(const bool forward) {
 	motorControl.rotate(forward);
-	mode = SteppingMotorControlIdle;
+	mode = SteppingMotorControlWithButtons::Waiting;
 	modeState = 0;
 }
 
 void SteppingMotorControlWithButtons::stop() {
 	motorControl.stop();
-	mode = SteppingMotorControlIdle;
+	mode = SteppingMotorControlWithButtons::Waiting;
 	modeState = 0;
 }
 
-#define MaxStepsWithWrongButtonDown 50
-void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
+void SteppingMotorControlWithButtons::doInitializeToStartPosition() {
 	switch (modeState) {
 	case 0:
 		// Start moving backward to begining
@@ -419,9 +421,9 @@ void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
 		modeState = 1;
 		break;
 	case 1:
-		if ((!endPositionButton->getState()) && (motorControl.getStep() <= -MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and endButton is still down - error
-			mode = SteppingMotorControlError;
+		if ((!endPositionButton->getState()) && (motorControl.getStep() <= -maxStepsWithWrongButtonDown)) {
+			// The motor moved maxStepsWithWrongButtonDown steps and endButton is still down - error
+			mode = SteppingMotorControlWithButtons::Error;
 			modeState = 0;
 			motorControl.stop();
 		} else if (!startPositionButton->getState()) {
@@ -431,7 +433,37 @@ void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
 		}
 		break;
 	case 2:
-		mode = SteppingMotorControlIdle;
+		mode = SteppingMotorControlWithButtons::Waiting;
+		modeState = 0;
+		break;
+	}
+}
+
+void SteppingMotorControlWithButtons::doInitializeToEndPosition() {
+	switch (modeState) {
+	case 0:
+		motorControl.resetStepTo(0);
+		if (endPositionButton->getState()) {
+			// button is up
+			// Start moving foreward to the end of the axis
+			motorControl.rotate(true);
+		}
+		modeState = 1;
+		break;
+	case 1:
+		if ((!startPositionButton->getState()) && (motorControl.getStep() <= -maxStepsWithWrongButtonDown)) {
+			// The motor moved maxStepsWithWrongButtonDown steps and startButton is still down - error
+			mode = SteppingMotorControlWithButtons::Error;
+			modeState = 0;
+			motorControl.stop();
+		} else if (!endPositionButton->getState()) {
+			modeState = 2;
+			motorControl.stop();
+			motorControl.resetStepTo(maxStep);
+		}
+		break;
+	case 2:
+		mode = SteppingMotorControlWithButtons::Waiting;
 		modeState = 0;
 		break;
 	}
@@ -442,7 +474,7 @@ void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
 	case 0:
 	case 1:
 		// These steps are absolutely the same.
-		doInitializeToStartingPosition();
+		doInitializeToStartPosition();
 		break;
 	case 2:
 		// Rotate forward till the button gets pressed.
@@ -450,9 +482,9 @@ void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
 		modeState = 3;
 		break;
 	case 3:
-		if ((!startPositionButton->getState()) && (motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and startButton is still down - error
-			mode = SteppingMotorControlError;
+		if ((!startPositionButton->getState()) && (motorControl.getStep() >= maxStepsWithWrongButtonDown)) {
+			// The motor moved maxStepsWithWrongButtonDown steps and startButton is still down - error
+			mode = SteppingMotorControlWithButtons::Error;
 			modeState = 0;
 			motorControl.stop();
 		} else if (!endPositionButton->getState()) {
@@ -464,16 +496,16 @@ void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
 		}
 		break;
 	case 4:
-		if ((!endPositionButton->getState()) && (maxStep - motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and endButton is still down - error
-			mode = SteppingMotorControlError;
+		if ((!endPositionButton->getState()) && (maxStep - motorControl.getStep() >= maxStepsWithWrongButtonDown)) {
+			// The motor moved maxStepsWithWrongButtonDown steps and endButton is still down - error
+			mode = SteppingMotorControlWithButtons::Error;
 			modeState = 0;
 			motorControl.stop();
 		} else if (!startPositionButton->getState()) {
 			minStep = motorControl.getStep();
 			motorControl.stop();
 			motorControl.resetStepTo(0);
-			mode = SteppingMotorControlIdle;
+			mode = SteppingMotorControlWithButtons::Waiting;
 			modeState = 0;
 		}
 		break;
@@ -482,17 +514,27 @@ void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
 
 void SteppingMotorControlWithButtons::update() {
 	switch (mode) {
-	case SteppingMotorControlInitializeToStartingPosition:
-		doInitializeToStartingPosition();
+	case InitializeToStartPosition:
+		doInitializeToStartPosition();
 		break;
-	case SteppingMotorControlDetermineAvailableSteps:
+	case InitializeToEndPosition:
+		doInitializeToEndPosition();
+		break;
+	case DetermineAvailableSteps:
 		doDetermineAvailableSteps();
 		break;
-	case SteppingMotorControlError:
+	case Idle:
+	case Error:
 		if (motorControl.isMoving()) {
-			stop();
+			motorControl.stop();
 		}
 		break;
+	case Waiting:
+		if (!motorControl.isMoving()) {
+			mode = SteppingMotorControlWithButtons::Idle;
+			modeState = 0;
+		}
+		// No break here.
 	default:
 		if ((!startPositionButton->getState()) || (!endPositionButton->getState())) {
 			// start or end button is down
@@ -505,17 +547,22 @@ void SteppingMotorControlWithButtons::update() {
 	motorControl.update();
 }
 
-void SteppingMotorControlWithButtons::initializeToStartingPosition() {
-	mode = SteppingMotorControlInitializeToStartingPosition;
+void SteppingMotorControlWithButtons::initializeToStartPosition() {
+	mode = SteppingMotorControlWithButtons::InitializeToStartPosition;
+	modeState = 0;
+}
+
+void SteppingMotorControlWithButtons::initializeToEndPosition() {
+	mode = SteppingMotorControlWithButtons::InitializeToEndPosition;
 	modeState = 0;
 }
 
 void SteppingMotorControlWithButtons::determineAvailableSteps() {
-	mode = SteppingMotorControlDetermineAvailableSteps;
+	mode = SteppingMotorControlWithButtons::DetermineAvailableSteps;
 	modeState = 0;
 }
 
 bool SteppingMotorControlWithButtons::isMoving() {
-	return ((mode != SteppingMotorControlIdle) && (mode != SteppingMotorControlError)) ||
+	return ((mode != SteppingMotorControlWithButtons::Idle) && (mode != SteppingMotorControlWithButtons::Error)) ||
 		(motorControl.isMoving());
 }
