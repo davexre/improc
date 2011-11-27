@@ -58,7 +58,8 @@ void SoftwarePWMTest::setup() {
 }
 
 void SoftwarePWMTest::loop() {
-	tps.update(true);
+	tps.tick();
+	tps.update();
 	spwm.update();
 	menu.update();
 

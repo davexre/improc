@@ -28,7 +28,8 @@ void LedSensorTest::setup() {
 
 unsigned int j;
 void LedSensorTest::loop() {
-	tps.update(true);
+	tps.tick();
+	tps.update();
 
 	pinMode(ledSensorPinN, OUTPUT);
 	pinMode(ledSensorPinP, OUTPUT);

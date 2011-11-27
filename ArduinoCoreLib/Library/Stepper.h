@@ -1,5 +1,5 @@
-#ifndef Stepper_h
 #define Stepper_h
+#ifndef Stepper_h
 
 #include "DigitalIO.h"
 

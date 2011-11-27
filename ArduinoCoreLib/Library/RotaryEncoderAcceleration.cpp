@@ -13,7 +13,8 @@ void RotaryEncoderAcceleration::update() {
 	pinB.update(); // direction
 
 	if (state->valueChangeEnabled && isTicked()) {
-		tps.update(true);
+		tps.tick();
+		tps.update();
 		int speed = constrain(tps.getIntTPS_unsafe(), MIN_TPS, MAX_TPS) - MIN_TPS;
 		long delta = max(1, (state->maxValue - state->minValue) / TICKS_AT_MAX_SPEED_FOR_FULL_SPAN);
 
@@ -29,7 +30,7 @@ void RotaryEncoderAcceleration::update() {
 
 		state->setValue_unsafe(state->getValue_unsafe() + (isIncrementing() ? step : -step));
 	} else {
-		tps.update(false);
+		tps.update();
 	}
 }
 

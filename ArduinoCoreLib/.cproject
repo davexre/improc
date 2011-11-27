@@ -56,7 +56,7 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.662881994" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.25200421" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.763801476" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="true" valueType="boolean"/>
-								<option id="de.innot.avreclipse.compiler.option.optimize.other.1107508059" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
+								<option id="de.innot.avreclipse.compiler.option.optimize.other.1107508059" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fno-keep-static-consts -fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.147511324" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.archiver.winavr.base.1712705690" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base"/>

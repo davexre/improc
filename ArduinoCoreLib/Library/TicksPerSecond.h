@@ -58,12 +58,10 @@ public:
 	 * be called from an interrupt if applicable. If the method is called from
 	 * interrupt the "safe" methods getTPS(), getIntTPS() for getting the ticks per
 	 * second value should be used.
-	 *
-	 * tick
-	 * 		Indicates if the invocation of the method should cause a ticking or
-	 * 		is just to update the ticks per second value.
 	 */
-	void update(const bool tick = true);
+	void update();
+
+	void tick();
 
 	/**
 	 * Returns the ticks per second value.

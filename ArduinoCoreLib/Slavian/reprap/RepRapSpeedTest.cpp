@@ -76,7 +76,8 @@ void RepRapSpeedTest::loop() {
 	pcb.update();
 	serialReader.update();
 	temperatureControl.update();
-	tps.update(true);
+	tps.tick();
+	tps.update();
 	spwm.update();
 	menu.update();
 

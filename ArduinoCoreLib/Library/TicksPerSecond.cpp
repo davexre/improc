@@ -11,7 +11,7 @@ void TicksPerSecond::initialize(const unsigned int holdLastTimeoutMillis) {
 	deltaTime = holdLastTimeoutMillis / TPS_TIMES_PER_PERIOD;
 }
 
-void TicksPerSecond::update(const bool tick) {
+void TicksPerSecond::update() {
 	unsigned long now = millis();
 	if (now - lastTime >= deltaTime) {
 		counters[curCounter] = 0;
@@ -19,14 +19,15 @@ void TicksPerSecond::update(const bool tick) {
 		if (curCounter >= TPS_TIMES_PER_PERIOD)
 			curCounter = 0;
 	}
-	if (tick) {
-		for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
-			counters[i]++;
-		}
-	}
 	dT = now - started[curCounter];
 	if (dT == 0)
 		dT = 1; // This is a division by zero protection.
+}
+
+void TicksPerSecond::tick() {
+	for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
+		counters[i]++;
+	}
 }
 
 float TicksPerSecond::getTPS_unsafe() {

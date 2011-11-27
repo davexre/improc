@@ -1,3 +1,6 @@
+#define Stepper_h
+#ifndef Stepper_h
+
 #include "Arduino.h"
 #include "Stepper.h"
 
@@ -443,3 +446,5 @@ bool SteppingMotorControlWithButtons::isMoving() {
 	return ((mode != SteppingMotorControlIdle) && (mode != SteppingMotorControlError)) ||
 		(motorControl.isMoving());
 }
+
+#endif

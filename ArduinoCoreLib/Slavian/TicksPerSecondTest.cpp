@@ -45,16 +45,16 @@ void TicksPerSecondTest::loop() {
 	}
 	Serial.println(tps.getTPS()); // Print button presses presses per second
 */
-	tps.update(true);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
-	tps.update(false);
+	tps.tick();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
+	tps.update();
 	count++;
 	unsigned long dt = millis() - start;
 	if (dt >= 5000) {

@@ -154,7 +154,8 @@ void SteppingMotorTest2::setup() {
 bool prevBuffer[9];
 
 void SteppingMotorTest2::loop() {
-	tps.update(true);
+	tps.tick();
+	tps.update();
 	btn.update();
 	led.update();
 	extenderOut.update();
