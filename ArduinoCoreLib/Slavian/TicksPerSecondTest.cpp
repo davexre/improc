@@ -13,9 +13,12 @@ static TicksPerSecond tps;
 
 unsigned long start, count;
 
+static DigitalInputArduinoPin diButtonPin;
+
 void TicksPerSecondTest::setup() {
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
 	tps.initialize();
 	Serial.begin(115200);
 	start = millis();

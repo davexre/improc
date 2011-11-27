@@ -19,9 +19,14 @@ static const unsigned int *states[] = {
 		BLINK_ON, BLINK_OFF
 };
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+
 void StateLedTest::setup(void) {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 }
 
 void StateLedTest::loop(void) {

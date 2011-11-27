@@ -16,10 +16,14 @@ static const unsigned int *states[] = {
 		BLINK_FAST
 };
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+
 void AdvButtonTest::setup() {
-	pinMode(ledPin, OUTPUT);
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin);
+	led.initialize(&diLedPin, states, size(states), true);
 	Serial.begin(115200);
 
 	led.setState(btn.isAutoRepeatEnabled());

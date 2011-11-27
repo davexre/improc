@@ -35,23 +35,36 @@ static void UpdateRotor() {
 
 #define DigitalOutputShiftRegisterPinsCount 16
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinSH;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinST;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinDS;
+
 static DigitalOutputShiftRegister_74HC595 extenderOut;
 
 void ShiftRegisterOutputTest2::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setMinMax(-1, 15);
 	rotor.setValue(-1);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 
+	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH, false);
+	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST, false);
+	diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS, false);
 	extenderOut.initialize(DigitalOutputShiftRegisterPinsCount, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+			&diShiftRegisterOutputPinSH,
+			&diShiftRegisterOutputPinST,
+			&diShiftRegisterOutputPinDS);
 
 	for (int i = 0; i < 16; i++) {
 		extenderOut.setState(i, false);

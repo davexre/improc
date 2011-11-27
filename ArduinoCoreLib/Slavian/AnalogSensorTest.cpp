@@ -27,9 +27,12 @@ static unsigned long lastTime;
 static float mySmoothVal;
 static int smoothedVal = 0;
 
+static DigitalOutputArduinoPin diLedPin;
+
 void AnalogSensorTest::setup() {
 	tps.initialize();
-	led.initialize(new DigitalOutputArduinoPin(ledPin));
+	diLedPin.initialize(ledPin);
+	led.initialize(&diLedPin);
 	led.playBlink(BLINK_FAST, -1);
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 	delay(1000);

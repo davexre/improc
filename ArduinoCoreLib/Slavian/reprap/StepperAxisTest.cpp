@@ -40,20 +40,39 @@ static void updateRotaryEncoder() {
 	menu.updateRotaryEncoder();
 }
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalOutputArduinoPin diStepMotor11pin;
+static DigitalOutputArduinoPin diStepMotor12pin;
+static DigitalOutputArduinoPin diStepMotor21pin;
+static DigitalOutputArduinoPin diStepMotor22pin;
+static DigitalInputArduinoPin diStartPositionButtonPin;
+static DigitalInputArduinoPin diEndPositionButtonPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 void StepperAxisTest::setup() {
-	led.initialize(new DigitalOutputArduinoPin(ledPin), ledStates, size(ledStates), true);
+	diLedPin.initialize(ledPin);
+	led.initialize(&diLedPin, ledStates, size(ledStates), true);
+	diStepMotor11pin.initialize(stepMotor11pin, 0);
+	diStepMotor12pin.initialize(stepMotor12pin, 0);
+	diStepMotor21pin.initialize(stepMotor21pin, 0);
+	diStepMotor22pin.initialize(stepMotor22pin, 0);
 	motor.initialize(
 			SteppingMotor::FullPower,
 			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			new DigitalOutputArduinoPin(stepMotor11pin, 0),
-			new DigitalOutputArduinoPin(stepMotor12pin, 0),
-			new DigitalOutputArduinoPin(stepMotor21pin, 0),
-			new DigitalOutputArduinoPin(stepMotor22pin, 0));
-	axis.initialize(&motor, new DigitalInputArduinoPin(startPositionButtonPin, true), new DigitalInputArduinoPin(endPositionButtonPin, true));
+			&diStepMotor11pin, &diStepMotor12pin, &diStepMotor21pin, &diStepMotor22pin);
+	diStartPositionButtonPin.initialize(startPositionButtonPin, true);
+	diEndPositionButtonPin.initialize(endPositionButtonPin, true);
+	axis.initialize(&motor, &diStartPositionButtonPin, &diEndPositionButtonPin);
 
 	axisMenu.initialize("Axis", axisMenuItems, size(axisMenuItems), false);
-	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
-			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
+
+	diButtonPin.initialize(buttonPin, true);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+
+	menu.initialize(&diRotorPinA, &diRotorPinB, &diButtonPin, menuItems, size(menuItems));
 	Serial.begin(115200);
     Serial.println("Long click the encoder button to select method.");
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);

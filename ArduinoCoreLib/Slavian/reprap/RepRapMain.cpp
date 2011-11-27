@@ -52,6 +52,11 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+static DigitalOutputArduinoPin diLedPin;
+
 void RepRapMain::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 
@@ -63,13 +68,15 @@ void RepRapMain::setup() {
 
 	reprap.initialize(&reader, &extruderTemperatureControl, &bedTemperatureControl);
 
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	attachInterrupt(0, UpdateRotor, CHANGE);
 
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diLedPin.initialize(ledPin);
+	led.initialize(&diLedPin, states, size(states), true);
 	led.setState(btn.isAutoRepeatEnabled());
 
 	Serial.println("ok");

@@ -22,6 +22,7 @@ public:
 
 static uint8_t a;
 static DummyA::MovementMode mode;
+static DigitalInputArduinoPin diButtonPin;
 
 long x,y,d,v;
 
@@ -43,7 +44,8 @@ void DummyTest::setup() {
 	sei();
 
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
 }
 
 void DummyTest::loop() {

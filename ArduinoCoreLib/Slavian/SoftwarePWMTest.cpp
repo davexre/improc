@@ -30,15 +30,25 @@ static void updateRotaryEncoder() {
 	menu.updateRotaryEncoder();
 }
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 void SoftwarePWMTest::setup() {
 	// Init menus
 	frequencyCyclesPerMinuteMenu.initialize("Frequency", 0, 2000, false);
 	pulseWidthMenu.initialize("Pulse Width", 0, 255, false);
-	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
-			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
+
+	diButtonPin.initialize(buttonPin, true);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+
+	menu.initialize(&diRotorPinA, &diRotorPinB, &diButtonPin, menuItems, size(menuItems));
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);
 
-	spwm.initialize(new DigitalOutputArduinoPin(ledPin), frequencyCyclesPerMinuteMenu.getValue());
+	diLedPin.initialize(ledPin, 0);
+	spwm.initialize(&diLedPin, frequencyCyclesPerMinuteMenu.getValue());
 	spwm.setValue(pulseWidthMenu.getValue());
 
 	tps.initialize(500);

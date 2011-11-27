@@ -28,10 +28,15 @@ static const unsigned int *states[] = {
 
 static bool paused;
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+
 void SteppingMotorWithEndButtonsTest::setup() {
 	pcb.initialize();
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 
     Serial.begin(115200);
     Serial.println("Initialized");
@@ -60,9 +65,9 @@ static void dumpMotorControl(int i, SteppingMotorControlWithButtons &motorContro
 	Serial.println(motorControl.getMaxStep());
 
 	Serial.print("  mc.stepsMadeSoFar:");
-	Serial.println(motorControl.motorControl.getStepsMadeSoFar());
+	Serial.println(motorControl.getStepsMadeSoFar());
 	Serial.print("  mc.delayBetweenStepsMicros:");
-	Serial.println(motorControl.motorControl.getDelayBetweenStepsMicros());
+	Serial.println(motorControl.getDelayBetweenStepsMicros());
 	Serial.print("  now:");
 	Serial.println(millis());
 }

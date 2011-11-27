@@ -47,23 +47,23 @@ static const byte coilStates3[][coilCount] = {
 static const int coilStatesCount = size(coilStates);
 static int activeCoilState = 0;
 
-static DigitalOutputArduinoPin *coilPorts[coilCount];
-static DigitalOutputArduinoPin *speakerPort;
-static DigitalOutputArduinoPin *led;
+static DigitalOutputArduinoPin coilPorts[coilCount];
+static DigitalOutputArduinoPin speakerPort;
+static DigitalOutputArduinoPin led;
 
 static Button btn;
 static RotaryEncoderAcceleration rotor;
 
 static void UpdateOnTimer1() {
 	const byte *states = coilStates[activeCoilState++];
-	DigitalOutputArduinoPin **pd = coilPorts;
+	DigitalOutputArduinoPin *pd = coilPorts;
 	for (int i = 0; i < coilCount; i++, pd++) {
 	    // set the pin
-		(*pd)->setState(*(states++));
+		pd->setState(*(states++));
 	}
 	if (activeCoilState >= coilStatesCount) {
 		activeCoilState = 0;
-		speakerPort->setState(!speakerPort->getState());
+		speakerPort.setState(!speakerPort.getState());
 	}
 }
 
@@ -73,19 +73,26 @@ static void UpdateRotor(void) {
 	rotor.update();
 }
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 void TPU::setup() {
 	for (int i = 0; i < coilCount; i++) {
-		coilPorts[i] = new DigitalOutputArduinoPin(coilPins[i], false);
+		coilPorts[i].initialize(coilPins[i], false);
 	}
-	speakerPort = new DigitalOutputArduinoPin(speakerPin, false);
-	led = new DigitalOutputArduinoPin(ledPin, false);
+	speakerPort.initialize(speakerPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(ledPin, false);
 	Timer1.initialize();
 	Timer1.attachInterrupt(UpdateOnTimer1);
 
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setMinMax(50, 50000);
 	rotor.setValue(100);
 	attachInterrupt(0, UpdateRotor, CHANGE);
@@ -99,14 +106,14 @@ void TPU::loop() {
 	btn.update();
 
 	if (btn.isPressed()) {
-		led->setState(!led->getState());
+		led.setState(!led.getState());
 
 		long curValue = rotor.getValue();
 		Timer1.startWithFrequency(curValue);
 		Serial.println(curValue);
 	}
 
-	if (led->getState()) {
+	if (led.getState()) {
 		if (rotor.hasValueChanged()) {
 			long curValue = rotor.getValue();
 			Timer1.startWithFrequency(curValue);
@@ -120,9 +127,9 @@ void TPU::loop() {
 			coilPorts[i]->setState(false);
 		}
 #else
-		DigitalOutputArduinoPin **pd = coilPorts;
+		DigitalOutputArduinoPin *pd = coilPorts;
 		for (int i = 0; i < coilCount; i++, pd++) {
-			(*pd)->setState(false);
+			pd->setState(false);
 		}
 #endif
 		activeCoilState = 0;

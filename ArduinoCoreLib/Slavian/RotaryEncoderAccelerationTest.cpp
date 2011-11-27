@@ -32,16 +32,23 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 void RotaryEncoderAccelerationTest::setup() {
 	pinMode(speakerPin, OUTPUT);
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
-	toneState.setValue(500);
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setState(&toneState);
 	attachInterrupt(0, UpdateRotor, CHANGE);
+	toneState.setValue(500);
     Serial.begin(115200);
     Serial.println("Push the encoder button to switch between changing pitch and blink");
 

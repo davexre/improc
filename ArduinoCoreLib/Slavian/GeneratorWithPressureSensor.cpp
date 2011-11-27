@@ -140,12 +140,15 @@ static void processReader() {
 
 static int tempCurrent;
 
+static DigitalOutputArduinoPin diLedPin;
+
 void GeneratorWithPressureSensor::setup() {
 	noTone(mosfetPin);
 	pinMode(mosfetPin, OUTPUT);
 	tps.initialize();
 	currentTPS.initialize();
-	led.initialize(new DigitalOutputArduinoPin(ledPin));
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin);
 	reader.initialize(115200, size(buf), buf);
 }
 

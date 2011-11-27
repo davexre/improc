@@ -54,22 +54,44 @@ static bool motorForward = true;
 static unsigned long lastPrint;
 static TicksPerSecond tps;
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
+static DigitalOutputArduinoPin diShiftRegisterOutputPinSH;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinST;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinDS;
+
+static DigitalOutputArduinoPin diShiftRegisterInputPinPE;
+static DigitalOutputArduinoPin diShiftRegisterInputPinCP;
+static DigitalInputArduinoPin diShiftRegisterInputPinQ7;
+
 void SteppingMotorTest2::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setMinMax(1000, 500000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
+
+	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
+	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);
+	diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS);
 	extenderOut.initialize(16, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+			&diShiftRegisterOutputPinSH,
+			&diShiftRegisterOutputPinST,
+			&diShiftRegisterOutputPinDS);
+	diShiftRegisterInputPinPE.initialize(shiftRegisterInputPinPE);
+	diShiftRegisterInputPinCP.initialize(shiftRegisterInputPinCP);
+	diShiftRegisterInputPinQ7.initialize(shiftRegisterInputPinQ7, false);
 	extenderInput.initialize(9,
-			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
-			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
+			&diShiftRegisterInputPinPE,
+			&diShiftRegisterInputPinCP,
+			&diShiftRegisterInputPinQ7);
 
 	motor1.initialize(
 			SteppingMotor::FullPower,

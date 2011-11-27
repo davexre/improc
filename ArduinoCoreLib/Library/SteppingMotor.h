@@ -133,7 +133,7 @@ private:
 
 	long targetStep;
 
-	long step;
+	long currentStep;
 
 	unsigned long stepAtMicros;
 	unsigned long timeMicros;
@@ -142,6 +142,8 @@ private:
 	long stepsMadeSoFar;
 
 	SteppingMotor *motor;
+protected:
+	virtual bool step(bool forward); // true -> success, false -> will not step
 public:
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
@@ -168,7 +170,7 @@ public:
 	bool isMoving();
 
 	inline long getStep(void) {
-		return step;
+		return currentStep;
 	}
 
 	inline long getStepsMadeSoFar(void) {
@@ -194,7 +196,7 @@ public:
 	}
 };
 
-class SteppingMotorControlWithButtons {
+class SteppingMotorControlWithButtons : private SteppingMotorControl {
 private:
 	int maxStepsWithWrongButtonDown;
 
@@ -219,13 +221,12 @@ private:
 	void doInitializeToEndPosition();
 
 	void doDetermineAvailableSteps();
-
+protected:
+	virtual bool step(bool forward); // true -> success, false -> will not step
 public:
 	DigitalInputPin *startPositionButton;
 
 	DigitalInputPin *endPositionButton;
-
-	SteppingMotorControl motorControl;
 
 	/**
 	 * Initializes the class, sets ports (outXXpin) to output mode.
@@ -252,7 +253,7 @@ public:
 	bool isMoving();
 
 	inline long getStep(void) {
-		return motorControl.getStep();
+		return SteppingMotorControl::getStep();
 	}
 
 	inline long getMinStep(void) {
@@ -275,19 +276,26 @@ public:
 	}
 
 	inline long getStepsMadeSoFar(void) {
-		return motorControl.getStepsMadeSoFar();
+		return SteppingMotorControl::getStepsMadeSoFar();
 	}
 
 	inline void resetStepsMadeSoFar(void) {
-		motorControl.resetStepsMadeSoFar();
+		SteppingMotorControl::resetStepsMadeSoFar();
 	}
 
 	inline void setDelayBetweenStepsMicros(unsigned long motorCoilDelayBetweenStepsMicros) {
-		motorControl.setDelayBetweenStepsMicros(motorCoilDelayBetweenStepsMicros);
+		SteppingMotorControl::setDelayBetweenStepsMicros(motorCoilDelayBetweenStepsMicros);
 	}
 
 	inline unsigned long getDelayBetweenStepsMicros(void) {
-		return motorControl.getDelayBetweenStepsMicros();
+		return SteppingMotorControl::getDelayBetweenStepsMicros();
+	}
+
+	inline void setMinDelayBetweenStepsMicros(unsigned long motorCoilMinDelayBetweenStepsMicros) {
+		SteppingMotorControl::setMinDelayBetweenStepsMicros(motorCoilMinDelayBetweenStepsMicros);
+	}
+	inline unsigned long getMinDelayBetweenStepsMicros(void) {
+		return SteppingMotorControl::getMinDelayBetweenStepsMicros();
 	}
 };
 

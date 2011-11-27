@@ -115,9 +115,14 @@ static void stop() {
 	pcb.axisE.stop();
 }
 
+static DigitalInputArduinoPin diButtonPin;
+static DigitalOutputArduinoPin diLedPin;
+
 void RepRapPCBTest::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
     Serial.println("Initialized");

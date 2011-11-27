@@ -8,15 +8,29 @@ static const int shiftRegisterOutputPinDS = 11;
 static const int shiftRegisterOutputPinSH = 12;
 static const int shiftRegisterOutputPinST = 13;
 
+static DigitalOutputArduinoPin diShiftRegisterOutputPinSH;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinST;
+static DigitalOutputArduinoPin diShiftRegisterOutputPinDS;
+
+static DigitalOutputArduinoPin diShiftRegisterInputPinPE;
+static DigitalOutputArduinoPin diShiftRegisterInputPinCP;
+static DigitalInputArduinoPin diShiftRegisterInputPinQ7;
+
 void RepRapPCB::initialize() {
+	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
+	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);
+	diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS);
 	extenderOutput.initialize(17, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroOnlyModifiedOutputs,
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinSH),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinST),
-			new DigitalOutputArduinoPin(shiftRegisterOutputPinDS));
+			&diShiftRegisterOutputPinSH,
+			&diShiftRegisterOutputPinST,
+			&diShiftRegisterOutputPinDS);
+	diShiftRegisterInputPinPE.initialize(shiftRegisterInputPinPE);
+	diShiftRegisterInputPinCP.initialize(shiftRegisterInputPinCP);
+	diShiftRegisterInputPinQ7.initialize(shiftRegisterInputPinQ7, false);
 	extenderInput.initialize(9,
-			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
-			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
+			&diShiftRegisterInputPinPE,
+			&diShiftRegisterInputPinCP,
+			&diShiftRegisterInputPinQ7);
 
 	motorX.initialize(
 			SteppingMotor::HalfPower,
@@ -94,10 +108,10 @@ void RepRapPCB::initialize() {
 	axisZ.motorControl.setMaxStepsWithWrongButtonDown(50);
 	axisE.motorControl.setMaxStepsWithWrongButtonDown(50);
 
-	axisX.motorControl.motorControl.setMinDelayBetweenStepsMicros(1000);
-	axisY.motorControl.motorControl.setMinDelayBetweenStepsMicros(1000);
-	axisZ.motorControl.motorControl.setMinDelayBetweenStepsMicros(1000);
-	axisE.motorControl.motorControl.setMinDelayBetweenStepsMicros(1000);
+	axisX.motorControl.setMinDelayBetweenStepsMicros(1000);
+	axisY.motorControl.setMinDelayBetweenStepsMicros(1000);
+	axisZ.motorControl.setMinDelayBetweenStepsMicros(1000);
+	axisE.motorControl.setMinDelayBetweenStepsMicros(1000);
 }
 
 void RepRapPCB::update() {

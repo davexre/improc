@@ -24,14 +24,6 @@ class DigitalInvertingInputPin {
 private:
 	DigitalInputPin *inputPin;
 public:
-	inline DigitalInvertingInputPin() {
-		initialize(NULL);
-	};
-
-	inline DigitalInvertingInputPin(DigitalInputPin *inputPin) {
-		initialize(inputPin);
-	}
-
 	inline void initialize(DigitalInputPin *inputPin) {
 		this->inputPin = inputPin;
 	}
@@ -47,7 +39,7 @@ private:
 
 	volatile uint8_t *inputRegister;
 public:
-	DigitalInputArduinoPin(const uint8_t arduinoPin, const bool enablePullup);
+	void initialize(const uint8_t arduinoPin, const bool enablePullup);
 
 	virtual bool getState();
 };
@@ -62,7 +54,7 @@ private:
 
 	bool lastState;
 public:
-	DigitalOutputArduinoPin(const uint8_t arduinoPin, const bool initialValue = 0);
+	void initialize(const uint8_t arduinoPin, const bool initialValue = 0);
 
 	virtual bool getState();
 

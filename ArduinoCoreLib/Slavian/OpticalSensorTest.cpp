@@ -9,9 +9,11 @@ static const int buttonPin = 4;		// the number of the pushbutton pin
 static Button btn;
 
 static unsigned long last;
+static DigitalInputArduinoPin diButtonPin;
 
 void OpticalSensorTest::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
     Serial.begin(115200);
     last = millis();
 }

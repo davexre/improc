@@ -1,0 +1,94 @@
+SteppingMotor_AllInOne	9 + 2
+	2	SteppingMotor *motor;
+	4	unsigned long delayBetweenStepsMicros;
+	4	unsigned long motorCoilOnMicros;
+	
+	4	unsigned long motorCoilTurnOffMicros;
+	4	unsigned long minDelayBetweenStepsMicros;
+	4	long targetStep;
+	4	long step;
+	1	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+	4	long maxSteps;
+	2	unsigned int axisStepsPerMeter;
+
+	2	DigitalInputPin *startPositionButton;
+	2	DigitalInputPin *endPositionButton;
+	4	long homePosition;
+
+motor:
+	1	signed char currentState;
+	2	DigitalOutputPin *out11pin;
+	2	DigitalOutputPin *out12pin;
+	2	DigitalOutputPin *out21pin;
+	2	DigitalOutputPin *out22pin;
+
+--------------
+
+SteppingMotor_MosfetHBridge	18 + 2
+	1	signed char currentState;
+	2	DigitalOutputPin *out11pin;
+	2	DigitalOutputPin *out12pin;
+	2	DigitalOutputPin *out21pin;
+	2	DigitalOutputPin *out22pin;
+
+	4	unsigned long motorCoilOnMicros;
+	1	uint8_t mode;
+	1	uint8_t stepSwithchingMode;
+	4	unsigned long motorCoilTurnOffMicros;
+SteppingMotorControl	23 + 2
+	2	SteppingMotor *motor;
+	4	unsigned long delayBetweenStepsMicros;
+	4	unsigned long motorCoilOnMicros;
+	1	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+
+	4	long targetStep;
+	4	long step;
+	4	long stepsMadeSoFar;
+SteppingMotorControlWithButtons : SteppingMotorControl motorControl;	18
+	2	DigitalInputPin *startPositionButton;
+	2	DigitalInputPin *endPositionButton;
+	
+	1	uint8_t mode;
+	1	uint8_t modeState;
+	4	long minStep;
+	4	long maxStep;
+	4	MaxStepsWithWrongButtonDown
+StepperAxis		16 + 2
+		SteppingMotorControlWithButtons motorControl;
+	4	unsigned long timestamp;
+	4	long homePosition;
+	4	long maxStep;
+	4	float axisStepsPerMM;
+	1	uint8_t mode;
+	1	uint8_t modeState;
+	4	unsigned long minDelayBetweenStepsMicros;
+
+Endless mode:
+direction, speed, length to move
+
+Restricted mode:
+end buttons, current step, target step, time to move
+
+Length specification in microns:
+steps per decimeter
+
+abstract StepperMotor
+Stepper_MosfetHBridge : StepperMotor 
+	1	signed char currentState;
+	2	DigitalOutputPin *out11pin;
+	2	DigitalOutputPin *out12pin;
+	2	DigitalOutputPin *out21pin;
+	2	DigitalOutputPin *out22pin;
+Stepper_LengthControl : Stepper_MosfetHBridge
+	2	stepsRemaining 
+
+Stepper_SpeedControl
+	2	StepperMotor * motor
+	1	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+	4	unsigned long delayBetweenStepsMicros;
+	4	unsigned long motorCoilOnMicros;
+
+Stepper_ControlWithEndButtons : Stepper_LengthControl
+	2	DigitalInputPin *startPositionButton;
+	2	DigitalInputPin *endPositionButton;
+	4	long currentStep;

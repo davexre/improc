@@ -40,22 +40,36 @@ static void UpdateRotor() {
 static bool motorAutoRunning = false;
 static bool motorForward = true;
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+static DigitalOutputArduinoPin diStepMotor11pin;
+static DigitalOutputArduinoPin diStepMotor12pin;
+static DigitalOutputArduinoPin diStepMotor21pin;
+static DigitalOutputArduinoPin diStepMotor22pin;
+
 void SteppingMotorTest::setup() {
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin, 0), states, size(states), true);
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diLedPin.initialize(ledPin);
+	led.initialize(&diLedPin, states, size(states), true);
+
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setMinMax(100, 5000);
 	rotor.setValue(1000);
 	attachInterrupt(0, UpdateRotor, CHANGE);
+	diStepMotor11pin.initialize(stepperPin11, 0);
+	diStepMotor12pin.initialize(stepperPin12, 0);
+	diStepMotor21pin.initialize(stepperPin21, 0);
+	diStepMotor22pin.initialize(stepperPin22, 0);
 	motor.initialize(
 			SteppingMotor::FullPower,
 			SteppingMotor_MosfetHBridge::TurnOffInSeparateCycle,
-			new DigitalOutputArduinoPin(stepperPin11),
-			new DigitalOutputArduinoPin(stepperPin12),
-			new DigitalOutputArduinoPin(stepperPin21),
-			new DigitalOutputArduinoPin(stepperPin22));
+			&diStepMotor11pin, &diStepMotor12pin, &diStepMotor21pin, &diStepMotor22pin);
 	motorControl.initialize(&motor);
 	motorControl.resetStepTo(rotor.getValue());
 	//motorControl.motorCoilDelayBetweenStepsMicros = 100000;

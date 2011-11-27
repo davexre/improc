@@ -7,7 +7,7 @@ bool DigitalInvertingInputPin::getState() {
 
 ///////// DigitalInputArduinoPin
 
-DigitalInputArduinoPin::DigitalInputArduinoPin(const uint8_t arduinoPin, const bool enablePullup) {
+void DigitalInputArduinoPin::initialize(const uint8_t arduinoPin, const bool enablePullup) {
 	bit = digitalPinToBitMask(arduinoPin);
 	uint8_t port = digitalPinToPort(arduinoPin);
 	inputRegister = portInputRegister(port);
@@ -31,7 +31,7 @@ bool DigitalInputArduinoPin::getState() {
 
 ///////// DigitalOutputArduinoPin
 
-DigitalOutputArduinoPin::DigitalOutputArduinoPin(const uint8_t arduinoPin, const bool initialValue) {
+void DigitalOutputArduinoPin::initialize(const uint8_t arduinoPin, const bool initialValue) {
 	bit = digitalPinToBitMask(arduinoPin);
 	uint8_t port = digitalPinToPort(arduinoPin);
 	outputRegister = portOutputRegister(port);

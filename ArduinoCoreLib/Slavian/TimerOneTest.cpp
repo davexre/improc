@@ -34,24 +34,29 @@ static void UpdateRotor() {
 	rotor.update();
 }
 
-static DigitalOutputArduinoPin *speaker;
+static DigitalOutputArduinoPin speaker;
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
 
 static void UpdateTimerOne() {
-	speaker->setState(speakerOn ? (!speaker->getState()) : false);
+	speaker.setState(speakerOn ? (!speaker.getState()) : false);
 }
 
 void TimerOneTest::setup() {
-	pinMode(speakerUsingTonePin, OUTPUT);
-	speaker = new DigitalOutputArduinoPin(speakerUsingTimerOnePin, false);
+	speaker.initialize(speakerUsingTimerOnePin, false);
 	Timer1.initialize();
 	Timer1.attachInterrupt(UpdateTimerOne);
 
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true), false);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 	toneState.setValue(500);
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setState(&toneState);
 	attachInterrupt(0, UpdateRotor, CHANGE);
     Serial.begin(115200);

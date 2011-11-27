@@ -9,9 +9,12 @@ static const int ledPin = 13; // the number of the LED pin
 static Button btn;
 static bool lightOn = false;
 
+static DigitalInputArduinoPin diButtonPin;
+
 void ButtonTest::setup() {
 	pinMode(ledPin, OUTPUT);
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
 }
 
 void ButtonTest::loop() {

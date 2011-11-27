@@ -14,15 +14,19 @@ static const int rotorPinB = 3;		// the other quadrature pin
 static Button btn;
 static RotaryEncoderAcceleration rotor;
 static bool speakerOn = false;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
 
 void PWM_Led::setup() {
 	pinMode(ledPin, OUTPUT);
 	pinMode(speakerPin, OUTPUT);
 
-	btn.initialize(new DigitalInputArduinoPin(buttonPin, true));
-	rotor.initialize(
-			new DigitalInputArduinoPin(rotorPinA, true),
-			new DigitalInputArduinoPin(rotorPinB, true));
+	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	rotor.setMinMax(0, 255);
 	rotor.setValue(1);
 

@@ -36,17 +36,25 @@ static void updateRotaryEncoder() {
 	menu.updateRotaryEncoder();
 }
 
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diButtonPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 void MenuLikeTest::setup() {
 	pinMode(speakerPin, OUTPUT);
-	led.initialize(new DigitalOutputArduinoPin(ledPin), ledStates, size(ledStates), true);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, ledStates, size(ledStates), true);
 
 	// Init menus
 	speakerMenu.initialize("Speaker", speakerStates, size(speakerStates), false);
 	ledStatesMenu.initialize("Led state", 0, size(ledStates) - 1, true);
 	tonePitchMenu.initialize("Pitch", 50, 5000, false);
 
-	menu.initialize(new DigitalInputArduinoPin(rotorPinA, true), new DigitalInputArduinoPin(rotorPinB, true),
-			new DigitalInputArduinoPin(buttonPin, true), menuItems, size(menuItems));
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	diButtonPin.initialize(buttonPin, true);
+	menu.initialize(&diRotorPinA, &diRotorPinB, &diButtonPin, menuItems, size(menuItems));
 	attachInterrupt(0, updateRotaryEncoder, CHANGE);
     Serial.begin(115200);
     Serial.println("Push the encoder button to switch between menus");

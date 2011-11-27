@@ -22,16 +22,24 @@ static const unsigned int *states[] = {
 };
 
 static DigitalInputShiftRegister_74HC166 shiftRegisterInput;
+static DigitalOutputArduinoPin diLedPin;
+static DigitalOutputArduinoPin diShiftRegisterInputPinPE;
+static DigitalOutputArduinoPin diShiftRegisterInputPinCP;
+static DigitalInputArduinoPin diShiftRegisterInputPinQ7;
 
 #define DigitalInputShiftRegisterPinsCount 9
 
 void ShiftRegisterInputTest::setup() {
-	led.initialize(new DigitalOutputArduinoPin(ledPin), states, size(states), true);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 
+	diShiftRegisterInputPinPE.initialize(shiftRegisterInputPinCP, false);
+	diShiftRegisterInputPinCP.initialize(shiftRegisterInputPinCP, false);
+	diShiftRegisterInputPinQ7.initialize(shiftRegisterInputPinQ7, false);
 	shiftRegisterInput.initialize(DigitalInputShiftRegisterPinsCount,
-			new DigitalOutputArduinoPin(shiftRegisterInputPinPE),
-			new DigitalOutputArduinoPin(shiftRegisterInputPinCP),
-			new DigitalInputArduinoPin(shiftRegisterInputPinQ7, false));
+			&diShiftRegisterInputPinPE,
+			&diShiftRegisterInputPinCP,
+			&diShiftRegisterInputPinQ7);
 
     Serial.begin(115200);
     Serial.println("Initialized");
