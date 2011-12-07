@@ -77,17 +77,16 @@ public:
 	enum MovementMode {
 		Idle = 0,
 		Stopping = 1,
-		Error = 2,
-		Foreward = 3,
-		Backward = 4,
-		GotoEndButton = 5,
-		GotoStartButton = 6
+		Foreward = 2,
+		Backward = 3,
+		GotoEndButton = 4,
+		GotoStartButton = 5
 	};
 
 	StepperMotor *motor;
+	long currentStep;
 
 	// end buttons
-	long currentStep;
 	DigitalInputPin *startButton;
 	DigitalInputPin *endButton;
 
@@ -106,6 +105,13 @@ public:
 			DigitalInputPin *endButton);
 	void update();
 
+	void gotoStep(long step);
+	void rotate(bool foreward);
+	void stop();
+
+	inline bool isMoving() {
+		return movementMode != StepperAxis::Idle;
+	}
 };
 
 ////////

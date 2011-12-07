@@ -1,19 +1,15 @@
 SteppingMotor_AllInOne	9 + 2
 	2	SteppingMotor *motor;
-	4	unsigned long delayBetweenStepsMicros;
-	4	unsigned long motorCoilOnMicros;
-	
-	4	unsigned long motorCoilTurnOffMicros;
-	4	unsigned long minDelayBetweenStepsMicros;
-	4	long targetStep;
-	4	long step;
-	1	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
-	4	long maxSteps;
-	2	unsigned int axisStepsPerMeter;
-
+	4	long currentStep;	
 	2	DigitalInputPin *startPositionButton;
 	2	DigitalInputPin *endPositionButton;
-	4	long homePosition;
+	1	uint8_t movementMode; // 0 - goto step; 1 - move forward; 2 - move backward
+	4	unsigned long delayBetweenStepsMicros;
+	4	unsigned long lastTimestampMicros;
+	2	unsigned int remainingSteps;
+	
+	2	unsigned int axisStepsPerMeter;
+	2	unsigned int homePosition; // in absolute coords
 
 motor:
 	1	signed char currentState;

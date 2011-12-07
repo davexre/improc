@@ -147,17 +147,15 @@ void StepperAxis::update() {
 	bool moveForeward;
 	switch (movementMode) {
 	case Idle:
-	case Error:
 		return;
-
-	case Foreward:
-	case GotoEndButton:
-		moveForeward = true;
-		break;
-//	case Backward:
-//	case GotoStartButton:
-	default:
+	case Backward:
+	case GotoStartButton:
 		moveForeward = false;
+		break;
+//	case Foreward:
+//	case GotoEndButton:
+	default:
+		moveForeward = true;
 		break;
 	}
 
@@ -169,6 +167,8 @@ void StepperAxis::update() {
 		if (now - lastTimestampMicros >= timeToStopMicros) {
 			motor->stop();
 			movementMode = StepperAxis::Idle;
+			if (!moveForeward)
+				currentStep = 0;
 		}
 		return;
 	}
@@ -193,6 +193,29 @@ void StepperAxis::update() {
 	}
 	motor->step(moveForeward);
 	lastTimestampMicros += delayBetweenStepsMicros; // should increase, not set to now!
+}
+
+void StepperAxis::gotoStep(long step) {
+	step -= currentStep;
+	if (step >= 0) {
+		movementMode = StepperAxis::Foreward;
+		remainingSteps = step;
+	} else {
+		movementMode = StepperAxis::Backward;
+		remainingSteps = -step;
+	}
+	lastTimestampMicros = millis() - delayBetweenStepsMicros;
+}
+
+void StepperAxis::rotate(bool foreward) {
+	movementMode = foreward ? StepperAxis::Foreward : StepperAxis::Backward;
+	lastTimestampMicros = millis() - delayBetweenStepsMicros;
+}
+
+void StepperAxis::stop() {
+	if (movementMode != StepperAxis::Idle) {
+		movementMode = StepperAxis::Stopping;
+	}
 }
 
 ////////
