@@ -58,7 +58,7 @@ void DigitalOutputArduinoPin::setState(const bool value) {
 
 ///////// DigitalInputShiftRegisterPin
 
-DigitalInputShiftRegisterPin::DigitalInputShiftRegisterPin(DigitalInputShiftRegister *parent, const uint8_t devicePin) {
+void DigitalInputShiftRegisterPin::initialize(DigitalInputShiftRegister *parent, const uint8_t devicePin) {
 	this->parent = parent;
 	this->devicePin = devicePin;
 }
@@ -75,7 +75,8 @@ bool DigitalInputShiftRegister::getState(const uint8_t shiftRegisterPin) {
 }
 
 DigitalInputPin *DigitalInputShiftRegister::createPinHandler(const uint8_t shiftRegisterPin) {
-	return new DigitalInputShiftRegisterPin(this, shiftRegisterPin);
+	pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+	return &pinHandlers[shiftRegisterPin];
 }
 
 ///////// DigitalInputShiftRegister_74HC166
@@ -127,7 +128,7 @@ void DigitalInputShiftRegister_74HC166::update() {
 
 ///////// DigitalOutputShiftRegister_74HC164
 
-DigitalOutputShiftRegister_74HC164_Pin::DigitalOutputShiftRegister_74HC164_Pin(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin) {
+void DigitalOutputShiftRegister_74HC164_Pin::initialize(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin) {
 	this->parent = parent;
 	this->devicePin = devicePin;
 }
@@ -198,12 +199,13 @@ void DigitalOutputShiftRegister_74HC164::setState(const uint8_t shiftRegisterPin
 }
 
 DigitalOutputShiftRegister_74HC164_Pin *DigitalOutputShiftRegister_74HC164::createPinHandler(const uint8_t shiftRegisterPin) {
-	return new DigitalOutputShiftRegister_74HC164_Pin(this, shiftRegisterPin);
+	pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+	return &pinHandlers[shiftRegisterPin];
 }
 
 ///////// DigitalOutputShiftRegister_74HC595
 
-DigitalOutputShiftRegister_74HC595_Pin::DigitalOutputShiftRegister_74HC595_Pin(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin) {
+void DigitalOutputShiftRegister_74HC595_Pin::initialize(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin) {
 	this->parent = parent;
 	this->devicePin = devicePin;
 }
@@ -218,8 +220,8 @@ void DigitalOutputShiftRegister_74HC595_Pin::setState(const bool value) {
 
 void DigitalOutputShiftRegister_74HC595::initialize(uint8_t outputPinsCount, WriteOutputMode writeOutputMode,
 		DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin) {
-	if (sizeof(outputBuffer) * 8 > outputPinsCount)
-		outputPinsCount = sizeof(outputBuffer) * 8;
+	if (DigitalOutputShiftRegisterMaxPins > outputPinsCount)
+		outputPinsCount = DigitalOutputShiftRegisterMaxPins;
 	this->outputPinsCount = outputPinsCount;
 	this->SH_pin = SH_pin;
 	this->ST_pin = ST_pin;
@@ -304,5 +306,6 @@ void DigitalOutputShiftRegister_74HC595::setState(uint8_t shiftRegisterPin, cons
 }
 
 DigitalOutputShiftRegister_74HC595_Pin *DigitalOutputShiftRegister_74HC595::createPinHandler(const uint8_t shiftRegisterPin) {
-	return new DigitalOutputShiftRegister_74HC595_Pin(this, shiftRegisterPin);
+	pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+	return &pinHandlers[shiftRegisterPin];
 }

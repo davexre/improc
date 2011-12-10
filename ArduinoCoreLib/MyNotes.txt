@@ -1,4 +1,4 @@
-SteppingMotor_AllInOne	9 + 2
+SteppingMotor_AllInOne	2 + 21
 	2	SteppingMotor *motor;
 	4	long currentStep;	
 	2	DigitalInputPin *startPositionButton;
@@ -8,10 +8,10 @@ SteppingMotor_AllInOne	9 + 2
 	4	unsigned long lastTimestampMicros;
 	2	unsigned int remainingSteps;
 	
-	2	unsigned int axisStepsPerMeter;
-	2	unsigned int homePosition; // in absolute coords
+	2	unsigned int axisResolution; // axis resolution in steps/dots per decimeter DPD
+	2	unsigned int homePosition; // in absolute coords - coordinates in tenths of milimeter, i.e. 10000 -> 1 meter
 
-motor:
+motor: 2 + 9
 	1	signed char currentState;
 	2	DigitalOutputPin *out11pin;
 	2	DigitalOutputPin *out12pin;

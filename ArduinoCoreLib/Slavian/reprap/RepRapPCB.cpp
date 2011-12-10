@@ -1,21 +1,5 @@
 #include "RepRapPCB.h"
 
-static const int shiftRegisterInputPinCP = 8;
-static const int shiftRegisterInputPinPE = 9;
-static const int shiftRegisterInputPinQ7 = 10;
-
-static const int shiftRegisterOutputPinDS = 11;
-static const int shiftRegisterOutputPinSH = 12;
-static const int shiftRegisterOutputPinST = 13;
-
-static DigitalOutputArduinoPin diShiftRegisterOutputPinSH;
-static DigitalOutputArduinoPin diShiftRegisterOutputPinST;
-static DigitalOutputArduinoPin diShiftRegisterOutputPinDS;
-
-static DigitalOutputArduinoPin diShiftRegisterInputPinPE;
-static DigitalOutputArduinoPin diShiftRegisterInputPinCP;
-static DigitalInputArduinoPin diShiftRegisterInputPinQ7;
-
 void RepRapPCB::initialize() {
 	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
 	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);

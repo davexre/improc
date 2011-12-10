@@ -1,10 +1,8 @@
-#define Stepper_h
-#ifndef Stepper_h
-
 #include "Arduino.h"
 #include "Stepper.h"
 
-void StepperMosfetHBridge::initialize(
+void StepperMotorBA6845FS::initialize(
+			StepperMotor::SteppingMotorMode motorMode,
 			DigitalOutputPin *out11pin,
 			DigitalOutputPin *out12pin,
 			DigitalOutputPin *out21pin,
@@ -13,137 +11,202 @@ void StepperMosfetHBridge::initialize(
 	this->out12pin = out12pin;
 	this->out21pin = out21pin;
 	this->out22pin = out22pin;
-	currentState = 0;
+	currentState = motorMode;
 	stop();
 }
 
-static const uint8_t motorStatesMosfetHBridge[] = {
-		0b01000,
-		0b00010,
-		0b00100,
-		0b00001
-};
-
-void StepperMosfetHBridge::setState(const uint8_t state) {
+void StepperMotorBA6845FS::setState(const uint8_t state) {
 	out11pin->setState(state & 0b01000);
 	out12pin->setState(state & 0b00100);
 	out21pin->setState(state & 0b00010);
 	out22pin->setState(state & 0b00001);
 }
 
-void StepperMosfetHBridge::step(const bool moveForward) {
+// http://www.engineersgarage.com/articles/stepper-motors
+
+/*
+	BA6845FS Truth table
+	IN11/21  IN12/22  OUT11/21  OUT12/22  MODE
+	LOW      HIGH     HIGH      LOW       Forward
+	HIGH     HIGH     LOW       HIGH      Reverse
+	LOW      LOW      OPEN      OPEN      Stop
+	HIGH     HIGH     OPEN      OPEN      Stop
+*/
+
+/**
+ * Half power consumption, lower torque
+ */
+static const uint8_t motorStatesBA6845FS_HalfPower[] = {
+		0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
+		0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
+		0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
+		0b00011  // H-bridge 1 - Stop,    H-bridge 2 - Reverse
+};
+
+/**
+ * Full power consumption & torque
+ */
+static const uint8_t motorStatesBA6845FS_FullPower[] = {
+		0b00111, // H-bridge 1 - Forward, H-bridge 2 - Reverse
+		0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
+		0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
+		0b01111  // H-bridge 1 - Reverse, H-bridge 2 - Reverse
+};
+
+/**
+ * Higher (double) precision, variable power consumption & torque
+ */
+static const uint8_t motorStatesBA6845FS_DoublePrecision[] = {
+		0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
+		0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
+		0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
+		0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
+		0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
+		0b01111, // H-bridge 1 - Reverse, H-bridge 2 - Reverse
+		0b00011, // H-bridge 1 - Stop,    H-bridge 2 - Reverse
+		0b00111  // H-bridge 1 - Forward, H-bridge 2 - Reverse
+};
+
+void StepperMotorBA6845FS::step(const bool moveForward) {
+	char mode = currentState & 0b00000011;
+	char index = currentState >> 2;
+	char maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
 	if (moveForward) {
-		currentState++;
-		if (currentState >= size(motorStatesMosfetHBridge))
-			currentState = 1;
+		index++;
+		if (index >= maxSteps)
+			index = 1;
 	} else {
-		currentState--;
-		if (currentState < 0)
-			currentState = size(motorStatesMosfetHBridge) - 1;
+		index--;
+		if (index < 0)
+			index = maxSteps - 1;
 	}
-	setState(motorStatesMosfetHBridge[currentState]);
-	return true;
+	currentState = (index << 2) | mode;
+	uint8_t state;
+	switch (mode) {
+	case DoublePrecision:
+		state = motorStatesBA6845FS_DoublePrecision[index];
+		break;
+	case FullPower:
+		state = motorStatesBA6845FS_FullPower[index];
+		break;
+	case HalfPower:
+	default:
+		state = motorStatesBA6845FS_HalfPower[index];
+		break;
+	}
+	setState(state);
 }
 
-void SteppingMotor_MosfetHBridge::stop() {
+void StepperMotorBA6845FS::stop() {
+	setState(0);
+}
+
+////////////////////////////////////////////
+
+void StepperMotorMosfetHBridge::initialize(
+		StepperMotor::SteppingMotorMode motorMode,
+			DigitalOutputPin *out11pin,
+			DigitalOutputPin *out12pin,
+			DigitalOutputPin *out21pin,
+			DigitalOutputPin *out22pin) {
+	this->out11pin = out11pin;
+	this->out12pin = out12pin;
+	this->out21pin = out21pin;
+	this->out22pin = out22pin;
+	currentState = motorMode;
+	stop();
+}
+
+void StepperMotorMosfetHBridge::setState(const uint8_t state) {
+	out11pin->setState(state & 0b01000);
+	out12pin->setState(state & 0b00100);
+	out21pin->setState(state & 0b00010);
+	out22pin->setState(state & 0b00001);
+}
+
+/**
+ * Full power consumption & torque
+ */
+static const uint8_t motorStatesMosfetHBridge_FullPower[] = {
+		0b01010,
+		0b00110,
+		0b00101,
+		0b01001
+};
+
+/**
+ * Half power consumption, lower torque
+ */
+static const uint8_t motorStatesMosfetHBridge_HalfPower[] = {
+		0b01000,
+		0b00010,
+		0b00100,
+		0b00001
+};
+
+/**
+ * Higher (double) precision, variable power consumption & torque
+ */
+static const uint8_t motorStatesMosfetHBridge_DoublePrecision[] = {
+		0b01000,
+		0b01001,
+		0b00010,
+		0b01010,
+		0b00100,
+		0b00110,
+		0b00001,
+		0b00101
+};
+
+void StepperMotorMosfetHBridge::step(const bool moveForward) {
+	char mode = currentState & 0b00000011;
+	char index = currentState >> 2;
+	char maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
+	if (moveForward) {
+		index++;
+		if (index >= maxSteps)
+			index = 1;
+	} else {
+		index--;
+		if (index < 0)
+			index = maxSteps - 1;
+	}
+	currentState = (index << 2) | mode;
+	uint8_t state;
+	switch (mode) {
+	case DoublePrecision:
+		state = motorStatesMosfetHBridge_DoublePrecision[index];
+		break;
+	case FullPower:
+		state = motorStatesMosfetHBridge_FullPower[index];
+		break;
+	case HalfPower:
+	default:
+		state = motorStatesMosfetHBridge_HalfPower[index];
+		break;
+	}
+	setState(state);
+}
+
+void StepperMotorMosfetHBridge::stop() {
 	setState(0);
 }
 
 ////////
 
-void StepperMosfetHBridgeWithLengthControl::initialize(
-		DigitalOutputPin *out11pin,
-		DigitalOutputPin *out12pin,
-		DigitalOutputPin *out21pin,
-		DigitalOutputPin *out22pin) {
-	StepperMosfetHBridge::initialize(out11pin, out12pin, out21pin, out22pin);
-	remainingSteps = 0;
-}
-
-bool StepperMosfetHBridgeWithLengthControl::step(const bool moveForward) {
-	return remainingSteps == 0 ? false : StepperMosfetHBridge::step(moveForward);
-}
-
-void StepperMosfetHBridgeWithLengthControl::stop() {
-	StepperMosfetHBridge::stop();
-	remainingSteps = 0;
-}
-
-////////
-
-void StepperMosfetHBridgeWithButtons::initialize(
-		DigitalOutputPin *out11pin,
-		DigitalOutputPin *out12pin,
-		DigitalOutputPin *out21pin,
-		DigitalOutputPin *out22pin,
-		DigitalInputPin *startButton,
-		DigitalInputPin *endButton) {
-	StepperMosfetHBridgeWithLengthControl::initialize(out11pin, out12pin, out21pin, out22pin);
-	this->startButton = startButton;
-	this->endButton = endButton;
-}
-
-bool StepperMosfetHBridgeWithButtons::step(const bool moveForward) {
-	if (((moveForward && !endButton->getState()) ||
-		(!moveForward && !startButton->getState())))
-		return false;
-	if (StepperMosfetHBridgeWithLengthControl::step(moveForward)) {
-		if (moveForward)
-			currentStep++;
-		else
-			currentStep--;
-		return true;
-	}
-	return false;
-}
-
-////////
-
-void SteperSpeedControl::initialize(StepperMotor * motor) {
-	this->motor = motor;
-	stepAtMicros = 0;
-}
-
-void SteperSpeedControl::update() {
-	if (movementMode == 0) {
-		return;
-	}
-	unsigned long now = micros();
-	if (now - stepAtMicros < delayBetweenStepsMicros)
-		return;
-	if (motor->step(movementMode == 1)) {
-		stepAtMicros += delayBetweenStepsMicros;
-	} else {
-		stop();
-	}
-}
-
-void SteperSpeedControl::move(bool foreward) {
-	uint8_t newMode = foreward ? 1 : 2;
-	if (movementMode == newMode)
-		return;
-	movementMode = newMode;
-	stepAt = micros();
-}
-
-void SteperSpeedControl::stop() {
-	if (movementMode != 0) {
-		movementMode = 0;
-		motor->stop();
-	}
-}
-
-////////
-
-void StepperAxis::initialize(
+void StepperMotorControlWithButtons::initialize(
+		StepperMotor *motor,
 		DigitalInputPin *startButton,
 		DigitalInputPin *endButton) {
 	this->motor = motor;
 	this->startButton = startButton;
 	this->endButton = endButton;
+	currentStep = 0;
+	movementMode = StepperMotorControlWithButtons::Idle;
+	delayBetweenStepsMicros = 2000UL;
 }
 
-void StepperAxis::update() {
+void StepperMotorControlWithButtons::update() {
 	bool moveForeward;
 	switch (movementMode) {
 	case Idle:
@@ -152,8 +215,8 @@ void StepperAxis::update() {
 	case GotoStartButton:
 		moveForeward = false;
 		break;
-//	case Foreward:
-//	case GotoEndButton:
+	// case Foreward:
+	// case GotoEndButton:
 	default:
 		moveForeward = true;
 		break;
@@ -161,12 +224,12 @@ void StepperAxis::update() {
 
 	unsigned long now = micros();
 	// Stopping & End buttons check
-	if ((movementMode == StepperAxis::Stopping) ||
+	if ((movementMode == StepperMotorControlWithButtons::Stopping) ||
 		(moveForeward && !endButton->getState()) ||
 		(!moveForeward && !startButton->getState())) {
 		if (now - lastTimestampMicros >= timeToStopMicros) {
 			motor->stop();
-			movementMode = StepperAxis::Idle;
+			movementMode = StepperMotorControlWithButtons::Idle;
 			if (!moveForeward)
 				currentStep = 0;
 		}
@@ -177,10 +240,10 @@ void StepperAxis::update() {
 	if (now - lastTimestampMicros < delayBetweenStepsMicros)
 		return;
 
-	if ((movementMode == StepperAxis::Foreward) ||
-		(movementMode == StepperAxis::Backward)) {
+	if ((movementMode == StepperMotorControlWithButtons::Foreward) ||
+		(movementMode == StepperMotorControlWithButtons::Backward)) {
 		if (remainingSteps == 0) {
-			movementMode = StepperAxis::Stopping;
+			movementMode = StepperMotorControlWithButtons::Stopping;
 			return;
 		}
 		remainingSteps--;
@@ -195,279 +258,25 @@ void StepperAxis::update() {
 	lastTimestampMicros += delayBetweenStepsMicros; // should increase, not set to now!
 }
 
-void StepperAxis::gotoStep(long step) {
+void StepperMotorControlWithButtons::gotoStep(long step) {
 	step -= currentStep;
 	if (step >= 0) {
-		movementMode = StepperAxis::Foreward;
+		movementMode = StepperMotorControlWithButtons::Foreward;
 		remainingSteps = step;
 	} else {
-		movementMode = StepperAxis::Backward;
+		movementMode = StepperMotorControlWithButtons::Backward;
 		remainingSteps = -step;
 	}
 	lastTimestampMicros = millis() - delayBetweenStepsMicros;
 }
 
-void StepperAxis::rotate(bool foreward) {
-	movementMode = foreward ? StepperAxis::Foreward : StepperAxis::Backward;
+void StepperMotorControlWithButtons::rotate(bool foreward) {
+	movementMode = foreward ? StepperMotorControlWithButtons::Foreward : StepperMotorControlWithButtons::Backward;
 	lastTimestampMicros = millis() - delayBetweenStepsMicros;
 }
 
-void StepperAxis::stop() {
-	if (movementMode != StepperAxis::Idle) {
-		movementMode = StepperAxis::Stopping;
+void StepperMotorControlWithButtons::stop() {
+	if (movementMode != StepperMotorControlWithButtons::Idle) {
+		movementMode = StepperMotorControlWithButtons::Stopping;
 	}
 }
-
-////////
-
-void SteppingMotorControl::initialize(SteppingMotor *motor) {
-	this->motor = motor;
-	delayBetweenStepsMicros = 2000UL;
-	motorCoilOnMicros = 0;
-	stepsMadeSoFar = 0;
-	step = 0;
-	motor->stop();
-	activateUpdater();
-}
-
-void SteppingMotorControl::stop() {
-	motor->stop();
-	movementMode = 0;
-	targetStep = step;
-	motorCoilOnMicros = micros() - delayBetweenStepsMicros;
-}
-
-void SteppingMotorControl::gotoStep(const long step) {
-	movementMode = 0;
-	targetStep = step;
-}
-
-void SteppingMotorControl::rotate(const bool forward) {
-	movementMode = forward ? 1 : 2;
-}
-
-void SteppingMotorControl::resetStepTo(const long step) {
-	this->movementMode = 0;
-	this->step = this->targetStep = step;
-}
-
-bool SteppingMotorControl::isMoving() {
-	return !(
-		(movementMode == 0) &&
-		(targetStep == step) &&
-		(micros() - motorCoilOnMicros > delayBetweenStepsMicros));
-}
-
-void SteppingMotorControl::update() {
-	unsigned long now = micros();
-	if (now - motorCoilOnMicros >= delayBetweenStepsMicros) {
-		bool shallMove;
-		bool forward;
-
-		switch (movementMode) {
-		case 1:
-			shallMove = true;
-			forward = true;
-			break;
-		case 2:
-			shallMove = true;
-			forward = false;
-			break;
-		default: //	case 0:
-			long tmp = targetStep - step;
-			if (tmp == 0) {
-				shallMove = false;
-				forward = false;
-			} else {
-				shallMove = true;
-				if (tmp > 0) {
-					forward = true;
-				} else {
-					forward = false;
-				}
-			}
-			break;
-		}
-
-		if (shallMove) {
-			if (forward) {
-				step++;
-			} else {
-				step--;
-			}
-			motor->step(forward);
-			stepsMadeSoFar++;
-			motorCoilOnMicros = now;
-		} else {
-			motorCoilOnMicros = now - delayBetweenStepsMicros;
-		}
-	}
-}
-
-////////
-
-void SteppingMotorControlWithButtons::initialize(SteppingMotor *motor,
-		DigitalInputPin *startPositionButtonPin,
-		DigitalInputPin *endPositionButtonPin) {
-	motorControl.initialize(motor);
-	startPositionButton = startPositionButtonPin;
-	endPositionButton = endPositionButtonPin;
-	mode = SteppingMotorControlIdle;
-	modeState = 0;
-	minStep = 0;
-	maxStep = 0;
-}
-
-void SteppingMotorControlWithButtons::gotoStep(const long step) {
-	motorControl.gotoStep(step);
-	mode = SteppingMotorControlIdle;
-	modeState = 0;
-}
-
-void SteppingMotorControlWithButtons::rotate(const bool forward) {
-	motorControl.rotate(forward);
-	mode = SteppingMotorControlIdle;
-	modeState = 0;
-}
-
-void SteppingMotorControlWithButtons::stop() {
-	motorControl.stop();
-	mode = SteppingMotorControlIdle;
-	modeState = 0;
-}
-
-#define MaxStepsWithWrongButtonDown 50
-void SteppingMotorControlWithButtons::doInitializeToStartingPosition() {
-	switch (modeState) {
-	case 0:
-		// Start moving backward to begining
-		motorControl.resetStepTo(0);
-		if (startPositionButton->getState()) {
-			// button is up
-			motorControl.rotate(false);
-			Serial.print("start btn up step=");
-			Serial.println(motorControl.getStep());
-		} else {
-			// button is down
-			motorControl.stop();
-			Serial.print("start btn down step=");
-			Serial.println(motorControl.getStep());
-		}
-		minStep = maxStep = 0;
-		modeState = 1;
-		break;
-	case 1:
-		if ((!endPositionButton->getState()) && (motorControl.getStep() <= -MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and endButton is still down - error
-			mode = SteppingMotorControlError;
-			modeState = 0;
-			motorControl.stop();
-			Serial.println("err1 step=");
-			Serial.println(motorControl.getStep());
-		} else if (!startPositionButton->getState()) {
-			modeState = 2;
-			motorControl.stop();
-			motorControl.resetStepTo(0);
-			Serial.print("start btn down 2 step=");
-			Serial.println(motorControl.getStep());
-		}
-		break;
-	case 2:
-		mode = SteppingMotorControlIdle;
-		modeState = 0;
-		break;
-	}
-}
-
-void SteppingMotorControlWithButtons::doDetermineAvailableSteps() {
-	switch (modeState) {
-	case 0:
-	case 1:
-		// These steps are absolutely the same.
-		doInitializeToStartingPosition();
-		break;
-	case 2:
-		// Rotate forward till the button gets pressed.
-		motorControl.rotate(true);
-		modeState = 3;
-		break;
-	case 3:
-		if ((!startPositionButton->getState()) && (motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and startButton is still down - error
-			mode = SteppingMotorControlError;
-			modeState = 0;
-			motorControl.stop();
-			Serial.print("err2 step=");
-			Serial.println(motorControl.getStep());
-		} else if (!endPositionButton->getState()) {
-			// The end position moving forward is reached.
-			maxStep = motorControl.getStep();
-			motorControl.stop();
-			motorControl.rotate(false);
-			modeState = 4;
-			Serial.print("end btn down step=");
-			Serial.println(motorControl.getStep());
-		}
-		break;
-	case 4:
-		if ((!endPositionButton->getState()) && (maxStep - motorControl.getStep() >= MaxStepsWithWrongButtonDown)) {
-			// The motor moved 10 steps and endButton is still down - error
-			mode = SteppingMotorControlError;
-			modeState = 0;
-			motorControl.stop();
-			Serial.print("err3 step=");
-			Serial.println(motorControl.getStep());
-		} else if (!startPositionButton->getState()) {
-			minStep = motorControl.getStep();
-			motorControl.stop();
-			motorControl.resetStepTo(0);
-			mode = SteppingMotorControlIdle;
-			modeState = 0;
-			Serial.print("start btn down 3 step=");
-			Serial.println(motorControl.getStep());
-		}
-		break;
-	}
-}
-
-void SteppingMotorControlWithButtons::update() {
-	switch (mode) {
-	case SteppingMotorControlInitializeToStartingPosition:
-		doInitializeToStartingPosition();
-		break;
-	case SteppingMotorControlDetermineAvailableSteps:
-		doDetermineAvailableSteps();
-		break;
-	case SteppingMotorControlError:
-		if (motorControl.isMoving()) {
-			stop();
-		}
-		break;
-	default:
-		if ((!startPositionButton->getState()) || (!endPositionButton->getState())) {
-			// start or end button is down
-			motorControl.stop();
-		}
-		MIN(minStep, motorControl.getStep());
-		MAX(maxStep, motorControl.getStep());
-		break;
-	}
-	motorControl.update();
-}
-
-void SteppingMotorControlWithButtons::initializeToStartingPosition() {
-	mode = SteppingMotorControlInitializeToStartingPosition;
-	modeState = 0;
-}
-
-void SteppingMotorControlWithButtons::determineAvailableSteps() {
-	mode = SteppingMotorControlDetermineAvailableSteps;
-	modeState = 0;
-}
-
-bool SteppingMotorControlWithButtons::isMoving() {
-	return ((mode != SteppingMotorControlIdle) && (mode != SteppingMotorControlError)) ||
-		(motorControl.isMoving());
-}
-
-#endif

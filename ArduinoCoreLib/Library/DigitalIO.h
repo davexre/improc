@@ -4,9 +4,11 @@
 #include <wiring.h>
 #include <pins_arduino.h>
 
-#define DigitalInputShiftRegisterBufferSize 4
+static const char DigitalInputShiftRegisterMaxPins = 17;
+static const char DigitalOutputShiftRegisterMaxPins = 9;
 
-#define DigitalOutputShiftRegisterBufferSize 4
+static const char DigitalInputShiftRegisterBufferSize = (DigitalInputShiftRegisterMaxPins + 8) / 8;
+static const char DigitalOutputShiftRegisterBufferSize = (DigitalOutputShiftRegisterMaxPins + 8) / 8;
 
 class DigitalInputPin {
 public:
@@ -70,7 +72,7 @@ private:
 
 	uint8_t devicePin;
 public:
-	DigitalInputShiftRegisterPin(DigitalInputShiftRegister *parent, const uint8_t devicePin);
+	void initialize(DigitalInputShiftRegister *parent, const uint8_t devicePin);
 
 	virtual bool getState();
 };
@@ -79,6 +81,7 @@ public:
 
 class DigitalInputShiftRegister {
 protected:
+	DigitalInputShiftRegisterPin pinHandlers[DigitalInputShiftRegisterMaxPins];
 	uint8_t inputBuffer[DigitalInputShiftRegisterBufferSize];
 	uint8_t inputPinsCount;
 public:
@@ -152,7 +155,7 @@ private:
 
 	uint8_t devicePin;
 public:
-	DigitalOutputShiftRegister_74HC164_Pin(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin);
+	void initialize(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin);
 
 	virtual bool getState();
 
@@ -161,6 +164,7 @@ public:
 
 class DigitalOutputShiftRegister_74HC164 {
 protected:
+	DigitalOutputShiftRegister_74HC164_Pin pinHandlers[DigitalOutputShiftRegisterMaxPins];
 	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
 	uint8_t outputPinsCount;
 	bool modified;
@@ -200,7 +204,7 @@ private:
 
 	uint8_t devicePin;
 public:
-	DigitalOutputShiftRegister_74HC595_Pin(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin);
+	void initialize(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin);
 
 	virtual bool getState();
 
@@ -209,6 +213,7 @@ public:
 
 class DigitalOutputShiftRegister_74HC595 {
 protected:
+	DigitalOutputShiftRegister_74HC595_Pin pinHandlers[DigitalOutputShiftRegisterMaxPins];
 	uint8_t writeOutputMode;
 	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
 	uint8_t fakeBuffer[DigitalOutputShiftRegisterBufferSize];
