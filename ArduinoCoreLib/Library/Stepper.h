@@ -87,10 +87,10 @@ class StepperMotorControlWithButtons {
 	StepperMotor *motor;
 	long currentStep;
 
+public:
 	// end buttons
 	DigitalInputPin *startButton;
 	DigitalInputPin *endButton;
-
 	// speed control
 	MovementMode movementMode;
 	unsigned long delayBetweenStepsMicros;
@@ -125,6 +125,80 @@ public:
 
 	inline unsigned long getDelayBetweenStepsMicros(void) {
 		return delayBetweenStepsMicros;
+	}
+};
+
+/////////
+
+/**
+ * StepperAxis uses MICRO meters for expressing lengths when working with stepper motors.
+ */
+class StepperMotorAxis {
+private:
+	void doDetermineAvailableSteps();
+
+	enum AxisModes {
+		Idle = 0,
+		Error = 1,
+		Waitings = 2,
+		InitializePosition = 3,
+		DetermineAvailableSteps = 10,
+	};
+	AxisModes mode;
+	uint8_t modeState;
+
+	unsigned int axisResolution; // in steps per decimeter
+	int homePositionMM; // in absolute coords - coordinates are in milimeters
+	unsigned long delayBetweenStepsAtMaxSpeedMicros;
+
+public:
+	StepperMotorControlWithButtons motorControl;
+
+	void initialize(StepperMotor *motor,
+			DigitalInputPin *startButton,
+			DigitalInputPin *endButton);
+	void update();
+
+	void determineAvailableSteps(void);
+
+	void moveToPositionMicroM(long absolutePositionMicroM, unsigned long delayBetweenStepsMicros);
+
+	long getAbsolutePositionMicroM();
+
+	inline void stop(void) {
+			motorControl.stop();
+	}
+
+	inline void moveToPositionMicroMFast(long absolutePositionMicroM) {
+		moveToPositionMicroM(absolutePositionMicroM, delayBetweenStepsAtMaxSpeedMicros);
+	}
+
+	inline void moveToHomePosition() {
+		moveToPositionMicroMFast(((long) homePositionMM) * 1000L);
+	}
+
+	inline void setDelayBetweenStepsAtMaxSpeedMicros(unsigned long delayBetweenStepsAtMaxSpeedMicros) {
+		this->delayBetweenStepsAtMaxSpeedMicros = delayBetweenStepsAtMaxSpeedMicros;
+	}
+
+	inline unsigned long getDelayBetweenStepsAtMaxSpeedMicros() {
+		return delayBetweenStepsAtMaxSpeedMicros;
+	}
+
+	inline void setAxisResolution(unsigned int axisResolution) {
+		this->axisResolution = axisResolution;
+	}
+
+	inline unsigned int getAxisResolution() {
+		return axisResolution;
+	}
+
+	inline void setHomePositionMM(int homePositionMM) {
+		this->homePositionMM = homePositionMM;
+	}
+
+	inline int getHomePositionMM() {
+		return homePositionMM;
 	}
 };
 

@@ -280,3 +280,60 @@ void StepperMotorControlWithButtons::stop() {
 		movementMode = StepperMotorControlWithButtons::Stopping;
 	}
 }
+
+///////
+
+void StepperMotorAxis::initialize(StepperMotor *motor,
+		DigitalInputPin *startButton,
+		DigitalInputPin *endButton) {
+	motorControl.initialize(motor, startButton, endButton);
+	homePositionMM = -32767;
+	delayBetweenStepsAtMaxSpeedMicros = 2000;
+	axisResolution = 1000;
+	mode = StepperMotorAxis::Idle;
+}
+
+void StepperMotorAxis::update() {
+	motorControl.update();
+	switch (mode) {
+	case DetermineAvailableSteps:
+		doDetermineAvailableSteps();
+		break;
+	}
+}
+
+void StepperMotorAxis::doDetermineAvailableSteps() {
+	switch (modeState) {
+	case 0:
+		motorControl.setDelayBetweenStepsMicros(delayBetweenStepsAtMaxSpeedMicros);
+		motorControl.rotate(false);
+		modeState = 1;
+		break;
+	case 1:
+		if (!motorControl.isMoving()) {
+			motorControl.rotate(true);
+			modeState = 2;
+		}
+		break;
+	case 2:
+		if (!motorControl.isMoving()) {
+			mode = StepperMotorAxis::Idle;
+		}
+		break;
+	}
+}
+
+void StepperMotorAxis::determineAvailableSteps(void) {
+	mode = StepperMotorAxis::DetermineAvailableSteps;
+	modeState = 0;
+}
+
+void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigned long delayBetweenStepsMicros) {
+	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsMicros);
+	motorControl.gotoStep(absolutePositionMicroM * 100000L / ((long) axisResolution));
+}
+
+long StepperMotorAxis::getAbsolutePositionMicroM() {
+	return motorControl.getStep() * 100000L / ((long) axisResolution);
+}
+

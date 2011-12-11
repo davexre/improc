@@ -17,7 +17,8 @@ void __cxa_guard_abort (__guard *) {};
 //#define MAINCLASS AnalogSensorTest
 //#define MAINCLASS RotaryEncoderAcellerationTest
 //#define MAINCLASS PWM_Led
-#define MAINCLASS RepRapMain
+//#define MAINCLASS RepRapPCB2Test
+#define MAINCLASS MemoryTest
 
 DefineClass(MAINCLASS);
 MAINCLASS mainClass;

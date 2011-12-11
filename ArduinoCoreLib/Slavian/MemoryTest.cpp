@@ -1,51 +1,56 @@
 #include "Arduino.h"
+#include "utils.h"
 #include "Button.h"
-#include "Stepper.h"
-#include "SteppingMotor.h"
+#include "AdvButton.h"
+#include "StateLed.h"
+#include "reprap/RepRapPCB2.h"
+#include "SerialReader.h"
 
 DefineClass(MemoryTest);
+/*
+static const int rotorPinA = 2;	// One quadrature pin
+static const int rotorPinB = 3;	// the other quadrature pin
+static const int buttonPin = 4;
+static const int ledPin = 6;
 
-DigitalInputArduinoPin startButton1;
-DigitalInputArduinoPin endButton1;
+static AdvButton btn;
+static StateLed led;
 
-DigitalOutputArduinoPin out11motor1;
-DigitalOutputArduinoPin out12motor1;
-DigitalOutputArduinoPin out21motor1;
-DigitalOutputArduinoPin out22motor1;
-StepperMotorMosfetHBridge motor1;
-StepperMotorControlWithButtons mcontrol1;
+static char readerBuffer[100];
+static SerialReader reader;
 
-SteppingMotor_MosfetHBridge motor2;
-SteppingMotorControlWithButtons mcontrol2;
+static const unsigned int *states[] = {
+		BLINK_SLOW,
+		BLINK_MEDIUM,
+		BLINK_OFF,
+		BLINK_FAST,
+		BLINK1, BLINK2, BLINK3
+};
 
-
+static DigitalInputArduinoPin diButtonPin;
+static DigitalOutputArduinoPin diLedPin;
+*/
 void MemoryTest::setup() {
-	Serial.begin(115200);
+/*	diButtonPin.initialize(buttonPin, true);
+	btn.initialize(&diButtonPin, false);
+	diLedPin.initialize(ledPin, 0);
+	led.initialize(&diLedPin, states, size(states), true);
 
-	out11motor1.initialize(3, false);
-	out12motor1.initialize(4, false);
-	out21motor1.initialize(5, false);
-	out22motor1.initialize(6, false);
-
-	startButton1.initialize(1, true);
-	endButton1.initialize(2, true);
-	motor1.initialize(StepperMotor::HalfPower,
-			&out11motor1,
-			&out12motor1,
-			&out21motor1,
-			&out22motor1);
-	mcontrol1.initialize(&motor1, &startButton1, &endButton1);
-
-	motor2.initialize(SteppingMotor::HalfPower, SteppingMotor_MosfetHBridge::DoNotTurnOff,
-			&out11motor1,
-			&out12motor1,
-			&out21motor1,
-			&out22motor1);
-	mcontrol2.initialize(&motor2, &startButton1, &endButton1);
+	reader.initialize(115200, size(readerBuffer), readerBuffer);
+*/
+    Serial.println("Initialized123456");
+//	Serial.println("abcde");
+//    Serial.println("Press the button to stop");
 }
 
 void MemoryTest::loop() {
-	mcontrol1.update();
-	motor2.update();
-	mcontrol2.update();
+/*	reader.update();
+	btn.update();
+	led.update();
+
+	if (reader.available()) {
+	}
+	if (btn.isLongClicked()) {
+	} else if (btn.isClicked()) {
+	}*/
 }
