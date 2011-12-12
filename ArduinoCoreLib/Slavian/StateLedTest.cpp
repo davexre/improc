@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "StateLed.h"
 #include "Button.h"
+#include "SerialReader.h"
 
 DefineClass(StateLedTest);
 
@@ -11,7 +12,10 @@ static const int ledPin = 13; // the number of the LED pin
 static Button btn;
 static StateLed led;
 
-static const unsigned int *states[] = {
+static SerialReader reader;
+static char buf[200];
+
+static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_FAST,
@@ -27,6 +31,7 @@ void StateLedTest::setup(void) {
 	btn.initialize(&diButtonPin);
 	diLedPin.initialize(ledPin, 0);
 	led.initialize(&diLedPin, states, size(states), true);
+	reader.initialize(115200, size(buf), buf);
 }
 
 void StateLedTest::loop(void) {

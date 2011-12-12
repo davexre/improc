@@ -1,5 +1,31 @@
 #include "BlinkingLed.h"
+#include "avr/pgmspace.h"
 #include "utils.h"
+
+const unsigned int PROGMEM BLINK_SLOW[] = {
+		BLINK_DELAY_LONG, BLINK_DELAY_LONG,
+		0};
+const unsigned int PROGMEM BLINK_MEDIUM[] = {
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int PROGMEM BLINK_FAST[] = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
+		0};
+const unsigned int PROGMEM BLINK_OFF[] = {0};
+const unsigned int PROGMEM BLINK_ON[] = {BLINK_DELAY_SHORT, 0};
+
+const unsigned int PROGMEM BLINK1[] = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int PROGMEM BLINK2[] = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
+		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int PROGMEM BLINK3[] = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_LONG,
+		0};
 
 void BlinkingLed::initialize(DigitalOutputPin *pin) {
 	this->pin = pin;
@@ -44,17 +70,19 @@ unsigned int BlinkingLed::getNextDelay() {
 	uint8_t oldSREG = SREG;
 	cli();
 	if (isPlaying()) {
-		result = delays[curDelay++];
+		result = pgm_read_word(&(delays[curDelay++]));
 		if (result == 0) {
+			lightOn = false;
 			curDelay = 0;
 			if (playCount > 0)
 				playCount--;
-			result = delays[curDelay++];
-			if (result == 0) {
-				curDelay = 0;
-				playCount = 0;
+			if (playCount != 0) {
+				result = pgm_read_word(&(delays[curDelay++]));
+				if (result == 0) {
+					curDelay = 0;
+					playCount = 0;
+				}
 			}
-			lightOn = false;
 		}
 	} else {
 		result = 0;

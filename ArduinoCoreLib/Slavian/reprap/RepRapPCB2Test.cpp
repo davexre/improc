@@ -25,10 +25,11 @@ static const unsigned int *states[] = {
 		BLINK_MEDIUM,
 		BLINK_OFF,
 		BLINK_FAST,
-		BLINK1, BLINK2, BLINK3
+		BLINK_MEDIUM,
+//		BLINK1, BLINK2, BLINK3
 };
 
-prog_char helpMessage[] =
+const char PROGMEM helpMessage[] =
 	"Command format: <command><sub-command>[parameter]<press enter>\n"
 	"Where:\n"
 	"<command>\n"
@@ -56,8 +57,8 @@ static void showError(const char * pgm_msg) {
 	printHelp();
 }
 
-prog_char pgm_Up[] = "Up";
-prog_char pgm_Down[] = "Down";
+const char PROGMEM  pgm_Up[] = "Up";
+const char PROGMEM  pgm_Down[] = "Down";
 
 static void doAxis(char *line, StepperMotorAxis &axis) {
 	switch (line++[0]) {
@@ -140,11 +141,11 @@ void RepRapPCB2Test::loop() {
 		Serial.println(line);
 		switch (line++[0]) {
 		case 'a':
-			Serial.println("X axis");
+			Serial.pgm_println(PSTR("X axis"));
 			doAxis(line, pcb.axisX);
-			Serial.println("Y axis");
+			Serial.pgm_println(PSTR("Y axis"));
 			doAxis(line, pcb.axisY);
-			Serial.println("Z axis");
+			Serial.pgm_println(PSTR("Z axis"));
 			doAxis(line, pcb.axisZ);
 			break;
 		case 'x':

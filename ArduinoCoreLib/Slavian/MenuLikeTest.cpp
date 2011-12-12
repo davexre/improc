@@ -15,7 +15,7 @@ static const int buttonPin = 4;	// the number of the pushbutton pin
 
 static const char *speakerStates[] = { "ON", "OFF" };
 
-static const unsigned int *ledStates[] = {
+static const unsigned int PROGMEM *ledStates[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

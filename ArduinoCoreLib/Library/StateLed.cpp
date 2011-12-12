@@ -1,4 +1,5 @@
 #include "StateLed.h"
+#include "avr/pgmspace.h"
 
 void StateLed::initialize(DigitalOutputPin *pin, const unsigned int *(*stateDelays),
 		const short int numberOfStates, const bool looped) {
@@ -16,7 +17,7 @@ void StateLed::setState(short int state) {
 		state = numberOfStates - 1 + state % numberOfStates;
 	if ((this->state != state) || (!led.isPlaying())) {
 		this->state = state;
-		led.playBlink(stateDelays[state], looped ? -1 : 1);
+		led.playBlink((unsigned int *)pgm_read_word(&(stateDelays[state])), looped ? -1 : 1);
 	}
 }
 

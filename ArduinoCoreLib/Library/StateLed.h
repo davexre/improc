@@ -11,7 +11,7 @@
  * Example:
  *
  * StateLed led;
- * const unsigned int *states[] = {
+ * const unsigned int PROGMEM *states[] = {
  * 		BLINK1, BLINK2
  * };
  *
@@ -43,7 +43,7 @@ private:
 	/**
 	 * Led on/off blink sequences. See the example above.
 	 */
-	const unsigned int *(*stateDelays);
+	const unsigned int *(*stateDelays); // All Delays AND the stateDelays array must be stored in PROGMEM
 
 public:
 	/**

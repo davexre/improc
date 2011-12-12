@@ -15,7 +15,7 @@ class BlinkingLed {
 private:
 	DigitalOutputPin *pin;
 
-	const unsigned int *delays;
+	const unsigned int *delays; // Delays must be stored in PROGMEM
 	uint8_t curDelay;
 
 	unsigned long toggleTime;
@@ -112,29 +112,13 @@ const unsigned int BLINK_DELAY_LONG = 500;
 const unsigned int BLINK_DELAY_MEDIUM = 250;
 const unsigned int BLINK_DELAY_SHORT = 50;
 
-const unsigned int BLINK_SLOW[] = {
-		BLINK_DELAY_LONG, BLINK_DELAY_LONG,
-		0};
-const unsigned int BLINK_MEDIUM[] = {
-		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
-		0};
-const unsigned int BLINK_FAST[] = {
-		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
-		0};
-const unsigned int BLINK_OFF[] = {0};
-const unsigned int BLINK_ON[] = {BLINK_DELAY_SHORT, 0};
-
-const unsigned int BLINK1[] = {
-		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
-		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
-		0};
-const unsigned int BLINK2[] = {
-		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
-		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
-		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
-		0};
-const unsigned int BLINK3[] = {
-		BLINK_DELAY_SHORT, BLINK_DELAY_LONG,
-		0};
+extern const unsigned int PROGMEM BLINK_SLOW[];
+extern const unsigned int PROGMEM BLINK_MEDIUM[];
+extern const unsigned int PROGMEM BLINK_FAST[];
+extern const unsigned int PROGMEM BLINK_OFF[];
+extern const unsigned int PROGMEM BLINK1[];
+extern const unsigned int PROGMEM BLINK2[];
+extern const unsigned int PROGMEM BLINK3[];
+extern const unsigned int PROGMEM BLINK_ON[];
 
 #endif
