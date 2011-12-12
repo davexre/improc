@@ -28,35 +28,36 @@ static const unsigned int *states[] = {
 		BLINK1, BLINK2, BLINK3
 };
 
+prog_char helpMessage[] =
+	"Command format: <command><sub-command>[parameter]<press enter>\n"
+	"Where:\n"
+	"<command>\n"
+	"  x, y, z - use axis x,y or z. See axis commands\n"
+	"  a - All (x,y,z) axis\n"
+	"  h - print this Help\n"
+	"  s - Stop all motors\n"
+	"<axis commands>\n"
+	"  s - goto Start position\n"
+	"  e - goto End position\n"
+	"  d - do Determine available steps\n"
+	"  h - goto Home position\n"
+	"  p - Print axis status\n"
+	"  g - Goto step (parameter long int)\n"
+	"  m - Move to position (parameter float - absolute position in millimeters)\n";
+
 static void printHelp() {
-	Serial.println("Command format: <command><sub-command>[parameter]<press enter>");
-	Serial.println("Where:");
-	Serial.println("<command>");
-	Serial.println("  x, y, z - use axis x,y or z. See axis commands");
-	Serial.println("  a - All (x,y,z) axis");
-	Serial.println("  h - print this Help");
-	Serial.println("  s - Stop all motors");
-	Serial.println("<axis commands>");
-	Serial.println("  s - goto Start position");
-	Serial.println("  e - goto End position");
-	Serial.println("  d - do Determine available steps");
-	Serial.println("  h - goto Home position");
-	Serial.println("  p - Print axis status");
-	Serial.println("  g - Goto step (parameter long int)");
-	Serial.println("  m - Move to position (parameter float - absolute position in millimeters)");
-	Serial.println("  ");
-	Serial.println("  ");
-	Serial.println("  ");
-	Serial.println("  ");
-	Serial.println("  ");
+	Serial.pgm_println(helpMessage);
 }
 
-static void showError(const char * msg) {
-	Serial.print("Error ");
-	Serial.println(msg);
+static void showError(const char * pgm_msg) {
+	Serial.pgm_print(PSTR("Error "));
+	Serial.pgm_println(pgm_msg);
 	Serial.println();
 	printHelp();
 }
+
+prog_char pgm_Up[] = "Up";
+prog_char pgm_Down[] = "Down";
 
 static void doAxis(char *line, StepperMotorAxis &axis) {
 	switch (line++[0]) {
@@ -83,26 +84,26 @@ static void doAxis(char *line, StepperMotorAxis &axis) {
 		break;
 	}
 	case 'p':
-		Serial.println("AXIS state");
-		Serial.print("isMoving:       "); Serial.println(axis.motorControl.isMoving() ? "T":"F");
-		Serial.print("remaining steps:"); Serial.println(axis.motorControl.remainingSteps);
-		Serial.print("cur step:       "); Serial.println(axis.motorControl.getStep());
-		Serial.print("abs position:   "); Serial.println(axis.getAbsolutePositionMicroM());
+		Serial.pgm_println(PSTR("AXIS state"));
+		Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(axis.motorControl.isMoving() ? 'T':'F');
+		Serial.pgm_print(PSTR("remaining steps:")); Serial.println(axis.motorControl.remainingSteps);
+		Serial.pgm_print(PSTR("cur step:       ")); Serial.println(axis.motorControl.getStep());
+		Serial.pgm_print(PSTR("abs position:   ")); Serial.println(axis.getAbsolutePositionMicroM());
 		Serial.println();
-		Serial.print("start button:   "); Serial.println(axis.motorControl.startButton->getState() ? "Up" : "Down");
-		Serial.print("end button:     "); Serial.println(axis.motorControl.endButton->getState() ? "Up" : "Down");
+		Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(axis.motorControl.startButton->getState() ? pgm_Up : pgm_Down);
+		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(axis.motorControl.endButton->getState() ? pgm_Up : pgm_Down);
 		Serial.println();
-		Serial.print("movement mode:  "); Serial.println((int)axis.motorControl.movementMode);
-		Serial.print("delay b/n steps:"); Serial.println((int)axis.motorControl.getDelayBetweenStepsMicros());
-		Serial.print("axis resolution:"); Serial.println(axis.getAxisResolution());
-		Serial.print("home position:  "); Serial.println(axis.getHomePositionMM());
+		Serial.pgm_print(PSTR("movement mode:  ")); Serial.println((int)axis.motorControl.movementMode);
+		Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println((int)axis.motorControl.getDelayBetweenStepsMicros());
+		Serial.pgm_print(PSTR("axis resolution:")); Serial.println(axis.getAxisResolution());
+		Serial.pgm_print(PSTR("home position:  ")); Serial.println(axis.getHomePositionMM());
 		Serial.println();
 		return;
 	default:
-		showError("invalid axis command");
+		showError(PSTR("invalid axis command"));
 		return;
 	}
-	Serial.println("ok");
+	Serial.pgm_println(PSTR("ok"));
 }
 
 static void stop() {
@@ -122,8 +123,8 @@ void RepRapPCB2Test::setup() {
 	led.initialize(&diLedPin, states, size(states), true);
 
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
-    Serial.println("Initialized");
-    Serial.println("Press the button to stop");
+    Serial.pgm_println(PSTR("Initialized"));
+    Serial.pgm_println(PSTR("Press the button to stop"));
 	pcb.initialize();
     printHelp();
 }
@@ -162,7 +163,7 @@ void RepRapPCB2Test::loop() {
 			stop();
 			break;
 		default:
-			showError("invalid command");
+			showError(PSTR("invalid command"));
 			break;
 		}
 	}

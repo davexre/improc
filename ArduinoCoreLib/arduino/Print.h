@@ -38,10 +38,13 @@ class Print
     void printFloat(double, uint8_t);
   public:
     virtual void write(uint8_t) = 0;
-    virtual void write(const char *str);
-    virtual void write(const uint8_t *buffer, size_t size);
+    void write(const char *str);	// SPP:
+    void write(const uint8_t *buffer, size_t size);			// SPP:
+    void pgm_write(const uint8_t *buffer, size_t size);		// SPP:
     
-//SPP:    void print(const String &);
+// SPP:    void print(const String &);
+    void pgm_print(const char str[]);	// SPP:
+
     void print(const char[]);
     void print(char, int = BYTE);
     void print(unsigned char, int = BYTE);
@@ -52,6 +55,7 @@ class Print
     void print(double, int = 2);
 
 //SPP:    void println(const String &s);
+    void pgm_println(const char[]);		// SPP:
     void println(const char[]);
     void println(char, int = BYTE);
     void println(unsigned char, int = BYTE);

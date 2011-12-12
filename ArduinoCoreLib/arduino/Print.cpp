@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 //SPP: #include <string.h>
+#include <avr/pgmspace.h>
 #include <math.h>
 #include "wiring.h"
 
@@ -42,7 +43,7 @@ void Print::write(const uint8_t *buffer, size_t size)
   while (size--)
     write(*buffer++);
 }
-/*SPP:
+/* SPP:
 void Print::print(const String &s)
 {
   for (int i = 0; i < s.length(); i++) {
@@ -50,6 +51,23 @@ void Print::print(const String &s)
   }
 }
 */
+
+// SPP:
+void Print::pgm_write(const uint8_t *buffer, size_t size) {
+	while (size--)
+		write(pgm_read_byte(buffer++));
+}
+
+void Print::pgm_print(const char str[]) {
+	while (char c = pgm_read_byte(str++))
+		write(c);
+}
+
+void Print::pgm_println(const char str[]) {
+	pgm_print(str);
+	println();
+}
+
 void Print::print(const char str[])
 {
   write(str);
