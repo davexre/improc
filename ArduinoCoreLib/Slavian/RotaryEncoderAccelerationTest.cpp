@@ -17,7 +17,7 @@ static bool speakerOn = true;
 static RotaryEncoderAcceleration rotor;
 static StateLed led;
 
-static const unsigned int *states[] = {
+static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

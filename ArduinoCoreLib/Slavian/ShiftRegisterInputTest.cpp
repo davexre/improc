@@ -13,7 +13,7 @@ static const int shiftRegisterInputPinQ7 = 10;
 
 static StateLed led;
 
-static const unsigned int *states[] = {
+static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

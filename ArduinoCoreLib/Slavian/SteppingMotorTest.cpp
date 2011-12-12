@@ -25,7 +25,7 @@ static StateLed led;
 static SteppingMotor_MosfetHBridge motor;
 static SteppingMotorControl motorControl;
 
-static const unsigned int *states[] = {
+static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

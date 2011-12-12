@@ -28,7 +28,7 @@ static MenuItem *menuItems[] = { &axisMenu };
 static SimpleMenuWithSerialPrint menu;
 static StateLed led;
 
-static const unsigned int *ledStates[] = {
+static const unsigned int PROGMEM *ledStates[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

@@ -37,7 +37,7 @@ static SteppingMotorControl motorControl2;
 static SteppingMotorControl motorControl3;
 static SteppingMotorControl motorControl4;
 
-static const unsigned int *states[] = {
+static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,
