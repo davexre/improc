@@ -271,7 +271,7 @@ void StepperMotorControlWithButtons::gotoStep(long step) {
 }
 
 void StepperMotorControlWithButtons::rotate(bool foreward) {
-	movementMode = foreward ? StepperMotorControlWithButtons::Foreward : StepperMotorControlWithButtons::Backward;
+	movementMode = foreward ? StepperMotorControlWithButtons::GotoStartButton : StepperMotorControlWithButtons::GotoEndButton;
 	lastTimestampMicros = millis() - delayBetweenStepsMicros;
 }
 

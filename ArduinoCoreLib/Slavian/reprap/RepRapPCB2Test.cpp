@@ -124,9 +124,8 @@ void RepRapPCB2Test::setup() {
 	led.initialize(&diLedPin, states, size(states), true);
 
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
-    Serial.pgm_println(PSTR("Initialized"));
-    Serial.pgm_println(PSTR("Press the button to stop"));
 	pcb.initialize();
+    Serial.pgm_println(PSTR("Initialized"));
     printHelp();
 }
 

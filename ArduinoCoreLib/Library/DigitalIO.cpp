@@ -82,8 +82,8 @@ DigitalInputPin *DigitalInputShiftRegister::createPinHandler(const uint8_t shift
 ///////// DigitalInputShiftRegister_74HC166
 
 void DigitalInputShiftRegister_74HC166::initialize(uint8_t inputPinsCount, DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin) {
-	if (sizeof(inputBuffer) * 8 > inputPinsCount)
-		inputPinsCount = sizeof(inputBuffer) * 8;
+	if (DigitalInputShiftRegisterMaxPins > inputPinsCount)
+		inputPinsCount = DigitalInputShiftRegisterMaxPins;
 	this->inputPinsCount = inputPinsCount;
 	this->PE_pin = PE_pin;
 	this->CP_pin = CP_pin;
@@ -143,8 +143,8 @@ void DigitalOutputShiftRegister_74HC164_Pin::setState(const bool value) {
 
 void DigitalOutputShiftRegister_74HC164::initialize(uint8_t outputPinsCount,
 		DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin) {
-	if (sizeof(outputBuffer) * 8 > outputPinsCount)
-		outputPinsCount = sizeof(outputBuffer) * 8;
+	if (DigitalInputShiftRegisterMaxPins > outputPinsCount)
+		outputPinsCount = DigitalInputShiftRegisterMaxPins;
 	this->outputPinsCount = outputPinsCount;
 	this->CP_pin = CP_pin;
 	this->DS_pin = DS_pin;
