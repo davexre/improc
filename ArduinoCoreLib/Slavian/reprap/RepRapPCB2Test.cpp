@@ -58,8 +58,8 @@ static void showError(const char * pgm_msg) {
 	printHelp();
 }
 
-const char PROGMEM  pgm_Up[] = "Up";
-const char PROGMEM  pgm_Down[] = "Down";
+const char PROGMEM pgm_Up[] = "Up";
+const char PROGMEM pgm_Down[] = "Down";
 
 static void doAxis(char *line, StepperMotorAxis &axis) {
 	switch (line++[0]) {
@@ -133,6 +133,7 @@ void RepRapPCB2Test::setup() {
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
 	pcb.initialize();
     Serial.pgm_println(PSTR("Initialized"));
+    Serial.pgm_println(PSTR("Press the button to stop"));
     printHelp();
 }
 
