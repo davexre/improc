@@ -49,7 +49,7 @@
   #define TX_BUFFER_SIZE 64
 #endif
 
-#define BufferIndex unsigned char
+#define BufferIndex uint8_t
 
 struct rx_ring_buffer
 {

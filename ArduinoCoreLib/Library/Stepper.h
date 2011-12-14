@@ -16,7 +16,7 @@ public:
 };
 
 class StepperMotorBA6845FS : public StepperMotor {
-	signed char currentState;
+	int8_t currentState;
 
 	DigitalOutputPin *out11pin;
 	DigitalOutputPin *out12pin;
@@ -165,9 +165,7 @@ public:
 
 	long getAbsolutePositionMicroM();
 
-	inline void stop(void) {
-			motorControl.stop();
-	}
+	void stop(void);
 
 	inline void moveToPositionMicroMFast(long absolutePositionMicroM) {
 		moveToPositionMicroM(absolutePositionMicroM, delayBetweenStepsAtMaxSpeedMicros);

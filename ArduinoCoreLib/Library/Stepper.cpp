@@ -68,9 +68,9 @@ static const uint8_t motorStatesBA6845FS_DoublePrecision[] = {
 };
 
 void StepperMotorBA6845FS::step(const bool moveForward) {
-	char mode = currentState & 0b00000011;
-	char index = currentState >> 2;
-	char maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
+	uint8_t mode = currentState & 0b00000011;
+	int8_t index = currentState >> 2;
+	int8_t maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
 	if (moveForward) {
 		index++;
 		if (index >= maxSteps)
@@ -159,13 +159,13 @@ static const uint8_t motorStatesMosfetHBridge_DoublePrecision[] = {
 };
 
 void StepperMotorMosfetHBridge::step(const bool moveForward) {
-	char mode = currentState & 0b00000011;
-	char index = currentState >> 2;
-	char maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
+	uint8_t mode = currentState & 0b00000011;
+	int8_t index = currentState >> 2;
+	int8_t maxSteps = mode == StepperMotor::DoublePrecision ? 8 : 4;
 	if (moveForward) {
 		index++;
 		if (index >= maxSteps)
-			index = 1;
+			index = 0;
 	} else {
 		index--;
 		if (index < 0)
@@ -267,12 +267,12 @@ void StepperMotorControlWithButtons::gotoStep(long step) {
 		movementMode = StepperMotorControlWithButtons::Backward;
 		remainingSteps = -step;
 	}
-	lastTimestampMicros = millis() - delayBetweenStepsMicros;
+	lastTimestampMicros = micros() - delayBetweenStepsMicros;
 }
 
 void StepperMotorControlWithButtons::rotate(bool foreward) {
 	movementMode = foreward ? StepperMotorControlWithButtons::GotoStartButton : StepperMotorControlWithButtons::GotoEndButton;
-	lastTimestampMicros = millis() - delayBetweenStepsMicros;
+	lastTimestampMicros = micros() - delayBetweenStepsMicros;
 }
 
 void StepperMotorControlWithButtons::stop() {
@@ -337,3 +337,7 @@ long StepperMotorAxis::getAbsolutePositionMicroM() {
 	return motorControl.getStep() * 100000L / ((long) axisResolution);
 }
 
+void StepperMotorAxis::stop() {
+	motorControl.stop();
+	mode = StepperMotorAxis::Idle;
+}

@@ -15,7 +15,7 @@ public:
 };
 
 class SteppingMotor_BA6845FS : public SteppingMotor {
-	signed char currentState;
+	int8_t currentState;
 
 	DigitalOutputPin *out11pin;
 	DigitalOutputPin *out12pin;
@@ -78,7 +78,7 @@ public:
 	};
 
 private:
-	signed char currentState;
+	int8_t currentState;
 	DigitalOutputPin *out11pin;
 	DigitalOutputPin *out12pin;
 	DigitalOutputPin *out21pin;

@@ -44,7 +44,8 @@ const char PROGMEM helpMessage[] =
 	"  h - goto Home position\n"
 	"  p - Print axis status\n"
 	"  g - Goto step (parameter long int)\n"
-	"  m - Move to position (parameter float - absolute position in millimeters)\n";
+	"  m - Move to position (parameter float - absolute position in millimeters)\n"
+	"  y - set delaY between steps at maximum speed (parameter int - delay microseconds)\n";
 
 static void printHelp() {
 	Serial.pgm_println(helpMessage);
@@ -84,6 +85,11 @@ static void doAxis(char *line, StepperMotorAxis &axis) {
 		axis.moveToPositionMicroMFast(pos);
 		break;
 	}
+	case 'y': {
+		long maxSpeed = atol(line);
+		axis.setDelayBetweenStepsAtMaxSpeedMicros(maxSpeed);
+		break;
+	}
 	case 'p':
 		Serial.pgm_println(PSTR("AXIS state"));
 		Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(axis.motorControl.isMoving() ? 'T':'F');
@@ -95,9 +101,10 @@ static void doAxis(char *line, StepperMotorAxis &axis) {
 		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(axis.motorControl.endButton->getState() ? pgm_Up : pgm_Down);
 		Serial.println();
 		Serial.pgm_print(PSTR("movement mode:  ")); Serial.println((int)axis.motorControl.movementMode);
-		Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println((int)axis.motorControl.getDelayBetweenStepsMicros());
 		Serial.pgm_print(PSTR("axis resolution:")); Serial.println(axis.getAxisResolution());
 		Serial.pgm_print(PSTR("home position:  ")); Serial.println(axis.getHomePositionMM());
+		Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println(axis.motorControl.getDelayBetweenStepsMicros());
+		Serial.pgm_print(PSTR("delay b/n steps@max speed:")); Serial.println(axis.getDelayBetweenStepsAtMaxSpeedMicros());
 		Serial.println();
 		return;
 	default:

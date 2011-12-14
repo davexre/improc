@@ -4,11 +4,11 @@
 #include <wiring.h>
 #include <pins_arduino.h>
 
-static const char DigitalInputShiftRegisterMaxPins = 9;
-static const char DigitalOutputShiftRegisterMaxPins = 17;
+static const uint8_t DigitalInputShiftRegisterMaxPins = 9;
+static const uint8_t DigitalOutputShiftRegisterMaxPins = 17;
 
-static const char DigitalInputShiftRegisterBufferSize = (DigitalInputShiftRegisterMaxPins + 8) / 8;
-static const char DigitalOutputShiftRegisterBufferSize = (DigitalOutputShiftRegisterMaxPins + 8) / 8;
+static const uint8_t DigitalInputShiftRegisterBufferSize = (DigitalInputShiftRegisterMaxPins + 8) / 8;
+static const uint8_t DigitalOutputShiftRegisterBufferSize = (DigitalOutputShiftRegisterMaxPins + 8) / 8;
 
 class DigitalInputPin {
 public:
