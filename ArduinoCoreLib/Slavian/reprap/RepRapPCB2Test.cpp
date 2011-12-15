@@ -5,6 +5,7 @@
 #include "StateLed.h"
 #include "reprap/RepRapPCB2.h"
 #include "SerialReader.h"
+#include "RotaryEncoderAcceleration.h"
 
 DefineClass(RepRapPCB2Test);
 
@@ -19,6 +20,7 @@ static StateLed led;
 static RepRapPCB2 pcb;
 static char readerBuffer[100];
 static SerialReader reader;
+static RotaryEncoderAcceleration rotor;
 
 static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
@@ -45,11 +47,25 @@ const char PROGMEM helpMessage[] =
 	"  p - Print axis status\n"
 	"  g - Goto step (parameter long int)\n"
 	"  m - Move to position (parameter float - absolute position in millimeters)\n"
-	"  y - set delaY between steps at maximum speed (parameter int - delay microseconds)\n";
+	"  y - set delaY between steps at maximum speed (parameter int - delay microseconds)\n"
+	"-- set the rotary encoder to control a value, only one axis at a time, long click to turn off\n"
+	"  Y - delaY between steps\n"
+	"  G - Goto step\n";
 
 static void printHelp() {
 	Serial.pgm_println(helpMessage);
 }
+
+enum RotorMode {
+	Idle = 0,
+	AlterDelayBetweenStepsX = 1,
+	AlterDelayBetweenStepsY = 2,
+	AlterDelayBetweenStepsZ = 3,
+
+	GotoStepX = 5,
+	GotoStepY = 6,
+	GotoStepZ = 7,
+} rotorMode;
 
 static void showError(const char * pgm_msg) {
 	Serial.pgm_print(PSTR("Error "));
@@ -61,7 +77,12 @@ static void showError(const char * pgm_msg) {
 const char PROGMEM pgm_Up[] = "Up";
 const char PROGMEM pgm_Down[] = "Down";
 
-static void doAxis(char *line, StepperMotorAxis &axis) {
+static void UpdateRotor() {
+	rotor.update();
+}
+
+static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
+	Serial.pgm_println(axisName);
 	switch (line++[0]) {
 	case 's':
 		axis.motorControl.rotate(false);
@@ -88,6 +109,29 @@ static void doAxis(char *line, StepperMotorAxis &axis) {
 	case 'y': {
 		long maxSpeed = atol(line);
 		axis.setDelayBetweenStepsAtMaxSpeedMicros(maxSpeed);
+		axis.motorControl.setDelayBetweenStepsMicros(maxSpeed);
+		break;
+	}
+	case 'Y': {
+		rotor.setMinMax(100, 10000);
+		rotor.setValue(axis.getDelayBetweenStepsAtMaxSpeedMicros());
+		if (&axis == &pcb.axisX)
+			rotorMode = AlterDelayBetweenStepsX;
+		else if (&axis == &pcb.axisY)
+			rotorMode = AlterDelayBetweenStepsY;
+		else if (&axis == &pcb.axisZ)
+			rotorMode = AlterDelayBetweenStepsZ;
+		break;
+	}
+	case 'G': {
+		rotor.setMinMax(0, 10000);
+		rotor.setValue(axis.motorControl.getStep());
+		if (&axis == &pcb.axisX)
+			rotorMode = GotoStepX;
+		else if (&axis == &pcb.axisY)
+			rotorMode = GotoStepY;
+		else if (&axis == &pcb.axisZ)
+			rotorMode = GotoStepZ;
 		break;
 	}
 	case 'p':
@@ -121,8 +165,32 @@ static void stop() {
 	pcb.axisE.stop();
 }
 
+static void doAlterDelayBetweenSteps(const char *axisName, StepperMotorAxis &axis) {
+	if (rotor.hasValueChanged()) {
+		long val = rotor.getValue();
+		Serial.pgm_print(axisName);
+		Serial.pgm_print(PSTR(": delay between steps = "));
+		Serial.println(val);
+		axis.setDelayBetweenStepsAtMaxSpeedMicros(val);
+		axis.motorControl.setDelayBetweenStepsMicros(val);
+	}
+}
+
+static void doGotoStep(const char *axisName, StepperMotorAxis &axis) {
+	if (rotor.hasValueChanged()) {
+		long val = rotor.getValue();
+		Serial.pgm_print(axisName);
+		Serial.pgm_print(PSTR(": goto step "));
+		Serial.println(val);
+		axis.setDelayBetweenStepsAtMaxSpeedMicros(val);
+		axis.motorControl.gotoStep(val);
+	}
+}
+
 static DigitalInputArduinoPin diButtonPin;
 static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
 
 void RepRapPCB2Test::setup() {
 	diButtonPin.initialize(buttonPin, true);
@@ -131,11 +199,21 @@ void RepRapPCB2Test::setup() {
 	led.initialize(&diLedPin, states, size(states), true);
 
 	reader.initialize(115200, size(readerBuffer), readerBuffer);
+	diRotorPinA.initialize(rotorPinA, true);
+	diRotorPinB.initialize(rotorPinB, true);
+	rotor.initialize(&diRotorPinA, &diRotorPinB);
+	attachInterrupt(0, UpdateRotor, CHANGE);
+	rotorMode = Idle;
+
 	pcb.initialize();
     Serial.pgm_println(PSTR("Initialized"));
     Serial.pgm_println(PSTR("Press the button to stop"));
     printHelp();
 }
+
+const char PROGMEM pgmAxisNameX[] = "X axis";
+const char PROGMEM pgmAxisNameY[] = "Y axis";
+const char PROGMEM pgmAxisNameZ[] = "Z axis";
 
 void RepRapPCB2Test::loop() {
 	pcb.update();
@@ -148,21 +226,18 @@ void RepRapPCB2Test::loop() {
 		Serial.println(line);
 		switch (line++[0]) {
 		case 'a':
-			Serial.pgm_println(PSTR("X axis"));
-			doAxis(line, pcb.axisX);
-			Serial.pgm_println(PSTR("Y axis"));
-			doAxis(line, pcb.axisY);
-			Serial.pgm_println(PSTR("Z axis"));
-			doAxis(line, pcb.axisZ);
+			doAxis(pgmAxisNameX, line, pcb.axisX);
+			doAxis(pgmAxisNameY, line, pcb.axisY);
+			doAxis(pgmAxisNameZ, line, pcb.axisZ);
 			break;
 		case 'x':
-			doAxis(line, pcb.axisX);
+			doAxis(pgmAxisNameX, line, pcb.axisX);
 			break;
 		case 'y':
-			doAxis(line, pcb.axisY);
+			doAxis(pgmAxisNameY, line, pcb.axisY);
 			break;
 		case 'z':
-			doAxis(line, pcb.axisZ);
+			doAxis(pgmAxisNameZ, line, pcb.axisZ);
 			break;
 		case 'h':
 			printHelp();
@@ -177,8 +252,33 @@ void RepRapPCB2Test::loop() {
 	}
 
 	if (btn.isLongClicked()) {
+		rotorMode = Idle;
 		printHelp();
 	} else if (btn.isClicked()) {
 		stop();
+	}
+
+	switch (rotorMode) {
+	case AlterDelayBetweenStepsX:
+		doAlterDelayBetweenSteps(pgmAxisNameX, pcb.axisX);
+		break;
+	case AlterDelayBetweenStepsY:
+		doAlterDelayBetweenSteps(pgmAxisNameY, pcb.axisY);
+		break;
+	case AlterDelayBetweenStepsZ:
+		doAlterDelayBetweenSteps(pgmAxisNameZ, pcb.axisZ);
+		break;
+	case GotoStepX:
+		doGotoStep(pgmAxisNameX, pcb.axisX);
+		break;
+	case GotoStepY:
+		doGotoStep(pgmAxisNameY, pcb.axisY);
+		break;
+	case GotoStepZ:
+		doGotoStep(pgmAxisNameZ, pcb.axisZ);
+		break;
+	case Idle:
+	default:
+		break;
 	}
 }

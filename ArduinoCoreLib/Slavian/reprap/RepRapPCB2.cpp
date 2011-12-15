@@ -48,9 +48,9 @@ void RepRapPCB2::initialize() {
 	axisZ.initialize(&motorZ, extenderInput.createPinHandler(4), extenderInput.createPinHandler(3));
 	axisE.initialize(&motorE, extenderInput.createPinHandler(5), extenderInput.createPinHandler(6));
 
-	axisX.setDelayBetweenStepsAtMaxSpeedMicros(2000);
-	axisY.setDelayBetweenStepsAtMaxSpeedMicros(2000);
-	axisZ.setDelayBetweenStepsAtMaxSpeedMicros(4000);
+	axisX.setDelayBetweenStepsAtMaxSpeedMicros(1500);
+	axisY.setDelayBetweenStepsAtMaxSpeedMicros(1500);
+	axisZ.setDelayBetweenStepsAtMaxSpeedMicros(2500);
 	axisE.setDelayBetweenStepsAtMaxSpeedMicros(2000);
 
 	axisX.setAxisResolution(1000);
