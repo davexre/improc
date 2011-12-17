@@ -5,7 +5,7 @@
 #include "StateLed.h"
 #include "menu/Menu.h"
 
-DefineClass(MenuLikeTest);
+DefineClass(SimpleMenuWithSerialPrintTest);
 
 static const int speakerPin = 8;
 static const int ledPin = 13; // the number of the LED pin
@@ -41,7 +41,7 @@ static DigitalInputArduinoPin diButtonPin;
 static DigitalInputArduinoPin diRotorPinA;
 static DigitalInputArduinoPin diRotorPinB;
 
-void MenuLikeTest::setup() {
+void SimpleMenuWithSerialPrintTest::setup() {
 	pinMode(speakerPin, OUTPUT);
 	diLedPin.initialize(ledPin, 0);
 	led.initialize(&diLedPin, ledStates, size(ledStates), true);
@@ -60,7 +60,7 @@ void MenuLikeTest::setup() {
     Serial.println("Push the encoder button to switch between menus");
 }
 
-void MenuLikeTest::loop() {
+void SimpleMenuWithSerialPrintTest::loop() {
 	led.update();
 	menu.update();
 
