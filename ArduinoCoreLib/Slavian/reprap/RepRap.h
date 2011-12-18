@@ -4,17 +4,7 @@
 #include "SerialReader.h"
 #include "GCodeParser.h"
 #include "TemperatureControl.h"
-#include "StepperAxis.h"
-#include "RepRapPCB.h"
-
-#define RepRap_Idle 0
-#define RepRap_Sleep200Millis 1
-#define RepRap_InitializePosition 2
-#define RepRap_InitializePositionForced 3
-#define RepRap_MoveRapid 4
-#define RepRap_ControlledMove 5
-#define RepRap_Stop 6
-#define RepRap_WaitForTemperature 7
+#include "RepRapPCB2.h"
 
 // Feedrates in mm/minute
 #define SLOW_XY_FEEDRATE 1000.0
@@ -28,18 +18,30 @@
 
 class RepRap {
 private:
+	enum RepRapMode {
+		Idle = 0,
+		Sleep200Millis = 1,
+		InitializePosition = 2,
+		InitializePositionForced = 3,
+//		MoveRapid = 4,
+		ControlledMove = 5,
+		Stop = 6,
+		WaitForTemperature = 7,
+		WaitForMotors = 10,
+	};
+	RepRapMode mode;
+	byte modeState;
+
 	GCodeParser gCodeParser;
 	void executeGCode(GCodeParser *gCode);
 
 	TemperatureControl *extruderTemperatureControl;
 	TemperatureControl *bedTemperatureControl;
 
-	byte mode;
-	byte modeState;
 	byte axesSelected;
 	unsigned long timeStamp;
 
-	inline void setMode(const byte mode) {
+	inline void setMode(const RepRapMode mode) {
 		this->mode = mode;
 		this->modeState = 0;
 	};
@@ -47,25 +49,15 @@ private:
 	void doRepRap_Sleep200Millis();
 	void doRepRap_InitializePosition();
 	void doRepRap_InitializePositionForced();
-	void doRepRap_MoveRapid();
+	void doRepRap_WaitForMotors();
 	void doRepRap_ControlledMove();
 	void doRepRap_Stop();
 	void doRepRap_WaitForTemperature();
-
-	bool isInitializePositionNeeded();
 public:
 	SerialReader *reader;
-	RepRapPCB pcb;
+	RepRapPCB2 pcb;
 
-	bool isPositioningAbsolute;
-
-	float originX, originY, originZ, originE;
-	/**
-	 * positionX = originX + gCode.X
-	 */
-	float positionX, positionY, positionZ, positionE;
-
-	float feedRate;
+	long feedRate; // value is specified in MM per Minute
 
 	/**
 	 * Initializes the class.

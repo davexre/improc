@@ -296,8 +296,14 @@ void StepperMotorAxis::initialize(StepperMotor *motor,
 void StepperMotorAxis::update() {
 	motorControl.update();
 	switch (mode) {
+	case InitializePosition:
+		doInitializePosition();
+		break;
 	case DetermineAvailableSteps:
 		doDetermineAvailableSteps();
+		break;
+	default:
+		modeState = StepperMotorAxis::Idle;
 		break;
 	}
 }
@@ -325,6 +331,25 @@ void StepperMotorAxis::doDetermineAvailableSteps() {
 
 void StepperMotorAxis::determineAvailableSteps(void) {
 	mode = StepperMotorAxis::DetermineAvailableSteps;
+	modeState = 0;
+}
+
+void StepperMotorAxis::doInitializePosition() {
+	switch (modeState) {
+	case 0:
+		motorControl.rotate(false);
+		modeState = 1;
+		break;
+	case 1:
+		if (!motorControl.isMoving()) {
+			motorControl.resetStep(0);
+			modeState = StepperMotorAxis::Idle;
+		}
+		break;
+	}
+}
+void StepperMotorAxis::initializePosition() {
+	mode = StepperMotorAxis::InitializePosition;
 	modeState = 0;
 }
 

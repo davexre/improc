@@ -118,6 +118,9 @@ public:
 	inline long getStep(void) {
 		return currentStep;
 	}
+	inline void resetStep(long step) {
+		currentStep = step;
+	}
 
 	inline void setDelayBetweenStepsMicros(unsigned long delayBetweenStepsMicros) {
 		this->delayBetweenStepsMicros = delayBetweenStepsMicros;
@@ -135,6 +138,7 @@ public:
  */
 class StepperMotorAxis {
 private:
+	void doInitializePosition();
 	void doDetermineAvailableSteps();
 
 	enum AxisModes {
@@ -160,6 +164,8 @@ public:
 	void update();
 
 	void determineAvailableSteps(void);
+
+	void initializePosition();
 
 	void moveToPositionMicroM(long absolutePositionMicroM, unsigned long delayBetweenStepsMicros);
 
@@ -197,6 +203,10 @@ public:
 
 	inline int getHomePositionMM() {
 		return homePositionMM;
+	}
+
+	inline bool isIdle() {
+		return (mode == StepperMotorAxis::Idle) && (!motorControl.isMoving());
 	}
 };
 

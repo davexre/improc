@@ -1,5 +1,11 @@
 #include "RepRap.h"
 
+const char PROGMEM pgm_OK[] = "ok";
+
+inline long pow2(long x) {
+	return x*x;
+}
+
 void RepRap::initialize(SerialReader *reader,
 		TemperatureControl *extruderTemperatureControl,
 		TemperatureControl *bedTemperatureControl) {
@@ -8,17 +14,8 @@ void RepRap::initialize(SerialReader *reader,
 	this->extruderTemperatureControl = extruderTemperatureControl;
 	this->bedTemperatureControl = bedTemperatureControl;
 	gCodeParser.initialize();
-	isPositioningAbsolute = true;
-	originX = originY = originZ = originE = 0;
-	positionX = positionY = positionZ = positionE = 0;
 	feedRate = 0;
-	setMode(RepRap_Idle);
-}
-
-bool RepRap::isInitializePositionNeeded() {
-	return
-		pcb.axisX.isInitializePositionNeeded() ||
-		pcb.axisY.isInitializePositionNeeded();
+	setMode(RepRap::Idle);
 }
 
 void RepRap::doRepRap_Sleep200Millis() {
@@ -29,8 +26,8 @@ void RepRap::doRepRap_Sleep200Millis() {
 		break;
 	case 1:
 		if (timeStamp - millis() >= 200) {
-			Serial.println("ok");
-			setMode(RepRap_Idle);
+			Serial.pgm_println(pgm_OK);
+			setMode(RepRap::Idle);
 		}
 		break;
 	}
@@ -41,11 +38,11 @@ void RepRap::doRepRap_InitializePositionForced() {
 	case 0:
 		pcb.axisX.initializePosition();
 		pcb.axisY.initializePosition();
+		modeState = 1;
 		break;
 	case 1:
-		if ((!pcb.axisX.isMoving()) &&
-			(!pcb.axisY.isMoving())) {
-			setMode(RepRap_Idle);
+		if (pcb.axisX.isIdle() && pcb.axisY.isIdle()) {
+			setMode(RepRap::Idle);
 		}
 		break;
 	}
@@ -56,51 +53,40 @@ void RepRap::doRepRap_InitializePosition() {
 	case 0:
 		if (axesSelected & CommandFlad_X) {
 			pcb.axisX.initializePosition();
-			originX = positionX = 0;
 		}
 		if (axesSelected & CommandFlad_Y) {
 			pcb.axisY.initializePosition();
-			originY = positionY = 0;
 		}
 		if (axesSelected & CommandFlad_Z) {
 			pcb.axisZ.initializePosition();
-			originZ = positionZ = 0;
 		}
 		if (axesSelected & CommandFlad_E) {
-			originE = positionE = 0;
+			// TODO: ???
 		}
 		modeState = 1;
 		break;
 	case 1:
-		if ((axesSelected & CommandFlad_X) && (pcb.axisX.isMoving()))
+		if ((axesSelected & CommandFlad_X) && (!pcb.axisX.isIdle()))
 			break;
-		if ((axesSelected & CommandFlad_Y) && (pcb.axisY.isMoving()))
+		if ((axesSelected & CommandFlad_Y) && (!pcb.axisY.isIdle()))
 			break;
-		if ((axesSelected & CommandFlad_Z) && (pcb.axisZ.isMoving()))
+		if ((axesSelected & CommandFlad_Z) && (!pcb.axisZ.isIdle()))
 			break;
-		Serial.println("ok");
-		setMode(RepRap_Idle);
+		Serial.pgm_println(pgm_OK);
+		setMode(RepRap::Idle);
 		break;
 	}
 }
 
-void RepRap::doRepRap_MoveRapid() {
+void RepRap::doRepRap_WaitForMotors() {
 	switch(modeState) {
 	case 0:
-		pcb.axisX.moveToPositionMicroMFast(1000 * gCodeParser.X);
-		pcb.axisY.moveToPositionMicroMFast(1000 * gCodeParser.Y);
-		pcb.axisZ.moveToPositionMicroMFast(1000 * gCodeParser.Z);
-		pcb.axisE.moveToPositionMicroMFast(1000 * gCodeParser.E);
-		modeState = 1;
-		break;
-	case 1:
-		if (!(
-				pcb.axisX.isMoving() ||
-				pcb.axisY.isMoving() ||
-				pcb.axisZ.isMoving() ||
-				pcb.axisE.isMoving())) {
-			Serial.println("ok");
-			setMode(RepRap_Idle);
+		if (pcb.axisX.isIdle() &&
+			pcb.axisY.isIdle() &&
+			pcb.axisZ.isIdle() &&
+			pcb.axisE.isIdle()) {
+			Serial.pgm_println(pgm_OK);
+			setMode(RepRap::Idle);
 		}
 		break;
 	}
@@ -122,13 +108,12 @@ void RepRap::doRepRap_ControlledMove() {
 		break;
 	}
 	case 1: {
-		if (!(
-				pcb.axisX.isMoving() ||
-				pcb.axisY.isMoving() ||
-				pcb.axisZ.isMoving() ||
-				pcb.axisE.isMoving())) {
-			Serial.println("ok");
-			setMode(RepRap_Idle);
+		if (pcb.axisX.isIdle() &&
+			pcb.axisY.isIdle() &&
+			pcb.axisZ.isIdle() &&
+			pcb.axisE.isIdle()) {
+			Serial.pgm_println(pgm_OK);
+			setMode(RepRap::Idle);
 		}
 		break;
 	}
@@ -150,8 +135,8 @@ void RepRap::doRepRap_Stop() {
 	case 1:
 		if (extruderTemperatureControl->getTemperature() < 60) {
 			pcb.fan->setState(false);
-			Serial.println("ok");
-			setMode(RepRap_Idle);
+			Serial.pgm_println(pgm_OK);
+			setMode(RepRap::Idle);
 		}
 		break;
 	}
@@ -160,42 +145,42 @@ void RepRap::doRepRap_Stop() {
 void RepRap::doRepRap_WaitForTemperature() {
 	if (extruderTemperatureControl->getTargetTemperature() ==
 			extruderTemperatureControl->getTemperature()) {
-		Serial.println("ok");
-		setMode(RepRap_Idle);
+		Serial.pgm_println(pgm_OK);
+		setMode(RepRap::Idle);
 	}
 }
 
 void RepRap::update() {
 	switch(mode) {
-	case RepRap_Sleep200Millis:
+	case Sleep200Millis:
 		doRepRap_Sleep200Millis();
 		break;
 
-	case RepRap_InitializePosition:
+	case InitializePosition:
 		doRepRap_InitializePosition();
 		break;
 
-	case RepRap_InitializePositionForced:
+	case InitializePositionForced:
 		doRepRap_InitializePositionForced();
 		break;
 
-	case RepRap_MoveRapid:
-		doRepRap_MoveRapid();
+	case WaitForMotors:
+		doRepRap_WaitForMotors();
 		break;
 
-	case RepRap_ControlledMove:
+	case ControlledMove:
 		doRepRap_ControlledMove();
 		break;
 
-	case RepRap_Stop:
+	case Stop:
 		doRepRap_Stop();
 		break;
 
-	case RepRap_WaitForTemperature:
+	case WaitForTemperature:
 		doRepRap_WaitForTemperature();
 		break;
 
-	case RepRap_Idle:
+	case Idle:
 	default:
 		if (reader->available()) {
 			if (gCodeParser.parse(reader->readln())) {
@@ -210,29 +195,17 @@ void RepRap::update() {
 
 void RepRap::executeGCode(GCodeParser *gCode) {
 	if (gCode->commandOccuraceFlag & CommandFlad_G) {
-		if (gCode->commandOccuraceFlag & CommandFlad_X) {
-			if (isPositioningAbsolute)
-				positionX = gCode->X;
-			else
-				positionX += gCode->X;
+		if (!gCode->commandOccuraceFlag & CommandFlad_X) {
+			gCode->X = pcb.axisX.getAbsolutePositionMicroM();
 		}
-		if (gCode->commandOccuraceFlag & CommandFlad_Y) {
-			if (isPositioningAbsolute)
-				positionY = gCode->Y;
-			else
-				positionY += gCode->Y;
+		if (!gCode->commandOccuraceFlag & CommandFlad_Y) {
+			gCode->Y = pcb.axisY.getAbsolutePositionMicroM();
 		}
-		if (gCode->commandOccuraceFlag & CommandFlad_Z) {
-			if (isPositioningAbsolute)
-				positionZ = gCode->Z;
-			else
-				positionZ += gCode->Z;
+		if (!gCode->commandOccuraceFlag & CommandFlad_Z) {
+			gCode->Z = pcb.axisZ.getAbsolutePositionMicroM();
 		}
-		if (gCode->commandOccuraceFlag & CommandFlad_E) {
-			if (isPositioningAbsolute)
-				positionE = gCode->E;
-			else
-				positionE += gCode->E;
+		if (!gCode->commandOccuraceFlag & CommandFlad_E) {
+			gCode->E = pcb.axisE.getAbsolutePositionMicroM();
 		}
 	}
 
@@ -241,122 +214,113 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 	}
 
 	switch (gCode->gCode) {
-	case CodeG_MoveRapid:
-		setMode(RepRap_MoveRapid);
+	case GCodeParser::GCode_MoveRapid:
+		pcb.axisX.moveToPositionMicroMFast(gCode->X);
+		pcb.axisY.moveToPositionMicroMFast(gCode->Y);
+		pcb.axisZ.moveToPositionMicroMFast(gCode->Z);
+		pcb.axisE.moveToPositionMicroMFast(gCode->E);
+		setMode(RepRap::WaitForMotors);
 		break;
-	case CodeG_ControlledMove:
-		setMode(RepRap_ControlledMove);
+	case GCodeParser::GCode_ControlledMove: {
+		long length = pow2(pcb.axisX.getAbsolutePositionMicroM() - gCode->X);
+		length += pow2(pcb.axisY.getAbsolutePositionMicroM() - gCode->Y);
+		length += pow2(pcb.axisZ.getAbsolutePositionMicroM() - gCode->Z);
+		length += pow2(pcb.axisE.getAbsolutePositionMicroM() - gCodeParser.E);
+		length = (long) sqrt(length);
+
+		long timeMicros = ((60000 * length) / feedRate) * 1000;
+		pcb.axisX.moveToPositionMicroM(1000 * gCodeParser.X, timeMicros);
+		pcb.axisY.moveToPositionMicroM(1000 * gCodeParser.Y, timeMicros);
+		pcb.axisZ.moveToPositionMicroM(1000 * gCodeParser.Z, timeMicros);
+		pcb.axisE.moveToPositionMicroM(1000 * gCodeParser.E, timeMicros);
+		setMode(RepRap::ControlledMove);
 		break;
-	case CodeG_GoHome: {
+	}
+	case GCodeParser::GCode_GoHome: {
 		axesSelected = gCode->commandOccuraceFlag & (CommandFlad_X | CommandFlad_Y | CommandFlad_Z);
 		if (axesSelected == 0)
 			axesSelected |= (CommandFlad_X | CommandFlad_Y | CommandFlad_Z);
-		setMode(RepRap_InitializePosition);
+		setMode(RepRap::InitializePosition);
 		break;
 	}
-	case CodeG_Dwell: // Sleep for 200 milliseconds
-		setMode(RepRap_Sleep200Millis);
+	case GCodeParser::GCode_Dwell: // Sleep for 200 milliseconds
+		setMode(RepRap::Sleep200Millis);
 		break;
-	case CodeG_UnitsInches:
-		gCode->gCodeUnitsToMM = 25.4;
-		break;
-	case CodeG_UnitsMM:
-		gCode->gCodeUnitsToMM = 1.0;
-		break;
-	case CodeG_PositioningAbsolute:
-		isPositioningAbsolute = true;
-		break;
-	case CodeG_PositioningIncremental:
-		isPositioningAbsolute = false;
-		break;
-	case CodeG_SetPosition: {
-		if (gCode->commandOccuraceFlag & CommandFlad_X)	{
-			originX = positionX - gCode->X;
-			positionX = gCode->X;
-		}
-		if (gCode->commandOccuraceFlag & CommandFlad_Y)	{
-			originY = positionY - gCode->Y;
-			positionY = gCode->Y;
-		}
-		if (gCode->commandOccuraceFlag & CommandFlad_Z)	{
-			originZ = positionZ - gCode->Z;
-			positionZ = gCode->Z;
-		}
-		if (gCode->commandOccuraceFlag & CommandFlad_E)	{
-			originE = positionE - gCode->E;
-			positionE = gCode->E;
-		}
-		break;
-	}
-	case CodeG_NoCommand:
+	case GCodeParser::GCode_NoCommand:
 	default:
 		break;
 	}
 
 	switch (gCode->mCode) {
-	case CodeM_CompulsoryStop:
-	case CodeM_Shutdown:
-	case CodeM_OptionalStop:
-	case CodeM_ProgramEnd:
-		setMode(RepRap_Stop);
+	case GCodeParser::MCode_CompulsoryStop:
+	case GCodeParser::MCode_Shutdown:
+	case GCodeParser::MCode_OptionalStop:
+	case GCodeParser::MCode_ProgramEnd:
+		setMode(RepRap::Stop);
 		break;
-	case CodeM_ExtruderSetTemperature:
+	case GCodeParser::MCode_ExtruderSetTemperature:
 		if (gCode->commandOccuraceFlag & CommandFlad_S)
 			extruderTemperatureControl->setTargetTemperature(gCode->S);
 		break;
-	case CodeM_ExtruderGetTemperature:
-		Serial.print("ok T:");
+	case GCodeParser::MCode_ExtruderGetTemperature:
+		Serial.pgm_print(PSTR("ok T:"));
 		Serial.println(extruderTemperatureControl->getTemperature());
 		break;
-	case CodeM_ExtruderFanOn:
+	case GCodeParser::MCode_ExtruderFanOn:
 		pcb.fan->setState(true);
 		break;
-	case CodeM_ExtruderFanOff:
+	case GCodeParser::MCode_ExtruderFanOff:
 		pcb.fan->setState(false);
 		break;
-	case CodeM_ExtruderSetTemperatureAndWait:
+	case GCodeParser::MCode_ExtruderSetTemperatureAndWait:
 		if (gCode->commandOccuraceFlag & CommandFlad_S) {
 			extruderTemperatureControl->setTargetTemperature(gCode->S);
 		}
-		setMode(RepRap_WaitForTemperature);
+		setMode(RepRap::WaitForTemperature);
 		break;
-	case CodeM_SetLineNumber:
+	case GCodeParser::MCode_SetLineNumber:
 		break;
-	case CodeM_SendDebugInfo:
+	case GCodeParser::MCode_SendDebugInfo:
 		break;
-	case CodeM_ExtruderSetPWM:
+	case GCodeParser::MCode_ExtruderSetPWM:
 		break;
-	case CodeM_GetPosition:
-		Serial.print("ok C: X:");
-		Serial.print((positionX - originX) / gCode->gCodeUnitsToMM);
-		Serial.print(" Y:");
-		Serial.print((positionY - originY) / gCode->gCodeUnitsToMM);
-		Serial.print(" Z:");
-		Serial.print((positionZ - originZ) / gCode->gCodeUnitsToMM);
-		Serial.print(" E:");
-		Serial.println((positionE - originE) / gCode->gCodeUnitsToMM);
+	case GCodeParser::MCode_GetPosition: {
+		Serial.pgm_print(PSTR("ok C: X:"));
+		float pos = (float) pcb.axisX.getAbsolutePositionMicroM() / 1000.0f;
+		Serial.print(pos);
+
+		Serial.pgm_print(PSTR(" Y:"));
+		pos = (float) pcb.axisY.getAbsolutePositionMicroM() / 1000.0f;
+		Serial.print(pos);
+
+		Serial.pgm_print(PSTR(" Z:"));
+		pos = (float) pcb.axisZ.getAbsolutePositionMicroM() / 1000.0f;
+		Serial.print(pos);
+
+		Serial.pgm_print(PSTR(" E:"));
+		pos = (float) pcb.axisE.getAbsolutePositionMicroM() / 1000.0f;
+		Serial.println(pos);
 		break;
-	case CodeM_GetCapabilities:
+	}
+	case GCodeParser::MCode_GetCapabilities:
 		break;
-	case CodeM_ExtruderWaitForTemperature:
-		setMode(RepRap_WaitForTemperature);
+	case GCodeParser::MCode_ExtruderWaitForTemperature:
+		setMode(RepRap::WaitForTemperature);
 		break;
-	case CodeM_GetZeroPosition:
+	case GCodeParser::MCode_GetZeroPosition:
 		break;
-	case CodeM_ExtruderOpenValve:
+	case GCodeParser::MCode_ExtruderOpenValve:
 // TODO:		axisE->rotate(true, FAST_E_FEEDRATE);
 		break;
-	case CodeM_ExtruderCloseValve:
+	case GCodeParser::MCode_ExtruderCloseValve:
 		pcb.axisE.moveToPositionMicroMFast(pcb.axisE.getAbsolutePositionMicroM() - 1000); // move extruder 1 mm backwards
-		if (isInitializePositionNeeded())
-			setMode(RepRap_InitializePositionForced);
 		break;
-	case CodeM_ExtruderSetTemperature2:
+	case GCodeParser::MCode_ExtruderSetTemperature2:
 		if (gCode->commandOccuraceFlag & CommandFlad_S) {
 			bedTemperatureControl->setTargetTemperature(gCode->S);
 		}
 		break;
-	case CodeM_NoCommand:
+	case GCodeParser::MCode_NoCommand:
 	default:
 		break;
 	}

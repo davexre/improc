@@ -6,50 +6,6 @@
 
 ////////////// GCODE
 
-#define CodeG_NoCommand -1
-#define CodeG_MoveRapid 0
-
-// Controlled move; -ve coordinate means zero the axis
-#define CodeG_ControlledMove 1
-
-//go home.  If we send coordinates (regardless of their value) only zero those axes
-#define CodeG_GoHome 28
-#define CodeG_Dwell 4
-#define CodeG_UnitsInches 20
-#define CodeG_UnitsMM 21
-#define CodeG_PositioningAbsolute 90
-#define CodeG_PositioningIncremental 91
-#define CodeG_SetPosition 92
-
-#define CodeM_NoCommand -1
-#define CodeM_CompulsoryStop 0
-#define CodeM_OptionalStop 1
-#define CodeM_ProgramEnd 2
-//#define CodeM_ExtruderForward 101
-//#define CodeM_ExtruderReverse 102
-#define CodeM_ExtruderSetTemperature 104
-#define CodeM_ExtruderGetTemperature 105
-#define CodeM_ExtruderFanOn 106
-#define CodeM_ExtruderFanOff 107
-#define CodeM_ExtruderSetTemperatureAndWait 109
-#define CodeM_SetLineNumber 110
-#define CodeM_SendDebugInfo 111
-#define CodeM_Shutdown 112
-#define CodeM_ExtruderSetPWM 113
-#define CodeM_GetPosition 114
-#define CodeM_GetCapabilities 115
-#define CodeM_ExtruderWaitForTemperature 116
-#define CodeM_GetZeroPosition 117
-#define CodeM_ExtruderOpenValve 126
-#define CodeM_ExtruderCloseValve 127
-#define CodeM_ExtruderSetTemperature2 140
-//#define CodeM_SetChamberTemperatrue 141
-//#define CodeM_SetHoldingPressure 142
-
-//#define CodeT_SetActiveExtruder0 0
-
-//////////
-
 #define CommandFlad_G (1<<0)
 #define CommandFlad_M (1<<1)
 #define CommandFlad_P (1<<2)
@@ -69,12 +25,57 @@
 
 class GCodeParser {
 public:
-	float gCodeUnitsToMM;
-	int gCode;
+	enum GCode {
+		GCode_NoCommand = -1,
+		GCode_MoveRapid = 0,
 
-	int mCode;
-	float X, Y, Z, E;
-	float feedRate;		// command F
+		// Controlled move; -ve coordinate means zero the axis
+		GCode_ControlledMove = 1,
+
+		//go home.  If we send coordinates (regardless of their value) only zero those axes
+		GCode_GoHome = 28,
+		GCode_Dwell = 4,
+//		GCode_UnitsInches = 20,
+//		GCode_UnitsMM = 21,
+//		GCode_PositioningAbsolute = 90,
+//		GCode_PositioningIncremental = 91,
+//		GCode_SetPosition = 92,
+	};
+
+	enum MCode {
+		MCode_NoCommand = -1,
+		MCode_CompulsoryStop = 0,
+		MCode_OptionalStop = 1,
+		MCode_ProgramEnd = 2,
+//		MCode_ExtruderForward = 101,
+//		MCode_ExtruderReverse = 102,
+		MCode_ExtruderSetTemperature = 104,
+		MCode_ExtruderGetTemperature = 105,
+		MCode_ExtruderFanOn = 106,
+		MCode_ExtruderFanOff = 107,
+		MCode_ExtruderSetTemperatureAndWait = 109,
+		MCode_SetLineNumber = 110,
+		MCode_SendDebugInfo = 111,
+		MCode_Shutdown = 112,
+		MCode_ExtruderSetPWM = 113,
+		MCode_GetPosition = 114,
+		MCode_GetCapabilities = 115,
+		MCode_ExtruderWaitForTemperature = 116,
+		MCode_GetZeroPosition = 117,
+		MCode_ExtruderOpenValve = 126,
+		MCode_ExtruderCloseValve = 127,
+		MCode_ExtruderSetTemperature2 = 140,
+//		MCode_SetChamberTemperatrue = 141,
+//		MCode_SetHoldingPressure = 142,
+
+//		CodeT_SetActiveExtruder0 = 0,
+	};
+
+	GCode gCode;
+	MCode mCode;
+
+	long X, Y, Z, E;
+	long feedRate;		// command F
 	float P;			// command P
 	float T;			// command T
 	float S;			// command S

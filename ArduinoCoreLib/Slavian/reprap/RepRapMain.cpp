@@ -34,7 +34,7 @@ static const unsigned int PROGMEM *states[] = {
 		BLINK_FAST
 };
 
-static char readerBuffer[200];
+static char readerBuffer[100];
 static SerialReader reader;
 
 static DigitalOutputShiftRegister_74HC595 extenderOutput;
