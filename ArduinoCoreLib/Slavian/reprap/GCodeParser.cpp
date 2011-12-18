@@ -9,7 +9,7 @@ void GCodeParser::initialize() {
 void GCodeParser::initVars() {
 	commandOccuraceFlag = 0;
 	mCode = GCodeParser::MCode_NoCommand;
-	feedRate = X = Y = Z = E = 0;
+	speed = feedRate = X = Y = Z = E = 0;
 	P = T = S = I = J = R = Q = N = 0;
 }
 
@@ -83,6 +83,11 @@ bool GCodeParser::parse(char *line) {
 	case 'F':
 		feedRate = (long) strtod(line, &line); // TODO: may be a multiplier constant is needed
 		commandOccuraceFlag |= CommandFlad_F;
+		break;
+
+	case 'K':
+		speed = (long) strtod(line, &line); // TODO: may be a multiplier constant is needed
+		commandOccuraceFlag |= CommandFlad_K;
 		break;
 
 	case 'R':

@@ -230,8 +230,8 @@ void StepperMotorControlWithButtons::update() {
 		if (now - lastTimestampMicros >= timeToStopMicros) {
 			motor->stop();
 			movementMode = StepperMotorControlWithButtons::Idle;
-			if (!moveForeward)
-				currentStep = 0;
+//			if (!moveForeward)
+//				currentStep = 0;	// TODO: Is this really necessary?
 		}
 		return;
 	}
@@ -258,6 +258,23 @@ void StepperMotorControlWithButtons::update() {
 	lastTimestampMicros += delayBetweenStepsMicros; // should increase, not set to now!
 }
 
+void StepperMotorControlWithButtons::moveTo(long step, unsigned long timeToMakeTheMoveMicors) {
+	step -= currentStep;
+	if (step >= 0) {
+		movementMode = StepperMotorControlWithButtons::Foreward;
+		remainingSteps = step;
+	} else {
+		movementMode = StepperMotorControlWithButtons::Backward;
+		remainingSteps = -step;
+	}
+	delayBetweenStepsMicros = remainingSteps;
+	if (remainingSteps < 3) {
+		delayBetweenStepsMicros++;
+	}
+	delayBetweenStepsMicros = timeToMakeTheMoveMicors / delayBetweenStepsMicros;
+	lastTimestampMicros = micros() - delayBetweenStepsMicros;
+}
+
 void StepperMotorControlWithButtons::gotoStep(long step) {
 	step -= currentStep;
 	if (step >= 0) {
@@ -271,7 +288,7 @@ void StepperMotorControlWithButtons::gotoStep(long step) {
 }
 
 void StepperMotorControlWithButtons::rotate(bool foreward) {
-	movementMode = foreward ? StepperMotorControlWithButtons::GotoStartButton : StepperMotorControlWithButtons::GotoEndButton;
+	movementMode = foreward ? StepperMotorControlWithButtons::GotoEndButton : StepperMotorControlWithButtons::GotoStartButton;
 	lastTimestampMicros = micros() - delayBetweenStepsMicros;
 }
 
@@ -353,13 +370,12 @@ void StepperMotorAxis::initializePosition() {
 	modeState = 0;
 }
 
-void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigned long delayBetweenStepsMicros) {
-	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsMicros);
-	motorControl.gotoStep(absolutePositionMicroM * 100000L / ((long) axisResolution));
+void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigned long timeToMakeTheMoveMicors) {
+	motorControl.moveTo((absolutePositionMicroM * axisResolution) / 100000L, timeToMakeTheMoveMicors);
 }
 
 long StepperMotorAxis::getAbsolutePositionMicroM() {
-	return motorControl.getStep() * 100000L / ((long) axisResolution);
+	return (motorControl.getStep() * 100000L) / axisResolution;
 }
 
 void StepperMotorAxis::stop() {

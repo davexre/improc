@@ -22,6 +22,7 @@
 #define CommandFlad_E (1<<13)
 #define CommandFlad_T (1<<14)
 #define CommandFlad_J (1<<15)
+#define CommandFlad_K (1<<16)
 
 class GCodeParser {
 public:
@@ -76,6 +77,7 @@ public:
 
 	long X, Y, Z, E;
 	long feedRate;		// command F
+	long speed;			// ???
 	float P;			// command P
 	float T;			// command T
 	float S;			// command S
@@ -85,7 +87,7 @@ public:
 	float Q;			// command Q
 	float N;			// command N
 
-	int commandOccuraceFlag;
+	long commandOccuraceFlag;
 
 	void initialize();
 	void initVars();

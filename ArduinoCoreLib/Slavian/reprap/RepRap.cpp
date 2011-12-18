@@ -15,6 +15,7 @@ void RepRap::initialize(SerialReader *reader,
 	this->bedTemperatureControl = bedTemperatureControl;
 	gCodeParser.initialize();
 	feedRate = 0;
+	speed = 0;
 	setMode(RepRap::Idle);
 }
 
@@ -204,13 +205,13 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 		if (!gCode->commandOccuraceFlag & CommandFlad_Z) {
 			gCode->Z = pcb.axisZ.getAbsolutePositionMicroM();
 		}
-		if (!gCode->commandOccuraceFlag & CommandFlad_E) {
-			gCode->E = pcb.axisE.getAbsolutePositionMicroM();
-		}
 	}
 
 	if (gCode->commandOccuraceFlag & CommandFlad_F) {
 		feedRate = gCode->feedRate;
+	}
+	if (gCode->commandOccuraceFlag & CommandFlad_K) {
+		speed = gCode->speed;
 	}
 
 	switch (gCode->gCode) {
@@ -218,21 +219,18 @@ void RepRap::executeGCode(GCodeParser *gCode) {
 		pcb.axisX.moveToPositionMicroMFast(gCode->X);
 		pcb.axisY.moveToPositionMicroMFast(gCode->Y);
 		pcb.axisZ.moveToPositionMicroMFast(gCode->Z);
-		pcb.axisE.moveToPositionMicroMFast(gCode->E);
 		setMode(RepRap::WaitForMotors);
 		break;
 	case GCodeParser::GCode_ControlledMove: {
 		long length = pow2(pcb.axisX.getAbsolutePositionMicroM() - gCode->X);
 		length += pow2(pcb.axisY.getAbsolutePositionMicroM() - gCode->Y);
 		length += pow2(pcb.axisZ.getAbsolutePositionMicroM() - gCode->Z);
-		length += pow2(pcb.axisE.getAbsolutePositionMicroM() - gCodeParser.E);
 		length = (long) sqrt(length);
 
-		long timeMicros = ((60000 * length) / feedRate) * 1000;
-		pcb.axisX.moveToPositionMicroM(1000 * gCodeParser.X, timeMicros);
-		pcb.axisY.moveToPositionMicroM(1000 * gCodeParser.Y, timeMicros);
-		pcb.axisZ.moveToPositionMicroM(1000 * gCodeParser.Z, timeMicros);
-		pcb.axisE.moveToPositionMicroM(1000 * gCodeParser.E, timeMicros);
+		long timeMicros = ((60000 * length) / speed) * 1000;
+		pcb.axisX.moveToPositionMicroM(gCodeParser.X, timeMicros);
+		pcb.axisY.moveToPositionMicroM(gCodeParser.Y, timeMicros);
+		pcb.axisZ.moveToPositionMicroM(gCodeParser.Z, timeMicros);
 		setMode(RepRap::ControlledMove);
 		break;
 	}

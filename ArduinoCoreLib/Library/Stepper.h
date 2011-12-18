@@ -107,6 +107,7 @@ public:
 			DigitalInputPin *endButton);
 	void update();
 
+	void moveTo(long step, unsigned long timeToMakeTheMoveMicors);
 	void gotoStep(long step);
 	void rotate(bool foreward);
 	void stop();
@@ -167,7 +168,7 @@ public:
 
 	void initializePosition();
 
-	void moveToPositionMicroM(long absolutePositionMicroM, unsigned long delayBetweenStepsMicros);
+	void moveToPositionMicroM(long absolutePositionMicroM, unsigned long timeToMakeTheMoveMicors);
 
 	long getAbsolutePositionMicroM();
 

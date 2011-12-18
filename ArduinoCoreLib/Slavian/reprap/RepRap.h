@@ -57,7 +57,8 @@ public:
 	SerialReader *reader;
 	RepRapPCB2 pcb;
 
-	long feedRate; // value is specified in MM per Minute
+	long speed;		// value is specified in MM per Minute
+	long feedRate;	// value is specified in MM per Minute
 
 	/**
 	 * Initializes the class.

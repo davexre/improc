@@ -22,6 +22,11 @@ static char readerBuffer[100];
 static SerialReader reader;
 static RotaryEncoderAcceleration rotor;
 
+static DigitalInputArduinoPin diButtonPin;
+static DigitalOutputArduinoPin diLedPin;
+static DigitalInputArduinoPin diRotorPinA;
+static DigitalInputArduinoPin diRotorPinB;
+
 static const unsigned int PROGMEM *states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
@@ -30,6 +35,10 @@ static const unsigned int PROGMEM *states[] = {
 		BLINK_MEDIUM,
 //		BLINK1, BLINK2, BLINK3
 };
+
+const char PROGMEM pgmAxisNameX[] = "X axis";
+const char PROGMEM pgmAxisNameY[] = "Y axis";
+const char PROGMEM pgmAxisNameZ[] = "Z axis";
 
 const char PROGMEM helpMessage[] =
 	"Command format: <command><sub-command>[parameter]<press enter>\n"
@@ -48,24 +57,27 @@ const char PROGMEM helpMessage[] =
 	"  g - Goto step (parameter long int)\n"
 	"  m - Move to position (parameter float - absolute position in millimeters)\n"
 	"  y - set delaY between steps at maximum speed (parameter int - delay microseconds)\n"
+	"  q - set speed to move the axis from start to end (parameter long - speed in mm/min)\n"
 	"-- set the rotary encoder to control a value, only one axis at a time, long click to turn off\n"
+	"  G - Goto step\n"
 	"  Y - delaY between steps\n"
-	"  G - Goto step\n";
+	"  Q - set speed to move the axis from start to end\n";
 
 static void printHelp() {
 	Serial.pgm_println(helpMessage);
 }
 
-enum RotorMode {
+enum RepRapMode {
 	Idle = 0,
-	AlterDelayBetweenStepsX = 1,
-	AlterDelayBetweenStepsY = 2,
-	AlterDelayBetweenStepsZ = 3,
-
-	GotoStepX = 5,
-	GotoStepY = 6,
-	GotoStepZ = 7,
-} rotorMode;
+	AlterDelayBetweenSteps = 1,
+	GotoStep = 2,
+	DetermineAvailableSteps = 3,
+	MoveForthAndBackAtSpeed = 4,
+} repRapMode;
+uint8_t modeState;
+const char *selectedAxisName;
+StepperMotorAxis *selectedAxis;
+long speed = 300; // mm per minute
 
 static void showError(const char * pgm_msg) {
 	Serial.pgm_print(PSTR("Error "));
@@ -83,6 +95,8 @@ static void UpdateRotor() {
 
 static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 	Serial.pgm_println(axisName);
+	selectedAxisName = axisName;
+	selectedAxis = &axis;
 	switch (line++[0]) {
 	case 's':
 		axis.motorControl.rotate(false);
@@ -91,7 +105,8 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		axis.motorControl.rotate(true);
 		break;
 	case 'd':
-		axis.determineAvailableSteps();
+		repRapMode = DetermineAvailableSteps;
+		modeState = 0;
 		break;
 	case 'h':
 		axis.moveToHomePosition();
@@ -107,31 +122,30 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		break;
 	}
 	case 'y': {
-		long maxSpeed = atol(line);
-		axis.setDelayBetweenStepsAtMaxSpeedMicros(maxSpeed);
-		axis.motorControl.setDelayBetweenStepsMicros(maxSpeed);
+		long delayBetweenSteps = atol(line);
+		axis.setDelayBetweenStepsAtMaxSpeedMicros(delayBetweenSteps);
+		axis.motorControl.setDelayBetweenStepsMicros(delayBetweenSteps);
 		break;
 	}
 	case 'Y': {
 		rotor.setMinMax(100, 10000);
 		rotor.setValue(axis.getDelayBetweenStepsAtMaxSpeedMicros());
-		if (&axis == &pcb.axisX)
-			rotorMode = AlterDelayBetweenStepsX;
-		else if (&axis == &pcb.axisY)
-			rotorMode = AlterDelayBetweenStepsY;
-		else if (&axis == &pcb.axisZ)
-			rotorMode = AlterDelayBetweenStepsZ;
 		break;
 	}
+	case 'q':
+		speed = atol(line);
+		repRapMode = MoveForthAndBackAtSpeed;
+		modeState = 0;
+		break;
+	case 'Q':
+		rotor.setMinMax(60, 6000);
+		rotor.setValue(speed);
+		repRapMode = MoveForthAndBackAtSpeed;
+		modeState = 0;
+		break;
 	case 'G': {
 		rotor.setMinMax(0, 10000);
 		rotor.setValue(axis.motorControl.getStep());
-		if (&axis == &pcb.axisX)
-			rotorMode = GotoStepX;
-		else if (&axis == &pcb.axisY)
-			rotorMode = GotoStepY;
-		else if (&axis == &pcb.axisZ)
-			rotorMode = GotoStepZ;
 		break;
 	}
 	case 'p':
@@ -140,6 +154,7 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		Serial.pgm_print(PSTR("remaining steps:")); Serial.println(axis.motorControl.remainingSteps);
 		Serial.pgm_print(PSTR("cur step:       ")); Serial.println(axis.motorControl.getStep());
 		Serial.pgm_print(PSTR("abs position:   ")); Serial.println(axis.getAbsolutePositionMicroM());
+		Serial.pgm_print(PSTR("speed (Q):      ")); Serial.println(speed);
 		Serial.println();
 		Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(axis.motorControl.startButton->getState() ? pgm_Up : pgm_Down);
 		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(axis.motorControl.endButton->getState() ? pgm_Up : pgm_Down);
@@ -163,34 +178,117 @@ static void stop() {
 	pcb.axisY.stop();
 	pcb.axisZ.stop();
 	pcb.axisE.stop();
+	repRapMode = Idle;
 }
 
-static void doAlterDelayBetweenSteps(const char *axisName, StepperMotorAxis &axis) {
+static void doAlterDelayBetweenSteps() {
 	if (rotor.hasValueChanged()) {
 		long val = rotor.getValue();
-		Serial.pgm_print(axisName);
+		Serial.pgm_print(selectedAxisName);
 		Serial.pgm_print(PSTR(": delay between steps = "));
 		Serial.println(val);
-		axis.setDelayBetweenStepsAtMaxSpeedMicros(val);
-		axis.motorControl.setDelayBetweenStepsMicros(val);
+		selectedAxis->setDelayBetweenStepsAtMaxSpeedMicros(val);
+		selectedAxis->motorControl.setDelayBetweenStepsMicros(val);
 	}
 }
 
-static void doGotoStep(const char *axisName, StepperMotorAxis &axis) {
+static void doGotoStep() {
 	if (rotor.hasValueChanged()) {
 		long val = rotor.getValue();
-		Serial.pgm_print(axisName);
+		Serial.pgm_print(selectedAxisName);
 		Serial.pgm_print(PSTR(": goto step "));
 		Serial.println(val);
-		axis.setDelayBetweenStepsAtMaxSpeedMicros(val);
-		axis.motorControl.gotoStep(val);
+		selectedAxis->setDelayBetweenStepsAtMaxSpeedMicros(val);
+		selectedAxis->motorControl.gotoStep(val);
 	}
 }
 
-static DigitalInputArduinoPin diButtonPin;
-static DigitalOutputArduinoPin diLedPin;
-static DigitalInputArduinoPin diRotorPinA;
-static DigitalInputArduinoPin diRotorPinB;
+long maxStep;
+
+static void doDetermineAvailableSteps() {
+	switch (modeState) {
+	case 0:
+		// goto begining
+		selectedAxis->motorControl.rotate(false);
+		modeState = 1;
+		break;
+	case 1:
+		if (!selectedAxis->motorControl.isMoving()) {
+			selectedAxis->motorControl.resetStep(0);
+			selectedAxis->motorControl.rotate(true);
+			modeState = 2;
+		}
+		break;
+	case 2:
+		if (!selectedAxis->motorControl.isMoving()) {
+			maxStep = selectedAxis->motorControl.getStep();
+			selectedAxis->motorControl.rotate(false);
+			modeState = 3;
+		}
+		break;
+	case 3:
+		if (!selectedAxis->motorControl.isMoving()) {
+			Serial.print(maxStep);
+			Serial.print('\t');
+			Serial.println(selectedAxis->motorControl.getStep());
+			selectedAxis->motorControl.resetStep(0);
+			modeState = 0;
+		}
+		break;
+	default:
+		stop();
+		break;
+	}
+}
+
+static const long deltaToMove = 5000; // 5 cm
+void doMoveForthAndBackAtSpeed() {
+	if (rotor.hasValueChanged()) {
+		speed = rotor.getValue();
+		Serial.pgm_print(selectedAxisName);
+		Serial.pgm_print(PSTR(": speed mm/min "));
+		Serial.println(speed);
+	}
+
+	switch (modeState) {
+	case 0: {
+		long pos = selectedAxis->getAbsolutePositionMicroM() - 2*deltaToMove;
+		long timeMicros = ((60000 * (2*deltaToMove)) / speed) * 1000;
+		selectedAxis->moveToPositionMicroM(pos, timeMicros);
+		modeState = 1;
+		break;
+	}
+	case 1: {
+		if (selectedAxis->isIdle()) {
+			long pos = selectedAxis->getAbsolutePositionMicroM() + 2 * deltaToMove;
+			long timeMicros = ((60000 * (2*deltaToMove)) / speed) * 1000;
+			selectedAxis->moveToPositionMicroM(pos, timeMicros);
+			modeState = 2;
+		}
+		break;
+	}
+	case 2: {
+		if (selectedAxis->isIdle()) {
+			long pos = selectedAxis->getAbsolutePositionMicroM() + deltaToMove;
+			long timeMicros = ((60000 * deltaToMove) / speed) * 1000;
+			selectedAxis->moveToPositionMicroM(pos, timeMicros);
+			modeState = 3;
+		}
+		break;
+	}
+	case 3: {
+		if (selectedAxis->isIdle()) {
+			long pos = selectedAxis->getAbsolutePositionMicroM() - deltaToMove;
+			long timeMicros = ((60000 * deltaToMove) / speed) * 1000;
+			selectedAxis->moveToPositionMicroM(pos, timeMicros);
+			modeState = 2;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}
 
 void RepRapPCB2Test::setup() {
 	diButtonPin.initialize(buttonPin, true);
@@ -203,17 +301,17 @@ void RepRapPCB2Test::setup() {
 	diRotorPinB.initialize(rotorPinB, true);
 	rotor.initialize(&diRotorPinA, &diRotorPinB);
 	attachInterrupt(0, UpdateRotor, CHANGE);
-	rotorMode = Idle;
 
 	pcb.initialize();
+	repRapMode = Idle;
+	repRapMode = Idle;
+	selectedAxisName = pgmAxisNameX;
+	selectedAxis = &pcb.axisX;
+
     Serial.pgm_println(PSTR("Initialized"));
     Serial.pgm_println(PSTR("Press the button to stop"));
     printHelp();
 }
-
-const char PROGMEM pgmAxisNameX[] = "X axis";
-const char PROGMEM pgmAxisNameY[] = "Y axis";
-const char PROGMEM pgmAxisNameZ[] = "Z axis";
 
 void RepRapPCB2Test::loop() {
 	pcb.update();
@@ -252,30 +350,24 @@ void RepRapPCB2Test::loop() {
 	}
 
 	if (btn.isLongClicked()) {
-		rotorMode = Idle;
+		stop();
 		printHelp();
 	} else if (btn.isClicked()) {
 		stop();
 	}
 
-	switch (rotorMode) {
-	case AlterDelayBetweenStepsX:
-		doAlterDelayBetweenSteps(pgmAxisNameX, pcb.axisX);
+	switch (repRapMode) {
+	case AlterDelayBetweenSteps:
+		doAlterDelayBetweenSteps();
 		break;
-	case AlterDelayBetweenStepsY:
-		doAlterDelayBetweenSteps(pgmAxisNameY, pcb.axisY);
+	case GotoStep:
+		doGotoStep();
 		break;
-	case AlterDelayBetweenStepsZ:
-		doAlterDelayBetweenSteps(pgmAxisNameZ, pcb.axisZ);
+	case DetermineAvailableSteps:
+		doDetermineAvailableSteps();
 		break;
-	case GotoStepX:
-		doGotoStep(pgmAxisNameX, pcb.axisX);
-		break;
-	case GotoStepY:
-		doGotoStep(pgmAxisNameY, pcb.axisY);
-		break;
-	case GotoStepZ:
-		doGotoStep(pgmAxisNameZ, pcb.axisZ);
+	case MoveForthAndBackAtSpeed:
+		doMoveForthAndBackAtSpeed();
 		break;
 	case Idle:
 	default:
