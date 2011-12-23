@@ -174,9 +174,7 @@ public:
 
 	void stop(void);
 
-	inline void moveToPositionMicroMFast(long absolutePositionMicroM) {
-		moveToPositionMicroM(absolutePositionMicroM, delayBetweenStepsAtMaxSpeedMicros);
-	}
+	void moveToPositionMicroMFast(long absolutePositionMicroM);
 
 	inline void moveToHomePosition() {
 		moveToPositionMicroMFast(((long) homePositionMM) * 1000L);

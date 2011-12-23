@@ -53,6 +53,11 @@ void RepRapPCB2::initialize() {
 	axisZ.setDelayBetweenStepsAtMaxSpeedMicros(2500);
 	axisE.setDelayBetweenStepsAtMaxSpeedMicros(2000);
 
+	axisX.motorControl.setDelayBetweenStepsMicros(axisX.getDelayBetweenStepsAtMaxSpeedMicros());
+	axisY.motorControl.setDelayBetweenStepsMicros(axisY.getDelayBetweenStepsAtMaxSpeedMicros());
+	axisZ.motorControl.setDelayBetweenStepsMicros(axisZ.getDelayBetweenStepsAtMaxSpeedMicros());
+	axisE.motorControl.setDelayBetweenStepsMicros(axisE.getDelayBetweenStepsAtMaxSpeedMicros());
+
 	axisX.setAxisResolution(1000);
 	axisY.setAxisResolution(1000);
 	axisZ.setAxisResolution(1000);

@@ -374,6 +374,11 @@ void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigne
 	motorControl.moveTo((absolutePositionMicroM * axisResolution) / 100000L, timeToMakeTheMoveMicors);
 }
 
+void StepperMotorAxis::moveToPositionMicroMFast(long absolutePositionMicroM) {
+	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsAtMaxSpeedMicros);
+	motorControl.gotoStep((absolutePositionMicroM * axisResolution) / 100000L);
+}
+
 long StepperMotorAxis::getAbsolutePositionMicroM() {
 	return (motorControl.getStep() * 100000L) / axisResolution;
 }
