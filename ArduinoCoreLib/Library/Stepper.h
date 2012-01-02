@@ -188,6 +188,9 @@ public:
 		return delayBetweenStepsAtMaxSpeedMicros;
 	}
 
+	/**
+	 * The resolution is specified in motor steps per DECImeter
+	 */
 	inline void setAxisResolution(unsigned int axisResolution) {
 		this->axisResolution = axisResolution;
 	}
@@ -206,6 +209,27 @@ public:
 
 	inline bool isIdle() {
 		return (mode == StepperMotorAxis::Idle) && (!motorControl.isMoving());
+	}
+
+	/**
+	 * Speed is in mm/min
+	 * Delay between steps is in microseconds
+	 * Uses the parameter axisResolution
+	 */
+	inline unsigned int delayBetweenStepsToSpeed(unsigned long delayBetweenStepsMicros) {
+		return (unsigned int) (((60000000UL / getAxisResolution()) * 100UL) / delayBetweenStepsMicros);
+	}
+
+	inline unsigned long speedToDelayBetweenSteps(unsigned int speed) {
+		return (((60000000UL / getAxisResolution()) * 100UL) / speed);
+	}
+
+	inline void setSpeed(unsigned int speed) {
+		motorControl.setDelayBetweenStepsMicros(speedToDelayBetweenSteps(speed));
+	}
+
+	inline unsigned int getSpeed() {
+		return delayBetweenStepsToSpeed(motorControl.getDelayBetweenStepsMicros());
 	}
 };
 

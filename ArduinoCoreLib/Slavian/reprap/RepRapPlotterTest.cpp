@@ -87,7 +87,7 @@ inline long pow2(long x) {
 	return x*x;
 }
 
-long speed = 1000;
+long speed = 200;		// in mm/min
 static void doReader() {
 	if (reader.available()) {
 		modeState = 0;
@@ -101,6 +101,7 @@ static void doReader() {
 			break;
 		case 'S':
 			speed = strtol(line, &line, 10);
+			Serial.pgm_println(pgm_ok);
 			break;
 		case 'U':
 			pcb.axisZ.moveToPositionMicroMFast(5000);
@@ -114,9 +115,23 @@ static void doReader() {
 			long x = strtol(line, &line, 10);
 			line++;
 			long y = strtol(line, &line, 10);
-			long length = (long) sqrt(pow2(pcb.axisX.getAbsolutePositionMicroM() - x) +
-					pow2(pcb.axisY.getAbsolutePositionMicroM() - y));
-			long timeMicros = ((60000 * length) / speed) * 1000;
+
+			long length = (long) hypot(pcb.axisX.getAbsolutePositionMicroM() - x,
+					pcb.axisY.getAbsolutePositionMicroM() - y);
+			long timeMicros = 1000 * ((60 * length) / speed);
+			Serial.pgm_print(PSTR("dbg x\t"));
+			Serial.print(x);
+			Serial.pgm_print(PSTR("\ty\t"));
+			Serial.print(y);
+			Serial.pgm_print(PSTR("\tcx\t"));
+			Serial.print(pcb.axisX.getAbsolutePositionMicroM());
+			Serial.pgm_print(PSTR("\tcy\t"));
+			Serial.print(pcb.axisY.getAbsolutePositionMicroM());
+			Serial.pgm_print(PSTR("\tlength\t"));
+			Serial.print(length);
+			Serial.pgm_print(PSTR("\ttime\t"));
+			Serial.print(timeMicros);
+			Serial.println();
 			pcb.axisX.moveToPositionMicroM(x, timeMicros);
 			pcb.axisY.moveToPositionMicroM(y, timeMicros);
 			repRapMode = WaitForMotors;
@@ -129,6 +144,9 @@ static void doReader() {
 			repRapMode = WaitForMotors;
 			break;
 		default:
+			Serial.pgm_print(PSTR("ERR: "));
+			Serial.println(line);
+			Serial.pgm_println(pgm_ok);
 			break;
 		}
 	}
@@ -137,6 +155,8 @@ static void doReader() {
 static void doInitXY() {
 	switch (modeState) {
 	case 0:
+//		pcb.axisX.motorControl.setDelayBetweenStepsMicros(pcb.axisX.getDelayBetweenStepsAtMaxSpeedMicros());
+//		pcb.axisY.motorControl.setDelayBetweenStepsMicros(pcb.axisY.getDelayBetweenStepsAtMaxSpeedMicros());
 		pcb.axisX.motorControl.rotate(false);
 		pcb.axisY.motorControl.rotate(false);
 		modeState = 1;
@@ -156,6 +176,7 @@ static void doInitXY() {
 static void doInitZ() {
 	switch (modeState) {
 	case 0:
+//		pcb.axisZ.motorControl.setDelayBetweenStepsMicros(pcb.axisZ.getDelayBetweenStepsAtMaxSpeedMicros());
 		pcb.axisZ.motorControl.rotate(false);
 		modeState = 1;
 		break;
@@ -172,6 +193,9 @@ static void doInitZ() {
 static void doInitXYZ() {
 	switch (modeState) {
 	case 0:
+//		pcb.axisX.motorControl.setDelayBetweenStepsMicros(pcb.axisX.getDelayBetweenStepsAtMaxSpeedMicros());
+//		pcb.axisY.motorControl.setDelayBetweenStepsMicros(pcb.axisY.getDelayBetweenStepsAtMaxSpeedMicros());
+//		pcb.axisZ.motorControl.setDelayBetweenStepsMicros(pcb.axisZ.getDelayBetweenStepsAtMaxSpeedMicros());
 		pcb.axisX.motorControl.rotate(false);
 		pcb.axisY.motorControl.rotate(false);
 		pcb.axisZ.motorControl.rotate(false);

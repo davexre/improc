@@ -28,8 +28,11 @@ public class PlotterCirclesTest {
 			String line = null;
 			while (!"ok".equals(line)) {
 				line = queue.poll(100, TimeUnit.MILLISECONDS);
+				if (line != null)
+					System.out.println("RECV: " + line);
 			}
 		}
+		System.out.println("SEND: " + cmd);
 		comReader.out.println(cmd);
 		waitForOk = true;
 	}
@@ -62,17 +65,17 @@ public class PlotterCirclesTest {
 	
 	void doIt() throws Exception {
 		comReader = new ComPortLineReader();
-		comReader.setParams("/dev/ttyUSB0", 11500, SerialPort.DATABITS_8, SerialPort.PARITY_NONE, SerialPort.STOPBITS_1);
+		comReader.setParams("/dev/ttyUSB0", 115200, SerialPort.DATABITS_8, SerialPort.PARITY_NONE, SerialPort.STOPBITS_1);
 		comReader.open(lineProcessor);
 		try {
-			double x = 100000;
-			double y = 100000;
-			double r = 5000;
-			double stepR = 5000;
-			double maxSegmentLength = 1000;
+			double x = 150000;
+			double y = 150000;
+			double r = 10000;
+			double stepR = 10000;
+			double maxSegmentLength = 5000;
 			
 			sendCommand("U"); // pen up
-			sendCommand("S100"); // set speed mm/min
+			sendCommand("S2000"); // set speed mm/min
 			sendCommand("I"); // init XY
 			sendCommand("Z"); // init Z
 			sendCommand("U"); // pen up
@@ -81,8 +84,11 @@ public class PlotterCirclesTest {
 				drawCircle(x, y, r, maxSegmentLength);
 				r += stepR;
 			}
-			sendCommand("H"); // mote to home
-			sendCommand(""); // just wait to finish 
+			sendCommand("U"); // up
+			sendCommand("I"); // init xy
+			sendCommand("Z"); // init z 
+			sendCommand("U"); // up
+			sendCommand("");  // wait
 		} finally {
 			if (comReader != null) {
 				comReader.close();

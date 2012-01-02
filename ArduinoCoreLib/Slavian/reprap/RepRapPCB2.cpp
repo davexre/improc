@@ -1,5 +1,25 @@
 #include "RepRapPCB2.h"
 
+#define XAxisLengthInMicroM 323800UL
+#define YAxisLengthInMicroM 303900UL
+#define ZAxisLengthInMicroM 168200UL
+
+#define XAxisLengthInSteps 4689
+#define YAxisLengthInSteps 4103
+#define ZAxisLengthInSteps 6488
+
+#define XAxisPrecissionInSteps 4
+#define YAxisPrecissionInSteps 10
+#define ZAxisPrecissionInSteps 16
+
+#define XAxisResolutionInStepsPerDecimeter (XAxisLengthInSteps * 1000UL / (XAxisLengthInMicroM / 100UL))
+#define YAxisResolutionInStepsPerDecimeter (YAxisLengthInSteps * 1000UL / (YAxisLengthInMicroM / 100UL))
+#define ZAxisResolutionInStepsPerDecimeter (ZAxisLengthInSteps * 1000UL / (ZAxisLengthInMicroM / 100UL))
+
+#define XAxisHomeInMM 143
+#define YAxisHomeInMM 147
+#define ZAxisHomeInMM 168
+
 void RepRapPCB2::initialize() {
 	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
 	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);
@@ -58,15 +78,15 @@ void RepRapPCB2::initialize() {
 	axisZ.motorControl.setDelayBetweenStepsMicros(axisZ.getDelayBetweenStepsAtMaxSpeedMicros());
 	axisE.motorControl.setDelayBetweenStepsMicros(axisE.getDelayBetweenStepsAtMaxSpeedMicros());
 
-	axisX.setAxisResolution(1000);
-	axisY.setAxisResolution(1000);
-	axisZ.setAxisResolution(1000);
-	axisE.setAxisResolution(1000);
+	axisX.setAxisResolution(XAxisResolutionInStepsPerDecimeter);
+	axisY.setAxisResolution(YAxisResolutionInStepsPerDecimeter);
+	axisZ.setAxisResolution(ZAxisResolutionInStepsPerDecimeter);
+	axisE.setAxisResolution(XAxisResolutionInStepsPerDecimeter);
 
-	axisX.setHomePositionMM(1000);
-	axisY.setHomePositionMM(1000);
-	axisZ.setHomePositionMM(1000);
-	axisE.setHomePositionMM(1000);
+	axisX.setHomePositionMM(XAxisHomeInMM);
+	axisY.setHomePositionMM(YAxisHomeInMM);
+	axisZ.setHomePositionMM(ZAxisHomeInMM);
+	axisE.setHomePositionMM(XAxisHomeInMM);
 }
 
 void RepRapPCB2::update() {

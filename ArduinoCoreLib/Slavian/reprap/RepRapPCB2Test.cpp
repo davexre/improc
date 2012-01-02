@@ -46,8 +46,9 @@ const char PROGMEM helpMessage[] =
 	"<command>\n"
 	"  x, y, z - use axis x,y or z. See axis commands\n"
 	"  a - All (x,y,z) axis\n"
-	"  h - print this Help\n"
 	"  s - Stop all motors\n"
+	"  i - Initialize all motors\n"
+	"  h - print this Help\n"
 	"<axis commands>\n"
 	"  s - goto Start position\n"
 	"  e - goto End position\n"
@@ -73,11 +74,11 @@ enum RepRapMode {
 	GotoStep = 2,
 	DetermineAvailableSteps = 3,
 	MoveForthAndBackAtSpeed = 4,
+	InitializeAllMotors = 5,
 } repRapMode;
 uint8_t modeState;
 const char *selectedAxisName;
 StepperMotorAxis *selectedAxis;
-long speed = 300; // mm per minute
 
 static void showError(const char * pgm_msg) {
 	Serial.pgm_print(PSTR("Error "));
@@ -132,14 +133,16 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		rotor.setValue(axis.getDelayBetweenStepsAtMaxSpeedMicros());
 		break;
 	}
-	case 'q':
-		speed = atol(line);
+	case 'q': {
+		unsigned int speed = atoi(line);
+		axis.setSpeed(speed);
 		repRapMode = MoveForthAndBackAtSpeed;
 		modeState = 0;
 		break;
+	}
 	case 'Q':
-		rotor.setMinMax(60, 6000);
-		rotor.setValue(speed);
+		rotor.setMinMax(30, 6000);
+		rotor.setValue(axis.getSpeed());
 		repRapMode = MoveForthAndBackAtSpeed;
 		modeState = 0;
 		break;
@@ -154,7 +157,7 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		Serial.pgm_print(PSTR("remaining steps:")); Serial.println(axis.motorControl.remainingSteps);
 		Serial.pgm_print(PSTR("cur step:       ")); Serial.println(axis.motorControl.getStep());
 		Serial.pgm_print(PSTR("abs position:   ")); Serial.println(axis.getAbsolutePositionMicroM());
-		Serial.pgm_print(PSTR("speed (Q):      ")); Serial.println(speed);
+		Serial.pgm_print(PSTR("speed (Q):      ")); Serial.println(axis.getSpeed());
 		Serial.println();
 		Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(axis.motorControl.startButton->getState() ? pgm_Up : pgm_Down);
 		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(axis.motorControl.endButton->getState() ? pgm_Up : pgm_Down);
@@ -204,11 +207,14 @@ static void doGotoStep() {
 }
 
 long maxStep;
+unsigned long timeStamp;
+unsigned long timeToMoveToEndMillis;
 
 static void doDetermineAvailableSteps() {
 	switch (modeState) {
 	case 0:
 		// goto begining
+		selectedAxis->motorControl.setDelayBetweenStepsMicros(selectedAxis->getDelayBetweenStepsAtMaxSpeedMicros());
 		selectedAxis->motorControl.rotate(false);
 		modeState = 1;
 		break;
@@ -216,21 +222,30 @@ static void doDetermineAvailableSteps() {
 		if (!selectedAxis->motorControl.isMoving()) {
 			selectedAxis->motorControl.resetStep(0);
 			selectedAxis->motorControl.rotate(true);
+			timeStamp = millis();
 			modeState = 2;
 		}
 		break;
 	case 2:
 		if (!selectedAxis->motorControl.isMoving()) {
 			maxStep = selectedAxis->motorControl.getStep();
+			timeToMoveToEndMillis = millis() - timeStamp;
+			timeStamp = millis();
 			selectedAxis->motorControl.rotate(false);
 			modeState = 3;
 		}
 		break;
 	case 3:
 		if (!selectedAxis->motorControl.isMoving()) {
+			timeStamp = millis() - timeStamp;
 			Serial.print(maxStep);
 			Serial.print('\t');
-			Serial.println(selectedAxis->motorControl.getStep());
+			Serial.print(selectedAxis->motorControl.getStep());
+			Serial.print('\t');
+			Serial.print(timeToMoveToEndMillis);
+			Serial.print('\t');
+			Serial.print(timeStamp);
+			Serial.println();
 			selectedAxis->motorControl.resetStep(0);
 			modeState = 0;
 		}
@@ -241,19 +256,20 @@ static void doDetermineAvailableSteps() {
 	}
 }
 
-static const long deltaToMove = 5000; // 5 cm
-void doMoveForthAndBackAtSpeed() {
+static const long deltaToMove = 50000; // 5 cm
+static void doMoveForthAndBackAtSpeed() {
 	if (rotor.hasValueChanged()) {
-		speed = rotor.getValue();
+		unsigned int speed = rotor.getValue();
 		Serial.pgm_print(selectedAxisName);
 		Serial.pgm_print(PSTR(": speed mm/min "));
 		Serial.println(speed);
+		selectedAxis->motorControl.setDelayBetweenStepsMicros(selectedAxis->speedToDelayBetweenSteps(speed));
 	}
 
 	switch (modeState) {
 	case 0: {
 		long pos = selectedAxis->getAbsolutePositionMicroM() - 2*deltaToMove;
-		long timeMicros = ((60000 * (2*deltaToMove)) / speed) * 1000;
+		long timeMicros = ((2 * deltaToMove * selectedAxis->motorControl.getDelayBetweenStepsMicros()) / 1000) * selectedAxis->getAxisResolution() / 100;
 		selectedAxis->moveToPositionMicroM(pos, timeMicros);
 		modeState = 1;
 		break;
@@ -261,7 +277,7 @@ void doMoveForthAndBackAtSpeed() {
 	case 1: {
 		if (selectedAxis->isIdle()) {
 			long pos = selectedAxis->getAbsolutePositionMicroM() + 2 * deltaToMove;
-			long timeMicros = ((60000 * (2*deltaToMove)) / speed) * 1000;
+			long timeMicros = ((2 * deltaToMove * selectedAxis->motorControl.getDelayBetweenStepsMicros()) / 1000) * selectedAxis->getAxisResolution() / 100;
 			selectedAxis->moveToPositionMicroM(pos, timeMicros);
 			modeState = 2;
 		}
@@ -270,7 +286,7 @@ void doMoveForthAndBackAtSpeed() {
 	case 2: {
 		if (selectedAxis->isIdle()) {
 			long pos = selectedAxis->getAbsolutePositionMicroM() + deltaToMove;
-			long timeMicros = ((60000 * deltaToMove) / speed) * 1000;
+			long timeMicros = ((deltaToMove * selectedAxis->motorControl.getDelayBetweenStepsMicros()) / 1000) * selectedAxis->getAxisResolution() / 100;
 			selectedAxis->moveToPositionMicroM(pos, timeMicros);
 			modeState = 3;
 		}
@@ -279,13 +295,36 @@ void doMoveForthAndBackAtSpeed() {
 	case 3: {
 		if (selectedAxis->isIdle()) {
 			long pos = selectedAxis->getAbsolutePositionMicroM() - deltaToMove;
-			long timeMicros = ((60000 * deltaToMove) / speed) * 1000;
+			long timeMicros = ((deltaToMove * selectedAxis->motorControl.getDelayBetweenStepsMicros()) / 1000) * selectedAxis->getAxisResolution() / 100;
 			selectedAxis->moveToPositionMicroM(pos, timeMicros);
 			modeState = 2;
 		}
 		break;
 	}
 	default:
+		break;
+	}
+}
+
+static void doInitializeAllMotors() {
+	switch (modeState) {
+	case 0:
+		pcb.axisX.motorControl.setDelayBetweenStepsMicros(pcb.axisX.getDelayBetweenStepsAtMaxSpeedMicros());
+		pcb.axisY.motorControl.setDelayBetweenStepsMicros(pcb.axisY.getDelayBetweenStepsAtMaxSpeedMicros());
+		pcb.axisZ.motorControl.setDelayBetweenStepsMicros(pcb.axisZ.getDelayBetweenStepsAtMaxSpeedMicros());
+
+		pcb.axisX.motorControl.rotate(false);
+		pcb.axisY.motorControl.rotate(false);
+		pcb.axisZ.motorControl.rotate(false);
+		modeState = 1;
+		break;
+	case 1:
+		if (pcb.axisX.isIdle() && pcb.axisY.isIdle() && pcb.axisZ.isIdle()) {
+			pcb.axisX.motorControl.resetStep(0);
+			pcb.axisY.motorControl.resetStep(0);
+			pcb.axisZ.motorControl.resetStep(0);
+			repRapMode = Idle;
+		}
 		break;
 	}
 }
@@ -323,6 +362,10 @@ void RepRapPCB2Test::loop() {
 		char *line = reader.readln();
 		Serial.println(line);
 		switch (line++[0]) {
+		case 'i':
+			stop();
+			repRapMode = InitializeAllMotors;
+			modeState= 0;
 		case 'a':
 			doAxis(pgmAxisNameX, line, pcb.axisX);
 			doAxis(pgmAxisNameY, line, pcb.axisY);
@@ -368,6 +411,9 @@ void RepRapPCB2Test::loop() {
 		break;
 	case MoveForthAndBackAtSpeed:
 		doMoveForthAndBackAtSpeed();
+		break;
+	case InitializeAllMotors:
+		doInitializeAllMotors();
 		break;
 	case Idle:
 	default:
