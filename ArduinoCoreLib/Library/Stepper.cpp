@@ -222,12 +222,12 @@ void StepperMotorControlWithButtons::update() {
 		break;
 	}
 
-	unsigned long now = micros();
+	unsigned long dT = micros() - lastTimestampMicros;
 	// Stopping & End buttons check
 	if ((movementMode == StepperMotorControlWithButtons::Stopping) ||
 		(moveForeward && !endButton->getState()) ||
 		(!moveForeward && !startButton->getState())) {
-		if (now - lastTimestampMicros >= timeToStopMicros) {
+		if (dT >= timeToStopMicros) {
 			motor->stop();
 			movementMode = StepperMotorControlWithButtons::Idle;
 //			if (!moveForeward)
@@ -237,8 +237,12 @@ void StepperMotorControlWithButtons::update() {
 	}
 
 	// Speed control
-	if (now - lastTimestampMicros < delayBetweenStepsMicros)
+	if (dT < delayBetweenStepsMicros) {
+		if (dT >= timeToStopMicros) {
+			motor->stop();
+		}
 		return;
+	}
 
 	if ((movementMode == StepperMotorControlWithButtons::Foreward) ||
 		(movementMode == StepperMotorControlWithButtons::Backward)) {
@@ -354,6 +358,7 @@ void StepperMotorAxis::determineAvailableSteps(void) {
 void StepperMotorAxis::doInitializePosition() {
 	switch (modeState) {
 	case 0:
+		motorControl.setDelayBetweenStepsMicros(getDelayBetweenStepsAtMaxSpeedMicros());
 		motorControl.rotate(false);
 		modeState = 1;
 		break;
@@ -375,7 +380,7 @@ void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigne
 }
 
 void StepperMotorAxis::moveToPositionMicroMFast(long absolutePositionMicroM) {
-	motorControl.setDelayBetweenStepsMicros(delayBetweenStepsAtMaxSpeedMicros);
+	motorControl.setDelayBetweenStepsMicros(getDelayBetweenStepsAtMaxSpeedMicros());
 	motorControl.gotoStep((absolutePositionMicroM * axisResolution) / 100000L);
 }
 

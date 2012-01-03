@@ -21,6 +21,9 @@
 #define ZAxisHomeInMM 168
 
 void RepRapPCB2::initialize() {
+	mode = RepRapPCB2::Idle;
+	modeState = 0;
+
 	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
 	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);
 	diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS);
@@ -98,4 +101,92 @@ void RepRapPCB2::update() {
 	axisE.update();
 
 	extenderOutput.update();
+
+	switch (mode) {
+	case InitializePosition:
+		doInitializePosition();
+		break;
+	case InitializePositionXY:
+		doInitializePositionXY();
+		break;
+	case Idle:
+	default:
+		break;
+	}
+}
+
+bool RepRapPCB2::isIdle() {
+	return (mode == RepRapPCB2::Idle) &&
+			axisX.isIdle() &&
+			axisY.isIdle() &&
+			axisZ.isIdle();
+//			axisE.isIdle() // TODO:
+}
+
+void RepRapPCB2::setMode(RepRapPcbMode mode) {
+	this->mode = mode;
+	modeState = 0;
+}
+
+void RepRapPCB2::doInitializePosition() {
+	switch (modeState) {
+	case 0:
+		axisZ.moveToPositionMicroMFast(axisZ.getAbsolutePositionMicroM() + 5000); // move 5 mm upwards
+		modeState = 1;
+		break;
+	case 1:
+		if (axisZ.isIdle()) {
+			axisX.initializePosition();
+			axisY.initializePosition();
+			modeState = 2;
+		}
+		break;
+	case 2:
+		if (axisX.isIdle() && axisY.isIdle()) {
+			axisZ.initializePosition();
+			modeState = 3;
+		}
+		break;
+	case 3:
+		if (axisZ.isIdle())
+			mode = RepRapPCB2::Idle;
+		break;
+	}
+}
+
+void RepRapPCB2::doInitializePositionXY() {
+	switch (modeState) {
+	case 0:
+		axisX.initializePosition();
+		axisY.initializePosition();
+		modeState = 1;
+		break;
+	case 1:
+		if (axisX.isIdle() && axisY.isIdle()) {
+			mode = RepRapPCB2::Idle;
+		}
+		break;
+	}
+}
+
+void RepRapPCB2::moveToXY(long xPositionMicroM, long yPositionMicroM, unsigned int speed) {
+	long length = (long) hypot(
+			axisX.getAbsolutePositionMicroM() - xPositionMicroM,
+			axisY.getAbsolutePositionMicroM() - yPositionMicroM);
+	long timeMicros = 1000 * ((60 * length) / speed);
+	axisX.moveToPositionMicroM(xPositionMicroM, timeMicros);
+	axisY.moveToPositionMicroM(yPositionMicroM, timeMicros);
+}
+
+void RepRapPCB2::moveToHomePosition() {
+	axisX.moveToHomePosition();
+	axisY.moveToHomePosition();
+	axisZ.moveToHomePosition();
+}
+
+void RepRapPCB2::stop() {
+	axisX.stop();
+	axisY.stop();
+	axisZ.stop();
+	axisE.stop();
 }

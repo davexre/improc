@@ -22,6 +22,18 @@ private:
 	DigitalOutputArduinoPin diShiftRegisterInputPinPE;
 	DigitalOutputArduinoPin diShiftRegisterInputPinCP;
 	DigitalInputArduinoPin diShiftRegisterInputPinQ7;
+
+	enum RepRapPcbMode {
+		Idle = 0,
+		InitializePosition = 2,
+		InitializePositionXY = 3,
+	};
+	RepRapPcbMode mode;
+	uint8_t modeState;
+
+	void setMode(RepRapPcbMode mode);
+	void doInitializePosition();
+	void doInitializePositionXY();
 public:
 	DigitalOutputShiftRegister_74HC595 extenderOutput;
 	DigitalInputShiftRegister_74HC166 extenderInput;
@@ -40,6 +52,24 @@ public:
 
 	void initialize();
 	void update();
+
+	bool isIdle();
+	inline void initializePosition() {
+		setMode(RepRapPCB2::InitializePosition);
+	}
+	inline void initializePositionXY() {
+		setMode(RepRapPCB2::InitializePositionXY);
+	}
+
+	/*
+	 * xPositionMicroM, yPositionMicroM - target position in micro meters
+	 * speed - speed in mm/min
+	 */
+	void moveToXY(long xPositionMicroM, long yPositionMicroM, unsigned int speed);
+
+	void moveToHomePosition();
+
+	void stop();
 };
 
 #endif
