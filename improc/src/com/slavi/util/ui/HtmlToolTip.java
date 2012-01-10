@@ -1,9 +1,12 @@
 package com.slavi.util.ui;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -61,16 +64,15 @@ public class HtmlToolTip {
 					tipHeight = r.height;
 					break;
 				}
-				case SWT.MouseExit:
+				case SWT.MouseExit: {
 					if ((tipShell == null) || (tipShell.isDisposed()))
 						break;
 					Point p = control.toDisplay(event.x, event.y);
-					System.out.println("x= " + p.x);
-					System.out.println("y= " + p.y);
 					if (!tipShell.getBounds().contains(p)) {
 						showToolTip(null);
 					}
 					break;
+				}
 				case SWT.Dispose:
 				case SWT.FocusOut:
 					showToolTip(null);
@@ -109,8 +111,21 @@ public class HtmlToolTip {
 		tipShell.setBounds(point.x, point.y, tipWidth, tipHeight);
 		tipShell.addListener(SWT.Resize, tipListener);
 		tipShell.addListener(SWT.Dispose, tipListener);
-		tipShell.addListener(SWT.FocusOut, tipListener);
-		tipShell.addListener(SWT.MouseExit, tipListener);
+		//tipShell.addListener(SWT.FocusOut, tipListener);
+		//tipShell.addListener(SWT.MouseExit, tipListener);
+		browser.addListener(SWT.FocusOut, tipListener);
+		browser.addListener(SWT.MouseExit, tipListener);
+		
+		browser.addLocationListener(new LocationListener() {
+			public void changing(LocationEvent event) {
+				System.out.println("changing: " + event);
+			}
+			
+			public void changed(LocationEvent event) {
+				System.out.println("changED:  " + event);
+			}
+		});
+		
 		tipShell.setVisible(true);
 	}
 
@@ -135,7 +150,7 @@ public class HtmlToolTip {
 		internalAddHtmlTooltip(control, helpUrl);
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		final Display display = new Display();
 		final Shell shell = new Shell(display);
 		shell.setLayout(new GridLayout(2, false));
@@ -151,6 +166,9 @@ public class HtmlToolTip {
 		new Label(shell, SWT.None).setText("Some label 3");
 		text = new Text(shell,SWT.None);
 		addHtmlTooltip(text, "<html><body><p><big>3</bid>Kuku ruku<br/><b>Vafla chudna</b></p></body></html>");
+		new Label(shell, SWT.None).setText("dir.g");
+		text = new Text(shell,SWT.None);
+		addHtmlTooltip(text, new URL("http://www.dir.bg"));
 
 		shell.pack();
 		SwtUtil.centerShell(shell);

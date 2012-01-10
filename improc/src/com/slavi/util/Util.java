@@ -1,6 +1,11 @@
 package com.slavi.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -430,5 +435,28 @@ public class Util {
 				};
 			}
 		};
+	}
+
+	/**
+	 * Code borrowed from:
+	 * http://www.javaworld.com/javaworld/javatips/jw-javatip76.html?page=2
+	 */
+	public static <SerializableObject extends Serializable> SerializableObject deepCopy(SerializableObject oldObj) throws Exception {
+		ObjectOutputStream oos = null;
+		ObjectInputStream ois = null;
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			oos = new ObjectOutputStream(bos);
+			// serialize and pass the object
+			oos.writeObject(oldObj);
+			oos.flush();
+			ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray());
+			ois = new ObjectInputStream(bin);
+			// return the new object
+			return (SerializableObject) ois.readObject();
+		} finally {
+			oos.close();
+			ois.close();
+		}
 	}
 }
