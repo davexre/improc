@@ -47,16 +47,39 @@ public class PropertyUtil {
 			substituionsCount++;
 			StringBuilder sb = new StringBuilder();
 			sb.append(str.substring(0, m.start()));
-			String varName = Util.trimNZ(m.group(1));
+			String innerToken = m.group(1);
+			int modifiersIndex = innerToken.indexOf(":");
+			String modifiers = Util.trimNZ(modifiersIndex < 0 ? "" : innerToken.substring(modifiersIndex + 1));
+			String varName = Util.trimNZ(modifiersIndex < 0 ? innerToken : innerToken.substring(0, modifiersIndex));
+			boolean modified = false;
 			if (!"".equals(varName)) {
 				String envVal = properties.getProperty(varName); // NO trimNZ() should be used here
 				if (envVal != null) {
-					sb.append(envVal);
+					String formatStr = "%s";
+					int modifiersAsInt;
+					try {
+						modifiersAsInt = Integer.parseInt(modifiers);
+					} catch (Exception e) {
+						modifiersAsInt = Integer.MIN_VALUE;
+					}
+					
+					if (modifiersAsInt != Integer.MIN_VALUE) {
+						formatStr = "%" + Integer.toString(modifiersAsInt) + "s";
+					} else if ("R".equalsIgnoreCase(modifiers)) {
+						formatStr = "%" + Integer.toString(innerToken.length() + 3) + "s";
+					} else if ("L".equalsIgnoreCase(modifiers)) {
+						formatStr = "%-" + Integer.toString(innerToken.length() + 3) + "s";
+					}
+					
+					sb.append(String.format(formatStr, envVal));
+					modified = true;
 				}
 			}
-			sb.append(str.substring(m.end()));
-			str = sb.toString();
-			m = vars.matcher(str);
+			if (modified) {
+				sb.append(str.substring(m.end()));
+				str = sb.toString();
+				m = vars.matcher(str);
+			}
 		}
 		return str;
 	}

@@ -58,21 +58,21 @@ public class Util {
 	public static String getFormatBytes(long sizeInBytes) {
 		String dim = "bytes";
 		double size = sizeInBytes;
-		if (Math.abs(size) >= 1000.0) {
+		if (Math.abs(size) >= 1024.0) {
 			dim = "K";
-			size /= 1000.0;
+			size /= 1024.0;
 		}
 		if (Math.abs(size) >= 800.0) {
 			dim = "M";
-			size /= 1000.0;
+			size /= 1024.0;
 		}
 		if (Math.abs(size) >= 800.0) {
 			dim = "G";
-			size /= 1000.0;
+			size /= 1024.0;
 		}
 		if (Math.abs(size) >= 800.0) {
 			dim = "T";
-			size /= 1000.0;
+			size /= 1024.0;
 		}
 		if (Math.floor(size) == size) 
 			return String.format(Locale.US, "%d %s", new Object[] { new Integer((int)size), dim } );

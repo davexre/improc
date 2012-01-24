@@ -13,12 +13,12 @@ public class TestAdvancedProperties {
 		p.setProperty("V.1", "Value 1");
 		p.setProperty("V.2", "Value 2");
 
-		p.setProperty("VAL$0", "Value 0");
-		p.setProperty("Кирилица$1", "Value 1");
-		p.setProperty("VAL$2", "Value 2");
-		p.setProperty("UseVal", "1");
-		p.setProperty("Z", "${ Кирилица$${UseVal} }");
-		p.setProperty("W", "${ V.${UseVal} }");
+		p.setProperty("VAL$0", "V.0");
+		p.setProperty("VAL$2", "|${V.2}|");
+		p.setProperty("Кирилица$0", "Value 1");
+		p.setProperty("UseVal", "2");
+		p.setProperty("Z", "|${ Кирилица$${UseVal}:L   }|");
+		p.setProperty("W", "${\nVAL$${UseVal}\n} = ${UseVal}");
 		PropertyUtil.mergeProperties(init, p);
 		System.out.println(p);
 

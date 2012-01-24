@@ -2,4 +2,7 @@ function asd() {
   return a*b;
 }
 
-res=asd();
+res=asd() + "";
+kuku=data.strData + "";
+println(kuku);
+ruku="qweasd";

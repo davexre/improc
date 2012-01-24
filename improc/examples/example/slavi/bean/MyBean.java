@@ -8,7 +8,7 @@ public class MyBean implements Serializable {
 
 	int id;
 	
-	MyData data0 = new MyData();
+//	MyData data0 = new MyData();
 
 	MyData data[] = new MyData[0];
 /*
@@ -34,7 +34,7 @@ public class MyBean implements Serializable {
 	public MyBean(int id, String name, MyData myData) {
 		setId(id);
 		setName(name);
-		setData0(myData);
+//		setData0(myData);
 		setData(new MyData[] { null, null, myData });
 	}
 	
@@ -66,20 +66,14 @@ public class MyBean implements Serializable {
 		this.id = id;
 	}
 
-	/**
-	 * @return the data
-	 */
 	public MyData[] getData() {
 		return data;
 	}
 
-	/**
-	 * @param data the data to set
-	 */
 	public void setData(MyData data[]) {
 		this.data = data;
 	}
-
+/*
 	public MyData getData(int i) {
 		return data[i];
 	}
@@ -87,7 +81,8 @@ public class MyBean implements Serializable {
 	public void setData(int i, MyData d) {
 		data[i] = d;
 	}
-
+*/
+/*
 	public MyData[] getIndexedData() {
 		return data;
 	}
@@ -99,7 +94,8 @@ public class MyBean implements Serializable {
 	public void setIndexedData(int i, MyData d) {
 		data[i] = d;
 	}
-	
+*/
+/*
 	public MyData getData0() {
 		return data0;
 	}
@@ -107,4 +103,5 @@ public class MyBean implements Serializable {
 	public void setData0(MyData data0) {
 		this.data0 = data0;
 	}
+*/
 }
