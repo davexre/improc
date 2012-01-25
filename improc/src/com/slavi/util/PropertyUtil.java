@@ -39,7 +39,7 @@ public class PropertyUtil {
 	public static String substituteVars(String str, Properties properties) {
 		if (str == null)
 			return "";
-		final Pattern vars = Pattern.compile("\\$\\{(([^}](?!\\$\\{))+)\\}");
+		final Pattern vars = Pattern.compile("\\$\\{(((?!\\$\\{)[^}])+)\\}");
 		Matcher m = vars.matcher(str);
 		int substituionsCount = 0;
 		
