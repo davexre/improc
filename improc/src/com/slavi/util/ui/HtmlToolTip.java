@@ -1,6 +1,5 @@
 package com.slavi.util.ui;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.swt.SWT;
@@ -166,7 +165,7 @@ public class HtmlToolTip {
 		new Label(shell, SWT.None).setText("Some label 3");
 		text = new Text(shell,SWT.None);
 		addHtmlTooltip(text, "<html><body><p><big>3</bid>Kuku ruku<br/><b>Vafla chudna</b></p></body></html>");
-		new Label(shell, SWT.None).setText("dir.g");
+		new Label(shell, SWT.None).setText("dir.bg");
 		text = new Text(shell,SWT.None);
 		addHtmlTooltip(text, new URL("http://www.dir.bg"));
 

@@ -459,4 +459,15 @@ public class Util {
 			ois.close();
 		}
 	}
+	
+	public static <T> int indexOf(T[] objects, T object) {
+		if (objects == null)
+			return -1;
+		for (int i = 0; i < objects.length; i++) {
+			if ((objects[i] != null && objects[i].equals(object)) || 
+				(object == null && objects[i] == null))
+				return i;
+		}
+		return -1;
+	}
 }
