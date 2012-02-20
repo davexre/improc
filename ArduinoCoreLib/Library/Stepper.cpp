@@ -141,7 +141,7 @@ static const uint8_t motorStatesMosfetHBridge_HalfPower[] = {
 		0b01000,
 		0b00010,
 		0b00100,
-		0b00001
+		0b00001,
 };
 
 /**
@@ -149,13 +149,13 @@ static const uint8_t motorStatesMosfetHBridge_HalfPower[] = {
  */
 static const uint8_t motorStatesMosfetHBridge_DoublePrecision[] = {
 		0b01000,
-		0b01001,
-		0b00010,
 		0b01010,
-		0b00100,
+		0b00010,
 		0b00110,
+		0b00100,
+		0b00101,
 		0b00001,
-		0b00101
+		0b01001,
 };
 
 void StepperMotorMosfetHBridge::step(const bool moveForward) {
@@ -302,6 +302,22 @@ void StepperMotorControlWithButtons::stop() {
 	}
 }
 
+const char PROGMEM pgm_Up[] = "Up";
+const char PROGMEM pgm_Down[] = "Down";
+
+void StepperMotorControlWithButtons::debugPrint() {
+	Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(isMoving() ? 'T':'F');
+	Serial.pgm_print(PSTR("remaining steps:")); Serial.println(remainingSteps);
+	Serial.pgm_print(PSTR("cur step:       ")); Serial.println(getStep());
+	Serial.println();
+	Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(startButton->getState() ? pgm_Up : pgm_Down);
+	Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(endButton->getState() ? pgm_Up : pgm_Down);
+	Serial.println();
+	Serial.pgm_print(PSTR("movement mode:  ")); Serial.println((int)movementMode);
+	Serial.pgm_print(PSTR("lastTimestMicro:")); Serial.println(lastTimestampMicros);
+	Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println(delayBetweenStepsMicros);
+}
+
 ///////
 
 void StepperMotorAxis::initialize(StepperMotor *motor,
@@ -365,7 +381,7 @@ void StepperMotorAxis::doInitializePosition() {
 	case 1:
 		if (!motorControl.isMoving()) {
 			motorControl.resetStep(0);
-			modeState = StepperMotorAxis::Idle;
+			mode = StepperMotorAxis::Idle;
 		}
 		break;
 	}
@@ -376,19 +392,32 @@ void StepperMotorAxis::initializePosition() {
 }
 
 void StepperMotorAxis::moveToPositionMicroM(long absolutePositionMicroM, unsigned long timeToMakeTheMoveMicors) {
-	motorControl.moveTo((absolutePositionMicroM * axisResolution) / 100000L, timeToMakeTheMoveMicors);
+	motorControl.moveTo(((absolutePositionMicroM / 100L) * axisResolution) / 1000L, timeToMakeTheMoveMicors);
 }
 
 void StepperMotorAxis::moveToPositionMicroMFast(long absolutePositionMicroM) {
 	motorControl.setDelayBetweenStepsMicros(getDelayBetweenStepsAtMaxSpeedMicros());
-	motorControl.gotoStep((absolutePositionMicroM * axisResolution) / 100000L);
+	motorControl.gotoStep(((absolutePositionMicroM / 100L) * axisResolution) / 1000L);
 }
 
 long StepperMotorAxis::getAbsolutePositionMicroM() {
-	return (motorControl.getStep() * 100000L) / axisResolution;
+	return ((motorControl.getStep() * 1000L) / axisResolution) * 100L;
 }
 
 void StepperMotorAxis::stop() {
 	motorControl.stop();
 	mode = StepperMotorAxis::Idle;
+}
+
+void StepperMotorAxis::debugPrint() {
+	Serial.pgm_println(PSTR("AXIS state"));
+	Serial.pgm_print(PSTR("AXIS mode:      ")); Serial.print((int)mode); Serial.print('/'); Serial.println((int)modeState);
+	Serial.pgm_print(PSTR("abs position:   ")); Serial.println(getAbsolutePositionMicroM());
+	Serial.pgm_print(PSTR("speed (Q):      ")); Serial.println(getSpeed());
+	Serial.println();
+	motorControl.debugPrint();
+	Serial.pgm_print(PSTR("delay b/n steps@max speed:")); Serial.println(getDelayBetweenStepsAtMaxSpeedMicros());
+	Serial.pgm_print(PSTR("axis resolution:")); Serial.println(getAxisResolution());
+	Serial.pgm_print(PSTR("home position:  ")); Serial.println(getHomePositionMM());
+	Serial.println();
 }

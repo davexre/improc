@@ -41,7 +41,6 @@ enum RepRapMode {
 	WaitForMotors = 1,
 } repRapMode;
 uint8_t modeState;
-StepperMotorAxis *selectedAxis;
 
 static void UpdateRotor() {
 	rotor.update();
@@ -61,7 +60,6 @@ void RepRapPlotterTest::setup() {
 
 	pcb.initialize();
 	repRapMode = WaitForMotors;
-	selectedAxis = &pcb.axisX;
 
     Serial.pgm_println(PSTR("Initialized"));
 }
@@ -99,10 +97,10 @@ static void doReader() {
 		default:
 			Serial.pgm_print(PSTR("ERR: "));
 			Serial.println(line);
-			break;
+			return;
 		}
+		repRapMode = WaitForMotors;
 	}
-	repRapMode = WaitForMotors;
 }
 
 void RepRapPlotterTest::loop() {
@@ -112,6 +110,7 @@ void RepRapPlotterTest::loop() {
 	led.update();
 
 	if (btn.isLongClicked()) {
+		pcb.debugPrint();
 	} else if (btn.isClicked()) {
 		pcb.stop();
 	}

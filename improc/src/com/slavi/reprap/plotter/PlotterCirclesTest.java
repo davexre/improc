@@ -11,6 +11,27 @@ import com.slavi.arduino.LineProcessor;
 
 
 public class PlotterCirclesTest {
+	final static double XDelayBetweenSteppsAtMaxSpeedMicros = 1500;
+	final static double YDelayBetweenSteppsAtMaxSpeedMicros = 1500;
+	final static double ZDelayBetweenSteppsAtMaxSpeedMicros = 2500;
+
+	final static double XAxisLengthInMicroM = 359800;
+	final static double YAxisLengthInMicroM = 305900;
+	final static double ZAxisLengthInMicroM = 163800;
+
+	final static double XAxisLengthInSteps = 57537;
+	final static double YAxisLengthInSteps = 49033;
+	final static double ZAxisLengthInSteps = 6338;
+
+	final static double XAxisResolutionInStepsPerDecimeter = (XAxisLengthInSteps * 1000.0 / (XAxisLengthInMicroM / 100.0));
+	final static double YAxisResolutionInStepsPerDecimeter = (YAxisLengthInSteps * 1000.0 / (YAxisLengthInMicroM / 100.0));
+	final static double ZAxisResolutionInStepsPerDecimeter = (ZAxisLengthInSteps * 1000.0 / (ZAxisLengthInMicroM / 100.0));
+	
+	final static double xMaxSpeedMmPerMin1 = (XAxisLengthInMicroM / 10000.0) / (XDelayBetweenSteppsAtMaxSpeedMicros / 1000000.0 / 60.0);
+	
+	final static double xStepsPerMM = XAxisResolutionInStepsPerDecimeter / 100.0; 
+	final static double xStepsPerMin = 1.0 / (XDelayBetweenSteppsAtMaxSpeedMicros / 1000000 / 60 ); 
+	final static double xMaxSpeedMmPerMin = xStepsPerMin / xStepsPerMM;    //(XDelayBetweenSteppsAtMaxSpeedMicros / 1.0 / 60.0) / (XAxisResolutionInStepsPerDecimeter / 100.0);
 
 	ComPortLineReader comReader;
 
@@ -75,7 +96,7 @@ public class PlotterCirclesTest {
 			double maxSegmentLength = 5000;
 			
 			sendCommand("U"); // pen up
-			sendCommand("S2000"); // set speed mm/min
+			sendCommand("S200"); // set speed mm/min
 			sendCommand("I"); // init XY
 			sendCommand("Z"); // init Z
 			sendCommand("U"); // pen up

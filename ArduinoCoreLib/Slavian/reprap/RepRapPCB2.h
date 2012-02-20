@@ -1,6 +1,7 @@
 #ifndef RepRapPCB_h
 #define RepRapPCB_h
 
+#include "Arduino.h"
 #include "utils.h"
 #include "DigitalIO.h"
 #include "Stepper.h"
@@ -70,6 +71,8 @@ public:
 	void moveToHomePosition();
 
 	void stop();
+
+	void debugPrint();
 };
 
 #endif

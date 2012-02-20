@@ -75,10 +75,15 @@ enum RepRapMode {
 	DetermineAvailableSteps = 3,
 	MoveForthAndBackAtSpeed = 4,
 	InitializeAllMotors = 5,
+	StepTicking = 6,
 } repRapMode;
 uint8_t modeState;
 const char *selectedAxisName;
 StepperMotorAxis *selectedAxis;
+
+long maxStep;
+unsigned long timeStamp;
+unsigned long timeToMoveToEndMillis;
 
 static void showError(const char * pgm_msg) {
 	Serial.pgm_print(PSTR("Error "));
@@ -86,9 +91,6 @@ static void showError(const char * pgm_msg) {
 	Serial.println();
 	printHelp();
 }
-
-const char PROGMEM pgm_Up[] = "Up";
-const char PROGMEM pgm_Down[] = "Down";
 
 static void UpdateRotor() {
 	rotor.update();
@@ -107,6 +109,7 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 		break;
 	case 'd':
 		repRapMode = DetermineAvailableSteps;
+		Serial.pgm_println(PSTR("maxStep\tminStep\ttimeToEndMillis\ttimeToStartMillis"));
 		modeState = 0;
 		break;
 	case 'h':
@@ -131,6 +134,8 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 	case 'Y': {
 		rotor.setMinMax(100, 10000);
 		rotor.setValue(axis.getDelayBetweenStepsAtMaxSpeedMicros());
+		repRapMode = AlterDelayBetweenSteps;
+		modeState = 0;
 		break;
 	}
 	case 'q': {
@@ -149,25 +154,19 @@ static void doAxis(const char *axisName, char *line, StepperMotorAxis &axis) {
 	case 'G': {
 		rotor.setMinMax(0, 10000);
 		rotor.setValue(axis.motorControl.getStep());
+		repRapMode = GotoStep;
+		modeState = 0;
 		break;
 	}
+	case 'T': {
+		rotor.setMinMax(8, 2000);
+		rotor.setValue(1000);
+		repRapMode = StepTicking;
+		timeStamp = millis();
+		modeState = 0;
+	}
 	case 'p':
-		Serial.pgm_println(PSTR("AXIS state"));
-		Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(axis.motorControl.isMoving() ? 'T':'F');
-		Serial.pgm_print(PSTR("remaining steps:")); Serial.println(axis.motorControl.remainingSteps);
-		Serial.pgm_print(PSTR("cur step:       ")); Serial.println(axis.motorControl.getStep());
-		Serial.pgm_print(PSTR("abs position:   ")); Serial.println(axis.getAbsolutePositionMicroM());
-		Serial.pgm_print(PSTR("speed (Q):      ")); Serial.println(axis.getSpeed());
-		Serial.println();
-		Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(axis.motorControl.startButton->getState() ? pgm_Up : pgm_Down);
-		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(axis.motorControl.endButton->getState() ? pgm_Up : pgm_Down);
-		Serial.println();
-		Serial.pgm_print(PSTR("movement mode:  ")); Serial.println((int)axis.motorControl.movementMode);
-		Serial.pgm_print(PSTR("axis resolution:")); Serial.println(axis.getAxisResolution());
-		Serial.pgm_print(PSTR("home position:  ")); Serial.println(axis.getHomePositionMM());
-		Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println(axis.motorControl.getDelayBetweenStepsMicros());
-		Serial.pgm_print(PSTR("delay b/n steps@max speed:")); Serial.println(axis.getDelayBetweenStepsAtMaxSpeedMicros());
-		Serial.println();
+		axis.debugPrint();
 		return;
 	default:
 		showError(PSTR("invalid axis command"));
@@ -206,9 +205,28 @@ static void doGotoStep() {
 	}
 }
 
-long maxStep;
-unsigned long timeStamp;
-unsigned long timeToMoveToEndMillis;
+static void doStepTicking() {
+	unsigned long dT = millis() - timeStamp;
+	if (rotor.hasValueChanged()) {
+		Serial.pgm_print(PSTR("Delay is "));
+		Serial.println(rotor.getValue());
+	}
+	unsigned long dR = rotor.getValue();
+	if (dT >= dR) {
+		long step = selectedAxis->motorControl.getStep();
+		if (modeState)
+			step++;
+		else
+			step--;
+		selectedAxis->motorControl.gotoStep(step);
+		Serial.pgm_print(PSTR("Tick delay: "));
+		Serial.print(dR);
+		Serial.print(" ");
+		Serial.println(step);
+
+		timeStamp = millis();
+	}
+}
 
 static void doDetermineAvailableSteps() {
 	switch (modeState) {
@@ -392,13 +410,6 @@ void RepRapPCB2Test::loop() {
 		}
 	}
 
-	if (btn.isLongClicked()) {
-		stop();
-		printHelp();
-	} else if (btn.isClicked()) {
-		stop();
-	}
-
 	switch (repRapMode) {
 	case AlterDelayBetweenSteps:
 		doAlterDelayBetweenSteps();
@@ -415,8 +426,22 @@ void RepRapPCB2Test::loop() {
 	case InitializeAllMotors:
 		doInitializeAllMotors();
 		break;
+	case StepTicking:
+		doStepTicking();
+		if (btn.isClicked()) {
+			modeState = !modeState;
+			btn.reset();
+		}
+		break;
 	case Idle:
 	default:
 		break;
+	}
+
+	if (btn.isLongClicked()) {
+		stop();
+		printHelp();
+	} else if (btn.isClicked()) {
+		stop();
 	}
 }

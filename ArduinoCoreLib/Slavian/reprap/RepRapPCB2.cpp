@@ -1,23 +1,44 @@
 #include "RepRapPCB2.h"
 
-#define XAxisLengthInMicroM 323800UL
-#define YAxisLengthInMicroM 303900UL
-#define ZAxisLengthInMicroM 168200UL
+/*
+X axis		- lenght 359.8 mm
+maxStep	minStep	timeToEndMillis	timeToStartMillis
+57539	4	86362	86357
+57539	4	86363	86356
+57532	1	86352	86351
 
-#define XAxisLengthInSteps 4689
-#define YAxisLengthInSteps 4103
-#define ZAxisLengthInSteps 6488
+Y axis		- length 305.9 mm
+maxStep	minStep	timeToEndMillis	timeToStartMillis
+49036	3	73608	73603
+49033	0	73603	73603
+49034	1	73605	73603
 
-#define XAxisPrecissionInSteps 4
-#define YAxisPrecissionInSteps 10
-#define ZAxisPrecissionInSteps 16
+Z axis		- length 163.8 mm
+maxStep	minStep	timeToEndMillis	timeToStartMillis
+6337	0	15895	15895
+6338	0	15897	15899
+6338	1	15898	15895
+6337	1	15894	15894
+*/
+
+#define XAxisLengthInMicroM 359800UL
+#define YAxisLengthInMicroM 305900UL
+#define ZAxisLengthInMicroM 163800UL
+
+#define XAxisLengthInSteps 57537
+#define YAxisLengthInSteps 49033
+#define ZAxisLengthInSteps 6338
+
+//#define XAxisPrecissionInSteps 4
+//#define YAxisPrecissionInSteps 10
+//#define ZAxisPrecissionInSteps 1
 
 #define XAxisResolutionInStepsPerDecimeter (XAxisLengthInSteps * 1000UL / (XAxisLengthInMicroM / 100UL))
 #define YAxisResolutionInStepsPerDecimeter (YAxisLengthInSteps * 1000UL / (YAxisLengthInMicroM / 100UL))
 #define ZAxisResolutionInStepsPerDecimeter (ZAxisLengthInSteps * 1000UL / (ZAxisLengthInMicroM / 100UL))
 
-#define XAxisHomeInMM 143
-#define YAxisHomeInMM 147
+#define XAxisHomeInMM 180
+#define YAxisHomeInMM 153
 #define ZAxisHomeInMM 168
 
 void RepRapPCB2::initialize() {
@@ -189,4 +210,20 @@ void RepRapPCB2::stop() {
 	axisY.stop();
 	axisZ.stop();
 	axisE.stop();
+}
+
+void RepRapPCB2::debugPrint() {
+	Serial.pgm_print(PSTR("PCB mode "));
+	Serial.print((int)mode);
+	Serial.pgm_print(PSTR("/"));
+	Serial.println((int)modeState);
+	Serial.pgm_print("Micros: ");
+	Serial.println(micros());
+	Serial.println();
+	Serial.pgm_print(PSTR("X "));
+	axisX.debugPrint();
+	Serial.pgm_print(PSTR("Y "));
+	axisY.debugPrint();
+	Serial.pgm_print(PSTR("Z "));
+	axisZ.debugPrint();
 }

@@ -1,6 +1,7 @@
 #ifndef Stepper_h
 #define Stepper_h
 
+#include "HardwareSerial.h"
 #include "DigitalIO.h"
 
 class StepperMotor {
@@ -87,7 +88,6 @@ class StepperMotorControlWithButtons {
 	StepperMotor *motor;
 	long currentStep;
 
-public:
 	// end buttons
 	DigitalInputPin *startButton;
 	DigitalInputPin *endButton;
@@ -130,6 +130,8 @@ public:
 	inline unsigned long getDelayBetweenStepsMicros(void) {
 		return delayBetweenStepsMicros;
 	}
+
+	void debugPrint();
 };
 
 /////////
@@ -231,6 +233,8 @@ public:
 	inline unsigned int getSpeed() {
 		return delayBetweenStepsToSpeed(motorControl.getDelayBetweenStepsMicros());
 	}
+
+	void debugPrint();
 };
 
 #endif
