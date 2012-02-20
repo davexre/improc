@@ -217,7 +217,7 @@ void RepRapPCB2::debugPrint() {
 	Serial.print((int)mode);
 	Serial.pgm_print(PSTR("/"));
 	Serial.println((int)modeState);
-	Serial.pgm_print("Micros: ");
+	Serial.pgm_print(PSTR("Micros: "));
 	Serial.println(micros());
 	Serial.println();
 	Serial.pgm_print(PSTR("X "));
