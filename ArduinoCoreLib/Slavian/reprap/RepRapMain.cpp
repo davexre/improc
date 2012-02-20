@@ -4,7 +4,6 @@
 #include "StateLed.h"
 #include "SerialReader.h"
 #include "TemperatureControl.h"
-#include "StepperAxis.h"
 #include "RepRap.h"
 #include "RotaryEncoderAcceleration.h"
 
