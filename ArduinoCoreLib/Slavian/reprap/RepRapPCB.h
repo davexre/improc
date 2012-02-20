@@ -4,9 +4,9 @@
 #include "Arduino.h"
 #include "utils.h"
 #include "DigitalIO.h"
-#include "Stepper.h"
+#include "StepperMotor.h"
 
-class RepRapPCB2 {
+class RepRapPCB {
 private:
 	static const int shiftRegisterInputPinCP = 8;
 	static const int shiftRegisterInputPinPE = 9;
@@ -56,10 +56,10 @@ public:
 
 	bool isIdle();
 	inline void initializePosition() {
-		setMode(RepRapPCB2::InitializePosition);
+		setMode(RepRapPCB::InitializePosition);
 	}
 	inline void initializePositionXY() {
-		setMode(RepRapPCB2::InitializePositionXY);
+		setMode(RepRapPCB::InitializePositionXY);
 	}
 
 	/*

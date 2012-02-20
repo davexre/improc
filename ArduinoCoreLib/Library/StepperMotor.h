@@ -1,5 +1,5 @@
-#ifndef Stepper_h
-#define Stepper_h
+#ifndef StepperMotor_h
+#define StepperMotor_h
 
 #include "HardwareSerial.h"
 #include "DigitalIO.h"

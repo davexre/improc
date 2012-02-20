@@ -4,7 +4,7 @@
 #include "SerialReader.h"
 #include "GCodeParser.h"
 #include "TemperatureControl.h"
-#include "RepRapPCB2.h"
+#include "RepRapPCB.h"
 
 // Feedrates in mm/minute
 #define SLOW_XY_FEEDRATE 1000.0
@@ -55,7 +55,7 @@ private:
 	void doRepRap_WaitForTemperature();
 public:
 	SerialReader *reader;
-	RepRapPCB2 pcb;
+	RepRapPCB pcb;
 
 	long speed;		// value is specified in MM per Minute
 	long feedRate;	// value is specified in MM per Minute

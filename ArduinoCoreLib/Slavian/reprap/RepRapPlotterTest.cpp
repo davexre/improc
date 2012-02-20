@@ -3,7 +3,7 @@
 #include "Button.h"
 #include "AdvButton.h"
 #include "StateLed.h"
-#include "reprap/RepRapPCB2.h"
+#include "reprap/RepRapPCB.h"
 #include "SerialReader.h"
 #include "RotaryEncoderAcceleration.h"
 
@@ -17,7 +17,7 @@ static const int ledPin = 6;
 static AdvButton btn;
 static StateLed led;
 
-static RepRapPCB2 pcb;
+static RepRapPCB pcb;
 static char readerBuffer[100];
 static SerialReader reader;
 static RotaryEncoderAcceleration rotor;

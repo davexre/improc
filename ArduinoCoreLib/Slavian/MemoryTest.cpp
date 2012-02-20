@@ -3,7 +3,7 @@
 #include "Button.h"
 #include "AdvButton.h"
 #include "StateLed.h"
-#include "reprap/RepRapPCB2.h"
+#include "reprap/RepRapPCB.h"
 #include "SerialReader.h"
 
 DefineClass(MemoryTest);

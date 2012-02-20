@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include "Stepper.h"
+#include "StepperMotor.h"
 
 void StepperMotorBA6845FS::initialize(
 			StepperMotor::SteppingMotorMode motorMode,

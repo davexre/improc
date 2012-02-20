@@ -3,11 +3,11 @@
 #include "Button.h"
 #include "AdvButton.h"
 #include "StateLed.h"
-#include "reprap/RepRapPCB2.h"
+#include "reprap/RepRapPCB.h"
 #include "SerialReader.h"
 #include "RotaryEncoderAcceleration.h"
 
-DefineClass(RepRapPCB2Test);
+DefineClass(RepRapPCBTest);
 
 static const int rotorPinA = 2;	// One quadrature pin
 static const int rotorPinB = 3;	// the other quadrature pin
@@ -17,7 +17,7 @@ static const int ledPin = 6;
 static AdvButton btn;
 static StateLed led;
 
-static RepRapPCB2 pcb;
+static RepRapPCB pcb;
 static char readerBuffer[100];
 static SerialReader reader;
 static RotaryEncoderAcceleration rotor;
@@ -347,7 +347,7 @@ static void doInitializeAllMotors() {
 	}
 }
 
-void RepRapPCB2Test::setup() {
+void RepRapPCBTest::setup() {
 	diButtonPin.initialize(buttonPin, true);
 	btn.initialize(&diButtonPin, false);
 	diLedPin.initialize(ledPin, 0);
@@ -370,7 +370,7 @@ void RepRapPCB2Test::setup() {
     printHelp();
 }
 
-void RepRapPCB2Test::loop() {
+void RepRapPCBTest::loop() {
 	pcb.update();
 	reader.update();
 	btn.update();
