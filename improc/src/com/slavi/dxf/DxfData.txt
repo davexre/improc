@@ -1,0 +1,51 @@
+; 
+ 1:Text/Block name 1
+ 2:Tag/Block internal name
+ 3:Prompt/Block name 3/Dimension style
+ 5:Handle
+ 6:LType
+ 7:Style
+ 8:Layer
+10:Point/Center X
+11:Point 2/Align/Mid/End/Major axis endpoint(ellipse) X
+12:Point 3/InsClone(dim) X
+13:Point 4/DefLinAng(dim) X
+15:DefDiaRadAng(dim) X
+16:DefArcAng(dim) X
+20:Point/Center Y
+21:Point 2/Align/Mid/End/Major axis endpoint(ellipse) Y
+22:Point 3/InsClone(dim) Y
+23:Point 4/DefLinAng(dim) Y
+25:DefDiaRadAng(dim) Y
+26:DefArcAng(dim) Y
+30:Point/Center Z
+31:Point 2/Align/Mid/End/Major axis endpoint(ellipse) Z
+32:Point 3/InsClone(dim) Z
+33:Point 4/DefLinAng(dim) Z
+35:DefDiaRadAng(dim) Z
+36:DefArcAng(dim) Z
+39:Thickness
+40:Height/Radius/Leaderlen/Ratio (ellipse min-max radius)
+41:RelXScale/Begining angle/Scale X
+42:End angle/Scale Y
+43:Scale Z
+44:Column spacing
+45:Row spacing
+48:LType scale
+50:Rotation/Start/Dim angle
+51:Oblique/End/Horizontal angle
+52:Ext angle
+53:Text angle
+60:Visible
+62:aci
+66:attFollow
+67:Space
+70:Flags/Column count
+71:Text gen flags/Row count
+72:Horizontal alignment flags
+73:Field length
+74:Vertical alignment flags
+210:XtruDir X
+220:XtruDir Y
+230:XtruDir Z
+
