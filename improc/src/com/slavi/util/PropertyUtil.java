@@ -1,5 +1,11 @@
 package com.slavi.util;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -113,5 +119,27 @@ public class PropertyUtil {
 		mergeProperties(res, System.getProperties());
 		mergeProperties(res, System.getenv());
 		return res;
+	}
+	
+	public static ArrayList<String> propertiesToSortedStringList(Properties properties) {
+		StringPrintStream out = new StringPrintStream();
+		try {
+			properties.store(out, null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		out.flush();
+		ArrayList<String> lines = new ArrayList<String>();
+		BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
+		try {
+			in.readLine(); // Skip comment line 
+			while (in.ready()) {
+				lines.add(in.readLine());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Collections.sort(lines);
+		return lines;
 	}
 }

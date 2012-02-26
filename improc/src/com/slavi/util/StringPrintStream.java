@@ -12,4 +12,8 @@ public class StringPrintStream extends PrintStream {
 	public String toString() {
 		return new String(((ByteArrayOutputStream) out).toByteArray());
 	}
+	
+	public byte[] toByteArray() {
+		return ((ByteArrayOutputStream) out).toByteArray();
+	}
 }

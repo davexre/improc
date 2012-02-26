@@ -2,37 +2,43 @@
  1:Text/Block name 1
  2:Tag/Block internal name
  3:Prompt/Block name 3/Dimension style
+ 4:NameList
  5:Handle
  6:LType
  7:Style
  8:Layer
-10:Point/Center X
-11:Point 2/Align/Mid/End/Major axis endpoint(ellipse) X
+10:Point/Center/LowerLeft X
+11:Point 2/Align/Mid/End/Major axis endpoint(ellipse)/UpperRigth X
 12:Point 3/InsClone(dim) X
 13:Point 4/DefLinAng(dim) X
 15:DefDiaRadAng(dim) X
-16:DefArcAng(dim) X
-20:Point/Center Y
-21:Point 2/Align/Mid/End/Major axis endpoint(ellipse) Y
+16:DefArcAng(dim)/VDir X
+17:VTgt X
+20:Point/Center/LowerLeft Y
+21:Point 2/Align/Mid/End/Major axis endpoint(ellipse)/UpperRigth Y
 22:Point 3/InsClone(dim) Y
 23:Point 4/DefLinAng(dim) Y
 25:DefDiaRadAng(dim) Y
-26:DefArcAng(dim) Y
-30:Point/Center Z
-31:Point 2/Align/Mid/End/Major axis endpoint(ellipse) Z
+26:DefArcAng(dim)/VDir Y
+27:VTgt Y
+30:Point/Center/LowerLeft Z
+31:Point 2/Align/Mid/End/Major axis endpoint(ellipse)/UpperRigth Z
 32:Point 3/InsClone(dim) Z
 33:Point 4/DefLinAng(dim) Z
 35:DefDiaRadAng(dim) Z
-36:DefArcAng(dim) Z
+36:DefArcAng(dim)/VDir Z
+37:VTgt Z
 39:Thickness
-40:Height/Radius/Leaderlen/Ratio (ellipse min-max radius)
-41:RelXScale/Begining angle/Scale X
-42:End angle/Scale Y
-43:Scale Z
-44:Column spacing
-45:Row spacing
+40:Height/Radius/Leaderlen/Ratio (ellipse min-max radius), Patternlen
+41:RelXScale/Begining angle/Scale X, Aspect
+42:End angle/Scale Y, lensLength
+43:Scale Z, fcp
+44:Column spacing, bcp, LType xlist
+45:Row spacing, LType ylist
+46:LType scalelist
 48:LType scale
-50:Rotation/Start/Dim angle
+49:LType lenlist
+50:Rotation/Start/Dim/ViewTwist angle. LType rotlist
 51:Oblique/End/Horizontal angle
 52:Ext angle
 53:Text angle
@@ -40,11 +46,18 @@
 62:aci
 66:attFollow
 67:Space
+68:Status
+69:Id
 70:Flags/Column count
-71:Text gen flags/Row count
-72:Horizontal alignment flags
-73:Field length
-74:Vertical alignment flags
+71:Text gen flags/Row count/ViewMode
+72:Horizontal alignment flags/circleZoomPercent/aligncode
+73:Field length/fastZoomSetting/dashlencount
+74:Vertical alignment flags/ucsicon
+75:Snaponoff
+76:Gridonoff
+77:SnapStyle
+78:SnapIsopair
+100:SubClassMarker
 210:XtruDir X
 220:XtruDir Y
 230:XtruDir Z
