@@ -74,7 +74,7 @@ public class WeightLightRender extends AbstractParallelRender {
 			// Calc the output image 1 color
 			ColorConversion.RGB.fromRGB(color, DRGB);
 			ColorConversion.HSL.fromDRGB(DRGB, HSL);
-			double hue = HSL[0];
+//			double hue = HSL[0];
 			double sumWeight = 0.0;
 			double sumLight = 0.0;
 			for (KeyPointList image : imageData.keySet()) {

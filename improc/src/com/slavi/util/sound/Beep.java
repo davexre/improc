@@ -87,7 +87,6 @@ public class Beep {
 		int duration = 0;
 		clipDuration = 0;
 		double omega = 0.0;
-		int sinCounter = 0;
 		
 		for (int index = 0; index < result.length; index++) {
 			if (index == getNextAtIndex) {
@@ -97,10 +96,8 @@ public class Beep {
 				clipDuration += duration;
 				omega = (2.0 * Math.PI * pitch) / samplesPerSecond;
 				getNextAtIndex = samplesPerSecond * clipDuration / 1000;
-				sinCounter = 0;
 			}
 			result[index] = (byte) (volumeInPersent * Math.sin(omega * index));
-			sinCounter++;
 		}
 		return result;
 	}

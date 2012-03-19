@@ -199,8 +199,8 @@ public class ImageAdjust {
 			}
 		});
 		
-		final double scaleL = 0.8;
-		final double scaleS = scaleL;
+//		final double scaleL = 0.8;
+//		final double scaleS = scaleL;
 		/***		
 
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_L") {

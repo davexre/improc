@@ -83,7 +83,7 @@ public class ImageHistogram2 {
 		
 		double DRGB[] = new double[3];
 		double HSL[] = new double[3];
-		double HSV[] = new double[3];
+//		double HSV[] = new double[3];
 
 		final int sizeX = bi.getWidth() - 1;
 		final int sizeY = bi.getHeight() - 1;

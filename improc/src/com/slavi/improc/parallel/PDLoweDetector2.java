@@ -678,7 +678,7 @@ public class PDLoweDetector2 implements Callable<Void> {
 		computeDOG(blurred1, blurred2, DOGs[2]);
 		sigma = getNextSigma(sigma, scaleSpaceLevels);
 
-		int dogcount = 0;
+//		int dogcount = 0;
 		for (int aLevel = 0; aLevel < scaleSpaceLevels; aLevel++) {
 			// Shift blurred
 			PDImageMapBuffer tmpimap = blurred0;
@@ -700,7 +700,7 @@ public class PDLoweDetector2 implements Callable<Void> {
 //			DWindowedImageUtils.toImageFile(DOGs[2], Const.workDir + "/dlowe_dog_" + (int)scale + "_" + dogcount + "p.png");
 //			DWindowedImageUtils.toImageFile(magnitude, Const.workDir + "/dlowe_magnitude_" + (int)scale + "_" + dogcount + "p.png");
 //			DWindowedImageUtils.toImageFile(direction, Const.workDir + "/dlowe_direction_" + (int)scale + "_" + dogcount + "p.png");
-			dogcount++;
+//			dogcount++;
 			sigma = getNextSigma(sigma, scaleSpaceLevels);
 
 			// detect

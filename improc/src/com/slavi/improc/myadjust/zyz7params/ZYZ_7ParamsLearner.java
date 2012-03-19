@@ -215,14 +215,12 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		lsa.clear();
 		ZYZ_7ParamsNorm norm = new ZYZ_7ParamsNorm();
 //		System.out.println("NORMAL EQUASIONS");
-		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
 			int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * paramsPerImage;
 			int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * paramsPerImage;
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
-				pointCounter++;
 				
 				double computedWeight = getWeight(item);
 				norm.setKeyPointPair(item);

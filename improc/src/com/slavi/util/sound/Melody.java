@@ -76,7 +76,6 @@ public class Melody {
 		int getNextAtIndex = 0;
 		clipDuration = 0;
 		double omega = 0.0;
-		int sinCounter = 0;
 		double volumeInPersent = 0.0;
 		
 		for (int index = 0; index < result.length; index++) {
@@ -86,10 +85,8 @@ public class Melody {
 				omega = (2.0 * Math.PI * note.tone.pitch) / samplesPerSecond;
 				volumeInPersent = MathUtil.clipValue(globalLoudness * note.loudness, 0, 100) * 127 / 100;
 				getNextAtIndex = samplesPerSecond * clipDuration / 1000;
-				sinCounter = 0;
 			}
 			result[index] = (byte) (volumeInPersent * Math.sin(omega * index));
-			sinCounter++;
 		}
 		return result;
 	}

@@ -168,14 +168,12 @@ public class MyPanoPairTransformZYXLearner extends PanoTransformer {
 		lsa.clear();
 		MyPanoPairTransformZYXNorm norm = new MyPanoPairTransformZYXNorm();
 //		System.out.println("NORMAL EQUASIONS");
-		int pointCounter = 0;
 		for (KeyPointPairList pairList : chain) {
 			int srcIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.source) * (adjustForScale ? 4 : 3);
 			int destIndex = (adjustOriginForScale ? 1 : 0) + images.indexOf(pairList.target) * (adjustForScale ? 4 : 3);
 			for (KeyPointPair item : pairList.items) {
 				if (isBad(item))
 					continue;
-				pointCounter++;
 				
 				double computedWeight = getWeight(item);
 				norm.setKeyPointPair(item);

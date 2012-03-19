@@ -24,8 +24,6 @@ public class TestPaintSWT {
 			});
 		}
 
-		private static final long serialVersionUID = 1L;
-		
 		public void paint(GC gc, int width, int height) {
 	        int d = Math.min(width, height); // diameter
 	        int ed = d/20; // eye diameter

@@ -1455,9 +1455,7 @@ public class JLapack {
 		// Iterative loop for norm reduction
 		final double SCLFAC = 8.0; // in fortran this is encoded like 0.8D+1;
 		
-		int ITER_COUNT = 0;
 		while (true) {
-			ITER_COUNT++;
 			boolean NOCONV = false;
 			for (int i = K; i <= L; i++) {
 				double c = 0.0;

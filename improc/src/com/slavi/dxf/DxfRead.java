@@ -1,7 +1,5 @@
 package com.slavi.dxf;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -10,46 +8,63 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import com.slavi.util.PropertyUtil;
-
-public class DxfRead {
-
-	LineNumberReader r;
-	
-	boolean hasPushedPair = false;
-	int code;
-	String val;
-	
-	Properties header = new Properties();
+public abstract class DxfRead {
 
 	public DxfRead(InputStream in) {
 		r = new LineNumberReader(new InputStreamReader(in));
 	}
 	
-	public void blockRead(Map<Integer, String> block, ArrayList<Map<Integer, String>> blockEntities, Map<Integer, String> blockData) {
-		System.out.println("Block :" + block.get(2) + " blockData:" + blockData.size());
+	public void readDxf() throws Exception {
+		while (r.ready()) {
+			readPair();
+			if (code != 0) {
+				err(r.getLineNumber(), "SECTION or EOF with code 0 expected");
+				continue;
+			}
+			if ("EOF".equals(val)) {
+				break;
+			} else if ("SECTION".equals(val)) {
+				readSection();
+			} else {
+				err(r.getLineNumber(), "SECTION or EOF expected");
+			}
+		}
 	}
 
-	public void entityRead(Map<Integer, String> entity) {
-		System.out.println("Entity:" + entity.get(0));
-	}
+	public abstract void blockRead(Map<Integer, String> block, ArrayList<Map<Integer, String>> blockEntities, Map<Integer, String> blockData);
 
-	public void tableRead(Map<Integer, String> tableDesc, ArrayList<Map<Integer, String>> table) {
-		System.out.println("Table :" + tableDesc.get(2));
-	}
+	public abstract void entityRead(Map<Integer, String> entity);
 
-	public void err(String desc) {
-		System.out.println(r.getLineNumber() + ": " + code + "/" + val + ": " + desc);
-	}
+	public abstract void tableRead(Map<Integer, String> tableDesc, ArrayList<Map<Integer, String>> table);
 
-	void pushPair() throws Exception {
+	public abstract void err(int lineNumber, String desc);
+
+	public Properties getHeader() {
+		return header;
+	}
+	
+	////////////////////////////////////
+	
+	protected int code;
+	
+	protected String val;
+	
+	////////////////////////////////////
+
+	private LineNumberReader r;
+	
+	private boolean hasPushedPair = false;
+	
+	private Properties header = new Properties();
+	
+	private void pushPair() throws Exception {
 		if (hasPushedPair) {
 			throw new Exception("Only one pair can be pushed");
 		}
 		hasPushedPair = true;
 	}
 	
-	void readPair() throws Exception {
+	private void readPair() throws Exception {
 		if (hasPushedPair) {
 			hasPushedPair = false;
 			return;
@@ -63,7 +78,7 @@ public class DxfRead {
 		}
 	}
 
-	void readHeader() throws Exception {
+	private void readHeader() throws Exception {
 		String lastName = "";
 		while (r.ready()) {
 			readPair();
@@ -71,7 +86,7 @@ public class DxfRead {
 				if ("ENDSEC".equals(val)) {
 					return;
 				}
-				err("ENDSEC expected reading header");
+				err(r.getLineNumber(), "ENDSEC expected reading header");
 				continue;
 			} else if (code == 9) {
 				lastName = val;
@@ -81,7 +96,7 @@ public class DxfRead {
 		}
 	}
 	
-	Map<Integer, String> readCodeValueMap() throws Exception {
+	private Map<Integer, String> readCodeValueMap() throws Exception {
 		Map<Integer, String> result = new HashMap<Integer, String>();
 		while (r.ready()) {
 			readPair();
@@ -99,7 +114,7 @@ public class DxfRead {
 		return result;
 	}
 	
-	ArrayList<Map<Integer, String>> readTable() throws Exception {
+	private ArrayList<Map<Integer, String>> readTable() throws Exception {
 		ArrayList<Map<Integer, String>> result = new ArrayList<Map<Integer,String>>();
 		while (r.ready()) {
 			readPair();
@@ -117,11 +132,11 @@ public class DxfRead {
 		return result;
 	}
 
-	void readTables() throws Exception {
+	private void readTables() throws Exception {
 		while (r.ready()) {
 			readPair();
 			if (code != 0) {
-				err("Code 0 expected reading tables");
+				err(r.getLineNumber(), "Code 0 expected reading tables");
 				continue;
 			}
 			if ("ENDSEC".equals(val)) {
@@ -131,23 +146,23 @@ public class DxfRead {
 				ArrayList<Map<Integer, String>> table = readTable();
 				tableRead(tableDesc, table);
 			} else {
-				err("ENDSEC or TABLE expected");
+				err(r.getLineNumber(), "ENDSEC or TABLE expected");
 			}
 		}
 	}
 
-	Map<Integer, String> readEntity() throws Exception {
+	private Map<Integer, String> readEntity() throws Exception {
 		String entityType = val;
 		Map<Integer, String> result = readCodeValueMap();
 		result.put(0, entityType);
 		return result;
 	}
 
-	void readEntities() throws Exception {
+	private void readEntities() throws Exception {
 		while (r.ready()) {
 			readPair();
 			if (code != 0) {
-				err("Code 0 expected reading entities");
+				err(r.getLineNumber(), "Code 0 expected reading entities");
 				continue;
 			}
 			if ("ENDSEC".equals(val)) {
@@ -159,13 +174,13 @@ public class DxfRead {
 		}
 	}
 	
-	void readBlocks() throws Exception {
+	private void readBlocks() throws Exception {
 		Map<Integer, String> block = null;
 		ArrayList<Map<Integer, String>> blockEntities = null;
 		while (r.ready()) {
 			readPair();
 			if (code != 0) {
-				err("ENDSEC/BLOCK/ENDBLK with code 0 expected");
+				err(r.getLineNumber(), "ENDSEC/BLOCK/ENDBLK with code 0 expected");
 				continue;
 			}
 			if ("ENDSEC".equals(val)) {
@@ -185,7 +200,7 @@ public class DxfRead {
 		}
 	}
 
-	void readSection() throws Exception {
+	private void readSection() throws Exception {
 		readPair();
 		if ("HEADER".equals(val)) {
 			readHeader();
@@ -196,7 +211,7 @@ public class DxfRead {
 		} else if ("ENTITIES".equals(val)) {
 			readEntities();
 		} else {
-			err("Invalid section");
+			err(r.getLineNumber(), "Invalid section");
 			while (r.ready()) {
 				readPair();
 				if (code != 0) {
@@ -206,32 +221,6 @@ public class DxfRead {
 					break;
 				}
 			}
-		}
-	}
-	
-	public void readDxf() throws Exception {
-		while (r.ready()) {
-			readPair();
-			if (code != 0) {
-				err("SECTION or EOF with code 0 expected");
-				continue;
-			}
-			if ("EOF".equals(val)) {
-				break;
-			} else if ("SECTION".equals(val)) {
-				readSection();
-			} else {
-				err("SECTION or EOF expected");
-			}
-		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		String dxfRoot = "/home/slavian/S/java/workspace/ycad/dat/";
-		DxfRead dxfRead = new DxfRead(new FileInputStream(new File(dxfRoot, "hexhouse.dxf")));
-		ArrayList<String> lines = PropertyUtil.propertiesToSortedStringList(dxfRead.header);
-		for (String line : lines) {
-			System.out.println(line);
 		}
 	}
 }
