@@ -6,6 +6,9 @@ import java.awt.geom.Path2D;
 import com.slavi.math.GeometryUtil;
 
 /*
+More info on cubic curves:
+http://graphics.ucsd.edu/courses/cse167_w06/slides/CSE167_07.ppt
+
 t=[0..1]
 
 B(n,m) = mth coefficient of nth degree Bernstein polynomial
@@ -15,7 +18,7 @@ C(n,m) = Combinations of n things, taken m at a time
 C(n,m) = n! / (m! * (n-m)!)
 
 C(2,0) = 2! / (0! * 2!) = 1
-C(2,1) = 2! / (1! * 1!) = 1
+C(2,1) = 2! / (1! * 1!) = 2
 C(2,2) = 2! / (2! * 0!) = 1
 
 C(3,0) = 3! / (0! * 3!) = 1
@@ -24,7 +27,7 @@ C(3,2) = 3! / (2! * 1!) = 3
 C(3,3) = 3! / (3! * 0!) = 1
 
 B(2,0) = (1-t)^2
-B(2,1) = t * (1-t)
+B(2,1) = 2 * t * (1-t)
 B(2,2) = t^2
 
 B(3,0) = (1-t)^3
@@ -34,7 +37,7 @@ B(3,3) = t^3
 
 SEG_QUADTO
 P(t) = B(2,0)*CP + B(2,1)*P1 + B(2,2)*P2
-P(t) = CP*(1-t)^2 + P1*t*(1-t) + P2*t^2
+P(t) = CP*(1-t)^2 + P1*2*t*(1-t) + P2*t^2
 
 SEG_CUBICTO
 P(t) = B(3,0)*CP + B(3,1)*P1 + B(3,2)*P2 + B(3,3)*P3

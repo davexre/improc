@@ -69,7 +69,7 @@ public class PlotterDxfTest {
 			fin.close();
 		}
 
-		RepRapPlotter reprap = new RepRapPlotter();
+//		RepRapPlotter reprap = new RepRapPlotter();
 		try {
 			//reprap.start("/dev/ttyUSB0");
 			double coords[] = new double[6];
@@ -79,10 +79,10 @@ public class PlotterDxfTest {
 					int type = pIter.currentSegment(coords);
 					switch (type) {
 					case PathIterator.SEG_MOVETO:
-						reprap.moveTo(coords[0], coords[1], true);
+//						reprap.moveTo(coords[0], coords[1], true);
 						break;
 					case PathIterator.SEG_LINETO:
-						reprap.moveTo(coords[0], coords[1], false);
+//						reprap.moveTo(coords[0], coords[1], false);
 						break;
 					}
 					pIter.next();
