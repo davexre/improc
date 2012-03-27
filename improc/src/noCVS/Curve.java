@@ -8,7 +8,6 @@ package noCVS;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -27,12 +26,9 @@ class Curve
 
     public void curveTo()
     {
-    	polygon = new Polygon();
-        polygon.addPoint((int)control0.x, (int)control0.y);
+    	points.clear();
+        points.add(control0);
 
-        int l = 0;
-        ArrayList<ControlSet> acontrolset = new ArrayList<ControlSet>();
-        ArrayList<ControlSet> acontrolset1 = new ArrayList<ControlSet>();
         
     	myPath = new Path2D.Double();
     	myPath.moveTo(control0.x, control0.y);
@@ -46,30 +42,21 @@ class Curve
         ScaledPoint scaledpoint2 = new ScaledPoint(control2);
         ScaledPoint scaledpoint3 = new ScaledPoint(control3);
         ControlSet controlset = new ControlSet(scaledpoint, scaledpoint1, scaledpoint2, scaledpoint3);
-        controlset = new ControlSet(controlset.point0, controlset.point1, controlset.point2, controlset.point3);
-        acontrolset1.add(controlset);
-        l++;
-        while(l > 0) 
+        ArrayList<ControlSet> todo = new ArrayList<ControlSet>();
+        todo.add(controlset);
+        while(todo.size() > 0) 
         {
-            ControlSet controlset1 = acontrolset1.get(--l);
-            if(controlset1.breadth() > resolution)
+            ControlSet controlset1 = todo.remove(0);
+            if(controlset1.breadth() > 0.5)
             {
                 ControlSet controlset3 = controlset1.bisect();
-                acontrolset1.add(controlset1);
-                l++;
-                acontrolset1.add(controlset3);
-                l++;
-            } else
-                acontrolset.add(controlset1);
+                todo.add(controlset1);
+                todo.add(controlset3);
+            } else {
+                points.add(new Point2D.Double(controlset1.point3.x / ControlSet.scale, controlset1.point3.y / ControlSet.scale));
+            }
         }
-        for(ControlSet controlset2 : acontrolset)
-        {
-            int k1 = (int) controlset2.point3.x;
-            k1 >>= ScaledInt.scale;
-            int l1 = (int) controlset2.point3.y;
-            l1 >>= ScaledInt.scale;
-            polygon.addPoint(k1, l1);
-        }
+        System.out.println(points.size());
     }
 
     public void reset(int i, int j, int k)
@@ -101,14 +88,13 @@ class Curve
     	Graphics2D g2 = (Graphics2D) g;
     	g2.draw(myPath);
         g.setColor(color);
-        for(int i = 0; i < polygon.npoints; i++)
-            g.fillRect(polygon.xpoints[i] - 1, polygon.ypoints[i] - 1, 2, 2);
+        for (Point2D.Double point : points)
+            g.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
 
     }
 
-    static double resolution = 0.5D;
     Path2D.Double myPath;
-    Polygon polygon;
+    ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
     Point2D.Double control0;
     Point2D.Double control1;
     Point2D.Double control2;

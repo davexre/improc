@@ -17,35 +17,38 @@ class ControlSet
         point3 = scaledpoint3;
     }
 
+    public static final double scale = 2;
+    public static final double resolution = 1;
     public double breadth()
     {
-        double f =  point0.x / 64.0;
-        double f4 = point0.y / 64.0;
-        double f1 = point1.x / 64.0;
-        double f5 = point1.y / 64.0;
-        double f2 = point2.x / 64.0;
-        double f6 = point2.y / 64.0;
-        double f3 = point3.x / 64.0;
-        double f7 = point3.y / 64.0;
-        if((double)Math.abs(f - f3) < ScaledInt.resolution && (double)Math.abs(f4 - f4) < ScaledInt.resolution)
-        {
-            double f8 = Math.abs(f1 - f) + Math.abs(f5 - f4);
-            double f10 = Math.abs(f2 - f) + Math.abs(f6 - f4);
-            if(f10 > f8)
-                return (double)f10;
+        double x0 = point0.x / scale;
+        double y0 = point0.y / scale;
+        double x1 = point1.x / scale;
+        double y1 = point1.y / scale;
+        double x2 = point2.x / scale;
+        double y2 = point2.y / scale;
+        double x3 = point3.x / scale;
+        double y3 = point3.y / scale;
+        
+        double dx = x3 - x0;
+        double dy = y3 - y0;
+        double dist = Math.sqrt(dy * dy + dx * dx);
+        
+        if (dist < resolution) {
+            double f8 = Math.abs(x1 - x0) + Math.abs(y1 - y0);
+            double f10 = Math.abs(x2 - x0) + Math.abs(y2 - y0);
+            if (f10 > f8)
+                return f10;
             else
-                return (double)f8;
+                return f8;
         }
-        double d = f4 - f7;
-        double d1 = f3 - f;
-        float f12 = (float)Math.sqrt(d * d + d1 * d1);
-        double d2 = f3 * f4 - f * f7;
-        float f9 = (float)Math.abs((d * (double)f2 + d1 * (double)f6) - d2) / f12;
-        float f11 = (float)Math.abs((d * (double)f1 + d1 * (double)f5) - d2) / f12;
+        double d2 = x3 * y0 - x0 * y3;
+        double f9 =  Math.abs((dx * y2 - dy * x2) - d2) / dist;
+        double f11 = Math.abs((dx * y1 - dy * x1) - d2) / dist;
         if(f9 > f11)
-            return (double)f9;
+            return f9;
         else
-            return (double)f11;
+            return f11;
     }
 
     public ControlSet bisect()

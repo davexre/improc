@@ -20,9 +20,9 @@ class ScaledPoint
     public ScaledPoint(Point2D.Double realpoint)
     {
         double d = realpoint.x;
-        x = (int)(d *= 1 << ScaledInt.scale);
+        x = (int)(d *= ControlSet.scale);
         d = realpoint.y;
-        y = (int)(d *= 1 << ScaledInt.scale);
+        y = (int)(d *= ControlSet.scale);
     }
 
     public static ScaledPoint average(ScaledPoint scaledpoint, ScaledPoint scaledpoint1)
