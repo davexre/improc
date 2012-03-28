@@ -30,15 +30,18 @@ public class BezierCurve {
 		this.p3 = p3;
 	}
 	
-	public double breadth(double resolution) {
+	public double breadth(double minLineLength) {
+		if (minLineLength <= 0)
+			minLineLength = 0.01;
 		double dx = p3.x - p0.x;
 		double dy = p3.y - p0.y;
 		double dist = Math.sqrt(dy * dy + dx * dx);
 
-		if (dist < resolution) {
-			double a1 = Math.abs(p1.x - p0.x) + Math.abs(p1.y - p0.y);
-			double a2 = Math.abs(p2.x - p0.x) + Math.abs(p2.y - p0.y);
-			return Math.max(a1, a2);
+		if (dist < minLineLength) {
+			return 0;
+//			double a1 = Math.abs(p1.x - p0.x) + Math.abs(p1.y - p0.y);
+//			double a2 = Math.abs(p2.x - p0.x) + Math.abs(p2.y - p0.y);
+//			return Math.max(a1, a2);
 		}
 		double d2 = p3.x * p0.y - p0.x * p3.y;
 		double a1 = Math.abs((dx * p1.y - dy * p1.x) - d2) / dist;
@@ -74,14 +77,16 @@ public class BezierCurve {
 		path.curveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 	}
 	
-	public void appendToPointsList(List<Point2D.Double> points) {
+	public void appendToPointsList(List<Point2D.Double> points, double maxBreadth, double minLineLength) {
+		if (maxBreadth <= 0)
+			maxBreadth = 0.1;
 		points.add(p0);
 
 		ArrayList<BezierCurve> todo = new ArrayList<BezierCurve>();
 		todo.add(new BezierCurve(p0, p1, p2, p3));
 		while (todo.size() > 0) {
 			BezierCurve curve = todo.remove(0);
-			if (curve.breadth(0.0001) > 0.5) {
+			if (curve.breadth(minLineLength) > maxBreadth) {
 				BezierCurve curve2 = curve.bisect();
 				todo.add(0, curve);
 				todo.add(1, curve2);

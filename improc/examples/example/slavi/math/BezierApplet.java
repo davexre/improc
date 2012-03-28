@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.slavi.math.BezierCurve;
 
@@ -81,6 +82,20 @@ public class BezierApplet extends Applet {
 				2 * controlNodeWidth, 2 * controlNodeHeight);
 	}
 
+	static Path2D.Double toPath(List<? extends Point2D> points) {
+		Path2D.Double path = new Path2D.Double();
+		if (points == null || points.size() == 0)
+			return path;
+		int i = 0;
+		Point2D p = points.get(i++);
+		path.moveTo(p.getX(), p.getY());
+		for (; i < points.size(); i++) {
+			p = points.get(i);
+			path.lineTo(p.getX(), p.getY());
+		}
+		return path;
+	}
+
 	public void paint(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -96,9 +111,19 @@ public class BezierApplet extends Applet {
 		spline.appendToPath(path);
 		g2.draw(path);
 
-		g2.setColor(Color.black);
+		double minLineLength = 100;
+		double maxBreadth = 0.1; 
+
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
-		spline.appendToPointsList(points);
+		spline.appendToPointsList(points, maxBreadth, minLineLength);
+		path = toPath(points);
+		g2.setColor(Color.green);
+		g2.draw(path);
+		
+		g2.setColor(Color.cyan);
+		g2.drawLine(0, 10, (int) minLineLength, 10); 
+		
+		g2.setColor(Color.black);
 		for (Point2D.Double point : points)
 			g2.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
 		drawControlNode(spline.p0, g2);
