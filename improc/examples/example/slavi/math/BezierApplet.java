@@ -124,8 +124,17 @@ public class BezierApplet extends Applet {
 		g2.drawLine(0, 10, (int) minLineLength, 10); 
 		
 		g2.setColor(Color.black);
-		for (Point2D.Double point : points)
-			g2.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
+		System.out.println();
+		System.out.println(spline.p0);
+		
+		for (int i = 1; i < 10; i++) {
+			Point2D.Double p = spline.getPointAt(i / 10.0);
+			System.out.println(p);
+			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
+		}
+		System.out.println(spline.p3);
+//		for (Point2D.Double point : points)
+//			g2.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
 		drawControlNode(spline.p0, g2);
 		drawControlNode(spline.p1, g2);
 		drawControlNode(spline.p2, g2);

@@ -30,12 +30,13 @@ public class BezierCurve {
 		this.p3 = p3;
 	}
 	
+	double dist;
 	public double breadth(double minLineLength) {
 		if (minLineLength <= 0)
 			minLineLength = 0.01;
 		double dx = p3.x - p0.x;
 		double dy = p3.y - p0.y;
-		double dist = Math.sqrt(dy * dy + dx * dx);
+		dist = Math.sqrt(dy * dy + dx * dx);
 
 		if (dist < minLineLength) {
 			return 0;
@@ -84,9 +85,11 @@ public class BezierCurve {
 
 		ArrayList<BezierCurve> todo = new ArrayList<BezierCurve>();
 		todo.add(new BezierCurve(p0, p1, p2, p3));
+		System.out.println();
 		while (todo.size() > 0) {
 			BezierCurve curve = todo.remove(0);
-			if (curve.breadth(minLineLength) > maxBreadth) {
+			double breadth = curve.breadth(minLineLength);
+			if (breadth > maxBreadth) {
 				BezierCurve curve2 = curve.bisect();
 				todo.add(0, curve);
 				todo.add(1, curve2);
@@ -94,5 +97,31 @@ public class BezierCurve {
 				points.add(curve.p3);
 			}
 		}
+	}
+	
+	/**
+	 * More info on cubic curves:
+	 * http://graphics.ucsd.edu/courses/cse167_w06/slides/CSE167_07.ppt
+	 *
+	 * 0 <= t <= 1
+	 * 
+	 * SEG_CUBICTO
+	 * P(t) = B(3,0)*CP + B(3,1)*P1 + B(3,2)*P2 + B(3,3)*P3
+	 * P(t) = CP*(1-t)^3 + P1*3*t*(1-t)^2 + P2*3*t^2*(1-t) + P3*t^3
+	 * 
+	 * B(n,m) = mth coefficient of nth degree Bernstein polynomial
+	 * B(n,m) = C(n,m) * t^(m) * (1 - t)^(n-m)
+	 * 
+	 * C(n,m) = Combinations of n things, taken m at a time
+	 * C(n,m) = n! / (m! * (n-m)!)
+	 */
+	public Point2D.Double getPointAt(double t) {
+		if ((t < 0.0) || (t > 1.0))
+			throw new IllegalArgumentException();
+		Point2D.Double r = new Point2D.Double();
+		double t1 = 1 - t;
+		r.x = p0.x * t1*t1*t1 + p1.x * 3*t*t1*t1 + p2.x * 3*t*t*t1 + p3.x * t*t*t; 
+		r.y = p0.y * t1*t1*t1 + p1.y * 3*t*t1*t1 + p2.y * 3*t*t*t1 + p3.y * t*t*t; 
+		return r;
 	}
 }
