@@ -11,15 +11,14 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.slavi.math.BezierCurve;
+import com.slavi.math.BezierQuadraticCurve;
 
-public class BezierApplet extends Applet {
+public class BezierQuadraticApplet extends Applet {
 
-	BezierCurve spline = new BezierCurve(
+	BezierQuadraticCurve spline = new BezierQuadraticCurve(
 		new Point2D.Double(25, 25),
 		new Point2D.Double(125, 125),
-		new Point2D.Double(225, 125),
-		new Point2D.Double(325, 25));
+		new Point2D.Double(225, 125));
 
 	static int controlNodeWidth = 3;
 	
@@ -36,6 +35,7 @@ public class BezierApplet extends Applet {
 	}
 
 	public void init() {
+		setName(getClass().getName());
 		MouseAdapter listener = new MouseAdapter() {
 			public void mouseDragged(MouseEvent e) {
 				int x = e.getX();
@@ -59,7 +59,6 @@ public class BezierApplet extends Applet {
 				checkControlNode(spline.p0, x, y);
 				checkControlNode(spline.p1, x, y);
 				checkControlNode(spline.p2, x, y);
-				checkControlNode(spline.p3, x, y);
 
 				if (selected != null) {
 					selected.x = x;
@@ -104,7 +103,6 @@ public class BezierApplet extends Applet {
 		g2.setColor(Color.lightGray);
 		g2.drawLine((int)spline.p0.x, (int)spline.p0.y, (int)spline.p1.x, (int)spline.p1.y);
 		g2.drawLine((int)spline.p1.x, (int)spline.p1.y, (int)spline.p2.x, (int)spline.p2.y);
-		g2.drawLine((int)spline.p2.x, (int)spline.p2.y, (int)spline.p3.x, (int)spline.p3.y);
 		g2.setColor(Color.red);
 
 		Path2D.Double path = new Path2D.Double();
@@ -132,12 +130,10 @@ public class BezierApplet extends Applet {
 			System.out.println(p);
 			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
 		}
-		System.out.println(spline.p3);
 //		for (Point2D.Double point : points)
 //			g2.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
 		drawControlNode(spline.p0, g2);
 		drawControlNode(spline.p1, g2);
 		drawControlNode(spline.p2, g2);
-		drawControlNode(spline.p3, g2);
 	}
 }

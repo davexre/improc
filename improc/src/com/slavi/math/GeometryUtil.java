@@ -269,4 +269,22 @@ public class GeometryUtil {
 				(b1 * c2 - b2 * c1) / denom, 
 				(a2 * c1 - a1 * c2) / denom);
 	}
+	
+	/**
+	 * Split the line defined by a and b by a ratioT, starting from a.
+	 * @param ratioT the split ratio in the range [0..1]
+	 * @returns the split point.
+	 */
+	public static Point2D.Double splitPoint(Point2D.Double a, Point2D.Double b, double ratioT) {
+		return new Point2D.Double(
+				a.x + ratioT * (b.x - a.x),
+				a.y + ratioT * (b.y - a.y));
+	}
+
+	public static Point2D.Double midPoint(Point2D.Double a, Point2D.Double b) {
+		return new Point2D.Double(
+				0.5 * (a.x + b.x),
+				0.5 * (a.y + b.y));
+	}
+
 }
