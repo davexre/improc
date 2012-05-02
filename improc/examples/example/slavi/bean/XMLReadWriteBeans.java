@@ -11,7 +11,7 @@ import com.slavi.io.xml.XMLHelper;
 
 public class XMLReadWriteBeans {
 	public static void main(String[] args) throws Exception {
-		MyBean myBean = new MyBean(111, "kuku", new MyData(123, "alabala"));
+		MyBean myBean = new MyBean(111, "kuku", new MyData(123, "alabala"), MyEnum.MyEnum2);
 		
 		Element root = new Element("obj");
 		SimpleBeanToXML.objectToXml(root, myBean);

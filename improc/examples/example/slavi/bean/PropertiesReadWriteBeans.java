@@ -37,7 +37,7 @@ public class PropertiesReadWriteBeans {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		MyBean myBean = new MyBean(111, "kuku", new MyData(123, "alabala"));
+		MyBean myBean = new MyBean(111, "kuku", new MyData(123, "alabala"), MyEnum.MyEnum2);
 		
 		Properties properties = new Properties();
 		SimpleBeanToProperties.objectToProperties(properties, "root.", myBean);
@@ -55,7 +55,7 @@ public class PropertiesReadWriteBeans {
 
 		String s2 = propertiesToString(properties);
 		System.out.println(s2);
-		
+		System.out.println(myBean.getMyEnum());
 		TestUtils.assertTrue("First and second time conversion not equal", s1.equals(s2));
 	}
 }

@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class MyBean implements Serializable {
 
+	MyEnum myEnum;
+	
 	String name;
 
 	int id;
@@ -31,13 +33,22 @@ public class MyBean implements Serializable {
 		
 	}
 	
-	public MyBean(int id, String name, MyData myData) {
+	public MyBean(int id, String name, MyData myData, MyEnum myEnum) {
 		setId(id);
 		setName(name);
 //		setData0(myData);
 		setData(new MyData[] { null, null, myData });
+		setMyEnum(myEnum);
 	}
 	
+	public MyEnum getMyEnum() {
+		return myEnum;
+	}
+
+	public void setMyEnum(MyEnum myEnum) {
+		this.myEnum = myEnum;
+	}
+
 	/**
 	 * @return the name
 	 */

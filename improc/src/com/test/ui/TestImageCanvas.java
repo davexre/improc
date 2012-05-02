@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -32,7 +33,7 @@ public class TestImageCanvas {
 		ArrayList<ImageCanvas> notify; 
 		
 		public ImageCanvas(Composite parent, int style, ImageCanvas linkWith) {
-			super(parent, style | SWT.DOUBLE_BUFFERED );
+			super(parent, style /*| SWT.DOUBLE_BUFFERED */);
 			if (linkWith == null) {
 				notify = new ArrayList<ImageCanvas>();
 			} else {
@@ -147,7 +148,7 @@ public class TestImageCanvas {
 							(int) srcTLX, (int) srcTLY, srcWidth, srcHeight,
 							(int) destTLX, (int) destTLY, destWidth, destHeight);
 				}
-/*
+
 				Color oldColor = gc.getForeground();
 				Color white = new Color(gc.getDevice(), 255, 255, 255);
 				gc.setForeground(white);
@@ -155,7 +156,7 @@ public class TestImageCanvas {
 				gc.drawLine(width / 2, 0, width / 2, height);
 				gc.setForeground(oldColor);
 				white.dispose();
-*/				
+				
 			}
 		}
 		

@@ -48,70 +48,74 @@ public class SimpleBeanToProperties {
 		for (PropertyDescriptor pd : pds) {
 			if (pd instanceof IndexedPropertyDescriptor) {
 				continue;
-			} else {
-				Method write = pd.getWriteMethod();
-				if (write == null)
-					continue;
-				String sval = properties.getProperty(prefix + pd.getName());
-				Class propertyType = pd.getPropertyType();
-				if (propertyType.getComponentType() != null) {
-					// array
-					Class arrayType = propertyType.getComponentType();
-					if (Serializable.class.isAssignableFrom(arrayType)) {
-						Object items[] = propertiesToObjectArray(properties, prefix + pd.getName() + ".", arrayType);
-						if (items != null)
-							write.invoke(object, new Object[] { items });
-					}
-				} else if ((propertyType == boolean.class) ||
-					(propertyType == Boolean.class)) {
-					if (sval != null)
-						write.invoke(object, Boolean.parseBoolean(sval));
-				} else if (
-					(propertyType == byte.class) ||
-					(propertyType == Byte.class)) {
-					if (sval != null)
-						write.invoke(object, Byte.parseByte(sval));
-				} else if (propertyType == Character.class) {
-					if ((sval != null) && (sval.length() > 0))
-						write.invoke(object, sval.charAt(0));
-				} else if ( 
-						(propertyType == double.class) ||
-						(propertyType == Double.class)) {
-					if (sval != null)
-						write.invoke(object, Double.parseDouble(sval));
-				} else if (propertyType == Enum.class) {
-					if (sval != null)
-						write.invoke(object, Enum.valueOf(propertyType, sval));
-				} else if (
-						(propertyType == float.class) ||
-						(propertyType == Float.class)) {
-					if (sval != null)
-						write.invoke(object, Float.parseFloat(sval));
-				} else if (
-						(propertyType == int.class) ||
-						(propertyType == Integer.class)) {
-					if (sval != null)
-						write.invoke(object, Integer.parseInt(sval));
-				} else if (
-						(propertyType == long.class) ||
-						(propertyType == Long.class)) {
-					if (sval != null)
-						write.invoke(object, Long.parseLong(sval));
-				} else if (
-						(propertyType == short.class) ||
-						(propertyType == Short.class)) {
-					if (sval != null)
-						write.invoke(object, Short.parseShort(sval));
-				} else if (propertyType == String.class) {
-					if (sval != null)
-						write.invoke(object, sval);
-				} else if (Serializable.class.isAssignableFrom(propertyType)) {
-					String childObjectPrefix = prefix + pd.getName() + "."; 
-					if (hasPropertiesStartingWith(properties, childObjectPrefix)) {
-						Serializable childObject = (Serializable) propertyType.getConstructor((Class[]) null).newInstance((Object[]) null);
-						propertiesToObject(properties, childObjectPrefix, childObject);
-						write.invoke(object, childObject);
-					}
+			}
+			
+			Method write = pd.getWriteMethod();
+			if (write == null)
+				continue;
+
+			Class propertyType = pd.getPropertyType();
+			if (propertyType.getComponentType() != null) {
+				// array
+				Class arrayType = propertyType.getComponentType();
+				if (Serializable.class.isAssignableFrom(arrayType)) {
+					Object items[] = propertiesToObjectArray(properties, prefix + pd.getName() + ".", arrayType);
+					if (items != null)
+						write.invoke(object, new Object[] { items });
+				}
+				continue;
+			}
+			
+			String sval = properties.getProperty(prefix + pd.getName());
+			if ((propertyType == boolean.class) ||
+				(propertyType == Boolean.class)) {
+				if (sval != null)
+					write.invoke(object, Boolean.parseBoolean(sval));
+			} else if (
+				(propertyType == byte.class) ||
+				(propertyType == Byte.class)) {
+				if (sval != null)
+					write.invoke(object, Byte.parseByte(sval));
+			} else if (propertyType == Character.class) {
+				if ((sval != null) && (sval.length() > 0))
+					write.invoke(object, sval.charAt(0));
+			} else if ( 
+					(propertyType == double.class) ||
+					(propertyType == Double.class)) {
+				if (sval != null)
+					write.invoke(object, Double.parseDouble(sval));
+			} else if ((propertyType.isEnum()) || (propertyType == Enum.class)) {
+				if (sval != null)
+					write.invoke(object, Enum.valueOf(propertyType, sval));
+			} else if (
+					(propertyType == float.class) ||
+					(propertyType == Float.class)) {
+				if (sval != null)
+					write.invoke(object, Float.parseFloat(sval));
+			} else if (
+					(propertyType == int.class) ||
+					(propertyType == Integer.class)) {
+				if (sval != null)
+					write.invoke(object, Integer.parseInt(sval));
+			} else if (
+					(propertyType == long.class) ||
+					(propertyType == Long.class)) {
+				if (sval != null)
+					write.invoke(object, Long.parseLong(sval));
+			} else if (
+					(propertyType == short.class) ||
+					(propertyType == Short.class)) {
+				if (sval != null)
+					write.invoke(object, Short.parseShort(sval));
+			} else if (propertyType == String.class) {
+				if (sval != null)
+					write.invoke(object, sval);
+			} else if (Serializable.class.isAssignableFrom(propertyType)) {
+				String childObjectPrefix = prefix + pd.getName() + "."; 
+				if (hasPropertiesStartingWith(properties, childObjectPrefix)) {
+					Serializable childObject = (Serializable) propertyType.getConstructor((Class[]) null).newInstance((Object[]) null);
+					propertiesToObject(properties, childObjectPrefix, childObject);
+					write.invoke(object, childObject);
 				}
 			}
 		}
@@ -203,6 +207,7 @@ public class SimpleBeanToProperties {
 					(propertyType == double.class) ||
 					(propertyType == Double.class) ||
 					(propertyType == Enum.class) ||
+					(propertyType.isEnum()) ||
 					(propertyType == float.class) ||
 					(propertyType == Float.class) ||
 					(propertyType == int.class) ||
