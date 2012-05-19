@@ -104,6 +104,10 @@ public class PropertiesReadWriteBeans {
 		myBean.myEnum = null;
 		doTest(prefix, myBean);
 		
+		myBean = createMyBean();
+		myBean.objectArray = null;
+		doTest(prefix, myBean);
+
 		System.out.println("Done.");
 	}
 }

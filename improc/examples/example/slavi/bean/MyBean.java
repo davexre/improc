@@ -15,9 +15,7 @@ public class MyBean implements Serializable {
 	}
 */
 
-	/**
-	 * Simple int property
-	 */
+	// Simple int property
 	int id;
 
 	public int getId() {
@@ -28,9 +26,7 @@ public class MyBean implements Serializable {
 		this.id = id;
 	}
 
-	/**
-	 * Simple string property
-	 */
+	// Simple string property
 	String name;
 
 	public String getName() {
@@ -41,9 +37,7 @@ public class MyBean implements Serializable {
 		this.name = name;
 	}
 
-	/**
-	 * Simple boolean Property
-	 */
+	// Simple boolean Property
 	boolean boolType;
 	
 	public boolean isBoolType() {
@@ -54,9 +48,7 @@ public class MyBean implements Serializable {
 		this.boolType = boolType;
 	}
 
-	/**
-	 * Enumeration property
-	 */
+	// Enumeration property
 	MyEnum myEnum;
 
 	public MyEnum getMyEnum() {
@@ -67,9 +59,7 @@ public class MyBean implements Serializable {
 		this.myEnum = myEnum;
 	}
 
-	/**
-	 * int array, but not an Indexed Property
-	 */
+	// int array, but not an Indexed Property
 	int arrayProperty[];
 
 	public int[] getArrayProperty() {
@@ -80,9 +70,7 @@ public class MyBean implements Serializable {
 		this.arrayProperty = arrayProperty;
 	}
 
-	/**
-	 * int Indexed Property
-	 */
+	// int Indexed Property
 	int indexProperty[];
 	
 	public int[] getIndexProperty() {
@@ -101,9 +89,7 @@ public class MyBean implements Serializable {
 		indexProperty[index] = value;
 	}
 
-	/**
-	 * Complex object property
-	 */
+	// Complex object property
 	MyData myData;
 
 	public MyData getMyData() {
@@ -114,9 +100,7 @@ public class MyBean implements Serializable {
 		this.myData = myData;
 	}
 
-	/**
-	 * Complex object array, but not an Indexed Property
-	 */
+	// Complex object array, but not an Indexed Property
 	MyData objectArray[] = new MyData[4];
 
 	public MyData[] getObjectArray() {
@@ -126,10 +110,8 @@ public class MyBean implements Serializable {
 	public void setObjectArray(MyData[] objectArray) {
 		this.objectArray = objectArray;
 	}
-	
-	/**
-	 * Complex object Indexed Property
-	 */
+
+	// Complex object Indexed Property
 	MyData objectIndexProperty[];
 
 	public MyData[] getObjectIndexProperty() {

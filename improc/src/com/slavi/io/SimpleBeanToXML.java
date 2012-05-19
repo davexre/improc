@@ -93,14 +93,15 @@ public class SimpleBeanToXML {
 
 				Class propertyType = pd.getPropertyType();
 				Element item = root.getChild(pd.getName());
+				Object o = null;
 				if (item != null) {
-					Object o = xmlToObject(item, propertyType, setToNullMissingProperties);
-					if (o == null) {
-						if (propertyType.isPrimitive() || (!setToNullMissingProperties))
-							continue;
-					}
-					write.invoke(object, new Object[] { o });
+					o = xmlToObject(item, propertyType, setToNullMissingProperties);
 				}
+				if (o == null) {
+					if (propertyType.isPrimitive() || (!setToNullMissingProperties))
+						continue;
+				}
+				write.invoke(object, new Object[] { o });
 			}
 			
 			for (PropertyDescriptor pd : pds) {
@@ -117,19 +118,19 @@ public class SimpleBeanToXML {
 				
 				Class propertyType = pd.getPropertyType();
 				Element properties = root.getChild(pd.getName());
+				Object items = null;
 				if (properties != null) {
-					Object items = xmlToObject(properties, propertyType, setToNullMissingProperties);
-
-					if (ipd.getWriteMethod() != null) {
-						Method write = ipd.getWriteMethod();
-						write.invoke(object, new Object[] { items });
-					} else if (items != null) {
-						Method write = ipd.getIndexedWriteMethod();
-						int length = Array.getLength(items);
-						for (int i = 0; i < length; i++) {
-							Object item = Array.get(items, i);
-							write.invoke(object, new Object[] { i, item });
-						}
+					items = xmlToObject(properties, propertyType, setToNullMissingProperties);
+				}
+				if (ipd.getWriteMethod() != null) {
+					Method write = ipd.getWriteMethod();
+					write.invoke(object, new Object[] { items });
+				} else if (items != null) {
+					Method write = ipd.getIndexedWriteMethod();
+					int length = Array.getLength(items);
+					for (int i = 0; i < length; i++) {
+						Object item = Array.get(items, i);
+						write.invoke(object, new Object[] { i, item });
 					}
 				}
 			}

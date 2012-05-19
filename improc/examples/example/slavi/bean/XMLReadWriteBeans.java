@@ -27,14 +27,15 @@ public class XMLReadWriteBeans {
 		XMLHelper.writeXML(fou, root, null); //, "dummy.xml");
 
 		String s2 = new String(fou.toByteArray());
+		System.out.println(s1);
+		System.out.println(s2);
 		TestUtils.assertTrue("First and second time conversion not equal", s1.equals(s2));
 		
-		System.out.println(s1);
 	}
 	
 	public static void main(String[] args) throws Exception {
 		MyBean myBean;
-		
+
 		myBean = new MyBean();
 		doTest(myBean);
 		
@@ -45,7 +46,11 @@ public class XMLReadWriteBeans {
 		myBean.objectArray[1] = null;
 		myBean.myEnum = null;
 		doTest(myBean);
-		
+
+		myBean = PropertiesReadWriteBeans.createMyBean();
+		myBean.objectArray = null;
+		doTest(myBean);
+
 		System.out.println("Done.");
 	}
 }
