@@ -13,6 +13,8 @@ import java.util.Properties;
 
 public class SimpleBeanToProperties {
 	private static boolean hasPropertiesStartingWith(Properties properties, String prefix) {
+		if (!prefix.endsWith("."))
+			prefix += ".";
 		for (Object key : properties.keySet()) {
 			if (((String) key).startsWith(prefix))
 				return true;
@@ -20,108 +22,112 @@ public class SimpleBeanToProperties {
 		return false;
 	}
 	
-	private static Object[] propertiesToObjectArray(Properties properties, String prefix, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
-		if (!Serializable.class.isAssignableFrom(arrayType))
-			return null;
-		String arraySizeStr = properties.getProperty(prefix + "size");
+	private static String getChildPrefix(String parentPrefix, String childName) {
+		if ("".equals(parentPrefix))
+			return childName;
+		if (parentPrefix.endsWith("."))
+			return parentPrefix + childName;
+		return parentPrefix + "." + childName;
+	}
+	
+	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
+		// array
+		String arraySizeStr = properties.getProperty(getChildPrefix(prefix, "size"));
 		if (arraySizeStr == null)
 			return null;
 		int arraySize = Integer.parseInt(arraySizeStr);
 		if (arraySize < 0)
 			return null;
 		
-		Object items[] = (Object[]) Array.newInstance(arrayType, arraySize);
+		Object array = Array.newInstance(arrayType, arraySize);
 		for (int i = 0; i < arraySize; i++) {
-			String itemPrefix = prefix + Integer.toString(i) + ".";
+			String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
 			if (hasPropertiesStartingWith(properties, itemPrefix)) {
-				items[i] = (Serializable) arrayType.getConstructor((Class[]) null).newInstance((Object[]) null);
-				propertiesToObject(properties, itemPrefix, (Serializable) items[i]);
+				Object item = propertiesToObject(properties, itemPrefix, arrayType);
+				Array.set(array, i, item);
 			}
 		}
-		return items;
+		return array;
 	}
 	
-	public static <BeanObject extends Serializable> BeanObject propertiesToObject(Properties properties, String prefix, BeanObject object) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		Class objectClass = object.getClass();
-		BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				continue;
+	public static <T> T propertiesToObject(Properties properties, String prefix, Class<T> objectClass) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		String sval = properties.getProperty(prefix);
+		if ((objectClass == boolean.class) ||
+			(objectClass == Boolean.class)) {
+			if (sval != null)
+				return (T) new Boolean(sval);
+		} else if (
+				(objectClass == byte.class) ||
+				(objectClass == Byte.class)) {
+			if (sval != null)
+				return (T) new Byte(sval);
+		} else if (objectClass == Character.class) {
+			if ((sval != null) && (sval.length() > 0))
+				return (T) new Character(sval.charAt(0));
+		} else if ( 
+				(objectClass == double.class) ||
+				(objectClass == Double.class)) {
+			if (sval != null)
+				return (T) new Double(sval);
+		} else if ((objectClass.isEnum()) || (objectClass == Enum.class)) {
+			if (sval != null)
+				return (T) Enum.valueOf((Class<Enum>) objectClass, sval);
+		} else if (
+				(objectClass == float.class) ||
+				(objectClass == Float.class)) {
+			if (sval != null)
+				return (T) new Float(sval);
+		} else if (
+				(objectClass == int.class) ||
+				(objectClass == Integer.class)) {
+			if (sval != null)
+				return (T) new Integer(sval);
+		} else if (
+				(objectClass == long.class) ||
+				(objectClass == Long.class)) {
+			if (sval != null)
+				return (T) new Long(sval);
+		} else if (
+				(objectClass == short.class) ||
+				(objectClass == Short.class)) {
+			if (sval != null)
+				return (T) new Short(sval);
+		} else if (objectClass == String.class) {
+			if (sval != null)
+				return (T) sval;
+		} else if (objectClass.getComponentType() != null) {
+			// array
+			Class arrayType = objectClass.getComponentType();
+			return (T) propertiesToObjectArray(properties, prefix, arrayType);
+		} else if (Serializable.class.isAssignableFrom(objectClass)) {
+			if (!hasPropertiesStartingWith(properties, prefix)) {
+				return null;
 			}
+			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
 			
-			Method write = pd.getWriteMethod();
-			if (write == null)
-				continue;
+			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				if (pd instanceof IndexedPropertyDescriptor) {
+					continue;
+				}
+				
+				Method write = pd.getWriteMethod();
+				if (write == null)
+					continue;
 
-			Class propertyType = pd.getPropertyType();
-			if (propertyType.getComponentType() != null) {
-				// array
-				Class arrayType = propertyType.getComponentType();
-				if (Serializable.class.isAssignableFrom(arrayType)) {
-					Object items[] = propertiesToObjectArray(properties, prefix + pd.getName() + ".", arrayType);
-					if (items != null)
-						write.invoke(object, new Object[] { items });
+				Class propertyType = pd.getPropertyType();
+				String propertyPrefix = getChildPrefix(prefix, pd.getName());
+				if (hasPropertiesStartingWith(properties, propertyPrefix)) {
+					Object o = propertiesToObject(properties, propertyPrefix, propertyType);
+					write.invoke(object, new Object[] { o });
 				}
-				continue;
 			}
 			
-			String sval = properties.getProperty(prefix + pd.getName());
-			if ((propertyType == boolean.class) ||
-				(propertyType == Boolean.class)) {
-				if (sval != null)
-					write.invoke(object, Boolean.parseBoolean(sval));
-			} else if (
-				(propertyType == byte.class) ||
-				(propertyType == Byte.class)) {
-				if (sval != null)
-					write.invoke(object, Byte.parseByte(sval));
-			} else if (propertyType == Character.class) {
-				if ((sval != null) && (sval.length() > 0))
-					write.invoke(object, sval.charAt(0));
-			} else if ( 
-					(propertyType == double.class) ||
-					(propertyType == Double.class)) {
-				if (sval != null)
-					write.invoke(object, Double.parseDouble(sval));
-			} else if ((propertyType.isEnum()) || (propertyType == Enum.class)) {
-				if (sval != null)
-					write.invoke(object, Enum.valueOf(propertyType, sval));
-			} else if (
-					(propertyType == float.class) ||
-					(propertyType == Float.class)) {
-				if (sval != null)
-					write.invoke(object, Float.parseFloat(sval));
-			} else if (
-					(propertyType == int.class) ||
-					(propertyType == Integer.class)) {
-				if (sval != null)
-					write.invoke(object, Integer.parseInt(sval));
-			} else if (
-					(propertyType == long.class) ||
-					(propertyType == Long.class)) {
-				if (sval != null)
-					write.invoke(object, Long.parseLong(sval));
-			} else if (
-					(propertyType == short.class) ||
-					(propertyType == Short.class)) {
-				if (sval != null)
-					write.invoke(object, Short.parseShort(sval));
-			} else if (propertyType == String.class) {
-				if (sval != null)
-					write.invoke(object, sval);
-			} else if (Serializable.class.isAssignableFrom(propertyType)) {
-				String childObjectPrefix = prefix + pd.getName() + "."; 
-				if (hasPropertiesStartingWith(properties, childObjectPrefix)) {
-					Serializable childObject = (Serializable) propertyType.getConstructor((Class[]) null).newInstance((Object[]) null);
-					propertiesToObject(properties, childObjectPrefix, childObject);
-					write.invoke(object, childObject);
+			for (PropertyDescriptor pd : pds) {
+				if (!(pd instanceof IndexedPropertyDescriptor)) {
+					continue;
 				}
-			}
-		}
-		
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
 				Method read = pd.getReadMethod();
 				if (read == null)
 					continue;
@@ -130,98 +136,85 @@ public class SimpleBeanToProperties {
 				if ((ipd.getWriteMethod() == null) && (ipd.getIndexedWriteMethod() == null))
 					continue;
 				
-				Class indexedPropertyType = ipd.getIndexedPropertyType();
-				Object items[] = propertiesToObjectArray(properties, prefix + pd.getName() + ".", indexedPropertyType);
-				if (items == null)
-					continue;
-				
-				if (ipd.getWriteMethod() != null) {
-					Method write = ipd.getWriteMethod();
-					write.invoke(object, new Object[] { items });
-				} else {
-					Method write = ipd.getIndexedWriteMethod();
-					for (int i = 0; i < items.length; i++) {
-						write.invoke(object, new Object[] { i, items[i] });
+				Class propertyType = pd.getPropertyType();
+				String propertyPrefix = getChildPrefix(prefix, pd.getName());
+				System.out.println("loading array " + propertyPrefix);
+				if (hasPropertiesStartingWith(properties, propertyPrefix)) {
+					Object items = propertiesToObject(properties, propertyPrefix, propertyType);
+
+					if (ipd.getWriteMethod() != null) {
+						Method write = ipd.getWriteMethod();
+						write.invoke(object, new Object[] { items });
+					} else if (items != null) {
+						Method write = ipd.getIndexedWriteMethod();
+						int length = Array.getLength(items);
+						for (int i = 0; i < length; i++) {
+							Object item = Array.get(items, i);
+							write.invoke(object, new Object[] { i, item });
+						}
 					}
 				}
 			}
+			
+			return (T) object;
 		}
-		return object;
+		return null;
 	}
 	
-	public static <BeanObject extends Serializable> void objectToProperties(Properties properties, String prefix, BeanObject object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+	public static void objectToProperties(Properties properties, String prefix, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		if (object == null)
 			return;
 		Class objectClass = object.getClass();
-		BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
-				Method read = indexedProperty.getReadMethod();
+		if (
+			(objectClass == boolean.class) ||
+			(objectClass == Boolean.class) ||
+			(objectClass == byte.class) ||
+			(objectClass == Byte.class) ||
+			(objectClass == Character.class) ||
+			(objectClass == double.class) ||
+			(objectClass == Double.class) ||
+			(objectClass == Enum.class) ||
+			(objectClass.isEnum()) ||
+			(objectClass == float.class) ||
+			(objectClass == Float.class) ||
+			(objectClass == int.class) ||
+			(objectClass == Integer.class) ||
+			(objectClass == long.class) ||
+			(objectClass == Long.class) ||
+			(objectClass == short.class) ||
+			(objectClass == Short.class) ||
+			(objectClass == String.class)) {
+			properties.setProperty(prefix, object.toString());
+		} else if (objectClass.getComponentType() != null) {
+			// array
+			int length = Array.getLength(object);
+			properties.setProperty(getChildPrefix(prefix, "size"), Integer.toString(length));
+			for (int i = 0; i < length; i++) {
+				Object o = Array.get(object, i);
+				String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
+				objectToProperties(properties, itemPrefix, o);
+			}
+		} else if (Serializable.class.isAssignableFrom(objectClass)) {
+			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				Method read = pd.getReadMethod();
 				if (read == null)
 					continue;
-				if ((indexedProperty.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
+				
+				if (pd instanceof IndexedPropertyDescriptor) {
+					IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
+					if ((pd.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
+						continue;
+					
+					Object array = read.invoke(object, (Object[]) null);
+					objectToProperties(properties, getChildPrefix(prefix, indexedProperty.getName()), array);
 					continue;
-				Object[] indexedObjects = (Object[]) read.invoke(object, (Object[]) null);
-				if (indexedObjects == null)
-					continue;
-				properties.setProperty(prefix + indexedProperty.getName() + ".size", Integer.toString(indexedObjects.length));
-				for (int i = 0; i < indexedObjects.length; i++) {
-					Object indexedObject = indexedObjects[i];
-					if ((indexedObject == null) || 
-						(!Serializable.class.isAssignableFrom(indexedObject.getClass())))
-							continue;
-					objectToProperties(properties, 
-							prefix + indexedProperty.getName() + "." + Integer.toString(i) + "." , 
-							(Serializable) indexedObject);
-				}
-				continue;
-			} else {
-				if (pd.getWriteMethod() == null)
-					continue;
-				Class propertyType = pd.getPropertyType();
-				Method read = pd.getReadMethod();
-				Object value = read.invoke(object, (Object[]) null);
-				if (value == null)
-					continue;
-				if (propertyType.getComponentType() != null) {
-					// array
-					Class arrayType = propertyType.getComponentType();
-					if (Serializable.class.isAssignableFrom(arrayType)) {
-						Object objects[] = (Object[]) value;
-						properties.setProperty(prefix + pd.getName() + ".size", Integer.toString(objects.length));
-						for (int i = 0; i < objects.length; i++) {
-							String itemPrefix = prefix + pd.getName() + "." + Integer.toString(i) + "."; 
-							objectToProperties(properties,
-									itemPrefix, 
-									(Serializable) objects[i]);
-						}
-					}
-				} else if (
-					(propertyType == boolean.class) ||
-					(propertyType == Boolean.class) ||
-					(propertyType == byte.class) ||
-					(propertyType == Byte.class) ||
-					(propertyType == Character.class) ||
-					(propertyType == double.class) ||
-					(propertyType == Double.class) ||
-					(propertyType == Enum.class) ||
-					(propertyType.isEnum()) ||
-					(propertyType == float.class) ||
-					(propertyType == Float.class) ||
-					(propertyType == int.class) ||
-					(propertyType == Integer.class) ||
-					(propertyType == long.class) ||
-					(propertyType == Long.class) ||
-					(propertyType == short.class) ||
-					(propertyType == Short.class) ||
-					(propertyType == String.class)) {
-					properties.setProperty(prefix + pd.getName(), value.toString());
-				} else if (Serializable.class.isAssignableFrom(propertyType)) {
-					objectToProperties(properties,
-							prefix + pd.getName() + ".", 
-							(Serializable) value);
+				} else {
+					if (pd.getWriteMethod() == null)
+						continue;
+					Object value = read.invoke(object, (Object[]) null);
+					objectToProperties(properties, getChildPrefix(prefix, pd.getName()), value);
 				}
 			}
 		}

@@ -12,7 +12,26 @@ public class MyBean implements Serializable {
 	
 //	MyData data0 = new MyData();
 
-	MyData data[] = new MyData[0];
+//	MyData data[] = new MyData[0];
+	
+	public int[] getIntArray() {
+		return intArray;
+	}
+
+	public void setIntArray(int[] intArray) {
+		this.intArray = intArray;
+	}
+
+	int intArray[] = new int[5];
+	
+	public int getIntArray(int index) {
+		return intArray[index];
+	}
+
+	public void setIntArray(int index, int value) {
+		intArray[index] = value;
+	}
+	
 /*
 	PropertyChangeSupport propertyChangeSupport;
 
@@ -37,7 +56,7 @@ public class MyBean implements Serializable {
 		setId(id);
 		setName(name);
 //		setData0(myData);
-		setData(new MyData[] { null, null, myData });
+//		setData(new MyData[] { null, null, myData });
 		setMyEnum(myEnum);
 	}
 	
@@ -76,14 +95,14 @@ public class MyBean implements Serializable {
 	public void setId(int id) {
 		this.id = id;
 	}
-
+/*
 	public MyData[] getData() {
 		return data;
 	}
 
 	public void setData(MyData data[]) {
 		this.data = data;
-	}
+	}*/
 /*
 	public MyData getData(int i) {
 		return data[i];
