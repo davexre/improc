@@ -138,7 +138,6 @@ public class SimpleBeanToProperties {
 				
 				Class propertyType = pd.getPropertyType();
 				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				System.out.println("loading array " + propertyPrefix);
 				if (hasPropertiesStartingWith(properties, propertyPrefix)) {
 					Object items = propertiesToObject(properties, propertyPrefix, propertyType);
 

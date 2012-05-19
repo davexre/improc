@@ -37,21 +37,25 @@ public class PropertiesReadWriteBeans {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		String prefix = "";
 		MyBean myBean = new MyBean(111, "kuku", new MyData(123, "alabala"), MyEnum.MyEnum2);
+		for (int i = 0; i < myBean.intArray.length; i++) {
+			myBean.intArray[i] = i;
+		}
 		
 		Properties properties = new Properties();
-		SimpleBeanToProperties.objectToProperties(properties, "root.", myBean);
+		SimpleBeanToProperties.objectToProperties(properties, prefix, myBean);
 		String s1 = propertiesToString(properties);
 		System.out.println(s1);
 		
 		ByteArrayInputStream fin = new ByteArrayInputStream(s1.getBytes());
 		properties.clear();
 		properties.load(fin);
-		myBean = new MyBean();
-		SimpleBeanToProperties.propertiesToObject(properties, "root.", myBean);
+//		myBean = new MyBean();
+		myBean = SimpleBeanToProperties.propertiesToObject(properties, prefix, MyBean.class);
 
 		properties.clear();
-		SimpleBeanToProperties.objectToProperties(properties, "root.", myBean);
+		SimpleBeanToProperties.objectToProperties(properties, prefix, myBean);
 
 		String s2 = propertiesToString(properties);
 		System.out.println(s2);

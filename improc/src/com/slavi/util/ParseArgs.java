@@ -72,7 +72,7 @@ public class ParseArgs {
 		return true;
 	}
 	
-	public boolean isStringInList(String value, String...validValues) {
+	public static boolean isStringInList(String value, String...validValues) {
 		return indexOf(value, validValues) >= 0;
 	}
 	
@@ -80,7 +80,7 @@ public class ParseArgs {
 	 * Returns the index of the value in the valuesList or -1 if the value is not found. 
 	 * The comparison is NOT case sensitive.
 	 */
-	public int indexOf(String value, String...valuesList) {
+	public static int indexOf(String value, String...valuesList) {
 		for (int i = 0; i < valuesList.length; i++)
 			if (valuesList[i].equalsIgnoreCase(value)) 
 				return i;
