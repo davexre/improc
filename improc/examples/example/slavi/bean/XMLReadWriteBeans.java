@@ -19,7 +19,7 @@ public class XMLReadWriteBeans {
 		
 		ByteArrayInputStream fin = new ByteArrayInputStream(fou.toByteArray());
 		root = XMLHelper.readXML(fin);
-		myBean = SimpleBeanToXML.xmlToObject(root, MyBean.class);
+		myBean = SimpleBeanToXML.xmlToObject(root, MyBean.class, true);
 
 		root = new Element("obj");
 		SimpleBeanToXML.objectToXml(root, myBean);

@@ -28,7 +28,7 @@ public class SimpleBeanToProperties {
 		return parentPrefix + "." + childName;
 	}
 	
-	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
+	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
 		String arraySizeStr = properties.getProperty(getChildPrefix(prefix, "size"));
 		if (arraySizeStr == null)
@@ -40,13 +40,17 @@ public class SimpleBeanToProperties {
 		Object array = Array.newInstance(arrayType, arraySize);
 		for (int i = 0; i < arraySize; i++) {
 			String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
-			Object item = propertiesToObject(properties, itemPrefix, arrayType);
+			Object item = propertiesToObject(properties, itemPrefix, arrayType, setToNullMissingProperties);
+			if (item == null) {
+				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
+					continue;
+			}
 			Array.set(array, i, item);
 		}
 		return array;
 	}
 	
-	public static <T> T propertiesToObject(Properties properties, String prefix, Class<T> objectClass) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static <T> T propertiesToObject(Properties properties, String prefix, Class<T> objectClass, boolean setToNullMissingProperties) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		String sval = properties.getProperty(prefix);
 		if ((objectClass == boolean.class) ||
 			(objectClass == Boolean.class)) {
@@ -94,7 +98,7 @@ public class SimpleBeanToProperties {
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			Class arrayType = objectClass.getComponentType();
-			return (T) propertiesToObjectArray(properties, prefix, arrayType);
+			return (T) propertiesToObjectArray(properties, prefix, arrayType, setToNullMissingProperties);
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
 			if (!hasPropertiesStartingWith(properties, prefix)) {
 				return null;
@@ -114,7 +118,11 @@ public class SimpleBeanToProperties {
 
 				Class propertyType = pd.getPropertyType();
 				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				Object o = propertiesToObject(properties, propertyPrefix, propertyType);
+				Object o = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
+				if (o == null) {
+					if (propertyType.isPrimitive() || (!setToNullMissingProperties))
+						continue;
+				}
 				write.invoke(object, new Object[] { o });
 			}
 			
@@ -132,7 +140,7 @@ public class SimpleBeanToProperties {
 				
 				Class propertyType = pd.getPropertyType();
 				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				Object items = propertiesToObject(properties, propertyPrefix, propertyType);
+				Object items = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
 
 				if (ipd.getWriteMethod() != null) {
 					Method write = ipd.getWriteMethod();

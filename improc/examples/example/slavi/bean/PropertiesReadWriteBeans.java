@@ -78,7 +78,7 @@ public class PropertiesReadWriteBeans {
 		ByteArrayInputStream fin = new ByteArrayInputStream(s1.getBytes());
 		properties.clear();
 		properties.load(fin);
-		myBean = SimpleBeanToProperties.propertiesToObject(properties, prefix, MyBean.class);
+		myBean = SimpleBeanToProperties.propertiesToObject(properties, prefix, MyBean.class, true);
 
 		properties.clear();
 		SimpleBeanToProperties.objectToProperties(properties, prefix, myBean);

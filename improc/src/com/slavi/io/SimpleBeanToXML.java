@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import org.jdom.Element;
 
 public class SimpleBeanToXML {
-	private static Object xmlToObjectArray(Element root, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
+	private static Object xmlToObjectArray(Element root, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
 		String arraySizeStr = root.getAttributeValue("size");
 		if (arraySizeStr == null)
@@ -26,13 +26,18 @@ public class SimpleBeanToXML {
 		for (Object i : root.getChildren("item")) {
 			Element e = (Element) i;
 			int index = Integer.parseInt(e.getAttributeValue("index"));
-			Object item = xmlToObject(e, arrayType);
+			Object item = xmlToObject(e, arrayType, setToNullMissingProperties);
+			if (item == null) {
+				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
+					continue;
+			}
+			
 			Array.set(array, index, item);
 		}
 		return array;
 	}
 	
-	public static <T> T xmlToObject(Element root, Class<T> objectClass) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static <T> T xmlToObject(Element root, Class<T> objectClass, boolean setToNullMissingProperties) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		String sval = root.getTextTrim();
 		if ((objectClass == boolean.class) ||
 			(objectClass == Boolean.class)) {
@@ -71,7 +76,7 @@ public class SimpleBeanToXML {
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			Class arrayType = objectClass.getComponentType();
-			return (T) xmlToObjectArray(root, arrayType);
+			return (T) xmlToObjectArray(root, arrayType, setToNullMissingProperties);
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
 			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
 			
@@ -89,7 +94,11 @@ public class SimpleBeanToXML {
 				Class propertyType = pd.getPropertyType();
 				Element item = root.getChild(pd.getName());
 				if (item != null) {
-					Object o = xmlToObject(item, propertyType);
+					Object o = xmlToObject(item, propertyType, setToNullMissingProperties);
+					if (o == null) {
+						if (propertyType.isPrimitive() || (!setToNullMissingProperties))
+							continue;
+					}
 					write.invoke(object, new Object[] { o });
 				}
 			}
@@ -109,7 +118,7 @@ public class SimpleBeanToXML {
 				Class propertyType = pd.getPropertyType();
 				Element properties = root.getChild(pd.getName());
 				if (properties != null) {
-					Object items = xmlToObject(properties, propertyType);
+					Object items = xmlToObject(properties, propertyType, setToNullMissingProperties);
 
 					if (ipd.getWriteMethod() != null) {
 						Method write = ipd.getWriteMethod();
@@ -130,90 +139,6 @@ public class SimpleBeanToXML {
 		return null;
 	}
 
-	public static <BeanObject extends Serializable> void objectToXml2(Element root, BeanObject object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-		if (object == null)
-			return;
-		Class objectClass = object.getClass();
-		BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
-				Method read = indexedProperty.getReadMethod();
-				if (read == null)
-					continue;
-				if ((indexedProperty.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
-					continue;
-				Object[] indexedObjects = (Object[]) read.invoke(object, (Object[]) null);
-				if (indexedObjects == null)
-					continue;
-				Element theArray = new Element(pd.getName());
-				for (int i = 0; i < indexedObjects.length; i++) {
-					Object indexedObject = indexedObjects[i];
-					if ((indexedObject == null) || 
-						(!Serializable.class.isAssignableFrom(indexedObject.getClass())))
-							continue;
-					Element item = new Element("item");
-					item.setAttribute("index", Integer.toString(i));
-					objectToXml(item, (Serializable) indexedObject);
-					theArray.addContent(item);
-				}
-				root.addContent(theArray);
-				continue;
-			} else {
-				if (pd.getWriteMethod() == null)
-					continue;
-				Class propertyType = pd.getPropertyType();
-				Method read = pd.getReadMethod();
-				Object value = read.invoke(object, (Object[]) null);
-				if (value == null)
-					continue;
-				if (propertyType.getComponentType() != null) {
-					// array
-					Class arrayType = propertyType.getComponentType();
-					if (Serializable.class.isAssignableFrom(arrayType)) {
-						Object objects[] = (Object[]) value;
-						Element theArray = new Element(pd.getName());
-						theArray.setAttribute("size", Integer.toString(objects.length));
-						for (int i = 0; i < objects.length; i++) {
-							Element item = new Element("item");
-							item.setAttribute("index", Integer.toString(i));
-							objectToXml(item, (Serializable) objects[i]);
-							theArray.addContent(item);
-						}
-						root.addContent(theArray);
-					}
-				} else if (
-					(propertyType == boolean.class) ||
-					(propertyType == Boolean.class) ||
-					(propertyType == byte.class) ||
-					(propertyType == Byte.class) ||
-					(propertyType == Character.class) ||
-					(propertyType == double.class) ||
-					(propertyType == Double.class) ||
-					(propertyType == Enum.class) ||
-					(propertyType.isEnum()) ||
-					(propertyType == float.class) ||
-					(propertyType == Float.class) ||
-					(propertyType == int.class) ||
-					(propertyType == Integer.class) ||
-					(propertyType == long.class) ||
-					(propertyType == Long.class) ||
-					(propertyType == short.class) ||
-					(propertyType == Short.class) ||
-					(propertyType == String.class)) {
-					Element el = new Element(pd.getName());
-					el.setText(value.toString());
-					root.addContent(el);
-				} else if (Serializable.class.isAssignableFrom(propertyType)) {
-					Element obj = new Element(pd.getName());
-					objectToXml(obj, (Serializable) value);
-					root.addContent(obj);
-				}
-			}
-		}
-	}
-	
 	public static void objectToXml(Element root, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		if (object == null)
 			return;
