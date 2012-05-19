@@ -3,41 +3,8 @@ package example.slavi.bean;
 import java.io.Serializable;
 
 public class MyBean implements Serializable {
-
-	MyEnum myEnum;
-	
-	String name;
-
-	int id;
-	
-//	MyData data0 = new MyData();
-
-//	MyData data[] = new MyData[0];
-	
-	public int[] getIntArray() {
-		return intArray;
-	}
-
-	public void setIntArray(int[] intArray) {
-		this.intArray = intArray;
-	}
-
-	int intArray[] = new int[5];
-	
-	public int getIntArray(int index) {
-		return intArray[index];
-	}
-
-	public void setIntArray(int index, int value) {
-		intArray[index] = value;
-	}
-	
 /*
-	PropertyChangeSupport propertyChangeSupport;
-
-	public MyBean() {
-		propertyChangeSupport = new PropertyChangeSupport(this);
-	}
+	PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		propertyChangeSupport.addPropertyChangeListener(listener);
@@ -47,19 +14,51 @@ public class MyBean implements Serializable {
 		propertyChangeSupport.removePropertyChangeListener(p);
 	}
 */
-	
-	public MyBean() {
-		
+
+	/**
+	 * Simple int property
+	 */
+	int id;
+
+	public int getId() {
+		return id;
 	}
-	
-	public MyBean(int id, String name, MyData myData, MyEnum myEnum) {
-		setId(id);
-		setName(name);
-//		setData0(myData);
-//		setData(new MyData[] { null, null, myData });
-		setMyEnum(myEnum);
+
+	public void setId(int id) {
+		this.id = id;
 	}
+
+	/**
+	 * Simple string property
+	 */
+	String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Simple boolean Property
+	 */
+	boolean boolType;
 	
+	public boolean isBoolType() {
+		return boolType;
+	}
+
+	public void setBoolType(boolean boolType) {
+		this.boolType = boolType;
+	}
+
+	/**
+	 * Enumeration property
+	 */
+	MyEnum myEnum;
+
 	public MyEnum getMyEnum() {
 		return myEnum;
 	}
@@ -69,69 +68,83 @@ public class MyBean implements Serializable {
 	}
 
 	/**
-	 * @return the name
+	 * int array, but not an Indexed Property
 	 */
-	public String getName() {
-		return name;
+	int arrayProperty[];
+
+	public int[] getArrayProperty() {
+		return arrayProperty;
+	}
+
+	public void setArrayProperty(int[] arrayProperty) {
+		this.arrayProperty = arrayProperty;
 	}
 
 	/**
-	 * @param name the name to set
+	 * int Indexed Property
 	 */
-	public void setName(String name) {
-		this.name = name;
+	int indexProperty[];
+	
+	public int[] getIndexProperty() {
+		return indexProperty;
+	}
+
+	public void setIndexProperty(int[] indexProperty) {
+		this.indexProperty = indexProperty;
+	}
+
+	public int getIndexProperty(int index) {
+		return indexProperty[index];
+	}
+
+	public void setIndexProperty(int index, int value) {
+		indexProperty[index] = value;
 	}
 
 	/**
-	 * @return the id
+	 * Complex object property
 	 */
-	public int getId() {
-		return id;
+	MyData myData;
+
+	public MyData getMyData() {
+		return myData;
+	}
+
+	public void setMyData(MyData myData) {
+		this.myData = myData;
 	}
 
 	/**
-	 * @param id the id to set
+	 * Complex object array, but not an Indexed Property
 	 */
-	public void setId(int id) {
-		this.id = id;
-	}
-/*
-	public MyData[] getData() {
-		return data;
+	MyData objectArray[] = new MyData[4];
+
+	public MyData[] getObjectArray() {
+		return objectArray;
 	}
 
-	public void setData(MyData data[]) {
-		this.data = data;
-	}*/
-/*
-	public MyData getData(int i) {
-		return data[i];
+	public void setObjectArray(MyData[] objectArray) {
+		this.objectArray = objectArray;
+	}
+	
+	/**
+	 * Complex object Indexed Property
+	 */
+	MyData objectIndexProperty[];
+
+	public MyData[] getObjectIndexProperty() {
+		return objectIndexProperty;
 	}
 
-	public void setData(int i, MyData d) {
-		data[i] = d;
-	}
-*/
-/*
-	public MyData[] getIndexedData() {
-		return data;
+	public void setObjectIndexProperty(MyData[] objectIndexProperty) {
+		this.objectIndexProperty = objectIndexProperty;
 	}
 
-	public MyData getIndexedData(int i) {
-		return data[i];
+	public MyData getObjectIndexProperty(int index) {
+		return objectIndexProperty[index];
 	}
 
-	public void setIndexedData(int i, MyData d) {
-		data[i] = d;
+	public void setObjectIndexProperty(MyData object, int index) {
+		this.objectIndexProperty[index] = object;
 	}
-*/
-/*
-	public MyData getData0() {
-		return data0;
-	}
-
-	public void setData0(MyData data0) {
-		this.data0 = data0;
-	}
-*/
 }

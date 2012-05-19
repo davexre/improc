@@ -9,22 +9,12 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import org.jdom.Element;
 
 public class SimpleBeanToXML {
-	private static class ArrayObjectData {
-		int index;
-		Serializable data;
-	}
-	
-	private static Object[] xmlToObjectArray(Element root, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
-		if (!Serializable.class.isAssignableFrom(arrayType))
-			return null;
+	private static Object xmlToObjectArray(Element root, Class arrayType) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
+		// array
 		String arraySizeStr = root.getAttributeValue("size");
 		if (arraySizeStr == null)
 			return null;
@@ -32,182 +22,115 @@ public class SimpleBeanToXML {
 		if (arraySize < 0)
 			return null;
 		
-		Object items[] = (Object[]) Array.newInstance(arrayType, arraySize);
+		Object array = Array.newInstance(arrayType, arraySize);
 		for (Object i : root.getChildren("item")) {
 			Element e = (Element) i;
 			int index = Integer.parseInt(e.getAttributeValue("index"));
-			if (e.getChildren().size() == 0) {
-				items[index] = null;
-			} else {
-				items[index] = (Serializable) arrayType.getConstructor((Class[]) null).newInstance((Object[]) null);
-				xmlToObject(e, (Serializable) items[index]);
-			}
+			Object item = xmlToObject(e, arrayType);
+			Array.set(array, index, item);
 		}
-		return items;
+		return array;
 	}
 	
-	public static <BeanObject extends Serializable> BeanObject xmlToObject(Element root, BeanObject object) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		Class objectClass = object.getClass();
-		BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				continue;
-			}
-			Method write = pd.getWriteMethod();
-			if (write == null)
-				continue;
+	public static <T> T xmlToObject(Element root, Class<T> objectClass) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		String sval = root.getTextTrim();
+		if ((objectClass == boolean.class) ||
+			(objectClass == Boolean.class)) {
+			return (T) new Boolean(sval);
+		} else if (
+				(objectClass == byte.class) ||
+				(objectClass == Byte.class)) {
+				return (T) new Byte(sval);
+		} else if (objectClass == Character.class) {
+			if (sval.length() > 0)
+				return (T) new Character(sval.charAt(0));
+		} else if ( 
+				(objectClass == double.class) ||
+				(objectClass == Double.class)) {
+				return (T) new Double(sval);
+		} else if ((objectClass.isEnum()) || (objectClass == Enum.class)) {
+				return (T) Enum.valueOf((Class<Enum>) objectClass, sval);
+		} else if (
+				(objectClass == float.class) ||
+				(objectClass == Float.class)) {
+				return (T) new Float(sval);
+		} else if (
+				(objectClass == int.class) ||
+				(objectClass == Integer.class)) {
+				return (T) new Integer(sval);
+		} else if (
+				(objectClass == long.class) ||
+				(objectClass == Long.class)) {
+				return (T) new Long(sval);
+		} else if (
+				(objectClass == short.class) ||
+				(objectClass == Short.class)) {
+				return (T) new Short(sval);
+		} else if (objectClass == String.class) {
+			return (T) sval;
+		} else if (objectClass.getComponentType() != null) {
+			// array
+			Class arrayType = objectClass.getComponentType();
+			return (T) xmlToObjectArray(root, arrayType);
+		} else if (Serializable.class.isAssignableFrom(objectClass)) {
+			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
 			
-			Class propertyType = pd.getPropertyType();
-			
-			if (propertyType.getComponentType() != null) {
-				// array
-				Class arrayType = propertyType.getComponentType();
-				if (Serializable.class.isAssignableFrom(arrayType)) {
-					Element theArray = root.getChild(pd.getName());
-					if (theArray != null) {
-						Object items[] = xmlToObjectArray(theArray, arrayType);
-						if (items != null)
-							write.invoke(object, new Object[] { items });
-					}
-				}
-				continue;
-			}
-			
-			Element svalEl = root.getChild(pd.getName());
-			if (svalEl == null)
-				continue;
-			String sval = svalEl.getTextTrim(); 
-
-			if ((propertyType == boolean.class) ||
-				(propertyType == Boolean.class)) {
-				if (sval != null)
-					write.invoke(object, Boolean.parseBoolean(sval));
-			} else if (
-				(propertyType == byte.class) ||
-				(propertyType == Byte.class)) {
-				if (sval != null)
-					write.invoke(object, Byte.parseByte(sval));
-			} else if (propertyType == Character.class) {
-				if ((sval != null) && (sval.length() > 0))
-					write.invoke(object, sval.charAt(0));
-			} else if ( 
-					(propertyType == double.class) ||
-					(propertyType == Double.class)) {
-				if (sval != null)
-					write.invoke(object, Double.parseDouble(sval));
-			} else if ((propertyType.isEnum()) || (propertyType == Enum.class)) {
-				if (sval != null)
-					write.invoke(object, Enum.valueOf(propertyType, sval));
-			} else if (
-					(propertyType == float.class) ||
-					(propertyType == Float.class)) {
-				if (sval != null)
-					write.invoke(object, Float.parseFloat(sval));
-			} else if (
-					(propertyType == int.class) ||
-					(propertyType == Integer.class)) {
-				if (sval != null)
-					write.invoke(object, Integer.parseInt(sval));
-			} else if (
-					(propertyType == long.class) ||
-					(propertyType == Long.class)) {
-				if (sval != null)
-					write.invoke(object, Long.parseLong(sval));
-			} else if (
-					(propertyType == short.class) ||
-					(propertyType == Short.class)) {
-				if (sval != null)
-					write.invoke(object, Short.parseShort(sval));
-			} else if (propertyType == String.class) {
-				if (sval != null)
-					write.invoke(object, sval);
-			} else if (Serializable.class.isAssignableFrom(propertyType)) {
-				Element childObjectRoot = root.getChild(pd.getName());
-				if (childObjectRoot != null) {
-					Serializable childObject = (Serializable) propertyType.getConstructor((Class[]) null).newInstance((Object[]) null);
-					xmlToObject(childObjectRoot, childObject);
-					write.invoke(object, childObject);
-				}
-			}
-		}
-		
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
-				Class indexedPropertyType = indexedProperty.getIndexedPropertyType();
-				if (!Serializable.class.isAssignableFrom(indexedPropertyType)) 
+			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				if (pd instanceof IndexedPropertyDescriptor) {
 					continue;
-				Method read = indexedProperty.getReadMethod();
+				}
+				
+				Method write = pd.getWriteMethod();
+				if (write == null)
+					continue;
+
+				Class propertyType = pd.getPropertyType();
+				Element item = root.getChild(pd.getName());
+				if (item != null) {
+					Object o = xmlToObject(item, propertyType);
+					write.invoke(object, new Object[] { o });
+				}
+			}
+			
+			for (PropertyDescriptor pd : pds) {
+				if (!(pd instanceof IndexedPropertyDescriptor)) {
+					continue;
+				}
+				Method read = pd.getReadMethod();
 				if (read == null)
 					continue;
-				if ((indexedProperty.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
+
+				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+				if ((ipd.getWriteMethod() == null) && (ipd.getIndexedWriteMethod() == null))
 					continue;
 				
-				Element theArray = root.getChild(pd.getName());
-				if (theArray == null)
-					continue;
-				
-				List itemElements = theArray.getChildren("item");
-				ArrayList<ArrayObjectData> items = new ArrayList<ArrayObjectData>();
-				boolean hasItemsWithoutIndex = false;
-				int maxIndex = -1;
-				for (int i = 0; i < itemElements.size(); i++) {
-					Element item = (Element) itemElements.get(i);
-					
-					ArrayObjectData itemData = new ArrayObjectData();
-					try {
-						itemData.index = Integer.parseInt(item.getAttributeValue("index"));
-						if (maxIndex < itemData.index)
-							maxIndex = itemData.index;
-					} catch (Exception e) {
-						itemData.index = -1;
-						hasItemsWithoutIndex = true;
-					}
-					itemData.data = (Serializable) indexedPropertyType.getConstructor((Class[]) null).newInstance((Object[]) null);
-					xmlToObject(item, itemData.data);
-					items.add(itemData);
-				}
-				
-				if (hasItemsWithoutIndex) {
-					Collections.sort(items, new Comparator<ArrayObjectData>() {
-						public int compare(ArrayObjectData o1, ArrayObjectData o2) {
-							if ((o1.index >= 0) && (o2.index >= 0)) {
-								return (o1.index < o2.index ? -1 : (o1.index == o2.index ? 0 : 1));
-							}
-							if ((o1.index >= 0) && (o2.index < 0)) {
-								return 1;
-							}
-							if ((o1.index < 0) && (o2.index >= 0)) {
-								return -1;
-							}
-							return 0;
+				Class propertyType = pd.getPropertyType();
+				Element properties = root.getChild(pd.getName());
+				if (properties != null) {
+					Object items = xmlToObject(properties, propertyType);
+
+					if (ipd.getWriteMethod() != null) {
+						Method write = ipd.getWriteMethod();
+						write.invoke(object, new Object[] { items });
+					} else if (items != null) {
+						Method write = ipd.getIndexedWriteMethod();
+						int length = Array.getLength(items);
+						for (int i = 0; i < length; i++) {
+							Object item = Array.get(items, i);
+							write.invoke(object, new Object[] { i, item });
 						}
-					});
-					for (int i = 0; i < items.size(); i++)
-						items.get(i).index = i;
-					maxIndex = items.size() - 1;
-				}
-				
-				if (indexedProperty.getWriteMethod() != null) {
-					Object data[] = (Object[]) Array.newInstance(indexedPropertyType, maxIndex + 1); 
-					for (ArrayObjectData item : items) {
-						data[item.index] = item.data;
-					}
-					Method write = indexedProperty.getWriteMethod();
-					write.invoke(object, new Object[] { data });
-				} else {
-					Method write = indexedProperty.getIndexedWriteMethod();
-					for (ArrayObjectData item : items) {
-						write.invoke(object, new Object[] { item.index, item.data });
 					}
 				}
 			}
+			
+			return (T) object;
 		}
-		return object;
+		return null;
 	}
-	
-	public static <BeanObject extends Serializable> void objectToXml(Element root, BeanObject object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+
+	public static <BeanObject extends Serializable> void objectToXml2(Element root, BeanObject object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		if (object == null)
 			return;
 		Class objectClass = object.getClass();
@@ -290,4 +213,76 @@ public class SimpleBeanToXML {
 			}
 		}
 	}
+	
+	public static void objectToXml(Element root, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		if (object == null)
+			return;
+		Class objectClass = object.getClass();
+		if (
+			(objectClass == boolean.class) ||
+			(objectClass == Boolean.class) ||
+			(objectClass == byte.class) ||
+			(objectClass == Byte.class) ||
+			(objectClass == Character.class) ||
+			(objectClass == double.class) ||
+			(objectClass == Double.class) ||
+			(objectClass == Enum.class) ||
+			(objectClass.isEnum()) ||
+			(objectClass == float.class) ||
+			(objectClass == Float.class) ||
+			(objectClass == int.class) ||
+			(objectClass == Integer.class) ||
+			(objectClass == long.class) ||
+			(objectClass == Long.class) ||
+			(objectClass == short.class) ||
+			(objectClass == Short.class) ||
+			(objectClass == String.class)) {
+			root.setText(object.toString());
+		} else if (objectClass.getComponentType() != null) {
+			// array
+			int length = Array.getLength(object);
+			root.setAttribute("size", Integer.toString(length));
+			for (int i = 0; i < length; i++) {
+				Object o = Array.get(object, i);
+				if (o == null)
+					continue;
+				Element item = new Element("item");
+				item.setAttribute("index", Integer.toString(i));
+				objectToXml(item, o);
+				root.addContent(item);
+			}
+		} else if (Serializable.class.isAssignableFrom(objectClass)) {
+			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
+			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				Method read = pd.getReadMethod();
+				if (read == null)
+					continue;
+				
+				if (pd instanceof IndexedPropertyDescriptor) {
+					IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
+					if ((pd.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
+						continue;
+					
+					Object array = read.invoke(object, (Object[]) null);
+					if (array == null)
+						continue;
+					Element item = new Element(pd.getName());
+					objectToXml(item, array);
+					root.addContent(item);
+					continue;
+				} else {
+					if (pd.getWriteMethod() == null)
+						continue;
+					Object value = read.invoke(object, (Object[]) null);
+					if (value == null)
+						continue;
+					Element item = new Element(pd.getName());
+					objectToXml(item, value);
+					root.addContent(item);
+				}
+			}
+		}
+	}
+	
 }

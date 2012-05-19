@@ -13,8 +13,6 @@ import java.util.Properties;
 
 public class SimpleBeanToProperties {
 	private static boolean hasPropertiesStartingWith(Properties properties, String prefix) {
-		if (!prefix.endsWith("."))
-			prefix += ".";
 		for (Object key : properties.keySet()) {
 			if (((String) key).startsWith(prefix))
 				return true;
@@ -42,10 +40,8 @@ public class SimpleBeanToProperties {
 		Object array = Array.newInstance(arrayType, arraySize);
 		for (int i = 0; i < arraySize; i++) {
 			String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
-			if (hasPropertiesStartingWith(properties, itemPrefix)) {
-				Object item = propertiesToObject(properties, itemPrefix, arrayType);
-				Array.set(array, i, item);
-			}
+			Object item = propertiesToObject(properties, itemPrefix, arrayType);
+			Array.set(array, i, item);
 		}
 		return array;
 	}
@@ -118,10 +114,8 @@ public class SimpleBeanToProperties {
 
 				Class propertyType = pd.getPropertyType();
 				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				if (hasPropertiesStartingWith(properties, propertyPrefix)) {
-					Object o = propertiesToObject(properties, propertyPrefix, propertyType);
-					write.invoke(object, new Object[] { o });
-				}
+				Object o = propertiesToObject(properties, propertyPrefix, propertyType);
+				write.invoke(object, new Object[] { o });
 			}
 			
 			for (PropertyDescriptor pd : pds) {
@@ -138,19 +132,17 @@ public class SimpleBeanToProperties {
 				
 				Class propertyType = pd.getPropertyType();
 				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				if (hasPropertiesStartingWith(properties, propertyPrefix)) {
-					Object items = propertiesToObject(properties, propertyPrefix, propertyType);
+				Object items = propertiesToObject(properties, propertyPrefix, propertyType);
 
-					if (ipd.getWriteMethod() != null) {
-						Method write = ipd.getWriteMethod();
-						write.invoke(object, new Object[] { items });
-					} else if (items != null) {
-						Method write = ipd.getIndexedWriteMethod();
-						int length = Array.getLength(items);
-						for (int i = 0; i < length; i++) {
-							Object item = Array.get(items, i);
-							write.invoke(object, new Object[] { i, item });
-						}
+				if (ipd.getWriteMethod() != null) {
+					Method write = ipd.getWriteMethod();
+					write.invoke(object, new Object[] { items });
+				} else if (items != null) {
+					Method write = ipd.getIndexedWriteMethod();
+					int length = Array.getLength(items);
+					for (int i = 0; i < length; i++) {
+						Object item = Array.get(items, i);
+						write.invoke(object, new Object[] { i, item });
 					}
 				}
 			}

@@ -11,7 +11,6 @@ public class MyData implements Serializable {
 	String comment;
 
 	public MyData () {
-		
 	}
 	
 	public MyData(int id, String name) {
