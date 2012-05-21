@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "utils.h"
 #include "Button.h"
 #include "TicksPerSecond.h"
 

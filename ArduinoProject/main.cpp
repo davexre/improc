@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "utils.h"
 
 extern "C" void __cxa_pure_virtual(void);
 __extension__ typedef int __guard __attribute__((mode (__DI__)));
@@ -17,8 +18,8 @@ void __cxa_guard_abort (__guard *) {};
 //#define MAINCLASS AnalogSensorTest
 //#define MAINCLASS RotaryEncoderAcellerationTest
 //#define MAINCLASS PWM_Led
-//#define MAINCLASS RepRapPCB2Test
-#define MAINCLASS MemoryTest
+#define MAINCLASS RepRapPCBTest
+//#define MAINCLASS MemoryTest
 
 DefineClass(MAINCLASS);
 MAINCLASS mainClass;

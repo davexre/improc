@@ -1,8 +1,7 @@
 #ifndef SERIALREADER_H_
 #define SERIALREADER_H_
 
-#include "wiring.h"
-#include "HardwareSerial.h"
+#include <Arduino.h>
 
 /**
  * Utility class for "LINE" data processing.

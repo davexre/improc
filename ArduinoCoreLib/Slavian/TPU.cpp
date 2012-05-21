@@ -1,5 +1,4 @@
-#include "Arduino.h"
-#include <pins_arduino.h>
+#include <Arduino.h>
 #include "utils.h"
 #include "Button.h"
 #include "RotaryEncoderAcceleration.h"

@@ -1,8 +1,7 @@
 #ifndef DIGITAL_IO_H
 #define DIGITAL_IO_H
 
-#include <wiring.h>
-#include <pins_arduino.h>
+#include <Arduino.h>
 
 static const uint8_t DigitalInputShiftRegisterMaxPins = 9;
 static const uint8_t DigitalOutputShiftRegisterMaxPins = 17;

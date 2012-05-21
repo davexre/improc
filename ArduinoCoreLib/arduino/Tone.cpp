@@ -33,8 +33,8 @@ Version Modified By Date     Comments
 
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
-#include "wiring.h"
-#include "pins_arduino.h"
+#include "Arduino.h"
+//#include "pins_arduino.h"		// SPP:
 
 #if defined(__AVR_ATmega8__) || defined(__AVR_ATmega128__)
 #define TCCR2A TCCR2

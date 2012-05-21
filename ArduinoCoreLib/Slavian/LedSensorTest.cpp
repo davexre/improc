@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "utils.h"
 #include "TicksPerSecond.h"
 
 DefineClass(LedSensorTest);

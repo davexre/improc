@@ -48,4 +48,11 @@ DUMMY(unsigned long)
 DUMMY(float)
 #undef DUMMY
 
+#define DefineClass(className) \
+class className { \
+public: \
+	static void setup(); \
+	static void loop(); \
+}
+
 #endif

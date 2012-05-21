@@ -2,7 +2,6 @@
 #define Button_h
 
 #include "DigitalIO.h"
-#include <wiring.h>
 
 /**
  * A debounced button class.

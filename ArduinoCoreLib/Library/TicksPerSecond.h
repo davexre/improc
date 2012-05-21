@@ -1,7 +1,7 @@
 #ifndef TicksPerSecond_h
 #define TicksPerSecond_h
 
-#include <wiring.h>
+#include <Arduino.h>
 #include <utils.h>
 
 /**
@@ -28,7 +28,7 @@ private:
 	 * Shows the current started/counters pair in use for calculating the
 	 * ticks per second value
 	 */
-	byte curCounter;
+	uint8_t curCounter;
 
 	/**
 	 * The last time the update() method was invoked
