@@ -100,7 +100,7 @@ public class SimpleBeanToProperties {
 			Class arrayType = objectClass.getComponentType();
 			return (T) propertiesToObjectArray(properties, prefix, arrayType, setToNullMissingProperties);
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
-			if (!hasPropertiesStartingWith(properties, prefix)) {
+			if (!hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
 				return null;
 			}
 			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
