@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Timer;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -18,6 +19,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -25,9 +27,11 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import com.slavi.ui.TaskManager;
 import com.slavi.ui.TaskProgress;
@@ -498,5 +502,80 @@ public class SwtUtil {
 	 */
 	public static String optionBox(Shell parent, String message, String title, String selectedItem, String... items) {
 		return SwtOptionBox.optionBox(parent, message, title, selectedItem, items);
+	}
+	
+	/**
+	 * Opens a dialog that prompts for the input of a String.
+	 * @return The string value entered or null if button cancel is pressed
+	 */
+	public static String inputBox(Shell parent, String message, String title, String defaultText) {
+		final AtomicReference<String> result = new AtomicReference<String>(null);
+		
+		final Shell shell = makeShell(parent, SWT.DIALOG_TRIM | SWT.RESIZE);
+		shell.setText(title);
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 1;
+		shell.setLayout(layout);
+		
+		new Label(shell, SWT.LEFT).setText(message);
+		final Text text = new Text(shell, SWT.SINGLE | SWT.BORDER);
+		text.setText(defaultText);
+		text.selectAll();
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.widthHint = 350;
+		text.setLayoutData(gridData);
+		new Label(shell, SWT.NONE);
+		
+		Composite buttonPanel = new Composite(shell, SWT.NONE);
+		RowLayout buttonLayout = new RowLayout(SWT.HORIZONTAL);
+		buttonLayout.spacing = 4;
+		buttonPanel.setLayout(buttonLayout);
+		
+		gridData = new GridData();
+		gridData.horizontalAlignment = SWT.RIGHT;
+		buttonPanel.setLayoutData(gridData);
+
+		Button btnOk = new Button(buttonPanel, SWT.PUSH);
+		btnOk.setText("OK");
+		btnOk.setLayoutData(new RowData(75, -1));
+		btnOk.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				result.set(text.getText());
+				shell.close();
+			}
+		});
+
+		Button btnCancel = new Button(buttonPanel, SWT.PUSH);
+		btnCancel.setText("Cancel");
+		btnCancel.setLayoutData(new RowData(75, -1));
+		btnCancel.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				shell.close();
+			}
+		});
+		
+		shell.setDefaultButton(btnOk);
+		shell.addListener (SWT.Traverse, new Listener () {
+			public void handleEvent (Event event) {
+				switch (event.detail) {
+					case SWT.TRAVERSE_ESCAPE:
+						shell.close ();
+						event.detail = SWT.TRAVERSE_NONE;
+						event.doit = false;
+						break;
+				}
+			}
+		});
+		shell.pack();
+		centerShell(shell);
+		shell.open();
+
+		Display display = shell.getDisplay();
+		while(!shell.isDisposed()){
+			if(!display.readAndDispatch())
+				display.sleep();
+		}
+		shell.dispose();
+		return result.get();
 	}
 }

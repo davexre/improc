@@ -3,7 +3,7 @@ package com.slavi.math;
 import java.util.Locale;
 
 public class MathUtil {
-	public static final double eps = calcEps();
+	public static final double eps = calcDoubleEps();
 	
 	public static final double epsAngle = calcAngleEps(0);
 	
@@ -151,7 +151,7 @@ public class MathUtil {
 	 * Calculates the machine precision.
 	 * @returns The maximum eps such that 1.0 == 1.0 + eps  
 	 */
-	private static double calcEps() {
+	public static double calcDoubleEps() {
 		double one = 1.0;
 		double eps = 1.0;
 		while(true) {
@@ -160,6 +160,18 @@ public class MathUtil {
 				return eps;
 			}
 			eps /= 10.0;
+		}
+	}
+
+	public static float calcFloatEps() {
+		float one = 1.0f;
+		float eps = 1.0f;
+		while(true) {
+			float onePlusEps = one + eps;
+			if (one == onePlusEps) {
+				return eps;
+			}
+			eps /= 10.0f;
 		}
 	}
 }

@@ -57,8 +57,81 @@ public class GeometryUtil {
 		}
 		det = ux * vy - uy * vx;
 		return (det * det) / length;
-    }
+	}
 	
+	public static interface PointToLinePosition {
+		public static int Inside = 0;
+		public static int NegativePlane = 1;
+		public static int PositivePlane = 2;
+		public static int BeforeTheStartPoint = 3;
+		public static int AfterTheEndPoint = 4;
+		public static int InvalidLine = 5;
+	}
+	
+	public static int pointToLine(Point2D lineA, Point2D lineB, Point2D point) {
+		return pointToLine(
+				lineA.getX(), lineA.getY(), 
+				lineB.getX(), lineB.getY(), 
+				point.getX(), point.getY());
+	}
+	
+	public static int pointToLine(
+			double lineX1, double lineY1, 
+			double lineX2, double lineY2, 
+			double pointX, double pointY) {
+		double dXBA = lineX2 - lineX1;
+		double dYBA = lineY2 - lineY1;
+		double f2 = dYBA * (pointX - lineX1) - dXBA * (pointY - lineY1);
+		if (f2 < 0.0)
+			return PointToLinePosition.NegativePlane;
+		if (f2 > 0.0)
+			return PointToLinePosition.PositivePlane;
+		
+		// Point P lies on the line
+		if (dXBA > 0.0) {
+			if (pointX < lineX1) {
+				return PointToLinePosition.BeforeTheStartPoint;
+			} else if (lineX2 >= pointX) {
+				// P between A and B
+				return PointToLinePosition.Inside;
+			} else {
+				return PointToLinePosition.AfterTheEndPoint;
+			}
+		}
+		
+		if (dXBA < 0.0) {
+			if (pointX > lineX1) {
+				return PointToLinePosition.BeforeTheStartPoint;
+			} else if (lineX2 <= pointX) {
+				return PointToLinePosition.Inside;
+			} else {
+				return PointToLinePosition.AfterTheEndPoint;
+			}
+		}
+		
+		if (dYBA > 0.0) {
+			if (pointY < lineY1) {
+				return PointToLinePosition.BeforeTheStartPoint;
+			} else if (lineY2 >= pointY) {
+				return PointToLinePosition.Inside;
+			} else {
+				return PointToLinePosition.AfterTheEndPoint;
+			}
+		}
+		
+		if (dYBA < 0.0) {
+			if (pointY > lineY1) {
+				return PointToLinePosition.BeforeTheStartPoint;
+			} else if (lineY2 <= pointY) {
+				return PointToLinePosition.Inside;
+			} else {
+				return PointToLinePosition.AfterTheEndPoint;
+			}
+		}
+		// The points of the line are equal, i.e. lineA = lineB
+		return PointToLinePosition.InvalidLine;
+	}
+
 	public static double distanceSquared(double x1, double y1, double x2, double y2) {
 		x1 -= x2;
 		y1 -= y2;
@@ -268,6 +341,86 @@ public class GeometryUtil {
 		return new Point2D.Double(
 				(b1 * c2 - b2 * c1) / denom, 
 				(a2 * c1 - a1 * c2) / denom);
+	}
+	
+	/**
+	 * @return
+	 * 		0 no common point or the circles are identical
+	 * 		1 one common point
+	 * 		2 the circles intersect in two points
+	 * Formulas taken from:
+	 * http://www.sonoma.edu/users/w/wilsonst/papers/geometry/circles/default.html
+	 */
+	public static int intersectTwoCircles(
+		double x1, double y1, double r1,
+		double x2, double y2, double r2,
+		Point2D p1, Point2D p2) {
+		
+		double d = MathUtil.hypot(x2 - x1, y2 - y1);
+		if (d == 0)
+			return 0;
+		
+		double DD = ((r1+r2)*(r1+r2) - d*d) * (d*d - (r1-r2)*(r1-r2));
+		if (DD < 0)
+			return 0;
+		DD = Math.sqrt(DD) / (2*d*d);
+		double tmpX = (y2-y1) * DD;
+		double tmpY = (x2-x1) * DD;
+		double x = (x2+x1) / 2.0 +
+				(x2-x1) * (r1*r1 - r2*r2) / (2*d*d);
+		double y = (y2+y1) / 2.0 +
+				(y2-y1) * (r1*r1 - r2*r2) / (2*d*d);
+		
+		p1.setLocation(x + tmpX, y - tmpY);
+		p2.setLocation(x - tmpX, y + tmpY);
+		
+		if (tmpX == 0 && tmpY == 0)
+			return 1;
+		return 2;
+	}
+	
+	/**
+	 * Computes the center of the circle and returns its radius.
+	 * Formulas taken from:
+	 * http://en.wikipedia.org/wiki/Circumscribed_circle
+	 */
+	public static double circleTreePoints(Point2D a, Point2D b, Point2D c, Point2D center) {
+		double D = 
+				a.getX() * (b.getY() - c.getY()) +
+				b.getX() * (c.getY() - a.getY()) +
+				c.getX() * (a.getY() - b.getY());
+		if (D == 0) {
+			center.setLocation(
+					(a.getX() + b.getX() + c.getX()) / 3.0,
+					(a.getY() + b.getY() + c.getY()) / 3.0);
+			return 0;
+		}
+		double aa = a.getX()*a.getX() + a.getY()*a.getY();
+		double bb = b.getX()*b.getX() + b.getY()*b.getY();
+		double cc = c.getX()*c.getX() + c.getY()*c.getY();
+		
+		double x =
+				aa * (b.getY() - c.getY()) +
+				bb * (c.getY() - a.getY()) +
+				cc * (a.getY() - b.getY());
+		double y =
+				aa * (c.getX() - b.getX()) +
+				bb * (a.getX() - c.getX()) +
+				cc * (b.getX() - a.getX());
+		
+		aa = Math.hypot(
+				b.getX() - c.getX(),
+				b.getY() - c.getY());
+		bb = Math.hypot(
+				a.getX() - c.getX(),
+				a.getY() - c.getY());
+		cc = Math.hypot(
+				a.getX() - b.getX(),
+				a.getY() - b.getY());
+		double r = aa*bb*cc / Math.sqrt((aa+bb+cc)*(-aa+bb+cc)*(aa-bb+cc)*(aa+bb-cc));
+
+		center.setLocation(x / (2*D), y / (2*D));
+		return r;
 	}
 	
 	/**
