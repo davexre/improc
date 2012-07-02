@@ -61,8 +61,8 @@ public class GeometryUtil {
 	
 	public static interface PointToLinePosition {
 		public static int Inside = 0;
-		public static int NegativePlane = 1;
-		public static int PositivePlane = 2;
+		public static int NegativePlane = 1;	// Left
+		public static int PositivePlane = 2;	// Right
 		public static int BeforeTheStartPoint = 3;
 		public static int AfterTheEndPoint = 4;
 		public static int InvalidLine = 5;

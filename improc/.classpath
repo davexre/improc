@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jdom.jar"/>
-	<classpathentry kind="lib" path="/home/slavian/S/java/jar/swt-3.5.1-gtk-linux-x86/swt.jar" sourcepath="/home/slavian/S/java/jar/swt-3.5.1-gtk-linux-x86/src.zip"/>
+	<classpathentry kind="lib" path="/home/slavian/java/jar/swt-3.7.1-64/swt.jar" sourcepath="/home/slavian/java/jar/swt-3.7.1-64/src.zip"/>
 	<classpathentry kind="lib" path="lib/org.swtchart_0.6.0.v20090801.jar"/>
 	<classpathentry kind="lib" path="lib/RXTXcomm_with_src.jar" sourcepath="/home/slavian/S/java/jar/rxtx-2.1-7r2/src"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/jl1.0.1.jar"/>
@@ -14,9 +14,14 @@
 	<classpathentry kind="lib" path="lib/javazoom.net/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/tritonus_share.jar"/>
 	<classpathentry kind="lib" path="lib/javazoom.net/vorbisspi1.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/j3d-org-java3d-all.jar"/>
+	<classpathentry kind="lib" path="lib/j3d-org-java3d-all.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="improc/lib/system-dependent/linux-i386"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/j3dcore.jar"/>
 	<classpathentry kind="lib" path="lib/j3dutils.jar"/>
+	<classpathentry kind="lib" path="lib/vecmath.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

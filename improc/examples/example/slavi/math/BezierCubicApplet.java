@@ -1,11 +1,8 @@
 package example.slavi.math;
 
-import java.applet.Applet;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -13,7 +10,9 @@ import java.util.List;
 
 import com.slavi.math.BezierCubicCurve;
 
-public class BezierCubicApplet extends Applet {
+import example.slavi.BasePointsListApplet;
+
+public class BezierCubicApplet extends BasePointsListApplet {
 
 	BezierCubicCurve spline = new BezierCubicCurve(
 		new Point2D.Double(25, 25),
@@ -21,68 +20,15 @@ public class BezierCubicApplet extends Applet {
 		new Point2D.Double(225, 125),
 		new Point2D.Double(325, 25));
 
-	static int controlNodeWidth = 3;
-	
-	static int controlNodeHeight = 3;
-
-	Point2D.Double selected = null;
-
-	void checkControlNode(Point2D.Double p, int i, int j) {
-		if ((p.x - controlNodeWidth <= i) && 
-			(i <= p.x + controlNodeWidth) && 
-			(p.y - controlNodeHeight <= j) && 
-			(j <= p.y + controlNodeHeight))
-			selected = p;
-	}
-
 	public void init() {
-		setName(getClass().getName());
-		MouseAdapter listener = new MouseAdapter() {
-			public void mouseDragged(MouseEvent e) {
-				int x = e.getX();
-				int y = e.getY();
-				if (selected != null) {
-					selected.x = x;
-					selected.y = y;
-					repaint();
-				}
-			}
-
-			public void mouseReleased(MouseEvent e) {
-				selected = null;
-				repaint();
-			}
-			
-			public void mousePressed(MouseEvent e) {
-				int x = e.getX();
-				int y = e.getY();
-				selected = null;
-				checkControlNode(spline.p0, x, y);
-				checkControlNode(spline.p1, x, y);
-				checkControlNode(spline.p2, x, y);
-				checkControlNode(spline.p3, x, y);
-
-				if (selected != null) {
-					selected.x = x;
-					selected.y = y;
-					repaint();
-				}
-			}
-		};
-
-		addMouseListener(listener);
-		addMouseMotionListener(listener);
+		fixedNumberOfPoints = true;
+		points.add(spline.p0);
+		points.add(spline.p1);
+		points.add(spline.p2);
+		points.add(spline.p3);
+		super.init();
 	}
 	
-	void drawControlNode(Point2D.Double p, Graphics2D g) {
-		g.setColor(Color.lightGray);
-		g.fillRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-				2 * controlNodeWidth, 2 * controlNodeHeight);
-		g.setColor(Color.black);
-		g.drawRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-				2 * controlNodeWidth, 2 * controlNodeHeight);
-	}
-
 	static Path2D.Double toPath(List<? extends Point2D> points) {
 		Path2D.Double path = new Path2D.Double();
 		if (points == null || points.size() == 0)
@@ -121,8 +67,8 @@ public class BezierCubicApplet extends Applet {
 		g2.setColor(Color.green);
 		g2.draw(path);
 		
-		g2.setColor(Color.cyan);
-		g2.drawLine(0, 10, (int) minLineLength, 10); 
+//		g2.setColor(Color.cyan);
+//		g2.drawLine(0, 10, (int) minLineLength, 10); 
 		
 		g2.setColor(Color.black);
 		System.out.println();
@@ -134,11 +80,6 @@ public class BezierCubicApplet extends Applet {
 			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
 		}
 		System.out.println(spline.p3);
-//		for (Point2D.Double point : points)
-//			g2.fillRect((int) point.x - 1, (int) point.y - 1, 2, 2);
-		drawControlNode(spline.p0, g2);
-		drawControlNode(spline.p1, g2);
-		drawControlNode(spline.p2, g2);
-		drawControlNode(spline.p3, g2);
+		paintPoints(g);
 	}
 }
