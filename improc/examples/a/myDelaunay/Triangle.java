@@ -89,4 +89,19 @@ public class Triangle {
 		circumCircle.r = GeometryUtil.circleTreePoints(a, b, c, circumCircle.center);
 		return circumCircle;
 	}
+
+	public Circle getInscribedCircle() {
+		Circle inscribedCircle = new Circle();
+		inscribedCircle.r = GeometryUtil.inscribedCircle(a, b, c, inscribedCircle.center);
+		return inscribedCircle;
+	}
+	
+	/**
+	 * Returns true is the points a, b and c are ordered Counter Clock Wise.
+	 */
+	public boolean isCCW() {
+		if (c == null)
+			return false;
+		return GeometryUtil.getTriangleArea(a, b, c) < 0;
+	}
 }

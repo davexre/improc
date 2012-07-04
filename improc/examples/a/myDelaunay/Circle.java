@@ -20,4 +20,10 @@ public class Circle {
 		double y = p.getY() - center.getY();
 		return x*x + y*y <= r*r;
 	}
+
+	public boolean isPointInside(Point2D p) {
+		double x = p.getX() - center.getX();
+		double y = p.getY() - center.getY();
+		return x*x + y*y < r*r;
+	}
 }
