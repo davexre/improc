@@ -144,7 +144,7 @@ public abstract class MyDelaunay {
 	Triangle extendOutside(Triangle t, Point2D.Double p) {
 		// Triangle t is a "border" tirangle, i.e. t.c == null 
 		if (GeometryUtil.pointToLine(t.a, t.b, p) == GeometryUtil.PointToLinePosition.Inside) {
-			System.out.println("extend outside on edge " + getPointId(p));
+//			System.out.println("extend outside on edge " + getPointId(p));
 			Triangle t1 = new Triangle(t.a, t.b, p);
 			Triangle right = new Triangle(p, t.b);
 			triangles.add(t1);
@@ -256,7 +256,7 @@ public abstract class MyDelaunay {
 			rightT.setCa(newT);
 			return newT;
 		} else {
-			System.out.println("extend clock " + getPointId(p) + " old=" + oldtc);
+//			System.out.println("extend clock " + getPointId(p) + " old=" + oldtc);
 			return extendclock(rightT, p);
 		}
 	}
@@ -281,9 +281,9 @@ public abstract class MyDelaunay {
 		Triangle t1 = t.getAb();
 		if ((t1.c == null) || !t1.getCircumCircle().isPointInside(t.c))
 			return;
-		System.out.println("Before");
-		dumpTriangle(t, "T ");
-		dumpTriangle(t1, "T1");
+//		System.out.println("Before");
+//		dumpTriangle(t, "T ");
+//		dumpTriangle(t1, "T1");
 		if (t.a == t1.a) {
 			t.a = t1.b;
 			t1.c = t.c;
@@ -310,10 +310,10 @@ public abstract class MyDelaunay {
 			return;
 		}
 
-		System.out.println("After");
-		dumpTriangle(t, "T ");
-		dumpTriangle(t1, "T1");
-		System.out.println();
+//		System.out.println("After");
+//		dumpTriangle(t, "T ");
+//		dumpTriangle(t1, "T1");
+//		System.out.println();
 
 		flip_NEW(t);
 		flip_NEW(t1);

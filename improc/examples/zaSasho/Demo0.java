@@ -14,7 +14,7 @@ import java.util.Comparator;
 import javax.imageio.ImageIO;
 
 
-public class Demo {
+public class Demo0 {
 
 	public static final int colors[] = {
 //		0x00ff0000,
@@ -101,6 +101,6 @@ public class Demo {
 	
 	
 	public static void main(String[] args) throws Exception {
-		new Demo().drawIt();
+		new Demo0().drawIt();
 	}
 }

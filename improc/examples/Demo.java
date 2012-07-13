@@ -1,4 +1,4 @@
-package zaSasho;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -17,10 +17,9 @@ import javax.imageio.ImageIO;
 import com.slavi.math.GeometryUtil;
 
 
-public class Demo3 {
+public class Demo {
 
 	public static final int colors[] = {
-//		0x00ff0000,
 		0x00ff9600,
 		0x008f8f00,
 		0x008f004f,
@@ -43,11 +42,11 @@ public class Demo3 {
 	}
 	
 	Ellipse2D el[] = {
-		circle(100,  80, 250),
+//		circle(100,  80, 250),  // Проблемно ?!?
 		circle(100, 100, 200),
 		circle(100, 200, 150),
-//		circle(100, 100, 50),
-//		circle(200, 100, 300),
+		circle(100, 100, 50),
+		circle(200, 100, 300),
 	};
 	
 	static double dist(double x1, double y1, double x2, double y2) {
@@ -217,6 +216,6 @@ public class Demo3 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Demo3().drawIt();
+		new Demo().drawIt();
 	}
 }

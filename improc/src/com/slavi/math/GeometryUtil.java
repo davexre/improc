@@ -91,7 +91,7 @@ public class GeometryUtil {
 		if (dXBA > 0.0) {
 			if (pointX < lineX1) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (lineX2 >= pointX) {
+			} else if (pointX <= lineX2) {
 				// P between A and B
 				return PointToLinePosition.Inside;
 			} else {
@@ -100,7 +100,7 @@ public class GeometryUtil {
 		}
 		
 		if (dXBA < 0.0) {
-			if (pointX > lineX1) {
+			if (lineX1 < pointX) {
 				return PointToLinePosition.BeforeTheStartPoint;
 			} else if (lineX2 <= pointX) {
 				return PointToLinePosition.Inside;
@@ -112,7 +112,7 @@ public class GeometryUtil {
 		if (dYBA > 0.0) {
 			if (pointY < lineY1) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (lineY2 >= pointY) {
+			} else if (pointY <= lineY2) {
 				return PointToLinePosition.Inside;
 			} else {
 				return PointToLinePosition.AfterTheEndPoint;
@@ -120,7 +120,7 @@ public class GeometryUtil {
 		}
 		
 		if (dYBA < 0.0) {
-			if (pointY > lineY1) {
+			if (lineY1 < pointY) {
 				return PointToLinePosition.BeforeTheStartPoint;
 			} else if (lineY2 <= pointY) {
 				return PointToLinePosition.Inside;
@@ -132,6 +132,10 @@ public class GeometryUtil {
 		return PointToLinePosition.InvalidLine;
 	}
 
+	public static double distance(Point2D a, Point2D b) {
+		return Math.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+	}
+	
 	public static double distanceSquared(double x1, double y1, double x2, double y2) {
 		x1 -= x2;
 		y1 -= y2;
@@ -379,6 +383,47 @@ public class GeometryUtil {
 		return 2;
 	}
 	
+	/**
+	 * Computes the center of the inscribed circle 
+	 * in the triangle specified by points a,b and c
+	 * and returns its radius.
+	 * Formulas taken from:
+	 * http://en.wikipedia.org/wiki/Inscribed_circle
+	 */
+	public static double inscribedCircle(Point2D a, Point2D b, Point2D c, Point2D center) {
+		double ab = distance(a, b);
+		double bc = distance(b, c);
+		double ca = distance(c, a);
+		double p = ab + bc + ca;
+		if (p == 0) {
+			center.setLocation(a);
+			return 0;
+		}
+		center.setLocation(
+			(a.getX() * bc + b.getX() * ca + c.getX() * ab) / p, 
+			(a.getY() * bc + b.getY() * ca + c.getY() * ab) / p);
+		p *= 0.5;
+		return Math.sqrt((p - ab) * (p - bc) * (p - ca) / p);
+	}
+	
+	/**
+	 * Returns a positive value if points a, b and are in Clock Wise (CW) order
+	 * and a negative value if the points are in Counter Clock Wise (CCW) order and
+	 * returns a zero (0) if the triangle is degenerate (invalid).
+	 *  
+	 * http://en.wikipedia.org/wiki/Triangle
+	 */
+	public static double getTriangleArea(Point2D a, Point2D b, Point2D c) {
+		return 0.5 * (
+			a.getX() * b.getY() - a.getY() * b.getX() +
+			b.getX() * c.getY() - b.getY() * c.getX() +
+			c.getX() * a.getY() - c.getY() * a.getX());
+	}
+	
+	public static boolean isCCW(Point2D a, Point2D b, Point2D c) {
+		return getTriangleArea(a, b, c) < 0;
+	}
+
 	/**
 	 * Computes the center of the circle and returns its radius.
 	 * Formulas taken from:
