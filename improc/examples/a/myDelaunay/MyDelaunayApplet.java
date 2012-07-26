@@ -151,6 +151,8 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 		for (int i = 0; i < points.size(); i++) {
 			Point2D.Double p = points.get(i);
 			d.insertPoint(p);
+			System.out.println("------------");
+			System.out.println(d);
 		}
 		ArrayList<Triangle> triangles = new ArrayList<Triangle>(d.getTriangles());
 /*		for (Triangle t : triangles) {
@@ -170,7 +172,8 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 		System.out.println(Arrays.toString(b));
 		System.out.println("----------------");*/
 
-		for (int i = 0; i < points.size(); i++) {
+		System.out.println(d);
+/*		for (int i = 0; i < points.size(); i++) {
 			Point2D.Double p = points.get(i);
 			System.out.println(p);
 		}

@@ -14,12 +14,24 @@ public abstract class MyDelaunay {
 
 	public abstract int getPointId(Point2D p);
 	
+	public ArrayList<Point2D> points = new ArrayList<Point2D>();
 	public ArrayList<Triangle> triangles = new ArrayList<Triangle>();
 	Triangle firstT, lastT;
 	public Triangle root;
 	boolean allCollinear = true;
 	Point2D.Double firstP, lastP;
 	int pointsCount = 0;
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Points:    ").append(points.size()).append('\n');
+		sb.append("Triangles: ").append(triangles.size()).append('\n');
+		for (Triangle t : triangles) {
+			sb.append(triangle2StringFull(t));
+			sb.append('\n');
+		}
+		return sb.toString();
+	}
 	
 	void recursiveAddTriangle(Triangle t, HashSet<Triangle> r) {
 		if (t == null)
@@ -44,6 +56,7 @@ public abstract class MyDelaunay {
 	}
 	
 	public void insertPoint(Point2D.Double p) {
+		points.add(p);
 		Triangle t = insertPointSimple(p);
 		if (t == null)
 			return;
@@ -306,8 +319,9 @@ public abstract class MyDelaunay {
 			t.setCa(t1);
 			t1.setAb(t);
 		} else {
-			System.out.println("Error in flip.");
-			return;
+			throw new Error("Error in flip");
+//			System.out.println("Error in flip.");
+//			return;
 		}
 
 //		System.out.println("After");
@@ -320,16 +334,20 @@ public abstract class MyDelaunay {
 	}
 
 	String triangle2String(Triangle t) {
-		return	getPointId(t.a) + ":" + 
+		return	"(" + getPointId(t.a) + ":" + 
 				getPointId(t.b) + ":" + 
-				getPointId(t.c);
+				getPointId(t.c) + ")";
+	}
+	
+	String triangle2StringFull(Triangle t) {
+		return	String.format("%-10s", triangle2String(t)) +
+				" ab" + String.format("%-10s", triangle2String(t.getAb())) +
+				" bc" + String.format("%-10s", triangle2String(t.getBc())) +
+				" ca" + String.format("%-10s", triangle2String(t.getCa()));
 	}
 	
 	public void dumpTriangle(Triangle t, String name) {
-		System.out.println(name + "(" + triangle2String(t) + ")" +
-				" ab(" + triangle2String(t.getAb()) + ") " +
-				" bc(" + triangle2String(t.getBc()) + ") " +
-				" ca(" + triangle2String(t.getCa()) + ")");
+		System.out.println(name + triangle2StringFull(t));
 	}
 
 	void flip(Triangle t, int recurseCount) {
@@ -358,8 +376,9 @@ public abstract class MyDelaunay {
 			t2.setAb(t1.getAb());
 			t.setAb(t1.getCa());
 		} else {
-			System.out.println("Error in flip.");
-			return;
+			throw new Error("Error in flip");
+//			System.out.println("Error in flip.");
+//			return;
 		}
 		t2.setBc(t.getBc());
 		t2.getAb().switchneighbors(t1, t2);
