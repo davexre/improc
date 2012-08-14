@@ -2,6 +2,7 @@ package com.slavi.util.concurrent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -25,12 +26,8 @@ public class FakeThreadExecutor implements ExecutorService {
 	}
 
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-		ArrayList<Future<T>> result = new ArrayList<Future<T>>();
+		ArrayList<Future<T>> result = new ArrayList<Future<T>>(tasks.size());
 		for (Callable<T> task : tasks) {
-			if (shutdown)
-				throw new RejectedExecutionException();
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException();
 			result.add(submit(task));
 		}
 		return result;
@@ -38,13 +35,9 @@ public class FakeThreadExecutor implements ExecutorService {
 
 	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
 			throws InterruptedException {
-		ArrayList<Future<T>> result = new ArrayList<Future<T>>();
+		ArrayList<Future<T>> result = new ArrayList<Future<T>>(tasks.size());
 		long maxTime = System.nanoTime() + unit.toNanos(timeout);
 		for (Callable<T> task : tasks) {
-			if (shutdown)
-				throw new RejectedExecutionException();
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException();
 			result.add(submit(task));
 			if (System.nanoTime() >= maxTime) {
 				FutureTask<T> canceledTask = new FutureTask<T>(task);
@@ -58,12 +51,8 @@ public class FakeThreadExecutor implements ExecutorService {
 	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
 		Throwable lastException = null;
 		for (Callable<T> task : tasks) {
-			if (shutdown)
-				throw new RejectedExecutionException();
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException();
 			try {
-				return task.call();
+				return submit(task).get();
 			} catch (Throwable t) {
 				lastException = t;
 			}
@@ -77,12 +66,8 @@ public class FakeThreadExecutor implements ExecutorService {
 		long maxTime = System.nanoTime() + unit.toNanos(timeout);
 		
 		for (Callable<T> task : tasks) {
-			if (shutdown)
-				throw new RejectedExecutionException();
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException();
 			try {
-				return task.call();
+				return submit(task).get();
 			} catch (Throwable t) {
 				lastException = t;
 			}
@@ -106,7 +91,7 @@ public class FakeThreadExecutor implements ExecutorService {
 
 	public List<Runnable> shutdownNow() {
 		shutdown = true;
-		return null;
+		return Collections.EMPTY_LIST;
 	}
 
 	public <T> Future<T> submit(Callable<T> task) {
@@ -142,14 +127,6 @@ public class FakeThreadExecutor implements ExecutorService {
 	}
 
 	public void execute(Runnable command) {
-		if (command == null) 
-			throw new NullPointerException();
-		if (shutdown || Thread.currentThread().isInterrupted())
-			throw new RejectedExecutionException();
-		try {
-			command.run();
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
+		submit(command);
 	}
 }

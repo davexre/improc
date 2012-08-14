@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.util.Util;
+import com.slavi.util.concurrent.FakeThreadExecutor;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
@@ -21,12 +22,20 @@ public class TaskSetExecutorUITest {
 		
 		public Void call() throws Exception {
 			TaskSetExecutor ts = new TaskSetExecutor(exec) {
-				public void onSubtaskFinished(Object task, Object result) throws Exception {
+				public void onError(Object task, Throwable e) throws Exception {
+					ExampleTask t = (ExampleTask) task;
+					System.out.println("ERROR in task " + t.taskName + " -> " + e.getMessage());
+				}
+				
+				public void onTaskFinished(Object task, Object result) throws Exception {
 					SwtUtil.activeWaitDialogSetStatus("Done " + 
 							Integer.toString(getFinishedTasksCount()) + "/" + Integer.toString(getTasksCount()), 
 							getFinishedTasksCount());
 				}
 				
+				public void onFinally() throws Exception {
+					System.out.println("TaskSet is done.");
+				}
 			};
 			System.out.println("Creating tasks");
 			for (int i = 1; i <= taskCount; i++) {
@@ -45,6 +54,7 @@ public class TaskSetExecutorUITest {
 	
 	public static void main(String[] args) throws Exception {
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor(2);
+//		ExecutorService exec = new FakeThreadExecutor();
 		int maxTasks = 10;
 		try {
 			SwtUtil.openTaskManager(null, true);

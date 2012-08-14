@@ -27,8 +27,10 @@ public class TaskSetExecutor {
 		
 		public Void call() {
 			synchronized (tasks) {
-				if (aborted)
+				if (aborted) {
+					isDone();
 					return null;
+				}
 				runningTasks++;
 			}
 			try {
@@ -40,7 +42,7 @@ public class TaskSetExecutor {
 				} else {
 					throw new Exception("Unsupported task type " + task);
 				}
-				onSubtaskFinished(task, result);
+				onTaskFinished(task, result);
 			} catch(Throwable t) {
 				synchronized (tasks) {
 					if (firstExceptionThatOccured == null)
@@ -55,7 +57,6 @@ public class TaskSetExecutor {
 			synchronized (tasks) {
 				runningTasks--;
 				finishedTasks++;
-				tasks.notifyAll();
 			}
 			isDone();
 			return null;
@@ -74,7 +75,7 @@ public class TaskSetExecutor {
 				}
 			}
 			aborted = true;
-			tasks.notifyAll();
+			isDone();
 		}
 	}
 	
@@ -123,7 +124,7 @@ public class TaskSetExecutor {
 	boolean onFinallyInvoked = false;
 	public boolean isDone() {
 		// The onFinally() must be called outside a synchronized block 
-		boolean localOnFinallyInvoked = false;
+		boolean localOnFinallyInvoked;
 		synchronized (tasks) {
 			if (!addingFinished) {
 				return false;
@@ -132,8 +133,7 @@ public class TaskSetExecutor {
 				if (runningTasks != 0) {
 					return false;
 				}
-			}
-			if (exec.isShutdown()) {
+			} else if (exec.isShutdown()) {
 				abort();
 			} else if (finishedTasks != tasks.size()) {
 				return false;
@@ -142,10 +142,12 @@ public class TaskSetExecutor {
 			onFinallyInvoked = true;
 		}
 		// Invoke onFinally if not already invoked.
-		try {
-			if (!localOnFinallyInvoked)
+		if (!localOnFinallyInvoked) {
+			try {
 				onFinally();
-		} catch (Throwable t) {
+			} catch (Throwable t) {
+			}
+			tasks.notifyAll();
 		}
 		return true;
 	}
@@ -163,22 +165,20 @@ public class TaskSetExecutor {
 	}
 	
 	private void internalAdd(Object task) {
-		synchronized (tasks) {
-			if (task == null) {
-				abort();
-				throw new NullPointerException();
-			}
-			if (addingFinished) {
-				abort();
-				throw new RejectedExecutionException();
-			}				
-			if (aborted) {
-				throw new RejectedExecutionException();
-			}
-			if (Thread.currentThread().isInterrupted()) {
-				abort();
-				throw new RejectedExecutionException();
-			}
+		if (task == null) {
+			abort();
+			throw new NullPointerException();
+		}
+		if (addingFinished) {
+			abort();
+			throw new RejectedExecutionException();
+		}				
+		if (aborted) {
+			throw new RejectedExecutionException();
+		}
+		if (Thread.currentThread().isInterrupted()) {
+			abort();
+			throw new RejectedExecutionException();
 		}
 		Future<Void> future = null;
 		try {
@@ -189,8 +189,6 @@ public class TaskSetExecutor {
 				}
 				tasks.add(future);
 			}
-		} catch (RejectedExecutionException e) {
-			throw e;
 		} catch (Throwable t) {
 			abort();
 			throw new RejectedExecutionException(t);
@@ -208,37 +206,30 @@ public class TaskSetExecutor {
 	public void addFinished() {
 		synchronized (tasks) {
 			addingFinished = true;
-			tasks.notifyAll();
 		}
 	}
 	
-	public void get() throws InterruptedException, ExecutionException {
-		try {
-			get(0);
-		} catch (TimeoutException e) {
-			throw new InterruptedException();
-		}
+	public void get() throws InterruptedException, ExecutionException, TimeoutException {
+		get(0);
 	}
 	
 	public void get(long timeoutMillis) throws InterruptedException, ExecutionException, TimeoutException {
-		final long sleepTimeoutMillis = 100;
-		long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
-		long timeToWait = timeoutMillis > sleepTimeoutMillis ? sleepTimeoutMillis : (timeoutMillis <= 0 ? sleepTimeoutMillis : timeoutMillis);
 		if (Thread.currentThread().isInterrupted())
 			abort();
-		while (!isDone()) {
-			if ((timeoutMillis > 0) && (System.currentTimeMillis() > maxTimeMillis))
-				throw new TimeoutException();
-			try {
-				synchronized (tasks) {
-					tasks.wait(timeToWait);
-				}
-			} catch (InterruptedException e) {
-				abort();
-				throw e;
-			}
-		}
 		synchronized (tasks) {
+			if (aborted)
+				throw new CancellationException();
+			if (!addingFinished) {
+				abort();
+				throw new CancellationException("Can not get result prior calling addFinished.");
+			}
+			if (!isDone())
+				try {
+					tasks.wait(timeoutMillis);
+				} catch (InterruptedException e) {
+					abort();
+					throw e;
+				}
 			if (firstExceptionThatOccured != null)
 				throw new ExecutionException(firstExceptionThatOccured);
 			if (aborted) 
@@ -254,10 +245,10 @@ public class TaskSetExecutor {
 	}
 
 	/**
-	 * Invoked upon an successful execution of a sub-task. The method MUST BE
+	 * Invoked upon an successful execution of a task. The method MUST BE
 	 * thread safe, i.e. may be invoked multiple time from different threads. 
 	 */
-	public void onSubtaskFinished(Object task, Object result) throws Exception {
+	public void onTaskFinished(Object task, Object result) throws Exception {
 	}
 
 	/**
@@ -267,7 +258,7 @@ public class TaskSetExecutor {
 	 * <li>the task has been canceled and all running sub-task have
 	 * been aborted or finished</li>
 	 * <li>an exception has been thrown by some sub-task or a method
-	 * like {@link #onSubtaskFinished(Object, Object)} and all running sub-taks have
+	 * like {@link #onTaskFinished(Object, Object)} and all running sub-taks have
 	 * been aborted</li>
 	 * </ul>
 	 * The method might not be invoked in case the ExecutorService is shutdown.
