@@ -69,7 +69,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			File image) {
 		return new File(FileUtil.changeFileExtension(
 			rootKeyPointFileDir.getFullPath(
-				rootImagesDir.getRelativePath(image, false)), ".spf.z"));
+				rootImagesDir.getRelativePath(image)), ".spf.z"));
 	}
 	
 	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
@@ -184,7 +184,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		
 		KeyPointList result = buildKeyPointFileMultiThreaded(exec, image);
 
-		String relativeImageName = rootImagesDir.getRelativePath(image, false);
+		String relativeImageName = rootImagesDir.getRelativePath(image);
 		result.imageFileStamp = new FileStamp(relativeImageName, rootImagesDir);
 		kplFile.getParentFile().mkdirs();
 		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(kplFile));

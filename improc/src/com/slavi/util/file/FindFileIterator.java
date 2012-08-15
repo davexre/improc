@@ -47,7 +47,7 @@ public class FindFileIterator implements Iterator<File> {
 	
 	private FileBookmark cur;
 	
-	private Stack<FileBookmark>dirstack = new Stack<FileBookmark>();
+	private final Stack<FileBookmark>dirstack = new Stack<FileBookmark>();
 	
 	private Pattern pattern;
 	
@@ -149,7 +149,7 @@ public class FindFileIterator implements Iterator<File> {
 					}
 				}
 			} else {
-				if ((dirstack == null) || (dirstack.isEmpty()))
+				if (dirstack.isEmpty())
 					cur = null;
 				else
 					cur = dirstack.pop();

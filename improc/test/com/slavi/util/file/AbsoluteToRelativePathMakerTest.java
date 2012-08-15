@@ -28,7 +28,7 @@ public class AbsoluteToRelativePathMakerTest {
 		};
 		for (String[] item : vals) {
 			AbsoluteToRelativePathMaker am = new AbsoluteToRelativePathMaker(item[0]);
-			String rel = am.getRelativePath(item[1], false);
+			String rel = am.getRelativePath(item[1]);
 			TestUtils.assertEqualIgnoreCase("", rel, item[2]);
 			File f1 = new File(item[1]);
 			File f2 = am.getFullPathFile(rel);
