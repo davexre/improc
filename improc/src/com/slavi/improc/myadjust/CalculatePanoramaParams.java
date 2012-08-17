@@ -13,7 +13,6 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.transform.TransformLearnerResult;
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<KeyPointPairList>>> {
 
@@ -34,7 +33,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	
 	ExecutorService exec;
 	PanoTransformer panoTransformer;
-	AbsoluteToRelativePathMaker keyPointPairFileRoot;
 	ArrayList<KeyPointPairList> kppl;
 	final String outputDir;
 	final boolean pinPoints;
@@ -46,7 +44,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 	public CalculatePanoramaParams(ExecutorService exec,
 			String panoTransformerClassName,
 			ArrayList<KeyPointPairList> kppl,
-			AbsoluteToRelativePathMaker keyPointPairFileRoot,
 			String outputDir,
 			boolean pinPoints,
 			boolean useColorMasks,
@@ -54,7 +51,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		this.exec = exec;
 		this.panoTransformer = (PanoTransformer) Class.forName(panoTransformerClassName).newInstance();
 		this.kppl = kppl;
-		this.keyPointPairFileRoot = keyPointPairFileRoot;
 		this.outputDir = outputDir;
 		this.pinPoints = pinPoints;
 		this.useColorMasks = useColorMasks;

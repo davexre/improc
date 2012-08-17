@@ -1,6 +1,7 @@
 package com.slavi.improc.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +11,7 @@ import com.slavi.improc.KeyPointListSaver;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.ui.SwtUtil;
 
-public class GenerateKeyPointFiles implements Callable<Void> {
+public class GenerateKeyPointFiles implements Callable<ArrayList<KeyPointList>> {
 
 	ExecutorService exec;	
 	List<String> images;
@@ -28,7 +29,8 @@ public class GenerateKeyPointFiles implements Callable<Void> {
 		this.keyPointFileRoot = keyPointFileRoot;
 	}
 	
-	public Void call() throws Exception {
+	public ArrayList<KeyPointList> call() throws Exception {
+		ArrayList<KeyPointList> result = new ArrayList<KeyPointList>();
 		for (int i = 0; i < images.size(); i++) {
 			if (Thread.interrupted()) {
 				throw new InterruptedException();
@@ -39,7 +41,8 @@ public class GenerateKeyPointFiles implements Callable<Void> {
 			SwtUtil.activeWaitDialogSetStatus(statusMessage, i);
 			KeyPointList kpl = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(fileName));
 			System.out.println(" (" + kpl.items.size() + " key points)");
+			result.add(kpl);
 		}
-		return null;
+		return result;
 	}
 }

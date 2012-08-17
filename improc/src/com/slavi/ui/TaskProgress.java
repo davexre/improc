@@ -76,22 +76,6 @@ public class TaskProgress extends Composite {
 			}
 		}
 		
-		public synchronized void setStatus(String newStatus) {
-			if (newStatus != null) {
-				this.newTaskStatusText = newStatus;
-				this.isNewTaskStatusTextSet = true;
-				scheduleRefresh();
-			}
-		}
-		
-		public synchronized void setProgress(int taskCompleted) {
-			if (taskCompleted >= 0) {
-				this.newTaskCompleted = taskCompleted;
-				this.isNewTaskCompletedSet = true;
-				scheduleRefresh();
-			}
-		}
-		
 		public synchronized void setStatusAndProgress(String newStatus, int taskCompleted) {
 			if (newStatus != null) {
 				this.newTaskStatusText = newStatus;
@@ -165,7 +149,7 @@ public class TaskProgress extends Composite {
 	 */
 	public synchronized void abortTask() {
 		if (taskState == TaskState.NOTSTARTED) {
-			asyncRefresh.setStatus("Aborted and not run");
+			asyncRefresh.setStatusAndProgress("Aborted and not run", -1);
 			taskState = TaskState.ABORTED;
 			btnAbort.setEnabled(false);
 			Display display = getDisplay();
@@ -178,7 +162,7 @@ public class TaskProgress extends Composite {
 				});
 			}
 		} else if (taskState == TaskState.RUNNING) {
-			asyncRefresh.setStatus("Aborting...");
+			asyncRefresh.setStatusAndProgress("Aborting...", -1);
 			taskState = TaskState.ABORTING;
 			if (thread != null)
 				thread.interrupt();
@@ -197,7 +181,7 @@ public class TaskProgress extends Composite {
 		if (taskState == TaskState.NOTSTARTED) {
 			thread = new NotifyingThread(task);
 			thread.setPriority(Thread.MIN_PRIORITY);
-			asyncRefresh.setStatus("Running...");
+			asyncRefresh.setStatusAndProgress("Running...", -1);
 			taskState = TaskState.RUNNING;
 			thread.start();
 		}
@@ -253,8 +237,8 @@ public class TaskProgress extends Composite {
  	 * @see #setStatusAndProgressThreadsafe(String, int)
  	 */
 	public void setStatusThreadsafe(String status) {
-		if (taskState != TaskState.RUNNING) {
-			asyncRefresh.setStatus(status);
+		if (taskState == TaskState.RUNNING) {
+			asyncRefresh.setStatusAndProgress(status, -1);
 		}
 	}
 	
@@ -267,11 +251,18 @@ public class TaskProgress extends Composite {
 	 * @see #setStatusAndProgressThreadsafe(String, int)
 	 */
 	public void setProgressThreadsafe(int taskCompleted) {
-		if (taskState != TaskState.RUNNING) {
-			asyncRefresh.setProgress(taskCompleted);
+		if (taskState == TaskState.RUNNING) {
+			asyncRefresh.setStatusAndProgress(null, taskCompleted);
 		}
 	}
 	
+	public void progress(int amount) {
+		if (taskState == TaskState.RUNNING) {
+			int cur = progressBar.getSelection();
+			asyncRefresh.setStatusAndProgress(null, cur + amount);
+		}
+	}
+
 	/**
 	 * Sets both the status and the progress bar of the task progress 
 	 * component, thread SAFE.

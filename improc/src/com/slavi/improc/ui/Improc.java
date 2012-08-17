@@ -8,6 +8,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.improc.KeyPointBigTree;
+import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.myadjust.CalculatePanoramaParams;
 import com.slavi.improc.myadjust.GeneratePanoramas;
@@ -48,35 +49,17 @@ public class Improc {
 		FindFileIterator imagesIterator = FindFileIterator.makeWithWildcard(imagesRoot.getFullPath(settings.imagesRelativePathStr + "/*.jpg"), true, true);
 		ArrayList<String> images = SwtUtil.openWaitDialog(parent, "Searching for images", new EnumerateImageFiles(imagesIterator), -1);
 		Collections.sort(images);
-		SwtUtil.openWaitDialog(parent, "Generating key point files", 
+		ArrayList<KeyPointList> kpl = SwtUtil.openWaitDialog(parent, "Generating key point files", 
 				new GenerateKeyPointFiles(exec, images, imagesRoot, keyPointFileRoot), images.size() - 1);
-	
-/*		if (true) {
-			for (String image : images) {
-				KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
-				SafeImage im = new SafeImage(new FileInputStream(l.imageFileStamp.getFile()));
-				for (int i = 0; i < im.sizeX; i++)
-					for (int j = 0; j < im.sizeY; j++) {
-						int col = im.getRGB(i, j);
-						col = DWindowedImageUtils.getGrayColor(col);
-						im.setRGB(i, j, col);
-					}
-				for (KeyPoint p : l.items) {
-					int color = SafeImage.colors[p.dogLevel % SafeImage.colors.length];
-					im.drawCross((int)p.doubleX, (int)p.doubleY, color, -1);
-				}
-				String fou = settings.outputDirStr + "/" + l.imageFileStamp.getFile().getName();
-				System.out.println("Writing file " + fou);
-				im.save(fou);
-			}
-			return;
-		}
-*/		
+
+//		SwtUtil.openWaitDialog(parent, "Writing output images with key points", 
+//				new WriteImagesWithKeyPoint(exec, kpl, imagesRoot, settings.outputDirStr), kpl.size() - 1);
+
 		ArrayList<KeyPointPairList> kppl;
 	
 		if (true) {
 			KeyPointBigTree bigTree = SwtUtil.openWaitDialog(parent, "Generating key point BIG tree", 
-					new GenerateKeyPointPairBigTree(exec, images, imagesRoot, keyPointFileRoot), 
+					new GenerateKeyPointPairBigTree(exec, kpl), 
 					images.size() - 1);
 			bigTree.balance();
 			System.out.println("Tree size  : " + bigTree.getSize());
@@ -92,8 +75,8 @@ public class Improc {
 			bigTree = null;
 		} else {
 			kppl = SwtUtil.openWaitDialog(parent, "Generating key point pairs NO big tree", 
-					new GenerateKeyPointPairs(exec, images, imagesRoot, keyPointFileRoot),
-					images.size() - 1);
+					new GenerateKeyPointPairs(exec, kpl),
+					kpl.size() - 1);
 			
 			images = null;
 		}		
@@ -133,7 +116,7 @@ public class Improc {
 		} else */ {
 			ArrayList<ArrayList<KeyPointPairList>> panos = SwtUtil.openWaitDialog(parent, "Calculating panorama parameters", 
 					new CalculatePanoramaParams(exec, settings.adjustMethodClassName, 
-							validkppl, keyPointFileRoot, settings.outputDirStr,
+							validkppl, settings.outputDirStr,
 							settings.pinPoints, settings.useColorMasks, settings.useImageMaxWeight), -1);
 
 			System.out.println("---------- Generating panorama images");

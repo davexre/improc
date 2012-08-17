@@ -1,19 +1,14 @@
 package com.slavi.improc.ui;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.improc.KeyPointListSaver;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.improc.KeyPointTree;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.tree.NearestNeighbours;
 import com.slavi.util.ui.SwtUtil;
 
@@ -21,56 +16,15 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 
 	ExecutorService exec;
 	
-	List<String> images;
-	
-	AbsoluteToRelativePathMaker imagesRoot;
-	
-	AbsoluteToRelativePathMaker keyPointFileRoot;
-	
-	ArrayList<KeyPointList> keyPointLists = new ArrayList<KeyPointList>();
+	ArrayList<KeyPointList> kpl;
 	
 	ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 	
 	public GenerateKeyPointPairs(
 			ExecutorService exec,
-			List<String> images,
-			AbsoluteToRelativePathMaker imagesRoot,
-			AbsoluteToRelativePathMaker keyPointFileRoot) {
+			ArrayList<KeyPointList> kpl) {
 		this.exec = exec;
-		this.images = images;
-		this.imagesRoot = imagesRoot;
-		this.keyPointFileRoot = keyPointFileRoot;
-	}
-
-	class ReadKeyPointLists implements Callable<Void> {
-
-		String image;
-		
-		int imageId;
-		
-		public ReadKeyPointLists(String image, int imageId) {
-			this.image = image;
-			this.imageId = imageId;
-		}
-		
-		public Void call() throws Exception {
-			KeyPointList l = KeyPointListSaver.readKeyPointFile(exec, imagesRoot, keyPointFileRoot, new File(image));
-			l.imageId = imageId;
-			l.tree = new KeyPointTree();
-			for (KeyPoint kp : l.items) {
-				if (Thread.currentThread().isInterrupted())
-					throw new InterruptedException();
-				l.tree.add(kp);
-			}
-			
-			synchronized (keyPointLists) {
-				keyPointLists.add(l);
-				String statusMessage = (keyPointLists.size()) + "/" + images.size() + " " + image;
-				System.out.println(statusMessage);
-				SwtUtil.activeWaitDialogSetStatus(statusMessage, keyPointLists.size() - 1);
-			}
-			return null;
-		}
+		this.kpl = kpl;
 	}
 
 	class MakePairs implements Callable<Void> {
@@ -111,34 +65,24 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 			synchronized(result) {
 				result.add(kppl);
 			}
-//			int count = processed.incrementAndGet();
-//			SwtUtil.activeWaitDialogSetStatus("Processing " + 
-//					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
+			SwtUtil.activeWaitDialogProgress(1); 
 			return null;
 		}
 	}
 		
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
-		for (int imageId = 0; imageId < images.size(); imageId++) {
-			String image = images.get(imageId);
-			taskSet.add(new ReadKeyPointLists(image, imageId));
-		}
-		taskSet.addFinished();
-		taskSet.get();
-
-		taskSet = new TaskSetExecutor(exec);
-		for (int i = 0; i < keyPointLists.size(); i++) {
-			KeyPointList imageI = keyPointLists.get(i);
-			for (int j = i + 1; j < keyPointLists.size(); j++) {
-				KeyPointList imageJ = keyPointLists.get(j);
+		for (int i = 0; i < kpl.size(); i++) {
+			KeyPointList imageI = kpl.get(i);
+			for (int j = i + 1; j < kpl.size(); j++) {
+				KeyPointList imageJ = kpl.get(j);
 				taskSet.add(new MakePairs(imageI, imageJ));
 			}
 		}
 		taskSet.addFinished();
 		taskSet.get();
 		
-		for (KeyPointList i : keyPointLists) {
+		for (KeyPointList i : kpl) {
 			i.tree = null;
 		}
 		return result;

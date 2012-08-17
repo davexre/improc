@@ -10,7 +10,16 @@ public class TaskSetExecutorExample {
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor(2);
 
 		System.out.println("Creating tasks");
-		TaskSetExecutor ts = new TaskSetExecutor(exec);
+		TaskSetExecutor ts = new TaskSetExecutor(exec) {
+			public void onTaskFinished(Object task, Object result) throws Exception {
+				ExampleTask t = (ExampleTask) task;
+				System.out.println("OnTaskFinish for Task " + t.taskName);
+			}
+			
+			public void onFinally() throws Exception {
+				System.out.println("OnFinally");
+			}
+		};
 		for (int i = 0; i < 10; i++) {
 			ExampleTask task = new ExampleTask(Integer.toString(i));
 			System.out.println("Created task " + i);

@@ -147,7 +147,9 @@ public class TaskSetExecutor {
 				onFinally();
 			} catch (Throwable t) {
 			}
-			tasks.notifyAll();
+			synchronized (tasks) {
+				tasks.notifyAll();
+			}
 		}
 		return true;
 	}
@@ -223,13 +225,17 @@ public class TaskSetExecutor {
 				abort();
 				throw new CancellationException("Can not get result prior calling addFinished.");
 			}
-			if (!isDone())
+		}
+		boolean done = isDone();
+		synchronized (tasks) {
+			if (!done && (!onFinallyInvoked)) {
 				try {
 					tasks.wait(timeoutMillis);
 				} catch (InterruptedException e) {
 					abort();
 					throw e;
 				}
+			}
 			if (firstExceptionThatOccured != null)
 				throw new ExecutionException(firstExceptionThatOccured);
 			if (aborted) 

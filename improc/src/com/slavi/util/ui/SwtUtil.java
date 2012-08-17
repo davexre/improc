@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.slavi.ui.TaskManager;
-import com.slavi.ui.TaskProgress;
 
 /**
  * This class contains utility methods for creating user interface using
@@ -301,139 +300,6 @@ public class SwtUtil {
 		shell.setBounds(shellRect);
 	}
 	
-	private static TaskProgress waitDialogTaskProgress = null; 
-
-	private static Shell waitDialogShell = null;
-	
-	/**
-	 * Updates the currently open wait dialog's status and progress bar value.
-	 * <p>
-	 * The method is thread safe. It is INTENDED to be called from the runnable
-	 * as specified by {@link #openWaitDialog(String, Runnable, int)}.
-	 * @param status The status message. If message = null the message will 
-	 * 		not be modified.
-	 * @param taskCompleted The progress bar value. 
-	 * 		Should be 0 <= taskCompleted <= maxProgressValue (as specified by
-	 *		{@link #openWaitDialog(String, Runnable, int)}).
-	 *		If the taskCompleted < 0 then it will not be set
-	 * @see #openWaitDialog(String, Runnable, int)
-	 */
-	public static void activeWaitDialogSetStatus(final String status, final int taskCompleted) {
-		if (waitDialogTaskProgress != null)
-			waitDialogTaskProgress.setStatusAndProgressThreadsafe(status, taskCompleted);
-	}
-	
-	public static void activeWaitDialogAbortTask() {
-		if (waitDialogTaskProgress != null)
-			waitDialogTaskProgress.abortTask();
-	}
-	
-	public static Shell getActiveWaitDialogShell() {
-		return waitDialogShell;
-	}
-	
-	/**
-	 * Opens a "Please wait..." dialog and starts the runnable thread.
-	 * <p>
-	 * The dialog is suspends the calling thread until the runnable is 
-	 * finished or until the user presses the "Cancel" button or the runnable
-	 * thread throws an exception.
-	 * 
-	 * @param title The title of the task
-	 * @param runnable The runnable instance that will be started when the 
-	 * 		dialog is opened and will be waited for to finish.
-	 * @param maxProgressValue The maximum value for the progress bar. The 
-	 * 		current progress value of the progress bar can be updated from
-	 * 		the runnable thread using the method 
-	 * 		{@link #activeWaitDialogSetStatus(String, int)}. The minimum 
-	 * 		progress bar value is always 0. If the maxProgressValue is 
-	 * 		negative (maxProgressValue < 0) the progress bar is set as
-	 * 		org.eclipse.swt.SWT.INDETERMINATE
-	 * @return True on success, False is the operation is aborted or the 
-	 * 		runnable thread throws an unhandled exception.
-	 * 
-	 * @see #activeWaitDialogSetStatus(String, int)
-	 */
-	public static boolean openWaitDialog(final Shell parent, final String title, final Runnable runnable, final int maxProgressValue) {
-		if (waitDialogShell != null)
-			return false;
-		
-		waitDialogShell = makeShell(parent, SWT.MIN | SWT.MAX | SWT.RESIZE);
-		waitDialogShell.setLayout(new FillLayout());
-		waitDialogTaskProgress = new TaskProgress(waitDialogShell, 
-				maxProgressValue < 1 ? SWT.INDETERMINATE : SWT.NONE, runnable);
-		waitDialogTaskProgress.setProgressMaximum(maxProgressValue);
-		waitDialogTaskProgress.addListener(TaskProgress.TaskFinished, new Listener() {
-			public void handleEvent(Event event) {
-				waitDialogShell.close();
-			}
-		});
-		waitDialogShell.pack();
-		waitDialogShell.setSize(300, 100);
-		centerShell(waitDialogShell);
-		Display display = Display.getCurrent();
-		waitDialogTaskProgress.setTitle(title);
-		waitDialogTaskProgress.setProgressMaximum(maxProgressValue);
-		waitDialogShell.addListener(SWT.Traverse, new Listener () {
-			public void handleEvent (Event event) {
-				switch (event.detail) {
-					case SWT.TRAVERSE_ESCAPE:
-						waitDialogTaskProgress.abortTask();
-						event.detail = SWT.TRAVERSE_NONE;
-						event.doit = false;
-						break;
-				}
-			}
-		});
-		waitDialogShell.open();
-		waitDialogTaskProgress.startTask();
-
-		while (!waitDialogShell.isDisposed()) {
-			if (display.readAndDispatch()) {
-				// Check once more if dialog is disposed as the dialog is disposed 
-				// in a call to readAndDispatch() and for some reason the
-				// readAndDispatch() returns a wrong "true" value;
-				if (!waitDialogShell.isDisposed()) 
-					display.sleep();
-			}
-		}
-		boolean result = !waitDialogTaskProgress.isAborted();
-		waitDialogShell.dispose();
-		waitDialogTaskProgress = null;
-		waitDialogShell = null;
-		return result;
-	}
-	
-	private static class CallableWrapper<V> implements Runnable {
-		final Callable<V> callable;
-		V result;
-		Exception exception;
-		
-		public CallableWrapper(Callable<V> callable) {
-			this.callable = callable;
-		}
-		
-		public void run() {
-			try {
-				result = callable.call();
-			} catch (Exception e) {
-				exception = e;
-				SwtUtil.activeWaitDialogAbortTask();
-			}
-		}
-	}
-	
-	public static <V> V openWaitDialog(final Shell parent, final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
-		CallableWrapper<V> wrapper = new CallableWrapper<V>(callable);
-		boolean res = openWaitDialog(parent, title, wrapper, maxProgressValue);
-		if (res && (wrapper.exception == null)) {
-			return wrapper.result;
-		}
-		if (wrapper.exception != null)
-			throw wrapper.exception;
-		throw new InterruptedException("Aborted");
-	}
-	
 	private static Shell taskManagerShell = null;
 
 	/**
@@ -473,7 +339,7 @@ public class SwtUtil {
 	 */
 	public synchronized static void openTaskManager(final Shell parent, final boolean closeable) {
 		asyncCloseShell(taskManagerShell);
-		taskManagerShell = makeShell(parent, closeable ? SWT.TITLE | SWT.CLOSE : SWT.TITLE);
+		taskManagerShell = makeShell(parent, SWT.TITLE | SWT.BORDER | SWT.RESIZE | (closeable ? SWT.CLOSE : 0));
 		taskManagerShell.setLayout(new FillLayout());
 		taskManagerShell.setText("Task manager");
 		taskManagerShell.setLocation(0, 0);
@@ -577,5 +443,59 @@ public class SwtUtil {
 		}
 		shell.dispose();
 		return result.get();
+	}
+	
+	private static WaitDialog waitDialog;
+	private static final Object waitDialogSynch = new Object();
+	
+	public static void activeWaitDialogAbortTask() {
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				waitDialog.abortTask();
+		}
+	}
+	
+	public static void activeWaitDialogSetStatus(final String status, final int taskCompleted) {
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				waitDialog.setStatus(status, taskCompleted);
+		}
+	}
+
+	public static void activeWaitDialogProgress(int amount) {
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				waitDialog.progress(amount);
+		}
+	}
+
+	public static boolean openWaitDialog(final Shell parent, final String title, final Runnable runnable, final int maxProgressValue) {
+		WaitDialog w;
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				return false;
+			w = waitDialog = new WaitDialog();
+		}
+		boolean r = w.open(parent, title, runnable, maxProgressValue);
+		synchronized (waitDialogSynch) {
+			if (w == waitDialog)
+				waitDialog= null;
+		}
+		return r;
+	}
+
+	public static <V> V openWaitDialog(final Shell parent, final String title, final Callable<V> callable, final int maxProgressValue) throws Exception {
+		WaitDialog w;
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				return null;
+			w = waitDialog = new WaitDialog();
+		}
+		V r = w.open(parent, title, callable, maxProgressValue);
+		synchronized (waitDialogSynch) {
+			if (w == waitDialog)
+				waitDialog= null;
+		}
+		return r;
 	}
 }

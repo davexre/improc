@@ -5,6 +5,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.ui.TaskProgress;
@@ -104,7 +105,7 @@ public class TestTaskProgress {
 					SwtUtil.activeWaitDialogSetStatus("thread step " + i, i);
 					Thread.sleep(1000);
 					if (i == iterations / 2) {
-						SwtUtil.getActiveWaitDialogShell().getDisplay().asyncExec(new Runnable() {
+						Display.getDefault().asyncExec(new Runnable() {
 							public void run() {
 								SwtUtil.msgbox(null, "asdasdasd");	
 							}
@@ -143,8 +144,9 @@ public class TestTaskProgress {
 	}
 	
 	public static void main(String[] args) {
-//		test2();
-		test3();
+//		test1();
+		test2();
+//		test3();
 //		testJobThrowingException();
 	}
 	
