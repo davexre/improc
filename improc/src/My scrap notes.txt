@@ -1,3 +1,37 @@
+Check these sf.net projects
+http://sourceforge.net/projects/geom-java/?source=directory
+http://sourceforge.net/projects/jts-topo-suite/?source=directory
+http://sourceforge.net/projects/j3dworkbench/?source=directory
+http://sourceforge.net/projects/muparser/?source=directory
+http://sourceforge.net/projects/reduce-algebra/?source=directory
+http://sourceforge.net/projects/ooo-imath/?source=directory
+http://sourceforge.net/projects/jmt/?source=directory
+http://sourceforge.net/projects/choco/?source=directory
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 http://www.dr-mikes-maths.com/DotPlacer.html
 
 helmert

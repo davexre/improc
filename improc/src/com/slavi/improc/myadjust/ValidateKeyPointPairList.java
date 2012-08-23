@@ -181,73 +181,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			return calcSourceArea ? pair.sourceSP.getDoubleY() : pair.targetSP.getDoubleY();
 		}
 	}
-/*
-	private class GenerateImageSpaceTree implements Callable<Void> {
-		KeyPointList image;
 
-		public GenerateImageSpaceTree(KeyPointList image) {
-			this.image = image;
-		}
-
-		public Void call() throws Exception {
-			image.imageSpaceTree = new KeyPointTreeImageSpace();
-			for (KeyPoint item : image.items) {
-				if (Thread.currentThread().isInterrupted())
-					throw new InterruptedException();
-				image.imageSpaceTree.add(item);
-			}
-			return null;
-		}
-	}
-*/
-/*
-	private class GenerateNewKeyPointPairs implements Callable<Void> {
-		KeyPointPairList pairList;
-
-		public GenerateNewKeyPointPairs(KeyPointPairList pairList) {
-			this.pairList = pairList;
-		}
-
-		public Void call() throws Exception {
-			pairList.items.clear();
-			KeyPoint tmpKP = new KeyPoint(pairList.target, 0, 0);
-			KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
-			tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
-
-			for (KeyPoint kp : pairList.source.items) {
-				if (Thread.currentThread().isInterrupted())
-					throw new InterruptedException();
-				tr.transform(kp, tmpKP);
-/ *				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 1);
-				KeyPoint target = nearest.size() > 0 ? nearest.getItem(0) : null;
-				double minDistance = nearest.size() > 0 ? nearest.getDistanceToTarget(0) : Double.MAX_VALUE;
-* /
-				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 5);
-//				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighboursMy(tmpKP, 20,
-//					40 * KeyPointHelmertTransformLearner.discrepancyThreshold);
-				double minDistance = Double.MAX_VALUE;
-				KeyPoint target = null;
-				for (int i = nearest.getSize() - 1; i >= 0; i--) {
-					KeyPoint point = nearest.getItem(i);
-					double distance = 0;
-					for (int j = KeyPoint.featureVectorLinearSize - 1; j >= 0; j--) {
-						double d = kp.getValue(j) - point.getValue(j);
-						distance += d * d;
-					}
-					if (minDistance > distance) {
-						minDistance = distance;
-						target = point;
-					}
-				}
-				if (target != null) {
-					KeyPointPair pair = new KeyPointPair(kp, target, minDistance, minDistance);
-					pairList.items.add(pair);
-				}
-			}
-			return null;
-		}
-	}
-*/
 	ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
@@ -261,25 +195,6 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 /*
 		System.out.println("---------------");
 
-		// Build 2D key point tree per target image
-		HashSet<KeyPointList> targets = new HashSet<KeyPointList>();
-		for (KeyPointPairList pairList : result) {
-			targets.add(pairList.target);
-		}
-		taskSet = new TaskSetExecutor(exec);
-		for (KeyPointList image : targets) {
-			taskSet.add(new GenerateImageSpaceTree(image));
-		}
-		taskSet.addFinished();
-		taskSet.get();
-
-		// Rebuild key point pairs
-		taskSet = new TaskSetExecutor(exec);
-		for (KeyPointPairList pairList : result) {
-			taskSet.add(new GenerateNewKeyPointPairs(pairList));
-		}
-		taskSet.addFinished();
-		taskSet.get();
 
 		//////////////////////////////////
 		for (KeyPointList image : targets) {
