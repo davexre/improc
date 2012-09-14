@@ -5,7 +5,8 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajStep.java
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Event;
 
 import a.ajCanvas;
 import a.ajPoint;

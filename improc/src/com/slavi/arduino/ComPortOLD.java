@@ -1,8 +1,14 @@
 package com.slavi.arduino;
 
-import java.io.*;
-import java.util.*;
-import gnu.io.*;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
 
 public class ComPortOLD implements SerialPortEventListener {
 	static CommPortIdentifier portId;

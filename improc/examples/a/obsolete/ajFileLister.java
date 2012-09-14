@@ -6,21 +6,15 @@ package a.obsolete;
 // Source File Name:   ajFileLister.java
 
 import java.awt.Button;
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Event;
 import java.awt.Frame;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.List;
 import java.awt.Panel;
-import java.awt.TextComponent;
 import java.awt.TextField;
-import java.awt.Window;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintStream;
 
 
 public class ajFileLister extends Frame implements Runnable {

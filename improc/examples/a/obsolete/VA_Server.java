@@ -5,8 +5,11 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   VA_Server.java
 
-import java.io.*;
-import java.net.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Enumeration;
 import java.util.Hashtable;
 

@@ -5,7 +5,9 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajElement.java
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 
 
 public abstract class ajElement extends ajListElement implements ajAnimation {

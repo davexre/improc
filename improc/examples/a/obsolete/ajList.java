@@ -5,9 +5,6 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajList.java
 
-import java.io.PrintStream;
-
-
 public class ajList {
 
 	public void append(ajListElement ajlistelement) {

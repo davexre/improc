@@ -5,7 +5,10 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   VA_ServerThread.java
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 
 

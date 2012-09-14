@@ -6,8 +6,6 @@ package a;
 // Source File Name:   ajDelaunay.java
 
 import java.awt.Color;
-import java.awt.geom.Point2D;
-import java.io.PrintStream;
 import java.util.ArrayList;
 
 import a.obsolete.ajElement;

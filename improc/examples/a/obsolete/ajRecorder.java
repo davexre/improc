@@ -5,11 +5,17 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajRecorder.java
 
-import java.applet.Applet;
-import java.awt.Component;
 import java.awt.Event;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 
 import a.VoronoiApplet;

@@ -5,8 +5,16 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajRecorderPanel.java
 
-import java.applet.Applet;
-import java.awt.*;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
+import java.awt.Color;
+import java.awt.Event;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.Panel;
 
 import a.VoronoiApplet;
 

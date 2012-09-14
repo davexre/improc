@@ -5,8 +5,14 @@ package a;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajCanvas.java
 
-import java.awt.*;
-import java.io.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 
 import a.obsolete.ajAnimator;
 import a.obsolete.ajElement;

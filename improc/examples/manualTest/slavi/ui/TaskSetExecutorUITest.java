@@ -4,7 +4,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.FakeThreadExecutor;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 

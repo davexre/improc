@@ -1,7 +1,6 @@
 package com.test.ui;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -14,7 +13,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Widget;
 
 import com.slavi.ui.TaskProgress;
 import com.slavi.util.ui.SwtUtil;
@@ -23,7 +21,7 @@ public class TestWaitDialog2 {
 
 	public static class TaskList extends ScrolledComposite {
 
-		ArrayList<TaskProgress> tasks = new ArrayList<>();
+		ArrayList<TaskProgress> tasks = new ArrayList<TaskProgress>();
 		Composite container;
 		
 		public TaskList(Composite parent) {

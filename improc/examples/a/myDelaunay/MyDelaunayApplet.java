@@ -51,6 +51,7 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 	}
 	
 	void drawTriangle(Graphics g, Triangle t) {
+		g.setColor(Color.black);
 		g.drawLine(
 			(int) t.a.getX(),
 			(int) t.a.getY(),

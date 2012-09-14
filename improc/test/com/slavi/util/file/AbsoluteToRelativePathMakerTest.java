@@ -5,7 +5,6 @@ import java.io.File;
 import org.junit.Test;
 
 import com.slavi.TestUtils;
-import com.slavi.util.file.AbsoluteToRelativePathMaker;
 
 public class AbsoluteToRelativePathMakerTest {
 	

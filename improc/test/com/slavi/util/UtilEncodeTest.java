@@ -2,7 +2,6 @@ package com.slavi.util;
 
 import org.junit.Test;
 
-import com.slavi.util.CEncoder;
 import com.slavi.util.CEncoder.CENCODE;
 
 public class UtilEncodeTest {

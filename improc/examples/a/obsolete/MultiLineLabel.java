@@ -5,7 +5,12 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   MultiLineLabel.java
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.util.StringTokenizer;
 
 public class MultiLineLabel extends Canvas {

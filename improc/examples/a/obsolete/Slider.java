@@ -5,7 +5,12 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   Slider.java
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Font;
+import java.awt.Graphics;
 
 public class Slider extends Canvas {
 

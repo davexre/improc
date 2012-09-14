@@ -9,7 +9,6 @@ import org.junit.Test;
 import com.slavi.TestUtils;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.transform.TransformLearnerResult;
 
 public class AffineTransformerTest {
 

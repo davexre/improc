@@ -84,6 +84,21 @@ public class TestUtils {
 		}
 	}
 
+	public static void assertEqual(String msg, byte a[], byte b[]) {
+		if (a.length != b.length) {
+			System.out.println("Arrays have different sizes: " + msg);
+		}
+		for (int i = 0; i < a.length; i++) {
+			if (a[i] != b[i]) {
+				System.out.println("Arrays differ: " + msg);
+				System.out.println("at index " + i);
+				System.out.println(MathUtil.d20(a[i]));
+				System.out.println(MathUtil.d20(b[i]));
+				throw new RuntimeException("Failed");
+			}
+		}
+	}
+
 	public static void assertMatrix0(String msg, Matrix m) {
 		if (m.is0(precision))
 			return;

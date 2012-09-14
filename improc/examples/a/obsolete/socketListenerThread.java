@@ -5,11 +5,12 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   socketListenerThread.java
 
-import java.applet.Applet;
-import java.awt.*;
-import java.io.*;
+import java.awt.Event;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
 
 import a.VoronoiApplet;
 

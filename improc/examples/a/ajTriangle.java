@@ -6,7 +6,6 @@ package a;
 // Source File Name:   ajTriangle.java
 
 import java.awt.Graphics;
-import java.io.PrintStream;
 
 import a.obsolete.ajCircle;
 import a.obsolete.ajElement;

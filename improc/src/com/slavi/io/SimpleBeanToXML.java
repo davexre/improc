@@ -38,6 +38,8 @@ public class SimpleBeanToXML {
 	}
 	
 	public static <T> T xmlToObject(Element root, Class<T> objectClass, boolean setToNullMissingProperties) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		if (root == null)
+			return null;
 		String sval = root.getTextTrim();
 		if ((objectClass == boolean.class) ||
 			(objectClass == Boolean.class)) {

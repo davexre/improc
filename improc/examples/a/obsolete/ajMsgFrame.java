@@ -5,7 +5,13 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajMsgFrame.java
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Event;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Panel;
 
 
 public class ajMsgFrame extends Frame {

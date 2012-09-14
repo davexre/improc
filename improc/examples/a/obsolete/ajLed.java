@@ -5,7 +5,10 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajLed.java
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 
 
 public class ajLed extends Canvas implements ajAnimation {

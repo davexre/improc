@@ -5,7 +5,11 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajSingleStepPanel.java
 
-import java.awt.*;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.Event;
+import java.awt.GridBagLayout;
+import java.awt.Panel;
 
 import a.VoronoiApplet;
 

@@ -3,11 +3,11 @@ package com.slavi.improc.parallel;
 import java.awt.Rectangle;
 import java.util.concurrent.Callable;
 
+import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
-import com.slavi.image.DImageWrapper;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 

@@ -2,7 +2,6 @@ package zaSasho;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -11,12 +10,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 
 import javax.imageio.ImageIO;
-
-import com.slavi.math.GeometryUtil;
 
 
 public class Demo2 {

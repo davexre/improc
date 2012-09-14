@@ -5,8 +5,6 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   listerWaitThread.java
 
-import java.awt.Component;
-
 import a.VoronoiApplet;
 
 class listerWaitThread extends Thread {

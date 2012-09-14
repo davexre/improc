@@ -38,10 +38,10 @@ package com.test;
  |<---            this code is formatted to fit into 80 columns             --->|
  */
 
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Synthesizer;
 import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Synthesizer;
 
 /**
  * <titleabbrev>SynthNote</titleabbrev> <title>Playing a note on the

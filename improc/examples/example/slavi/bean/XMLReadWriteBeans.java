@@ -36,6 +36,13 @@ public class XMLReadWriteBeans {
 	public static void main(String[] args) throws Exception {
 		MyBean myBean;
 
+		Element root = null;
+		myBean = SimpleBeanToXML.xmlToObject(root, MyBean.class, true);
+		TestUtils.assertTrue("Expected null object", myBean == null);
+		root = new Element("obj");
+		SimpleBeanToXML.objectToXml(root, myBean);
+		TestUtils.assertTrue("Expected no children in xml element", root.getChildren().size() == 0);
+		
 		myBean = new MyBean();
 		doTest(myBean);
 		
@@ -43,12 +50,14 @@ public class XMLReadWriteBeans {
 		doTest(myBean);
 
 		myBean = PropertiesReadWriteBeans.createMyBean();
-		myBean.objectArray[1] = null;
-		myBean.myEnum = null;
+		myBean.getMyDataArray()[1] = null;
+		myBean.setMyDataIndexPropertyNoArrayWrite(2, null);
+		myBean.setMyData(null);
+		myBean.setMyEnum(null);
 		doTest(myBean);
 
 		myBean = PropertiesReadWriteBeans.createMyBean();
-		myBean.objectArray = null;
+		myBean.setMyDataArray(null);
 		doTest(myBean);
 
 		System.out.println("Done.");

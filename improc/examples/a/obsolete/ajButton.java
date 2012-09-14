@@ -5,7 +5,13 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   ajButton.java
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Event;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageObserver;
 

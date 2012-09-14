@@ -444,20 +444,15 @@ public class Util {
 	public static <SerializableObject extends Serializable> SerializableObject deepCopy(SerializableObject oldObj) throws Exception {
 		ObjectOutputStream oos = null;
 		ObjectInputStream ois = null;
-		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			oos = new ObjectOutputStream(bos);
-			// serialize and pass the object
-			oos.writeObject(oldObj);
-			oos.flush();
-			ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray());
-			ois = new ObjectInputStream(bin);
-			// return the new object
-			return (SerializableObject) ois.readObject();
-		} finally {
-			oos.close();
-			ois.close();
-		}
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		oos = new ObjectOutputStream(bos);
+		// serialize and pass the object
+		oos.writeObject(oldObj);
+		oos.flush();
+		ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray());
+		ois = new ObjectInputStream(bin);
+		// return the new object
+		return (SerializableObject) ois.readObject();
 	}
 	
 	public static <T> int indexOf(T[] objects, T object) {

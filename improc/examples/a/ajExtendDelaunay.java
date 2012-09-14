@@ -7,7 +7,6 @@ package a;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.io.PrintStream;
 
 import a.obsolete.ajElement;
 import a.obsolete.ajLine;

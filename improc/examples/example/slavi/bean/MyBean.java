@@ -1,6 +1,11 @@
 package example.slavi.bean;
 
+import java.beans.BeanInfo;
+import java.beans.IndexedPropertyDescriptor;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class MyBean implements Serializable {
 /*
@@ -16,40 +21,58 @@ public class MyBean implements Serializable {
 */
 
 	// Simple int property
-	int id;
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
+	private int intProperty;
 
 	// Simple string property
-	String name;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
+	private String stringProperty;
 
 	// Simple boolean Property
-	boolean boolType;
+	private boolean boolProperty;
 	
-	public boolean isBoolType() {
-		return boolType;
-	}
-
-	public void setBoolType(boolean boolType) {
-		this.boolType = boolType;
-	}
-
 	// Enumeration property
-	MyEnum myEnum;
+	private MyEnum myEnum;
+
+	// int array, but not an Indexed Property
+	private int intArrayProperty[];
+
+	// int Indexed Property
+	private int intIndexProperty[];
+	
+	// Complex object property
+	private MyData myData;
+
+	// Complex object array, but not an Indexed Property
+	private MyData myDataArray[] = new MyData[4];
+
+	// Complex object Indexed Property
+	private MyData myDataIndexProperty[];
+
+	// Complex object Indexed Property
+	private MyData myDataIndexPropertyNoArrayWrite[] = new MyData[0];
+
+	public int getIntProperty() {
+		return intProperty;
+	}
+
+	public void setIntProperty(int intProperty) {
+		this.intProperty = intProperty;
+	}
+
+	public String getStringProperty() {
+		return stringProperty;
+	}
+
+	public void setStringProperty(String stringProperty) {
+		this.stringProperty = stringProperty;
+	}
+
+	public boolean isBoolProperty() {
+		return boolProperty;
+	}
+
+	public void setBoolProperty(boolean boolProperty) {
+		this.boolProperty = boolProperty;
+	}
 
 	public MyEnum getMyEnum() {
 		return myEnum;
@@ -59,38 +82,29 @@ public class MyBean implements Serializable {
 		this.myEnum = myEnum;
 	}
 
-	// int array, but not an Indexed Property
-	int arrayProperty[];
-
-	public int[] getArrayProperty() {
-		return arrayProperty;
+	public int[] getIntArrayProperty() {
+		return intArrayProperty;
 	}
 
-	public void setArrayProperty(int[] arrayProperty) {
-		this.arrayProperty = arrayProperty;
+	public void setIntArrayProperty(int[] intArrayProperty) {
+		this.intArrayProperty = intArrayProperty;
 	}
 
-	// int Indexed Property
-	int indexProperty[];
-	
-	public int[] getIndexProperty() {
-		return indexProperty;
+	public int[] getIntIndexProperty() {
+		return intIndexProperty;
 	}
 
-	public void setIndexProperty(int[] indexProperty) {
-		this.indexProperty = indexProperty;
+	public void setIntIndexProperty(int[] intIndexProperty) {
+		this.intIndexProperty = intIndexProperty;
 	}
 
 	public int getIndexProperty(int index) {
-		return indexProperty[index];
+		return intIndexProperty[index];
 	}
 
 	public void setIndexProperty(int index, int value) {
-		indexProperty[index] = value;
+		intIndexProperty[index] = value;
 	}
-
-	// Complex object property
-	MyData myData;
 
 	public MyData getMyData() {
 		return myData;
@@ -100,33 +114,64 @@ public class MyBean implements Serializable {
 		this.myData = myData;
 	}
 
-	// Complex object array, but not an Indexed Property
-	MyData objectArray[] = new MyData[4];
-
-	public MyData[] getObjectArray() {
-		return objectArray;
+	public MyData[] getMyDataArray() {
+		return myDataArray;
 	}
 
-	public void setObjectArray(MyData[] objectArray) {
-		this.objectArray = objectArray;
+	public void setMyDataArray(MyData[] myDataArray) {
+		this.myDataArray = myDataArray;
 	}
 
-	// Complex object Indexed Property
-	MyData objectIndexProperty[];
-
-	public MyData[] getObjectIndexProperty() {
-		return objectIndexProperty;
+	public MyData[] getMyDataIndexProperty() {
+		return myDataIndexProperty;
 	}
 
-	public void setObjectIndexProperty(MyData[] objectIndexProperty) {
-		this.objectIndexProperty = objectIndexProperty;
+	public void setMyDataIndexProperty(MyData[] myDataArray) {
+		this.myDataIndexProperty = myDataArray;
 	}
 
-	public MyData getObjectIndexProperty(int index) {
-		return objectIndexProperty[index];
+	public MyData getMyDataIndexProperty(int index) {
+		return myDataIndexProperty[index];
 	}
 
-	public void setObjectIndexProperty(MyData object, int index) {
-		this.objectIndexProperty[index] = object;
+	public void setMyDataIndexProperty(int index, MyData myData) {
+		this.myDataIndexProperty[index] = myData;
+	}
+	
+	public int getMyDataIndexPropertyNoArrayWriteSize() {
+		return myDataIndexPropertyNoArrayWrite.length;
+	}
+	
+	public void setMyDataIndexPropertyNoArrayWriteSize(int size) {
+		if (size < 0)
+			return;
+		myDataIndexPropertyNoArrayWrite = Arrays.copyOf(myDataIndexPropertyNoArrayWrite, size);
+	}
+	
+	public MyData[] getMyDataIndexPropertyNoArrayWrite() {
+		return myDataIndexPropertyNoArrayWrite;
+	}
+
+	public MyData getMyDataIndexPropertyNoArrayWrite(int index) {
+		return myDataIndexPropertyNoArrayWrite[index];
+	}
+
+	public void setMyDataIndexPropertyNoArrayWrite(int index, MyData myData) {
+		this.myDataIndexPropertyNoArrayWrite[index] = myData;
+	}
+
+	public static void main(String[] args) throws Exception {
+		BeanInfo beanInfo = Introspector.getBeanInfo(MyBean.class);
+		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
+		for (PropertyDescriptor pd : pds) {
+			if (pd instanceof IndexedPropertyDescriptor) {
+				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+				System.out.println(pd.getName());
+				System.out.println("  read:        " + ipd.getReadMethod());
+				System.out.println("  index read:  " + ipd.getIndexedReadMethod());
+				System.out.println("  write:       " + ipd.getWriteMethod());
+				System.out.println("  index write: " + ipd.getIndexedWriteMethod());
+			}
+		}
 	}
 }

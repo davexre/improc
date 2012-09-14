@@ -5,8 +5,10 @@ package a.obsolete;
 // Decompiler options: packimports(3) 
 // Source File Name:   VA_ControlThread.java
 
-import java.io.*;
-import java.net.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 
 
 class VA_ControlThread extends Thread {

@@ -6,7 +6,9 @@ package a.obsolete;
 // Source File Name:   ajAnimator.java
 
 import java.awt.Component;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 public class ajAnimator implements Runnable {

@@ -1,17 +1,13 @@
 package com.slavi.io;
 
-import java.beans.BeanInfo;
-import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Properties;
 
-public class SimpleBeanToProperties {
+public class SimpleObjectToProperties {
 	private static boolean hasPropertiesStartingWith(Properties properties, String prefix) {
 		prefix = getChildPrefix(prefix, "");
 		for (Object key : properties.keySet()) {
@@ -28,7 +24,7 @@ public class SimpleBeanToProperties {
 			return parentPrefix + childName;
 		return parentPrefix + "." + childName;
 	}
-	
+
 	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
 		String arraySizeStr = properties.getProperty(getChildPrefix(prefix, "size"));
@@ -100,67 +96,38 @@ public class SimpleBeanToProperties {
 			// array
 			Class arrayType = objectClass.getComponentType();
 			return (T) propertiesToObjectArray(properties, prefix, arrayType, setToNullMissingProperties);
-		} else if (Serializable.class.isAssignableFrom(objectClass)) {
-			if (!hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
-				return null;
-			}
-			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
-			
-			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-			for (PropertyDescriptor pd : pds) {
-				if (pd instanceof IndexedPropertyDescriptor) {
+		}
+		
+		if (!hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
+			return null;
+		}
+		T object = objectClass.newInstance();
+		
+		Class currClass = objectClass;
+		while (currClass != null) {
+			for (Field field : currClass.getDeclaredFields()) {
+				int modifiers = field.getModifiers();
+				if (Modifier.isFinal(modifiers))
 					continue;
-				}
+				if (Modifier.isTransient(modifiers))
+					continue;
+				if (Modifier.isStatic(modifiers))
+					continue;
 				
-				Method write = pd.getWriteMethod();
-				if (write == null)
-					continue;
-
-				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				Object o = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
-				if (o == null) {
-					if (propertyType.isPrimitive() || (!setToNullMissingProperties))
+				Class fieldClass = field.getType();
+				Object value = propertiesToObject(properties, getChildPrefix(prefix, field.getName()), fieldClass, setToNullMissingProperties);
+				if (value == null) {
+					if (fieldClass.isPrimitive() || (!setToNullMissingProperties))
 						continue;
 				}
-				write.invoke(object, new Object[] { o });
+				field.setAccessible(true);
+				field.set(object, value);
 			}
-			
-			for (PropertyDescriptor pd : pds) {
-				if (!(pd instanceof IndexedPropertyDescriptor)) {
-					continue;
-				}
-				Method read = pd.getReadMethod();
-				if (read == null)
-					continue;
-
-				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
-				if ((ipd.getWriteMethod() == null) && (ipd.getIndexedWriteMethod() == null))
-					continue;
-				
-				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = getChildPrefix(prefix, pd.getName());
-				Object items = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
-
-				if (ipd.getWriteMethod() != null) {
-					Method write = ipd.getWriteMethod();
-					write.invoke(object, new Object[] { items });
-				} else if (items != null) {
-					Method write = ipd.getIndexedWriteMethod();
-					int length = Array.getLength(items);
-					for (int i = 0; i < length; i++) {
-						Object item = Array.get(items, i);
-						write.invoke(object, new Object[] { i, item });
-					}
-				}
-			}
-			
-			return (T) object;
+			currClass = currClass.getSuperclass();
 		}
-		return null;
+		return object;
 	}
-	
+
 	public static void objectToProperties(Properties properties, String prefix, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		if (object == null)
 			return;
@@ -194,28 +161,22 @@ public class SimpleBeanToProperties {
 				String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
 				objectToProperties(properties, itemPrefix, o);
 			}
-		} else if (Serializable.class.isAssignableFrom(objectClass)) {
-			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
-			PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-			for (PropertyDescriptor pd : pds) {
-				Method read = pd.getReadMethod();
-				if (read == null)
-					continue;
-				
-				if (pd instanceof IndexedPropertyDescriptor) {
-					IndexedPropertyDescriptor indexedProperty = (IndexedPropertyDescriptor) pd;
-					if ((pd.getWriteMethod() == null) && (indexedProperty.getIndexedWriteMethod() == null))
+		} else {
+			Class currClass = objectClass;
+			while (currClass != null) {
+				for (Field field : currClass.getDeclaredFields()) {
+					int modifiers = field.getModifiers();
+					if (Modifier.isFinal(modifiers))
 						continue;
-					
-					Object array = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, getChildPrefix(prefix, indexedProperty.getName()), array);
-					continue;
-				} else {
-					if (pd.getWriteMethod() == null)
+					if (Modifier.isTransient(modifiers))
 						continue;
-					Object value = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, getChildPrefix(prefix, pd.getName()), value);
+					if (Modifier.isStatic(modifiers))
+						continue;
+					field.setAccessible(true);
+					Object value = field.get(object);
+					objectToProperties(properties, getChildPrefix(prefix, field.getName()), value);
 				}
+				currClass = currClass.getSuperclass();
 			}
 		}
 	}
