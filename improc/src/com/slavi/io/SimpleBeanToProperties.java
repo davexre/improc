@@ -12,26 +12,53 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 
 public class SimpleBeanToProperties {
-	private static boolean hasPropertiesStartingWith(Properties properties, String prefix) {
-		prefix = getChildPrefix(prefix, "");
-		for (Object key : properties.keySet()) {
-			if (((String) key).startsWith(prefix))
-				return true;
+	public static class Read implements ObjectRead {
+		Properties properties;
+		
+		boolean setToNullMissingProperties;
+		
+		public Read(Properties properties) {
+			this(properties, true);
 		}
-		return false;
+		
+		public Read(Properties properties, boolean setToNullMissingProperties) {
+			this.properties = properties;
+			this.setToNullMissingProperties = setToNullMissingProperties;
+		}
+		
+		int readCounter = 0;
+
+		public Object read() throws Exception {
+			String prefix = "$object$" + Integer.toString(++readCounter);
+			String className = properties.getProperty(prefix + ".$class");
+			if (className == null)
+				return null;
+			Class clazz = Class.forName(className);
+			return propertiesToObject(properties, prefix, clazz, setToNullMissingProperties);
+		}
 	}
-	
-	private static String getChildPrefix(String parentPrefix, String childName) {
-		if ("".equals(parentPrefix))
-			return childName;
-		if (parentPrefix.endsWith("."))
-			return parentPrefix + childName;
-		return parentPrefix + "." + childName;
+
+	public static class Write implements ObjectWrite {
+		Properties properties;
+		
+		public Write(Properties properties) {
+			this.properties = properties;
+		}
+		
+		int writeCounter = 0;
+
+		public void write(Object object) throws Exception {
+			String prefix = "$object$" + Integer.toString(++writeCounter);
+			if (object == null)
+				return;
+			properties.setProperty(prefix + ".$class", object.getClass().getName());
+			objectToProperties(properties, prefix, object);
+		}
 	}
-	
+
 	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
-		String arraySizeStr = properties.getProperty(getChildPrefix(prefix, "size"));
+		String arraySizeStr = properties.getProperty(Utils.getChildPrefix(prefix, "size"));
 		if (arraySizeStr == null)
 			return null;
 		int arraySize = Integer.parseInt(arraySizeStr);
@@ -40,7 +67,7 @@ public class SimpleBeanToProperties {
 		
 		Object array = Array.newInstance(arrayType, arraySize);
 		for (int i = 0; i < arraySize; i++) {
-			String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
+			String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
 			Object item = propertiesToObject(properties, itemPrefix, arrayType, setToNullMissingProperties);
 			if (item == null) {
 				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
@@ -101,7 +128,7 @@ public class SimpleBeanToProperties {
 			Class arrayType = objectClass.getComponentType();
 			return (T) propertiesToObjectArray(properties, prefix, arrayType, setToNullMissingProperties);
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
-			if (!hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
+			if (!Utils.hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
 				return null;
 			}
 			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
@@ -118,7 +145,7 @@ public class SimpleBeanToProperties {
 					continue;
 
 				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = getChildPrefix(prefix, pd.getName());
+				String propertyPrefix = Utils.getChildPrefix(prefix, pd.getName());
 				Object o = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
 				if (o == null) {
 					if (propertyType.isPrimitive() || (!setToNullMissingProperties))
@@ -140,7 +167,7 @@ public class SimpleBeanToProperties {
 					continue;
 				
 				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = getChildPrefix(prefix, pd.getName());
+				String propertyPrefix = Utils.getChildPrefix(prefix, pd.getName());
 				Object items = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
 
 				if (ipd.getWriteMethod() != null) {
@@ -188,10 +215,10 @@ public class SimpleBeanToProperties {
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			int length = Array.getLength(object);
-			properties.setProperty(getChildPrefix(prefix, "size"), Integer.toString(length));
+			properties.setProperty(Utils.getChildPrefix(prefix, "size"), Integer.toString(length));
 			for (int i = 0; i < length; i++) {
 				Object o = Array.get(object, i);
-				String itemPrefix = getChildPrefix(prefix, Integer.toString(i));
+				String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
 				objectToProperties(properties, itemPrefix, o);
 			}
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
@@ -208,13 +235,13 @@ public class SimpleBeanToProperties {
 						continue;
 					
 					Object array = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, getChildPrefix(prefix, indexedProperty.getName()), array);
+					objectToProperties(properties, Utils.getChildPrefix(prefix, indexedProperty.getName()), array);
 					continue;
 				} else {
 					if (pd.getWriteMethod() == null)
 						continue;
 					Object value = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, getChildPrefix(prefix, pd.getName()), value);
+					objectToProperties(properties, Utils.getChildPrefix(prefix, pd.getName()), value);
 				}
 			}
 		}

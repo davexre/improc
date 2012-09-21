@@ -13,6 +13,62 @@ import java.lang.reflect.Method;
 import org.jdom.Element;
 
 public class SimpleBeanToXML {
+	public static class Read implements ObjectRead {
+		Element root;
+		
+		boolean setToNullMissingProperties;
+		
+		public Read(Element root) {
+			this(root, true);
+		}
+		
+		public Read(Element root, boolean setToNullMissingProperties) {
+			this.root = root;
+			this.setToNullMissingProperties = setToNullMissingProperties;
+		}
+		
+		int readCounter = 0;
+
+		public Object read() throws Exception {
+			String objectName = "object." + Integer.toString(++readCounter);
+			Element el = root.getChild(objectName);
+			if (el == null)
+				return null;
+			String className = el.getAttributeValue("class");
+			if (className == null)
+				return null;
+			Class clazz = Class.forName(className);
+			return xmlToObject(el, clazz, setToNullMissingProperties);
+		}
+	}
+
+	public static class Write implements ObjectWrite {
+		Element root;
+		
+		boolean setToNullMissingProperties;
+
+		public Write(Element root) {
+			this(root, true);
+		}
+		
+		public Write(Element root, boolean setToNullMissingProperties) {
+			this.root = root;
+			this.setToNullMissingProperties = setToNullMissingProperties;
+		}
+		
+		int writeCounter = 0;
+
+		public void write(Object object) throws Exception {
+			String objectName = "object." + Integer.toString(++writeCounter);
+			if (object == null)
+				return;
+			Element el = new Element(objectName);
+			el.setAttribute("class", object.getClass().getName());
+			root.addContent(el);
+			objectToXml(el, object);
+		}
+	}
+
 	private static Object xmlToObjectArray(Element root, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
 		String arraySizeStr = root.getAttributeValue("size");

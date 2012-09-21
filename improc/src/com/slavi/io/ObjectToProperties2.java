@@ -2,6 +2,7 @@ package com.slavi.io;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -12,7 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class ObjectToProperties {
+import sun.reflect.ReflectionFactory;
+
+public class ObjectToProperties2 {
 	private static Class getClassFromClassTag(String className) throws ClassNotFoundException {
 		Class r = Utils.primitiveClasses.get(className);
 		if (r != null) {
@@ -27,7 +30,7 @@ public class ObjectToProperties {
 		return Class.forName(className);
 	}
 	
-	private static String computeClassTag(Class clazz) {
+	static String computeClassTag(Class clazz) {
 		if (clazz.getComponentType() != null) {
 			return "[" + computeClassTag(clazz.getComponentType()) + "]";
 		}
@@ -56,6 +59,10 @@ public class ObjectToProperties {
 
 		Properties properties;
 		
+		private String getProperty(String key) {
+			return properties.getProperty(key);
+		}
+		
 		boolean setToNullMissingProperties;
 
 		public Read(Properties properties) {
@@ -67,7 +74,7 @@ public class ObjectToProperties {
 			this.setToNullMissingProperties = setToNullMissingProperties;
 		}
 		
-		public void loadPropertiesToObject(String prefix, Object object) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException {
+		public void loadPropertiesToObject(String prefix, Object object) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException, SecurityException, NoSuchMethodException, InvocationTargetException {
 			if (object == null) {
 				return;
 			}
@@ -84,17 +91,17 @@ public class ObjectToProperties {
 				});
 				for (Field field : fields) {
 					int modifiers = field.getModifiers();
-					if (field.isSynthetic())
-						continue;
-					if (Modifier.isTransient(modifiers))
-						continue;
+//					if (field.isSynthetic())
+//						continue;
+//					if (Modifier.isTransient(modifiers))
+//						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
 					Class fieldType = field.getType();
 					field.setAccessible(true);
 					String fieldPrefix = Utils.getChildPrefix(prefix, field.getName());
 
-					String classStr = properties.getProperty(Utils.getChildPrefix(fieldPrefix, "$class"));
+					String classStr = getProperty(Utils.getChildPrefix(fieldPrefix, "$class"));
 					if (classStr == null)
 						classStr = computeClassTag(fieldType);
 					Object value = propertiesToObject(fieldPrefix, classStr);
@@ -105,17 +112,18 @@ public class ObjectToProperties {
 					field.set(object, value);
 				}
 				currClass = currClass.getSuperclass();
+				prefix = Utils.getChildPrefix(prefix, "$");
 			}
 		}
 		
-		public Object propertiesToObject(String prefix) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-			String objectClassName = properties.getProperty(Utils.getChildPrefix(prefix, "$class"));
+		public Object propertiesToObject(String prefix) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+			String objectClassName = getProperty(Utils.getChildPrefix(prefix, "$class"));
 			if (objectClassName == null)
 				return null;
 			return propertiesToObject(prefix, objectClassName);
 		}
 		
-		public Object propertiesToObject(String prefix, String objectClassName) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		public Object propertiesToObject(String prefix, String objectClassName) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 			if (objectClassName == null)
 				return null;
 			if (objectClassName.startsWith("$ref$")) {
@@ -128,7 +136,7 @@ public class ObjectToProperties {
 				// array
 				Class arrayType = objectClass.getComponentType();
 				String arrayItemType = objectClassName.substring(1, objectClassName.length() - 1);
-				String arraySizeStr = properties.getProperty(Utils.getChildPrefix(prefix, "$size"));
+				String arraySizeStr = getProperty(Utils.getChildPrefix(prefix, "$size"));
 				if (arraySizeStr == null)
 					return null;
 				int arraySize = Integer.parseInt(arraySizeStr);
@@ -154,7 +162,7 @@ public class ObjectToProperties {
 				return array;
 			}
 			
-			String sval = properties.getProperty(prefix);
+			String sval = getProperty(prefix);
 			if ((objectClass == boolean.class) ||
 				(objectClass == Boolean.class)) {
 				return (sval == null) ? null : new Boolean(sval);
@@ -197,7 +205,16 @@ public class ObjectToProperties {
 			if (!Utils.hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
 				return null;
 			}
-			Object object = objectClass.newInstance();
+			
+			/*
+			 * Creating new object WITHOUT invoking a constructor.
+			 * Ideas borrowed from http://www.javaspecialists.eu/archive/Issue175.html
+			 */
+			ReflectionFactory rf = ReflectionFactory.getReflectionFactory();
+			Constructor objDef = Object.class.getDeclaredConstructor();
+			Constructor intConstr = rf.newConstructorForSerialization(objectClass, objDef);
+			Object object = intConstr.newInstance();
+			
 			readObjectIds.add(object);
 			loadPropertiesToObject(prefix, object);
 			return object;
@@ -216,6 +233,10 @@ public class ObjectToProperties {
 		
 		Properties properties;
 		
+		private void setProperty(String key, String value) {
+			properties.setProperty(key, value);
+		}
+		
 		public Write(Properties properties) {
 			this.properties = properties;
 		}
@@ -229,25 +250,25 @@ public class ObjectToProperties {
 				return;
 			Integer objectId = writeObjectIds.get(object);
 			if (objectId != null) {
-				properties.setProperty(Utils.getChildPrefix(prefix, "$class"), "$ref$" + objectId);
+				setProperty(Utils.getChildPrefix(prefix, "$class"), "$ref$" + objectId);
 				return;
 			}
 			Class objectClass = object.getClass();
 			String objectClassName = computeClassTag(objectClass);
 			if (Utils.primitiveClasses.containsKey(objectClassName) || objectClass.isEnum()) {
 				if (needsClassTag) {
-					properties.setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
+					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
 				}
-				properties.setProperty(prefix, object.toString());
+				setProperty(prefix, object.toString());
 			} else if (objectClass.getComponentType() != null) {
 				// array
 				if (needsClassTag) {
-					properties.setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
+					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
 				}
 				writeObjectIds.put(object, writeObjectIds.size() + 1);
 				boolean arrayItemsNeedClassTag = isClassTagNeeded(objectClass.getComponentType());
 				int length = Array.getLength(object);
-				properties.setProperty(Utils.getChildPrefix(prefix, "$size"), Integer.toString(length));
+				setProperty(Utils.getChildPrefix(prefix, "$size"), Integer.toString(length));
 				for (int i = 0; i < length; i++) {
 					Object o = Array.get(object, i);
 					String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
@@ -255,7 +276,7 @@ public class ObjectToProperties {
 				}
 			} else {
 				if (needsClassTag) {
-					properties.setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
+					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
 				}
 				writeObjectIds.put(object, writeObjectIds.size() + 1);
 				Class currClass = objectClass;
@@ -268,10 +289,10 @@ public class ObjectToProperties {
 					});
 					for (Field field : fields) {
 						int modifiers = field.getModifiers();
-						if (field.isSynthetic())
-							continue;
-						if (Modifier.isTransient(modifiers))
-							continue;
+//						if (field.isSynthetic())
+//							continue;
+//						if (Modifier.isTransient(modifiers))
+//							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
 						Class fieldType = field.getType();
@@ -281,6 +302,7 @@ public class ObjectToProperties {
 						objectToProperties(Utils.getChildPrefix(prefix, field.getName()), value, fieldItemNeedClassTag);
 					}
 					currClass = currClass.getSuperclass();
+					prefix = Utils.getChildPrefix(prefix, "$");
 				}
 			}
 		}

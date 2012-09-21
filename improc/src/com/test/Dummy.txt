@@ -1,157 +1,83 @@
-=======
-write add (2) :class example.slavi.bean.DeepObjectToPropertiesTest$MyBeanNested 603737068 111
-write add (1) :class [Ljava.lang.Object; 355165777 111.objects
-write add (2) :class example.slavi.bean.MyData 1569228633 111.objects.1
-write add (1) :class [I 798941612 111.intArrayProperty
-write add (1) :class [I 1743911840 111.intIndexProperty
-write add (1) :class [Lexample.slavi.bean.MyData; 322722178 111.myDataArray
-write add (2) :class example.slavi.bean.MyData 1595436971 111.myDataArray.0
-write add (2) :class example.slavi.bean.MyData 1028355155 111.myDataArray.2
-write add (2) :class example.slavi.bean.MyData 616699029 111.myDataArray.3
-write add (2) :class example.slavi.bean.MyData 1104499981 111.myDataArray.4
-write add (1) :class [Lexample.slavi.bean.MyData; 482535999 111.myDataIndexProperty
-write add (2) :class example.slavi.bean.MyData 1084284121 111.myDataIndexProperty.0
-write add (2) :class example.slavi.bean.MyData 16993205 111.myDataIndexProperty.1
-write add (2) :class example.slavi.bean.MyData 2136955031 111.myDataIndexProperty.2
-write add (1) :class [Lexample.slavi.bean.MyData; 1286693589 111.myDataIndexPropertyNoArrayWrite
-write add (2) :class example.slavi.bean.MyData 298825033 111.myDataIndexPropertyNoArrayWrite.0
-write add (2) :class example.slavi.bean.MyData 1535562945 111.myDataIndexPropertyNoArrayWrite.1
-write add (2) :class example.slavi.bean.MyData 1895430616 111.myDataIndexPropertyNoArrayWrite.3
------
-read add (3) :class example.slavi.bean.DeepObjectToPropertiesTest$MyBeanNested 803523524 111
-read add (2) :class [Ljava.lang.Object; 1442695532 111.objects
-read add (3) :class example.slavi.bean.MyData 145948047 111.objects.1
-read add (2) :class [I 522501055 111.intArrayProperty
-read add (2) :class [I 614598802 111.intIndexProperty
-read add (3) :class example.slavi.bean.MyData 165723144 111.myData
-read add (2) :class [Lexample.slavi.bean.MyData; 22591049 111.myDataArray
-read add (3) :class example.slavi.bean.MyData 1730638671 111.myDataArray.0
-read add (3) :class example.slavi.bean.MyData 1325628529 111.myDataArray.2
-read add (3) :class example.slavi.bean.MyData 1843332925 111.myDataArray.3
-read add (3) :class example.slavi.bean.MyData 1297378853 111.myDataArray.4
-read add (2) :class [Lexample.slavi.bean.MyData; 1644914380 111.myDataIndexProperty
-read add (3) :class example.slavi.bean.MyData 1518996829 111.myDataIndexProperty.0
-read add (3) :class example.slavi.bean.MyData 494109467 111.myDataIndexProperty.1
-read add (3) :class example.slavi.bean.MyData 178548920 111.myDataIndexProperty.2
-read add (2) :class [Lexample.slavi.bean.MyData; 837043581 111.myDataIndexPropertyNoArrayWrite
-read add (3) :class example.slavi.bean.MyData 26094370 111.myDataIndexPropertyNoArrayWrite.0
-read add (3) :class example.slavi.bean.MyData 481412602 111.myDataIndexPropertyNoArrayWrite.1
-read add (3) :class example.slavi.bean.MyData 1530703565 111.myDataIndexPropertyNoArrayWrite.3
-++++++++
-alabala
-null
-write add (2) :class example.slavi.bean.DeepObjectToPropertiesTest$MyBeanNested 803523524 111
-write add (1) :class [Ljava.lang.Object; 1442695532 111.objects
-write add (2) :class example.slavi.bean.MyData 145948047 111.objects.1
-write add (1) :class [I 522501055 111.intArrayProperty
-write add (1) :class [I 614598802 111.intIndexProperty
-write add (2) :class example.slavi.bean.MyData 165723144 111.myData
-write add (1) :class [Lexample.slavi.bean.MyData; 22591049 111.myDataArray
-write add (2) :class example.slavi.bean.MyData 1730638671 111.myDataArray.0
-write add (2) :class example.slavi.bean.MyData 1325628529 111.myDataArray.2
-write add (2) :class example.slavi.bean.MyData 1843332925 111.myDataArray.3
-write add (2) :class example.slavi.bean.MyData 1297378853 111.myDataArray.4
-write add (1) :class [Lexample.slavi.bean.MyData; 1644914380 111.myDataIndexProperty
-write add (2) :class example.slavi.bean.MyData 1518996829 111.myDataIndexProperty.0
-write add (2) :class example.slavi.bean.MyData 494109467 111.myDataIndexProperty.1
-write add (2) :class example.slavi.bean.MyData 178548920 111.myDataIndexProperty.2
-write add (1) :class [Lexample.slavi.bean.MyData; 837043581 111.myDataIndexPropertyNoArrayWrite
-write add (2) :class example.slavi.bean.MyData 26094370 111.myDataIndexPropertyNoArrayWrite.0
-write add (2) :class example.slavi.bean.MyData 481412602 111.myDataIndexPropertyNoArrayWrite.1
-write add (2) :class example.slavi.bean.MyData 1530703565 111.myDataIndexPropertyNoArrayWrite.3
-Strings not equal: First and second time conversion not equal
-111.$class=example.slavi.bean.DeepObjectToPropertiesTest$MyBeanNested
-111.boolProperty=true
-111.intArrayProperty.$size=5
-111.intArrayProperty.0=0
-111.intArrayProperty.1=1
-111.intArrayProperty.2=2
-111.intArrayProperty.3=3
-111.intArrayProperty.4=4
-111.intIndexProperty.$size=3
-111.intIndexProperty.0=2
-111.intIndexProperty.1=3
-111.intIndexProperty.2=4
-111.intProperty=111
-111.myData.$class=$ref$3
-111.myDataArray.$size=5
-111.myDataArray.0.id=0
-111.myDataArray.0.name=ID 0
-111.myDataArray.2.id=2
-111.myDataArray.2.name=ID 2
-111.myDataArray.3.id=3
-111.myDataArray.3.name=ID 3
-111.myDataArray.4.id=4
-111.myDataArray.4.name=ID 4
-111.myDataIndexProperty.$size=3
-111.myDataIndexProperty.0.id=3
-111.myDataIndexProperty.0.name=ID 3
-111.myDataIndexProperty.1.id=4
-111.myDataIndexProperty.1.name=ID 4
-111.myDataIndexProperty.2.id=5
-111.myDataIndexProperty.2.name=ID 5
-111.myDataIndexPropertyNoArrayWrite.$size=4
-111.myDataIndexPropertyNoArrayWrite.0.id=5
-111.myDataIndexPropertyNoArrayWrite.0.name=ID 5
-111.myDataIndexPropertyNoArrayWrite.1.id=6
-111.myDataIndexPropertyNoArrayWrite.1.name=ID 6
-111.myDataIndexPropertyNoArrayWrite.3.id=8
-111.myDataIndexPropertyNoArrayWrite.3.name=ID 8
-111.objects.$size=3
-111.objects.0.$class=java.lang.String
-111.objects.0=123qwe
-111.objects.1.$class=example.slavi.bean.MyData
-111.objects.1.id=123
-111.objects.1.name=alabala
-111.stringProperty=kuku
+ObjectToPropertiesTest2
+-------------------------------------
+new Class1() Class1 0
+*** Creating object 0
+new Class1() Class1 1
+*** Creating object 1
+new Class1Inner() 2
+*** Creating object 2
+new Class1StaticInner() Class1StaticInner 3
+*** Creating object 3
+new Class1Inner() 4
+new Class1InnerClassExtended() 5
+*** Creating object 4
+new Class1InnerClassExtendedInner() 6
+*** Creating object 5
+new Class1Inner() 7
+new StaticClassExtendsNonStaticInner() 8
+*** Creating object 6
+new Class2() Class2 9
+*** Creating object 7
+new Class1Inner() 10
+new Class2InnerExtendsNonStatic() 11
+*** Creating object 8
+new Class1Inner() 12
+new StaticClassExtendsNonStaticWithConstructorHack() final dummy string
+*** Creating object 9
+new Class1() Class1 13
+-------------------------------------
+$object$1.$class=java.util.ArrayList
+$object$1.elementData.$class=[java.lang.Object]
+$object$1.elementData.$size=10
+$object$1.elementData.0.$class=example.slavi.bean.BaseClassForSerialization$Class1
+$object$1.elementData.0.stringProperty=Class1 1
+$object$1.elementData.1.$class=example.slavi.bean.BaseClassForSerialization$Class1$Class1Inner
+$object$1.elementData.1.intProperty=2
+$object$1.elementData.1.this$1.$class=$ref$3
+$object$1.elementData.2.$class=example.slavi.bean.BaseClassForSerialization$Class1$Class1StaticInner
+$object$1.elementData.2.stringProperty=Class1StaticInner 3
+$object$1.elementData.3.$class=example.slavi.bean.BaseClassForSerialization$Class1$Class1InnerClassExtended
+$object$1.elementData.3.intProperty=4
+$object$1.elementData.3.privateInt=5
+$object$1.elementData.3.this$1.$class=$ref$3
+$object$1.elementData.4.$class=example.slavi.bean.BaseClassForSerialization$Class1$Class1InnerClassExtended$Class1InnerClassExtendedInner
+$object$1.elementData.4.protectedInt=6
+$object$1.elementData.4.this$2.$class=$ref$6
+$object$1.elementData.5.$class=example.slavi.bean.BaseClassForSerialization$StaticClassExtendsNonStaticInner
+$object$1.elementData.5.finalInt=8
+$object$1.elementData.5.intProperty=7
+$object$1.elementData.5.this$1.$class=$ref$3
+$object$1.elementData.6.$class=example.slavi.bean.BaseClassForSerialization$Class2
+$object$1.elementData.6.stringProperty=Class2 9
+$object$1.elementData.6.this$0.$class=example.slavi.bean.BaseClassForSerialization
+$object$1.elementData.7.$class=example.slavi.bean.BaseClassForSerialization$Class2$Class2InnerExtendsNonStatic
+$object$1.elementData.7.finalInt=11
+$object$1.elementData.7.intProperty=10
+$object$1.elementData.7.this$1.$class=$ref$3
+$object$1.elementData.8.$class=example.slavi.bean.BaseClassForSerialization$StaticClassExtendsNonStaticWithConstructorHack
+$object$1.elementData.8.finalStringProperty=final dummy string
+$object$1.elementData.8.intProperty=12
+$object$1.elementData.8.this$1.$class=example.slavi.bean.BaseClassForSerialization$Class1
+$object$1.elementData.8.this$1.stringProperty=Class1 0
+$object$1.elementData.9.$class=example.slavi.bean.BaseClassForSerialization$1
+$object$1.elementData.9.stringProperty=Class1 13
+$object$1.elementData.9.this$0.$class=$ref$10
+$object$1.modCount=10
+$object$1.size=10
 
-111.$class=example.slavi.bean.DeepObjectToPropertiesTest$MyBeanNested
-111.boolProperty=true
-111.intArrayProperty.$size=5
-111.intArrayProperty.0=0
-111.intArrayProperty.1=1
-111.intArrayProperty.2=2
-111.intArrayProperty.3=3
-111.intArrayProperty.4=4
-111.intIndexProperty.$size=3
-111.intIndexProperty.0=2
-111.intIndexProperty.1=3
-111.intIndexProperty.2=4
-111.intProperty=111
-111.myData.id=0
-111.myDataArray.$size=5
-111.myDataArray.0.id=0
-111.myDataArray.0.name=ID 0
-111.myDataArray.2.id=2
-111.myDataArray.2.name=ID 2
-111.myDataArray.3.id=3
-111.myDataArray.3.name=ID 3
-111.myDataArray.4.id=4
-111.myDataArray.4.name=ID 4
-111.myDataIndexProperty.$size=3
-111.myDataIndexProperty.0.id=3
-111.myDataIndexProperty.0.name=ID 3
-111.myDataIndexProperty.1.id=4
-111.myDataIndexProperty.1.name=ID 4
-111.myDataIndexProperty.2.id=5
-111.myDataIndexProperty.2.name=ID 5
-111.myDataIndexPropertyNoArrayWrite.$size=4
-111.myDataIndexPropertyNoArrayWrite.0.id=5
-111.myDataIndexPropertyNoArrayWrite.0.name=ID 5
-111.myDataIndexPropertyNoArrayWrite.1.id=6
-111.myDataIndexPropertyNoArrayWrite.1.name=ID 6
-111.myDataIndexPropertyNoArrayWrite.3.id=8
-111.myDataIndexPropertyNoArrayWrite.3.name=ID 8
-111.objects.$size=3
-111.objects.0.$class=java.lang.String
-111.objects.0=123qwe
-111.objects.1.$class=example.slavi.bean.MyData
-111.objects.1.id=123
-111.objects.1.name=alabala
-111.stringProperty=kuku
-
-Exception in thread "main" java.lang.RuntimeException: Failed
-	at com.slavi.TestUtils.assertEqual(TestUtils.java:51)
-	at example.slavi.bean.DeepObjectToPropertiesTest.doTest(DeepObjectToPropertiesTest.java:114)
-	at example.slavi.bean.DeepObjectToPropertiesTest.doAll(DeepObjectToPropertiesTest.java:147)
-	at example.slavi.bean.DeepObjectToPropertiesTest.main(DeepObjectToPropertiesTest.java:156)
+Exception in thread "main" java.lang.IllegalArgumentException: Can not set final example.slavi.bean.BaseClassForSerialization$Class2 field example.slavi.bean.BaseClassForSerialization$Class2$Class2InnerExtendsNonStatic.this$1 to example.slavi.bean.BaseClassForSerialization$Class1
+	at sun.reflect.UnsafeFieldAccessorImpl.throwSetIllegalArgumentException(UnsafeFieldAccessorImpl.java:146)
+	at sun.reflect.UnsafeFieldAccessorImpl.throwSetIllegalArgumentException(UnsafeFieldAccessorImpl.java:150)
+	at sun.reflect.UnsafeQualifiedObjectFieldAccessorImpl.set(UnsafeQualifiedObjectFieldAccessorImpl.java:65)
+	at java.lang.reflect.Field.set(Field.java:657)
+	at com.slavi.io.ObjectToProperties2$Read.loadPropertiesToObject(ObjectToProperties2.java:108)
+	at com.slavi.io.ObjectToProperties2$Read.propertiesToObject(ObjectToProperties2.java:210)
+	at com.slavi.io.ObjectToProperties2$Read.propertiesToObject(ObjectToProperties2.java:118)
+	at com.slavi.io.ObjectToProperties2$Read.propertiesToObject(ObjectToProperties2.java:148)
+	at com.slavi.io.ObjectToProperties2$Read.loadPropertiesToObject(ObjectToProperties2.java:103)
+	at com.slavi.io.ObjectToProperties2$Read.propertiesToObject(ObjectToProperties2.java:210)
+	at com.slavi.io.ObjectToProperties2$Read.propertiesToObject(ObjectToProperties2.java:118)
+	at com.slavi.io.ObjectToProperties2$Read.read(ObjectToProperties2.java:218)
+	at example.slavi.bean.ObjectToPropertiesTest2.doTest(ObjectToPropertiesTest2.java:23)
+	at example.slavi.bean.ObjectToPropertiesTest2.doHardTest(ObjectToPropertiesTest2.java:100)
+	at example.slavi.bean.ObjectToPropertiesTest2.main(ObjectToPropertiesTest2.java:107)

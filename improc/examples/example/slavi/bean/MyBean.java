@@ -1,9 +1,5 @@
 package example.slavi.bean;
 
-import java.beans.BeanInfo;
-import java.beans.IndexedPropertyDescriptor;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -160,18 +156,43 @@ public class MyBean implements Serializable {
 		this.myDataIndexPropertyNoArrayWrite[index] = myData;
 	}
 
-	public static void main(String[] args) throws Exception {
-		BeanInfo beanInfo = Introspector.getBeanInfo(MyBean.class);
-		PropertyDescriptor pds[] = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor pd : pds) {
-			if (pd instanceof IndexedPropertyDescriptor) {
-				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
-				System.out.println(pd.getName());
-				System.out.println("  read:        " + ipd.getReadMethod());
-				System.out.println("  index read:  " + ipd.getIndexedReadMethod());
-				System.out.println("  write:       " + ipd.getWriteMethod());
-				System.out.println("  index write: " + ipd.getIndexedWriteMethod());
-			}
+	public void initialize() {
+		setIntProperty(111);
+		setStringProperty("kuku");
+		setBoolProperty(true);
+		setMyEnum(MyEnum.MyEnum2);
+		setMyData(new MyData(123, "alabala"));
+
+		int intArray[] = new int[5];
+		for (int i = 0; i < intArray.length; i++) {
+			intArray[i] = i;
 		}
+		setIntArrayProperty(intArray);
+
+		intArray = new int[3];
+		for (int i = 0; i < intArray.length; i++) {
+			intArray[i] = i + 2;
+		}
+		setIntIndexProperty(intArray);
+
+		MyData myDataArray[] = new MyData[5];
+		for (int i = 0; i < myDataArray.length; i++) {
+			myDataArray[i] = new MyData(i, "ID " + i);
+		}
+		setMyDataArray(myDataArray);
+		
+		myDataArray = new MyData[3];
+		for (int i = 0; i < myDataArray.length; i++) {
+			myDataArray[i] = new MyData(i + 3, "ID " + (i + 3));
+		}
+		setMyDataIndexProperty(myDataArray);
+		
+		myDataArray = new MyData[4];
+		for (int i = 0; i < myDataArray.length; i++) {
+			myDataArray[i] = new MyData(i + 5, "ID " + (i + 5));
+		}
+		setMyDataIndexPropertyNoArrayWriteSize(myDataArray.length);
+		for (int i = 0; i < myDataArray.length; i++)
+			setMyDataIndexPropertyNoArrayWrite(i, myDataArray[i]);
 	}
 }

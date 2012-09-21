@@ -1,31 +1,29 @@
 package com.test;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
-
-import com.slavi.util.Util;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 
 public class Dummy implements Serializable {
-	
-	String str;
-	
-	class Kuku implements Serializable {
-		String strKuku;
-		
-		public String getStr() {
-			return str;
+	String prefix;
+	private void popPrefix() {
+		int last = prefix.lastIndexOf('.');
+		if (last < 0) {
+			prefix = "";
+		} else {
+			prefix = prefix.substring(0, last);
 		}
 	}
 	
+	void doIt() throws Exception {
+		int v = 1355;
+		System.out.println(new String(new int[] { v }, 0, 1));
+	}
+	
 	public static void main(String[] args) throws Exception {
-		Dummy dummy1 = new Dummy();
-		dummy1.str = "dummy1";
-		Kuku kuku1 = dummy1.new Kuku();
-		kuku1.strKuku = "kuku1";
-		
-		Kuku kuku2 = Util.deepCopy(kuku1);
-		System.out.println(kuku2.strKuku);
-		System.out.println(kuku1 == kuku2);
-		dummy1.str = "changed1";
-		System.out.println(kuku2.getStr());
+		new Dummy().doIt();
+		System.out.println("Done.");
 	}
 }

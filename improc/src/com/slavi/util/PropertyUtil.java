@@ -2,6 +2,7 @@ package com.slavi.util;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -122,24 +123,39 @@ public class PropertyUtil {
 	}
 	
 	public static ArrayList<String> propertiesToSortedStringList(Properties properties) {
-		StringPrintStream out = new StringPrintStream();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			properties.store(out, null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		out.flush();
 		ArrayList<String> lines = new ArrayList<String>();
 		BufferedReader in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out.toByteArray())));
-		try {
-			in.readLine(); // Skip comment line 
-			while (in.ready()) {
-				lines.add(in.readLine());
+		while (true) {
+			String line = null;
+			try {
+				line = in.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+			if (line == null)
+				break;
+			line = line.trim();
+			if (line.startsWith("#"))
+				continue;
+			lines.add(line);
 		}
 		Collections.sort(lines);
 		return lines;
+	}
+
+	public static String propertiesToString(Properties properties) throws IOException {
+		ArrayList<String> lines = propertiesToSortedStringList(properties);
+		StringBuilder sb = new StringBuilder();
+		for (String line : lines) { 
+			sb.append(line);
+			sb.append('\n');
+		}
+		return sb.toString();
 	}
 }
