@@ -25,6 +25,10 @@ public class DeepCopyTest {
 		
 		private CopyMe aObject;
 
+		private CopyMe() {
+			System.out.println("CopyMe create");
+		}
+		
 		public CopyMe getaObject() {
 			return aObject;
 		}
@@ -69,6 +73,7 @@ public class DeepCopyTest {
 		System.out.println(str.getBytes(cs).length);
 		ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes(cs));
 		ObjectInputStream ois = new ObjectInputStream(bis);
+		System.out.println("reading...");
 		CopyMe c3 = (CopyMe) ois.readObject();
 		System.out.println(c1.asd);
 		System.out.println(c3.asd);

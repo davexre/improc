@@ -7,29 +7,29 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectRead;
 import com.slavi.io.ObjectToProperties2;
-import com.slavi.io.ObjectWrite;
+import com.slavi.io.ObjectToPropertiesInputStream;
+import com.slavi.io.ObjectToPropertiesOutputStream;
 import com.slavi.util.PropertyUtil;
 
-public class ObjectToPropertiesTest2 {
+public class ObjectToPropertiesOutputStreamTest {
 	static Object doTest(String prefix, Object o) throws Exception {
 		Properties properties = new Properties();
 		
-		ObjectWrite write = new ObjectToProperties2.Write(properties);
-		write.write(o);
+		ObjectToPropertiesOutputStream oos = new ObjectToPropertiesOutputStream(properties, prefix);
+		oos.writeObject(o);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		System.out.println(s1);
 		
-		ObjectRead read = new ObjectToProperties2.Read(properties);
-		o = read.read();
+		ObjectToPropertiesInputStream ois = new ObjectToPropertiesInputStream(properties, prefix, true);
+		o = ois.readObject();
 
 		properties.clear();
-		write = new ObjectToProperties2.Write(properties);
-		write.write(o);
+		oos = new ObjectToPropertiesOutputStream(properties, prefix);
+		oos.writeObject(o);
 		String s2 = PropertyUtil.propertiesToString(properties);
 		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
-		
+
 //		System.out.println(s1);
 		return o;
 	}
@@ -122,7 +122,7 @@ public class ObjectToPropertiesTest2 {
 		c2.nestedDump("");
 	}
 	
-	public static class BaseClass {
+	public static class BaseClass implements Serializable {
 		public String str = "baseClass";
 	}
 	
@@ -171,12 +171,12 @@ public class ObjectToPropertiesTest2 {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		System.out.println("ObjectToPropertiesTest2");
-//		new ObjectToPropertiesTest2().serializeClass();
-//		new ObjectToPropertiesTest2().typedArrayTest();
-		new ObjectToPropertiesTest2().doHardTest();
-//		new ObjectToPropertiesTest2().partialHardTest();
-//		new ObjectToPropertiesTest2().simplifiedHardTest();
+		System.out.println("ObjectToPropertiesOutputStreamTest");
+//		new ObjectToPropertiesOutputStreamTest().serializeClass();
+//		new ObjectToPropertiesOutputStreamTest().typedArrayTest();
+		new ObjectToPropertiesOutputStreamTest().doHardTest();
+//		new ObjectToPropertiesOutputStreamTest().partialHardTest();
+//		new ObjectToPropertiesOutputStreamTest().simplifiedHardTest();
 		System.out.println("Done.");
 	}
 }

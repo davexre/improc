@@ -16,7 +16,7 @@ import java.util.Properties;
 import sun.reflect.ReflectionFactory;
 
 public class ObjectToProperties2 {
-	private static Class getClassFromClassTag(String className) throws ClassNotFoundException {
+	static Class getClassFromClassTag(String className) throws ClassNotFoundException {
 		Class r = Utils.primitiveClasses.get(className);
 		if (r != null) {
 			return r;
@@ -37,7 +37,7 @@ public class ObjectToProperties2 {
 		return clazz.getName();
 	}
 
-	private static boolean isClassTagNeeded(Class clazz) {
+	static boolean isClassTagNeeded(Class clazz) {
 		if (Utils.primitiveClasses.containsKey(clazz.getName()) || clazz.isEnum()) {
 			// ex: public int myField;
 			return false;
@@ -201,6 +201,10 @@ public class ObjectToProperties2 {
 			if (objectClass == String.class) {
 				return (sval == null) ? null : sval;
 			}
+			if (objectClass == Class.class) {
+				Class r = getClassFromClassTag(sval);
+				return r;
+			}
 
 			if (!Utils.hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
 				return null;
@@ -260,6 +264,12 @@ public class ObjectToProperties2 {
 					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
 				}
 				setProperty(prefix, object.toString());
+			} else if (objectClass == Class.class) {
+				if (needsClassTag) {
+					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName); // "java.lang.Class"
+				}
+				String value = computeClassTag((Class) object);
+				setProperty(prefix, value);
 			} else if (objectClass.getComponentType() != null) {
 				// array
 				if (needsClassTag) {
