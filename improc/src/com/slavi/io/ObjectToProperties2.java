@@ -16,48 +16,12 @@ import java.util.Properties;
 import sun.reflect.ReflectionFactory;
 
 public class ObjectToProperties2 {
-	static Class getClassFromClassTag(String className) throws ClassNotFoundException {
-		Class r = Utils.primitiveClasses.get(className);
-		if (r != null) {
-			return r;
-		}
-		if (className.startsWith("[") && className.endsWith("]")) {
-			String arrayType = className.substring(1, className.length() - 1);
-			r = getClassFromClassTag(arrayType);
-			r = Array.newInstance(r, 0).getClass();
-			return r;
-		}
-		return Class.forName(className);
-	}
-	
-	static String computeClassTag(Class clazz) {
-		if (clazz.getComponentType() != null) {
-			return "[" + computeClassTag(clazz.getComponentType()) + "]";
-		}
-		return clazz.getName();
-	}
-
-	static boolean isClassTagNeeded(Class clazz) {
-		if (Utils.primitiveClasses.containsKey(clazz.getName()) || clazz.isEnum()) {
-			// ex: public int myField;
-			return false;
-		}
-		if (clazz.getComponentType() == null) {
-			if (Modifier.isFinal(clazz.getModifiers())) {
-				return false;
-			}
-		} else {
-			// arrays are always final. check the ComponentType
-			// ex: public String myField[];
-			return isClassTagNeeded(clazz.getComponentType());
-		}
-		return true;
-	}
-
 	public static class Read implements ObjectRead {
 		public ArrayList readObjectIds = new ArrayList();
 
 		Properties properties;
+		
+		String initialPrefix;
 		
 		private String getProperty(String key) {
 			return properties.getProperty(key);
@@ -65,8 +29,9 @@ public class ObjectToProperties2 {
 		
 		boolean setToNullMissingProperties;
 
-		public Read(Properties properties) {
+		public Read(Properties properties, String prefix) {
 			this(properties, true);
+			this.initialPrefix = prefix;
 		}
 		
 		public Read(Properties properties, boolean setToNullMissingProperties) {
@@ -103,7 +68,7 @@ public class ObjectToProperties2 {
 
 					String classStr = getProperty(Utils.getChildPrefix(fieldPrefix, "$class"));
 					if (classStr == null)
-						classStr = computeClassTag(fieldType);
+						classStr = Utils.computeClassTag(fieldType);
 					Object value = propertiesToObject(fieldPrefix, classStr);
 					if (value == null) {
 						if (fieldType.isPrimitive() || (!setToNullMissingProperties))
@@ -131,7 +96,7 @@ public class ObjectToProperties2 {
 				Object o = readObjectIds.get(index - 1);
 				return o;
 			}
-			Class objectClass = getClassFromClassTag(objectClassName);
+			Class objectClass = Utils.getClassFromClassTag(objectClassName);
 			if (objectClass.getComponentType() != null) {
 				// array
 				Class arrayType = objectClass.getComponentType();
@@ -145,7 +110,7 @@ public class ObjectToProperties2 {
 				Object array = Array.newInstance(arrayType, arraySize);
 				readObjectIds.add(array);
 
-				boolean arrayItemsNeedClassTag = isClassTagNeeded(objectClass);
+				boolean arrayItemsNeedClassTag = Utils.isClassTagNeeded(objectClass);
 				for (int i = 0; i < arraySize; i++) {
 					String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
 					Object item;
@@ -202,7 +167,7 @@ public class ObjectToProperties2 {
 				return (sval == null) ? null : sval;
 			}
 			if (objectClass == Class.class) {
-				Class r = getClassFromClassTag(sval);
+				Class r = Utils.getClassFromClassTag(sval);
 				return r;
 			}
 
@@ -227,7 +192,7 @@ public class ObjectToProperties2 {
 		int readCounter = 0;
 
 		public Object read() throws Exception {
-			String prefix = "$object$" + Integer.toString(++readCounter);
+			String prefix = Utils.getChildPrefix(initialPrefix, "$object$" + Integer.toString(++readCounter));
 			return propertiesToObject(prefix);
 		}
 	}
@@ -237,12 +202,15 @@ public class ObjectToProperties2 {
 		
 		Properties properties;
 		
+		String initialPrefix;
+		
 		private void setProperty(String key, String value) {
 			properties.setProperty(key, value);
 		}
 		
-		public Write(Properties properties) {
+		public Write(Properties properties, String prefix) {
 			this.properties = properties;
+			this.initialPrefix = prefix;
 		}
 		
 		public void objectToProperties(String prefix, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -258,7 +226,7 @@ public class ObjectToProperties2 {
 				return;
 			}
 			Class objectClass = object.getClass();
-			String objectClassName = computeClassTag(objectClass);
+			String objectClassName = Utils.computeClassTag(objectClass);
 			if (Utils.primitiveClasses.containsKey(objectClassName) || objectClass.isEnum()) {
 				if (needsClassTag) {
 					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
@@ -268,7 +236,7 @@ public class ObjectToProperties2 {
 				if (needsClassTag) {
 					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName); // "java.lang.Class"
 				}
-				String value = computeClassTag((Class) object);
+				String value = Utils.computeClassTag((Class) object);
 				setProperty(prefix, value);
 			} else if (objectClass.getComponentType() != null) {
 				// array
@@ -276,7 +244,7 @@ public class ObjectToProperties2 {
 					setProperty(Utils.getChildPrefix(prefix, "$class"), objectClassName);
 				}
 				writeObjectIds.put(object, writeObjectIds.size() + 1);
-				boolean arrayItemsNeedClassTag = isClassTagNeeded(objectClass.getComponentType());
+				boolean arrayItemsNeedClassTag = Utils.isClassTagNeeded(objectClass.getComponentType());
 				int length = Array.getLength(object);
 				setProperty(Utils.getChildPrefix(prefix, "$size"), Integer.toString(length));
 				for (int i = 0; i < length; i++) {
@@ -307,7 +275,7 @@ public class ObjectToProperties2 {
 							continue;
 						Class fieldType = field.getType();
 						field.setAccessible(true);
-						boolean fieldItemNeedClassTag = isClassTagNeeded(fieldType);
+						boolean fieldItemNeedClassTag = Utils.isClassTagNeeded(fieldType);
 						Object value = field.get(object);
 						objectToProperties(Utils.getChildPrefix(prefix, field.getName()), value, fieldItemNeedClassTag);
 					}
@@ -320,7 +288,7 @@ public class ObjectToProperties2 {
 		int writeCounter = 0;
 
 		public void write(Object object) throws Exception {
-			String prefix = "$object$" + Integer.toString(++writeCounter);
+			String prefix = Utils.getChildPrefix(initialPrefix, "$object$" + Integer.toString(++writeCounter));
 			objectToProperties(prefix, object);
 		}
 	}

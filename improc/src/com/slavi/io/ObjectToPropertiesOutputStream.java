@@ -42,10 +42,17 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 	}
 	
 	Stack<State> stack = new Stack<State>();
+	
+	boolean canWriteNonSerializable;
 
 	public ObjectToPropertiesOutputStream(Properties properties, String prefix) throws IOException {
+		this(properties, prefix, false);
+	}
+	
+	public ObjectToPropertiesOutputStream(Properties properties, String prefix, boolean canWriteNonSerializable) throws IOException {
 		this.properties = properties;
 		stack.push(new State(prefix));
+		this.canWriteNonSerializable = canWriteNonSerializable;
 	}
 
 	private void setProperty(String key, String value) {
@@ -241,7 +248,7 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 
 		// remaining cases
 		Class objectClass = obj.getClass();
-		String objectClassName = ObjectToProperties2.computeClassTag(objectClass);
+		String objectClassName = Utils.computeClassTag(objectClass);
 		if (cl.isArray()) {
 			writeArray(obj, needsClassTag);
 		} else if (Utils.primitiveClasses.containsKey(objectClassName) || objectClass.isEnum()) {
@@ -251,8 +258,9 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 			setProperty(stack.peek().prefix, obj.toString());
 		} else if (obj instanceof Serializable) {
 			writeOrdinaryObject(obj, needsClassTag);
+		} else if (canWriteNonSerializable) {
+			writeOrdinaryObject(obj, needsClassTag);
 		} else {
-//			writeOrdinaryObject(obj, needsClassTag);
 			throw new NotSerializableException(cl.getName());
 		}
 	}
@@ -365,7 +373,7 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 				continue;
 			Class fieldType = field.getType();
 			field.setAccessible(true);
-			boolean fieldItemNeedClassTag = ObjectToProperties2.isClassTagNeeded(fieldType);
+			boolean fieldItemNeedClassTag = Utils.isClassTagNeeded(fieldType);
 			Object value = field.get(object);
 			pushPrefix(Utils.getChildPrefix(stack.peek().prefix, osfield.getName()));
 			writeObjectOverride0(value, fieldItemNeedClassTag);
@@ -375,7 +383,7 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 	
 	protected void writeOrdinaryObject(Object object, boolean needsClassTag) throws Exception {
 		Class objectClass = object.getClass();
-		String objectClassName = ObjectToProperties2.computeClassTag(objectClass);
+		String objectClassName = Utils.computeClassTag(objectClass);
 		if (needsClassTag) {
 			setProperty(Utils.getChildPrefix(stack.peek().prefix, "$class"), objectClassName);
 		}
@@ -414,13 +422,13 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 
 	protected void writeClass(Class clazz, boolean needsClassTag) throws Exception {
 		setProperty(Utils.getChildPrefix(stack.peek().prefix, "$class"), Class.class.getName()); // "java.lang.Class"
-		String value = ObjectToProperties2.computeClassTag(clazz);
+		String value = Utils.computeClassTag(clazz);
 		setProperty(stack.peek().prefix, value);
 	}
 	
 	protected void writeArray(Object array, boolean needsClassTag) throws Exception {
 		Class objectClass = array.getClass();
-		String objectClassName = ObjectToProperties2.computeClassTag(objectClass);
+		String objectClassName = Utils.computeClassTag(objectClass);
 		if (needsClassTag) {
 			setProperty(Utils.getChildPrefix(stack.peek().prefix, "$class"), objectClassName);
 		}
@@ -485,7 +493,7 @@ public class ObjectToPropertiesOutputStream extends ObjectOutputStream {
 		} else {
 			int len = Array.getLength(array);
 			setProperty(Utils.getChildPrefix(stack.peek().prefix, "$size"), Integer.toString(len));
-			boolean arrayItemsNeedClassTag = ObjectToProperties2.isClassTagNeeded(objectClass.getComponentType());
+			boolean arrayItemsNeedClassTag = Utils.isClassTagNeeded(objectClass.getComponentType());
 			for (int i = 0; i < len; i++) {
 				pushPrefix(Utils.getChildPrefix(stack.peek().prefix, Integer.toString(i)));
 				Object o = Array.get(array, i);

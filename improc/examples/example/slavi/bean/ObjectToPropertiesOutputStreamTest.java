@@ -55,9 +55,9 @@ public class ObjectToPropertiesOutputStreamTest {
 		String prefix = "111";
 
 		Properties properties = new Properties();
-		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties).read();
+		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties, prefix).read();
 		TestUtils.assertTrue("Expected null object", myBean == null);
-		new ObjectToProperties2.Write(properties).write(myBean);
+		new ObjectToProperties2.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		TestUtils.assertEqual("Expected empty string", s1, "");
 		
@@ -155,6 +155,8 @@ public class ObjectToPropertiesOutputStreamTest {
 		str.add("asdqwe");
 		System.out.println(Arrays.toString(str.getClass().getTypeParameters()));
 		str = (ArrayList) doTest("", str);
+		TestUtils.assertTrue("", str.size() == 1);
+		TestUtils.assertTrue("", "asdqwe".equals(str.get(0)));
 		System.out.println(str);
 		str.add("zxczxc");
 		System.out.println(str);
@@ -167,16 +169,16 @@ public class ObjectToPropertiesOutputStreamTest {
 		
 		Class ec2 = (Class) doTest("", ec1);
 		System.out.println("EC.str " + ec2);
-		System.out.println(ec1 == ec2);
+		TestUtils.assertTrue("", ec1 == ec2);
 	}
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("ObjectToPropertiesOutputStreamTest");
-//		new ObjectToPropertiesOutputStreamTest().serializeClass();
-//		new ObjectToPropertiesOutputStreamTest().typedArrayTest();
+		new ObjectToPropertiesOutputStreamTest().serializeClass();
+		new ObjectToPropertiesOutputStreamTest().typedArrayTest();
 		new ObjectToPropertiesOutputStreamTest().doHardTest();
-//		new ObjectToPropertiesOutputStreamTest().partialHardTest();
-//		new ObjectToPropertiesOutputStreamTest().simplifiedHardTest();
+		new ObjectToPropertiesOutputStreamTest().partialHardTest();
+		new ObjectToPropertiesOutputStreamTest().simplifiedHardTest();
 		System.out.println("Done.");
 	}
 }

@@ -1,5 +1,7 @@
 package com.slavi.io;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -48,5 +50,43 @@ public class Utils {
 		if (parentPrefix.endsWith("."))
 			return parentPrefix + childName;
 		return parentPrefix + "." + childName;
+	}
+	
+	public static Class getClassFromClassTag(String className) throws ClassNotFoundException {
+		Class r = Utils.primitiveClasses.get(className);
+		if (r != null) {
+			return r;
+		}
+		if (className.startsWith("[") && className.endsWith("]")) {
+			String arrayType = className.substring(1, className.length() - 1);
+			r = getClassFromClassTag(arrayType);
+			r = Array.newInstance(r, 0).getClass();
+			return r;
+		}
+		return Class.forName(className);
+	}
+	
+	public static String computeClassTag(Class clazz) {
+		if (clazz.getComponentType() != null) {
+			return "[" + computeClassTag(clazz.getComponentType()) + "]";
+		}
+		return clazz.getName();
+	}
+
+	public static boolean isClassTagNeeded(Class clazz) {
+		if (Utils.primitiveClasses.containsKey(clazz.getName()) || clazz.isEnum()) {
+			// ex: public int myField;
+			return false;
+		}
+		if (clazz.getComponentType() == null) {
+			if (Modifier.isFinal(clazz.getModifiers())) {
+				return false;
+			}
+		} else {
+			// arrays are always final. check the ComponentType
+			// ex: public String myField[];
+			return isClassTagNeeded(clazz.getComponentType());
+		}
+		return true;
 	}
 }

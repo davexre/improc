@@ -250,7 +250,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		// TC_CLASSDESC:
 		// TC_PROXYCLASSDESC:
 		
-		Class objectClass = ObjectToProperties2.getClassFromClassTag(objectClassName);
+		Class objectClass = Utils.getClassFromClassTag(objectClassName);
 		if (objectClass.getComponentType() != null) {
 			// array
 			Class arrayType = objectClass.getComponentType();
@@ -264,7 +264,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			Object array = Array.newInstance(arrayType, arraySize);
 			handle.add(array);
 
-			boolean arrayItemsNeedClassTag = ObjectToProperties2.isClassTagNeeded(objectClass);
+			boolean arrayItemsNeedClassTag = Utils.isClassTagNeeded(objectClass);
 			for (int i = 0; i < arraySize; i++) {
 				String itemPrefix = Utils.getChildPrefix(stack.peek().prefix, Integer.toString(i));
 				pushPrefix(itemPrefix);
@@ -323,7 +323,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			return (sval == null) ? null : sval;
 		}
 		if (objectClass == Class.class) {
-			Class r = ObjectToProperties2.getClassFromClassTag(sval);
+			Class r = Utils.getClassFromClassTag(sval);
 			return r;
 		}
 
@@ -406,7 +406,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			try {
 				String classStr = getProperty(Utils.getChildPrefix(stack.peek().prefix, "$class"));
 				if (classStr == null)
-					classStr = ObjectToProperties2.computeClassTag(fieldType);
+					classStr = Utils.computeClassTag(fieldType);
 				Object value = readObjectOverride0(classStr);
 				if (value == null) {
 					if (fieldType.isPrimitive() || (!setToNullMissingProperties))

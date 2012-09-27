@@ -16,16 +16,16 @@ public class ObjectToPropertiesTest2 {
 	static Object doTest(String prefix, Object o) throws Exception {
 		Properties properties = new Properties();
 		
-		ObjectWrite write = new ObjectToProperties2.Write(properties);
+		ObjectWrite write = new ObjectToProperties2.Write(properties, prefix);
 		write.write(o);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		System.out.println(s1);
 		
-		ObjectRead read = new ObjectToProperties2.Read(properties);
+		ObjectRead read = new ObjectToProperties2.Read(properties, prefix);
 		o = read.read();
 
 		properties.clear();
-		write = new ObjectToProperties2.Write(properties);
+		write = new ObjectToProperties2.Write(properties, prefix);
 		write.write(o);
 		String s2 = PropertyUtil.propertiesToString(properties);
 		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
@@ -55,9 +55,9 @@ public class ObjectToPropertiesTest2 {
 		String prefix = "111";
 
 		Properties properties = new Properties();
-		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties).read();
+		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties, prefix).read();
 		TestUtils.assertTrue("Expected null object", myBean == null);
-		new ObjectToProperties2.Write(properties).write(myBean);
+		new ObjectToProperties2.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		TestUtils.assertEqual("Expected empty string", s1, "");
 		
