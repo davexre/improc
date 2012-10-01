@@ -2,9 +2,9 @@ package com.slavi.improc;
 
 import java.util.ArrayList;
 
-import com.slavi.util.tree.ConcurrentKDTree;
+import com.slavi.util.tree.KDTree;
 
-public class KeyPointBigTree extends ConcurrentKDTree<KeyPoint> {
+public class KeyPointBigTree extends KDTree<KeyPoint> {
 	public final ArrayList<KeyPointList> keyPointLists = new ArrayList<KeyPointList>();
 
 	public KeyPointBigTree() {

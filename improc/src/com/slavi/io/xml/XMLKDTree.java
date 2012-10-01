@@ -39,7 +39,7 @@ public abstract class XMLKDTree<E> {
 	 * All "Item" XML elements can have one sub "Item" sub element with the "v" attribute
 	 * set to "Left" and one sub element with "v" attribute set to "Right"
 	 * <p>
-	 * Note: This method is thread UNSAFE even if called on {@link com.slavi.util.tree.ConcurrentKDTree}
+	 * Note: This method is thread UNSAFE.
 	 * @see #fromXML(Element, KDNodeSaverXML)
 	 * @see com.slavi.util.tree.KDTree#balanceIfNeeded();
 	 */

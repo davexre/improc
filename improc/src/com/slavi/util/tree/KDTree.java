@@ -6,15 +6,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * Thread SAFE implementaion of K-dimensional tree.
+ */
 public abstract class KDTree<E> implements Iterable<E>{
 	
 	public abstract boolean canFindDistanceBetween(E fromNode, E toNode);
 	
 	public abstract double getValue(E node, int dimensionIndex);
 
-	protected int dimensions;
-
-	protected TreeNode<E> root;
+	Object synch = new Object();
+	
+	protected final int dimensions;
+	
+	protected volatile TreeNode<E> root;
 	
 	volatile int size;
 	
@@ -22,8 +27,16 @@ public abstract class KDTree<E> implements Iterable<E>{
 	
 	volatile int mutations;
 	
-	boolean ignoreDuplicates;
+	final boolean ignoreDuplicates;
 	
+	/**
+	 * 
+	 * @param	ignoreDuplicates
+	 * 			Specifies whether to accept or to ignore duplicated items.
+	 *			Setting to true will cause invocation of
+	 *			{@link #compareItems(Object, Object)} at each {@link #add(Object)} and
+	 *			thus slowing down the addition of new items.
+	 */
 	public KDTree(int dimensions, boolean ignoreDuplicates) {
 		this.dimensions = dimensions;
 		this.size = 0;
@@ -43,10 +56,12 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * Removes all elements in the tree.
 	 */
 	public void clear() {
-		size = 0;
-		treeDepth = 0;
-		root = null;
-		mutations++;
+		synchronized (synch) {
+			size = 0;
+			treeDepth = 0;
+			root = null;
+			mutations++;
+		}
 	}
 
 	private void addToList_recursive(ArrayList<E>list, TreeNode<E> node) {
@@ -62,8 +77,11 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * in the list is undefined. 
 	 */
 	public ArrayList<E>toList() {
-		ArrayList<E>list = new ArrayList<E>();
-		addToList_recursive(list, root); 
+		int oldMutations = mutations;
+		ArrayList<E>list = new ArrayList<E>(size);
+		addToList_recursive(list, root);
+		if (oldMutations != mutations)
+			throw new ConcurrentModificationException();
 		return list;
 	}
 
@@ -72,10 +90,18 @@ public abstract class KDTree<E> implements Iterable<E>{
 	 * to use {@link #balanceIfNeeded()}
 	 */
 	public void balance() {
-		ArrayList<E>list = toList();
-		treeDepth = 0;
-		mutations++;
-		root = balanceSegment(list, dimensions, 0, list.size() - 1, 0, 0);
+		int oldMutations = mutations;
+		ArrayList<E> list = toList();
+		BalanceData data = new BalanceData();
+		TreeNode<E> newRoot = balanceSegment(data, 0, list.size() - 1, 0, 0);
+		synchronized (synch) {
+			if (mutations == oldMutations) {
+				treeDepth = data.newTreeDepth;
+				mutations++;
+				root = newRoot;
+			} else
+				throw new ConcurrentModificationException();
+		}
 	}
 
 	/**
@@ -160,28 +186,33 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return deepSort(items, dimensions, segmentStartIndex, segmentEndIndex, nextDimension, numberOfUnsuccessfullSorts);
 	}
 	
-	private TreeNode<E> balanceSegment(ArrayList<E> items, int dimensions, int left, int right, int curDimension, int depthLevel) {
+	static class BalanceData<E> {
+		ArrayList<E> items;
+		int newTreeDepth = 0;
+	}
+	
+	private TreeNode<E> balanceSegment(BalanceData<E> data, int left, int right, int curDimension, int depthLevel) {
 		if (left > right)
 			return null;
-		int midIndex = deepSort(items, dimensions, left, right, curDimension, 0);
-		double midValue = getValue(items.get(midIndex), curDimension);
+		int midIndex = deepSort(data.items, dimensions, left, right, curDimension, 0);
+		double midValue = getValue(data.items.get(midIndex), curDimension);
 		int startIndex = midIndex - 1;
 		for (; startIndex >= left; startIndex--) 
-			if (getValue(items.get(startIndex), curDimension) != midValue) 
+			if (getValue(data.items.get(startIndex), curDimension) != midValue) 
 				break;
 		startIndex++;
 		if (startIndex != midIndex) {
-			E tmp = items.get(midIndex);
-			items.set(midIndex, items.get(startIndex));
-			items.set(startIndex, tmp);
+			E tmp = data.items.get(midIndex);
+			data.items.set(midIndex, data.items.get(startIndex));
+			data.items.set(startIndex, tmp);
 		}
 		int nextDimension = (curDimension + 1) % dimensions;
-		TreeNode<E> result = new TreeNode<E>(items.get(startIndex));
+		TreeNode<E> result = new TreeNode<E>(data.items.get(startIndex));
 		depthLevel++;
-		if (depthLevel > treeDepth)
-			treeDepth = depthLevel;
-		result.left = balanceSegment(items, dimensions, left, startIndex - 1, nextDimension, depthLevel);
-		result.right = balanceSegment(items, dimensions, startIndex + 1, right, nextDimension, depthLevel);
+		if (depthLevel > data.newTreeDepth)
+			data.newTreeDepth = depthLevel;
+		result.left = balanceSegment(data, left, startIndex - 1, nextDimension, depthLevel);
+		result.right = balanceSegment(data, startIndex + 1, right, nextDimension, depthLevel);
 		return result;
 	}
 	
@@ -362,32 +393,47 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return result;
 	}
 
-	private void add_recursive(E data, TreeNode<E> curNode, int dimension, int depthLevel) {
-		depthLevel++;
-		double value = getValue(data, dimension);
-		double curNodeValue = getValue(curNode.data, dimension);
-		int nextDimension = (dimension + 1) % dimensions;
-		if (value < curNodeValue) {
-			if (curNode.left == null) {
-				if (treeDepth < depthLevel)
-					treeDepth = depthLevel;
-				curNode.left = new TreeNode<E>(data);
-				mutations++;
-				size++;
-			} else
-				add_recursive(data, curNode.left, nextDimension, depthLevel);
-		} else if ((!ignoreDuplicates) && (value == curNodeValue) && compareItems(data, curNode.data)) {
-			return;
-		} else {
-			if (curNode.right == null) {
-				if (treeDepth < depthLevel) 
-					treeDepth = depthLevel;
-				curNode.right = new TreeNode<E>(data);
-				mutations++;
-				size++;
-			} else
-				add_recursive(data, curNode.right, nextDimension, depthLevel);
-		}		
+	private void addInternal(E data, TreeNode<E> curNode, int dimension, int depthLevel) {
+		while (true) {
+			depthLevel++;
+			double value = getValue(data, dimension);
+			double curNodeValue = getValue(curNode.data, dimension);
+			if (value < curNodeValue) {
+				if (curNode.left == null) {
+					synchronized (synch) {
+						if (curNode.left == null) {
+							TreeNode<E> newNode = new TreeNode<E>(data);
+							curNode.left = newNode;
+							mutations++;
+							size++;
+							if (depthLevel > treeDepth)
+								treeDepth = depthLevel;
+							break;
+						}
+					}
+				}
+				curNode = curNode.left;
+				dimension = (dimension + 1) % dimensions;
+			} else if ((!ignoreDuplicates) && (value == curNodeValue) && compareItems(data, curNode.data)) {
+				return;
+			} else {
+				if (curNode.right == null) {
+					synchronized (synch) {
+						if (curNode.right == null) {
+							TreeNode<E> newNode = new TreeNode<E>(data);
+							curNode.right = newNode;
+							mutations++;
+							size++;
+							if (depthLevel > treeDepth)
+								treeDepth = depthLevel;
+							break;
+						}
+					}
+				}
+				curNode = curNode.right;
+				dimension = (dimension + 1) % dimensions;
+			}
+		}
 	}
 
 	/**
@@ -407,13 +453,18 @@ public abstract class KDTree<E> implements Iterable<E>{
 	public void add(E item) {
 		if (item == null)
 			return;
-		if (root == null) { 
-			root = new TreeNode<E>(item);
-			mutations++;
-			size++;
-		} else {
-			add_recursive(item, root, 0, 1);
+		if (root == null) {
+			synchronized (synch) {
+				if (root == null) {
+					TreeNode<E> newNode = new TreeNode<E>(item);
+					root = newNode;
+					mutations++;
+					size++;
+					return;
+				}
+			}
 		}
+		addInternal(item, root, 0, 1);
 	}
 	
 	/**
@@ -456,9 +507,9 @@ public abstract class KDTree<E> implements Iterable<E>{
 			stack = new Stack<IteratorVisit<TreeNode<E>>>();
 			nextItem = root;
 			mutationsAtIteratorCreate = mutations;
-			if (root != null) {
+			if (nextItem != null) {
 				IteratorVisit<TreeNode<E>>v = new IteratorVisit<TreeNode<E>>();
-				v.item = root;
+				v.item = nextItem;
 				v.status = 0;
 				stack.push(v);
 			}
@@ -535,23 +586,6 @@ public abstract class KDTree<E> implements Iterable<E>{
 		return root;
 	}
 
-	/**
-	 * Specifies whether to accept or to ignore duplicated items.
-	 * 
-	 * Setting this property to true will cause invocation of
-	 * {@link #compareItems(Object, Object)} at each {@link #add(Object)} and
-	 * thus slowing down the addition of new items.
-	 * <p>
-	 * Changing this value affects only newly added items.
-	 * <p>
-	 * The default value is false, i.e. duplicates are accepted and
-	 * adding new objects is faster. 
-	 * @see #add(Object)  
-	 */
-	public void setIgnoreDuplicates(boolean ignoreDuplicates) {
-		this.ignoreDuplicates = ignoreDuplicates;
-	}
-	
 	/**
 	 * @see #setIgnoreDuplicates(boolean)
 	 * @see #add(Object)  

@@ -2,9 +2,11 @@ package com.slavi.util.tree;
 
 public class TreeNode<E> {
 	
-	protected E data;
+	protected final E data;
 	
-	protected TreeNode<E> left, right;
+	protected volatile TreeNode<E> left;
+	
+	protected volatile TreeNode<E> right;
 	
 	public TreeNode(E data) {
 		this.data = data;

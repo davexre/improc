@@ -24,7 +24,7 @@ public abstract class TXTKDTree<E> {
 	/**
 	 * The tree is stored to a text stream one node at a line.
 	 * <p>
-	 * Note: This method is thread UNSAFE even if called on {@link com.slavi.util.tree.ConcurrentKDTree}
+	 * Note: This method is thread UNSAFE
 	 */
 	public void toTextStream(KDTree<E> tree, PrintWriter fou) {
 		toTextStream_recursive(tree.getRoot(), fou);
