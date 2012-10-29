@@ -80,6 +80,7 @@ public class Triangle {
 			setCa(newTr);
 			return;
 		}
+		throw new Error();
 	}
 	
 	private Circle circumCircle;
@@ -102,6 +103,6 @@ public class Triangle {
 	public boolean isCCW() {
 		if (c == null)
 			return false;
-		return GeometryUtil.getTriangleArea(a, b, c) < 0;
+		return GeometryUtil.isCCW(a, b, c);
 	}
 }
