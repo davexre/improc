@@ -12,6 +12,8 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import com.slavi.util.Const;
+
 import example.slavi.BasePointsListApplet;
 
 public class MyDelaunayApplet extends BasePointsListApplet {
@@ -33,6 +35,7 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 	}
 	
 	void dumpTriangle(MyDelaunay d, Triangle t, ArrayList<Triangle> triangles) {
+		String isOk = MyDelaunay.isTriangleOk(t) ? "  " : "* ";
 		String id = Integer.toString(triangles.indexOf(t));
 		String a = Integer.toString(points.indexOf(t.a));
 		String b = Integer.toString(points.indexOf(t.b));
@@ -40,7 +43,7 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 		String ab = Integer.toString(d.triangles.indexOf(t.getAb()));
 		String bc = c == null ? " null" : Integer.toString(triangles.indexOf(t.getBc()));
 		String ca = c == null ? " null" : Integer.toString(triangles.indexOf(t.getCa()));
-		System.out.println(
+		System.out.println(isOk +
 				"id=" + id + 
 				"\ta=" + a + 
 				"\tb=" + b + 
@@ -128,8 +131,10 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, bo.getWidth(), bo.getHeight());
 			
-			ArrayList<Triangle> triangles = new ArrayList<Triangle>(d.getTriangles());
+			ArrayList<Triangle> triangles = d.getTriangles();
+			System.out.println("\n\nPoint " + i);
 			for (Triangle t : triangles) {
+				dumpTriangle(d, t, triangles);
 				drawTriangle(g, t);
 			}
 			
@@ -139,7 +144,7 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 			}
 			paintPoints(g);
 			
-			ImageIO.write(bo, "png", new File("out" + i + ".png"));
+			ImageIO.write(bo, "png", new File(Const.workDir, "out" + i + ".png"));
 		}
 	}
 	
