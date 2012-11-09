@@ -13,61 +13,54 @@ public abstract class MyDelaunay {
 
 	public abstract int getPointId(Point2D p);
 	
-	public ArrayList<Point2D> points = new ArrayList<Point2D>();
+	public ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 	public ArrayList<Triangle> triangles = new ArrayList<Triangle>();
-	Triangle firstT, lastT;
 	public Triangle root;
-	boolean allCollinear = true;
-	Point2D.Double firstP, lastP;
-	int pointsCount = 0;
-	
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Points:    ").append(points.size()).append('\n');
-		sb.append("Triangles: ").append(triangles.size()).append('\n');
-		for (Triangle t : triangles) {
-			sb.append(triangle2StringFull(t));
-			sb.append('\n');
-		}
-		return sb.toString();
-	}
-	
-	void recursiveAddTriangle(Triangle t, ArrayList<Triangle> r) {
-		if (t == null)
-			return;
-		if (r.contains(t))
-			return;
-		r.add(t);
-		recursiveAddTriangle(t.getAb(), r);
-		recursiveAddTriangle(t.getBc(), r);
-		recursiveAddTriangle(t.getCa(), r);
-	}
 	
 	public ArrayList<Triangle> getTriangles() {
-		ArrayList<Triangle> r = new ArrayList<Triangle>();
-		if (root == null) {
-			System.out.println("All colinear");
-			recursiveAddTriangle(firstT, r);
-		} else {
-			recursiveAddTriangle(root, r);
-		}
-		return r;
+		return triangles;
 	}
 	
 	public void insertPoint(Point2D.Double p) {
 		points.add(p);
-		Triangle t = insertPointSimple(p);
+		if (points.size() == 1) {
+			return;
+		}
+		if (points.size() == 2) {
+			Point2D.Double a = points.get(0);
+			root = new Triangle(a, p);
+			Triangle mirrorT = new Triangle(p, a);
+			triangles.add(root);
+			triangles.add(mirrorT);
+			
+			root.setAb(mirrorT);
+			root.setBc(mirrorT);
+			root.setCa(mirrorT);
+			
+			mirrorT.setAb(root);
+			mirrorT.setBc(root);
+			mirrorT.setCa(root);
+
+			return;
+		}
+
+		Triangle t = doInsert(root, p);
+		System.out.println("Selected triangle id=" + triangles.indexOf(t));
+		dumpIfBadTrianglesExist();
 		if (t == null)
 			return;
 		Triangle t1 = t;
-		if (true) {
-			flip_NEW(t1);
+/*		if (true) {
+			do {
+				flip_NEW(t1);
+				t1 = t1.getCa();
+			} while (t1 != t && t1.c != null);
 		} else {
 			do {
 				flip(t1, 1);
 				t1 = t1.getCa();
 			} while (t1 != t && t1.c != null);
-		}
+		}*/
 	}
 	
 	public static boolean isLess(Point2D.Double a, Point2D.Double b) {
@@ -79,9 +72,15 @@ public abstract class MyDelaunay {
 	}
 
 	
-	static Triangle findTriangle(Triangle t, Point2D.Double p) {
+	private Triangle doInsert(Triangle t, Point2D.Double p) {
 		while (t != null) {
-			switch (GeometryUtil.pointToLine(t.a, t.b, p)) {
+			int abp = GeometryUtil.pointToLine(t.a, t.b, p);
+			switch (abp) {
+			case GeometryUtil.PointToLinePosition.EqualsTheStartPoint:
+			case GeometryUtil.PointToLinePosition.EqualsTheEndPoint:
+			case GeometryUtil.PointToLinePosition.InvalidLine:
+				// TODO: Do nothing. Point should be ignored.
+				return null;
 			case GeometryUtil.PointToLinePosition.AfterTheEndPoint:
 				if (t.c == null)
 					return t;
@@ -97,18 +96,24 @@ public abstract class MyDelaunay {
 				continue;
 
 			case GeometryUtil.PointToLinePosition.Inside:
+				return splitOnEdgeAB(t, p);
 			case GeometryUtil.PointToLinePosition.NegativePlane:
-			case GeometryUtil.PointToLinePosition.InvalidLine:
 			default:
 				break;
 			}
 			
 			if (t.c == null) {
 				// Half plane
-				return t;
+				return extendOutside(t, p);
 			}
 
-			switch (GeometryUtil.pointToLine(t.b, t.c, p)) {
+			int bcp = GeometryUtil.pointToLine(t.b, t.c, p);
+			switch (bcp) {
+			case GeometryUtil.PointToLinePosition.EqualsTheStartPoint:
+			case GeometryUtil.PointToLinePosition.EqualsTheEndPoint:
+			case GeometryUtil.PointToLinePosition.InvalidLine:
+				// TODO: Do nothing. Point should be ignored.
+				return null;
 			case GeometryUtil.PointToLinePosition.AfterTheEndPoint:
 				t = t.getCa();
 				continue;
@@ -120,13 +125,22 @@ public abstract class MyDelaunay {
 				continue;
 
 			case GeometryUtil.PointToLinePosition.Inside:
+				t.rotateCounterClockWise();
+				splitOnEdgeAB(t, p);
+				break;
+				
 			case GeometryUtil.PointToLinePosition.NegativePlane:
-			case GeometryUtil.PointToLinePosition.InvalidLine:
 			default:
 				break;
 			}
 			
-			switch (GeometryUtil.pointToLine(t.c, t.a, p)) {
+			int cap = GeometryUtil.pointToLine(t.c, t.a, p);
+			switch (cap) {
+			case GeometryUtil.PointToLinePosition.EqualsTheStartPoint:
+			case GeometryUtil.PointToLinePosition.EqualsTheEndPoint:
+			case GeometryUtil.PointToLinePosition.InvalidLine:
+				// TODO: Do nothing. Point should be ignored.
+				return null;
 			case GeometryUtil.PointToLinePosition.AfterTheEndPoint:
 				t = t.getAb();
 				continue;
@@ -138,16 +152,82 @@ public abstract class MyDelaunay {
 				continue;
 
 			case GeometryUtil.PointToLinePosition.Inside:
+				t.rotateClockWise();
+				splitOnEdgeAB(t, p);
+				break;
+				
 			case GeometryUtil.PointToLinePosition.NegativePlane:
-			case GeometryUtil.PointToLinePosition.InvalidLine:
 			default:
 				break;
 			}
 			
 			// Point is inside this triangle
+			Triangle left = new Triangle(t.c, t.a, p);
+			Triangle right = new Triangle(t.b, t.c, p);
+			triangles.add(left);
+			triangles.add(right);
+			t.c = p;
+			left.setAb(t.getCa());
+			left.setBc(t);
+			left.setCa(right);
+			right.setAb(t.getBc());
+			right.setBc(left);
+			right.setCa(t);
+			left.getAb().switchneighbors(t, left);
+			right.getAb().switchneighbors(t, right);
+			t.setBc(right);
+			t.setCa(left);
 			return t;
 		}
 		return null;
+	}
+	
+	private Triangle splitOnEdgeAB(Triangle t, Point2D.Double p) {
+		if ((t.c != null) && 
+			(GeometryUtil.pointToLine(t.a, p, t.c) >= GeometryUtil.PointToLinePosition.PositivePlane))
+			throw new RuntimeException("WTF?");
+
+		dumpTriangle(t, "Split");
+		dumpIfBadTrianglesExist();
+		System.out.println();
+		
+		Triangle right = new Triangle(p, t.b);
+		right.c = t.c;
+		Triangle mirrorRight = new Triangle(t.b, p);
+		triangles.add(right);
+		triangles.add(mirrorRight);
+		Triangle mirrorT = t.getAb();
+
+		if (t.a == mirrorT.b) {
+			mirrorRight.c = mirrorT.c;
+			mirrorRight.setCa(mirrorT.getCa());
+			mirrorT.a = p;
+			mirrorT.setCa(mirrorRight);
+		} else if (t.a == mirrorT.c) {
+			mirrorRight.c = mirrorT.a;
+			mirrorRight.setCa(mirrorT.getAb());
+			mirrorT.b = p;
+			mirrorT.setAb(mirrorRight);
+		} else if (t.a == mirrorT.a) {
+			mirrorRight.c = mirrorT.b;
+			mirrorRight.setCa(mirrorT.getBc());
+			mirrorT.c = p;
+			mirrorT.setBc(mirrorRight);
+		} else {
+			throw new RuntimeException("WTF?");
+		}
+
+		right.setAb(mirrorRight);
+		right.setBc(t.getBc());
+		right.setCa(t);
+
+		mirrorRight.setAb(right);
+		mirrorRight.setBc(mirrorT);
+
+		t.b = p;
+		t.setBc(right);
+		
+		return right;
 	}
 	
 	/**
@@ -156,151 +236,52 @@ public abstract class MyDelaunay {
 	Triangle extendOutside(Triangle t, Point2D.Double p) {
 		// Triangle t is a "border" tirangle, i.e. t.c == null 
 		if (GeometryUtil.pointToLine(t.a, t.b, p) == GeometryUtil.PointToLinePosition.Inside) {
-//			System.out.println("extend outside on edge " + getPointId(p));
-			Triangle left = new Triangle(t.a, p);
-			Triangle right = new Triangle(p, t.b);
-			triangles.add(left);
-			triangles.add(right);
-			left.setAb(t);
-			left.setBc(right);
-			left.setCa(t.getCa());
-			right.setAb(t);
-			right.setBc(t.getBc());
-			right.setCa(left);
-			t.c = p;
-			t.setBc(right);
-			t.setCa(left);
-			return t;
-/*
-			// original way
-			Triangle t1 = new Triangle(t.a, t.b, p);
-			Triangle right = new Triangle(p, t.b);
-			triangles.add(t1);
-			triangles.add(right);
-			t.b = p;
-			t1.setAb(t.getAb());
-			t1.getAb().switchneighbors(t, t1);
-			t1.setBc(right);
-			right.setAb(t1);
-			t1.setCa(t);
-			t.setAb(t1);
-			right.setBc(t.getBc());
-			right.getBc().setCa(right);
-			right.setCa(t);
-			t.setBc(right);
-			return t1;
- */
-/*			
-			// my old way
-			Triangle t1 = new Triangle(t.a, t.b, p);
-			Triangle right = new Triangle(p, t.b);
-			triangles.add(t1);
-			triangles.add(right);
-			t1.setAb(t.getAb());
-			t1.setBc(right);
-			t1.setCa(t);
-			t1.getAb().switchneighbors(t, t1);
-
-			right.setAb(t1);
-			right.setBc(t.getBc());
-			right.setCa(t);
-			right.getBc().setCa(right);
-			
-			t.b = p;
-			t.setAb(t1);
-			t.setBc(right);
-			return t1;
- */
-			
+			// already handled
+			throw new RuntimeException("WTF?");
 		} else {
-			Triangle left = extendcounterclock(t, p);
-			Triangle right = extendclock(t, p);
-			left.setBc(right);
-			right.setCa(left);
-			return right.getAb();
-		}
-	}
+			Triangle leftT = new Triangle();
+			Triangle rightT = new Triangle();
+			triangles.add(leftT);
+			triangles.add(rightT);
 
-	Triangle extendInside(Triangle t, Point2D.Double p) {
-		Triangle t1 = treatDegeneracyInside(t, p);
-		if (t1 != null) {
-			return t1;
-		} else {
-			Triangle t2 = new Triangle(t.c, t.a, p);
-			Triangle t3 = new Triangle(t.b, t.c, p);
-			triangles.add(t2);
-			triangles.add(t3);
-			t.c = p;
-			t2.setAb(t.getCa());
-			t2.setBc(t);
-			t2.setCa(t3);
-			t3.setAb(t.getBc());
-			t3.setBc(t2);
-			t3.setCa(t);
-			t2.getAb().switchneighbors(t, t2);
-			t3.getAb().switchneighbors(t, t3);
-			t.setBc(t3);
-			t.setCa(t2);
-			return t;
-		}
-	}
+			Triangle curT = t;
+			while (true) {
+				// Go Left (counter clock wise)
+				curT.c = p;
+				Triangle nextT = curT.getCa();
+				if (GeometryUtil.pointToLine(nextT.a, nextT.b, p) >= GeometryUtil.PointToLinePosition.PositivePlane) {
+					leftT.a = curT.a;
+					leftT.b = p;
+					leftT.setAb(curT);
+					leftT.setBc(rightT);
+					leftT.setCa(nextT);
 
-	Triangle treatDegeneracyInside(Triangle t, Point2D.Double p) {
-		if (t.getAb().c == null && GeometryUtil.pointToLine(t.b, t.a, p) == GeometryUtil.PointToLinePosition.Inside)
-			return extendOutside(t.getAb(), p);
-		if (t.getBc().c == null && GeometryUtil.pointToLine(t.c, t.b, p) == GeometryUtil.PointToLinePosition.Inside)
-			return extendOutside(t.getBc(), p);
-		if (t.getCa().c == null && GeometryUtil.pointToLine(t.a, t.c, p) == GeometryUtil.PointToLinePosition.Inside)
-			return extendOutside(t.getCa(), p);
-		else
-			return null;
-	}
-
-	Triangle extendclock(Triangle t, Point2D.Double p) {
-/*		while (true) {
-			Triangle oldRightT = t.getBc();
-			if (GeometryUtil.pointToLine(oldRightT.a, oldRightT.b, p) >= GeometryUtil.PointToLinePosition.PositivePlane) {
-				Triangle newRightT = new Triangle(p, t.b);
-				triangles.add(newRightT);
-				t.c = p;
-				newRightT.setAb(t);
-				t.setBc(newRightT);
-				newRightT.setBc(oldRightT);
-				oldRightT.setCa(newRightT);
-				return newRightT;
+					nextT.setBc(leftT);
+					curT.setCa(leftT);
+					break;
+				}
+				curT = nextT;
 			}
-			t = oldRightT;
-			oldRightT = t.getBc();
-		}
-*/
-		t.c = p;
-		Triangle rightT = t.getBc();
-		if (GeometryUtil.pointToLine(rightT.a, rightT.b, p) >= GeometryUtil.PointToLinePosition.PositivePlane) {
-			Triangle newT = new Triangle(p, t.b);
-			triangles.add(newT);
-			newT.setAb(t);
-			t.setBc(newT);
-			newT.setBc(rightT);
-			rightT.setCa(newT);
-			return newT;
-		} else {
-			return extendclock(rightT, p);
-		}
-	}
-	
-	Triangle extendcounterclock(Triangle t, Point2D.Double p) {
-		t.c = p;
-		Triangle leftT = t.getCa();
-		if (GeometryUtil.pointToLine(leftT.a, leftT.b, p) >= GeometryUtil.PointToLinePosition.PositivePlane) {
-			Triangle newT = new Triangle(t.a, p);
-			triangles.add(newT);
-			newT.setAb(t);
-			t.setCa(newT);
-			newT.setCa(leftT);
-			leftT.setBc(newT);
-			return newT;
-		} else {
-			return extendcounterclock(leftT, p);
+
+			curT = t;
+			while (true) {
+				// Go Right (clock wise)
+				curT.c = p;
+				Triangle nextT = curT.getBc();
+				if (GeometryUtil.pointToLine(nextT.a, nextT.b, p) >= GeometryUtil.PointToLinePosition.PositivePlane) {
+					rightT.a = p;
+					rightT.b = curT.b;
+					rightT.setAb(curT);
+					rightT.setBc(nextT);
+					rightT.setCa(leftT);
+
+					nextT.setCa(rightT);
+					curT.setBc(rightT);
+					break;
+				}
+				curT = nextT;
+			}
+			return rightT;
 		}
 	}
 
@@ -308,9 +289,11 @@ public abstract class MyDelaunay {
 		Triangle t1 = t.getAb();
 		if ((t1.c == null) || !t1.getCircumCircle().isPointInside(t.c))
 			return;
+
 //		System.out.println("Before");
 //		dumpTriangle(t, "T ");
 //		dumpTriangle(t1, "T1");
+
 		if (t.a == t1.a) {
 			t.a = t1.b;
 			t1.c = t.c;
@@ -347,24 +330,56 @@ public abstract class MyDelaunay {
 		flip_NEW(t1);
 	}
 
-	String triangle2String(Triangle t) {
-		return	"(" + getPointId(t.a) + ":" + 
-				getPointId(t.b) + ":" + 
-				getPointId(t.c) + ")";
-	}
-	
-	String triangle2StringFull(Triangle t) {
-		return	String.format("%-10s", triangle2String(t)) +
-				" ab" + String.format("%-10s", triangle2String(t.getAb())) +
-				" bc" + String.format("%-10s", triangle2String(t.getBc())) +
-				" ca" + String.format("%-10s", triangle2String(t.getCa()));
-	}
-	
 	static boolean containsPoint(Triangle t, Point2D.Double p) {
-		return ((p != null) && (
+		return ((t != null) && (p != null) && (
 				(t.a == p) ||
 				(t.b == p) ||
 				(t.c == p)));
+	}
+	
+	public void dumpIfBadTrianglesExist() {
+		boolean badExist = false;
+		for (Triangle t : triangles) {
+			if (!isTriangleOk(t)) {
+				badExist = true;
+				break;
+			}
+		}
+		if (badExist)
+			System.out.println("\nBAD triangles exist");
+		else
+			System.out.println("\nNo bad triangles");
+		dumpTriangles();
+	}
+
+	public void dumpTriangles() {
+		for (Triangle t : triangles) {
+			System.out.println(triangle2String(t));
+		}
+	}
+
+	public void dumpTriangle(Triangle t, String name) {
+		System.out.println(name);
+		System.out.println(triangle2String(t));
+	}
+	
+	public String triangle2String(Triangle t) {
+		String isOk = MyDelaunay.isTriangleOk(t) ? "  " : "* ";
+		String id = Integer.toString(triangles.indexOf(t));
+		String a = Integer.toString(getPointId(t.a));
+		String b = Integer.toString(getPointId(t.b));
+		String c = t.c == null ? "null" : Integer.toString(getPointId(t.c));
+		String ab = Integer.toString(triangles.indexOf(t.getAb()));
+		String bc = c == null ? " null" : Integer.toString(triangles.indexOf(t.getBc()));
+		String ca = c == null ? " null" : Integer.toString(triangles.indexOf(t.getCa()));
+		return isOk +
+				"id=" + id + 
+				"\ta=" + a + 
+				"\tb=" + b + 
+				"\tc=" + c +
+				"\tab=" + ab +
+				"\tbc=" + bc +
+				"\tca=" + ca;
 	}
 	
 	public static boolean isTriangleOk(Triangle t) {
@@ -373,8 +388,12 @@ public abstract class MyDelaunay {
 			containsPoint(t.getAb(), t.b) &&
 			containsPoint(t.getBc(), t.b) &&
 			containsPoint(t.getCa(), t.a)) {
-			if (t.c == null)
-				return true;
+			if (t.c == null) {
+				if (t.getBc().c == null && 
+					t.getCa().c == null)
+					return true;
+				return false;
+			}
 			if (containsPoint(t.getBc(), t.c) &&
 				containsPoint(t.getCa(), t.c))
 				return true;
@@ -382,10 +401,6 @@ public abstract class MyDelaunay {
 		return false;
 	}
 	
-	public void dumpTriangle(Triangle t, String name) {
-		System.out.println(name + triangle2StringFull(t));
-	}
-
 	void flip(Triangle t, int recurseCount) {
 		if (recurseCount > 1)
 			System.out.println("WTF?!? " + recurseCount);
@@ -432,170 +447,5 @@ public abstract class MyDelaunay {
 		
 		flip(t, recurseCount + 1);
 		flip(t2, recurseCount + 1);
-	}
-
-	Triangle insertPointSimple(Point2D.Double p) {
-		pointsCount++;
-		if (pointsCount == 1) {
-			firstP = p;
-			return null;
-		}
-		if (pointsCount == 2) {
-			startTriangulation(p);
-			return null;
-		}
-		Triangle t = findTriangle(root, p);
-		System.out.println("Selected triangle id=" + triangles.indexOf(t));
-		if (t.c == null) {
-			// Half plane
-			extendOutside(t, p);
-		} else {
-			extendInside(t, p);
-		}
-		return t;
-	}
-	
-	Triangle insertPointSimple_OLD(Point2D.Double p) {
-		pointsCount++;
-		if (!allCollinear) {
-			Triangle t = findTriangle(root, p);
-			System.out.println("Selected triangle id=" + triangles.indexOf(t));
-			if (t.c == null) {
-				// Half plane
-				extendOutside(t, p);
-			} else {
-				extendInside(t, p);
-			}
-			return t;
-		}
-		if (pointsCount == 1) {
-			firstP = p;
-			return null;
-		}
-		if (pointsCount == 2) {
-			startTriangulation(p);
-			return null;
-		}
-		switch (GeometryUtil.pointToLine(firstP, lastP, p)) {
-		case GeometryUtil.PointToLinePosition.NegativePlane:
-			extendOutside(firstT.getAb(), p);
-			allCollinear = false;
-			break;
-
-		case GeometryUtil.PointToLinePosition.PositivePlane:
-			extendOutside(firstT, p);
-			allCollinear = false;
-			break;
-
-		case GeometryUtil.PointToLinePosition.Inside: {
-			Triangle leftT;
-			for (leftT = firstT; isGreater(p, leftT.a); leftT = leftT.getCa())
-				;
-			Triangle newT = new Triangle(p, leftT.b);
-			Triangle newMirrorT = new Triangle(leftT.b, p);
-			triangles.add(newT);
-			triangles.add(newMirrorT);
-			Triangle mirrorLeft = leftT.getAb();
-			leftT.b = p;
-			mirrorLeft.a = p;
-			Triangle oldRight = leftT.getBc();
-			Triangle oldMirrorLeft = mirrorLeft.getCa();
-			
-			newT.setAb(newMirrorT);
-			newMirrorT.setAb(newT);
-			
-			newT.setBc(oldRight);
-			oldRight.setCa(newT);
-			
-			newT.setCa(leftT);
-			leftT.setBc(newT);
-			
-			newMirrorT.setCa(oldMirrorLeft);
-			oldMirrorLeft.setBc(newMirrorT);
-			
-			newMirrorT.setBc(mirrorLeft);
-			mirrorLeft.setCa(newMirrorT);
-			if (firstT == leftT) {
-				firstT = newT;
-			}
-			break;
-		}
-		case GeometryUtil.PointToLinePosition.BeforeTheStartPoint: {
-			Triangle newT = new Triangle(p, firstP);
-			Triangle newMirrorT = new Triangle(firstP, p);
-			triangles.add(newT);
-			triangles.add(newMirrorT);
-			
-			Triangle firstMirror = firstT.getAb();
-			
-			newT.setAb(newMirrorT);
-			newMirrorT.setAb(newT);
-			
-			newT.setBc(firstT);
-			newMirrorT.setCa(firstMirror);
-			
-			newT.setCa(newMirrorT);
-			newMirrorT.setBc(newT);
-
-			firstT.setCa(newT);
-			firstMirror.setBc(newMirrorT);
-
-			firstT = newT;
-			firstP = p;
-			break;
-		}
-		case GeometryUtil.PointToLinePosition.AfterTheEndPoint: {
-			Triangle newT = new Triangle(lastP, p);
-			Triangle newMirror = new Triangle(p, lastP);
-			triangles.add(newT);
-			triangles.add(newMirror);
-			
-			Triangle lastMirror = lastT.getAb();
-			
-			newT.setAb(newMirror);
-			newMirror.setAb(newT);
-			
-			newT.setBc(newMirror);
-			newMirror.setCa(newT);
-			
-			newT.setCa(lastT);
-			newMirror.setBc(lastMirror);
-			
-			lastT.setCa(newT);
-			lastMirror.setBc(newMirror);
-			
-			lastT = newMirror;
-			lastP = p;
-			break;
-		}
-		}
-		return null;
-	}
-	
-	void startTriangulation(Point2D.Double p) {
-		Point2D.Double b;
-		Point2D.Double a;
-		if (isLess(firstP, p)) {
-			a = firstP;
-			b = p;
-		} else {
-			a = p;
-			b = firstP;
-		}
-		root = lastT = firstT = new Triangle(a, b);
-		Triangle mirrorT = new Triangle(b, a);
-		triangles.add(firstT);
-		triangles.add(mirrorT);
-		
-		firstT.setAb(mirrorT);
-		firstT.setBc(mirrorT);
-		firstT.setCa(mirrorT);
-		
-		mirrorT.setAb(firstT);
-		mirrorT.setBc(firstT);
-		mirrorT.setCa(firstT);
-		
-		firstP = b;
-		lastP = a;
 	}
 }

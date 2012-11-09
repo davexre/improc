@@ -60,6 +60,8 @@ public class GeometryUtil {
 	}
 	
 	public static interface PointToLinePosition {
+		public static int EqualsTheStartPoint = -2;
+		public static int EqualsTheEndPoint = -1;
 		public static int Inside = 0;
 		public static int NegativePlane = 1;	// Left
 		public static int PositivePlane = 2;	// Right
@@ -91,41 +93,57 @@ public class GeometryUtil {
 		if (dXBA > 0.0) {
 			if (pointX < lineX1) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (pointX <= lineX2) {
+			} else if (pointX == lineX1) {
+				return PointToLinePosition.EqualsTheStartPoint;
+			} else if (pointX > lineX2) {
+				return PointToLinePosition.AfterTheEndPoint;
+			} else if (pointX == lineX2) {
+				return PointToLinePosition.EqualsTheEndPoint;
+			} else {
 				// P between A and B
 				return PointToLinePosition.Inside;
-			} else {
-				return PointToLinePosition.AfterTheEndPoint;
 			}
 		}
 		
 		if (dXBA < 0.0) {
 			if (lineX1 < pointX) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (lineX2 <= pointX) {
-				return PointToLinePosition.Inside;
-			} else {
+			} else if (lineX1 == pointX) {
+				return PointToLinePosition.EqualsTheStartPoint;
+			} else if (lineX2 > pointX) {
 				return PointToLinePosition.AfterTheEndPoint;
+			} else if (lineX2 == pointX) {
+				return PointToLinePosition.EqualsTheEndPoint;
+			} else {
+				return PointToLinePosition.Inside;
 			}
 		}
 		
 		if (dYBA > 0.0) {
 			if (pointY < lineY1) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (pointY <= lineY2) {
-				return PointToLinePosition.Inside;
-			} else {
+			} else if (pointY == lineY1) {
+				return PointToLinePosition.EqualsTheStartPoint;
+			} else if (pointY > lineY2) {
 				return PointToLinePosition.AfterTheEndPoint;
+			} else if (pointY == lineY2) {
+				return PointToLinePosition.EqualsTheEndPoint;
+			} else {
+				return PointToLinePosition.Inside;
 			}
 		}
 		
 		if (dYBA < 0.0) {
 			if (lineY1 < pointY) {
 				return PointToLinePosition.BeforeTheStartPoint;
-			} else if (lineY2 <= pointY) {
-				return PointToLinePosition.Inside;
-			} else {
+			} else if (lineY1 == pointY) {
+				return PointToLinePosition.EqualsTheStartPoint;
+			} else if (lineY2 > pointY) {
 				return PointToLinePosition.AfterTheEndPoint;
+			} else if (lineY2 == pointY) {
+				return PointToLinePosition.EqualsTheEndPoint;
+			} else {
+				return PointToLinePosition.Inside;
 			}
 		}
 		// The points of the line are equal, i.e. lineA = lineB

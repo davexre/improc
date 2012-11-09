@@ -1,0 +1,23 @@
+<tests>
+<!-- 	<test>
+		<name>Error in flip</name>
+		<points>
+			<point x=" 38.0" y=" 79.0"/>
+			<point x=" 84.0" y="138.0"/>
+			<point x=" 90.0" y=" 21.0"/>
+			<point x="135.0" y=" 79.0"/>
+			<point x="115.0" y="108.0"/>
+		</points>
+	</test>
+ -->
+	<test>
+		<name>Not connected point</name>
+		<points>
+			<point x="100.0" y="500.0"/>
+			<point x="300.0" y="500.0"/>
+			<point x="200.0" y="500.0"/>
+			<point x="400.0" y="500.0"/>
+			<point x="200.0" y="100.0"/>
+		</points>
+	</test>
+</tests>

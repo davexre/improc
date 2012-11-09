@@ -53,6 +53,8 @@ public class Triangle {
 	public Triangle(Point2D.Double a, Point2D.Double b, Point2D.Double c) {
 		this.a = a;
 		switch (GeometryUtil.pointToLine(a, b, c)) {
+		case GeometryUtil.PointToLinePosition.EqualsTheStartPoint:
+		case GeometryUtil.PointToLinePosition.EqualsTheEndPoint:
 		case GeometryUtil.PointToLinePosition.Inside:
 		case GeometryUtil.PointToLinePosition.NegativePlane:
 		case GeometryUtil.PointToLinePosition.BeforeTheStartPoint:
@@ -61,6 +63,7 @@ public class Triangle {
 			this.c = c;
 			break;
 		default:
+			System.out.println("Swap triangle points");
 			this.b = c;
 			this.c = b;
 			break;
@@ -104,5 +107,27 @@ public class Triangle {
 		if (c == null)
 			return false;
 		return GeometryUtil.isCCW(a, b, c);
+	}
+	
+	public void rotateClockWise() {
+		Point2D.Double tmpP = a;
+		a = b;
+		b = c;
+		c = tmpP;
+		Triangle tmpT = ab;
+		ab = bc;
+		bc = ca;
+		ca = tmpT;
+	}
+
+	public void rotateCounterClockWise() {
+		Point2D.Double tmpP = a;
+		a = c;
+		c = b;
+		b = tmpP;
+		Triangle tmpT = ab;
+		ab = ca;
+		ca = bc;
+		bc = tmpT;
 	}
 }
