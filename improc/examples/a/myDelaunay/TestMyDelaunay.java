@@ -18,8 +18,6 @@ import org.jdom.JDOMException;
 import com.slavi.io.xml.XMLHelper;
 import com.slavi.util.Const;
 
-import example.slavi.BasePointsListApplet;
-
 public class TestMyDelaunay {
 
 	static class TestData {

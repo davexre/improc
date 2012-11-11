@@ -9,7 +9,6 @@ public class TestInvocationHandler implements InvocationHandler {
 		this.testImpl = impl;
 	}
 
-	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (Object.class == method.getDeclaringClass()) {
 			String name = method.getName();

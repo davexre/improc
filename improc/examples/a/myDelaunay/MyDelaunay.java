@@ -182,50 +182,57 @@ public abstract class MyDelaunay {
 		return null;
 	}
 	
-	private Triangle splitOnEdgeAB(Triangle t, Point2D.Double p) {
-		if ((t.c != null) && 
-			(GeometryUtil.pointToLine(t.a, p, t.c) >= GeometryUtil.PointToLinePosition.PositivePlane))
+	private Triangle splitOnEdgeAB(Triangle left, Point2D.Double p) {
+		if ((left.c != null) && 
+			(GeometryUtil.pointToLine(left.a, p, left.c) >= GeometryUtil.PointToLinePosition.PositivePlane))
 			throw new RuntimeException("WTF?");
 
-		dumpTriangle(t, "Split");
+		dumpTriangle(left, "Split");
 		dumpIfBadTrianglesExist();
 		System.out.println();
 		
-		Triangle right = new Triangle(p, t.b);
-		right.c = t.c;
-		Triangle mirrorRight = new Triangle(t.b, p);
+		Triangle right = new Triangle(p, left.b);
+		right.c = left.c;
+		Triangle mirrorLeft = new Triangle(p, left.a);
 		triangles.add(right);
-		triangles.add(mirrorRight);
-		Triangle mirrorT = t.getAb();
+		triangles.add(mirrorLeft);
+		Triangle mirrorRight = left.getAb();
 
-		if (t.a == mirrorT.b) {
-			mirrorRight.c = mirrorT.c;
-			mirrorRight.setCa(mirrorT.getCa());
-			mirrorT.a = p;
-			mirrorT.setCa(mirrorRight);
-		} else if (t.a == mirrorT.c) {
-			mirrorRight.c = mirrorT.a;
-			mirrorRight.setCa(mirrorT.getAb());
-			mirrorT.b = p;
-			mirrorT.setAb(mirrorRight);
-		} else if (t.a == mirrorT.a) {
-			mirrorRight.c = mirrorT.b;
-			mirrorRight.setCa(mirrorT.getBc());
-			mirrorT.c = p;
-			mirrorT.setBc(mirrorRight);
+		if (left.a == mirrorRight.b) {
+			System.out.println("----1");
+			mirrorLeft.c = mirrorRight.c;
+			mirrorLeft.setBc(mirrorRight.getBc());
+			mirrorRight.b = p;
+			mirrorRight.setAb(right);
+			mirrorRight.setBc(mirrorLeft);
+		} else if (left.a == mirrorRight.c) {
+			System.out.println("----2");
+			mirrorLeft.c = mirrorRight.a;
+			mirrorLeft.setBc(mirrorRight.getCa());
+			mirrorRight.c = p;
+			mirrorRight.setBc(right);
+			mirrorRight.setCa(mirrorLeft);
+		} else if (left.a == mirrorRight.a) {
+			System.out.println("----3");
+			mirrorLeft.c = mirrorRight.b;
+			mirrorLeft.setBc(mirrorRight.getAb());
+			mirrorRight.a = p;
+			mirrorRight.setAb(mirrorLeft);
+			mirrorRight.setCa(right);
 		} else {
 			throw new RuntimeException("WTF?");
 		}
 
 		right.setAb(mirrorRight);
-		right.setBc(t.getBc());
-		right.setCa(t);
+		right.setBc(left.getBc());
+		right.setCa(left);
 
-		mirrorRight.setAb(right);
-		mirrorRight.setBc(mirrorT);
+		mirrorLeft.setAb(left);
+		mirrorLeft.setCa(mirrorRight);
 
-		t.b = p;
-		t.setBc(right);
+		left.b = p;
+		left.setAb(mirrorLeft);
+		left.setBc(right);
 		
 		return right;
 	}
