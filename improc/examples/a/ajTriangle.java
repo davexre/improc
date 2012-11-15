@@ -349,9 +349,9 @@ public class ajTriangle extends ajElement {
 			return " T" + ((ajElement) (ajtriangle)).ident;
 	}
 
-	ajPoint a;
-	ajPoint b;
-	ajPoint c;
+	public ajPoint a;
+	public ajPoint b;
+	public ajPoint c;
 	ajTriangle ab;
 	ajTriangle bc;
 	ajTriangle ca;
@@ -359,4 +359,36 @@ public class ajTriangle extends ajElement {
 	boolean halfplane;
 	boolean visitflag;
 	private static boolean visitValue;
+
+	public ajTriangle getAb() {
+		return ab;
+	}
+
+	public void setAb(ajTriangle ab) {
+		this.ab = ab;
+	}
+
+	public ajTriangle getBc() {
+		return bc;
+	}
+
+	public void setBc(ajTriangle bc) {
+		this.bc = bc;
+	}
+
+	public ajTriangle getCa() {
+		return ca;
+	}
+
+	public void setCa(ajTriangle ca) {
+		this.ca = ca;
+	}
+
+	public boolean isHalfplane() {
+		return halfplane;
+	}
+
+	public void setHalfplane(boolean halfplane) {
+		this.halfplane = halfplane;
+	}
 }

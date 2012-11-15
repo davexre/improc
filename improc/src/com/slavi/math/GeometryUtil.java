@@ -491,16 +491,23 @@ public class GeometryUtil {
 	 * @param ratioT the split ratio in the range [0..1]
 	 * @returns the split point.
 	 */
-	public static Point2D.Double splitPoint(Point2D.Double a, Point2D.Double b, double ratioT) {
+	public static Point2D.Double splitPoint(Point2D a, Point2D b, double ratioT) {
 		return new Point2D.Double(
-				a.x + ratioT * (b.x - a.x),
-				a.y + ratioT * (b.y - a.y));
+				a.getX() + ratioT * (b.getX() - a.getX()),
+				a.getY() + ratioT * (b.getY() - a.getY()));
 	}
 
-	public static Point2D.Double midPoint(Point2D.Double a, Point2D.Double b) {
+	public static Point2D midPoint(Point2D a, Point2D b, Point2D dest) {
+		dest.setLocation(
+				0.5 * (a.getX() + b.getX()),
+				0.5 * (a.getY() + b.getY()));
+		return dest;
+	}
+
+	public static Point2D.Double midPoint(Point2D a, Point2D b) {
 		return new Point2D.Double(
-				0.5 * (a.x + b.x),
-				0.5 * (a.y + b.y));
+				0.5 * (a.getX() + b.getX()),
+				0.5 * (a.getY() + b.getY()));
 	}
 
 }

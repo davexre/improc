@@ -94,7 +94,25 @@ public class GeometryUtilTest {
 		System.out.println(simplified);
 	}
 	
+	@Test
+	public void testPointToLine() {
+		Point2D.Double a = new Point2D.Double(1, 1);
+		Point2D.Double b = new Point2D.Double(2, 1);
+		Point2D.Double c = new Point2D.Double(2, 2);
+		Point2D.Double mid = GeometryUtil.midPoint(a, b);
+		
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, b, a) == GeometryUtil.PointToLinePosition.EqualsTheStartPoint);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, b, b) == GeometryUtil.PointToLinePosition.EqualsTheEndPoint);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, b, mid) == GeometryUtil.PointToLinePosition.Inside);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, b, c) == GeometryUtil.PointToLinePosition.NegativePlane);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, c, b) == GeometryUtil.PointToLinePosition.PositivePlane);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(mid, b, a) == GeometryUtil.PointToLinePosition.BeforeTheStartPoint);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, mid, b) == GeometryUtil.PointToLinePosition.AfterTheEndPoint);
+		TestUtils.assertTrue("", GeometryUtil.pointToLine(a, a, b) == GeometryUtil.PointToLinePosition.InvalidLine);
+	}
+	
 	public static void main(String[] args) {
-		new GeometryUtilTest().testSimplifyPolygon333();
+		new GeometryUtilTest().testPointToLine();
+		System.out.println("Done.");
 	}
 }

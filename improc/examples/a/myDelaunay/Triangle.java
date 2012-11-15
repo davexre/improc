@@ -130,4 +130,44 @@ public class Triangle {
 		ca = bc;
 		bc = tmpT;
 	}
+	
+	public enum TriangleRotation {
+		None,
+		CW,
+		CCW,
+		InvalidRotation,
+	}
+	
+	public TriangleRotation rotateAndMatchA(Point2D.Double pointA) {
+		if (pointA == null)
+			return TriangleRotation.InvalidRotation;
+		if (pointA == a) {
+			return TriangleRotation.None;
+		}
+		if (pointA == b) {
+			rotateCounterClockWise();
+			return TriangleRotation.CCW;
+		}
+		if (pointA == c) {
+			rotateClockWise();
+			return TriangleRotation.CW;
+		}
+		return TriangleRotation.InvalidRotation;
+	}
+	
+	public void unrotate(TriangleRotation rotation) {
+		switch (rotation) {
+		case CW:
+			rotateCounterClockWise();
+			break;
+		case CCW:
+			rotateClockWise();
+			break;
+		case None:
+			break;
+		case InvalidRotation:
+		default:
+			throw new RuntimeException("WTF?");
+		}
+	}
 }

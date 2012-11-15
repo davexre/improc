@@ -174,6 +174,22 @@ public class ajPoint extends ajElement {
 	public static final int BEHINDB = 4;
 	public static final int ERROR = 5;
 
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = (float) x;
+	}
+
+	public double getY() {
+		return y;
+	}
+
+	public void setY(double y) {
+		this.y = (float) y;
+	}
+
 	static {
 		SetSmallPoints(false);
 	}

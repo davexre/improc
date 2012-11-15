@@ -9,15 +9,28 @@
 			<point x="115.0" y="108.0"/>
 		</points>
 	</test>
- -->
+-->
+
 	<test>
 		<name>Not connected point</name>
+		<points>
+			<point x="100.0" y="100.0"/>
+			<point x="300.0" y="100.0"/>
+			<point x="200.0" y="500.0"/>
+			<point x="200.0" y="100.0"/>
+			<point x="400.0" y="100.0"/>
+		</points>
+	</test>
+<!--
+	<test>
+		<name>5 points in a line</name>
 		<points>
 			<point x="100.0" y="500.0"/>
 			<point x="300.0" y="500.0"/>
 			<point x="200.0" y="500.0"/>
 			<point x="400.0" y="500.0"/>
-			<point x="200.0" y="100.0"/>
+			<point x="500.0" y="500.0"/>
 		</points>
 	</test>
+ -->
 </tests>
