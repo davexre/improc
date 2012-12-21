@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project default="default">
+	<property name="download" location="target/download" />
+	<property name="unzip" location="target/unzip" />
+	
+	<target name="default">
+		<echo>
+			Should be invoked from Maven.
+			Instead use: mvn clean install
+		</echo>
+	</target>
+
+	<target name="main">
+		<mkdir dir="${download}" />
+		<get dest="${download}" skipexisting="true">
+			<url url="http://switch.dl.sourceforge.net/project/swt-chart/SWTChart/0.8.0/org.swtchart_0.8.0.zip" />
+
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/joalmixer-1_5_2.zip" />
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-src.zip" />
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/vecmath-1_5_2-src.zip" />
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.0/java3d-1_5-spec.zip" />
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-api-docs.zip" />
+			<url url="http://download.java.net/media/java3d/examples/1.5.2/j3d-examples-1_5_2-src.zip" />
+		</get>
+		
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-linux-amd64.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d" />
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-linux-i586.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d" />
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-macosx.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d" />
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-solaris-sparc.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d" />
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-solaris-x86.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d" />
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-windows-amd64.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d/lib/windows_64">
+			<patternset>
+				<include name="**/*.dll"/>
+			</patternset>
+			<mapper type="flatten"/>
+		</unzip>
+
+		<antcall target="unzip_j3d_jre">
+			<param name="fileToUnzip" value="j3d-1_5_2-windows-i586.zip"/>
+		</antcall>
+		<unzip src="${unzip}/java3d/j3d-jre.zip" dest="${unzip}/j3d/lib/windows_x86">
+			<patternset>
+				<include name="**/*.dll"/>
+			</patternset>
+			<mapper type="flatten"/>
+		</unzip>
+
+		<unzip src="${download}/org.swtchart_0.8.0.zip" dest="${unzip}/swtchart" />
+		<exec executable="mvn" dir="${unzip}/swtchart/plugins" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=org.swtchart_0.8.0.v20120301.jar -Dversion=0.8" />
+			<arg line="-DgroupId=org.swtchart -DartifactId=swtchart -Dpackaging=jar" />
+		</exec>
+		
+		<exec executable="mvn" dir="${unzip}/j3d/lib/ext" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=j3dcore.jar -Dversion=1.5.2" />
+			<arg line="-DgroupId=java3d -DartifactId=j3d-core -Dpackaging=jar" />
+		</exec>
+		<exec executable="mvn" dir="${download}" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=j3d-1_5_2-src.zip -Dversion=1.5.2" />
+			<arg line="-DgroupId=java3d -DartifactId=j3d-core -Dpackaging=sources" />
+		</exec>
+
+		<exec executable="mvn" dir="${unzip}/j3d/lib/ext" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=j3dutils.jar -Dversion=1.5.2" />
+			<arg line="-DgroupId=java3d -DartifactId=j3d-core-utils -Dpackaging=jar" />
+		</exec>
+
+		<exec executable="mvn" dir="${unzip}/j3d/lib/ext" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=vecmath.jar -Dversion=1.5.2" />
+			<arg line="-DgroupId=java3d -DartifactId=vecmath -Dpackaging=jar" />
+		</exec>
+		<exec executable="mvn" dir="${download}" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=vecmath-1_5_2-src.zip -Dversion=1.5.2" />
+			<arg line="-DgroupId=java3d -DartifactId=vecmath -Dpackaging=sources" />
+		</exec>
+
+	</target>
+	
+	<target name="unzip_j3d_jre">
+		<get dest="${download}" skipexisting="true">
+			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/${fileToUnzip}" />
+		</get>
+		<unzip src="${download}/${fileToUnzip}" dest="${unzip}/java3d" >
+			<patternset>
+				<include name="**/j3d-jre.zip"/>
+			</patternset>
+			<mapper type="flatten"/>
+		</unzip>
+	</target>
+
+	<target name="code_j3d_org">
+		<get dest="${download}" skipexisting="true">
+			<url url="ftp://ftp.j3d.org/pub/code/j3d-org-code-1.1.0.zip" />
+			<url url="ftp://ftp.j3d.org/pub/code/j3d-org-src-1.1.0.zip" />
+			<url url="ftp://ftp.j3d.org/pub/code/j3d-org-doc-1.1.0.zip" />
+			<url url="ftp://ftp.j3d.org/pub/code/j3d-org-examples-1.1.0.zip" />
+		</get>
+		<unzip src="${download}/j3d-org-code-1.1.0.zip" dest="${unzip}/code_j3d" />
+		<unzip src="${download}/j3d-org-src-1.1.0.zip" dest="${unzip}/code_j3d" />
+		<unzip src="${download}/j3d-org-doc-1.1.0.zip" dest="${unzip}/code_j3d" />
+
+		<exec executable="mvn" dir="${unzip}/code_j3d/jars" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=org.j3d.core_1.1.0.jar -Dversion=1.1.0" />
+			<arg line="-DgroupId=org.j3d.code -DartifactId=org.j3d.code -Dpackaging=jar" />
+		</exec>
+
+	</target>
+
+</project>
