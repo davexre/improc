@@ -55,7 +55,7 @@ public static void main (String [] args)
     c2.setExpandHorizontal(true);
     c2.setExpandVertical(true);
     c2.setMinSize(400, -1);
-    c2.setShowFocusedControl(true);
+//    c2.setShowFocusedControl(true);
     
 //    Button b2 = new Button(c2inside, SWT.PUSH);
 //    b2.setText("expanding button");

@@ -1,6 +1,5 @@
 package com.slavi.reprap;
 
-import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -10,10 +9,6 @@ import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Shape3D;
 import javax.vecmath.Point3d;
 
-import org.j3d.renderer.java3d.loaders.STLLoader;
-
-import com.sun.j3d.loaders.IncorrectFormatException;
-import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
 
 public class RepRap {
@@ -26,9 +21,8 @@ RrPolygon.simplify
 
  */
 
-	void loadSTL(URL fin) throws FileNotFoundException, IncorrectFormatException, ParsingErrorException {
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
+	void loadSTL(URL fin) throws Exception {
+		Scene scene = RepRapUtils.load(fin);
 		BranchGroup stl = scene.getSceneGroup();
 		Enumeration<?> children = stl.getAllChildren();
 		while (children.hasMoreElements()) {
@@ -56,8 +50,7 @@ RrPolygon.simplify
 		String fname = "C:/Users/i047367/S/img3d/img3d.stl";
 		URL fin = new File(fname).toURL();
 */
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
+		Scene scene = RepRapUtils.load(fin);
 		BranchGroup stl = scene.getSceneGroup();
 		ArrayList objects = new ArrayList();
 		objects.add(stl);

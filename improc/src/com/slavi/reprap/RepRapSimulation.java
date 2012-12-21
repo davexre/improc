@@ -21,7 +21,6 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.j3d.renderer.java3d.loaders.STLLoader;
 
 import com.slavi.util.ui.SwtUtil;
 import com.sun.j3d.loaders.Scene;
@@ -174,8 +173,7 @@ public class RepRapSimulation implements RepRapPrinter, Runnable {
 	void preparePrinting() throws Exception {
 		String fname = "pulley-4.5-6-8-40.stl";
 		URL fin = getClass().getResource(fname);
-		STLLoader loader = new STLLoader();
-		Scene scene = loader.load(fin);
+		Scene scene = RepRapUtils.load(fin);
 		BranchGroup stl = scene.getSceneGroup();
 		ArrayList objects = new ArrayList();
 		objects.add(stl);
