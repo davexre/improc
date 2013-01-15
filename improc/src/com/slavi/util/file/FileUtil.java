@@ -1,5 +1,6 @@
 package com.slavi.util.file;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -115,6 +116,12 @@ public class FileUtil {
 			// One is file the other is folder
 			return false;
 		}
+	}
+
+	public static String streamToString(InputStream is) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		copyStream(is, os);
+		return new String(os.toByteArray());
 	}
 
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
