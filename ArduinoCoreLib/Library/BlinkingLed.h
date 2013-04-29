@@ -3,7 +3,6 @@
 
 #include "DigitalIO.h"
 #include <stddef.h>
-#include <wiring.h>
 #include <avr/interrupt.h>
 
 /**

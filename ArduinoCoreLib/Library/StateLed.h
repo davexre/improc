@@ -1,7 +1,6 @@
 #ifndef STATELED_H_
 #define STATELED_H_
 
-#include <wiring.h>
 #include <BlinkingLed.h>
 
 /**

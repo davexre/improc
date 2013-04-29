@@ -2,7 +2,6 @@
 #define GCodeParser_h
 
 #include <stdlib.h>
-#include <wiring.h>
 
 ////////////// GCODE
 
