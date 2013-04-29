@@ -1,6 +1,5 @@
 /*
-  Stream.h - base class for character-based streams.
-  Copyright (c) 2010 David A. Mellis.  All right reserved.
+  Copyright (c) 2012 Arduino.  All right reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -9,27 +8,30 @@
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Lesser General Public License for more details.
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef Stream_h
-#define Stream_h
+/**
+ * Empty yield() hook.
+ *
+ * This function is intended to be used by library writers to build
+ * libraries or sketches that supports cooperative threads.
+ *
+ * Its defined as a weak symbol and it can be redefined to implement a
+ * real cooperative scheduler.
+ */
 
-#include <inttypes.h>
-#include "Print.h"
-
-class Stream : public Print
-{
-  public:
-    virtual int available() = 0;
-    virtual int read() = 0;
-    virtual int peek() = 0;
-    virtual void flush() = 0;
-};
-
-#endif
+/* SPP:
+static void __empty() {
+	// Empty
+}
+void yield(void) __attribute__ ((weak, alias("__empty")));
+*/
+void yield(void) {
+	// Empty
+}

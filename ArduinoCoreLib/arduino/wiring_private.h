@@ -19,7 +19,7 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id$
+  $Id: wiring.h 239 2007-01-12 17:58:39Z mellis $
 */
 
 #ifndef WiringPrivate_h
@@ -54,6 +54,10 @@ extern "C"{
 
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 #define EXTERNAL_NUM_INTERRUPTS 8
+#elif defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__)
+#define EXTERNAL_NUM_INTERRUPTS 3
+#elif defined(__AVR_ATmega32U4__)
+#define EXTERNAL_NUM_INTERRUPTS 4
 #else
 #define EXTERNAL_NUM_INTERRUPTS 2
 #endif

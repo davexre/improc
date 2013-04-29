@@ -19,11 +19,11 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id$
+  $Id: wiring.c 248 2007-02-03 15:36:30Z mellis $
 */
 
 #include "wiring_private.h"
-//#include "pins_arduino.h"		// SPP:
+#include "pins_arduino.h"
 
 /* Measures the length (in microseconds) of a pulse on the pin; state is HIGH
  * or LOW, the type of pulse to measure.  Works on pulses from 2-3 microseconds

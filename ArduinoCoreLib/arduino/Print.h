@@ -46,12 +46,15 @@ class Print
     void clearWriteError() { setWriteError(0); }
   
     virtual size_t write(uint8_t) = 0;
-    size_t write(const char *str) { return write((const uint8_t *)str, strlen(str)); }
+    size_t write(const char *str) {
+      if (str == NULL) return 0;
+      return write((const uint8_t *)str, strlen(str));
+    }
     virtual size_t write(const uint8_t *buffer, size_t size);
     
-    void pgm_write(const uint8_t *buffer, size_t size);		// SPP:
-    void pgm_print(const char str[]);	// SPP:
-    void pgm_println(const char[]);		// SPP:
+    void pgm_write(const uint8_t *buffer, size_t size);  // SPP:
+    void pgm_print(const char str[]);                    // SPP:
+    void pgm_println(const char[]);	                     // SPP:
 
     size_t print(const __FlashStringHelper *);
     size_t print(const String &);

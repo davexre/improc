@@ -1,1 +1,1 @@
-Udated to Arduino v.1.0
+Udated to Arduino v.1.5.2
