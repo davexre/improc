@@ -1,0 +1,22 @@
+Sourceforge GIT
+===============
+* Pull/Push URL
+ssh://slavianp@image-process.git.sourceforge.net/gitroot/image-process/image-process
+
+Sourceforge Shell Service
+=========================
+
+* Documentation
+https://sourceforge.net/apps/trac/sourceforge/wiki/Shell%20service
+
+* Create shell session & connect
+ssh -t slavianp,image-process@shell.sourceforge.net create
+ssh slavianp@shell.sourceforge.net
+
+* Location of git in sourceforge
+/home/scm_git/i/im/image-process
+
+* Create a new git repository
+cd /home/scm_git/i/im/image-process
+mkdir <REPONAME>
+git --git-dir=<REPONAME> init --shared=all --bare
