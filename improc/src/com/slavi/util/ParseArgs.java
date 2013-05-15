@@ -46,6 +46,15 @@ public class ParseArgs {
 		return result;
 	}
 	
+	public String getRemainingArg(int index, String defaultValue) {
+		if (index < 0 || index >= remainingArgs.length)
+			return defaultValue;
+		String result = remainingArgs[index];
+		if (result == null || "".equals(result))
+			return defaultValue;
+		return result;
+	}
+	
 	/**
 	 * Utility method to check the validity of the options.
 	 * Returns true if all keys in the options map are present in the validOptions list.

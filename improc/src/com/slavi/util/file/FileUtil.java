@@ -1,6 +1,5 @@
 package com.slavi.util.file;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -71,23 +70,30 @@ public class FileUtil {
 				(Math.abs(file1.lastModified() - file2.lastModified()) > 2000))
 				return false;
 			if (compareFileContent) {
-				FileInputStream fs1 = new FileInputStream(file1);
-				FileInputStream fs2 = new FileInputStream(file2);
-				byte buf1[] = new byte[256];
-				byte buf2[] = new byte[256];
-				int len1;
-				while ((len1 = fs1.read(buf1)) >= 0) {
-					int len2;
-					while ((len1 > 0) && ((len2 = fs2.read(buf2, 0, len1)) >= 0)) {
-						len1 -= len2;
-						for (int i = 0; i < len2; i++) {
-							if (buf1[i] != buf2[i])
-								return false;
+				FileInputStream fs1 = null;
+				FileInputStream fs2 = null;
+				try {
+					fs1 = new FileInputStream(file1);
+					fs2 = new FileInputStream(file2);
+					byte buf1[] = new byte[256];
+					byte buf2[] = new byte[256];
+					int len1;
+					while ((len1 = fs1.read(buf1)) >= 0) {
+						int len2;
+						while ((len1 > 0) && ((len2 = fs2.read(buf2, 0, len1)) >= 0)) {
+							len1 -= len2;
+							for (int i = 0; i < len2; i++) {
+								if (buf1[i] != buf2[i])
+									return false;
+							}
 						}
 					}
+				} finally {
+					if (fs1 != null)
+						fs1.close();
+					if (fs2 != null)
+						fs2.close();
 				}
-				fs1.close();
-				fs2.close();
 			}
 			return true;
 		} else if (file1.isDirectory() && file2.isDirectory()) {
@@ -119,9 +125,18 @@ public class FileUtil {
 	}
 
 	public static String streamToString(InputStream is) throws IOException {
+/*
+		// This piece of code does not work on some characters like 0xFF,0xCF,0xA4 
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		copyStream(is, os);
 		return new String(os.toByteArray());
+*/
+		StringBuilder sb = new StringBuilder();
+		int b;
+		while ((b = is.read()) >= 0) {
+			sb.append((char)b);
+		}
+		return sb.toString();
 	}
 
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
