@@ -1,0 +1,10 @@
+Tomcat
+======
+
+
+
+
+=====================
+mvn archetype:create -DgroupId=test.maven.web -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp
+
+	            	<tomcat-url>http://localhost:8080/manager/html</tomcat-url>

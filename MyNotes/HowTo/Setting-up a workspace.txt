@@ -1,0 +1,32 @@
+Setting-up a workspace:
+* Java Development Kit
+	* set environment variable JAVA_HOME
+* Apache Maven
+	* set environment variable M2_HOME
+* Eclipse for Java Developers
+	Install from "Install new software"
+	* Web Tools Platform (WTP)
+	* PHP Development Tools (PDT)
+	* JavaScript Development Tools
+	* C/C++ Development Tools
+	* Linux Tools
+	* ShellEd (Update site https://downloads.sourceforge.net/project/shelled/shelled/ShellEd%202.0.2/update)
+	* Mongrel (Tomcat plugin)
+	* Web,XML,Java EE and OSGi Enterprise Development/
+		* Eclipse Java EE Developer Tools
+		* Eclipse Java Web Developer Tools
+		* Eclipse Web Developer Tools
+		* Eclipse XML Editors and Tools
+		* Eclipse XSL Developer Tools
+		* Rich Ajax Platform (RAP) Tools
+		* Web Page Editor
+	Install from "Eclipse Market Place"
+	* AVR Eclipse Plugin
+	* Quick Bookmarks Plugin
+	Other plugins
+	* from a pom.xml file install "Sonatype m2e connector"
+	Settings
+	* Import Preferences file (for Quick Bookmarks Plugin)
+* MySQL
+* SQuireL http://squirrel-sql.sourceforge.net/
+* Apache Tomcat
