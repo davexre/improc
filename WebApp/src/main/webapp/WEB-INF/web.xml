@@ -1,0 +1,57 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<icon>
+		<small-icon>none</small-icon>
+		<large-icon>NONE</large-icon>
+	</icon>
+	<display-name>My WebApp for Testing</display-name>
+	<description>My WebApp for Testing</description>
+
+	<context-param>
+		<param-name>debug</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
+	<session-config>  <!-- 10 minutes -->
+		<session-timeout>10</session-timeout>
+	</session-config>
+
+	<servlet>
+		<icon>
+			<small-icon>none</small-icon>
+			<large-icon>NONE</large-icon>
+		</icon>
+		<servlet-name>ListFiles</servlet-name>
+		<display-name>ListFiles</display-name>
+		<description>List files in a specified directory</description>
+		<servlet-class>com.slavi.various.ListFilesServlet</servlet-class>
+		<init-param>
+			<param-name>rootDir</param-name>
+			<param-value>/home/slavian/temp/a</param-value>
+		</init-param>
+		<init-param>
+			<param-name>usersAllowed</param-name>
+			<param-value>Guest</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+		
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ListFiles</servlet-name>
+		<url-pattern>/ListFiles</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+
+</web-app>
