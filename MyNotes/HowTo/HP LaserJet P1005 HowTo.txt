@@ -1,0 +1,31 @@
+Setup HP LaserJet P1005 on Ubuntu
+=================================
+
+1. Download and install from
+http://hplipopensource.com/hplip-web/install/manual/distros/ubuntu.html
+
+2. run hp-setup
+
+3. Add to startup applications hp-systray
+
+
+* Error code "System Request 1806"
+info taken from
+http://forum.ubuntu.ru/index.php?topic=47894.msg1723349#msg1723349
+   Open /usr/share/hplip/base/status.py
+   locate "PJL_STATUS_MAP"
+   add an error code to the map
+----------------------------------
+   40017: STATUS_PRINTER_IDLE,
+----------------------------------
+   save & try again
+   if the problem is not solved
+   locate "def MapPJLErrorCode"
+   add this logging line
+----------------------------------
+    log.info("SPP: error_code is %d" % error_code)
+----------------------------------
+   run again and check the error code
+
+
+

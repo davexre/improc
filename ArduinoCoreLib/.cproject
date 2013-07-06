@@ -139,6 +139,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/arduino}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Slavian}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Library}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/lib/avr/include"/>
 								</option>
 								<option id="de.innot.avreclipse.compiler.option.allwarn.1369128133" name="All Warnings (-Wall)" superClass="de.innot.avreclipse.compiler.option.allwarn" value="false" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.std.1061525764" name="Language Standard" superClass="de.innot.avreclipse.compiler.option.std" value="de.innot.avreclipse.compiler.option.std.default" valueType="enumerated"/>
@@ -148,6 +149,10 @@
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.1464644753" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.optimize.other.1820845337" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
 								<option id="de.innot.avreclipse.compiler.option.otherflags.587011174" name="Other flags" superClass="de.innot.avreclipse.compiler.option.otherflags" value="-E" valueType="string"/>
+								<option id="de.innot.avreclipse.compiler.option.def.1325750105" name="Define Syms (-D)" superClass="de.innot.avreclipse.compiler.option.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="__AVR_ATmega32U4__"/>
+									<listOptionValue builtIn="false" value="F_CPU=16000000"/>
+								</option>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.49273430" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cpplinker.app.release.1571578783" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.release"/>
