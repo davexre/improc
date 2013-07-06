@@ -3,6 +3,7 @@
 	<name>ArduinoProject</name>
 	<comment></comment>
 	<projects>
+		<project>ArduinoCoreLib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
