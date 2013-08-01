@@ -10,7 +10,7 @@ Setting-up a workspace:
 	* JavaScript Development Tools
 	* C/C++ Development Tools
 	* Linux Tools
-	* ShellEd (Update site https://downloads.sourceforge.net/project/shelled/shelled/ShellEd%202.0.2/update)
+	* ShellEd (Update site http://sourceforge.net/projects/shelled/files/shelled/update/)
 	* Mongrel (Tomcat plugin)
 	* Web,XML,Java EE and OSGi Enterprise Development/
 		* Eclipse Java EE Developer Tools
