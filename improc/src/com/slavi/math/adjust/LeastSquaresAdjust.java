@@ -98,7 +98,7 @@ public class LeastSquaresAdjust {
 		return measurementCount >= getRequiredMeasurements();
 	}
 
-	public static double precision = 1.0 / 10000.0;
+	public double precision = 1.0 / 10000.0;
 	
 	public boolean calculateWithDebug(boolean alwaysPrint) {
 		if (!canCalculate()) {
@@ -128,12 +128,7 @@ public class LeastSquaresAdjust {
 		if (deviation > precision) {
 			return false;
 		}
-		
-		unknown.make0();
-		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
-			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)
-				for (int k = numCoordinates - 1; k >= 0; k--)
-					unknown.setItem(k, i, unknown.getItem(k, i) + nm.getItem(i, j) * apl.getItem(k, j));
+		calculateUnknowns();
 		return true;
 	}
 	
@@ -142,12 +137,16 @@ public class LeastSquaresAdjust {
 			return false;
 		if (!nm.inverse())
 			return false;
+		calculateUnknowns();
+		return true;
+	}
+	
+	private void calculateUnknowns() {
 		unknown.make0();
 		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
 			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)
 				for (int k = numCoordinates - 1; k >= 0; k--)
 					unknown.setItem(k, i, unknown.getItem(k, i) + nm.getItem(i, j) * apl.getItem(k, j));
-		return true;
 	}
 
 	public void addMeasurement(Matrix m, double weight, double L, int coordinate) {

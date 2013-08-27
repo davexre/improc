@@ -1,0 +1,170 @@
+http://hackaday.com/2013/08/19/rescuing-an-sd-card-with-an-arduino/
+
+A few days ago, one of [Severin]‘s SD cards died on him, Instead of trashing the card, 
+he decided to investigate what was actually wrong with the card and ended up recovering 
+most of the data using an Arduino and an immense amount of cleverness.
+
+SD cards can be accessed with two modes. The first is the SDIO mode, which is what cameras, 
+laptops, and other card readers use. The second mode is SPI mode. SPI is slower, but much, 
+much simpler. It turned out the SDIO mode on [Severin]‘s card was broken, but accessing it
+with an Arduino and SPI mode worked. There was finally hope to get files off this damaged card.
+
+[Severin] used a few sketches to dump the data on the SD card to his computer. The first 
+looked at the file system and grabbed a list of files contained on the card. The second 
+iterated over the file system and output all the files in hex over the serial port. With a 
+bit of Python, [Severin] was able to reconstruct a few files that were previously lost forever.
+
+Even though the SD card was completely inaccessible with a normal card reader, [Severin] was 
+able to get a few files off the card. All the sketches and Python scripts are available on the 
+Githubs, ready to recover files from your broken SD cards.
+
+
+https://github.com/tiefpunkt/arduino_sd_recovery/blob/master/sd_recovery_raw.ino
+
+#include <SD.h>
+
+File root;
+
+Sd2Card card;
+
+void setup()
+{
+  Serial.begin(115200);
+  pinMode(10, OUTPUT);
+  
+  card.init(SPI_HALF_SPEED, 10);
+// SD.begin(10);
+
+  long blocks = card.cardSize();
+  //Serial.println(blocks);
+
+  uint8_t data[512];
+  int i = 0;
+  boolean notZero = false;
+  for (long blockNumber = 0; blockNumber < blocks; blockNumber++) {
+    //card.chipSelectLow();
+    if (!card.readBlock(blockNumber, data)) {
+      Serial.println("Z");
+      break;
+    }
+    
+    notZero = false;
+    
+    for (i = 0; i<512; i++) {
+      if (data[i] > 0x00) {
+        notZero = true;
+        break;
+      }
+    }
+    if (notZero) {
+      for (i = 0; i<512; i++) {
+        if (data[i] < 0x10) {
+          Serial.print("0");
+        }
+        Serial.print(data[i], HEX);
+      }
+      Serial.println("X");
+    } else {
+      Serial.println("Y");
+    
+  }
+  
+  //Serial.println("done!");
+}
+
+void loop()
+{
+  // nothing happens after setup finishes.
+}
+
+void printDirectory(File dir, String folder) {
+  boolean files = true;
+  while(files) {
+    File entry = dir.openNextFile();
+    if (! entry) {
+      files = false;
+    } else {
+      if (entry.isDirectory()) {
+        String folder_new = folder;
+        folder_new += entry.name();
+        folder_new += "/";
+        printDirectory(entry, folder_new);
+      } else {
+        Serial.print("--- ");
+        Serial.print(folder);
+        Serial.print(entry.name());
+        Serial.print(";");
+        Serial.println(entry.size(), DEC);
+        byte r;
+        while (entry.available()) {
+          r = entry.read();
+          if (r < 0x10) {
+            Serial.print("0");
+          }
+          Serial.print(r, HEX);
+        }
+        Serial.println();
+      }
+    }
+  }
+}
+
+https://github.com/tiefpunkt/arduino_sd_recovery/blob/master/sd_recovery_files.ino
+
+#include <SD.h>
+
+File root;
+
+void setup()
+{
+  Serial.begin(115200);
+  pinMode(10, OUTPUT);
+
+  SD.begin(10);
+
+  root = SD.open("/");
+  readDirectory(root, "");
+
+  Serial.println("done!");
+}
+
+void loop()
+{
+  // nothing happens after setup finishes.
+}
+
+void readDirectory(File dir, String folder) {
+  boolean files = true;
+  while(files) {
+    File entry = dir.openNextFile();
+    if (! entry) {
+      files = false;
+    } else {
+      if (entry.isDirectory()) {
+        String folder_new = folder;
+        folder_new += entry.name();
+        folder_new += "/";
+        readDirectory(entry, folder_new);
+      } else {
+        outputFile(entry, folder);
+      }
+    }
+  }
+}
+
+void outputFile(File entry, String folder) {
+  Serial.print("--- ");
+  Serial.print(folder);
+  Serial.print(entry.name());
+  Serial.print(";");
+  Serial.println(entry.size(), DEC);
+  byte r;
+  while (entry.available()) {
+    r = entry.read();
+    if (r < 0x10) {
+      Serial.print("0");
+    }
+    Serial.print(r, HEX);
+  }
+  Serial.println();
+}

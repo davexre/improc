@@ -4,30 +4,37 @@ import java.io.Serializable;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Properties;
+
+import org.jdom.Element;
 
 import com.slavi.TestUtils;
 import com.slavi.io.ObjectRead;
-import com.slavi.io.ObjectToProperties2;
+import com.slavi.io.ObjectToXML;
 import com.slavi.io.ObjectWrite;
-import com.slavi.util.PropertyUtil;
+import com.slavi.io.xml.XMLHelper;
+import com.slavi.util.StringPrintStream;
 
-public class ObjectToPropertiesTest2 {
-	static Object doTest(String prefix, Object o) throws Exception {
-		Properties properties = new Properties();
+public class ObjectToXMLTest {
+	static Object doTest(Object o) throws Exception {
+		Element element = new Element("root");
 		
-		ObjectWrite write = new ObjectToProperties2.Write(properties, prefix);
+		ObjectWrite write = new ObjectToXML.Write(element);
 		write.write(o);
-		String s1 = PropertyUtil.propertiesToString(properties);
+		
+		StringPrintStream fou = new StringPrintStream();
+		XMLHelper.writeXML(fou, element, null);
+		String s1 = fou.toString();
 		System.out.println(s1);
 		
-		ObjectRead read = new ObjectToProperties2.Read(properties, prefix);
+		ObjectRead read = new ObjectToXML.Read(element);
 		o = read.read();
 
-		properties.clear();
-		write = new ObjectToProperties2.Write(properties, prefix);
+		element = new Element("root");
+		write = new ObjectToXML.Write(element);
 		write.write(o);
-		String s2 = PropertyUtil.propertiesToString(properties);
+		fou = new StringPrintStream();
+		XMLHelper.writeXML(fou, element, null);
+		String s2 = fou.toString();
 		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
 		
 //		System.out.println(s1);
@@ -52,21 +59,24 @@ public class ObjectToPropertiesTest2 {
 
 	public void doIt() throws Exception {
 		MyBeanNested myBean;
-		String prefix = "111";
 
-		Properties properties = new Properties();
-		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties, prefix).read();
+		Element element = new Element("root");
+
+		myBean = (MyBeanNested) new ObjectToXML.Read(element).read();
 		TestUtils.assertTrue("Expected null object", myBean == null);
-		new ObjectToProperties2.Write(properties, prefix).write(myBean);
-		String s1 = PropertyUtil.propertiesToString(properties);
-		TestUtils.assertEqual("Expected empty string", s1, "");
+		new ObjectToXML.Write(element).write(myBean);
+		StringPrintStream fou = new StringPrintStream();
+		XMLHelper.writeXML(fou, element, null);
+		String s1 = fou.toString();
+		System.out.println(s1);
+		//TestUtils.assertEqual("Expected empty string", s1, "");
 		
 		myBean = new MyBeanNested();
-		doTest(prefix, myBean);
+		doTest(myBean);
 
 		myBean = new MyBeanNested();
 		myBean.initialize();
-		doTest(prefix, myBean);
+		doTest(myBean);
 
 		myBean = new MyBeanNested();
 		myBean.initialize();
@@ -76,17 +86,15 @@ public class ObjectToPropertiesTest2 {
 		myBean.objects[1] = myBean.getMyData();
 		myBean.setMyEnum(null);
 		
-		doTest(prefix, myBean);
+		doTest(myBean);
 		
 		myBean = new MyBeanNested();
 		myBean.initialize();
 		myBean.setMyDataArray(null);
-		doTest(prefix, myBean);
+		doTest(myBean);
 	}
 	
 	public void doHardTest() throws Exception {
-		String prefix = "";
-
 //		ArrayList list = new ArrayList();
 //		for (int i = 0; i < 5; i++) {
 //			myBean = new MyBeanNested();
@@ -99,7 +107,7 @@ public class ObjectToPropertiesTest2 {
 		System.out.println("-------------------------------------");
 		ArrayList<Serializable> list = new BaseClassForSerialization().getTestObjects();
 		System.out.println("-------------------------------------");
-		Object o = doTest(prefix, list);
+		Object o = doTest(list);
 		System.out.println("-------------------------------------");
 		BaseClassForSerialization.dumpObjects((ArrayList) o);
 	}
@@ -115,7 +123,7 @@ public class ObjectToPropertiesTest2 {
 		System.out.println();
 		System.out.println("*** Making copy");
 		BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic c2 = 
-			(BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic) doTest("", c);
+			(BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic) doTest(c);
 
 		System.out.println();
 		System.out.println("*** Invoking dump");
@@ -137,7 +145,7 @@ public class ObjectToPropertiesTest2 {
 		System.out.println("EC.str " + ec1.str);
 		System.out.println("BC.str " + bc1.str);
 		
-		ExtendingClass ec2 = (ExtendingClass) doTest("", ec1);
+		ExtendingClass ec2 = (ExtendingClass) doTest(ec1);
 		BaseClass bc2 = ec2;
 		
 		System.out.println("EC.str " + ec2.str);
@@ -154,7 +162,7 @@ public class ObjectToPropertiesTest2 {
 		ArrayList<String> str = new ArrayList<String>();
 		str.add("asdqwe");
 		System.out.println(Arrays.toString(str.getClass().getTypeParameters()));
-		str = (ArrayList) doTest("", str);
+		str = (ArrayList) doTest(str);
 		System.out.println(str);
 		str.add("zxczxc");
 		System.out.println(str);
@@ -165,18 +173,35 @@ public class ObjectToPropertiesTest2 {
 		Class ec1 = ExtendingClass.class;
 		System.out.println("EC.str " + ec1);
 		
-		Class ec2 = (Class) doTest("", ec1);
+		Class ec2 = (Class) doTest(ec1);
 		System.out.println("EC.str " + ec2);
 		System.out.println(ec1 == ec2);
+	}
+
+	public void simpleTest() throws Exception {
+		ArrayList<Serializable> objs = new BaseClassForSerialization().getTestObjects();
+		Object o = objs.get(0);
+
+		Element element = new Element("root");
+		
+		ObjectToXML.Write write = new ObjectToXML.Write(element);
+		write.objectToXML(element, o, false);
+		
+		StringPrintStream fou = new StringPrintStream();
+		XMLHelper.writeXML(fou, element, null);
+		String s1 = fou.toString();
+		System.out.println(s1);
 	}
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("ObjectToPropertiesTest2");
-//		new ObjectToPropertiesTest2().serializeClass();
-//		new ObjectToPropertiesTest2().typedArrayTest();
-		new ObjectToPropertiesTest2().doHardTest();
-//		new ObjectToPropertiesTest2().partialHardTest();
-//		new ObjectToPropertiesTest2().simplifiedHardTest();
+		
+//		new ObjectToXMLTest2().simpleTest();
+//		new ObjectToXMLTest2().serializeClass();
+//		new ObjectToXMLTest2().typedArrayTest();
+		new ObjectToXMLTest().doHardTest();
+//		new ObjectToXMLTest2().partialHardTest();
+//		new ObjectToXMLTest2().simplifiedHardTest();
 		System.out.println("Done.");
 	}
 }

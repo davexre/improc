@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectToProperties2;
+import com.slavi.io.ObjectToProperties;
 import com.slavi.io.ObjectToPropertiesInputStream;
 import com.slavi.io.ObjectToPropertiesOutputStream;
 import com.slavi.util.PropertyUtil;
@@ -55,9 +55,9 @@ public class ObjectToPropertiesOutputStreamTest {
 		String prefix = "111";
 
 		Properties properties = new Properties();
-		myBean = (MyBeanNested) new ObjectToProperties2.Read(properties, prefix).read();
+		myBean = (MyBeanNested) new ObjectToProperties.Read(properties, prefix).read();
 		TestUtils.assertTrue("Expected null object", myBean == null);
-		new ObjectToProperties2.Write(properties, prefix).write(myBean);
+		new ObjectToProperties.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		TestUtils.assertEqual("Expected empty string", s1, "");
 		
