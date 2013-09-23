@@ -15,36 +15,43 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.util.Const;
 
-public class Printer3DAdjust {
+public class Printer3DAdjust2 {
 
 	String dataFile = Const.workDir + "/" + this.getClass().getName() + ".xml";
 	
 	public static class Measurement {
 		double p[] = new double[3];	// Printer coordinates
-		double hx, hy;				// Measuerd on millimeter paper on the printer's bed (the light pen)
+		double hx1, hy1;				// Measuerd on millimeter paper on the printer's bed (the light pen)
+		double hx2, hy2;				// Measuerd on millimeter paper on the printer's bed (the light pen)
 		
 		public String toString() {
-			return String.format("P(%10.2f, %10.2f, %10.2f) H(%10.2f, %10.2f)", p[0], p[1], p[2], hx, hy);
+			return String.format("P(%10.2f, %10.2f, %10.2f) H1(%10.2f, %10.2f) H2(%10.2f, %10.2f)", p[0], p[1], p[2], hx1, hy1, hx2, hy2);
 		}
 	}
 	
 	public static class Data {
 		double rotationAngles[] = new double[3];
-		double alpha;			// lightPenAngleZX
-		double beta;			// lightPenAngleZY
-		ArrayList<Measurement> measurements = new ArrayList<Printer3DAdjust.Measurement>();
+		double alpha1;			// lightPenAngleZX
+		double beta1;			// lightPenAngleZY
+		double alpha2;			// lightPenAngleZX
+		double beta2;			// lightPenAngleZY
+		ArrayList<Measurement> measurements = new ArrayList<Measurement>();
 	}
 
 	Data data;
 	
 	Matrix M;
-	double tgAlpha;
-	double tgBeta;
+	double tgAlpha1;
+	double tgBeta1;
+	double tgAlpha2;
+	double tgBeta2;
 	
 	void precompute(Data data) {
 		M = RotationXYZ.instance.makeAngles(data.rotationAngles);
-		tgAlpha = Math.tan(data.alpha);
-		tgBeta = Math.tan(data.beta);
+		tgAlpha1 = Math.tan(data.alpha1);
+		tgBeta1 = Math.tan(data.beta1);
+		tgAlpha2 = Math.tan(data.alpha2);
+		tgBeta2 = Math.tan(data.beta2);
 	}
 	
 	Data generateData() {
@@ -54,8 +61,10 @@ public class Printer3DAdjust {
 		for (int i = 0; i < result.rotationAngles.length; i++) {
 			result.rotationAngles[i] = 0.01; // rnd.nextDouble();
 		}
-		result.alpha = 0.01; // rnd.nextDouble();
-		result.beta = 0.03; //rnd.nextDouble();
+		result.alpha1 = 0.01; // rnd.nextDouble();
+		result.beta1 = 0.03; //rnd.nextDouble();
+		result.alpha2 = 0.2; // rnd.nextDouble();
+		result.beta2 = 0.1; //rnd.nextDouble();
 		
 		precompute(result);
 		
@@ -67,8 +76,10 @@ public class Printer3DAdjust {
 			d.p[2] = rnd.nextDouble(); // rnd.nextInt(3000);
 			
 			RotationXYZ.instance.transformForward(M, d.p, tmp);
-			d.hx = tmp[0] + tmp[2] * tgAlpha; // + rnd.nextDouble() - 0.5;
-			d.hy = tmp[1] + tmp[2] * tgBeta;  // + rnd.nextDouble() - 0.5;
+			d.hx1 = tmp[0] + tmp[2] * tgAlpha1; // + rnd.nextDouble() - 0.5;
+			d.hy1 = tmp[1] + tmp[2] * tgBeta1;  // + rnd.nextDouble() - 0.5;
+			d.hx2 = tmp[0] + tmp[2] * tgAlpha2; // + rnd.nextDouble() - 0.5;
+			d.hy2 = tmp[1] + tmp[2] * tgBeta2;  // + rnd.nextDouble() - 0.5;
 			result.measurements.add(d);
 		}
 		return result;
@@ -85,27 +96,36 @@ public class Printer3DAdjust {
 		Element data = XMLHelper.readXML(new File(dataFile));
 		ObjectToXML.Read fromxml = new ObjectToXML.Read(data);
 		Data result = (Data) fromxml.xmlToObject(data);
-		result.beta = 0.3; //TODO:
 		precompute(result);
 		return result;
 	}
 	
 	Matrix adjM;
-	double adjAlpha;
-	double adjBeta;
+	double adjAlpha1;
+	double adjBeta1;
+	double adjAlpha2;
+	double adjBeta2;
 	
 	void adjust() {
-		double tgAlpha1 = Math.tan(adjAlpha);
-		double tgBeta1 = Math.tan(adjBeta);
-		double dFdAlpha1 = Math.cos(adjAlpha);
+		double tgAlpha1 = Math.tan(adjAlpha1);
+		double tgBeta1 = Math.tan(adjBeta1);
+		double tgAlpha2 = Math.tan(adjAlpha1);
+		double tgBeta2 = Math.tan(adjBeta1);
+
+		double dFdAlpha1 = Math.cos(adjAlpha1);
 		dFdAlpha1 = 1.0 / (dFdAlpha1 * dFdAlpha1);
-		double dFdBeta1 = Math.cos(adjBeta);
+		double dFdBeta1 = Math.cos(adjBeta1);
 		dFdBeta1 = 1.0 / (dFdBeta1 * dFdBeta1);
 
+		double dFdAlpha2 = Math.cos(adjAlpha2);
+		dFdAlpha2 = 1.0 / (dFdAlpha2 * dFdAlpha2);
+		double dFdBeta2 = Math.cos(adjBeta2);
+		dFdBeta2 = 1.0 / (dFdBeta2 * dFdBeta2);
+		
 		double tmp[] = new double[3];
 		double L;
-		Matrix m = new Matrix(11, 1);
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(11);
+		Matrix m = new Matrix(13, 1);
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(13);
 		lsa.clear();
 		for (Measurement d : data.measurements) {
 			RotationXYZ.instance.transformForward(adjM, d.p, tmp);
@@ -121,7 +141,9 @@ public class Printer3DAdjust {
 			m.setItem(8, 0, d.p[2] * tgAlpha1);
 			m.setItem(9, 0, tmp[2] * dFdAlpha1);
 			m.setItem(10, 0, 0);
-			L = tmp[0] + tmp[2] * tgAlpha1 - d.hx;
+			m.setItem(11, 0, 0);
+			m.setItem(12, 0, 0);
+			L = tmp[0] + tmp[2] * tgAlpha1 - d.hx1;
 			lsa.addMeasurement(m, 1.0, -L, 0);
 			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 
@@ -138,7 +160,47 @@ public class Printer3DAdjust {
 			m.setItem(8, 0, d.p[2] * tgBeta1);
 			m.setItem(9, 0, 0);
 			m.setItem(10, 0, tmp[2] * dFdBeta1);
-			L = tmp[1] + tmp[2] * tgBeta1 - d.hy;
+			m.setItem(11, 0, 0);
+			m.setItem(12, 0, 0);
+			L = tmp[1] + tmp[2] * tgBeta1 - d.hy1;
+			lsa.addMeasurement(m, 1.0, -L, 0);
+			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+
+			///////////////////////////////////
+
+			m.setItem(0, 0, d.p[0]);
+			m.setItem(1, 0, d.p[1]);
+			m.setItem(2, 0, d.p[2]);
+			m.setItem(3, 0, 0);
+			m.setItem(4, 0, 0);
+			m.setItem(5, 0, 0);
+			m.setItem(6, 0, d.p[0] * tgAlpha2);
+			m.setItem(7, 0, d.p[1] * tgAlpha2);
+			m.setItem(8, 0, d.p[2] * tgAlpha2);
+			m.setItem(9, 0, 0);
+			m.setItem(10, 0, 0);
+			m.setItem(11, 0, tmp[2] * dFdAlpha2);
+			m.setItem(12, 0, 0);
+			L = tmp[0] + tmp[2] * tgAlpha2 - d.hx2;
+			lsa.addMeasurement(m, 1.0, -L, 0);
+			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+
+			///////////////////////////////////
+			
+			m.setItem(0, 0, 0);
+			m.setItem(1, 0, 0);
+			m.setItem(2, 0, 0);
+			m.setItem(3, 0, d.p[0]);
+			m.setItem(4, 0, d.p[1]);
+			m.setItem(5, 0, d.p[2]);
+			m.setItem(6, 0, d.p[0] * tgBeta2);
+			m.setItem(7, 0, d.p[1] * tgBeta2);
+			m.setItem(8, 0, d.p[2] * tgBeta2);
+			m.setItem(9, 0, 0);
+			m.setItem(10, 0, 0);
+			m.setItem(11, 0, 0);
+			m.setItem(12, 0, tmp[2] * dFdBeta2);
+			L = tmp[1] + tmp[2] * tgBeta2 - d.hy2;
 			lsa.addMeasurement(m, 1.0, -L, 0);
 			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 		}
@@ -170,8 +232,10 @@ public class Printer3DAdjust {
 		adjM.setItem(1, 2, adjM.getItem(1, 2) + U.getItem(0, 7));
 		adjM.setItem(2, 2, adjM.getItem(2, 2) + U.getItem(0, 8));
 
-		adjAlpha += U.getItem(0, 9);
-		adjBeta += U.getItem(0, 10);
+		adjAlpha1 += U.getItem(0, 9);
+		adjBeta1 += U.getItem(0, 10);
+		adjAlpha2 += U.getItem(0, 11);
+		adjBeta2 += U.getItem(0, 12);
 		
 		U.printM("U");
 		M.printM("M");
@@ -191,8 +255,10 @@ public class Printer3DAdjust {
 		adjM.makeE();
 //		M.copyTo(adjM);
 		
-		adjAlpha = data.alpha;
-		adjBeta = data.beta;
+		adjAlpha1 = data.alpha1;
+		adjBeta1 = data.beta1;
+		adjAlpha2 = data.alpha2;
+		adjBeta2 = data.beta2;
 		
 		adjust();
 		adjust();
@@ -200,7 +266,7 @@ public class Printer3DAdjust {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new Printer3DAdjust().doIt();
+		new Printer3DAdjust2().doIt();
 		System.out.println("Done.");
 	}
 }

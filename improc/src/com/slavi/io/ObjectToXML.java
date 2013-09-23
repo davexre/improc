@@ -75,7 +75,6 @@ public class ObjectToXML {
 					
 					String fieldName = field.getName();
 					Element fieldElement = element;
-					System.out.println("reading field " + fieldName);
 					if (fieldName.startsWith("this$")) {
 						fieldName = "this_" + fieldName.substring("this$".length());
 						fieldElement = element.getChild("this");
