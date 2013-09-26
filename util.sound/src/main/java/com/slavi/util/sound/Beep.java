@@ -11,7 +11,6 @@ import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
 
 import com.slavi.math.MathUtil;
-import com.slavi.util.Marker;
 
 public class Beep {
 
@@ -132,7 +131,7 @@ public class Beep {
 	public static void main(String[] args) throws Exception {
 //		FileInputStream is = new FileInputStream("/usr/lib/openoffice/basis3.2/share/gallery/sounds/pluck.wav");
 //		playSoundStream(is, 0);
-		Marker.mark();
+//		Marker.mark();
 		int d = 450;
 //		int pitch = 1499;
 //		Beep.beep2(80, 900, d, 1000, d, 500, d, 1500, d);
@@ -140,7 +139,7 @@ public class Beep {
 		Beep.beep2(80, 700, d, 1000, d, 700, d, 1000, d, 700, d);
 //		Beep.beep(1000, 400, 80);
 //		Beep.beep(1900, 300, 80);
-		Marker.release();
+//		Marker.release();
 //		Beep.beep();
 //		Beep.beep();
 //		Beep.beep();

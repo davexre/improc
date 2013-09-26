@@ -17,6 +17,7 @@
 		<module>util.io</module>
 		<module>util.util</module>
     <module>util.ui</module>
+    <module>reprap</module>
   </modules>
 
 	<build>
