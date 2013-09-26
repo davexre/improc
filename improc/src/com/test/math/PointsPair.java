@@ -3,9 +3,9 @@ package com.test.math;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.xml.XMLHelper;
 
 public class PointsPair {
 	public Matrix source;

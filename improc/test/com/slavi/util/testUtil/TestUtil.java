@@ -1,9 +1,9 @@
-package com.slavi;
+package com.slavi.util.testUtil;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 
-public class TestUtils {
+public class TestUtil {
 
 	public static double precision = 1.0 / 10000.0;
 	

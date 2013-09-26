@@ -6,11 +6,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
+import com.slavi.util.testUtil.TestUtil;
 
 public class DeepCopyTest {
 
@@ -66,7 +65,7 @@ public class DeepCopyTest {
 	
 		Charset cs = Charset.forName("ISO-8859-5");
 		
-		TestUtils.assertEqual("Objects differ", bos1.toByteArray(), bos2.toByteArray());
+		TestUtil.assertEqual("Objects differ", bos1.toByteArray(), bos2.toByteArray());
 		String str = new String(bos1.toByteArray(), cs);
 		str = str.replaceAll("qwe", "zxc");
 		System.out.println(bos1.toByteArray().length);

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
@@ -14,6 +13,7 @@ import com.slavi.improc.myadjust.sphere.SpherePanoTransformLearner;
 import com.slavi.math.MathUtil;
 import com.slavi.math.SphericalCoordsLongLat;
 import com.slavi.math.SphericalCoordsLongZen;
+import com.slavi.util.testUtil.TestUtil;
 
 public class SpherePanoTransformLearnerTest {
 
@@ -34,11 +34,11 @@ public class SpherePanoTransformLearnerTest {
 		double dest2[] = new double[3];
 		panoTransform.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		panoTransform.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqualAngle("", dest2[0], p1.getDoubleX());
-		TestUtils.assertEqualAngle("", dest2[1], p1.getDoubleY());
+		TestUtil.assertEqualAngle("", dest2[0], p1.getDoubleX());
+		TestUtil.assertEqualAngle("", dest2[1], p1.getDoubleY());
 		panoTransform.transformForeward(dest2[0], dest2[1], kpl1, dest2);
-		TestUtils.assertEqualAngle("", dest2[0], dest[0]);
-		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
+		TestUtil.assertEqualAngle("", dest2[0], dest[0]);
+		TestUtil.assertEqualAngle("", dest2[1], dest[1]);
 	}
 
 	@Test
@@ -47,17 +47,17 @@ public class SpherePanoTransformLearnerTest {
 		double rx1 = 180 * MathUtil.deg2rad;
 		double ry1 = 89 * MathUtil.deg2rad;
 		double d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1, ry1 + delta);
-		TestUtils.assertEqual("", d, delta);
+		TestUtil.assertEqual("", d, delta);
 		
 		rx1 = 0 * MathUtil.deg2rad;
 		ry1 = 90 * MathUtil.deg2rad;
 		d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1, -ry1);
-		TestUtils.assertEqual("", d, 180 * MathUtil.deg2rad);
+		TestUtil.assertEqual("", d, 180 * MathUtil.deg2rad);
 		
 		rx1 = 179 * MathUtil.deg2rad;
 		ry1 = 0 * MathUtil.deg2rad;
 		d = SphericalCoordsLongLat.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
-		TestUtils.assertEqual("", d, delta);
+		TestUtil.assertEqual("", d, delta);
 	}
 	
 	private static void checkNorm(SpherePanoTransformLearner panoTransform, KeyPointPair kpp, 
@@ -105,7 +105,7 @@ public class SpherePanoTransformLearnerTest {
 		kpp.targetSP.getKeyPointList().sphereRZ2 -= dZ2;
 		kpp.targetSP.getKeyPointList().scaleZ -= dF2;
 		
-		TestUtils.assertEqualAngle("", dist0, dist1);
+		TestUtil.assertEqualAngle("", dist0, dist1);
 		System.out.println(MathUtil.rad2degStr(dist0));
 		System.out.println(MathUtil.rad2degStr(dist1));
 		System.out.println(MathUtil.d20(dist0));
@@ -175,7 +175,7 @@ public class SpherePanoTransformLearnerTest {
 		
 //		System.out.println(MathUtil.rad2degStr(dist));
 //		System.out.println(MathUtil.rad2degStr(dist0));
-		TestUtils.assertEqualAngle("", dist0, dist1);
+		TestUtil.assertEqualAngle("", dist0, dist1);
 	}
 
 	private void dump(String str, double dest[]) {

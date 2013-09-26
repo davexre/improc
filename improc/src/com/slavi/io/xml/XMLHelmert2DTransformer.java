@@ -3,6 +3,7 @@ package com.slavi.io.xml;
 import org.jdom.Element;
 
 import com.slavi.math.transform.Helmert2DTransformer;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLHelmert2DTransformer {
 

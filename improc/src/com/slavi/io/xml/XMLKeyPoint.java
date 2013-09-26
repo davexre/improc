@@ -7,6 +7,7 @@ import org.jdom.JDOMException;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLKeyPoint {
 	

@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import com.slavi.TestUtils;
+import com.slavi.util.testUtil.TestUtil;
 
 public class URLEncoderDecoder {
 	public static void main(String[] args) throws UnsupportedEncodingException {
@@ -15,6 +15,6 @@ public class URLEncoderDecoder {
 		System.out.println(str);
 		System.out.println(decoded);
 		System.out.println(encoded);
-		TestUtils.assertEqual("", str, decoded);
+		TestUtil.assertEqual("", str, decoded);
 	}
 }

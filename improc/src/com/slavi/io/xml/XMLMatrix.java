@@ -6,6 +6,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLMatrix {
 

@@ -9,9 +9,9 @@ import org.jdom.Element;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.slavi.TestUtils;
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.io.xml.XMLMatrix;
+import com.slavi.util.testUtil.TestUtil;
+import com.slavi.util.xml.XMLHelper;
 
 public class SymmetricMatrixTest {
 
@@ -34,18 +34,18 @@ public class SymmetricMatrixTest {
 	public void testMatrixInverse() {
 		Matrix a = m.makeCopy();
 		Matrix b = m.makeCopy();
-		TestUtils.assertTrue("Failed to inverse the matrix", a.inverse());
+		TestUtil.assertTrue("Failed to inverse the matrix", a.inverse());
 		a.mMul(m, b);
-		TestUtils.assertMatrixE("Inverse matrix incorrect", b);
+		TestUtil.assertMatrixE("Inverse matrix incorrect", b);
 	}
 
 	@Test
 	public void testTriangularMatrixInverse() throws Exception {
 		SymmetricMatrix ta = tm.makeCopy();
 		SymmetricMatrix tb = tm.makeCopy();
-		TestUtils.assertTrue("Failed to inverse the matrix", ta.inverse());
+		TestUtil.assertTrue("Failed to inverse the matrix", ta.inverse());
 		ta.mMul(tm, tb);
-		TestUtils.assertMatrixE("Inverse matrix incorrect", tb.makeSquareMatrix());
+		TestUtil.assertMatrixE("Inverse matrix incorrect", tb.makeSquareMatrix());
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class SymmetricMatrixTest {
 		root = XMLHelper.readXML(fin);
 		Matrix m2 = XMLMatrix.instance.fromXML(root);
 		m.mSub(m2, m2);
-		TestUtils.assertMatrix0("", m2);		
+		TestUtil.assertMatrix0("", m2);		
 	}
 
 }

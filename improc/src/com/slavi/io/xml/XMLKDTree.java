@@ -8,6 +8,7 @@ import org.jdom.JDOMException;
 
 import com.slavi.util.tree.KDTree;
 import com.slavi.util.tree.TreeNode;
+import com.slavi.util.xml.XMLHelper;
 
 public abstract class XMLKDTree<E> {
 

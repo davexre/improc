@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPairList;
@@ -14,6 +13,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.RotationZYZ;
 import com.slavi.math.SphericalCoordsLongZen;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.testUtil.TestUtil;
 
 public class SpherePanoTransformer2Test {
 
@@ -34,8 +34,8 @@ public class SpherePanoTransformer2Test {
 		double dest2[] = new double[3];
 		SphereNorm2.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		SphereNorm2.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqual("", dest2[0], p1.getDoubleX());
-		TestUtils.assertEqual("", dest2[1], p1.getDoubleY());
+		TestUtil.assertEqual("", dest2[0], p1.getDoubleX());
+		TestUtil.assertEqual("", dest2[1], p1.getDoubleY());
 		
 		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
 		double d1[] = new double[3];
@@ -46,12 +46,12 @@ public class SpherePanoTransformer2Test {
 		d1[2] = p1.getKeyPointList().scaleZ;
 		RotationZYZ.instance.transformForward(m, d1, d2);
 		SphericalCoordsLongZen.cartesianToPolar(d2[0], d2[1], d2[2], d2);
-		TestUtils.assertEqualAngle("", dest[0], d2[0]);
-		TestUtils.assertEqualAngle("", dest[1], d2[1]);
+		TestUtil.assertEqualAngle("", dest[0], d2[0]);
+		TestUtil.assertEqualAngle("", dest[1], d2[1]);
 
 		SphereNorm2.transformForeward(dest2[0], dest2[1], kpl1, dest2);
-		TestUtils.assertEqualAngle("", dest2[0], dest[0]);
-		TestUtils.assertEqualAngle("", dest2[1], dest[1]);
+		TestUtil.assertEqualAngle("", dest2[0], dest[0]);
+		TestUtil.assertEqualAngle("", dest2[1], dest[1]);
 	}
 
 	@Test
@@ -60,17 +60,17 @@ public class SpherePanoTransformer2Test {
 		double rx1 = 10 * MathUtil.deg2rad;
 		double ry1 = 89 * MathUtil.deg2rad;
 		double d = SphericalCoordsLongZen.getSphericalDistance(rx1, ry1, rx1, ry1 + delta);
-		TestUtils.assertEqualAngle("", d, delta);
+		TestUtil.assertEqualAngle("", d, delta);
 		
 		rx1 = 0 * MathUtil.deg2rad;
 		ry1 = 90 * MathUtil.deg2rad;
 		d = SphericalCoordsLongZen.getSphericalDistance(rx1, ry1, rx1, -ry1);
-		TestUtils.assertEqualAngle("", d, 180 * MathUtil.deg2rad);
+		TestUtil.assertEqualAngle("", d, 180 * MathUtil.deg2rad);
 		
 		rx1 = 179 * MathUtil.deg2rad;
 		ry1 = 90 * MathUtil.deg2rad;
 		d = SphericalCoordsLongZen.getSphericalDistance(rx1, ry1, rx1 + delta, ry1);
-		TestUtils.assertEqualAngle("", d, delta);
+		TestUtil.assertEqualAngle("", d, delta);
 	}
 
 	private static void checkNorm0(KeyPoint kp, double dX, double dY, double dZ, double dF) {
@@ -79,8 +79,8 @@ public class SpherePanoTransformer2Test {
 		SphereNorm2.PointDerivatives pd = new SphereNorm2.PointDerivatives();
 		pd.setKeyPoint(kp);
 		
-		TestUtils.assertEqualAngle("", dest0[0], pd.tx);
-		TestUtils.assertEqualAngle("", dest0[1], pd.ty);
+		TestUtil.assertEqualAngle("", dest0[0], pd.tx);
+		TestUtil.assertEqualAngle("", dest0[1], pd.ty);
 		
 		double dest2[] = new double[2];
 		dest2[0] = dest0[0] + pd.dTX_dR1 * dX + pd.dTX_dR2 * dY + pd.dTX_dR3 * dZ + pd.dTX_dF * dF;
@@ -99,8 +99,8 @@ public class SpherePanoTransformer2Test {
 		kp.getKeyPointList().sphereRZ2 -= dZ;
 		kp.getKeyPointList().scaleZ -= dF;
 		
-		TestUtils.assertEqualAngle("", dest1[0], dest2[0]);
-		TestUtils.assertEqualAngle("", dest1[1], dest2[1]);
+		TestUtil.assertEqualAngle("", dest1[0], dest2[0]);
+		TestUtil.assertEqualAngle("", dest1[1], dest2[1]);
 	}
 
 	@Test
@@ -340,7 +340,7 @@ public class SpherePanoTransformer2Test {
 		pKPL[0] = pWorld2[0] - pWorld1[0];
 		pKPL[1] = pWorld2[1] - pWorld1[1];
 		dump("delta", pKPL);*/
-		TestUtils.assertEqualAngle("", pWorld1[0], pWorld2[0]);
-		TestUtils.assertEqualAngle("", pWorld1[1], pWorld2[1]);
+		TestUtil.assertEqualAngle("", pWorld1[0], pWorld2[0]);
+		TestUtil.assertEqualAngle("", pWorld1[1], pWorld2[1]);
 	}
 }

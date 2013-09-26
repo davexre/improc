@@ -1,11 +1,11 @@
-package com.slavi.util.file;
+package com.slavi.util;
 
 import java.util.StringTokenizer;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
 import com.slavi.util.Util;
+import com.slavi.util.testUtil.TestUtil;
 
 public class UtilIterableTest {
 
@@ -17,6 +17,6 @@ public class UtilIterableTest {
 			if (i != null)
 				count++;
 		}
-		TestUtils.assertTrue("", count == 5);
+		TestUtil.assertTrue("", count == 5);
 	}
 }

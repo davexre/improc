@@ -2,13 +2,13 @@ package com.slavi.improc.myadjust;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsLearner;
 import com.slavi.improc.myadjust.zyz7params.ZYZ_7ParamsNorm;
 import com.slavi.math.MathUtil;
+import com.slavi.util.testUtil.TestUtil;
 
 public class ZYZ_7ParamsTransformerTest {
 
@@ -84,7 +84,7 @@ public class ZYZ_7ParamsTransformerTest {
 				calcSum(0, norm.p1, dSRZ1, dSRY, dSRZ2, dSTX, dSTY, dSTZ, dSS) +
 				calcSum(0, norm.p2, dTRZ1, dTRY, dTRZ2, dTTX, dTTY, dTTZ, dTS);
 			double L1 = dest1[c1] * dest2[c2] - dest1[c2] * dest2[c1];
-			TestUtils.assertEqual("", L2, L1);
+			TestUtil.assertEqual("", L2, L1);
 		}		
 	}
 
@@ -120,8 +120,8 @@ public class ZYZ_7ParamsTransformerTest {
 		kp.getKeyPointList().tz -= dTZ;
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kp.getKeyPointList());
 		
-		TestUtils.assertEqual("", dest1[0], dest2[0]);
-		TestUtils.assertEqual("", dest1[1], dest2[1]);
+		TestUtil.assertEqual("", dest1[0], dest2[0]);
+		TestUtil.assertEqual("", dest1[1], dest2[1]);
 	}
 	
 	@Test
@@ -145,14 +145,14 @@ public class ZYZ_7ParamsTransformerTest {
 		ZYZ_7ParamsLearner.buildCamera2RealMatrix(kpl1);
 		ZYZ_7ParamsNorm.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		ZYZ_7ParamsNorm.transformBackward(dest[0], dest[1], dest[2], kpl1, dest2);
-		TestUtils.assertEqual("norm.transform.x", dest2[0], p1.getDoubleX());
-		TestUtils.assertEqual("norm.transform.y", dest2[1], p1.getDoubleY());
+		TestUtil.assertEqual("norm.transform.x", dest2[0], p1.getDoubleX());
+		TestUtil.assertEqual("norm.transform.y", dest2[1], p1.getDoubleY());
 
 		ZYZ_7ParamsLearner tr = new ZYZ_7ParamsLearner();
 		tr.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		tr.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtils.assertEqual("X", dest2[0], p1.getDoubleX());
-		TestUtils.assertEqual("Y", dest2[1], p1.getDoubleY());
+		TestUtil.assertEqual("X", dest2[0], p1.getDoubleX());
+		TestUtil.assertEqual("Y", dest2[1], p1.getDoubleY());
 	}
 
 	@Test

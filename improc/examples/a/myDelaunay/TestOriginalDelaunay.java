@@ -2,7 +2,6 @@ package a.myDelaunay;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -19,8 +18,8 @@ import a.ajDelaunay;
 import a.ajPoint;
 import a.ajTriangle;
 
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.util.Const;
+import com.slavi.util.xml.XMLHelper;
 
 public class TestOriginalDelaunay {
 

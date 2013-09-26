@@ -9,6 +9,7 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>util.util</artifactId>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.slavi</groupId>

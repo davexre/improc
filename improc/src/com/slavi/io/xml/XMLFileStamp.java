@@ -6,6 +6,7 @@ import org.jdom.Element;
 
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLFileStamp {
 

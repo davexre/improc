@@ -6,14 +6,13 @@ import java.util.Random;
 
 import org.jdom.Element;
 
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.math.matrix.SymmetricMatrix;
 import com.slavi.util.Const;
 import com.slavi.util.io.ObjectToXML;
+import com.slavi.util.xml.XMLHelper;
 
 public class Printer3DAdjust {
 

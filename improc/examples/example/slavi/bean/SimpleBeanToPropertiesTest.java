@@ -2,11 +2,11 @@ package example.slavi.bean;
 
 import java.util.Properties;
 
-import com.slavi.TestUtils;
 import com.slavi.util.PropertyUtil;
 import com.slavi.util.io.ObjectRead;
 import com.slavi.util.io.ObjectWrite;
 import com.slavi.util.io.SimpleBeanToProperties;
+import com.slavi.util.testUtil.TestUtil;
 
 public class SimpleBeanToPropertiesTest {
 	static void doTest(String prefix, Object myBean) throws Exception {
@@ -23,7 +23,7 @@ public class SimpleBeanToPropertiesTest {
 		write = new SimpleBeanToProperties.Write(properties);
 		write.write(myBean);
 		String s2 = PropertyUtil.propertiesToString(properties);
-		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
+		TestUtil.assertEqual("First and second time conversion not equal", s1, s2);
 		
 		System.out.println(s1);
 	}
@@ -36,10 +36,10 @@ public class SimpleBeanToPropertiesTest {
 		
 		Properties properties = new Properties();
 		myBean = SimpleBeanToProperties.propertiesToObject(properties, prefix, MyBean.class, true);
-		TestUtils.assertTrue("Expected null object", myBean == null);
+		TestUtil.assertTrue("Expected null object", myBean == null);
 		SimpleBeanToProperties.objectToProperties(properties, prefix, myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
-		TestUtils.assertEqual("Expected empty string", s1, "");
+		TestUtil.assertEqual("Expected empty string", s1, "");
 		
 		myBean = new MyBean();
 		doTest(prefix, myBean);

@@ -5,6 +5,7 @@ import org.jdom.JDOMException;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLKeyPointPair {
 

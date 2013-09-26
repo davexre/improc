@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import com.slavi.TestUtils;
 import com.slavi.util.PropertyUtil;
 import com.slavi.util.io.ObjectRead;
 import com.slavi.util.io.ObjectToProperties;
 import com.slavi.util.io.ObjectWrite;
+import com.slavi.util.testUtil.TestUtil;
 
 public class ObjectToPropertiesTest {
 	static Object doTest(String prefix, Object o) throws Exception {
@@ -28,7 +28,7 @@ public class ObjectToPropertiesTest {
 		write = new ObjectToProperties.Write(properties, prefix);
 		write.write(o);
 		String s2 = PropertyUtil.propertiesToString(properties);
-		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
+		TestUtil.assertEqual("First and second time conversion not equal", s1, s2);
 		
 //		System.out.println(s1);
 		return o;
@@ -56,10 +56,10 @@ public class ObjectToPropertiesTest {
 
 		Properties properties = new Properties();
 		myBean = (MyBeanNested) new ObjectToProperties.Read(properties, prefix).read();
-		TestUtils.assertTrue("Expected null object", myBean == null);
+		TestUtil.assertTrue("Expected null object", myBean == null);
 		new ObjectToProperties.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
-		TestUtils.assertEqual("Expected empty string", s1, "");
+		TestUtil.assertEqual("Expected empty string", s1, "");
 		
 		myBean = new MyBeanNested();
 		doTest(prefix, myBean);

@@ -3,6 +3,7 @@ package com.slavi.io.xml;
 import org.jdom.Element;
 
 import com.slavi.math.matrix.MatrixCompareResult;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLMatrixCompareResult {
 	

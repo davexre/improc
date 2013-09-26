@@ -7,12 +7,12 @@ import java.util.Arrays;
 
 import org.jdom.Element;
 
-import com.slavi.TestUtils;
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.util.StringPrintStream;
 import com.slavi.util.io.ObjectRead;
 import com.slavi.util.io.ObjectToXML;
 import com.slavi.util.io.ObjectWrite;
+import com.slavi.util.testUtil.TestUtil;
+import com.slavi.util.xml.XMLHelper;
 
 public class ObjectToXMLTest {
 	static Object doTest(Object o) throws Exception {
@@ -35,7 +35,7 @@ public class ObjectToXMLTest {
 		fou = new StringPrintStream();
 		XMLHelper.writeXML(fou, element, null);
 		String s2 = fou.toString();
-		TestUtils.assertEqual("First and second time conversion not equal", s1, s2);
+		TestUtil.assertEqual("First and second time conversion not equal", s1, s2);
 		
 //		System.out.println(s1);
 		return o;
@@ -63,7 +63,7 @@ public class ObjectToXMLTest {
 		Element element = new Element("root");
 
 		myBean = (MyBeanNested) new ObjectToXML.Read(element).read();
-		TestUtils.assertTrue("Expected null object", myBean == null);
+		TestUtil.assertTrue("Expected null object", myBean == null);
 		new ObjectToXML.Write(element).write(myBean);
 		StringPrintStream fou = new StringPrintStream();
 		XMLHelper.writeXML(fou, element, null);

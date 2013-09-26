@@ -1,4 +1,4 @@
-package com.slavi.io.xml;
+package com.slavi.util.xml;
 
 import java.io.File;
 import java.io.FileInputStream;

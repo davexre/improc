@@ -17,10 +17,9 @@ import javax.imageio.ImageIO;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import com.slavi.io.xml.XMLHelper;
 import com.slavi.math.GeometryUtil;
-import com.slavi.math.transform.AffineTransformer;
 import com.slavi.util.Const;
+import com.slavi.util.xml.XMLHelper;
 
 public class TestMyDelaunay {
 

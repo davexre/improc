@@ -4,6 +4,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 
 import com.slavi.math.transform.PolynomialTransformer;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLPolynomialTransformer {
 

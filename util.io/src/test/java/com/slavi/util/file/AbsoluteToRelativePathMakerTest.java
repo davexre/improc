@@ -4,10 +4,19 @@ import java.io.File;
 
 import org.junit.Test;
 
-import com.slavi.TestUtils;
-
 public class AbsoluteToRelativePathMakerTest {
 	
+	public static void assertEqualIgnoreCase(String msg, String strA, String strB) {
+		if ((strA == null) && (strB == null))
+			return;
+		if ((strA != null) && strA.equalsIgnoreCase(strB))
+			return;
+		System.out.println("Strings not equal: " + msg);
+		System.out.println(strA);
+		System.out.println(strB);
+		throw new RuntimeException("Failed");
+	}
+
 	@Test
 	public void testAbsoluteToRelativePath() throws Exception {
 		String vals[][] = {
@@ -28,10 +37,10 @@ public class AbsoluteToRelativePathMakerTest {
 		for (String[] item : vals) {
 			AbsoluteToRelativePathMaker am = new AbsoluteToRelativePathMaker(item[0]);
 			String rel = am.getRelativePath(item[1]);
-			TestUtils.assertEqualIgnoreCase("", rel, item[2]);
+			assertEqualIgnoreCase("", rel, item[2]);
 			File f1 = new File(item[1]);
 			File f2 = am.getFullPathFile(rel);
-			TestUtils.assertEqualIgnoreCase("comparing full paths", f1.getAbsolutePath(), f2.getAbsolutePath());
+			assertEqualIgnoreCase("comparing full paths", f1.getAbsolutePath(), f2.getAbsolutePath());
 		}
 	}
 }

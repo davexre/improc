@@ -3,6 +3,7 @@ package com.slavi.io.xml;
 import org.jdom.Element;
 
 import com.slavi.math.adjust.LeastSquaresAdjust;
+import com.slavi.util.xml.XMLHelper;
 
 public class XMLLeastSquaresAdjust {
 
