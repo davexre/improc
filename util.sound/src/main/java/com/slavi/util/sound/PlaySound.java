@@ -24,19 +24,19 @@ public class PlaySound {
 	public static SoundScheme soundScheme = new SoundScheme();
 	
 	static String availableSounds[] = {
-			"ubuntu/dialog-warning.ogg",
-			"ubuntu/window-slide.ogg",
-			"ubuntu/dialog-error.ogg",
-			"ubuntu/dialog-question.ogg",
-			"ubuntu/button-pressed.ogg",
-			"gnome/victory.ogg",
-			"gnome/lines3.ogg",
-			"gnome/glass.ogg",
-			"gnome/bark.ogg",
-			"gnome/laughter.ogg",
-			"gnome/sonar.ogg",
-			"gnome/gameover.ogg",
-			"gnome/flip-piece.ogg",
+			"/ubuntu/dialog-warning.ogg",
+			"/ubuntu/window-slide.ogg",
+			"/ubuntu/dialog-error.ogg",
+			"/ubuntu/dialog-question.ogg",
+			"/ubuntu/button-pressed.ogg",
+			"/gnome/victory.ogg",
+			"/gnome/lines3.ogg",
+			"/gnome/glass.ogg",
+			"/gnome/bark.ogg",
+			"/gnome/laughter.ogg",
+			"/gnome/sonar.ogg",
+			"/gnome/gameover.ogg",
+			"/gnome/flip-piece.ogg",
 	};
 
 	public static void playSoundStream(InputStream soundStream) throws UnsupportedAudioFileException, IOException, LineUnavailableException {

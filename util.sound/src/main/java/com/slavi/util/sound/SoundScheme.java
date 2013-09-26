@@ -7,16 +7,16 @@ public class SoundScheme {
 		String fname;
 		switch (sound) {
 		case BEEP: 
-			fname = "ubuntu/dialog-question.ogg"; 
+			fname = "/ubuntu/dialog-question.ogg"; 
 			break;
 		case WARNING: 
-			fname = "ubuntu/dialog-warning.ogg"; 
+			fname = "/ubuntu/dialog-warning.ogg"; 
 			break;
 		case ERROR: 
-			fname = "ubuntu/dialog-error.ogg"; 
+			fname = "/ubuntu/dialog-error.ogg"; 
 			break;
 		default: 
-			fname = "ubuntu/dialog-error.ogg";
+			fname = "/ubuntu/dialog-error.ogg";
 			break;
 		}			
 		return PlaySound.class.getResourceAsStream(fname);
