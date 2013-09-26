@@ -1,4 +1,4 @@
-package com.slavi.ui;
+package com.slavi.util.ui;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
-import com.slavi.util.ui.SwtUtil;
 
 public class ProcessManager extends Composite {
 	

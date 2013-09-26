@@ -2,7 +2,7 @@ package com.test.ui;
 
 import javax.swing.JFrame;
 
-import com.slavi.ui.BarChart;
+import com.slavi.util.ui.BarChart;
 
 public class TestBarChart {
 	public static void main(String[] args) {

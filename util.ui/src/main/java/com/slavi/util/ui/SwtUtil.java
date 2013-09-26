@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.slavi.ui.TaskManager;
 
 /**
  * This class contains utility methods for creating user interface using

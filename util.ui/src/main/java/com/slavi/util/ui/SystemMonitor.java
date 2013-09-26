@@ -1,4 +1,4 @@
-package com.slavi.ui;
+package com.slavi.util.ui;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;
@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.ProgressBar;
 
 import com.slavi.util.Marker;
 import com.slavi.util.Util;
-import com.slavi.util.ui.SwtUtil;
 
 public class SystemMonitor extends Composite {
 

@@ -3,7 +3,7 @@ package com.test.ui;
 import javax.swing.JFrame;
 
 import com.slavi.math.matrix.Matrix;
-import com.slavi.ui.BitMatrix;
+import com.slavi.util.ui.BitMatrix;
 
 public class TestBitMatrix {
 	public static void main(String[] args) {
