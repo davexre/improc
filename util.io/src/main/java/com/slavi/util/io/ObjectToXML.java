@@ -1,4 +1,4 @@
-package com.slavi.io;
+package com.slavi.util.io;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Array;

@@ -7,10 +7,10 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectRead;
-import com.slavi.io.ObjectToProperties;
-import com.slavi.io.ObjectWrite;
 import com.slavi.util.PropertyUtil;
+import com.slavi.util.io.ObjectRead;
+import com.slavi.util.io.ObjectToProperties;
+import com.slavi.util.io.ObjectWrite;
 
 public class ObjectToPropertiesTest {
 	static Object doTest(String prefix, Object o) throws Exception {

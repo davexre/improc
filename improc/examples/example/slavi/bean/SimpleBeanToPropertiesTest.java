@@ -3,10 +3,10 @@ package example.slavi.bean;
 import java.util.Properties;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectRead;
-import com.slavi.io.ObjectWrite;
-import com.slavi.io.SimpleBeanToProperties;
 import com.slavi.util.PropertyUtil;
+import com.slavi.util.io.ObjectRead;
+import com.slavi.util.io.ObjectWrite;
+import com.slavi.util.io.SimpleBeanToProperties;
 
 public class SimpleBeanToPropertiesTest {
 	static void doTest(String prefix, Object myBean) throws Exception {

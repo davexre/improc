@@ -6,10 +6,10 @@ import java.io.ByteArrayOutputStream;
 import org.jdom.Element;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectRead;
-import com.slavi.io.ObjectWrite;
-import com.slavi.io.SimpleBeanToXML;
 import com.slavi.io.xml.XMLHelper;
+import com.slavi.util.io.ObjectRead;
+import com.slavi.util.io.ObjectWrite;
+import com.slavi.util.io.SimpleBeanToXML;
 
 public class XMLReadWriteBeans {
 	static void doTest(Object myBean) throws Exception {

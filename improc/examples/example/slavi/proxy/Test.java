@@ -4,10 +4,10 @@ import java.lang.reflect.Proxy;
 import java.util.Properties;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectToPropertiesInputStream;
-import com.slavi.io.ObjectToPropertiesOutputStream;
 import com.slavi.util.PropertyUtil;
 import com.slavi.util.Util;
+import com.slavi.util.io.ObjectToPropertiesInputStream;
+import com.slavi.util.io.ObjectToPropertiesOutputStream;
 
 public class Test {
 	

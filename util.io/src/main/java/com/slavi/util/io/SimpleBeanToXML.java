@@ -1,4 +1,4 @@
-package com.slavi.io;
+package com.slavi.util.io;
 
 import java.beans.BeanInfo;
 import java.beans.IndexedPropertyDescriptor;
@@ -9,56 +9,69 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Properties;
 
-public class SimpleBeanToProperties {
+import org.jdom.Element;
+
+public class SimpleBeanToXML {
 	public static class Read implements ObjectRead {
-		Properties properties;
+		Element root;
 		
 		boolean setToNullMissingProperties;
 		
-		public Read(Properties properties) {
-			this(properties, true);
+		public Read(Element root) {
+			this(root, true);
 		}
 		
-		public Read(Properties properties, boolean setToNullMissingProperties) {
-			this.properties = properties;
+		public Read(Element root, boolean setToNullMissingProperties) {
+			this.root = root;
 			this.setToNullMissingProperties = setToNullMissingProperties;
 		}
 		
 		int readCounter = 0;
 
 		public Object read() throws Exception {
-			String prefix = "$object$" + Integer.toString(++readCounter);
-			String className = properties.getProperty(prefix + ".$class");
+			String objectName = "object." + Integer.toString(++readCounter);
+			Element el = root.getChild(objectName);
+			if (el == null)
+				return null;
+			String className = el.getAttributeValue("class");
 			if (className == null)
 				return null;
 			Class clazz = Class.forName(className);
-			return propertiesToObject(properties, prefix, clazz, setToNullMissingProperties);
+			return xmlToObject(el, clazz, setToNullMissingProperties);
 		}
 	}
 
 	public static class Write implements ObjectWrite {
-		Properties properties;
+		Element root;
 		
-		public Write(Properties properties) {
-			this.properties = properties;
+		boolean setToNullMissingProperties;
+
+		public Write(Element root) {
+			this(root, true);
+		}
+		
+		public Write(Element root, boolean setToNullMissingProperties) {
+			this.root = root;
+			this.setToNullMissingProperties = setToNullMissingProperties;
 		}
 		
 		int writeCounter = 0;
 
 		public void write(Object object) throws Exception {
-			String prefix = "$object$" + Integer.toString(++writeCounter);
+			String objectName = "object." + Integer.toString(++writeCounter);
 			if (object == null)
 				return;
-			properties.setProperty(prefix + ".$class", object.getClass().getName());
-			objectToProperties(properties, prefix, object);
+			Element el = new Element(objectName);
+			el.setAttribute("class", object.getClass().getName());
+			root.addContent(el);
+			objectToXml(el, object);
 		}
 	}
 
-	private static Object propertiesToObjectArray(Properties properties, String prefix, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
+	private static Object xmlToObjectArray(Element root, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
 		// array
-		String arraySizeStr = properties.getProperty(Utils.getChildPrefix(prefix, "size"));
+		String arraySizeStr = root.getAttributeValue("size");
 		if (arraySizeStr == null)
 			return null;
 		int arraySize = Integer.parseInt(arraySizeStr);
@@ -66,71 +79,63 @@ public class SimpleBeanToProperties {
 			return null;
 		
 		Object array = Array.newInstance(arrayType, arraySize);
-		for (int i = 0; i < arraySize; i++) {
-			String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
-			Object item = propertiesToObject(properties, itemPrefix, arrayType, setToNullMissingProperties);
+		for (Object i : root.getChildren("item")) {
+			Element e = (Element) i;
+			int index = Integer.parseInt(e.getAttributeValue("index"));
+			Object item = xmlToObject(e, arrayType, setToNullMissingProperties);
 			if (item == null) {
 				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
 					continue;
 			}
-			Array.set(array, i, item);
+			
+			Array.set(array, index, item);
 		}
 		return array;
 	}
 	
-	public static <T> T propertiesToObject(Properties properties, String prefix, Class<T> objectClass, boolean setToNullMissingProperties) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		String sval = properties.getProperty(prefix);
+	public static <T> T xmlToObject(Element root, Class<T> objectClass, boolean setToNullMissingProperties) throws IntrospectionException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		if (root == null)
+			return null;
+		String sval = root.getTextTrim();
 		if ((objectClass == boolean.class) ||
 			(objectClass == Boolean.class)) {
-			if (sval != null)
-				return (T) new Boolean(sval);
+			return (T) new Boolean(sval);
 		} else if (
 				(objectClass == byte.class) ||
 				(objectClass == Byte.class)) {
-			if (sval != null)
 				return (T) new Byte(sval);
 		} else if (objectClass == Character.class) {
-			if ((sval != null) && (sval.length() > 0))
+			if (sval.length() > 0)
 				return (T) new Character(sval.charAt(0));
 		} else if ( 
 				(objectClass == double.class) ||
 				(objectClass == Double.class)) {
-			if (sval != null)
 				return (T) new Double(sval);
 		} else if ((objectClass.isEnum()) || (objectClass == Enum.class)) {
-			if (sval != null)
 				return (T) Enum.valueOf((Class<Enum>) objectClass, sval);
 		} else if (
 				(objectClass == float.class) ||
 				(objectClass == Float.class)) {
-			if (sval != null)
 				return (T) new Float(sval);
 		} else if (
 				(objectClass == int.class) ||
 				(objectClass == Integer.class)) {
-			if (sval != null)
 				return (T) new Integer(sval);
 		} else if (
 				(objectClass == long.class) ||
 				(objectClass == Long.class)) {
-			if (sval != null)
 				return (T) new Long(sval);
 		} else if (
 				(objectClass == short.class) ||
 				(objectClass == Short.class)) {
-			if (sval != null)
 				return (T) new Short(sval);
 		} else if (objectClass == String.class) {
-			if (sval != null)
-				return (T) sval;
+			return (T) sval;
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			Class arrayType = objectClass.getComponentType();
-			return (T) propertiesToObjectArray(properties, prefix, arrayType, setToNullMissingProperties);
+			return (T) xmlToObjectArray(root, arrayType, setToNullMissingProperties);
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
-			if (!Utils.hasPropertiesStartingWith(properties, prefix) && setToNullMissingProperties) {
-				return null;
-			}
 			Serializable object = (Serializable) objectClass.getConstructor((Class[]) null).newInstance((Object[]) null);
 			
 			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
@@ -145,8 +150,11 @@ public class SimpleBeanToProperties {
 					continue;
 
 				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = Utils.getChildPrefix(prefix, pd.getName());
-				Object o = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
+				Element item = root.getChild(pd.getName());
+				Object o = null;
+				if (item != null) {
+					o = xmlToObject(item, propertyType, setToNullMissingProperties);
+				}
 				if (o == null) {
 					if (propertyType.isPrimitive() || (!setToNullMissingProperties))
 						continue;
@@ -167,9 +175,11 @@ public class SimpleBeanToProperties {
 					continue;
 				
 				Class propertyType = pd.getPropertyType();
-				String propertyPrefix = Utils.getChildPrefix(prefix, pd.getName());
-				Object items = propertiesToObject(properties, propertyPrefix, propertyType, setToNullMissingProperties);
-
+				Element properties = root.getChild(pd.getName());
+				Object items = null;
+				if (properties != null) {
+					items = xmlToObject(properties, propertyType, setToNullMissingProperties);
+				}
 				if (ipd.getWriteMethod() != null) {
 					Method write = ipd.getWriteMethod();
 					write.invoke(object, new Object[] { items });
@@ -187,8 +197,8 @@ public class SimpleBeanToProperties {
 		}
 		return null;
 	}
-	
-	public static void objectToProperties(Properties properties, String prefix, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+
+	public static void objectToXml(Element root, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 		if (object == null)
 			return;
 		Class objectClass = object.getClass();
@@ -211,15 +221,19 @@ public class SimpleBeanToProperties {
 			(objectClass == short.class) ||
 			(objectClass == Short.class) ||
 			(objectClass == String.class)) {
-			properties.setProperty(prefix, object.toString());
+			root.setText(object.toString());
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			int length = Array.getLength(object);
-			properties.setProperty(Utils.getChildPrefix(prefix, "size"), Integer.toString(length));
+			root.setAttribute("size", Integer.toString(length));
 			for (int i = 0; i < length; i++) {
 				Object o = Array.get(object, i);
-				String itemPrefix = Utils.getChildPrefix(prefix, Integer.toString(i));
-				objectToProperties(properties, itemPrefix, o);
+				if (o == null)
+					continue;
+				Element item = new Element("item");
+				item.setAttribute("index", Integer.toString(i));
+				objectToXml(item, o);
+				root.addContent(item);
 			}
 		} else if (Serializable.class.isAssignableFrom(objectClass)) {
 			BeanInfo beanInfo = Introspector.getBeanInfo(objectClass);
@@ -235,15 +249,24 @@ public class SimpleBeanToProperties {
 						continue;
 					
 					Object array = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, Utils.getChildPrefix(prefix, indexedProperty.getName()), array);
+					if (array == null)
+						continue;
+					Element item = new Element(pd.getName());
+					objectToXml(item, array);
+					root.addContent(item);
 					continue;
 				} else {
 					if (pd.getWriteMethod() == null)
 						continue;
 					Object value = read.invoke(object, (Object[]) null);
-					objectToProperties(properties, Utils.getChildPrefix(prefix, pd.getName()), value);
+					if (value == null)
+						continue;
+					Element item = new Element(pd.getName());
+					objectToXml(item, value);
+					root.addContent(item);
 				}
 			}
 		}
 	}
+	
 }

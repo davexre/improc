@@ -1,4 +1,4 @@
-package com.slavi.io;
+package com.slavi.util.io;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.util.StringTokenizer;
 import sun.reflect.ReflectionFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import com.slavi.io.ObjectToPropertiesOutputStream.State;
+import com.slavi.util.io.ObjectToPropertiesOutputStream.State;
 
 public class ObjectToPropertiesInputStream extends ObjectInputStream {
 //implements ObjectInput {

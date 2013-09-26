@@ -8,11 +8,11 @@ import java.util.Arrays;
 import org.jdom.Element;
 
 import com.slavi.TestUtils;
-import com.slavi.io.ObjectRead;
-import com.slavi.io.ObjectToXML;
-import com.slavi.io.ObjectWrite;
 import com.slavi.io.xml.XMLHelper;
 import com.slavi.util.StringPrintStream;
+import com.slavi.util.io.ObjectRead;
+import com.slavi.util.io.ObjectToXML;
+import com.slavi.util.io.ObjectWrite;
 
 public class ObjectToXMLTest {
 	static Object doTest(Object o) throws Exception {

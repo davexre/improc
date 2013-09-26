@@ -1,4 +1,4 @@
-package com.slavi.io;
+package com.slavi.util.io;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
