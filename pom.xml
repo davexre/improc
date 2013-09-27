@@ -13,12 +13,14 @@
 	</properties>
 
 	<modules>
-		<module>util.sound</module>
 		<module>util.math</module>
-		<module>util.io</module>
 		<module>util.util</module>
+		<module>util.sound</module>
+		<module>util.io</module>
 		<module>util.ui</module>
+		<module>improc</module>
 		<module>reprap</module>
+		<module>zaSasho</module>
 	</modules>
 
 	<dependencies>
