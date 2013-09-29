@@ -14,8 +14,6 @@ import javax.imageio.ImageIO;
 
 import com.slavi.util.Const;
 
-import example.slavi.BasePointsListApplet;
-
 public class MyDelaunayApplet extends BasePointsListApplet {
 
 	public void init() {
