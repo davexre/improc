@@ -4,11 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import org.jdom.Element;
+import org.junit.Assert;
 
 import com.slavi.util.io.ObjectRead;
 import com.slavi.util.io.ObjectWrite;
 import com.slavi.util.io.SimpleBeanToXML;
-import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.xml.XMLHelper;
 
 public class XMLReadWriteBeans {
@@ -32,7 +32,7 @@ public class XMLReadWriteBeans {
 		fou = new ByteArrayOutputStream();
 		XMLHelper.writeXML(fou, root, null); //, "dummy.xml");
 		String s2 = new String(fou.toByteArray());
-		TestUtil.assertTrue("First and second time conversion not equal", s1.equals(s2));
+		Assert.assertTrue("First and second time conversion not equal", s1.equals(s2));
 		System.out.println(s1);
 	}
 	
@@ -43,10 +43,10 @@ public class XMLReadWriteBeans {
 		
 		Element root = null;
 		myBean = SimpleBeanToXML.xmlToObject(root, MyBean.class, true);
-		TestUtil.assertTrue("Expected null object", myBean == null);
+		Assert.assertTrue("Expected null object", myBean == null);
 		root = new Element("obj");
 		SimpleBeanToXML.objectToXml(root, myBean);
-		TestUtil.assertTrue("Expected no children in xml element", root.getChildren().size() == 0);
+		Assert.assertTrue("Expected no children in xml element", root.getChildren().size() == 0);
 		
 		myBean = new MyBean();
 		doTest(myBean);

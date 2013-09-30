@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.jdom.Element;
+import org.junit.Assert;
 
 import com.slavi.util.StringPrintStream;
 import com.slavi.util.io.ObjectRead;
@@ -35,7 +36,7 @@ public class ObjectToXMLTest {
 		fou = new StringPrintStream();
 		XMLHelper.writeXML(fou, element, null);
 		String s2 = fou.toString();
-		TestUtil.assertEqual("First and second time conversion not equal", s1, s2);
+		Assert.assertEquals("First and second time conversion not equal", s1, s2);
 		
 //		System.out.println(s1);
 		return o;
@@ -196,12 +197,12 @@ public class ObjectToXMLTest {
 	public static void main(String[] args) throws Exception {
 		System.out.println("ObjectToPropertiesTest2");
 		
-//		new ObjectToXMLTest2().simpleTest();
-//		new ObjectToXMLTest2().serializeClass();
-//		new ObjectToXMLTest2().typedArrayTest();
+		new ObjectToXMLTest().simpleTest();
+		new ObjectToXMLTest().serializeClass();
+		new ObjectToXMLTest().typedArrayTest();
 		new ObjectToXMLTest().doHardTest();
-//		new ObjectToXMLTest2().partialHardTest();
-//		new ObjectToXMLTest2().simplifiedHardTest();
+		new ObjectToXMLTest().partialHardTest();
+		new ObjectToXMLTest().simplifiedHardTest();
 		System.out.println("Done.");
 	}
 }
