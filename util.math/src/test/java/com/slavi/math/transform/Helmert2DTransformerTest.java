@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.math.MathUtil;
@@ -12,6 +13,7 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.util.testUtil.TestUtil;
 
 public class Helmert2DTransformerTest {
+	public static double precision = 1.0 / 10000.0;
 
 	static void dumpAffineTransform(AffineTransform af) {
 		double[] d = new double[6]; 
@@ -137,7 +139,7 @@ public class Helmert2DTransformerTest {
 		System.out.println("==== max discrepancy 2 ====");
 		System.out.println(delta.toString());
 		
-		TestUtil.assertMatrix0("Delta", delta);
+		Assert.assertTrue("Delta", delta.is0(precision));
 	}
 
 	

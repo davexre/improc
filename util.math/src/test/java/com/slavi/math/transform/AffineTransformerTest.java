@@ -4,6 +4,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.math.MathUtil;
@@ -11,6 +12,7 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.util.testUtil.TestUtil;
 
 public class AffineTransformerTest {
+	public static double precision = 1.0 / 10000.0;
 
 	private AffineTransformLearnerTestImpl learner;
 
@@ -39,7 +41,7 @@ public class AffineTransformerTest {
 		learner = new AffineTransformLearnerTestImpl(points);
 		TransformLearnerResult res = learner.calculateOne();
 //		System.out.println(res);
-		TestUtil.assertTrue("Learner adjusted", res.isAdjusted());
+		Assert.assertTrue("Learner adjusted", res.isAdjusted());
 	}
 
 	void transformBackward() {
@@ -60,7 +62,7 @@ public class AffineTransformerTest {
 		
 		Matrix backward = new Matrix(3, 3);
 		forward.copyTo(backward);
-		TestUtil.assertTrue("Inverse", backward.inverse());
+		Assert.assertTrue("Inverse", backward.inverse());
 		
 		Point2D.Double srcP = new Point2D.Double(100, 200);
 		Point2D.Double destP = new Point2D.Double();
@@ -81,11 +83,11 @@ public class AffineTransformerTest {
 		
 		p1.mMul(forward, p2);
 		p2.mSub(p3, p4);
-		TestUtil.assertMatrix0("Forward", p4);
+		Assert.assertTrue("Forward", p4.is0(precision));
 		
 		p2.mMul(backward, p3);
 		p3.mSub(p1, p4);
-		TestUtil.assertMatrix0("Inverse(Forward)", p4);
+		Assert.assertTrue("Inverse(Forward)", p4.is0(precision));
 /*		
 //		tr.affineCoefs.printM("Coefs");
 //		tr.origin.printM("Origin");
@@ -116,7 +118,8 @@ public class AffineTransformerTest {
 	public void testAffineTransformer() throws Exception {
 		learn();
 		Matrix delta = learner.computeTransformedTargetDelta(true);
-		TestUtil.assertMatrix0("", delta);
+		
+		Assert.assertTrue(delta.is0(precision));
 		transformBackward();
 	}
 }

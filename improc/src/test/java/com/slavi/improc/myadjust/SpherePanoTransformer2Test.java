@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.improc.KeyPoint;
@@ -16,6 +17,8 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.util.testUtil.TestUtil;
 
 public class SpherePanoTransformer2Test {
+
+	public static double precision = 1.0 / 10000.0;
 
 	@Test
 	public void testSpherePanoTransformer() {
@@ -34,8 +37,8 @@ public class SpherePanoTransformer2Test {
 		double dest2[] = new double[3];
 		SphereNorm2.transformForeward(p1.getDoubleX(), p1.getDoubleY(), kpl1, dest);
 		SphereNorm2.transformBackward(dest[0], dest[1], kpl1, dest2);
-		TestUtil.assertEqual("", dest2[0], p1.getDoubleX());
-		TestUtil.assertEqual("", dest2[1], p1.getDoubleY());
+		Assert.assertEquals(dest2[0], p1.getDoubleX(), precision);
+		Assert.assertEquals(dest2[1], p1.getDoubleY(), precision);
 		
 		Matrix m = RotationZYZ.instance.makeAngles(kpl1.sphereRZ1, kpl1.sphereRY, kpl1.sphereRZ2);
 		double d1[] = new double[3];

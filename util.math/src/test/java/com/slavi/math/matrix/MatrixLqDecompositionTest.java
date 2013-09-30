@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.util.testUtil.TestUtil;
 
 public class MatrixLqDecompositionTest {
+	public static double precision = 1.0 / 10000.0;
 
 	@Test
 	public void testLqDecomposition() throws Exception {
@@ -35,6 +37,6 @@ public class MatrixLqDecompositionTest {
 //		s.printM("S2");
 		s.mSub(b, b);
 //		b.printM("A");
-		TestUtil.assertMatrix0("", b);
+		Assert.assertTrue(b.is0(precision));
 	}
 }

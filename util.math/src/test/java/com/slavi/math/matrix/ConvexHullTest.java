@@ -3,6 +3,7 @@ package com.slavi.math.matrix;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.math.ConvexHull;
@@ -45,7 +46,7 @@ public class ConvexHullTest {
 		points.add(new Point2D.Double(3, 3));
 
 		ArrayList<Point2D.Double> result = ConvexHull.makeConvexHull(points);
-		TestUtil.assertEqual("Number of points in convex hull polygon", result.size(), 5);
+		Assert.assertEquals("Number of points in convex hull polygon", result.size(), 5);
 		TestUtil.assertEqual("Area of polygon", ConvexHull.getPolygonArea(result), 4.0);
 		TestUtil.assertEqual("Area of convex hull polygon", ConvexHull.getConvexHullArea(result), 4.0);
 		TestUtil.assertEqual("Area of convex hull polygon", new ConvexHullArea(points).getConvexHullArea(), 4.0);

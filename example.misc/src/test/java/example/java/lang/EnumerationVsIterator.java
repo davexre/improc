@@ -4,6 +4,8 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.junit.Assert;
+
 import com.slavi.util.Marker;
 import com.slavi.util.testUtil.TestUtil;
 
@@ -41,7 +43,7 @@ public class EnumerationVsIterator {
 			}
 		}
 		Marker.release();
-		TestUtil.assertTrue("", count1 == count2);
+		Assert.assertTrue("", count1 == count2);
 
 		// --------------
 		int count3 = 0;
@@ -56,6 +58,6 @@ public class EnumerationVsIterator {
 		}
 		Marker.release();
 		
-		TestUtil.assertTrue("", count3 == count2);
+		Assert.assertTrue("", count3 == count2);
 	}
 }

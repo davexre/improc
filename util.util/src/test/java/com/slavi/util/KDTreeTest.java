@@ -2,10 +2,10 @@ package com.slavi.util;
 
 import java.util.ArrayList;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.math.adjust.Statistics;
-import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.tree.KDTreeTestData;
 import com.slavi.util.tree.KDTreeTestImpl;
 import com.slavi.util.tree.NearestNeighbours;
@@ -41,12 +41,12 @@ public class KDTreeTest {
 		ArrayList<KDTreeTestData> items = KDTreeTest.generateTestDataItems(dimensions, itemsToGenerate);
 		KDTreeTestImpl tree = new KDTreeTestImpl(dimensions, items);
 		int itemsCount = tree.getSize();
-		TestUtil.assertEqual("Incorrect tree addition", items.size(), itemsCount);
+		Assert.assertEquals("Incorrect tree addition", items.size(), itemsCount);
 
 		for (KDTreeTestData item : items)
 			tree.add(item);
 		itemsCount = tree.getSize();
-		TestUtil.assertEqual("Duplicated items exist in tree", items.size(), itemsCount);
+		Assert.assertEquals("Duplicated items exist in tree", items.size(), itemsCount);
 	}
 	
 	@Test
@@ -57,7 +57,7 @@ public class KDTreeTest {
 		KDTreeTestImpl tree = new KDTreeTestImpl(dimensions, items);
 		
 		for (KDTreeTestData i : items) {
-			TestUtil.assertTrue("Item not found", tree.contains(i));
+			Assert.assertTrue("Item not found", tree.contains(i));
 		}
 	}
 	
@@ -72,7 +72,7 @@ public class KDTreeTest {
 		for (KDTreeTestData i : items) {
 			NearestNeighbours<KDTreeTestData> nn;
 			nn = find.findNN(tree, i);
-			TestUtil.assertTrue("", i == nn.getItem(0));
+			Assert.assertTrue("", i == nn.getItem(0));
 			stat.addValue(nn.getUsedSearchSteps());
 		}
 		stat.stop();
@@ -124,19 +124,19 @@ public class KDTreeTest {
 		int oldDepth = tree.getTreeDepth();
 		int perfectTreeDepth = tree.getPerfectTreeDepth();
 		
-		TestUtil.assertTrue("Tree is broken", tree.isValidTree());
+		Assert.assertTrue("Tree is broken", tree.isValidTree());
 		System.out.println("Tree BEFORE balance");
 		tree.printTree();
 		tree.balance();
 		System.out.println("Tree AFTER balance");
 		tree.printTree();
-		TestUtil.assertTrue("Tree is broken", tree.isValidTree());
+		Assert.assertTrue("Tree is broken", tree.isValidTree());
 		
 		int newDepth = tree.getTreeDepth();
 		System.out.println("Old depth " + oldDepth);
 		System.out.println("New depth " + newDepth);
 		System.out.println("Perfect   " + perfectTreeDepth);
-		TestUtil.assertEqual("", newDepth, perfectTreeDepth);
+		Assert.assertEquals("", newDepth, perfectTreeDepth);
 	}
 	
 	public static void main(String[] args) {

@@ -6,15 +6,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
 import org.jdom.Element;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.xml.XMLHelper;
 
 public class XMLMatrixTest {
+	public static double precision = 1.0 / 10000.0;
+
 	Matrix m;
 
 	@Before
@@ -37,6 +39,6 @@ public class XMLMatrixTest {
 		root = XMLHelper.readXML(fin);
 		Matrix m2 = XMLMatrix.instance.fromXML(root);
 		m.mSub(m2, m2);
-		TestUtil.assertMatrix0("", m2);		
+		Assert.assertTrue(m2.is0(precision));
 	}
 }

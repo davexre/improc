@@ -3,6 +3,7 @@ package com.slavi.math;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.util.testUtil.TestUtil;
@@ -28,30 +29,30 @@ public class GeometryUtilTest {
 	public void testSimplifyPolygon1() {
 		ArrayList<Point2D> points = new ArrayList<Point2D>();
 		ArrayList<Point2D> simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 
 		points.add(new Point2D.Double(0, 0));
 		simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 
 		points.add(new Point2D.Double(1, 0));
 		simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 
 		points.add(new Point2D.Double(2, 0));
 		simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 
 		points.add(new Point2D.Double(2, 0));
 		simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 
 		points.add(new Point2D.Double(2, 2));
 		points.add(new Point2D.Double(-2, 2));
 		points.add(new Point2D.Double(-2, 0));
 		points.add(new Point2D.Double(-1, 0));
 		simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertEqual("", simplified.size(), 4);
+		Assert.assertEquals("", simplified.size(), 4);
 	}
 	
 	@Test
@@ -62,7 +63,7 @@ public class GeometryUtilTest {
 		points.add(new Point2D.Double(0, 0));
 		points.add(new Point2D.Double(2, 0));
 		ArrayList<Point2D> simplified = GeometryUtil.simplifyPolygon(points, 0.5);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 	}
 	
 	@Test
@@ -73,10 +74,10 @@ public class GeometryUtilTest {
 		points.add(new Point2D.Double(0, 1));
 		points.add(new Point2D.Double(1, 1));
 		ArrayList<Point2D> simplified = GeometryUtil.simplifyPolygon(points, 1);
-		TestUtil.assertEqual("", simplified.size(), 4);
+		Assert.assertEquals("", simplified.size(), 4);
 
 		simplified = GeometryUtil.simplifyPolygon(points, 1.1);
-		TestUtil.assertTrue("", simplified.size() < 3);
+		Assert.assertTrue("", simplified.size() < 3);
 	}
 		
 	@Test
@@ -101,14 +102,14 @@ public class GeometryUtilTest {
 		Point2D.Double c = new Point2D.Double(2, 2);
 		Point2D.Double mid = GeometryUtil.midPoint(a, b);
 		
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, b, a) == GeometryUtil.PointToLinePosition.EqualsTheStartPoint);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, b, b) == GeometryUtil.PointToLinePosition.EqualsTheEndPoint);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, b, mid) == GeometryUtil.PointToLinePosition.Inside);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, b, c) == GeometryUtil.PointToLinePosition.NegativePlane);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, c, b) == GeometryUtil.PointToLinePosition.PositivePlane);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(mid, b, a) == GeometryUtil.PointToLinePosition.BeforeTheStartPoint);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, mid, b) == GeometryUtil.PointToLinePosition.AfterTheEndPoint);
-		TestUtil.assertTrue("", GeometryUtil.pointToLine(a, a, b) == GeometryUtil.PointToLinePosition.InvalidLine);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, b, a) == GeometryUtil.PointToLinePosition.EqualsTheStartPoint);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, b, b) == GeometryUtil.PointToLinePosition.EqualsTheEndPoint);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, b, mid) == GeometryUtil.PointToLinePosition.Inside);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, b, c) == GeometryUtil.PointToLinePosition.NegativePlane);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, c, b) == GeometryUtil.PointToLinePosition.PositivePlane);
+		Assert.assertTrue("", GeometryUtil.pointToLine(mid, b, a) == GeometryUtil.PointToLinePosition.BeforeTheStartPoint);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, mid, b) == GeometryUtil.PointToLinePosition.AfterTheEndPoint);
+		Assert.assertTrue("", GeometryUtil.pointToLine(a, a, b) == GeometryUtil.PointToLinePosition.InvalidLine);
 	}
 	
 	public static void main(String[] args) {

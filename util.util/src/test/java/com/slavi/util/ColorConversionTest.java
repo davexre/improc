@@ -1,32 +1,34 @@
 package com.slavi.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.slavi.math.MathUtil;
-import com.slavi.util.testUtil.TestUtil;
 
 public class ColorConversionTest {
+	public static double precision = 1.0 / 1000.0;
+
 	public static class Data {
 		public double R, G, B, H, H2, C, C2, V, L, I, Y601, SHSV, SHSL, SHSI;
 
 		public Data(double R, double G, double B, double H, double H2, double C, double C2, double V, double L, double I, double Y601, double SHSV, double SHSL, double SHSI) {
-			this.R = R; 
-			this.G = G; 
-			this.B = B; 
-			this.H = H; 
-			this.H2 = H2; 
-			this.C = C; 
-			this.C2 = C2; 
-			this.V = V; 
-			this.L = L; 
-			this.I = I; 
+			this.R = R;
+			this.G = G;
+			this.B = B;
+			this.H = H;
+			this.H2 = H2;
+			this.C = C;
+			this.C2 = C2;
+			this.V = V;
+			this.L = L;
+			this.I = I;
 			this.Y601 = Y601;
 			this.SHSV = SHSV;
 			this.SHSL = SHSL;
 			this.SHSI = SHSI;
 		}
 	}
-		
+
 	Data testData[] = {
 			new Data(1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0),
 			new Data(0.5, 0.5, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0.5, 0.5, 0, 0, 0),
@@ -56,38 +58,29 @@ public class ColorConversionTest {
 		double dest2[] = new double[3];
 		double dest3[] = new double[3];
 
-		TestUtil.precision = 1.0 / 1000.0;
 		for (int index = 0; index < testData.length; index++) {
 			Data i = testData[index];
 			dest0[0] = i.R;
 			dest0[1] = i.G;
 			dest0[2] = i.B;
-			
+
 			dest3[0] = i.H * MathUtil.deg2rad;
 			dest3[1] = i.SHSV;
 			dest3[2] = i.V;
-			
+
 			ColorConversion.HSV.fromDRGB(dest0, dest1);
 			ColorConversion.HSV.toDRGB(dest1, dest2);
-			try {
-				TestUtil.assertEqual("Color not matched HSV", dest1, dest3);
-				TestUtil.assertEqual("Color not matched RGB", dest0, dest2);
-			} catch (RuntimeException e) {
-				System.out.println("Error at index " + index);
-				TestUtil.dumpArray("", dest0);
-				TestUtil.dumpArray("", dest1);
-				TestUtil.dumpArray("", dest2);
-				throw e;
-			}
+			Assert.assertArrayEquals("Color not matched HSV", dest1, dest3, precision);
+			Assert.assertArrayEquals("Color not matched RGB", dest0, dest2, precision);
 		}
 	}
-	
+
 	@Test
 	public void testHSV() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
 		double dest2[] = new double[3];
-		
+
 		for (int r = 0; r <= 255; r++) {
 			for (int g = 0; g <= 255; g++) {
 				for (int b = 0; b <= 255; b++) {
@@ -96,23 +89,15 @@ public class ColorConversionTest {
 					dest0[2] = b;
 					ColorConversion.RGB.toDRGB(dest0, dest1);
 					ColorConversion.HSV.fromDRGB(dest1, dest1);
-					TestUtil.assertEqualAngle("Hue not matched", dest1[0], MathUtil.fixAngle2PI(dest1[0]));
+					Assert.assertEquals("Hue not matched", dest1[0], MathUtil.fixAngle2PI(dest1[0]), precision);
 					ColorConversion.HSV.toDRGB(dest1, dest2);
 					ColorConversion.RGB.fromDRGB(dest2, dest2);
-					try {
-						TestUtil.assertEqual("Color not matched", dest0, dest2);
-					} catch (RuntimeException e) {
-						TestUtil.dumpArray("", dest0);
-						TestUtil.dumpArray("", dest1);
-						TestUtil.dumpArray("", dest2);
-						System.out.println("----");
-						throw e;
-					}
+					Assert.assertArrayEquals("Color not matched", dest0, dest2, precision);
 				}
-			}			
+			}
 		}
 	}
-	
+
 	@Test
 	public void testHSL2() {
 		double dest0[] = new double[3];
@@ -120,74 +105,53 @@ public class ColorConversionTest {
 		double dest2[] = new double[3];
 		double dest3[] = new double[3];
 
-		TestUtil.precision = 1.0 / 1000.0;
 		for (int index = 0; index < testData.length; index++) {
 			Data i = testData[index];
 			dest0[0] = i.R;
 			dest0[1] = i.G;
 			dest0[2] = i.B;
-			
+
 			dest3[0] = i.H * MathUtil.deg2rad;
 			dest3[1] = i.SHSL;
 			dest3[2] = i.L;
-			
+
 			ColorConversion.HSL.fromDRGB(dest0, dest1);
 			ColorConversion.HSL.toDRGB(dest1, dest2);
-			try {
-				TestUtil.assertEqual("Color not matched HSL", dest1, dest3);
-				TestUtil.assertEqual("Color not matched RGB", dest0, dest2);
-			} catch (RuntimeException e) {
-				System.out.println("Error at index " + index);
-				TestUtil.dumpArray("", dest0);
-				TestUtil.dumpArray("", dest1);
-				TestUtil.dumpArray("", dest2);
-				TestUtil.dumpArray("", dest3);
-				throw e;
-			}
+			Assert.assertArrayEquals("Color not matched HSL", dest1, dest3, precision);
+			Assert.assertArrayEquals("Color not matched RGB", dest0, dest2, precision);
 		}
 	}
-	
+
 	@Test
 	public void testHSL() {
 		double dest0[] = new double[3];
 		double dest1[] = new double[3];
 		double dest2[] = new double[3];
-		
+
 		for (int r = 0; r <= 255; r++) {
 			for (int g = 0; g <= 255; g++) {
 				for (int b = 0; b <= 255; b++) {
-					try {
-						int color = r << 16 | g << 8 | b;
-						dest0[0] = r;
-						dest0[1] = g;
-						dest0[2] = b;
+					int color = r << 16 | g << 8 | b;
+					dest0[0] = r;
+					dest0[1] = g;
+					dest0[2] = b;
 
-						ColorConversion.RGB.toDRGB(dest0, dest1);
-						ColorConversion.RGB.fromRGB(color, dest2);
-						TestUtil.assertEqual("Color not matched 1", dest1, dest2);
+					ColorConversion.RGB.toDRGB(dest0, dest1);
+					ColorConversion.RGB.fromRGB(color, dest2);
+					Assert.assertArrayEquals("Color not matched 1", dest1, dest2, precision);
 
-						ColorConversion.HSL.fromDRGB(dest1, dest1);
-						ColorConversion.HSL.toDRGB(dest1, dest1);
-						ColorConversion.RGB.fromDRGB(dest1, dest2);
-						TestUtil.assertEqual("Color not matched 2", dest0, dest2);
+					ColorConversion.HSL.fromDRGB(dest1, dest1);
+					ColorConversion.HSL.toDRGB(dest1, dest1);
+					ColorConversion.RGB.fromDRGB(dest1, dest2);
+					Assert.assertArrayEquals("Color not matched 2", dest0, dest2, precision);
 
-						int color2 = ColorConversion.RGB.toRGB(dest1);
-						TestUtil.assertEqual("Color not matched 3", color, color2);
-					} catch (RuntimeException e) {
-						System.out.println("R=" + r);
-						System.out.println("G=" + g);
-						System.out.println("B=" + b);
-						TestUtil.dumpArray("", dest0);
-						TestUtil.dumpArray("", dest1);
-						TestUtil.dumpArray("", dest2);
-						System.out.println("----");
-						throw e;
-					}
+					int color2 = ColorConversion.RGB.toRGB(dest1);
+					Assert.assertEquals("Color not matched 3", color, color2);
 				}
-			}			
+			}
 		}
 	}
-	
+
 	@Test
 	public void testCMYK() {
 		double rgb[] = new double[3];
@@ -195,40 +159,27 @@ public class ColorConversionTest {
 		double cmyk[] = new double[4];
 		double drgb2[] = new double[3];
 		double rgb2[] = new double[3];
-		
+
 		for (int r = 0; r <= 255; r++) {
 			for (int g = 0; g <= 255; g++) {
 				for (int b = 0; b <= 255; b++) {
-					try {
-						int color = r << 16 | g << 8 | b;
-						rgb[0] = r;
-						rgb[1] = g;
-						rgb[2] = b;
+					int color = r << 16 | g << 8 | b;
+					rgb[0] = r;
+					rgb[1] = g;
+					rgb[2] = b;
 
-						ColorConversion.RGB.toDRGB(rgb, drgb);
-						ColorConversion.CMYK.fromDRGB(drgb, cmyk);
-						ColorConversion.CMYK.toDRGB(cmyk, drgb2);
-						ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+					ColorConversion.RGB.toDRGB(rgb, drgb);
+					ColorConversion.CMYK.fromDRGB(drgb, cmyk);
+					ColorConversion.CMYK.toDRGB(cmyk, drgb2);
+					ColorConversion.RGB.fromDRGB(drgb2, rgb2);
 
-						int color2 = ColorConversion.RGB.toRGB(drgb2);
-						TestUtil.assertEqual("Color not matched", color, color2);
-					} catch (RuntimeException e) {
-						System.out.println("R=" + r);
-						System.out.println("G=" + g);
-						System.out.println("B=" + b);
-						TestUtil.dumpArray("rgb", rgb);
-						TestUtil.dumpArray("drgb", drgb);
-						TestUtil.dumpArray("cmyk", cmyk);
-						TestUtil.dumpArray("drgb2", drgb2);
-						TestUtil.dumpArray("rgb2", rgb2);
-						System.out.println("----");
-						throw e;
-					}
+					int color2 = ColorConversion.RGB.toRGB(drgb2);
+					Assert.assertEquals("Color not matched", color, color2);
 				}
-			}			
+			}
 		}
 	}
-	
+
 	@Test
 	public void testRBW() {
 		double rgb[] = new double[3];
@@ -236,37 +187,24 @@ public class ColorConversionTest {
 		double rbw[] = new double[3];
 		double drgb2[] = new double[3];
 		double rgb2[] = new double[3];
-		
+
 		for (int r = 0; r <= 255; r++) {
 			for (int g = 0; g <= 255; g++) {
 				for (int b = 0; b <= 255; b++) {
-					try {
-						int color = r << 16 | g << 8 | b;
-						rgb[0] = r;
-						rgb[1] = g;
-						rgb[2] = b;
+					int color = r << 16 | g << 8 | b;
+					rgb[0] = r;
+					rgb[1] = g;
+					rgb[2] = b;
 
-						ColorConversion.RGB.toDRGB(rgb, drgb);
-						ColorConversion.RBW.fromDRGB(drgb, rbw);
-						ColorConversion.RBW.toDRGB(rbw, drgb2);
-						ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+					ColorConversion.RGB.toDRGB(rgb, drgb);
+					ColorConversion.RBW.fromDRGB(drgb, rbw);
+					ColorConversion.RBW.toDRGB(rbw, drgb2);
+					ColorConversion.RGB.fromDRGB(drgb2, rgb2);
 
-						int color2 = ColorConversion.RGB.toRGB(drgb2);
-						TestUtil.assertEqual("Color not matched", color, color2);
-					} catch (RuntimeException e) {
-						System.out.println("R=" + r);
-						System.out.println("G=" + g);
-						System.out.println("B=" + b);
-						TestUtil.dumpArray("rgb", rgb);
-						TestUtil.dumpArray("drgb", drgb);
-						TestUtil.dumpArray("rbw", rbw);
-						TestUtil.dumpArray("drgb2", drgb2);
-						TestUtil.dumpArray("rgb2", rgb2);
-						System.out.println("----");
-						throw e;
-					}
+					int color2 = ColorConversion.RGB.toRGB(drgb2);
+					Assert.assertEquals("Color not matched", color, color2);
 				}
-			}			
+			}
 		}
 	}
 }

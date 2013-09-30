@@ -2,6 +2,7 @@ package com.slavi.util;
 
 import java.util.Properties;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -32,23 +33,23 @@ public class PropertyUtilTest {
 	
 	@Test 
 	public void testSubstituteVars() {
-		TestUtil.assertEqual("", "", PropertyUtil.substituteVars("", p));
-		TestUtil.assertEqual("", "Static text Кирилица", PropertyUtil.substituteVars("Static text Кирилица", p));
-		TestUtil.assertEqual("", "text${}text", PropertyUtil.substituteVars("text${}text", p));
-		TestUtil.assertEqual("", "text${invalidVariable:10}text", PropertyUtil.substituteVars("text${invalidVariable:10}text", p));
-		TestUtil.assertEqual("", "text  123text", PropertyUtil.substituteVars("text${  Value  :  5  }text", p));
-		TestUtil.assertEqual("", "text123         text", PropertyUtil.substituteVars("text${ Value:L }text", p));
+		Assert.assertEquals("", "", PropertyUtil.substituteVars("", p));
+		Assert.assertEquals("", "Static text Кирилица", PropertyUtil.substituteVars("Static text Кирилица", p));
+		Assert.assertEquals("", "text${}text", PropertyUtil.substituteVars("text${}text", p));
+		Assert.assertEquals("", "text${invalidVariable:10}text", PropertyUtil.substituteVars("text${invalidVariable:10}text", p));
+		Assert.assertEquals("", "text  123text", PropertyUtil.substituteVars("text${  Value  :  5  }text", p));
+		Assert.assertEquals("", "text123         text", PropertyUtil.substituteVars("text${ Value:L }text", p));
 		String str = "${ Value:L }";
-		TestUtil.assertEqual("", str.length(), PropertyUtil.substituteVars(str, p).length());
+		Assert.assertEquals("", str.length(), PropertyUtil.substituteVars(str, p).length());
 		str = "${ Value:R }";
-		TestUtil.assertEqual("", str.length(), PropertyUtil.substituteVars(str, p).length());
-		TestUtil.assertEqual("", "text     A Value 2 Atext", PropertyUtil.substituteVars("text${ VAL$${UseVal2}:15 }text", p));
-		TestUtil.assertEqual("", "text     A Value 2 Atext", PropertyUtil.substituteVars("text${VAL$${UseVal2}:15}text", p));
-		TestUtil.assertEqual("", "textValue 1text", PropertyUtil.substituteVars("text${ ${VAL$${ UseVal0:L }} }text", p));
-		TestUtil.assertEqual("", "textValue 1text", PropertyUtil.substituteVars("text${${VAL$${ UseVal0:L }}}text", p));
-		TestUtil.assertEqual("", "textValue 1text", PropertyUtil.substituteVars("text${${VAL$${ UseVal0 }${ UseVal2 }}}text", p));
-		TestUtil.assertEqual("", "${Recursive}", PropertyUtil.substituteVars("${Recursive}", p));
-		TestUtil.assertEqual("", "text${}text", PropertyUtil.substituteVars("text${}text", p));
+		Assert.assertEquals("", str.length(), PropertyUtil.substituteVars(str, p).length());
+		Assert.assertEquals("", "text     A Value 2 Atext", PropertyUtil.substituteVars("text${ VAL$${UseVal2}:15 }text", p));
+		Assert.assertEquals("", "text     A Value 2 Atext", PropertyUtil.substituteVars("text${VAL$${UseVal2}:15}text", p));
+		Assert.assertEquals("", "textValue 1text", PropertyUtil.substituteVars("text${ ${VAL$${ UseVal0:L }} }text", p));
+		Assert.assertEquals("", "textValue 1text", PropertyUtil.substituteVars("text${${VAL$${ UseVal0:L }}}text", p));
+		Assert.assertEquals("", "textValue 1text", PropertyUtil.substituteVars("text${${VAL$${ UseVal0 }${ UseVal2 }}}text", p));
+		Assert.assertEquals("", "${Recursive}", PropertyUtil.substituteVars("${Recursive}", p));
+		Assert.assertEquals("", "text${}text", PropertyUtil.substituteVars("text${}text", p));
 	}
 /*
 	void dummy() {
