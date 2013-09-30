@@ -23,11 +23,11 @@ import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.parallel.PDLoweDetector;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.improc.parallel.PDLoweDetector2;
-import com.slavi.io.txt.TXTKDTree;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 import com.slavi.util.file.FileUtil;
+import com.slavi.util.tree.TXTKDTree;
 
 public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 	final KeyPointList keyPointList;

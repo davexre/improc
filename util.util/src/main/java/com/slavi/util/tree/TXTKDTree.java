@@ -1,4 +1,4 @@
-package com.slavi.io.txt;
+package com.slavi.util.tree;
 
 import java.io.BufferedReader;
 import java.io.IOException;

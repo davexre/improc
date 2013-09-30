@@ -22,6 +22,7 @@
 		<module>reprap</module>
 		<module>zaSasho</module>
 		<module>example.misc</module>
+		<module>work</module>
 	</modules>
 
 	<dependencies>
