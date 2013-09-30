@@ -12,7 +12,6 @@ import com.slavi.util.StringPrintStream;
 import com.slavi.util.io.ObjectRead;
 import com.slavi.util.io.ObjectToXML;
 import com.slavi.util.io.ObjectWrite;
-import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.xml.XMLHelper;
 
 public class ObjectToXMLTest {
@@ -64,7 +63,7 @@ public class ObjectToXMLTest {
 		Element element = new Element("root");
 
 		myBean = (MyBeanNested) new ObjectToXML.Read(element).read();
-		TestUtil.assertTrue("Expected null object", myBean == null);
+		Assert.assertTrue("Expected null object", myBean == null);
 		new ObjectToXML.Write(element).write(myBean);
 		StringPrintStream fou = new StringPrintStream();
 		XMLHelper.writeXML(fou, element, null);

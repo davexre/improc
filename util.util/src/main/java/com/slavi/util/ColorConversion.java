@@ -1,19 +1,35 @@
 package com.slavi.util;
 
-import com.slavi.math.MathUtil;
-
 public class ColorConversion {
 	public static final double piOver3 = Math.PI / 3.0;
-	
+	public static final double C2PI = Math.PI * 2.0;
+
+	/**
+	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 */
+	public static double clipValue(double value, double min, double max) {
+		return Math.min(max, Math.max(min, value));
+	}
+
+	/**
+	 * Returns the specified angle in the range [0..2*pi)
+	 */
+	public static double fixAngle2PI(double angle) {
+		angle %= C2PI;
+		return (angle < 0) ? C2PI + angle : angle;
+//		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
+	}
+
+
 	/**
 	 * @param r		Value for RED [0..255] 
 	 * @param g		Value for GREEN [0..255] 
 	 * @param b		Value for BLUE [0..255]
 	 */
 	public static void clipRGB(double r, double g, double b, double dest[]) {
-		dest[0] = MathUtil.clipValue(r, 0.0, 255.0);
-		dest[1] = MathUtil.clipValue(g, 0.0, 255.0);
-		dest[2] = MathUtil.clipValue(b, 0.0, 255.0);
+		dest[0] = clipValue(r, 0.0, 255.0);
+		dest[1] = clipValue(g, 0.0, 255.0);
+		dest[2] = clipValue(b, 0.0, 255.0);
 	}
 
 	/**
@@ -22,9 +38,9 @@ public class ColorConversion {
 	 * DB - Blue [0..1]
 	 */
 	public static void clipDRGB(double DR, double DG, double DB, double dest[]) {
-		dest[0] = MathUtil.clipValue(DR, 0.0, 1.0);
-		dest[1] = MathUtil.clipValue(DG, 0.0, 1.0);
-		dest[2] = MathUtil.clipValue(DB, 0.0, 1.0);
+		dest[0] = clipValue(DR, 0.0, 1.0);
+		dest[1] = clipValue(DG, 0.0, 1.0);
+		dest[2] = clipValue(DB, 0.0, 1.0);
 	}
 	
 	public static class RGB {
@@ -56,9 +72,9 @@ public class ColorConversion {
 		
 		public static int toRGB(double DR, double DG, double DB) {
 			return (int) (
-				((int) MathUtil.clipValue(Math.round(DR * 255.0), 0.0, 255.0) << 16) | 
-				((int) MathUtil.clipValue(Math.round(DG * 255.0), 0.0, 255.0) << 8) | 
-				((int) MathUtil.clipValue(Math.round(DB * 255.0), 0.0, 255.0)));
+				((int) clipValue(Math.round(DR * 255.0), 0.0, 255.0) << 16) | 
+				((int) clipValue(Math.round(DG * 255.0), 0.0, 255.0) << 8) | 
+				((int) clipValue(Math.round(DB * 255.0), 0.0, 255.0)));
 		}
 		
 		public static void fromRGB(int rgb, double DRGB[]) {
@@ -105,21 +121,21 @@ public class ColorConversion {
 				return;
 			}
 			if (hsv[0] == max) {
-				hsv[0] = MathUtil.fixAngle2PI(piOver3 * (hsv[1] - hsv[2]) / chroma);
+				hsv[0] = fixAngle2PI(piOver3 * (hsv[1] - hsv[2]) / chroma);
 			} else if (hsv[1] == max) {
 				hsv[0] = piOver3 * (2.0 + (hsv[2] - hsv[0]) / chroma);
 			} else {
 				hsv[0] = piOver3 * (4.0 + (hsv[0] - hsv[1]) / chroma);
 			}
-			hsv[0] = MathUtil.fixAngle2PI(hsv[0]); // TODO: Obsolete
+			hsv[0] = fixAngle2PI(hsv[0]); // TODO: Obsolete
 			hsv[1] = chroma / max;
 			hsv[2] = max;
 		}
 		
 		public static void toDRGB(double h, double s, double v, double DRGB[]) {
-			h = MathUtil.fixAngle2PI(h);
-			s = MathUtil.clipValue(s, 0.0, 1.0);
-			v = MathUtil.clipValue(v, 0.0, 1.0);
+			h = fixAngle2PI(h);
+			s = clipValue(s, 0.0, 1.0);
+			v = clipValue(v, 0.0, 1.0);
 			double C = v * s;
 			double m = v - C;
 			double h1 = h / piOver3;
@@ -196,7 +212,7 @@ public class ColorConversion {
 				return;
 			}
 			if (hsl[0] == max) {
-				hsl[0] = MathUtil.fixAngle2PI(piOver3 * (hsl[1] - hsl[2]) / chroma);
+				hsl[0] = fixAngle2PI(piOver3 * (hsl[1] - hsl[2]) / chroma);
 			} else if (hsl[1] == max) {
 				hsl[0] = piOver3 * (2.0 + (hsl[2] - hsl[0]) / chroma);
 			} else {
@@ -212,9 +228,9 @@ public class ColorConversion {
 		}
 		
 		public static void toDRGB(double h, double s, double l, double DRGB[]) {
-			h = MathUtil.fixAngle2PI(h);
-			s = MathUtil.clipValue(s, 0.0, 1.0);
-			l = MathUtil.clipValue(l, 0.0, 1.0);
+			h = fixAngle2PI(h);
+			s = clipValue(s, 0.0, 1.0);
+			l = clipValue(l, 0.0, 1.0);
 			double C = s * (l <= 0.5 ? l : 1.0 - l);
 			double m = l - C;
 			C *= 2.0;
@@ -296,10 +312,10 @@ public class ColorConversion {
 		}
 		
 		public static void toDRGB(double c, double m, double y, double k, double DRGB[]) {
-			c = MathUtil.clipValue(1.0 - c, 0.0, 1.0);
-			m = MathUtil.clipValue(1.0 - m, 0.0, 1.0);
-			y = MathUtil.clipValue(1.0 - y, 0.0, 1.0);
-			k = MathUtil.clipValue(1.0 - k, 0.0, 1.0);
+			c = clipValue(1.0 - c, 0.0, 1.0);
+			m = clipValue(1.0 - m, 0.0, 1.0);
+			y = clipValue(1.0 - y, 0.0, 1.0);
+			k = clipValue(1.0 - k, 0.0, 1.0);
 			DRGB[0] = k * c;
 			DRGB[1] = k * m;
 			DRGB[2] = k * y;
@@ -328,7 +344,7 @@ public class ColorConversion {
 		 */
 		public static void fromDRGB(double DR, double DG, double DB, double rbw[]) {
 			HSV.fromDRGB(DR, DG, DB, rbw);
-			double h = 6.0 * rbw[0] / MathUtil.C2PI;
+			double h = 6.0 * rbw[0] / C2PI;
 			double s = rbw[1];
 			double v = rbw[2];
 			
@@ -381,7 +397,7 @@ public class ColorConversion {
 			HSV.fromDRGB(DR, DG, DB, rbw);
 			double h, s, v;
 			double a, k, t, c, vs, f = 0, sr = 0, sb = 0, r, b;
-			h = rbw[0] / MathUtil.C2PI;
+			h = rbw[0] / C2PI;
 			s = rbw[1];
 			v = rbw[2];
 			
@@ -432,9 +448,9 @@ public class ColorConversion {
 		}
 		
 		public static void toDRGB(double r, double b, double w, double DRGB[]) {
-			r = MathUtil.clipValue(r, -1.0, 1.0);
-			b = MathUtil.clipValue(b, -1.0, 1.0);
-			w = MathUtil.clipValue(w, -1.0, 1.0);
+			r = clipValue(r, -1.0, 1.0);
+			b = clipValue(b, -1.0, 1.0);
+			w = clipValue(w, -1.0, 1.0);
 
 			double h;
 			if (r == 0 && b == 0) {
@@ -474,7 +490,7 @@ public class ColorConversion {
 			} else {
 				s = vs / v;
 			}
-			DRGB[0] = h * MathUtil.C2PI;
+			DRGB[0] = h * C2PI;
 			DRGB[1] = s;
 			DRGB[2] = v;
 			HSV.toDRGB(DRGB, DRGB);

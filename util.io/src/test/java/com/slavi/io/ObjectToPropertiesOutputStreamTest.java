@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.junit.Assert;
+
 import com.slavi.util.PropertyUtil;
 import com.slavi.util.io.ObjectToProperties;
 import com.slavi.util.io.ObjectToPropertiesInputStream;
 import com.slavi.util.io.ObjectToPropertiesOutputStream;
-import com.slavi.util.testUtil.TestUtil;
 
 public class ObjectToPropertiesOutputStreamTest {
 	static Object doTest(String prefix, Object o) throws Exception {
@@ -28,7 +29,7 @@ public class ObjectToPropertiesOutputStreamTest {
 		oos = new ObjectToPropertiesOutputStream(properties, prefix);
 		oos.writeObject(o);
 		String s2 = PropertyUtil.propertiesToString(properties);
-		TestUtil.assertEqual("First and second time conversion not equal", s1, s2);
+		Assert.assertEquals("First and second time conversion not equal", s1, s2);
 
 //		System.out.println(s1);
 		return o;
@@ -56,10 +57,10 @@ public class ObjectToPropertiesOutputStreamTest {
 
 		Properties properties = new Properties();
 		myBean = (MyBeanNested) new ObjectToProperties.Read(properties, prefix).read();
-		TestUtil.assertTrue("Expected null object", myBean == null);
+		Assert.assertTrue("Expected null object", myBean == null);
 		new ObjectToProperties.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
-		TestUtil.assertEqual("Expected empty string", s1, "");
+		Assert.assertEquals("Expected empty string", s1, "");
 		
 		myBean = new MyBeanNested();
 		doTest(prefix, myBean);
@@ -155,8 +156,8 @@ public class ObjectToPropertiesOutputStreamTest {
 		str.add("asdqwe");
 		System.out.println(Arrays.toString(str.getClass().getTypeParameters()));
 		str = (ArrayList) doTest("", str);
-		TestUtil.assertTrue("", str.size() == 1);
-		TestUtil.assertTrue("", "asdqwe".equals(str.get(0)));
+		Assert.assertTrue("", str.size() == 1);
+		Assert.assertTrue("", "asdqwe".equals(str.get(0)));
 		System.out.println(str);
 		str.add("zxczxc");
 		System.out.println(str);
@@ -169,7 +170,7 @@ public class ObjectToPropertiesOutputStreamTest {
 		
 		Class ec2 = (Class) doTest("", ec1);
 		System.out.println("EC.str " + ec2);
-		TestUtil.assertTrue("", ec1 == ec2);
+		Assert.assertTrue("", ec1 == ec2);
 	}
 	
 	public static void main(String[] args) throws Exception {

@@ -3,11 +3,12 @@ package com.slavi.proxy;
 import java.lang.reflect.Proxy;
 import java.util.Properties;
 
+import org.junit.Assert;
+
 import com.slavi.util.PropertyUtil;
 import com.slavi.util.Util;
 import com.slavi.util.io.ObjectToPropertiesInputStream;
 import com.slavi.util.io.ObjectToPropertiesOutputStream;
-import com.slavi.util.testUtil.TestUtil;
 
 public class Test {
 	
@@ -39,7 +40,7 @@ public class Test {
 		oos.writeObject(t2);
 		String s2 = PropertyUtil.propertiesToString(properties);
 		
-		TestUtil.assertEqual("", s1, s2);
+		Assert.assertEquals("", s1, s2);
 		dumpTestIF(t2);
 	}
 }
