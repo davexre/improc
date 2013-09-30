@@ -1,0 +1,2 @@
+This is a sample file to capture properties from the maven build.
+The version of the project is ${project.version} and this is the latest build number.

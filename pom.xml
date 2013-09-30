@@ -22,7 +22,7 @@
 		<module>improc</module>
 		<module>reprap</module>
 		<module>zaSasho</module>
-		<module>example.misc</module>
+		<module>example</module>
 		<module>work</module>
 	</modules>
 
