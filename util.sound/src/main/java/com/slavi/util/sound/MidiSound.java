@@ -5,8 +5,6 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Synthesizer;
 
-import com.slavi.math.MathUtil;
-
 public class MidiSound {
 
 	/**
@@ -16,9 +14,9 @@ public class MidiSound {
 	 * @param velocity				[0..127]
 	 */
 	public static void playNote(int channel, int note, int velocity, int durationMillis) throws InterruptedException, MidiUnavailableException {
-		channel = MathUtil.clipValue(channel, 0, 15);
-		note = MathUtil.clipValue(note, 0, 127);
-		velocity = MathUtil.clipValue(velocity, 0, 127);
+		channel = PlaySound.clipValue(channel, 0, 15);
+		note = PlaySound.clipValue(note, 0, 127);
+		velocity = PlaySound.clipValue(velocity, 0, 127);
 				
 		Synthesizer synth = MidiSystem.getSynthesizer();
 		synth.open();

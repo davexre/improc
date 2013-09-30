@@ -10,8 +10,6 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
 
-import com.slavi.math.MathUtil;
-
 public class Beep {
 
 	static final int defaultBeepDuration = 500;		// milliseconds
@@ -28,21 +26,21 @@ public class Beep {
 	static final byte[] beepData2 = new byte[samplesPerSecond / 10]; 
 				//makeTone(1000, defaultBeepLoudness, samplesPerSecond, 100);
 	
-	public static void makeTone(double pitch, double volumeInPersent, int samplesPerSecond, byte dest[]) {
+	public static void makeTone(double pitch, int volumeInPersent, int samplesPerSecond, byte dest[]) {
 		double omega = (2.0 * Math.PI * pitch) / samplesPerSecond;
-		volumeInPersent = MathUtil.clipValue(volumeInPersent, 0, 100) * 127 / 100;
+		volumeInPersent = PlaySound.clipValue(volumeInPersent, 0, 100) * 127 / 100;
 		for (int i = 0; i < dest.length; i++) {
 			dest[i] = (byte) (volumeInPersent * Math.sin(omega * i));
 		}		
 	}
 	
-	public static byte[] makeTone(double pitch, double volumeInPersent, int samplesPerSecond, int durationMillis) {
+	public static byte[] makeTone(double pitch, int volumeInPersent, int samplesPerSecond, int durationMillis) {
 		byte dest[] = new byte[samplesPerSecond * durationMillis / 1000];
 		makeTone(pitch, volumeInPersent, samplesPerSecond, dest);
 		return dest;
 	}
 
-	public static byte[] makeTone(double pitch, double volumeInPersent, int durationMillis) {
+	public static byte[] makeTone(double pitch, int volumeInPersent, int durationMillis) {
 		int samplesPerSecond = (int) (pitch * 10);
 		byte dest[] = new byte[samplesPerSecond * durationMillis / 1000];
 		makeTone(pitch, volumeInPersent, samplesPerSecond, dest);
@@ -78,7 +76,7 @@ public class Beep {
 		}
 		System.out.println(clipDuration);
 		byte result[] = new byte[samplesPerSecond * clipDuration / 1000];
-		double volumeInPersent = MathUtil.clipValue(beepLoudness, 0, 100) * 127 / 100;
+		double volumeInPersent = PlaySound.clipValue(beepLoudness, 0, 100) * 127 / 100;
 
 		i = 0;
 		int getNextAtIndex = 0;

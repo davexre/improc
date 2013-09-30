@@ -10,8 +10,6 @@ import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineEvent.Type;
 import javax.sound.sampled.LineListener;
 
-import com.slavi.math.MathUtil;
-
 public class Melody {
 
 	static final int samplesPerSecond = 44000;
@@ -63,8 +61,8 @@ public class Melody {
 		}
 	}
 	
-	public static byte[] makeMelody(double globalLoudness, final Note... notes) {
-		globalLoudness = MathUtil.clipValue(globalLoudness, 0, 1);
+	public static byte[] makeMelody(int globalLoudness, final Note... notes) {
+		globalLoudness = PlaySound.clipValue(globalLoudness, 0, 100);
 		
 		int clipDuration = 0;
 		for (Note note : notes) {
@@ -83,7 +81,8 @@ public class Melody {
 				Note note = notes[i++];
 				clipDuration += note.durationMillis;
 				omega = (2.0 * Math.PI * note.tone.pitch) / samplesPerSecond;
-				volumeInPersent = MathUtil.clipValue(globalLoudness * note.loudness, 0, 100) * 127 / 100;
+				int noteLoudness = PlaySound.clipValue(note.loudness, 0, 100);
+				volumeInPersent = globalLoudness * noteLoudness * 127.0 / 10000.0;
 				getNextAtIndex = samplesPerSecond * clipDuration / 1000;
 			}
 			result[index] = (byte) (volumeInPersent * Math.sin(omega * index));
@@ -91,12 +90,12 @@ public class Melody {
 		return result;
 	}
 	
-	public static void playMelody(double globalLoudness, final Note... notes ) {
+	public static void playMelody(int globalLoudness, final Note... notes ) {
 		Clip clip = null;
 		try {
 			DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
 			clip = (Clip) AudioSystem.getLine(info);
-			byte[] beepData = makeMelody(0.8, notes);
+			byte[] beepData = makeMelody(globalLoudness, notes);
 			clip.open(audioFormat, beepData, 0, beepData.length);
 			final CountDownLatch latch = new CountDownLatch(1);
 			clip.addLineListener(new LineListener() {
@@ -123,11 +122,11 @@ public class Melody {
 		for (int i = 0; i < tones.length; i++) {
 			melody[i] = new Note(tones[i], toneDurationMillis, toneLoudness);
 		}
-		playMelody(1, melody);
+		playMelody(100, melody);
 	}
 	
 	public static void main(String[] args) {
 //		playMelody(80, 250, Octaves);
-		playMelody(80, 120, C5, C5, NoTone, A4, NoTone, A4, NoTone, A4);
+		playMelody(100, 120, C5, C5, NoTone, A4, NoTone, A4, NoTone, A4);
 	}
 }

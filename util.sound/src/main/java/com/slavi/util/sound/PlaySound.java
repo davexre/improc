@@ -17,6 +17,13 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class PlaySound {
 	
+	/**
+	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 */
+	static int clipValue(int value, int min, int max) {
+		return Math.min(max, Math.max(min, value));
+	}
+
 	/*
 	 * Needed library from http://www.javazoom.net/vorbisspi/sources.html
 	 */
