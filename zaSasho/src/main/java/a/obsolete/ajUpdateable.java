@@ -8,7 +8,7 @@ package a.obsolete;
 import java.awt.Event;
 import java.awt.Graphics;
 
-public interface ajUpdate {
+public interface ajUpdateable {
 
 	public abstract void ajUpdate(Graphics g);
 

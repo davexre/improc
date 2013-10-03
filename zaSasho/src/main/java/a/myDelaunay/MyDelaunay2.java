@@ -41,8 +41,9 @@ public abstract class MyDelaunay2 {
 		Triangle t = insertPointSimple_NEW(p);
 		if (t == null)
 			return;
+/*
 		Triangle t1 = t;
-/*		if (true) {
+		if (true) {
 			do {
 				flip_NEW(t1);
 				t1 = t1.getCa();

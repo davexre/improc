@@ -202,18 +202,18 @@ public class Slider extends Canvas {
 		return dimension;
 	}
 
-	private static final int THUMB_SIZE = 14;
-	private static final int BUFFER = 2;
-	private static final int BUTTON_WIDTH = 12;
-	private static final int BUTTON_SIZE = 16;
-	private static final int TEXT_HEIGHT = 18;
-	private static final int TEXT_BUFFER = 3;
-	private static final int DEFAULT_WIDTH = 132;
-	private static final int DEFAULT_HEIGHT = 15;
-	private static final int MIN_WIDTH = 66;
-	private static final int MIN_HEIGHT = 6;
-	private static final int DEFAULT_MIN = 1;
-	private static final int DEFAULT_MAX = 100;
+//	private static final int THUMB_SIZE = 14;
+//	private static final int BUFFER = 2;
+//	private static final int BUTTON_WIDTH = 12;
+//	private static final int BUTTON_SIZE = 16;
+//	private static final int TEXT_HEIGHT = 18;
+//	private static final int TEXT_BUFFER = 3;
+//	private static final int DEFAULT_WIDTH = 132;
+//	private static final int DEFAULT_HEIGHT = 15;
+//	private static final int MIN_WIDTH = 66;
+//	private static final int MIN_HEIGHT = 6;
+//	private static final int DEFAULT_MIN = 1;
+//	private static final int DEFAULT_MAX = 100;
 	int min;
 	int max;
 	int value;

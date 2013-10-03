@@ -44,8 +44,6 @@ public class ajSingleStepPanel extends Panel {
 	public boolean action(Event event, Object obj) {
 		if (event.target == va.evRec) {
 			ajEvent ajevent = (ajEvent) event.arg;
-			Object obj1 = null;
-			Object obj2 = null;
 			switch (ajevent.arg1) {
 			case 0: // '\0'
 				Event event1 = new Event(stepStop, event.when, 501, event.x, event.y, 0, event.modifiers);

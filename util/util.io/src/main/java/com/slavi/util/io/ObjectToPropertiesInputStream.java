@@ -23,6 +23,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.slavi.util.io.ObjectToPropertiesOutputStream.State;
 
+@SuppressWarnings("restriction")
 public class ObjectToPropertiesInputStream extends ObjectInputStream {
 //implements ObjectInput {
 

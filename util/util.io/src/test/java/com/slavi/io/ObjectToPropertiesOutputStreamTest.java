@@ -19,15 +19,18 @@ public class ObjectToPropertiesOutputStreamTest {
 		
 		ObjectToPropertiesOutputStream oos = new ObjectToPropertiesOutputStream(properties, prefix);
 		oos.writeObject(o);
+		oos.close();
 		String s1 = PropertyUtil.propertiesToString(properties);
 		System.out.println(s1);
 		
 		ObjectToPropertiesInputStream ois = new ObjectToPropertiesInputStream(properties, prefix, true);
 		o = ois.readObject();
+		ois.close();
 
 		properties.clear();
 		oos = new ObjectToPropertiesOutputStream(properties, prefix);
 		oos.writeObject(o);
+		oos.close();
 		String s2 = PropertyUtil.propertiesToString(properties);
 		Assert.assertEquals("First and second time conversion not equal", s1, s2);
 

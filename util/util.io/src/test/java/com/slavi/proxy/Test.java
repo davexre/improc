@@ -6,7 +6,6 @@ import java.util.Properties;
 import org.junit.Assert;
 
 import com.slavi.util.PropertyUtil;
-import com.slavi.util.Util;
 import com.slavi.util.io.ObjectToPropertiesInputStream;
 import com.slavi.util.io.ObjectToPropertiesOutputStream;
 
@@ -29,15 +28,18 @@ public class Test {
 		Properties properties = new Properties();
 		ObjectToPropertiesOutputStream oos = new ObjectToPropertiesOutputStream(properties, "", true);
 		oos.writeObject(t);
+		oos.close();
 		String s1 = PropertyUtil.propertiesToString(properties);
 		
 		System.out.println(s1);
 		ObjectToPropertiesInputStream ois = new ObjectToPropertiesInputStream(properties, "");
 		TestIF t2 = (TestIF) ois.readObject();
+		ois.close();
 		
 		properties.clear();
 		oos = new ObjectToPropertiesOutputStream(properties, "", true);
 		oos.writeObject(t2);
+		oos.close();
 		String s2 = PropertyUtil.propertiesToString(properties);
 		
 		Assert.assertEquals("", s1, s2);

@@ -28,10 +28,10 @@ import a.obsolete.ajRecorderPanel;
 import a.obsolete.ajSegment;
 import a.obsolete.ajSingleStepPanel;
 import a.obsolete.ajStep;
-import a.obsolete.ajUpdate;
+import a.obsolete.ajUpdateable;
 import a.obsolete.socketListenerThread;
 
-public class VoronoiApplet extends Applet implements ajUpdate {
+public class VoronoiApplet extends Applet implements ajUpdateable {
 
 	public void init() {
 		String s = getParameter("FrameWidth");
@@ -307,7 +307,6 @@ public class VoronoiApplet extends Applet implements ajUpdate {
 	public boolean action(Event event, Object obj) {
 		if (event.target == evRec) {
 			ajEvent ajevent = (ajEvent) event.arg;
-			Object obj1 = null;
 			switch (ajevent.eventType) {
 			case 0: // '\0'
 				Event event1 = new Event(canvas, event.when, 501, ajevent.arg1, ajevent.arg2, 0, 0);

@@ -7,8 +7,6 @@ import java.util.StringTokenizer;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.slavi.util.testUtil.TestUtil;
-
 public class MatrixLqDecompositionTest {
 	public static double precision = 1.0 / 10000.0;
 

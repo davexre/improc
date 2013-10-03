@@ -18,7 +18,7 @@ import a.obsolete.ajAnimator;
 import a.obsolete.ajElement;
 import a.obsolete.ajList;
 import a.obsolete.ajSegment;
-import a.obsolete.ajUpdate;
+import a.obsolete.ajUpdateable;
 
 public class ajCanvas extends Canvas {
 
@@ -334,5 +334,5 @@ public class ajCanvas extends Canvas {
 	DataOutputStream dos;
 	boolean toFile;
 	boolean fromFile;
-	public ajUpdate updateInterface;
+	public ajUpdateable updateInterface;
 }

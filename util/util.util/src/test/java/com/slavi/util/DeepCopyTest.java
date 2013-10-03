@@ -10,8 +10,6 @@ import java.nio.charset.Charset;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.slavi.util.testUtil.TestUtil;
-
 public class DeepCopyTest {
 
 	public static class CopyMe implements Serializable {

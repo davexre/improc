@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.slavi.util.testUtil.TestUtil;
-
 public class PropertyUtilTest {
 
 	Properties p;

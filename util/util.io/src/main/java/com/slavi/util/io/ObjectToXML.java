@@ -18,6 +18,7 @@ import org.jdom.Element;
 
 import sun.reflect.ReflectionFactory;
 
+@SuppressWarnings("restriction")
 public class ObjectToXML {
 	private static class CompareByIndex implements Comparator<Element> {
 		public int compare(Element o1, Element o2) {

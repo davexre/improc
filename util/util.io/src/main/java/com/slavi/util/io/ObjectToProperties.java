@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import sun.reflect.ReflectionFactory;
 
+@SuppressWarnings("restriction")
 public class ObjectToProperties {
 	public static class Read implements ObjectRead {
 		public ArrayList readObjectIds = new ArrayList();

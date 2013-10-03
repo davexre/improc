@@ -104,7 +104,9 @@ public class CEncoder {
 					f.format("\\u%04x", ic);
 			}
 		}
-		return f.toString();
+		String result = f.toString();
+		f.close();
+		return result;
 	}
 
 	/**

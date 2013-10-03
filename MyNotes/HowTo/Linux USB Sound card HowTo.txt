@@ -1,0 +1,43 @@
+Setup USB Sound card to be set as default sound device upon hotplug on Ubuntu
+=============================================================================
+
+1. Add a udev rule file
+/etc/udev/rule.d/00-my-sound-card.rules
+========================================================
+ACTION!="add", GOTO="EOF"
+SUBSYSTEM=="sound", ATTR{id}=="Device", RUN+="/home/slavian/.bin/waitAndRunSelectUSBSoundCard.sh"
+LABEL="EOF"
+========================================================
+
+2. Create the file and make it executable
+/home/slavian/.bin/waitAndRunSelectUSBSoundCard.sh
+========================================================
+#!/bin/bash
+su slavian -c '(sleep 5s)&&(/home/slavian/.bin/selectUSBSoundCard.sh)'&
+========================================================
+
+3. Create the file and make it executable
+/home/slavian/.bin/selectUSBSoundCard.sh
+========================================================
+#!/bin/bash
+out=/home/slavian/usbsoundcard.log
+out=/dev/null
+echo "" >> $out
+date >> $out
+echo "sinks" >> $out
+pacmd list-sinks &>> $out
+echo "sources" >> $out
+pacmd list-sources &>> $out
+echo "----" >> $out
+
+sinkname=alsa_output.usb-0d8c_Generic_USB_Audio_Device-00-Device.analog-stereo
+sourcename=alsa_input.usb-0d8c_Generic_USB_Audio_Device-00-Device.analog-mono
+pacmd set-default-sink $sinkname &>> $out
+pacmd set-default-source $sourcename &>> $out
+
+inputs=($(pacmd list-sink-inputs | grep index | awk '{print $2}'))
+for i in ${inputs[*]}; do pacmd move-sink-input $i $sinkname &>> $out; done
+
+notify-send "Sound card changed" "USB Sound card selected"
+========================================================
+

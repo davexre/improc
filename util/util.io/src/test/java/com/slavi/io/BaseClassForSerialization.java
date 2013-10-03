@@ -7,8 +7,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import sun.reflect.ReflectionFactory;
-
 import com.slavi.util.Util;
 
 public class BaseClassForSerialization implements Serializable {

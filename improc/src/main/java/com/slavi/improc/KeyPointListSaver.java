@@ -169,14 +169,18 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			}
 			if (entry != null) {
 				BufferedReader fin = new BufferedReader(new InputStreamReader(zis));
-				if (KeyPointList.fileHeader.equals(fin.readLine())) {
-					FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
-					if (!fs.isModified()) {
-						if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
-							// The image file is not modified, so don't build
-							return null;
+				try {
+					if (KeyPointList.fileHeader.equals(fin.readLine())) {
+						FileStamp fs = FileStamp.fromString(fin.readLine(), rootImagesDir);
+						if (!fs.isModified()) {
+							if (fs.getFile().getCanonicalPath().equals(image.getCanonicalPath())) {
+								// The image file is not modified, so don't build
+								return null;
+							}
 						}
 					}
+				} finally {
+					fin.close();
 				}
 			}
 			zis.close();

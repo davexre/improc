@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.testUtil.TestUtil;
 
 public class AffineTransformerTest {
 	public static double precision = 1.0 / 10000.0;

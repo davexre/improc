@@ -217,6 +217,7 @@ public class VisualizeGCode {
 					gr.setColor(Color.red);
 					isExtruding = false;
 				} else if (newZ < curZ) {
+					reader.close();
 					throw new Exception("newZ < curZ");
 				}
 			}
