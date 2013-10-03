@@ -15,18 +15,14 @@ import com.slavi.util.io.ObjectToXML;
 import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.xml.XMLHelper;
 
-/*
- * Two light pens
- * Adjusting all parameters
- */
-public class Printer3DAdjust2 {
+public class Printer3DAdjust2_1 {
 
 	String dataFile = Const.workDir + "/" + this.getClass().getName() + ".xml";
 	
 	public static class Measurement {
 		double p[] = new double[3];	// Printer coordinates
-		double hx1, hy1;			// Measuerd on millimeter paper on the printer's bed (the light pen)
-		double hx2, hy2;			// Measuerd on millimeter paper on the printer's bed (the light pen)
+		double hx1, hy1;				// Measuerd on millimeter paper on the printer's bed (the light pen)
+		double hx2, hy2;				// Measuerd on millimeter paper on the printer's bed (the light pen)
 		
 		public String toString() {
 			return String.format("P(%10.2f, %10.2f, %10.2f) H1(%10.2f, %10.2f) H2(%10.2f, %10.2f)", p[0], p[1], p[2], hx1, hy1, hx2, hy2);
@@ -42,7 +38,7 @@ public class Printer3DAdjust2 {
 		double offsetX;			// Millimeter paper offset X
 		double offsetY;			// Millimeter paper offset Y
 		double paperAlpha;		// Millimeter paper rotation
-		ArrayList<Measurement> measurements = new ArrayList<Printer3DAdjust2.Measurement>();
+		ArrayList<Measurement> measurements = new ArrayList<Printer3DAdjust2_1.Measurement>();
 	}
 
 	static Data generateData() {
@@ -105,6 +101,24 @@ public class Printer3DAdjust2 {
 		return ((angle < 0) ? Math.PI + angle : angle) - MathUtil.PIover2;
 	}
 
+	static boolean shallRotate(double angle) {
+		angle = MathUtil.fixAngle2PI(angle);
+		return (angle > 0.5 * Math.PI) && (angle <= 1.5 * Math.PI);
+	}
+
+	static boolean shallRotate2(double angle) {
+		angle = MathUtil.fixAngle2PI(angle);
+		return (angle > 0.25 * Math.PI) && (angle <= 1.75 * Math.PI);
+	}
+
+	static void rotateAngles(double rotationAngles[], double dR1, double dR2, double dR3) {
+		Matrix rot1 = RotationXYZ.instance.makeAngles(rotationAngles);
+		Matrix rot2 = RotationXYZ.instance.makeAngles(dR1, dR2, dR3);
+		Matrix res = new Matrix(3, 3);
+		rot2.mMul(rot1, res);
+		RotationXYZ.instance.getRotationAngles(res, rotationAngles);
+	}
+	
 	Data data;
 	
 	double adjRotationAngles[] = new double[3];
@@ -115,6 +129,85 @@ public class Printer3DAdjust2 {
 	double adjOffsetX;
 	double adjOffsetY;
 	double adjPaperAlpha;
+	
+	void fixAngles() {
+		double pi4 = 0.25 * Math.PI;
+		double pi2 = 0.5 * Math.PI;
+		double dR;
+		int index;
+		
+		dR = 0;
+		index = (int) (MathUtil.fixAngle2PI(adjAlpha1) / pi4);
+		switch (index) {
+		case 1: // [pi*1/4..pi*2/4]
+		case 2: // [pi*2/4..pi*3/4]
+			dR = -pi2;
+			break;
+		case 3: // [pi*3/4..pi*4/4]
+		case 4: // [pi*4/4..pi*5/4]
+			dR = Math.PI;
+			break;
+		case 5: // [pi*5/4..pi*6/4]
+		case 6: // [pi*6/4..pi*7/4]
+			dR = pi2;
+			break;
+		case 0: // [0..pi/4]
+		case 7: // [-pi/4..0]
+			// Do nothing
+			dR = 0;
+			break;
+		}
+		if (dR != 0) {
+			System.out.println("Fixing adjAngle1 with " + dR);
+			adjAlpha1 = MathUtil.fixAngleMPI_PI(adjAlpha1 + dR);
+			adjAlpha2 = MathUtil.fixAngleMPI_PI(adjAlpha2 + dR);
+			rotateAngles(adjRotationAngles, 0, dR, 0);
+		}
+		
+		///////////////////////
+		
+		dR = 0;
+		index = (int) (MathUtil.fixAngle2PI(adjAlpha2) / pi2);
+		switch (index) {
+		case 0: // [0..pi*1/2]
+		case 1: // [pi*3/2..pi*4/2]
+			// Do nothing
+			dR = 0;
+			break;
+		case 2: // [pi*1/2..pi*2/2]
+		case 3: // [pi*2/2..pi*3/2]
+			dR = Math.PI;
+			System.out.println("Fixing adjAlpha2");
+			adjAlpha2 = MathUtil.fixAngleMPI_PI(adjAlpha2 + dR);
+			adjBeta2 = MathUtil.fixAngleMPI_PI(adjBeta2 + dR);
+			break;
+		}
+
+		////////////////////////
+		
+		dR = 0;
+		index = (int) (MathUtil.fixAngle2PI(adjBeta1) / pi2);
+		switch (index) {
+		case 1: // [pi*1/4..pi*2/4]
+		case 2: // [pi*2/4..pi*3/4]
+			dR = -pi2;
+			break;
+		case 3: // [pi*3/4..pi*4/4]
+		case 4: // [pi*4/4..pi*5/4]
+			dR = Math.PI;
+			break;
+		case 5: // [pi*5/4..pi*6/4]
+		case 6: // [pi*6/4..pi*7/4]
+			dR = pi2;
+			break;
+		case 0: // [0..pi/4]
+		case 7: // [-pi/4..0]
+			// Do nothing
+			dR = 0;
+			break;
+		}
+		
+	}
 	
 	void adjust() {
 		double tgAlpha1 = Math.tan(adjAlpha1);
@@ -166,7 +259,7 @@ public class Printer3DAdjust2 {
 			m.setItem(9, 0, -sinPaperAlpha * (tmp[0] + tmp[2] * tgAlpha1));
 			L = adjOffsetX + cosPaperAlpha * (tmp[0] + tmp[2] * tgAlpha1) - d.hx1;
 			lsa.addMeasurement(m, 1.0, -L, 0);
-			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+//			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 
 			///////////////////////////////////
 			
@@ -182,7 +275,7 @@ public class Printer3DAdjust2 {
 			m.setItem(9, 0,  cosPaperAlpha * (tmp[1] + tmp[2] * tgBeta1));
 			L = adjOffsetY + sinPaperAlpha * (tmp[1] + tmp[2] * tgBeta1) - d.hy1;
 			lsa.addMeasurement(m, 1.0, -L, 0);
-			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+//			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 
 			///////////////////////////////////
 
@@ -198,7 +291,7 @@ public class Printer3DAdjust2 {
 			m.setItem(9, 0, -sinPaperAlpha * (tmp[0] + tmp[2] * tgAlpha2));
 			L = adjOffsetX + cosPaperAlpha * (tmp[0] + tmp[2] * tgAlpha2) - d.hx2;
 			lsa.addMeasurement(m, 1.0, -L, 0);
-			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+//			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 
 			///////////////////////////////////
 			
@@ -214,46 +307,83 @@ public class Printer3DAdjust2 {
 			m.setItem(9, 0,  cosPaperAlpha * (tmp[1] + tmp[2] * tgBeta2));
 			L = adjOffsetY + sinPaperAlpha * (tmp[1] + tmp[2] * tgBeta2) - d.hy2;
 			lsa.addMeasurement(m, 1.0, -L, 0);
-			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
+//			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 		}
 		
 		if (!lsa.calculateWithDebug(true)) {
 			throw new RuntimeException("Calculation failed");
 		}
-/*
-		lsa.getApl().printM("APL");
-		SymmetricMatrix NM = lsa.getNm().makeCopy();
-		lsa.getNm().printM("NM");
-		if (!lsa.calculate()) {
-			throw new RuntimeException("Calculation failed");
-		}
-		lsa.getNm().printM("NM inverse");
-		SymmetricMatrix dest = NM.makeCopy();
-		lsa.getNm().mMul(NM, dest);
-		dest.printM("NM * NM inverse");
-*/
+
 		Matrix U = lsa.getUnknown();
-		
-/*		adjRotationAngles[0] = MathUtil.fixAngle2PI(adjRotationAngles[0] + U.getItem(0, 0));
-		adjRotationAngles[1] = MathUtil.fixAngle2PI(adjRotationAngles[1] + U.getItem(0, 1));
-		adjRotationAngles[2] = MathUtil.fixAngle2PI(adjRotationAngles[2] + U.getItem(0, 2));
-		adjAlpha = MathUtil.fixAngle2PI(adjAlpha + U.getItem(0, 3));
-		adjBeta  = MathUtil.fixAngle2PI(adjBeta  + U.getItem(0, 4));
-*/		
+
 		adjRotationAngles[0] = MathUtil.fixAngle2PI(adjRotationAngles[0] + U.getItem(0, 0));
 		adjRotationAngles[1] = MathUtil.fixAngle2PI(adjRotationAngles[1] + U.getItem(0, 1));
 		adjRotationAngles[2] = MathUtil.fixAngle2PI(adjRotationAngles[2] + U.getItem(0, 2));
-		adjAlpha1 = fixAngleMPIover2_PIover2(adjAlpha1 + U.getItem(0, 3));
-		adjBeta1  = fixAngleMPIover2_PIover2(adjBeta1  + U.getItem(0, 4));
-		adjAlpha2 = fixAngleMPIover2_PIover2(adjAlpha2 + U.getItem(0, 5));
-		adjBeta2  = fixAngleMPIover2_PIover2(adjBeta2  + U.getItem(0, 6));
+		adjAlpha1 = MathUtil.fixAngleMPI_PI(adjAlpha1 + U.getItem(0, 3));
+		adjBeta1  = MathUtil.fixAngleMPI_PI(adjBeta1  + U.getItem(0, 4));
+		adjAlpha2 = MathUtil.fixAngleMPI_PI(adjAlpha2 + U.getItem(0, 5));
+		adjBeta2  = MathUtil.fixAngleMPI_PI(adjBeta2  + U.getItem(0, 6));
 		adjOffsetX += U.getItem(0, 7);
 		adjOffsetY += U.getItem(0, 8);
 		adjPaperAlpha = MathUtil.fixAngle2PI(adjPaperAlpha + U.getItem(0, 9));
 
+		boolean rotated = false;
+		/*
+		
+		if (shallRotate(adjAlpha1)) {
+			adjAlpha1 = MathUtil.fixAngleMPI_PI(adjAlpha1 + Math.PI);
+			adjBeta1 =  MathUtil.fixAngleMPI_PI(adjBeta1 + Math.PI);
+			System.out.println("ROTATING adjAlpha1");
+			rotated = true;
+		}
+		if (shallRotate(adjAlpha2)) {
+			adjAlpha2 = MathUtil.fixAngleMPI_PI(adjAlpha2 + Math.PI);
+			adjBeta2 =  MathUtil.fixAngleMPI_PI(adjBeta2 + Math.PI);
+			System.out.println("ROTATING adjAlpha2");
+			rotated = true;
+		}
+		if (shallRotate2(adjAlpha1)) {
+			adjAlpha1 = MathUtil.fixAngleMPI_PI(adjAlpha1 + 0.5 * Math.PI);
+			adjAlpha2 = MathUtil.fixAngleMPI_PI(adjAlpha1 + 0.5 * Math.PI);
+			rotateAngles(adjRotationAngles, 0, 90 * MathUtil.deg2rad, 0);
+			
+			adjRotationAngles[1] = MathUtil.fixAngle2PI(adjRotationAngles[1] + Math.PI);
+			adjBeta1 =  MathUtil.fixAngleMPI_PI(adjBeta1 + Math.PI);
+			System.out.println("ROTATING adjAlpha1");
+			rotated = true;
+		}
+		
+		
+		
+		if (shallRotate(adjBeta1)) {
+			adjBeta1 = MathUtil.fixAngleMPI_PI(adjBeta1 + Math.PI);
+			adjBeta2 = MathUtil.fixAngleMPI_PI(adjBeta2 + Math.PI);
+			adjRotationAngles[0] = MathUtil.fixAngle2PI(adjRotationAngles[0] + Math.PI);
+			System.out.println("ROTATING adjBeta1");
+			rotated = true;
+		}
+		if (shallRotate(adjBeta2)) {
+			adjBeta2 = MathUtil.fixAngleMPI_PI(adjBeta2 + Math.PI);
+			System.out.println("ROTATING adjBeta2");
+			System.out.println("************************** WHY ???????????\n\n");
+			rotated = true;
+		}
+		if (shallRotate(adjRotationAngles[0])) {
+			System.out.println("ROTATING adjRotationAngles[0]");
+			adjRotationAngles[0] = MathUtil.fixAngle2PI(adjRotationAngles[0] + Math.PI);
+			adjRotationAngles[1] = MathUtil.fixAngle2PI(adjRotationAngles[1] + Math.PI);
+			adjRotationAngles[2] = MathUtil.fixAngle2PI(adjRotationAngles[2] + Math.PI);
+			rotated = true;
+		}*/
+		fixAngles();
+		
 		TestUtil.dumpAngles("   rotationAngles", data.rotationAngles);
 		TestUtil.dumpAngles("ADJrotationAngles", adjRotationAngles);
+		System.out.println();
+		System.out.println("   PaperAlpha = " + MathUtil.rad2degStr(data.paperAlpha));
+		System.out.println("adjPaperAlpha = " + MathUtil.rad2degStr(adjPaperAlpha));
 
+		System.out.println();
 		System.out.println("   Alpha1 = " + MathUtil.rad2degStr(data.alpha1));
 		System.out.println("adjAlpha1 = " + MathUtil.rad2degStr(adjAlpha1));
 		System.out.println("   Beta1  = " + MathUtil.rad2degStr(data.beta1));
@@ -269,17 +399,16 @@ public class Printer3DAdjust2 {
 		System.out.println("   offY   = " + MathUtil.d4(data.offsetY));
 		System.out.println("adjOffY   = " + MathUtil.d4(adjOffsetY));
 		System.out.println();
-		System.out.println("   PaperAlpha = " + MathUtil.rad2degStr(data.paperAlpha));
-		System.out.println("adjPaperAlpha = " + MathUtil.rad2degStr(adjPaperAlpha));
 		U.printM("U");
-		
-//		System.out.println("Squared Deviation from E: " + dest.getSquaredDeviationFromE());
 	}
 	
 	private void doIt() throws Exception {
 		System.out.println("Data file is " + dataFile);
 
-		data = generateData();
+//		data = generateData();
+//		toXML(data, dataFile);
+		data = fromXML(dataFile);
+
 /*
 		try {
 			data = fromXML(dataFile);
@@ -290,18 +419,17 @@ public class Printer3DAdjust2 {
 
 		data = generateData();
 */		
-		toXML(data, dataFile);
 		adjRotationAngles[0] = 0;
 		adjRotationAngles[1] = 0;
 		adjRotationAngles[2] = 0;
 		
-		adjAlpha1  = 0.01; //data.alpha;
-		adjBeta1   = 0.01; //data.beta;
-		adjAlpha2  = 0.01; //data.alpha;
-		adjBeta2   = 0.01; //data.beta;
+		adjAlpha1  = 0.01;
+		adjBeta1   = 0.01;
+		adjAlpha2  = 0.01;
+		adjBeta2   = 0.01;
 		adjOffsetX = 0;
 		adjOffsetY = 0;
-		adjPaperAlpha = 0.01;
+		adjPaperAlpha = 0.01; //260 * MathUtil.deg2rad;
 
 		for (int i = 1; i < 16; i++) {
 			System.out.println("\n\n=========== Iteration " + i);
@@ -310,7 +438,7 @@ public class Printer3DAdjust2 {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new Printer3DAdjust2().doIt();
+		new Printer3DAdjust2_1().doIt();
 		System.out.println("Done.");
 	}
 }

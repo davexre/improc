@@ -9,10 +9,10 @@ public class Rotation3DTest {
 
 	Rotation3D rots[] = {
 			new RotationXYZ(),
-			new RotationZXZ(),
 			new RotationZYX(),
-			new RotationZYZ(),
-			new RotationZYZObjects()
+			new RotationZYZObjects(),
+			new RotationZYZ(),	// ??? need a check of the derivatives
+			new RotationZXZ(),	// ??? need a check of the derivatives
 	};
 	
 	private interface TestRotation {
@@ -59,7 +59,7 @@ public class Rotation3DTest {
 	
 	@Test
 	public void testGetRotationAnglesBackword() throws Exception {
-		forEachRotation3D("GetRotationAnglesBackword", new TestRotation() {
+		forEachRotation3D("GetRotationAnglesBackward", new TestRotation() {
 			public void doIt(Rotation3D rot) {
 				double angles[] = { 10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad };
 				double point[] = { 5, 15, 25 };
@@ -90,34 +90,47 @@ public class Rotation3DTest {
 	public void test_dF() throws Exception {
 		forEachRotation3D("dF", new TestRotation() {
 			public void doIt(Rotation3D rot) {
-				double angles[] = { 10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad };
 				double point[] = { 5, 15, 25 };
-				double tmp1[] = new double[3];
-				double tmp2[] = new double[3];
-				double tmp3[] = new double[3];
-				Matrix r = rot.makeAngles(angles);
-				rot.transformForward(r, point, tmp1);
-				double delta = 0.000001 * MathUtil.deg2rad;
 
+				double angles[] = { 10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad };
+				double dest1[] = new double[3];
+				Matrix r = rot.makeAngles(angles);
+				rot.transformForward(r, point, dest1);
+
+				double delta = 0.01 * MathUtil.deg2rad;
+				double angles0[] = { 
+						angles[0] + delta,
+						angles[1] + delta,
+						angles[2] + delta};
+				double dest0[] = new double[3];
+				Matrix r0 = rot.makeAngles(angles0);
+				rot.transformForward(r0, point, dest0);
+				
 				Matrix dF[] = {
-						rot.make_dF_dR1(angles[0], angles[1], angles[2]), 
-						rot.make_dF_dR2(angles[0], angles[1], angles[2]), 
-						rot.make_dF_dR3(angles[0], angles[1], angles[2])
+						rot.make_dF_dR1(angles0[0], angles0[1], angles0[2]), 
+						rot.make_dF_dR2(angles0[0], angles0[1], angles0[2]), 
+						rot.make_dF_dR3(angles0[0], angles0[1], angles0[2])
 				};
 				
+				double dest2[] = dest0.clone();
+				
 				for (int dindex = 0; dindex < 3; dindex++) {
-					double d[] = { 0, 0, 0 };
-					d[dindex] = delta;
-					rot.transformForward(dF[dindex], point, tmp2);
+					double tmp[] = new double[3];
+					rot.transformForward(dF[dindex], point, tmp);
 					for (int i = 0; i < 3; i++) {
-						tmp2[i] = tmp1[i] + tmp2[i] * delta;
+						dest2[i] -= tmp[i] * delta;
 					}
-					double d2[] = point.clone();
-					d2[dindex] += delta;
-					rot.transformForward(r, d2, tmp3);
-					TestUtil.assertEqual("", tmp3, tmp2);
 				}
+				TestUtil.dumpArray("dest0", dest0);
+				TestUtil.dumpArray("dest1", dest1);
+				TestUtil.dumpArray("dest2", dest2);
+				
+				TestUtil.assertEqual("", dest1, dest2);
 			}
 		});
+	}
+	
+	public static void main(String[] args) throws Exception {
+		new Rotation3DTest().test_dF();
 	}
 }

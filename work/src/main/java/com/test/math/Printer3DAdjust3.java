@@ -15,7 +15,7 @@ import com.slavi.util.io.ObjectToXML;
 import com.slavi.util.testUtil.TestUtil;
 import com.slavi.util.xml.XMLHelper;
 
-public class Printer3DAdjust {
+public class Printer3DAdjust3 {
 
 	String dataFile = Const.workDir + "/" + this.getClass().getName() + ".xml";
 	
@@ -34,7 +34,7 @@ public class Printer3DAdjust {
 		double beta;			// lightPenAngleZY
 		double offsetX;			// Millimeter paper offset X
 		double offsetY;			// Millimeter paper offset Y
-		ArrayList<Measurement> measurements = new ArrayList<Printer3DAdjust.Measurement>();
+		ArrayList<Measurement> measurements = new ArrayList<Printer3DAdjust3.Measurement>();
 	}
 
 	static Data generateData() {
@@ -61,8 +61,8 @@ public class Printer3DAdjust {
 			d.p[2] = rnd.nextInt(3000);
 			
 			RotationXYZ.instance.transformForward(M, d.p, tmp);
-			d.hx = tmp[0] + tmp[2] * tgAlpha; // + rnd.nextDouble() - 0.5;
-			d.hy = tmp[1] + tmp[2] * tgBeta ; // + rnd.nextDouble() - 0.5;
+			d.hx = result.offsetX + tmp[0] + tmp[2] * tgAlpha; // + rnd.nextDouble() - 0.5;
+			d.hy = result.offsetY + tmp[1] + tmp[2] * tgBeta ; // + rnd.nextDouble() - 0.5;
 			result.measurements.add(d);
 		}
 		return result;
@@ -108,8 +108,8 @@ public class Printer3DAdjust {
 		double tmp2[] = new double[3];
 		double tmp3[] = new double[3];
 		double L;
-		Matrix m = new Matrix(5, 1);
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(5);
+		Matrix m = new Matrix(7, 1);
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(7);
 		lsa.clear();
 		for (Measurement d : data.measurements) {
 			RotationXYZ.instance.transformForward(adjM, d.p, tmp);
@@ -122,9 +122,9 @@ public class Printer3DAdjust {
 			m.setItem(2, 0, tmp3[0] + tmp3[2] * tgAlpha1);
 			m.setItem(3, 0, tmp[2] * dFdAlpha1);
 			m.setItem(4, 0, 0);
-//			m.setItem(5, 0, 1);
-//			m.setItem(6, 0, 0);
-			L = tmp[0] + tmp[2] * tgAlpha1 - d.hx;
+			m.setItem(5, 0, 1);
+			m.setItem(6, 0, 0);
+			L = adjOffsetX + tmp[0] + tmp[2] * tgAlpha1 - d.hx;
 			lsa.addMeasurement(m, 1.0, -L, 0);
 			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 
@@ -135,9 +135,9 @@ public class Printer3DAdjust {
 			m.setItem(2, 0, tmp3[1] + tmp3[2] * tgBeta1);
 			m.setItem(3, 0, 0);
 			m.setItem(4, 0, tmp[2] * dFdBeta1);
-//			m.setItem(5, 0, 0);
-//			m.setItem(6, 0, 1);
-			L = tmp[1] + tmp[2] * tgBeta1 - d.hy;
+			m.setItem(5, 0, 0);
+			m.setItem(6, 0, 1);
+			L = adjOffsetY + tmp[1] + tmp[2] * tgBeta1 - d.hy;
 			lsa.addMeasurement(m, 1.0, -L, 0);
 			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 		}
@@ -170,6 +170,8 @@ public class Printer3DAdjust {
 		adjRotationAngles[2] = (adjRotationAngles[2] + U.getItem(0, 2));
 		adjAlpha = (adjAlpha + U.getItem(0, 3));
 		adjBeta  = (adjBeta  + U.getItem(0, 4));
+		adjOffsetX += U.getItem(0, 5);
+		adjOffsetY += U.getItem(0, 6);
 
 		U.printM("U");
 		TestUtil.dumpAngles("   rotationAngles", data.rotationAngles);
@@ -179,6 +181,11 @@ public class Printer3DAdjust {
 		System.out.println("adjAlpha = " + MathUtil.rad2degStr(adjAlpha));
 		System.out.println("   Beta  = " + MathUtil.rad2degStr(data.beta));
 		System.out.println("adjBeta  = " + MathUtil.rad2degStr(adjBeta));
+		System.out.println("   offX  = " + MathUtil.d4(data.offsetX));
+		System.out.println("adjOffX  = " + MathUtil.d4(adjOffsetX));
+		System.out.println("   offY  = " + MathUtil.d4(data.offsetY));
+		System.out.println("adjOffY  = " + MathUtil.d4(adjOffsetY));
+		
 //		System.out.println("Squared Deviation from E: " + dest.getSquaredDeviationFromE());
 	}
 	
@@ -211,7 +218,7 @@ public class Printer3DAdjust {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new Printer3DAdjust().doIt();
+		new Printer3DAdjust3().doIt();
 		System.out.println("Done.");
 	}
 }
