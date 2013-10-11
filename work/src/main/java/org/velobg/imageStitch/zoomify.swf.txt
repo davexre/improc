@@ -1,0 +1,3227 @@
+﻿// DECOMPILED BY http://www.showmycode.com/
+
+
+//----------------------------------------------------------------------
+//Symbol 26 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    intervalID = setInterval(this.getImageInstance(), "panUp", 1);
+}
+on (release) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 53 MovieClip [emptyLabelClick_mc] "emptyLabelClick_mc" in Symbol 54 MovieClip [emptyLabel_mc] Frame 1
+//----------------------------------------------------------------------
+on (press) {
+    this._parent.gTextMovieClip.labelText_mc.StartDragLabel(false);
+}
+on (release) {
+    this._parent.gTextMovieClip.labelText_mc.StopDragLabel();
+}
+on (releaseOutside) {
+    this._parent.gTextMovieClip.labelText_mc.StopDragLabel();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 18 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    intervalID = setInterval(this.getImageInstance(), "panLeft", 1);
+}
+on (release) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 54 MovieClip [emptyLabel_mc] Frame 1
+//----------------------------------------------------------------------
+    function ClipNameIsURL(movieClipString) {
+        var len = movieClipString.length;
+        if (movieClipString.substring(0, 4).toLowerCase() == "http") {
+            return(true);
+        }
+        if (movieClipString.substring(0, 4).toLowerCase() == "file") {
+            return(true);
+        }
+        if (movieClipString.substring(len - 4).toLowerCase() == ".swf") {
+            return(true);
+        }
+        if (movieClipString.substring(len - 4).toLowerCase() == ".jpg") {
+            return(true);
+        }
+        return(false);
+    }
+    if (ClipNameIsURL(gMovieClipString) == true) {
+        this.emptyLabelClick_mc.labelPlaceHolder_mc._y = -45;
+        this.emptyLabelClick_mc.labelPlaceHolder_mc._x = -58;
+        this.emptyLabelClick_mc.labelPlaceHolder_mc.loadMovie(this.gMovieClipString);
+    } else {
+        this.emptyLabelClick_mc.labelPlaceHolder_mc.attachMovie(this.gMovieClipString, "labelGraphic", this.gMovieLevel);
+    }
+    stop();
+
+﻿
+//----------------------------------------------------------------------
+//Symbol 22 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    intervalID = setInterval(this.getImageInstance(), "panRight", 1);
+}
+on (release) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+﻿
+//----------------------------------------------------------------------
+//Frame 1
+//----------------------------------------------------------------------
+    function ZoomifyStartViewer() {
+        if ((zoomifyImagePath == undefined) && (gCSVLoaded == false)) {
+            return(undefined);
+        }
+        gInitialized = true;
+        _root.NavWindowInstance._x = parseInt(zoomifyNavX);
+        _root.NavWindowInstance._y = parseInt(zoomifyNavY);
+        _root.NavWindowInstance.setSize(parseInt(zoomifyNavWidth), parseInt(zoomifyNavHeight));
+        if (gShowNavWindow == false) {
+            _root.NavWindowInstance._visible = false;
+        }
+        if (gShowToolbar == true) {
+            _root.ToolbarStandardInstance._visible = true;
+        }
+    }
+    function ZoomifyResizeViewer() {
+        _root.ZoomifyViewerInstance._width = Stage.width;
+        _root.ZoomifyViewerInstance._height = Stage.height;
+        _root.ZoomifyViewerInstance._x = Stage.width / 2;
+        _root.ZoomifyViewerInstance._y = Stage.height / 2;
+        _root.ZoomifyViewerInstance.setSize(Stage.width, Stage.height);
+        _root.ZoomifyViewerInstance.updateView(true);
+        _root.ToolbarStandardInstance._xscale = 100;
+        _root.ToolbarStandardInstance._yscale = 100;
+        if (_root.ToolbarStandardInstance._width > Stage.width) {
+            _root.ToolbarStandardInstance._xscale = _root.ToolbarStandardInstance._xscale * (Stage.width / _root.ToolbarStandardInstance._width);
+            _root.ToolbarStandardInstance._yscale = _root.ToolbarStandardInstance._yscale * (Stage.width / _root.ToolbarStandardInstance._width);
+        }
+        _root.ToolbarStandardInstance._y = (Stage.height - (Stage.height * 0.01)) - (_root.ToolbarStandardInstance._height / 2);
+        _root.ToolbarStandardInstance._x = Stage.width / 2;
+    }
+    var gImage = "";
+    var gZoomifyX = 0;
+    var gZoomifyY = 0;
+    var gZoomifyZoom = -1;
+    var gZoomifyMinZoom = -1;
+    var gZoomifyMaxZoom = 100;
+    var gShowNavWindow = true;
+    var gZoomifyStageHandler;
+    var gInitialized = false;
+    var gImageInitCalled = false;
+    var gShowSlider = true;
+    var gShowToolbar = true;
+    var gStartImageIndex = 0;
+    Stage.scaleMode = "noScale";
+    Stage.align = "TL";
+    if (zoomifyImagePath != undefined) {
+        gImage = zoomifyImagePath;
+        if (zoomifyMinZoom != undefined) {
+            gZoomifyMinZoom = parseFloat(zoomifyMinZoom);
+        }
+        if (zoomifyMaxZoom != undefined) {
+            gZoomifyMaxZoom = parseFloat(zoomifyMaxZoom);
+        }
+        if (zoomifyX != undefined) {
+            gZoomifyX = parseFloat(zoomifyX);
+        }
+        if (zoomifyY != undefined) {
+            gZoomifyY = parseFloat(zoomifyY);
+        }
+        if (zoomifyZoom != undefined) {
+            gZoomifyZoom = parseFloat(zoomifyZoom);
+        }
+        if (zoomifyToolbar != undefined) {
+            var showToolbar = parseInt(zoomifyToolbar);
+            if (showToolbar == 0) {
+                gShowToolbar = false;
+                _root.ToolbarStandardInstance._visible = false;
+            }
+        }
+        if (zoomifyNavWindow != undefined) {
+            var showNav = parseInt(zoomifyNavWindow);
+            if (showNav == 0) {
+                gShowNavWindow = false;
+            }
+        }
+        if (zoomifyShowNav != undefined) {
+            var showNav = parseInt(zoomifyShowNav);
+            if (showNav == 0) {
+                gShowNavWindow = false;
+            }
+        }
+        if (zoomifySlider != undefined) {
+            var showSlider = parseInt(zoomifySlider);
+            if (showSlider == 0) {
+                _root.ToolbarStandardInstance.ZoomSlider_mc._visible = false;
+                _root.ToolbarStandardInstance.setSliderVisibility(false);
+            } else {
+                _root.ToolbarStandardInstance.ZoomSlider_mc._visible = true;
+                _root.ToolbarStandardInstance.setSliderVisibility(true);
+            }
+        }
+        if (zoomifyEnabled != undefined) {
+            var isEnabled = parseInt(zoomifyEnabled);
+            if (isEnabled == 0) {
+                _root.ZoomifyViewerInstance.setEnabled(false);
+                gShowToolbar = false;
+                _root.ToolbarStandardInstance._visible = false;
+            }
+        }
+        if (zoomifyNavX == undefined) {
+            zoomifyNavX = "0";
+        }
+        if (zoomifyNavY == undefined) {
+            zoomifyNavY = "0";
+        }
+        if (zoomifyNavWidth == undefined) {
+            zoomifyNavWidth = "130";
+        }
+        if (zoomifyNavHeight == undefined) {
+            zoomifyNavHeight = "130";
+        }
+        _root.ZoomifyViewerInstance.setImagePath(unescape(gImage));
+        _root.ZoomifyViewerInstance._initialX = gZoomifyX;
+        _root.ZoomifyViewerInstance._initialY = gZoomifyY;
+        _root.ZoomifyViewerInstance._initialZoom = gZoomifyZoom;
+        _root.ZoomifyViewerInstance._minZoom = gZoomifyMinZoom;
+        _root.ZoomifyViewerInstance._maxZoom = gZoomifyMaxZoom;
+        _root.ZoomifyViewerInstance.updateView(true);
+    }
+    gZoomifyStageHandler = new Object();
+    gZoomifyStageHandler.onResize = function () {
+        if (gInitialized == false) {
+            ZoomifyStartViewer();
+        }
+        ZoomifyResizeViewer();
+    };
+    Stage.addListener(gZoomifyStageHandler);
+    if ((Stage.width != 0) && (Stage.height != 0)) {
+        ZoomifyStartViewer();
+        ZoomifyResizeViewer();
+    }
+    stop();
+
+﻿
+//----------------------------------------------------------------------
+//Symbol 10 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    var intervalID2;
+    intervalID = setInterval(this.getImageInstance(), "zoomOut", 1);
+    intervalID2 = setInterval(this, "adjustSlider", 5);
+}
+on (release) {
+    clearInterval(intervalID);
+    clearInterval(intervalID2);
+    this.getImageInstance().updateView();
+    this.adjustSlider();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    clearInterval(intervalID2);
+    this.getImageInstance().updateView();
+    this.adjustSlider();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 30 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    intervalID = setInterval(this.getImageInstance(), "panDown", 1);
+}
+on (release) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    this.getImageInstance().panStop();
+    this.getImageInstance().updateView();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 63 MovieClip [ZoomifyNavWindowSymbol] Frame 1
+//----------------------------------------------------------------------
+    #initclip 2
+    function ZoomifyNavWindowClass() {
+        this.gRectMovedCallback = new Array();
+        this.gImageInitCalled = false;
+        this.gNavInitialized = false;
+        this.gInitialNavX = 0;
+        this.gInitialNavY = 0;
+        this.gCurrentNavX = 0;
+        this.gCurrentNavY = 0;
+        this.gSavedXScale = 0;
+        this.gSavedYScale = 0;
+        this.gNavRectIntervalID = -1;
+        this.gNavRectReadyCallbackID = -1;
+        if (this.getImageInstance()._showSplash == false) {
+            this.navigationImage.zoomifySplash_mc._visible = false;
+        }
+        this.setSize(this._width, this._height);
+        callbackName = targetPath(this) + ".onMainImageInitialized";
+        this.getImageInstance().registerCallback("Init", callbackName);
+        callbackName = targetPath(this) + ".viewRectCallback";
+        this.getImageInstance().registerCallback("View", callbackName);
+    }
+    ZoomifyNavWindowClass.prototype = new MovieClip();
+    Object.registerClass("ZoomifyNavWindowSymbol", ZoomifyNavWindowClass);
+    ZoomifyNavWindowClass.prototype.getImageInstance = function () {
+        var imageInstance = null;
+        if ((this._targetZoomifyViewer.substring(0, 5) == "_root") || (this._targetZoomifyViewer.substring(0, 6) == "_level")) {
+            imageInstance = eval (this._targetZoomifyViewer);
+        } else {
+            imageInstance = this._parent[this._targetZoomifyViewer];
+        }
+        return(imageInstance);
+    };
+    ZoomifyNavWindowClass.prototype.onMainImageInitialized = function (theInst) {
+        this.onImageChanged();
+        var x = this.getImageInstance().getX();
+        var y = this.getImageInstance().getY();
+        var zoom = this.getImageInstance().getZoom();
+        this.viewRectCallback(theInst, x, y, zoom);
+    };
+    ZoomifyNavWindowClass.prototype.onNavImageInitialized = function (theInst) {
+        this.gNavInitialized = true;
+        var x = this.getImageInstance().getX();
+        var y = this.getImageInstance().getY();
+        var zoom = this.getImageInstance().getZoom();
+        this.viewRectCallback(theInst, x, y, zoom);
+        this.navigationImage.setEnabled(false);
+    };
+    ZoomifyNavWindowClass.prototype.onImageChanged = function (componentInstance) {
+        var targetImagePath = this.getImageInstance()._imagePath;
+        if ((targetImagePath == "") || (targetImagePath == undefined)) {
+            return(undefined);
+        }
+        if (this.gImageInitCalled == false) {
+            callbackName = targetPath(this) + ".onNavImageInitialized";
+            this.navigationImage.registerCallback("Init", callbackName);
+        }
+        this.gNavInitialized = false;
+        this.gImageInitCalled = true;
+        this.navRect_mc._xscale = this.gSavedXScale;
+        this.navRect_mc._yscale = this.gSavedYScale;
+        this.navRect_mc._x = this.navigationImage._x;
+        this.navRect_mc._y = this.navigationImage._y;
+        this.navigationImage.setEnabled(true);
+        this.navigationImage._showSplash = this.getImageInstance()._showSplash;
+        this.navigationImage._initialX = 0;
+        this.navigationImage._initialY = 0;
+        this.navigationImage._initialZoom = -1;
+        this.navigationImage.setImagePath(targetImagePath);
+        this.navigationImage.setByteHandlerURL(this.getImageInstance()._byteHandlerURL);
+        this.navigationImage.setMapFilePath(this.getImageInstance()._mapFilePath);
+        this.navigationImage.updateView();
+    };
+    ZoomifyNavWindowClass.prototype.setSize = function (newWidth, newHeight) {
+        this._width = newWidth;
+        this._height = newHeight;
+        this.gSavedXScale = this._xscale;
+        this.gSavedYScale = this._yscale;
+        this._xscale = 100;
+        this._yscale = 100;
+        this.gInitialNavX = (this.navigationImage._x = (this._width / 2) + ((((this._width * this.gSavedXScale) / 100) / 2) - (this._width / 2)));
+        this.gInitialNavY = (this.navigationImage._y = (this._height / 2) + ((((this._height * this.gSavedYScale) / 100) / 2) - (this._height / 2)));
+        this.backgroup_mc._width = newWidth;
+        this.backgroup_mc._height = newHeight;
+        this.backgroup_mc._x = this.navigationImage._x;
+        this.backgroup_mc._y = this.navigationImage._y;
+        this.navRect_mc._width = newWidth;
+        this.navRect_mc._height = newHeight;
+        this.navRect_mc._x = this.navigationImage._x;
+        this.navRect_mc._y = this.navigationImage._y;
+        this.navMask_mc._width = newWidth;
+        this.navMask_mc._height = newHeight;
+        this.navMask_mc._x = this.navigationImage._x;
+        this.navMask_mc._y = this.navigationImage._y;
+        this.navigationImage.setEnabled(true);
+        this.navigationImage._width = newWidth - 2;
+        this.navigationImage._height = newHeight - 2;
+        this.navigationImage.setSize(newWidth - 2, newHeight - 2);
+        this.navigationImage.updateView();
+        this.navigationImage.setEnabled(false);
+    };
+    ZoomifyNavWindowClass.prototype.navRectPressed = function () {
+        if (this.getImageInstance().getEnabled() == false) {
+            stopDrag();
+            return(undefined);
+        }
+        var i = 0;
+        while (i < this.gRectMovedCallback.length) {
+            eval (this.gRectMovedCallback[i])("start");
+            i++;
+        }
+        this.gCurrentNavX = 100000 /* 0x0186A0 */;
+        this.gCurrentNavY = 100000 /* 0x0186A0 */;
+        this.gNavRectIntervalID = setInterval(this, "navRectMoved", 3000, 0);
+    };
+    ZoomifyNavWindowClass.prototype.navRectReleased = function () {
+        clearInterval(this.gNavRectIntervalID);
+        this.gNavRectIntervalID = -1;
+        this.navRectMoved(1);
+        var i = 0;
+        while (i < this.gRectMovedCallback.length) {
+            eval (this.gRectMovedCallback[i])("stop");
+            i++;
+        }
+    };
+    ZoomifyNavWindowClass.prototype.navRectMoved = function (forceUpdate) {
+        if (this.gImageInitCalled == false) {
+            return(undefined);
+        }
+        if (this.getImageInstance().getEnabled() == false) {
+            stopDrag();
+            clearInterval(this.gNavRectIntervalID);
+            this.gNavRectIntervalID = -1;
+            return(undefined);
+        }
+        if ((forceUpdate == 1) || (((this.gCurrentNavX - this.navRect_mc._x) == 0) && ((this.gCurrentNavY - this.navRect_mc._y) == 0))) {
+            this.gCurrentNavX = this.navRect_mc._x;
+            this.gCurrentNavY = this.navRect_mc._y;
+            var imageWidth = this.getImageInstance().getTierWidth(this.getImageInstance().getTierCount());
+            var imageHeight = this.getImageInstance().getTierHeight(this.getImageInstance().getTierCount());
+            var initialImageWidth = ((this.navigationImage.getZoom() / 100) * imageWidth);
+            var initialImageHeight = ((this.navigationImage.getZoom() / 100) * imageHeight);
+            var x = ((this.gInitialNavX - this.navRect_mc._x) / initialImageWidth);
+            var y = ((this.gInitialNavY - this.navRect_mc._y) / initialImageHeight);
+            var zoom = this.getImageInstance().getZoom();
+            this.getImageInstance().setView(x, y, zoom);
+            this.getImageInstance().updateView();
+            var i = 0;
+            while (i < this.gRectMovedCallback.length) {
+                eval (this.gRectMovedCallback[i])("moved");
+                i++;
+            }
+        } else {
+            this.gCurrentNavX = this.navRect_mc._x;
+            this.gCurrentNavY = this.navRect_mc._y;
+        }
+    };
+    ZoomifyNavWindowClass.prototype.viewRectCallback = function (focusInstance, x, y, zoom) {
+        if (((this.gImageInitCalled == false) || (this.gNavInitialized == false)) || (this.gNavRectIntervalID != -1)) {
+            return(undefined);
+        }
+        var imageWidth = this.getImageInstance().getTierWidth(this.getImageInstance().getTierCount());
+        var imageHeight = this.getImageInstance().getTierHeight(this.getImageInstance().getTierCount());
+        var imageAspect = (imageWidth / imageHeight);
+        var initialImageWidth = ((this.navigationImage.getZoom() / 100) * imageWidth);
+        var initialImageHeight = ((this.navigationImage.getZoom() / 100) * imageHeight);
+        var initialNavWidth = initialImageWidth;
+        var initialNavHeight = initialImageHeight;
+        var imageViewWidth = this.getImageInstance().gViewWidth;
+        var imageViewHeight = this.getImageInstance().gViewHeight;
+        var imageViewAspect = (imageViewWidth / imageViewHeight);
+        var initialZoom = 0;
+        if (imageAspect > imageViewAspect) {
+            initialNavHeight = initialNavWidth / imageViewAspect;
+            initialZoom = (100 * imageViewWidth) / imageWidth;
+        } else {
+            initialNavWidth = initialNavHeight * imageViewAspect;
+            initialZoom = (100 * imageViewHeight) / imageHeight;
+        }
+        var tempWidth = (initialNavWidth * (initialZoom / zoom));
+        var tempHeight = (initialNavHeight * (initialZoom / zoom));
+        this.navRect_mc._width = tempWidth;
+        this.navRect_mc._height = tempHeight;
+        this.navRect_mc._x = this.gInitialNavX - (x * initialImageWidth);
+        this.navRect_mc._y = this.gInitialNavY - (y * initialImageHeight);
+    };
+    ZoomifyNavWindowClass.prototype.registerCallback = function (functionType, functionName) {
+        if (functionType == "RectMoved") {
+            this.gRectMovedCallback.push(functionName);
+            return(this.gRectMovedCallback.length);
+        }
+        this.navigationImage.registerCallback(functionType, functionName);
+    };
+    ZoomifyNavWindowClass.prototype.unregisterCallback = function (functionType, id) {
+        if (functionType == "RectMoved") {
+            this.gRectMovedCallback[id - 1] = "";
+        } else {
+            this.navigationImage.unregisterCallback(functionType, functionName);
+        }
+    };
+    ZoomifyNavWindowClass.prototype.buildPyramid = function (imageWidth, imageHeight, pyramidType, tileSize, minTier) {
+        this.navigationImage.buildPyramid(imageWidth, imageHeight, pyramidType, tileSize, minTier);
+    };
+    ZoomifyNavWindowClass.prototype.getImagePath = function () {
+        return(this.navigationImage.getImagePath());
+    };
+    ZoomifyNavWindowClass.prototype.updateView = function () {
+        return(this.navigationImage.updateView());
+    };
+    ZoomifyNavWindowClass.prototype.getViewerState = function () {
+        return(this.navigationImage.getViewerState());
+    };
+    ZoomifyNavWindowClass.prototype.getByteHandlerURL = function () {
+        return(this.navigationImage.getByteHandlerURL());
+    };
+    ZoomifyNavWindowClass.prototype.getTierCount = function () {
+        return(this.navigationImage.getTierCount());
+    };
+    ZoomifyNavWindowClass.prototype.getMapFilePath = function () {
+        return(this.navigationImage.getMapFilePath());
+    };
+    ZoomifyNavWindowClass.prototype.getTileCountWidth = function (tier) {
+        return(this.navigationImage.getTileCountWidth(tier));
+    };
+    ZoomifyNavWindowClass.prototype.getTierWidth = function (tier) {
+        return(this.navigationImage.getTierWidth(tier));
+    };
+    ZoomifyNavWindowClass.prototype.getTileCountHeight = function (tier) {
+        return(this.navigationImage.getTileCountHeight(tier));
+    };
+    ZoomifyNavWindowClass.prototype.getTierHeight = function (tier) {
+        return(this.navigationImage.getTierHeight(tier));
+    };
+    ZoomifyNavWindowClass.prototype.getInitializationData = function (instance) {
+        return(this.navigationImage.getInitializationData(instance));
+    };
+    ZoomifyNavWindowClass.prototype.getTierTileCount = function (tier) {
+        return(this.navigationImage.getTierTileCount(tier));
+    };
+    #endinitclip
+
+
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 63 MovieClip [ZoomifyNavWindowSymbol] "NavWindowInstance" in Frame 1
+//----------------------------------------------------------------------
+//component parameters
+onClipEvent (initialize) {
+    _targetZoomifyViewer = "ZoomifyViewerInstance";
+    _imagePath = "";
+    _byteHandlerURL = "";
+    _devFolderPath = "";
+    _mapFilePath = "";
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 50 MovieClip Frame 1
+//----------------------------------------------------------------------
+    function StartDragLabel(launchURL) {
+        if (this.gLabelsEditableFlag == true) {
+            this.gStartTextX = this._parent._x;
+            this.gStartTextY = this._parent._y;
+            this.gStartLabelX = this.gGraphicMovieClip._x;
+            this.gStartLabelY = this.gGraphicMovieClip._y;
+            this.gLabelDragIntervalID = setInterval(this, "LabelIsDragging", 10);
+            this._parent.startDrag();
+        } else if ((this.gZoomifyURL != undefined) && (this.gZoomifyURL != "")) {
+            getURL (this.gZoomifyURL, "_blank");
+        }
+    }
+    function StopDragLabel() {
+        if (this.gLabelsEditableFlag == true) {
+            this._parent.stopDrag();
+            clearInterval(this.gLabelDragIntervalID);
+            if (this.gLabelMovedCallback != "") {
+                var xRI = (Math.round((10000 * ((this.gBackgroundTierWidth / 2) - this._parent._x)) / this.gBackgroundTierWidth) / 10000);
+                var yRI = (Math.round((10000 * ((this.gBackgroundTierHeight / 2) - this._parent._y)) / this.gBackgroundTierHeight) / 10000);
+                eval (this.gLabelMovedCallback)(xRI, yRI);
+            }
+        }
+    }
+    function LabelIsDragging() {
+        this.gGraphicMovieClip._x = this.gStartLabelX + (this._parent._x - this.gStartTextX);
+        this.gGraphicMovieClip._y = this.gStartLabelY + (this._parent._y - this.gStartTextY);
+    }
+    var gStartLabelX;
+    var gStartLabelY;
+    var gStartTextX;
+    var gStartTextY;
+    var gLabelDragIntervalID;
+
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 41 MovieClip [view_rect] "navRect_mc" in Symbol 63 MovieClip [ZoomifyNavWindowSymbol] Frame 1
+//----------------------------------------------------------------------
+on (press) {
+    startDrag (_parent.navRect_mc);
+    this._parent.navRectPressed();
+}
+on (release) {
+    stopDrag();
+    _parent.navRectReleased();
+}
+on (releaseOutside) {
+    stopDrag();
+    _parent.navRectReleased();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 37 MovieClip [ZoomifyToolbarSymbol] Frame 1
+//----------------------------------------------------------------------
+    #initclip 3
+    function ZoomifyToolbarClass() {
+        this.gSliderIsDown = false;
+        this.gSliderY = 0;
+        callbackName = targetPath(this) + ".viewChangedCallback";
+        this.getImageInstance().registerCallback("View", callbackName);
+        this.update();
+    }
+    ZoomifyToolbarClass.prototype = new MovieClip();
+    Object.registerClass("ZoomifyToolbarSymbol", ZoomifyToolbarClass);
+    ZoomifyToolbarClass.prototype.viewChangedCallback = function (instance, x, y, zoom) {
+        this.adjustSlider();
+    };
+    ZoomifyToolbarClass.prototype.update = function () {
+        this.ZoomSlider_mc._visible = this._showSlider;
+    };
+    ZoomifyToolbarClass.prototype.setSliderVisibility = function (sliderVisibility) {
+        this._showSlider = sliderVisibility;
+        this.update();
+    };
+    ZoomifyToolbarClass.prototype.adjustSlider = function () {
+        if (this.gSliderY == 0) {
+            this.gSliderY = this.ZoomSlider_mc._y;
+        }
+        var currZoom = this.getImageInstance().getZoom();
+        var minZoom = this.getImageInstance()._minZoom;
+        var maxZoom = this.getImageInstance()._maxZoom;
+        if (maxZoom == -1) {
+            maxZoom = this.getImageInstance().calculateScreenZoom();
+        }
+        if (minZoom == -1) {
+            minZoom = this.getImageInstance().calculateScreenZoom();
+        }
+        var toolbarWidth = this.background_mc._width;
+        this.ZoomSlider_mc._x = ((-toolbarWidth) / 2) + (toolbarWidth * ((currZoom - minZoom) / (maxZoom - minZoom)));
+        this.ZoomSlider_mc._y = this.gSliderY;
+    };
+    ZoomifyToolbarClass.prototype.sliderDragged = function () {
+        if (this.gSliderIsDown == true) {
+            if (this.gSliderY == 0) {
+                this.gSliderY = this.ZoomSlider_mc._y;
+            }
+            var currZoom = this.getImageInstance().getZoom();
+            var minZoom = this.getImageInstance()._minZoom;
+            var maxZoom = this.getImageInstance()._maxZoom;
+            if (maxZoom == -1) {
+                maxZoom = this.getImageInstance().calculateScreenZoom();
+            }
+            if (minZoom == -1) {
+                minZoom = this.getImageInstance().calculateScreenZoom();
+            }
+            var toolbarWidth = this.background_mc._width;
+            if (this.ZoomSlider_mc._x > (toolbarWidth / 2)) {
+                this.ZoomSlider_mc._x = toolbarWidth / 2;
+            }
+            if (this.ZoomSlider_mc._x < ((-toolbarWidth) / 2)) {
+                this.ZoomSlider_mc._x = (-toolbarWidth) / 2;
+            }
+            var sliderX = this.ZoomSlider_mc._x;
+            var newZoom = (minZoom + ((maxZoom - minZoom) * ((sliderX + (toolbarWidth / 2)) / toolbarWidth)));
+            this.ZoomSlider_mc._y = this.gSliderY;
+            this.getImageInstance().setZoom(newZoom);
+        }
+    };
+    ZoomifyToolbarClass.prototype.getImageInstance = function () {
+        var imageInstance = null;
+        if ((this._targetZoomifyViewer.substring(0, 5) == "_root") || (this._targetZoomifyViewer.substring(0, 6) == "_level")) {
+            imageInstance = eval (this._targetZoomifyViewer);
+        } else {
+            imageInstance = this._parent[this._targetZoomifyViewer];
+        }
+        return(imageInstance);
+    };
+    ZoomifyToolbarClass.prototype.sliderReleased = function () {
+        this.sliderDragged();
+        this.gSliderIsDown = false;
+        this.getImageInstance().updateView();
+    };
+    ZoomifyToolbarClass.prototype.sliderPressed = function () {
+        this.gSliderIsDown = true;
+    };
+    #endinitclip
+
+
+﻿
+//----------------------------------------------------------------------
+//Symbol 7 Button
+//----------------------------------------------------------------------
+on (press) {
+    var intervalID;
+    var intervalID2;
+    intervalID = setInterval(this.getImageInstance(), "zoomIn", 1);
+    intervalID2 = setInterval(this, "adjustSlider", 5);
+}
+on (release) {
+    clearInterval(intervalID);
+    clearInterval(intervalID2);
+    this.getImageInstance().updateView();
+    this.adjustSlider();
+}
+on (dragOut) {
+    clearInterval(intervalID);
+    clearInterval(intervalID2);
+    this.getImageInstance().updateView();
+    this.adjustSlider();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 57 Button
+//----------------------------------------------------------------------
+on (press) {
+    this.MousePan("start");
+}
+on (release) {
+    this.MousePan("stop");
+}
+on (releaseOutside) {
+    this.MousePan("stop");
+}
+on (rollOver) {
+    this.MousePan("stop");
+}
+on (rollOut) {
+    this.MousePan("stop");
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 62 MovieClip [ZoomifyViewerSymbol] Frame 1
+//----------------------------------------------------------------------
+    #initclip 1
+    function ZoomifyViewerClass() {
+        if (this.gEnabled == undefined) {
+            this.gEnabled = true;
+        }
+        this.gMouseEnabled = true;
+        this.syncTierMotionID = -1;
+        this.gSavedZoomToView = false;
+        this.gIsSlideshow = false;
+        this.gSetViewCalled = false;
+        this.gURLChanged = true;
+        this.gMustResetViewer = true;
+        this.gInitialized = false;
+        this.gInitCalled = false;
+        this.gOriginalPanMouseXScale = this.invisiblePanMouse_btn._xscale;
+        this.gOriginalPanMouseYScale = this.invisiblePanMouse_btn._yscale;
+        this.maskdummy_mc._visible = false;
+        this.tierdummy_mc._visible = false;
+        this.LabelTextDummy_mc._visible = false;
+        if (this._showSplash == false) {
+            this.zoomifySplash_mc._visible = false;
+        }
+        this._isLivePreview = false;
+        this._swfURLShown = false;
+        if (this.gViewWidth == undefined) {
+            this.gViewWidth = 500;
+        }
+        if (this.gViewHeight == undefined) {
+            this.gViewHeight = 350;
+        }
+        this.gOriginalMovieWidth = this.gViewWidth;
+        this.gOriginalMovieHeight = this.gViewHeight;
+        this.gOffscreenX = 50000;
+        this._sizeChanged = false;
+        this.initKeyHandler();
+        this.gInitializeCallback = new Array();
+        this.gFocusCallback = new Array();
+        this.gRectCallback = new Array();
+        this.gViewCallback = new Array();
+        this.gStatusCallback = new Array();
+        this.gDownloadsCompleteCallback = new Array();
+        this.gCommServerCallback = new Array();
+        this.gCommServerMessageReceivedCallback = new Array();
+        this.gFormatCallback = new Array();
+        this.gMaxZoomCallback = new Array();
+        this.gMinZoomCallback = new Array();
+        this.gMouseCallback = new Array();
+        this.gKeyCallback = new Array();
+        this.gLabelVisibilityCallback = new Array();
+        this.gLabelMovedCallback = "";
+        this.gDoImmediateClipRemoval = false;
+        this.gTransitionList = new Array();
+        this.gNumTransitions = 0;
+        this.gCacheArray = new Array();
+        this.gCurrentCacheIndex = 0;
+        this.gCacheViewsIntervalID = -1;
+        if (this._initialX != undefined) {
+            this.gSavedInitialX = this._initialX;
+        } else {
+            this.gSavedInitialX = 0;
+        }
+        if (this._initialY != undefined) {
+            this.gSavedInitialY = this._initialY;
+        } else {
+            this.gSavedInitialY = 0;
+        }
+        if (this._initialZoom != undefined) {
+            this.gSavedInitialZoom = this._initialZoom;
+        } else {
+            this.gSavedInitialZoom = -1;
+        }
+        this.gLabelVisibility = true;
+        this.gDoImmediateClipRemoval = false;
+        if (this.gComponentInitCallback != undefined) {
+            eval (this.gComponentInitCallback)(this);
+        }
+        this.gPreserveCache = false;
+        this.gSkipHeader = false;
+        if (this.gCacheAllTiles == undefined) {
+            this.gCacheAllTiles = false;
+        }
+        if (((this._imagePath != "Enter /path/foldername or /path/imagename.extension") && (this._imagePath != "")) && (this._imagePath != undefined)) {
+            this.init();
+        }
+    }
+    ZoomifyViewerClass.prototype = new MovieClip();
+    Object.registerClass("ZoomifyViewerSymbol", ZoomifyViewerClass);
+    ZoomifyViewerClass.prototype.setByteHandlerURL = function (url) {
+        this._byteHandlerURL = url;
+        this.gURLChanged = true;
+    };
+    ZoomifyViewerClass.prototype.getByteHandlerURL = function () {
+        return(this._byteHandlerURL);
+    };
+    ZoomifyViewerClass.prototype.setImagePath = function (path) {
+        this._imagePath = path;
+        this.gURLChanged = true;
+    };
+    ZoomifyViewerClass.prototype.getImagePath = function () {
+        return(this._imagePath);
+    };
+    ZoomifyViewerClass.prototype.setMapFilePath = function (path) {
+        this._mapFilePath = path;
+        this.gURLChanged = true;
+    };
+    ZoomifyViewerClass.prototype.getMapFilePath = function () {
+        return(this._mapFilePath);
+    };
+    ZoomifyViewerClass.prototype.setSize = function (width, height) {
+        this._xscale = 100;
+        this.gViewWidth = width;
+        this._yscale = 100;
+        this.gViewHeight = height;
+        this._sizeChanged = true;
+        this.gMustResetViewer = true;
+    };
+    ZoomifyViewerClass.prototype.setFocus = function (focus) {
+        this._focus = focus;
+        if (this._focus == true) {
+            i = 0;
+            while (i < this.gFocusCallback.length) {
+                eval (this.gFocusCallback[i])(this);
+                i++;
+            }
+        }
+    };
+    ZoomifyViewerClass.prototype.getFocus = function () {
+        return(this._focus);
+    };
+    ZoomifyViewerClass.prototype.setEnabled = function (enabled) {
+        this.gEnabled = enabled;
+    };
+    ZoomifyViewerClass.prototype.getEnabled = function () {
+        return(this.gEnabled);
+    };
+    ZoomifyViewerClass.prototype.setMouseEnabled = function (mouseEnabled) {
+        this.gMouseEnabled = mouseEnabled;
+    };
+    ZoomifyViewerClass.prototype.getMouseEnabled = function () {
+        return(this.gMouseEnabled);
+    };
+    ZoomifyViewerClass.prototype.setView = function (x, y, zoom) {
+        if (this.gEnabled == false) {
+            return(undefined);
+        }
+        if (this.gInitialized == true) {
+            this.gPanPositionX = x;
+            this.gPanPositionY = y;
+            this.setZoom(zoom);
+            updateAfterEvent();
+        } else {
+            this.gSavedZoomToView = true;
+            this.gEndZoomX = x;
+            this.gEndZoomY = y;
+            this.gEndZoomZoom = zoom;
+            this.gZoomDuration = 0;
+            this.gZoomIntervalRate = 10;
+        }
+    };
+    ZoomifyViewerClass.prototype.setX = function (x) {
+        if (this.gEnabled == false) {
+            return(undefined);
+        }
+        this.gPanPositionX = x;
+        this.fillView();
+        updateAfterEvent();
+    };
+    ZoomifyViewerClass.prototype.setY = function (y) {
+        if (this.gEnabled == false) {
+            return(undefined);
+        }
+        this.gPanPositionY = y;
+        this.fillView();
+        updateAfterEvent();
+    };
+    ZoomifyViewerClass.prototype.setZoom = function (zoom) {
+        this.gZoom = zoom;
+        if ((this.gInitialized == true) && (this.gEnabled == true)) {
+            var tempZoom;
+            if ((zoom == -1) || (this._minZoom == -1)) {
+                tempZoom = this.calculateScreenZoom();
+            }
+            if (this._minZoom == -1) {
+                this._minZoom = tempZoom;
+            }
+            if (zoom == -1) {
+                this.gZoom = tempZoom;
+            }
+            var baseWidth = this.getTierWidth(this.gTierCount);
+            var currentWidth;
+            currentWidth = this.getTierWidth(this.gCurrentTier);
+            this.gCurrentTier_mc._xscale = (this.gZoom * baseWidth) / currentWidth;
+            this.gCurrentTier_mc._yscale = this.gCurrentTier_mc._xscale;
+            currentWidth = this.getTierWidth(this.gOldTier);
+            this.gCurrentTierOld_mc._xscale = (this.gZoom * baseWidth) / currentWidth;
+            this.gCurrentTierOld_mc._yscale = this.gCurrentTierOld_mc._xscale;
+            currentWidth = this.getTierWidth(this.gBackgroundTier);
+            this.gCurrentTierBackground_mc._xscale = (this.gZoom * baseWidth) / currentWidth;
+            this.gCurrentTierBackground_mc._yscale = this.gCurrentTierBackground_mc._xscale;
+            this.gLabelTier_mc._xscale = (this.gZoom * baseWidth) / currentWidth;
+            this.gLabelTier_mc._yscale = this.gLabelTier_mc._xscale;
+        }
+    };
+    ZoomifyViewerClass.prototype.getX = function () {
+        return(this.gPanPositionX);
+    };
+    ZoomifyViewerClass.prototype.getY = function () {
+        return(this.gPanPositionY);
+    };
+    ZoomifyViewerClass.prototype.getZoom = function () {
+        var baseWidth = this.getTierWidth(this.gTierCount);
+        if (baseWidth == 0) {
+            return(this._initialZoom);
+        }
+        var currentWidth = this.getTierWidth(this.gBackgroundTier);
+        if (currentWidth == 0) {
+            return(this._initialZoom);
+        }
+        var zoom = ((this.gCurrentTierBackground_mc._xscale * currentWidth) / baseWidth);
+        return(zoom);
+    };
+    ZoomifyViewerClass.prototype.setInitialX = function (x) {
+        this._initialX = x;
+    };
+    ZoomifyViewerClass.prototype.getInitialX = function () {
+        return(this._initialX);
+    };
+    ZoomifyViewerClass.prototype.setInitialY = function (y) {
+        this._initialY = y;
+    };
+    ZoomifyViewerClass.prototype.getInitialY = function () {
+        return(this._initialY);
+    };
+    ZoomifyViewerClass.prototype.setInitialZoom = function (zoom) {
+        this._initialZoom = zoom;
+    };
+    ZoomifyViewerClass.prototype.getInitialZoom = function () {
+        return(this._initialZoom);
+    };
+    ZoomifyViewerClass.prototype.setMinZoom = function (minZoom) {
+        this._minZoom = minZoom;
+    };
+    ZoomifyViewerClass.prototype.getMinZoom = function () {
+        return(this._minZoom);
+    };
+    ZoomifyViewerClass.prototype.setMaxZoom = function (maxZoom) {
+        this._maxZoom = maxZoom;
+    };
+    ZoomifyViewerClass.prototype.getMaxZoom = function () {
+        return(this._maxZoom);
+    };
+    ZoomifyViewerClass.prototype.resetView = function () {
+        if ((this.gInTransition == false) && (this.gEnabled == true)) {
+            this.stopZoomToView();
+            this.setView(this._initialX, this._initialY, this._initialZoom);
+            this.updateView();
+        }
+    };
+    ZoomifyViewerClass.prototype.updateView = function (preserveCache) {
+        if ((preserveCache == undefined) || (preserveCache == "")) {
+            preserveCache = true;
+        }
+        if ((this.gMustResetViewer == true) || (this.gURLChanged == true)) {
+            if (preserveCache == true) {
+                this.gPreserveCache = true;
+            }
+            this.gSavedInitialX = this._initialX;
+            this.gSavedInitialY = this._initialY;
+            this.gSavedInitialZoom = this._initialZoom;
+            if (this.gInitialized == true) {
+                if (this.gURLChanged == false) {
+                    this._initialX = this.getX();
+                    this._initialY = this.getY();
+                    this._initialZoom = this.getZoom();
+                }
+                this.destroy();
+            }
+            this.init();
+            this.gPreserveCache = false;
+            return(undefined);
+        }
+        if (this.gInitialized == true) {
+            if (this.gSetViewCalled == true) {
+                this.panStop();
+                this.gSetViewCalled = false;
+            }
+            this.setTier();
+            this.fillView();
+            this._initialX = this.gSavedInitialX;
+            this._initialY = this.gSavedInitialY;
+            this._initialZoom = this.gSavedInitialZoom;
+        }
+        if ((((((this._name.substring(0, 20) != "ZoomifyTemporaryClip") && (this._isLivePreview == false)) && (((this._devFolderPath == undefined) || (this._devFolderPath == "")) || (this._devFolderPath == "Enables stage preview.  Control | Test Movie for value to enter."))) && (this._swfURLShown == false)) && (this._imagePath.substring(0, 4) != "http")) && (this._imagePath.substring(0, 4) != "file")) {
+            this._swfURLShown = true;
+            trace(("The Development Folder Path parameter in the ZoomifyViewer Component named \"" + this._name) + "\" is empty.\nUse the following path to activate Live Preview:");
+            var tempArray = _root._url.split("/");
+            var fileName = tempArray[tempArray.length - 1];
+            trace(_root._url.substring(0, _root._url.length - fileName.length));
+        }
+    };
+    ZoomifyViewerClass.prototype.calculateScreenZoom = function () {
+        var screenZoom;
+        var baseWidth = this.getTierWidth(this.gTierCount);
+        var baseHeight = this.getTierHeight(this.gTierCount);
+        var testWidth = (this.gViewWidth / baseWidth);
+        var testHeight = (this.gViewHeight / baseHeight);
+        if (testWidth > testHeight) {
+            screenZoom = testHeight * 100;
+        } else {
+            screenZoom = testWidth * 100;
+        }
+        return(screenZoom);
+    };
+    ZoomifyViewerClass.prototype.getViewWidth = function () {
+        return(this.gViewWidth);
+    };
+    ZoomifyViewerClass.prototype.getViewHeight = function () {
+        return(this.gViewHeight);
+    };
+    ZoomifyViewerClass.prototype.getTileSize = function () {
+        return(this.gTileSize);
+    };
+    ZoomifyViewerClass.prototype.getWindowLeft = function () {
+        return(this.gScaledWindowLeft);
+    };
+    ZoomifyViewerClass.prototype.getWindowTop = function () {
+        return(this.gScaledWindowTop);
+    };
+    ZoomifyViewerClass.prototype.getWindowRight = function () {
+        return(this.gScaledWindowRight);
+    };
+    ZoomifyViewerClass.prototype.getWindowBottom = function () {
+        return(this.gScaledWindowBottom);
+    };
+    ZoomifyViewerClass.prototype.getTierCount = function () {
+        return(this.gTierCount);
+    };
+    ZoomifyViewerClass.prototype.getTileCountHeight = function (tier) {
+        return(this.gTileCountHeight[tier - 1]);
+    };
+    ZoomifyViewerClass.prototype.getTileCountWidth = function (tier) {
+        return(this.gTileCountWidth[tier - 1]);
+    };
+    ZoomifyViewerClass.prototype.getTierWidth = function (tier) {
+        if (this.gTierCount < 1) {
+            return(0);
+        }
+        return(this.gTierWidth[tier - 1]);
+    };
+    ZoomifyViewerClass.prototype.getTierHeight = function (tier) {
+        if (this.gTierCount < 1) {
+            return(0);
+        }
+        return(this.gTierHeight[tier - 1]);
+    };
+    ZoomifyViewerClass.prototype.getTierTileCount = function (tier) {
+        return(this.gTierTileCount[tier - 1]);
+    };
+    ZoomifyViewerClass.prototype.getImageWidth = function () {
+        return(this.gImageWidth);
+    };
+    ZoomifyViewerClass.prototype.getImageHeight = function () {
+        return(this.gImageHeight);
+    };
+    ZoomifyViewerClass.prototype.getViewerState = function () {
+        return(this.gViewerState);
+    };
+    ZoomifyViewerClass.prototype.zoomIn = function () {
+        var zoomFactor = 1.2;
+        if (this.gZoomFactor != -1) {
+            zoomFactor = this.gZoomFactor;
+        }
+        if (((this.gInitialized == true) && ((this.gInTransition == false) || (this.gZoomFactor != -1))) && (this.gEnabled == true)) {
+            if (this.gZoomFactor == -1) {
+                this.stopZoomToView();
+            }
+            var currentZoom = this.getZoom();
+            var maxZoom = this._maxZoom;
+            if (maxZoom == -1) {
+                maxZoom = this.calculateScreenZoom();
+            }
+            if (parseFloat(currentZoom) < parseFloat(maxZoom)) {
+                if ((currentZoom * zoomFactor) > maxZoom) {
+                    zoomFactor = maxZoom / currentZoom;
+                }
+                if (this.gCurrentTier > this.gBackgroundTier) {
+                    this.gCurrentTier_mc._xscale = this.gCurrentTier_mc._xscale * zoomFactor;
+                    this.gCurrentTier_mc._yscale = this.gCurrentTier_mc._yscale * zoomFactor;
+                }
+                if (this.gOldTier > this.gBackgroundTier) {
+                    this.gCurrentTierOld_mc._xscale = this.gCurrentTierOld_mc._xscale * zoomFactor;
+                    this.gCurrentTierOld_mc._yscale = this.gCurrentTierOld_mc._yscale * zoomFactor;
+                }
+                this.gCurrentTierBackground_mc._xscale = this.gCurrentTierBackground_mc._xscale * zoomFactor;
+                this.gCurrentTierBackground_mc._yscale = this.gCurrentTierBackground_mc._yscale * zoomFactor;
+                this.gLabelTier_mc._xscale = this.gLabelTier_mc._xscale * zoomFactor;
+                this.gLabelTier_mc._yscale = this.gLabelTier_mc._yscale * zoomFactor;
+                var currentZoom = this.getZoom();
+                if (currentZoom >= this._maxZoom) {
+                    i = 0;
+                    while (i < this.gMaxZoomCallback.length) {
+                        eval (this.gMaxZoomCallback[i])(this, this._maxZoom);
+                        i++;
+                    }
+                }
+                updateAfterEvent();
+            }
+        }
+    };
+    ZoomifyViewerClass.prototype.zoomOut = function () {
+        var zoomFactor = 1.2;
+        if (this.gZoomFactor != -1) {
+            zoomFactor = this.gZoomFactor;
+        }
+        if (((this.gInitialized == true) && ((this.gInTransition == false) || (this.gZoomFactor != -1))) && (this.gEnabled == true)) {
+            if (this.gZoomFactor == -1) {
+                this.stopZoomToView();
+            }
+            var currentZoom = this.getZoom();
+            var minZoom = this._minZoom;
+            if (minZoom == -1) {
+                minZoom = this.calculateScreenZoom();
+            }
+            if (parseFloat(currentZoom) > parseFloat(minZoom)) {
+                if ((currentZoom / zoomFactor) < minZoom) {
+                    zoomFactor = currentZoom / minZoom;
+                }
+                if (this.gCurrentTier > this.gBackgroundTier) {
+                    this.gCurrentTier_mc._xscale = this.gCurrentTier_mc._xscale / zoomFactor;
+                    this.gCurrentTier_mc._yscale = this.gCurrentTier_mc._yscale / zoomFactor;
+                }
+                if (this.gOldTier > this.gBackgroundTier) {
+                    this.gCurrentTierOld_mc._xscale = this.gCurrentTierOld_mc._xscale / zoomFactor;
+                    this.gCurrentTierOld_mc._yscale = this.gCurrentTierOld_mc._yscale / zoomFactor;
+                }
+                this.gCurrentTierBackground_mc._xscale = this.gCurrentTierBackground_mc._xscale / zoomFactor;
+                this.gCurrentTierBackground_mc._yscale = this.gCurrentTierBackground_mc._yscale / zoomFactor;
+                this.gLabelTier_mc._xscale = this.gLabelTier_mc._xscale / zoomFactor;
+                this.gLabelTier_mc._yscale = this.gLabelTier_mc._yscale / zoomFactor;
+                currentZoom = this.getZoom();
+                if (currentZoom <= minZoom) {
+                    i = 0;
+                    while (i < this.gMinZoomCallback.length) {
+                        eval (this.gMinZoomCallback[i])(this, this._minZoom);
+                        i++;
+                    }
+                }
+                updateAfterEvent();
+            }
+        }
+    };
+    ZoomifyViewerClass.prototype.panImage = function (x, y) {
+        if (((this.gInitialized == true) && (this.gInTransition == false)) && (this.gEnabled == true)) {
+            this.stopZoomToView();
+            var theRotation = ((this._rotation * Math.PI) / 180);
+            this.gCurrentTier_mc._x = this.gCurrentTier_mc._x + ((x * Math.cos(theRotation)) + (y * Math.sin(theRotation)));
+            this.gCurrentTier_mc._y = this.gCurrentTier_mc._y + ((y * Math.cos(theRotation)) - (x * Math.sin(theRotation)));
+            this.gCurrentTierOld_mc._x = this.gCurrentTier_mc._x;
+            this.gCurrentTierBackground_mc._x = this.gCurrentTier_mc._x;
+            this.gLabelTier_mc._x = this.gCurrentTier_mc._x;
+            this.gCurrentTierOld_mc._y = this.gCurrentTier_mc._y;
+            this.gCurrentTierBackground_mc._y = this.gCurrentTier_mc._y;
+            this.gLabelTier_mc._y = this.gCurrentTier_mc._y;
+        }
+    };
+    ZoomifyViewerClass.prototype.panLeft = function () {
+        this.panImage((this.gViewWidth * (this.gCurrentTier_mc._xscale / 100)) / 50, 0);
+    };
+    ZoomifyViewerClass.prototype.panUp = function () {
+        this.panImage(0, (this.gViewHeight * (this.gCurrentTier_mc._yscale / 100)) / 50);
+    };
+    ZoomifyViewerClass.prototype.panDown = function () {
+        this.panImage(0, ((-this.gViewHeight) * (this.gCurrentTier_mc._yscale / 100)) / 50);
+    };
+    ZoomifyViewerClass.prototype.panRight = function () {
+        this.panImage(((-this.gViewWidth) * (this.gCurrentTier_mc._xscale / 100)) / 50, 0);
+    };
+    ZoomifyViewerClass.prototype.panStop = function () {
+        if (this.gInitialized == true) {
+            var motionX = (this.gCurrentTier_mc._x - this.gRegistrationPointX);
+            var motionY = (this.gCurrentTier_mc._y - this.gRegistrationPointY);
+            var motionScaledX = (motionX / ((this.getTierWidth(this.gCurrentTier) * this.gCurrentTier_mc._xscale) / 100));
+            var motionScaledY = (motionY / ((this.getTierHeight(this.gCurrentTier) * this.gCurrentTier_mc._yscale) / 100));
+            this.gPanPositionX = Number(this.gPanPositionX) + Number(motionScaledX);
+            this.gPanPositionY = Number(this.gPanPositionY) + Number(motionScaledY);
+            this.gCurrentTier_mc._x = this.gRegistrationPointX;
+            this.gCurrentTier_mc._y = this.gRegistrationPointY;
+            this.gCurrentTierOld_mc._x = this.gRegistrationPointX;
+            this.gCurrentTierOld_mc._y = this.gRegistrationPointY;
+            this.gCurrentTierBackground_mc._x = this.gRegistrationPointX;
+            this.gCurrentTierBackground_mc._y = this.gRegistrationPointY;
+            this.gLabelTier_mc._x = this.gRegistrationPointX;
+            this.gLabelTier_mc._y = this.gRegistrationPointY;
+        }
+    };
+    ZoomifyViewerClass.prototype.registerCallback = function (functionType, functionName) {
+        if (functionType == "Focus") {
+            this.gFocusCallback.push(functionName);
+            if ((this._focus == true) && (functionName != "")) {
+                eval (functionName)(this);
+            }
+            return(this.gFocusCallback.length);
+        }
+        if (functionType == "View") {
+            this.gViewCallback.push(functionName);
+            if ((functionName != "") && (this.gInitialized == true)) {
+                eval (functionName)(this, this.getX(), this.getY(), this.getZoom());
+            }
+            return(this.gViewCallback.length);
+        }
+        if (functionType == "Rect") {
+            this.gRectCallback.push(functionName);
+            if ((functionName != "") && (this.gInitialized == true)) {
+                eval (functionName)(this, this.getWindowLeft(), this.getWindowTop(), this.getWindowRight(), this.getWindowBottom());
+            }
+            return(this.gRectCallback.length);
+        }
+        if (functionType == "Init") {
+            this.gInitializeCallback.push(functionName);
+            return(this.gInitializeCallback.length);
+        }
+        if (functionType == "Status") {
+            this.gStatusCallback.push(functionName);
+            return(this.gStatusCallback.length);
+        }
+        if (functionType == "DownloadComplete") {
+            this.gDownloadsCompleteCallback.push(functionName);
+            return(this.gDownloadsCompleteCallback.length);
+        }
+        if (functionType == "Communication") {
+            this.gCommServerCallback.push(functionName);
+            return(this.gCommServerCallback.length);
+        }
+        if (functionType == "CommunicationReceived") {
+            this.gCommServerMessageReceivedCallback.push(functionName);
+            return(this.gCommServerMessageReceivedCallback.length);
+        }
+        if (functionType == "MaxZoomReached") {
+            this.gMaxZoomCallback.push(functionName);
+            return(this.gMaxZoomCallback.length);
+        }
+        if (functionType == "MinZoomReached") {
+            this.gMinZoomCallback.push(functionName);
+            return(this.gMinZoomCallback.length);
+        }
+        if (functionType == "Mouse") {
+            this.gMouseCallback.push(functionName);
+            return(this.gMouseCallback.length);
+        }
+        if (functionType == "Key") {
+            this.gKeyCallback.push(functionName);
+            return(this.gKeyCallback.length);
+        }
+        if (functionType == "LabelVisibility") {
+            this.gLabelVisibilityCallback.push(functionName);
+            return(this.gLabelVisibilityCallback.length);
+        }
+        if (functionType == "LabelMoved") {
+            this.gLabelMovedCallback = functionName;
+            var i = 0;
+            while (i < this.gLabelArray.length) {
+                this.gLabelArray[i].gTextMovieClip.labelText_mc.gLabelMovedCallback = functionName;
+                i++;
+            }
+        } else if (functionType.substring(0, 6) == "Format") {
+            var formatObject = new Object();
+            formatObject.extension = functionType.substring(7, 10);
+            formatObject.callback = functionName;
+            this.gFormatCallback.push(formatObject);
+            return(this.gFormatCallback.length);
+        }
+    };
+    ZoomifyViewerClass.prototype.unregisterCallback = function (functionType, id) {
+        if (functionType == "Focus") {
+            this.gFocusCallback[id - 1] = "";
+        } else if (functionType == "View") {
+            this.gViewCallback[id - 1] = "";
+        } else if (functionType == "Rect") {
+            this.gRectCallback[id - 1] = "";
+        } else if (functionType == "Init") {
+            this.gInitializeCallback[id - 1] = "";
+        } else if (functionType == "Status") {
+            this.gStatusCallback[id - 1] = "";
+        } else if (functionType == "DownloadComplete") {
+            this.gDownloadsCompleteCallback[id - 1] = "";
+        } else if (functionType == "Communication") {
+            this.gCommServerCallback[id - 1] = "";
+        } else if (functionType == "Mouse") {
+            this.gMouseCallback[id - 1] = "";
+        } else if (functionType == "Key") {
+            this.gKeyCallback[id - 1] = "";
+        } else if (functionType == "LabelVisibility") {
+            this.gLabelVisibilityCallback[id - 1] = "";
+        } else if (functionType == "CommunicationReceived") {
+            this.gCommServerMessageReceivedCallback[id - 1] = "";
+        } else if (functionType == "LabelMoved") {
+            this.gLabelMovedCallback = "";
+        } else if (functionType.substring(0, 6) == "Format") {
+            delete this.gFormatCallback[id - 1];
+            this.gFormatCallback[id - 1] = undefined;
+        } else if (functionType == "MaxZoomReached") {
+            this.gMaxZoomCallback[id - 1] = "";
+        } else if (functionType == "MinZoomReached") {
+            this.gMinZoomCallback[id - 1] = "";
+        }
+    };
+    ZoomifyViewerClass.prototype.addLabel = function (labelNode) {
+        this.addLabelByXML(labelNode);
+    };
+    ZoomifyViewerClass.prototype.addLabelByXML = function (labelNode) {
+        var xOffset = parseFloat(labelNode.attributes.x);
+        var yOffset = parseFloat(labelNode.attributes.y);
+        var xScale = parseInt(labelNode.attributes.xscale);
+        var yScale = parseInt(labelNode.attributes.yscale);
+        var zoom = parseFloat(labelNode.attributes.zoom);
+        var movieClipString = unescape(labelNode.attributes.movieClip);
+        var id = labelNode.attributes.id;
+        var url = labelNode.attributes.url;
+        var text = unescape(labelNode.attributes.name);
+        var textColor = parseInt(labelNode.attributes.textColor);
+        var textBackgroundColor = parseInt(labelNode.attributes.textBackgroundColor);
+        this.addLabelByParams(xOffset, yOffset, xScale, yScale, zoom, movieClipString, id, url, text, textColor, textBackgroundColor);
+    };
+    ZoomifyViewerClass.prototype.addLabelByParams = function (xOffset, yOffset, xScale, yScale, zoom, movieClipString, id, url, text, textColor, textBackgroundColor) {
+        if (this.gCurrentTierBackground_mc != undefined) {
+            var clipIndex = (this.gLabelArray.length * 10);
+            if (this.gLabelArray.length > 0) {
+                this.gLabelArray[this.gLabelArray.length - 1] + 1;
+            }
+            var labelClipName = (("label" + id) + "_mc");
+            var mcLabelImageString = "this.gLabelTier_mc.labels_mc";
+            var mcLabelImage = eval (mcLabelImageString);
+            var mcMyLabelImage;
+            mcLabelImage.attachMovie("emptyLabel_mc", labelClipName, 100 + (2 * this.gLabelArray.length));
+            mcLabelImage.attachMovie("LabelText_mc", "text_for_" + labelClipName, 10000 + (2 * this.gLabelArray.length));
+            mcMyLabelImage = eval ((mcLabelImageString + ".") + labelClipName);
+            mcMyLabelText = eval ((mcLabelImageString + ".text_for_") + labelClipName);
+            var xWidth = this.getTierWidth(this.gBackgroundTier);
+            var yHeight = this.getTierHeight(this.gBackgroundTier);
+            var zoomScale = (this.getZoom() / zoom);
+            mcMyLabelImage._x = (xWidth / 2) - (xOffset * xWidth);
+            mcMyLabelImage._y = (yHeight / 2) - (yOffset * yHeight);
+            mcMyLabelImage._xscale = (zoomScale * xScale) / (this.gCurrentTierBackground_mc._xscale / 100);
+            mcMyLabelImage._yscale = (zoomScale * yScale) / (this.gCurrentTierBackground_mc._yscale / 100);
+            mcMyLabelImage._visible = true;
+            mcMyLabelImage.gZoomifyURL = unescape(url);
+            mcMyLabelImage.gMovieClipString = movieClipString;
+            mcMyLabelImage.gMovieLevel = 100 + (2 * this.gLabelArray.length);
+            if (text != "") {
+                mcMyLabelText.labelText_mc._labelText.text = text;
+                mcMyLabelText.labelText_mc._labelText.textColor = textColor;
+                mcMyLabelText.labelText_mc._labelText.backgroundColor = textBackgroundColor;
+                mcMyLabelText._x = (xWidth / 2) - (xOffset * xWidth);
+                mcMyLabelText._y = (yHeight / 2) - (yOffset * yHeight);
+                mcMyLabelText._xscale = (zoomScale * xScale) / (this.gCurrentTierBackground_mc._xscale / 100);
+                mcMyLabelText._yscale = (zoomScale * yScale) / (this.gCurrentTierBackground_mc._yscale / 100);
+                mcMyLabelText._visible = true;
+            } else {
+                mcMyLabelText._visible = false;
+            }
+            mcMyLabelText.labelText_mc.gLabelsEditableFlag = false;
+            mcMyLabelText.labelText_mc.gLabelMovedCallback = this.gLabelMovedCallback;
+            mcMyLabelText.labelText_mc.gBackgroundTierWidth = this.getTierWidth(this.gBackgroundTier);
+            mcMyLabelText.labelText_mc.gBackgroundTierHeight = this.getTierHeight(this.gBackgroundTier);
+            mcMyLabelText.labelText_mc.gGraphicMovieClip = mcMyLabelImage;
+            mcMyLabelText.labelText_mc.gZoomifyURL = unescape(url);
+            mcMyLabelImage.gTextMovieClip = mcMyLabelText;
+            this.gLabelArray.push(mcMyLabelImage);
+        }
+    };
+    ZoomifyViewerClass.prototype.setLabelProperty = function (id, property, value) {
+        var mcMyLabelImageString = (("this.gLabelTier_mc.labels_mc.label" + id) + "_mc");
+        var mcMyLabelTextString = (("this.gLabelTier_mc.labels_mc.text_for_label" + id) + "_mc");
+        var theLabel = eval (mcMyLabelImageString);
+        var theTextLabel = eval (mcMyLabelTextString);
+        var xWidth = this.getTierWidth(this.gBackgroundTier);
+        var yHeight = this.getTierHeight(this.gBackgroundTier);
+        var zoomScale = (this.getZoom() / zoom);
+        if (property == "x") {
+            theLabel._x = (xWidth / 2) - (value * xWidth);
+            theTextLabel._x = theLabel._x;
+        } else if (property == "y") {
+            theLabel._y = (yHeight / 2) - (value * yHeight);
+            theTextLabel._y = theLabel._y;
+        } else if (property == "xscale") {
+            theLabel._xscale = theLabel._xscale * value;
+            theTextLabel._xscale = theLabel._xscale;
+        } else if (property == "yscale") {
+            theLabel._yscale = theLabel._yscale * value;
+            theTextLabel._yscale = theLabel._yscale;
+        } else if (property == "url") {
+            theTextLabel.labelText_mc.gZoomifyURL = unescape(value);
+            theLabel.gZoomifyURL = unescape(value);
+        } else if (property == "textColor") {
+            theTextLabel.labelText_mc._labelText.textColor = value;
+        } else if (property == "textBackgroundColor") {
+            theTextLabel.labelText_mc._labelText.backgroundColor = value;
+        } else if (property == "name") {
+            theTextLabel.labelText_mc._labelText.text = value;
+        }
+    };
+    ZoomifyViewerClass.prototype.setLabelVisibility = function (visibleFlag) {
+        var mcMyLabelImageString = "this.gLabelTier_mc";
+        var theLabel = eval (mcMyLabelImageString);
+        theLabel._visible = visibleFlag;
+        if (this.gLabelVisibility != visibleFlag) {
+            this.gLabelVisibility = visibleFlag;
+            i = 0;
+            while (i < this.gLabelVisibilityCallback.length) {
+                eval (this.gLabelVisibilityCallback[i])(this, visibleFlag);
+                i++;
+            }
+        }
+    };
+    ZoomifyViewerClass.prototype.getLabelVisibility = function () {
+        return(this.gLabelVisibility);
+    };
+    ZoomifyViewerClass.prototype.removeLabel = function (id) {
+        var mcMyLabelImageString = (("this.gLabelTier_mc.labels_mc.label" + id) + "_mc");
+        var theLabel = eval (mcMyLabelImageString);
+        var i = 0;
+        while (i < this.gLabelArray.length) {
+            if (this.gLabelArray[i] == theLabel) {
+                theLabel.gTextMovieClip.removeMovieClip();
+                theLabel.removeMovieClip();
+                this.gLabelArray.splice(i, 1);
+                return(undefined);
+            }
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.getLabelEditMode = function (id) {
+        var mcMyLabelImageString = (("this.gLabelTier_mc.labels_mc.label" + id) + "_mc");
+        var theLabel = eval (mcMyLabelImageString);
+        return(theLabel.gTextMovieClip.labelText_mc.gLabelsEditableFlag);
+    };
+    ZoomifyViewerClass.prototype.setLabelEditMode = function (id, editFlag) {
+        var mcMyLabelImageString = (("this.gLabelTier_mc.labels_mc.label" + id) + "_mc");
+        var theLabel = eval (mcMyLabelImageString);
+        theLabel.gTextMovieClip.labelText_mc.gLabelsEditableFlag = editFlag;
+    };
+    ZoomifyViewerClass.prototype.removeAllLabels = function () {
+        var i = 0;
+        while (i < this.gLabelArray.length) {
+            this.gLabelArray[i].gTextMovieClip.removeMovieClip();
+            this.gLabelArray[i].removeMovieClip();
+            i++;
+        }
+        delete this.gLabelArray;
+        this.gLabelArray = new Array();
+    };
+    ZoomifyViewerClass.prototype.initKeyHandler = function () {
+        keyListener = new Object();
+        keyListener.owner = this;
+        keyListener.onKeyDown = function () {
+            this.owner.myOnKeyDown();
+        };
+        keyListener.onKeyUp = function () {
+            this.owner.myOnKeyUp();
+        };
+        Key.addListener(keyListener);
+    };
+    ZoomifyViewerClass.prototype.myOnKeyDown = function () {
+        if (((this._focus == false) || (this.gEnabled == false)) || (this.gInTransition == true)) {
+            return(undefined);
+        }
+        var i;
+        switch (Key.getCode()) {
+            case 37 : 
+                this.panLeft();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 38 : 
+                this.panUp();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 39 : 
+                this.panRight();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 40 : 
+                this.panDown();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 65 : 
+                this.zoomIn();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 90 : 
+                this.zoomOut();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 16 : 
+                this.zoomIn();
+                updateAfterEvent();
+                i = 0;
+                while (i < this.gKeyCallback.length) {
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                }
+                return;
+            case 17 : 
+                this.zoomOut();
+                updateAfterEvent();
+                i = 0;
+                for(;;){
+                    if (i >= this.gKeyCallback.length) { 
+                        break;
+                    }
+                    eval (this.gKeyCallback[i])(this, "down", Key.getCode());
+                    i++;
+                };
+        }
+    };
+    ZoomifyViewerClass.prototype.myOnKeyUp = function () {
+        if (((this._focus == false) || (this.gEnabled == false)) || (this.gInTransition == true)) {
+            return(undefined);
+        }
+        var i;
+        switch (Key.getCode()) {
+            case 72 : 
+                if (this.getLabelVisibility() == false) {
+                    this.setLabelVisibility(true);
+                } else {
+                    this.setLabelVisibility(false);
+                }
+                return;
+            case 27 : 
+                this.resetView();
+                return;
+            case 37 : 
+            case 38 : 
+            case 39 : 
+            case 40 : 
+            case 65 : 
+            case 90 : 
+            case 16 : 
+            case 17 : 
+                this.panStop();
+                this.updateView();
+                updateAfterEvent();
+                i = 0;
+                for(;;){
+                    if (i >= this.gKeyCallback.length) { 
+                        break;
+                    }
+                    eval (this.gKeyCallback[i])(this, "up", Key.getCode());
+                    i++;
+                };
+        }
+    };
+    ZoomifyViewerClass.prototype.MousePan = function (panEvent) {
+        if ((this.gInitialized == true) && (this.gEnabled == true)) {
+            if (this.gInTransition == false) {
+                if (panEvent == "start") {
+                    if (this.gMouseEnabled) {
+                        this.gMouseStartX = _root._xmouse;
+                        this.gMouseStartY = _root._ymouse;
+                        this.stopZoomToView();
+                        this.gCurrentTier_mc.startDrag();
+                        this.syncTierMotionID = setInterval(this, "syncTierMotion", 1);
+                        this.setFocus(true);
+                    }
+                }
+            }
+            if (panEvent == "stop") {
+                if (this.gMouseEnabled && (this.syncTierMotionID != -1)) {
+                    this.gCurrentTier_mc.stopDrag();
+                    clearInterval(this.syncTierMotionID);
+                    this.syncTierMotionID = -1;
+                    this.panStop();
+                    if (((((_root._xmouse - this.gMouseStartX) < 3) && ((_root._xmouse - this.gMouseStartX) > -3)) && ((_root._ymouse - this.gMouseStartY) < 3)) && ((_root._ymouse - this.gMouseStartY) > -3)) {
+                        var currentZoom = this.getZoom();
+                        if (currentZoom == -1) {
+                            currentZoom = this.calculateScreenZoom();
+                        }
+                        var testZoom = 400;
+                        while (testZoom > currentZoom) {
+                            testZoom = testZoom / 2;
+                        }
+                        testZoom = testZoom * 2;
+                        if (testZoom > this._maxZoom) {
+                            testZoom = this._maxZoom;
+                        }
+                        var x = (0.5 - (this.getWindowLeft() + (((this.getWindowRight() - this.getWindowLeft()) * (_root._xmouse - (this._x - (this.gViewWidth / 2)))) / this.gViewWidth)));
+                        var y = (0.5 - (this.getWindowTop() + (((this.getWindowBottom() - this.getWindowTop()) * (_root._ymouse - (this._y - (this.gViewHeight / 2)))) / this.gViewHeight)));
+                        this.setView(x, y, testZoom);
+                    }
+                    this.updateView();
+                }
+            }
+        }
+        var i = 0;
+        while (i < this.gMouseCallback.length) {
+            eval (this.gMouseCallback[i])(this, panEvent);
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.syncTierMotion = function () {
+        if (this.gMouseEnabled) {
+            this.gCurrentTierOld_mc._x = this.gCurrentTier_mc._x;
+            this.gCurrentTierOld_mc._y = this.gCurrentTier_mc._y;
+            this.gCurrentTierBackground_mc._x = this.gCurrentTier_mc._x;
+            this.gCurrentTierBackground_mc._y = this.gCurrentTier_mc._y;
+            this.gLabelTier_mc._x = this.gCurrentTier_mc._x;
+            this.gLabelTier_mc._y = this.gCurrentTier_mc._y;
+        }
+        var i = 0;
+        while (i < this.gMouseCallback.length) {
+            eval (this.gMouseCallback[i])(this, "stilldown");
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.init = function () {
+        this.gHaltViewMessages = true;
+        this.gLastViewSent = "First Message";
+        var tempRotation = this._rotation;
+        this._rotation = 0;
+        if (this._sizeChanged == false) {
+            this.setSize(this._width, this._height);
+        }
+        this._rotation = tempRotation;
+        this.attachMovie("mask_mc", "mask_mc", 15002);
+        this.mask_mc._width = this.gViewWidth;
+        this.mask_mc._height = this.gViewHeight;
+        this.setMask(this.mask_mc);
+        if (((this._imagePath == "Enter /path/foldername or /path/imagename.extension") || (this._imagePath == "")) || (this._imagePath == undefined)) {
+            return(undefined);
+        }
+        this.gTileCountWidth = new Array();
+        this.gTileCountHeight = new Array();
+        this.gTierTileCount = new Array();
+        this.gTierWidth = new Array();
+        this.gTierHeight = new Array();
+        this.gTileCacheoffsetIndex = new Array();
+        this.gOffsetChunkArray = new Array();
+        this.gTilesUsedArray1 = new Array();
+        this.gTilesUsedArray2 = new Array();
+        this.gTilesUsedOldTierArray1 = new Array();
+        this.gTilesUsedOldTierArray2 = new Array();
+        this.gLabelArray = new Array();
+        this.gMetersPerPixel = new Array();
+        this.gViewerState = 0;
+        this.gHeaderSize = 0;
+        this.gNumImages = 0;
+        this.gNumTotalTiles = 0;
+        this.gImageWidth = 0;
+        this.gImageHeight = 0;
+        this.gTierCount = 0;
+        this.gCurrentTierArray = 1;
+        this.gKeyDown = 0;
+        this.gOffsetY = 0;
+        this.gOffsetX = 0;
+        this.gStartTier = 1;
+        this.gCurrentTier = 1;
+        this.gBackgroundTier = 1;
+        this.gOldTier = 1;
+        this.gRegistrationPointY = 0;
+        this.gPanPositionX = 0;
+        this.gPanPositionY = 0;
+        this.gZoom = -1;
+        this.gTileSize = 64;
+        this.gCurrentTier_mc = undefined;
+        this.gCurrentTierOld_mc = undefined;
+        this.gCurrentTierBackground_mc = undefined;
+        this.gRegistrationPointX = 0;
+        this.gMustResetViewer = false;
+        this.gURLChanged = false;
+        this.gSwapTierPercent = 100;
+        this.gZoomToViewIntervalID = -1;
+        this.gMinTier = 1;
+        this.gInitialized = false;
+        this.gInitCalled = true;
+        var tempTier_mc;
+        this.numPremadeLevels = 20;
+        i = 1;
+        while (i < this.numPremadeLevels) {
+            var movieClipString = (("tier" + i) + "_mc");
+            tempTier_mc = eval ("this." + movieClipString);
+            if (tempTier_mc == undefined) {
+                this.attachMovie("tier_mc", ("tier" + i) + "_mc", i);
+                tempTier_mc = eval ("this." + movieClipString);
+            }
+            tempTier_mc._x = 0;
+            tempTier_mc._y = 0;
+            tempTier_mc._width = this.gViewWidth;
+            tempTier_mc._height = this.gViewHeight;
+            tempTier_mc._xscale = 100;
+            tempTier_mc._yscale = 100;
+            tempTier_mc._visible = false;
+            tempTier_mc._quality = "BEST";
+            i++;
+        }
+        this.attachMovie("tier_mc", "gLabelTier_mc", 9000);
+        this.gLabelTier_mc._x = 0;
+        this.gLabelTier_mc._y = 0;
+        this.gLabelTier_mc._xscale = 100;
+        this.gLabelTier_mc._yscale = 100;
+        this.gLabelTier_mc._width = this.gViewWidth;
+        this.gLabelTier_mc._height = this.gViewHeight;
+        this.gLabelTier_mc._quality = "BEST";
+        this.gLabelTier_mc.attachMovie("tier_mc", "labels_mc", 9001);
+        this.gLabelTier_mc.labels_mc._visible = true;
+        this.gLabelTier_mc._visible = this.gLabelVisibility;
+        this.invisiblePanMouse_btn._xscale = (this.gOriginalPanMouseXScale * this.gViewWidth) / this.gOriginalMovieWidth;
+        this.invisiblePanMouse_btn._yscale = (this.gOriginalPanMouseYScale * this.gViewHeight) / this.gOriginalMovieHeight;
+        if (this.gTileQueue == undefined) {
+            this.gTileQueue = new Array();
+        }
+        if (this.gTileQueueIntervalID == undefined) {
+            this.gTileQueueIntervalID = -1;
+        }
+        if (this.gLastTileTime == undefined) {
+            this.gLastTileTime = -1;
+        }
+        if (this.gMaxTileQueueLength == undefined) {
+            this.gMaxTileQueueLength = 0;
+        }
+        this.gZoomStartTime = -1;
+        this.gInTransition = false;
+        this.gZoomFactor = -1;
+        this.gOldEnabled = this.gEnabled;
+        var showPreloader = false;
+        var cacheArray = new Array();
+        if (this.gCurrentCacheIndex == undefined) {
+            this.gCurrentCacheIndex = 0;
+        }
+        if (this.gPreserveCache == false) {
+            if (this.gTileQueue != undefined) {
+                delete this.gTileQueue;
+            }
+            this.gTileQueue = new Array();
+            this.gTileQueueIntervalID = -1;
+            this.gLastTileTime = -1;
+            this.gMaxTileQueueLength = 0;
+            this.gNumTransitions = 0;
+            this.gCacheViewsIntervalID = -1;
+            i = 0;
+            while (i < this._transitionName.length) {
+                var transitionObject = new Object();
+                transitionObject.fromX = parseFloat(this._fromX[i]);
+                transitionObject.fromY = parseFloat(this._fromY[i]);
+                transitionObject.fromZoom = parseFloat(this._fromZoom[i]);
+                transitionObject.fromDuration = parseInt(this._fromDuration[i]);
+                transitionObject.toX = parseFloat(this._toX[i]);
+                transitionObject.toY = parseFloat(this._toY[i]);
+                transitionObject.toZoom = parseFloat(this._toZoom[i]);
+                transitionObject.toViewName = this._transitionName[i] + "_view";
+                transitionObject.toImagePath = this._toImagePath[i];
+                transitionObject.imageEffectDuration = parseInt(this._imageEffectDuration[i]);
+                transitionObject.imageEffectType = this._imageEffectType[i];
+                transitionObject.imageEffectParam = this._imageEffectParam1[i];
+                transitionObject.imageEffectParam2 = this._imageEffectParam2[i];
+                transitionObject.imageEffectCompleteCallback = this._imageEffectCompleteCallback[i];
+                transitionObject.zoomCompleteCallback = this._zoomCompleteCallback[i];
+                transitionObject.name = this._transitionName[i];
+                this.addTransition(transitionObject);
+                if ((this._precacheTransitions == true) || (this._preloadTransitions == true)) {
+                    var index = cacheArray.length;
+                    cacheArray[index] = new Object();
+                    cacheArray[index].x = transitionObject.toX;
+                    cacheArray[index].y = transitionObject.toY;
+                    cacheArray[index].zoom = transitionObject.toZoom;
+                    if (transitionObject.toImagePath == "") {
+                        cacheArray[index].imagePath = this._imagePath;
+                    } else {
+                        cacheArray[index].imagePath = transitionObject.toImagePath;
+                    }
+                    cacheArray[index].name = transitionObject.toViewName;
+                }
+                i++;
+            }
+        }
+        if (cacheArray.length > 0) {
+            if (this._preloadTransitions == true) {
+                this.gCurrentTierOld_mc._visible = false;
+                this.gCurrentTierBackground_mc._visible = false;
+                this.gCurrentTier_mc._visible = false;
+                this.gLabelTier_mc._visible = false;
+                this.gOldEnabled = this.gEnabled;
+                this.gEnabled = false;
+                this.zoomifySplash_mc.preloadText_txt.text = "Preloading 0% done";
+                this.cacheViews(cacheArray, "this.preloadProgress");
+            } else {
+                this.cacheViews(cacheArray, "");
+            }
+        }
+        this.gDelayStart = false;
+        if (this.gSkipHeader == false) {
+            if ((this.gInitialHeaderIntervalID != -1) && (this.gInitialHeaderIntervalID != undefined)) {
+                clearInterval(this.gInitialHeaderIntervalID);
+                this.gInitialHeaderIntervalID = -1;
+            }
+            this.gInitialHeaderIntervalID = setInterval(this, "getHeader", 10);
+        }
+    };
+    ZoomifyViewerClass.prototype.preloadProgress = function (instance, percentDone) {
+        this.zoomifySplash_mc.preloadText_txt.text = ("Preloading " + percentDone) + "% done";
+        if (percentDone == 100) {
+            this.gCurrentTierOld_mc._visible = true;
+            this.gCurrentTierBackground_mc._visible = true;
+            this.gCurrentTier_mc._visible = true;
+            this.gLabelTier_mc._visible = this.gLabelVisibility;
+            this.zoomifySplash_mc._visible = false;
+            this.gEnabled = this.gOldEnabled;
+            this.updateView();
+        } else {
+            this.zoomifySplash_mc._visible = true;
+        }
+    };
+    ZoomifyViewerClass.prototype.viewerInitialized = function () {
+        var i;
+        if (this.gDoImmediateClipRemoval == false) {
+            i = 0;
+            while (i < this.gInitializeCallback.length) {
+                eval (this.gInitializeCallback[i])(this);
+                i++;
+            }
+            i = 0;
+            while (i < this.gStatusCallback.length) {
+                eval (this.gStatusCallback[i])("Image initialized.");
+                i++;
+            }
+        }
+        if ((this._preloadTransitions != true) || (this.gCacheArray.length <= this.gCurrentCacheIndex)) {
+            this.zoomifySplash_mc._visible = false;
+        }
+        if (this.gSavedZoomToView == true) {
+            this.gSavedZoomToView = false;
+            var tempEnabled = this.gEnabled;
+            this.setEnabled(true);
+            this.zoomToView(this.gEndZoomX, this.gEndZoomY, this.gEndZoomZoom, this.gZoomDuration, this.gZoomIntervalRate, "", "");
+            this.setEnabled(tempEnabled);
+        } else {
+            this.gHaltViewMessages = false;
+        }
+    };
+    ZoomifyViewerClass.prototype.onUnload = function () {
+        this.destroy();
+    };
+    ZoomifyViewerClass.prototype.destroy = function () {
+        if (this.gInitialized == false) {
+            return(undefined);
+        }
+        this.gInitialized = false;
+        if (this.gInitialHeaderIntervalID != -1) {
+            clearInterval(this.gInitialHeaderIntervalID);
+            this.gInitialHeaderIntervalID = -1;
+        }
+        this.stopZoomToView();
+        this.removeAllLabels();
+        this.destroyBackground();
+        if (this.gTilesUsedOldTierArray1 != undefined) {
+            this.unloadTilesInArray(this.gTilesUsedOldTierArray1);
+            delete this.gTilesUsedOldTierArray1;
+        }
+        if (this.gTilesUsedOldTierArray2 != undefined) {
+            this.unloadTilesInArray(this.gTilesUsedOldTierArray2);
+            delete this.gTilesUsedOldTierArray2;
+        }
+        if (this.gTilesUsedArray1 != undefined) {
+            this.unloadTilesInArray(this.gTilesUsedArray1);
+            delete this.gTilesUsedArray1;
+        }
+        if (this.gTilesUsedArray2 != undefined) {
+            this.unloadTilesInArray(this.gTilesUsedArray2);
+            delete this.gTilesUsedArray2;
+        }
+        i = 0;
+        while (i < this.gOffsetChunkArray.length) {
+            if (this.gOffsetChunkArray[i] != undefined) {
+                delete this.gOffsetChunkArray[i];
+            }
+            i++;
+        }
+        i = 1;
+        while (i < this.numPremadeLevels) {
+            var movieClipString = (("tier" + i) + "_mc");
+            var tempTier_mc = eval ("this." + movieClipString);
+            if (tempTier_mc != undefined) {
+                tempTier_mc.removeMovieClip();
+                tempTier_mc = undefined;
+            }
+            i++;
+        }
+        this.mask_mc.removeMovieClip();
+        if (this.gPreserveCache == false) {
+            this.emptyCache();
+        }
+        delete this.gTileCountWidth;
+        delete this.gTileCountHeight;
+        delete this.gTierTileCount;
+        delete this.gTierWidth;
+        delete this.gTierHeight;
+        delete this.gTileCacheoffsetIndex;
+        delete this.gTilesUsedArray1;
+        delete this.gTilesUsedArray2;
+        delete this.gTilesUsedOldTierArray1;
+        delete this.gTilesUsedOldTierArray2;
+        delete this.gMetersPerPixel;
+    };
+    ZoomifyViewerClass.prototype.destroyBackground = function () {
+        var tempTile;
+        var rowCounter;
+        var columnCounter;
+        rowCounter = 1;
+        while (rowCounter <= this.getTileCountHeight(this.gBackgroundTier)) {
+            columnCounter = 1;
+            while (columnCounter <= this.getTileCountWidth(this.gBackgroundTier)) {
+                tileName = (((this.gBackgroundTier + "-") + rowCounter) + "-") + columnCounter;
+                var mcTileString = (((("this.tier" + this.gBackgroundTier) + "_mc") + ".") + tileName);
+                tempTile = eval (mcTileString);
+                if (tempTile != undefined) {
+                    tempTile._x = this.gOffscreenX;
+                    if (movieToAdd.cacheIndex != undefined) {
+                        unloadMovie (tempTile);
+                    }
+                }
+                columnCounter++;
+            }
+            rowCounter++;
+        }
+    };
+    ZoomifyViewerClass.prototype.initView = function () {
+        this.gCurrentTier = this.gStartTier;
+        this.gCurrentTier_mc = eval (("this.tier" + this.gCurrentTier) + "_mc");
+        this.gOldTier = this.gStartTier - 1;
+        if (this.gOldTier == this.gBackgroundTier) {
+            this.gOldTier = 1;
+        }
+        this.gCurrentTierOld_mc = eval (("this.tier" + this.gOldTier) + "_mc");
+        this.gCurrentTierBackground_mc = eval (("this.tier" + this.gBackgroundTier) + "_mc");
+        this.gRegistrationPointX = 0;
+        this.gRegistrationPointY = 0;
+        this.gCurrentTierBackground_mc._xscale = this.gCurrentTier_mc._xscale / (this.getTierWidth(this.gBackgroundTier) / this.getTierWidth(this.gCurrentTier));
+        this.gCurrentTierBackground_mc._yscale = this.gCurrentTier_mc._yscale / (this.getTierHeight(this.gBackgroundTier) / this.getTierHeight(this.gCurrentTier));
+        this.gLabelTier_mc._xscale = this.gCurrentTierBackground_mc._xscale;
+        this.gLabelTier_mc._yscale = this.gCurrentTierBackground_mc._yscale;
+        var tempEnabled = this.gEnabled;
+        this.setEnabled(true);
+        this.setView(this._initialX, this._initialY, this._initialZoom);
+        this.setEnabled(tempEnabled);
+    };
+    ZoomifyViewerClass.prototype.setTier = function () {
+        var currentTier = this.gTierCount;
+        var currZoom = 1;
+        var tempZoom = (this.getZoom() / 100);
+        while (currZoom > tempZoom) {
+            currentTier--;
+            currZoom = currZoom / 2;
+        }
+        if (currentTier < this.gTierCount) {
+            currentTier++;
+        }
+        if (currentTier < this.gMinTier) {
+            currentTier = this.gMinTier;
+        }
+        var tierWidth = this.getTierWidth(this.gTierCount);
+        var tierHeight = this.getTierHeight(this.gTierCount);
+        tierWidth = this.getTierWidth(currentTier);
+        tierHeight = this.getTierHeight(currentTier);
+        if (currentTier != this.gCurrentTier) {
+            if (this.gCurrentTier > this.gBackgroundTier) {
+                this.gCurrentTierOld_mc = this.gCurrentTier_mc;
+            }
+            this.gCurrentTier_mc = eval (("this.tier" + currentTier) + "_mc");
+            this.gCurrentTier_mc._x = this.gRegistrationPointX;
+            this.gCurrentTier_mc._y = this.gRegistrationPointY;
+            this.gCurrentTier_mc._rotation = this.gCurrentTierBackground_mc._rotation;
+            this.gCurrentTier_mc._xscale = this.gCurrentTierBackground_mc._xscale / (this.getTierWidth(currentTier) / this.getTierWidth(this.gBackgroundTier));
+            this.gCurrentTier_mc._yscale = this.gCurrentTierBackground_mc._yscale / (this.getTierHeight(currentTier) / this.getTierHeight(this.gBackgroundTier));
+            if (this.gOldTier > this.gBackgroundTier) {
+                this.unloadTilesInArray(this.gTilesUsedOldTierArray1, false);
+                this.unloadTilesInArray(this.gTilesUsedOldTierArray2, false);
+            }
+            delete this.gTilesUsedOldTierArray1;
+            delete this.gTilesUsedOldTierArray2;
+            this.gOldTier = this.gCurrentTier;
+            this.gCurrentTier = currentTier;
+            if (this.gOldTier < this.gCurrentTier) {
+                var tempArray1 = new Array();
+                var tempArray2 = new Array();
+                this.gTilesUsedOldTierArray1 = tempArray1.concat(this.gTilesUsedArray1);
+                this.gTilesUsedOldTierArray2 = tempArray2.concat(this.gTilesUsedArray2);
+                delete tempArray1;
+                delete tempArray2;
+            } else {
+                this.gTilesUsedOldTierArray1 = new Array();
+                this.gTilesUsedOldTierArray2 = new Array();
+                if (this.gOldTier > this.gBackgroundTier) {
+                    this.unloadTilesInArray(this.gTilesUsedArray1, false);
+                    this.unloadTilesInArray(this.gTilesUsedArray2, false);
+                }
+                this.gOldTier = this.gCurrentTier - 1;
+                if (this.gOldTier <= 0) {
+                    this.gOldTier = 1;
+                }
+                this.gCurrentTierOld_mc = eval (("this.tier" + this.gOldTier) + "_mc");
+                this.gCurrentTierOld_mc._x = this.gRegistrationPointX;
+                this.gCurrentTierOld_mc._y = this.gRegistrationPointY;
+                this.gCurrentTierOld_mc._xscale = this.gCurrentTierBackground_mc._xscale / (this.getTierWidth(this.gOldTier) / this.getTierWidth(this.gBackgroundTier));
+                this.gCurrentTierOld_mc._yscale = this.gCurrentTierBackground_mc._yscale / (this.getTierHeight(this.gOldTier) / this.getTierHeight(this.gBackgroundTier));
+            }
+            delete this.gTilesUsedArray1;
+            delete this.gTilesUsedArray2;
+            this.gTilesUsedArray1 = new Array();
+            this.gTilesUsedArray2 = new Array();
+            this.gCurrentTier_mc._visible = true;
+            this.gCurrentTierOld_mc._visible = true;
+        }
+    };
+    ZoomifyViewerClass.prototype.unloadTilesInArray = function (tileArray, checkVisible) {
+        var i;
+        i = 0;
+        while (i < tileArray.length) {
+            var tempTile = eval (tileArray[i]);
+            if ((tempTile != undefined) && ((checkVisible == false) || ((tempTile._visible == false) && (checkVisible == true)))) {
+                tempTile._x = this.gOffscreenX;
+                if (movieToAdd.cacheIndex != undefined) {
+                    unloadMovie (tempTile);
+                }
+            }
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.setTileArrayVisibility = function (tileArray, visibilityFlag) {
+        var i;
+        i = 0;
+        while (i < tileArray.length) {
+            var tempTile = eval (tileArray[i]);
+            tempTile._visible = visibilityFlag;
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.fillView = function () {
+        var savedRotation = this._rotation;
+        this._rotation = 0;
+        this.fillViewWithParams(this.gBackgroundTier, this.gCurrentTierBackground_mc, "");
+        var currentArray = this.gCurrentTierArray;
+        var oldArray = 1;
+        if (currentArray == 1) {
+            oldArray = 2;
+        }
+        this.setTileArrayVisibility(eval ("this.gTilesUsedArray" + oldArray), false);
+        if (this.gCurrentTier > this.gBackgroundTier) {
+            this.fillViewWithParams(this.gCurrentTier, this.gCurrentTier_mc, "this.gTilesUsedArray" + currentArray);
+        }
+        if (this.gCurrentTier != this.gBackgroundTier) {
+            this.unloadTilesInArray(eval ("this.gTilesUsedArray" + oldArray), true);
+        }
+        if ((this.gOldTier < this.gCurrentTier) && (this.gOldTier > 0)) {
+            this.setTileArrayVisibility(eval ("this.gTilesUsedOldTierArray" + oldArray), false);
+            if (this.gOldTier > this.gBackgroundTier) {
+                this.fillViewWithParams(this.gOldTier, this.gCurrentTierOld_mc, "this.gTilesUsedOldTierArray" + currentArray);
+            }
+            if (this.gOldTier != this.gBackgroundTier) {
+                this.unloadTilesInArray(eval ("this.gTilesUsedOldTierArray" + oldArray), true);
+            }
+        }
+        if (currentArray == 1) {
+            delete this.gTilesUsedOldTierArray2;
+            delete this.gTilesUsedArray2;
+            this.gTilesUsedOldTierArray2 = new Array();
+            this.gTilesUsedArray2 = new Array();
+        } else {
+            delete this.gTilesUsedOldTierArray1;
+            delete this.gTilesUsedArray1;
+            this.gTilesUsedOldTierArray1 = new Array();
+            this.gTilesUsedArray1 = new Array();
+        }
+        this.gCurrentTierArray = oldArray;
+        i = 0;
+        while (i < this.gViewCallback.length) {
+            eval (this.gViewCallback[i])(this, this.getX(), this.getY(), this.getZoom());
+            i++;
+        }
+        i = 0;
+        while (i < this.gRectCallback.length) {
+            eval (this.gRectCallback[i])(this, this.getWindowLeft(), this.getWindowTop(), this.getWindowRight(), this.getWindowBottom());
+            i++;
+        }
+        this.sendMessage((((("setView:" + this.getX()) + ":") + this.getY()) + ":") + this.getZoom());
+        this._rotation = savedRotation;
+    };
+    ZoomifyViewerClass.prototype.fillViewWithParams = function (tier, mClip, newTierArrayName) {
+        var newTierArray;
+        if (newTierArrayName != "") {
+            newTierArray = eval (newTierArrayName);
+        }
+        var i;
+        var tempTile;
+        var tileName = "";
+        var tileLevel = 0;
+        var rowCounter = 0;
+        var columnCounter = 0;
+        var tierWidth = this.getTierWidth(tier);
+        var tierHeight = this.getTierHeight(tier);
+        var screenRectLeft = ((-this.gViewWidth) / 2);
+        var screenRectRight = (this.gViewWidth / 2);
+        var screenRectTop = ((-this.gViewHeight) / 2);
+        var screenRectBottom = (this.gViewHeight / 2);
+        var scale = (mClip._xscale / 100);
+        var scaledTileSize = (scale * this.gTileSize);
+        var imageRectLeft = ((this.gPanPositionX * tierWidth) - (tierWidth / 2));
+        var imageRectTop = ((this.gPanPositionY * tierHeight) - (tierHeight / 2));
+        var imageRectRight = ((this.gPanPositionX * tierWidth) + (tierWidth / 2));
+        var imageRectBottom = ((this.gPanPositionY * tierHeight) + (tierHeight / 2));
+        var scaledCenterX = (((tierWidth * scale) / 2) - ((this.gPanPositionX * tierWidth) * scale));
+        var scaledCenterY = (((tierHeight * scale) / 2) - ((this.gPanPositionY * tierHeight) * scale));
+        var scaledTop = (scaledCenterY + screenRectTop);
+        var scaledLeft = (scaledCenterX + screenRectLeft);
+        var scaledTempBottom = (scaledCenterY + screenRectBottom);
+        var scaledTempRight = (scaledCenterX + screenRectRight);
+        this.gScaledWindowTop = scaledTop / (scale * tierHeight);
+        this.gScaledWindowBottom = scaledTempBottom / (scale * tierHeight);
+        this.gScaledWindowLeft = scaledLeft / (scale * tierWidth);
+        this.gScaledWindowRight = scaledTempRight / (scale * tierWidth);
+        var leftViewColumn = (Math.floor(scaledLeft / scaledTileSize) + 1);
+        var topViewRow = (Math.floor(scaledTop / scaledTileSize) + 1);
+        var rightViewColumn = (Math.floor(scaledTempRight / scaledTileSize) + 1);
+        var bottomViewRow = (Math.floor(scaledTempBottom / scaledTileSize) + 1);
+        if ((leftViewColumn < 1) || (tier == this.gBackgroundTier)) {
+            leftViewColumn = 1;
+        }
+        if ((topViewRow < 1) || (tier == this.gBackgroundTier)) {
+            topViewRow = 1;
+        }
+        if ((rightViewColumn > this.getTileCountWidth(tier)) || (tier == this.gBackgroundTier)) {
+            rightViewColumn = this.getTileCountWidth(tier);
+        }
+        if ((bottomViewRow > this.getTileCountHeight(tier)) || (tier == this.gBackgroundTier)) {
+            bottomViewRow = this.getTileCountHeight(tier);
+        }
+        var viewColumns = ((rightViewColumn - leftViewColumn) + 1);
+        var viewRows = ((bottomViewRow - topViewRow) + 1);
+        rowCounter = topViewRow;
+        while (rowCounter <= bottomViewRow) {
+            columnCounter = leftViewColumn;
+            while (columnCounter <= rightViewColumn) {
+                var xPosition = (((columnCounter - 1) * this.gTileSize) + imageRectLeft);
+                var yPosition = (((rowCounter - 1) * this.gTileSize) + imageRectTop);
+                tileName = (((tier + "-") + rowCounter) + "-") + columnCounter;
+                tileLevel = (((columnCounter - 1) + ((rowCounter - 1) * viewColumns)) % 65000) + 10;
+                var mcTileString = (((("this.tier" + tier) + "_mc") + ".") + tileName);
+                mcTile = eval (mcTileString);
+                tileSource = this.getTileURL(tier, columnCounter, rowCounter);
+                if (tileSource != "missing") {
+                    if (this.gInTransition == false) {
+                        if (mcTile == undefined) {
+                            mClip.createEmptyMovieClip(tileName, tileLevel);
+                            mcTile = eval (mcTileString);
+                            mcTile._x = this.gOffscreenX;
+                        }
+                        if ((mcTile._x == this.gOffscreenX) && (tileSource != "missing")) {
+                            loadMovie (tileSource, mcTile);
+                            this.addTileToQueue(mcTile);
+                        }
+                    }
+                    if (mcTile != undefined) {
+                        mcTile._x = xPosition;
+                        mcTile._y = yPosition;
+                        mcTile._visible = true;
+                    }
+                }
+                if ((tier != this.gBackgroundTier) && (mcTile != undefined)) {
+                    newTierArray[newTierArray.length] = mcTileString;
+                }
+                columnCounter++;
+            }
+            rowCounter++;
+        }
+        if ((this.zoomifySplash_mc._visible == false) || (this.gCurrentCacheIndex == 0)) {
+            mClip._visible = true;
+        } else {
+            mClip._visible = false;
+        }
+        if (tier == this.gBackgroundTier) {
+            this.gLabelTier_mc.labels_mc._x = imageRectLeft;
+            this.gLabelTier_mc.labels_mc._y = imageRectTop;
+        }
+    };
+    ZoomifyViewerClass.prototype.checkFormatCallback = function (callbackType, tier, x, y) {
+        if (this.gFormatCallback.length == 0) {
+            return("");
+        }
+        var imageExtension = this._imagePath.substring(this._imagePath.length - 3, this._imagePath.length).toLowerCase();
+        var usedCallback = false;
+        var i;
+        i = 0;
+        while (i < this.gFormatCallback.length) {
+            if (imageExtension == this.gFormatCallback[i].extension) {
+                return(eval (this.gFormatCallback[i].callback)(this, callbackType, tier, x, y));
+            }
+            i++;
+        }
+        return("");
+    };
+    ZoomifyViewerClass.prototype.getHeader = function () {
+        if (this.gInitialHeaderIntervalID != -1) {
+            clearInterval(this.gInitialHeaderIntervalID);
+            this.gInitialHeaderIntervalID = -1;
+        }
+        if (this.checkFormatCallback("Header", 0, 0, 0) == "") {
+            this.getImagePropertiesFile();
+        }
+    };
+    ZoomifyViewerClass.prototype.getTileURL = function (tier, x, y) {
+        var retVal = this.checkFormatCallback("TileURL", tier - 1, x - 1, y - 1);
+        if (retVal == "") {
+            retVal = this.getFolderTileURL(tier - 1, x - 1, y - 1);
+        }
+        return(retVal);
+    };
+    ZoomifyViewerClass.prototype.buildPyramid = function (imageWidth, imageHeight, pyramidType, tileSize, minTier) {
+        this.gImageHeight = imageHeight;
+        this.gImageWidth = imageWidth;
+        this.gTileSize = tileSize;
+        this.gPyramidType = pyramidType;
+        this.gMinTier = minTier;
+        var tempWidth = this.gImageWidth;
+        var tempHeight = this.gImageHeight;
+        this.gTierCount = 1;
+        var divider = 2;
+        while ((tempWidth > this.gTileSize) || (tempHeight > this.gTileSize)) {
+            if (pyramidType == "Div2") {
+                tempWidth = Math.floor(tempWidth / 2);
+                tempHeight = Math.floor(tempHeight / 2);
+            } else if (pyramidType == "Plus1Div2") {
+                tempWidth = Math.floor((tempWidth + 1) / 2);
+                tempHeight = Math.floor((tempHeight + 1) / 2);
+            } else {
+                tempWidth = Math.floor(this.gImageWidth / divider);
+                tempHeight = Math.floor(this.gImageHeight / divider);
+                divider = divider * 2;
+                if (tempWidth % 2) {
+                    tempWidth++;
+                }
+                if (tempHeight % 2) {
+                    tempHeight++;
+                }
+            }
+            this.gTierCount++;
+        }
+        this.gStartTier = minTier;
+        this.gCurrentTier = minTier;
+        this.gBackgroundTier = minTier;
+        tempWidth = this.gImageWidth;
+        tempHeight = this.gImageHeight;
+        var j;
+        divider = 2;
+        j = this.gTierCount - 1;
+        while (j >= 0) {
+            this.gTileCountWidth[j] = Math.floor(tempWidth / this.gTileSize);
+            if (tempWidth % this.gTileSize) {
+                this.gTileCountWidth[j]++;
+            }
+            this.gTileCountHeight[j] = Math.floor(tempHeight / this.gTileSize);
+            if (tempHeight % this.gTileSize) {
+                this.gTileCountHeight[j]++;
+            }
+            this.gTierTileCount[j] = this.gTileCountWidth[j] * this.gTileCountHeight[j];
+            this.gTierWidth[j] = tempWidth;
+            this.gTierHeight[j] = tempHeight;
+            if (pyramidType == "Div2") {
+                tempWidth = Math.floor(tempWidth / 2);
+                tempHeight = Math.floor(tempHeight / 2);
+            } else if (pyramidType == "Plus1Div2") {
+                tempWidth = Math.floor((tempWidth + 1) / 2);
+                tempHeight = Math.floor((tempHeight + 1) / 2);
+            } else {
+                tempWidth = Math.floor(this.gImageWidth / divider);
+                tempHeight = Math.floor(this.gImageHeight / divider);
+                divider = divider * 2;
+                if (tempWidth % 2) {
+                    tempWidth++;
+                }
+                if (tempHeight % 2) {
+                    tempHeight++;
+                }
+            }
+            j--;
+        }
+        this.gViewerState = 3;
+        this.gInitialized = true;
+        this.initView();
+        this.updateView();
+        updateAfterEvent();
+        this.viewerInitialized();
+    };
+    ZoomifyViewerClass.prototype.getInitializationData = function (initObject) {
+        initObject.gImageHeight = this.gImageHeight;
+        initObject.gImageWidth = this.gImageWidth;
+        initObject.gTileSize = this.gTileSize;
+        initObject.gPyramidType = this.gPyramidType;
+        initObject.gMinTier = this.gMinTier;
+    };
+    ZoomifyViewerClass.prototype.getImagePropertiesFile = function () {
+        var pathLen = this._imagePath.length;
+        if (this._imagePath.charAt(pathLen - 1) != "/") {
+            this._imagePath = this._imagePath + "/";
+        }
+        if (this._imagePath.substring(0, 6) == "swf://") {
+            var imagePath = _root._url;
+            var index;
+            var urlLen = imagePath.length;
+            index = urlLen - 1;
+            while (index > 0) {
+                if (imagePath.charAt(index) == "/") {
+                    var relativePath = this._imagePath.substring(6, this._imagePath.length);
+                    this._imagePath = imagePath.subString(0, index + 1) + relativePath;
+                    break;
+                }
+                index--;
+            }
+        }
+        var myXML = new XML();
+        myXML.ignoreWhite = true;
+        myXML.owner = this;
+        myXML.onData = this.onImagePropertiesData;
+        var byteHandler = "";
+        if ((this._byteHandlerURL != "") && (this._byteHandlerURL != "Leave blank unless publishing a PFF, JP2, or MrSid file")) {
+            byteHandler = this._byteHandlerURL;
+        }
+        var propertiesURL = ((byteHandler + this._imagePath) + "ImageProperties.xml");
+        myXML.load(propertiesURL);
+    };
+    ZoomifyViewerClass.prototype.onImagePropertiesData = function (theData) {
+        var theXML = new XML(theData);
+        var rootNodes = theXML.childNodes;
+        var node;
+        var imageWidth = 0;
+        var imageHeight = 0;
+        var tileSize;
+        var minTier = 1;
+        node = 0;
+        while (node < rootNodes.length) {
+            if (rootNodes[node].nodeName == "IMAGE_PROPERTIES") {
+                imageWidth = parseInt(rootNodes[node].attributes.WIDTH);
+                imageHeight = parseInt(rootNodes[node].attributes.HEIGHT);
+                tileSize = parseInt(rootNodes[node].attributes.TILESIZE);
+            }
+            node++;
+        }
+        if ((imageWidth == 0) || (imageHeight == 0)) {
+            return(undefined);
+        }
+        this.owner.buildPyramid(imageWidth, imageHeight, "Div2", tileSize, minTier);
+        this.owner = undefined;
+        delete this;
+    };
+    ZoomifyViewerClass.prototype.getFolderTileURL = function (tier, x, y) {
+        if (this._imagePath.charAt(this._imagePath.length - 1) != "/") {
+            this._imagePath = this._imagePath + "/";
+        }
+        var theOffset = parseFloat((y * this.gTileCountWidth[tier]) + x);
+        var theTier;
+        theTier = 0;
+        while (theTier < tier) {
+            theOffset = theOffset + this.gTierTileCount[theTier];
+            theTier++;
+        }
+        var theCurrentOffsetChunk = Math.floor(theOffset / 256);
+        var byteHandler = "";
+        if ((this._byteHandlerURL != "") && (this._byteHandlerURL != "Leave blank unless publishing a PFF, JP2, or MrSid file")) {
+            byteHandler = this._byteHandlerURL;
+        }
+        var tempPath = (byteHandler + this._imagePath);
+        var tilePath = (((((((((tempPath + "TileGroup") + theCurrentOffsetChunk) + "/") + tier) + "-") + x) + "-") + y) + ".jpg");
+        return(tilePath);
+    };
+    ZoomifyViewerClass.prototype.addTileToQueue = function (movieToAdd) {
+        this.gTileQueue[this.gTileQueue.length] = movieToAdd;
+        this.gMaxTileQueueLength++;
+        if (this.gLastTileTime == -1) {
+            this.gLastTileTime = getTimer();
+        }
+        if (this.gTileQueueIntervalID == -1) {
+            this.gTileQueueIntervalID = setInterval(this, "checkTileQueue", 30);
+        }
+    };
+    ZoomifyViewerClass.prototype.checkTileQueue = function () {
+        var i;
+        i = this.gTileQueue.length - 1;
+        while (i >= 0) {
+            var totalBytes = this.gTileQueue[i].getBytesTotal();
+            var bytesLoaded = this.gTileQueue[i].getBytesLoaded();
+            if ((totalBytes > 0) && (bytesLoaded >= totalBytes)) {
+                this.gTileQueue.splice(i, 1);
+            } else {
+                if ((getTimer() - this.gLastTileTime) > 5000) {
+                    this.gTileQueue[i]._x = this.gOffscreenX;
+                    this.gTileQueue.splice(i, 1);
+                    this.gLastTileTime = -1;
+                    this.updateView();
+                    return(true);
+                }
+                break;
+            }
+            i--;
+        }
+        if (this.gTileQueue.length > 0) {
+            i = 0;
+            while (i < this.gDownloadsCompleteCallback.length) {
+                var percentDone = Math.round((100 * (this.gMaxTileQueueLength - this.gTileQueue.length)) / this.gMaxTileQueueLength);
+                eval (this.gDownloadsCompleteCallback[i])(this, percentDone);
+                i++;
+            }
+            return(true);
+        }
+        delete this.gTileQueue;
+        this.gTileQueue = new Array();
+        clearInterval(this.gTileQueueIntervalID);
+        this.gTileQueueIntervalID = -1;
+        this.gMaxTileQueueLength = 0;
+        if (this.gCacheArray.length > this.gCurrentCacheIndex) {
+            this.cacheNextView();
+        }
+        i = 0;
+        while (i < this.gDownloadsCompleteCallback.length) {
+            eval (this.gDownloadsCompleteCallback[i])(this, 100);
+            i++;
+        }
+        return(false);
+    };
+    ZoomifyViewerClass.prototype.cacheViews = function (viewsArray, callbackString) {
+        this.gCacheViewsCallback = callbackString;
+        this.gCacheArray = this.gCacheArray.concat(viewsArray);
+        if (this.gTileQueueIntervalID == -1) {
+            this.checkTileQueue();
+        }
+    };
+    ZoomifyViewerClass.prototype.removeCachedView = function (name) {
+        var i;
+        i = 0;
+        if (i < this.gCacheArray.length) {
+            this.gCacheArray[i].clip.destroy();
+            this.gCacheArray[i].clip.removeMovieClip();
+            this.gCacheArray.splice(i, 1);
+            if (this.gCurrentCacheIndex > i) {
+                this.gCurrentCacheIndex--;
+            }
+            return(undefined);
+        }
+    };
+    ZoomifyViewerClass.prototype.emptyCache = function () {
+        if (this.gTileQueueIntervalID != -1) {
+            delete this.gTileQueue;
+            clearInterval(this.gTileQueueIntervalID);
+            this.gTileQueueIntervalID = -1;
+        }
+        if (this.gCacheViewsIntervalID != -1) {
+            clearInterval(this.gCacheViewsIntervalID);
+        }
+        this.gCacheViewsIntervalID = -1;
+        i = 0;
+        while (i < this.gCacheArray.length) {
+            this.gCacheArray[i].clip.destroy();
+            this.gCacheArray[i].clip.removeMovieClip();
+            delete this.gCacheArray[i];
+            i++;
+        }
+        delete this.gCacheArray;
+        this.gCacheArray = new Array();
+        i = 0;
+        while (i < this.gNumTransitions) {
+            delete this.gTransitionList[i];
+            i++;
+        }
+        delete this.gTransitionList;
+        this.gTransitionList = new Array();
+        this.unloadTilesInArray(this.gTileCache, false);
+        delete this.gTileCache;
+        this.gTileCache = new Array();
+        this.gCurrentCacheIndex = 0;
+    };
+    ZoomifyViewerClass.prototype.getCachedView = function (name) {
+        var i;
+        i = 0;
+        while (i < this.gCacheArray.length) {
+            if (this.gCacheArray[i].name == name) {
+                return(this.gCacheArray[i]);
+            }
+            i++;
+        }
+        return(null);
+    };
+    ZoomifyViewerClass.prototype.cacheNextView = function () {
+        if ((((this.gCacheViewsIntervalID != -1) || (this.gTileQueue.length > 0)) || (this.gTileQueueIntervalID != -1)) || ((this.gCurrentCacheIndex > 0) && (this.gCacheArray[this.gCurrentCacheIndex - 1].intervalID != -1))) {
+            return(undefined);
+        }
+        var clipName = ("ZoomifyTemporaryClip" + this.gCurrentCacheIndex);
+        this.attachMovie("ZoomifyViewerSymbol", clipName, 30000 + this.gCurrentCacheIndex);
+        this.gCacheArray[this.gCurrentCacheIndex].clip = eval ("this." + clipName);
+        this.gCacheArray[this.gCurrentCacheIndex].clip._x = this.gOffscreenX;
+        this.gCacheArray[this.gCurrentCacheIndex].intervalID = 5;
+        this.gCacheViewsIntervalID = setInterval(this, "cacheViewDelay", 10);
+    };
+    ZoomifyViewerClass.prototype.offscreenMouseEvent = function (theInstance, theEvent) {
+        i = 0;
+        while (i < this.gMouseCallback.length) {
+            eval (this.gMouseCallback[i])(this, theEvent);
+            i++;
+        }
+    };
+    ZoomifyViewerClass.prototype.cacheViewDelay = function () {
+        if (this.gCacheViewsIntervalID != -1) {
+            clearInterval(this.gCacheViewsIntervalID);
+            this.gCacheViewsIntervalID = -1;
+        }
+        this.gCacheArray[this.gCurrentCacheIndex].clip._x = this.gOffscreenX;
+        var myPath = (targetPath(this) + ".viewCached");
+        this.gCacheArray[this.gCurrentCacheIndex].intervalID = this.gCacheArray[this.gCurrentCacheIndex].clip.registerCallback("DownloadComplete", myPath);
+        this.gCacheArray[this.gCurrentCacheIndex].clip._initialX = this.gCacheArray[this.gCurrentCacheIndex].x;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._initialY = this.gCacheArray[this.gCurrentCacheIndex].y;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._initialZoom = this.gCacheArray[this.gCurrentCacheIndex].zoom;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._showSplash = false;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._focus = false;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._visible = false;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._minZoom = -1;
+        this.gCacheArray[this.gCurrentCacheIndex].clip._maxZoom = 200;
+        this.gCacheArray[this.gCurrentCacheIndex].clip.setSize(this.gViewWidth, this.gViewHeight);
+        this.gCacheArray[this.gCurrentCacheIndex].clip.setImagePath(this.gCacheArray[this.gCurrentCacheIndex].imagePath);
+        this.gCacheArray[this.gCurrentCacheIndex].clip.setByteHandlerURL(this._byteHandlerURL);
+        this.gCacheArray[this.gCurrentCacheIndex].clip.setMapFilePath(this._mapFilePath);
+        this.gCacheArray[this.gCurrentCacheIndex].clip.setEnabled(false);
+        this.gCacheArray[this.gCurrentCacheIndex].clip.registerCallback("Mouse", targetPath(this) + ".offscreenMouseEvent");
+        this.gCacheArray[this.gCurrentCacheIndex].clip.updateView();
+        this.gCurrentCacheIndex++;
+    };
+    ZoomifyViewerClass.prototype.viewCached = function (movieClipInstance, percentComplete) {
+        if ((this.gCurrentCacheIndex < this.gCacheArray.length) || (percentComplete < 100)) {
+            var currentViewPercent = (percentComplete / this.gCacheArray.length);
+            this.cacheViewsComplete(Math.round(currentViewPercent + ((100 * (this.gCurrentCacheIndex - 1)) / this.gCacheArray.length)));
+            if (percentComplete == 100) {
+                this.gCacheArray[this.gCurrentCacheIndex - 1].clip.unregisterCallback("DownloadComplete", this.gCacheArray[this.gCurrentCacheIndex - 1].intervalID);
+                this.gCacheArray[this.gCurrentCacheIndex - 1].intervalID = -1;
+                this.cacheNextView();
+            }
+        } else {
+            this.gCacheArray[this.gCurrentCacheIndex - 1].clip.unregisterCallback("DownloadComplete", this.gCacheArray[this.gCurrentCacheIndex - 1].intervalID);
+            this.gCacheArray[this.gCurrentCacheIndex - 1].intervalID = -1;
+            this.cacheViewsComplete(100);
+        }
+    };
+    ZoomifyViewerClass.prototype.cacheViewsComplete = function (percentComplete) {
+        if (this.gCacheViewsCallback != "") {
+            eval (this.gCacheViewsCallback)(this, percentComplete);
+        }
+    };
+    ZoomifyViewerClass.prototype.addTransition = function (transitionObject) {
+        this.gTransitionList.push(transitionObject);
+        this.gNumTransitions++;
+    };
+    ZoomifyViewerClass.prototype.removeFromTransitionList = function (name) {
+        var i;
+        i = 0;
+        while (i < this.gNumTransitions) {
+            if (this.gTransitionList[i].name == name) {
+                this.gTransitionList.splice(i, 1);
+                return(true);
+            }
+            i++;
+        }
+        return(false);
+    };
+    ZoomifyViewerClass.prototype.getTransitionByName = function (name) {
+        var i;
+        i = 0;
+        while (i < this.gNumTransitions) {
+            if (this.gTransitionList[i].name == name) {
+                return(this.gTransitionList[i]);
+            }
+            i++;
+        }
+        return(null);
+    };
+    ZoomifyViewerClass.prototype.doTransitionByName = function (name) {
+        var i;
+        i = 0;
+        while (i < this.gNumTransitions) {
+            if (this.gTransitionList[i].name == name) {
+                return(this.doTransition(this.gTransitionList[i]));
+            }
+            i++;
+        }
+        return(false);
+    };
+    ZoomifyViewerClass.prototype.doTransition = function (transitionObject) {
+        if (this.gInitialized == false) {
+            return(false);
+        }
+        if (this.gInTransition == true) {
+            if ((transitionObject.imageEffectDuration == 0) && ((this.gDelayEffectCompletionIntervalID != -1) || ((this.gCurrentTransitionObject.callbackID != undefined) && (this.gCurrentTransitionObject.callbackID != -1)))) {
+                if (this.gDelayEffectCompletionIntervalID != -1) {
+                    clearInterval(this.gDelayEffectCompletionIntervalID);
+                }
+                this.gDelayEffectCompletionIntervalID = -1;
+                this.effectComplete(this, 100);
+            } else {
+                return(false);
+            }
+        }
+        this.gTransitionTimeChecker = getTimer();
+        transitionObject.callbackID = -1;
+        if ((transitionObject.fromDuration < 0) && (((transitionObject.imageEffectDuration < 0) || (transitionObject.imaegEffectType == "none")) || (transitionObject.imageEffectType == ""))) {
+            return(false);
+        }
+        var cachedView = this.getCachedView(transitionObject.toViewName);
+        if ((cachedView != null) && ((cachedView.clip == undefined) || (cachedView.clip == null))) {
+            this.setClipToEndOfEffectView(transitionObject);
+            return(true);
+        }
+        if ((((cachedView == null) && (transitionObject.toViewName != "")) && (transitionObject.toViewName != undefined)) && (transitionObject.imageEffectType != "Zoom")) {
+            var cacheArray = new Array();
+            cacheArray[0] = new Object();
+            cacheArray[0].name = transitionObject.toViewName;
+            cacheArray[0].x = transitionObject.toX;
+            cacheArray[0].y = transitionObject.toY;
+            cacheArray[0].zoom = transitionObject.toZoom;
+            cacheArray[0].imagePath = transitionObject.toImagePath;
+            if (cacheArray[0].imagePath == "") {
+                cacheArray[0].imagePath = this._imagePath;
+            }
+            this.cacheViews(cacheArray, "");
+            this.cacheNextView();
+            cachedView = this.getCachedView(transitionObject.toViewName);
+        }
+        this.gCurrentTransitionObject = transitionObject;
+        this.gCurrentTransitionObject.labelVisibility = this.gLabelVisibility;
+        this.setLabelVisibility(false);
+        transitionObject.intervalID = -1;
+        if (transitionObject.fromDuration < 0) {
+            this.gInTransition = true;
+            if (transitionObject.imageEffectDuration > 0) {
+                transitionObject.intervalID = setInterval(this, "doImageEffect", 20, transitionObject);
+            } else if (transitionObject.imageEffectDuration == 0) {
+                this.gCurrentTier_mc._visible = false;
+                this.gCurrentTierOld_mc._visible = false;
+                this.gCurrentTierBackground_mc._visible = false;
+                this.doImageEffect(transitionObject);
+            } else {
+                return(false);
+            }
+        } else {
+            var callbackName = "this.doImageEffect";
+            if ((((transitionObject.imageEffectDuration < 0) || (transitionObject.imageEffectDuration == undefined)) || (transitionObject.imageEffectType == "None")) || (transitionObject.imageEffectType == undefined)) {
+                callbackName = "this.callEffectCompleteCallback";
+            } else {
+                this.gInTransition = true;
+            }
+            var tempEnabled = this.gEnabled;
+            this.setEnabled(true);
+            this.zoomToView(transitionObject.fromX, transitionObject.fromY, transitionObject.fromZoom, transitionObject.fromDuration, 10, callbackName, transitionObject);
+            this.setEnabled(tempEnabled);
+        }
+        return(true);
+    };
+    ZoomifyViewerClass.prototype.doImageEffect = function (transitionObject) {
+        if (transitionObject.intervalID != -1) {
+            clearInterval(transitionObject.intervalID);
+        }
+        transitionObject.intervalID = -1;
+        if (((transitionObject.fromDuration >= 0) && (transitionObject.zoomCompleteCallback != "")) && (transitionObject.zoomCompleteCallback != undefined)) {
+            eval (transitionObject.zoomCompleteCallback)(this);
+        }
+        if (((transitionObject.toViewName == "") || (transitionObject.toViewName == undefined)) && (transitionObject.imageEffectType != "Zoom")) {
+            return(false);
+        }
+        var cachedView = this.getCachedView(transitionObject.toViewName);
+        if ((((transitionObject.imageEffectDuration < 0) || (transitionObject.imageEffectType == "none")) || (transitionObject.imageEffectType == "")) || ((cachedView == null) && (transitionObject.imageEffectType != "Zoom"))) {
+            this.gInTransition = false;
+            return(false);
+        }
+        transitionObject.intervalID = -1;
+        transitionObject.startTime = getTimer();
+        transitionObject.previousTime = transitionObject.startTime;
+        transitionObject.toMovieClip = cachedView.clip;
+        cachedView.clip._x = this.gOffscreenX;
+        cachedView.clip._visible = true;
+        transitionObject.fromMovieClip = this;
+        transitionObject.startXScale = transitionObject.toMovieClip._xscale;
+        transitionObject.startYScale = transitionObject.toMovieClip._yscale;
+        this.setEnabled(false);
+        this.gCurrentZoomTime = getTimer();
+        if (transitionObject.imageEffectDuration == 0) {
+            this.effectInterval(transitionObject);
+        } else if (transitionObject.imageEffectType == "Zoom") {
+            this.setEnabled(true);
+            this.zoomToView(transitionObject.toX, transitionObject.toY, transitionObject.toZoom, transitionObject.imageEffectDuration, 10, "this.setClipToEndOfEffectView", transitionObject);
+            this.setEnabled(false);
+        } else {
+            transitionObject.intervalID = setInterval(this, "effectInterval", 10, transitionObject);
+        }
+        return(true);
+    };
+    ZoomifyViewerClass.prototype.effectInterval = function (transitionObject) {
+        var currentTime = getTimer();
+        var percentDone = ((currentTime - transitionObject.startTime) / transitionObject.imageEffectDuration);
+        var effectDefined = true;
+        if (percentDone > 1) {
+            percentDone = 1;
+        }
+        var effectType = transitionObject.imageEffectType;
+        if (transitionObject.imageEffectDuration == 0) {
+            effectType = "Cut";
+        }
+        switch (effectType) {
+            case "Wipe" : 
+                switch (transitionObject.imageEffectParam) {
+                    case "Left" : 
+                        transitionObject.toMovieClip._x = this.gViewWidth - (percentDone * this.gViewWidth);
+                        transitionObject.toMovieClip._y = 0;
+                        break;
+                    case "Down" : 
+                        transitionObject.toMovieClip._y = (percentDone * this.gViewHeight) - this.gViewHeight;
+                        transitionObject.toMovieClip._x = 0;
+                        break;
+                    case "Up" : 
+                        transitionObject.toMovieClip._y = this.gViewHeight - (percentDone * this.gViewHeight);
+                        transitionObject.toMovieClip._x = 0;
+                        break;
+                    case "Right" : 
+                    default : 
+                        transitionObject.toMovieClip._x = (percentDone * this.gViewWidth) - this.gViewWidth;
+                        transitionObject.toMovieClip._y = 0;
+                }
+                break;
+            case "Fly" : 
+                switch (transitionObject.imageEffectParam) {
+                    case "DownLeft" : 
+                        transitionObject.toMovieClip._x = this.gViewWidth - (percentDone * this.gViewWidth);
+                        transitionObject.toMovieClip._y = (percentDone * this.gViewHeight) - this.gViewHeight;
+                        break;
+                    case "DownRight" : 
+                        transitionObject.toMovieClip._y = (percentDone * this.gViewHeight) - this.gViewHeight;
+                        transitionObject.toMovieClip._x = (percentDone * this.gViewWidth) - this.gViewWidth;
+                        break;
+                    case "UpLeft" : 
+                        transitionObject.toMovieClip._y = this.gViewHeight - (percentDone * this.gViewHeight);
+                        transitionObject.toMovieClip._x = this.gViewWidth - (percentDone * this.gViewWidth);
+                        break;
+                    case "UpRight" : 
+                    default : 
+                        transitionObject.toMovieClip._x = (percentDone * this.gViewWidth) - this.gViewWidth;
+                        transitionObject.toMovieClip._y = this.gViewHeight - (percentDone * this.gViewHeight);
+                }
+                break;
+            case "Fade" : 
+                transitionObject.toMovieClip._x = 0;
+                transitionObject.toMovieClip._y = 0;
+                transitionObject.toMovieClip._alpha = percentDone * 100;
+                break;
+            case "Rotate" : 
+                switch (transitionObject.imageEffectParam) {
+                    case "Left" : 
+                        transitionObject.toMovieClip._x = this.gViewWidth - (percentDone * this.gViewWidth);
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                        break;
+                    case "Down" : 
+                        transitionObject.toMovieClip._y = (percentDone * this.gViewHeight) - this.gViewHeight;
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                        break;
+                    case "Up" : 
+                        transitionObject.toMovieClip._y = this.gViewHeight - (percentDone * this.gViewHeight);
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                        break;
+                    case "Right" : 
+                        transitionObject.toMovieClip._x = (percentDone * this.gViewWidth) - this.gViewWidth;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                        break;
+                    case "Scale" : 
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                        transitionObject.toMovieClip._xscale = percentDone * transitionObject.startXScale;
+                        transitionObject.toMovieClip._yscale = percentDone * transitionObject.startYScale;
+                        break;
+                    case "Still" : 
+                    default : 
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._rotation = percentDone * parseInt(transitionObject.imageEffectParam2);
+                }
+                break;
+            case "Squeeze" : 
+                switch (transitionObject.imageEffectParam) {
+                    case "Horizontal" : 
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._xscale = percentDone * transitionObject.startXScale;
+                        break;
+                    case "Vertical" : 
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._yscale = percentDone * transitionObject.startYScale;
+                        break;
+                    case "Both" : 
+                    default : 
+                        transitionObject.toMovieClip._x = 0;
+                        transitionObject.toMovieClip._y = 0;
+                        transitionObject.toMovieClip._xscale = percentDone * transitionObject.startXScale;
+                        transitionObject.toMovieClip._yscale = percentDone * transitionObject.startYScale;
+                }
+                break;
+            case "Cut" : 
+            default : 
+                effectDefined = false;
+                transitionObject.toMovieClip._x = 0;
+                transitionObject.toMovieClip._y = 0;
+        }
+        if ((currentTime > (transitionObject.startTime + transitionObject.imageEffectDuration)) || (effectDefined == false)) {
+            if (transitionObject.intervalID != -1) {
+                clearInterval(transitionObject.intervalID);
+            }
+            transitionObject.intervalID = -1;
+            transitionObject.toMovieClip._rotation = 0;
+            this.gCurrentTransitionObject = transitionObject;
+            this.gDelayEffectCompletionIntervalID = setInterval(this, "setClipToEndOfEffectView", 100, transitionObject);
+            updateAfterEvent();
+        }
+    };
+    ZoomifyViewerClass.prototype.setClipToEndOfEffectView = function (transitionObject) {
+        if (this.gDelayEffectCompletionIntervalID != -1) {
+            clearInterval(this.gDelayEffectCompletionIntervalID);
+            this.gDelayEffectCompletionIntervalID = -1;
+        }
+        var waitForDownload = true;
+        this.gInTransition = false;
+        if (((this._imagePath != (transitionObject.toImagePath + "/")) && (this._imagePath != transitionObject.toImagePath)) && (transitionObject.toImagePath != "")) {
+            if (transitionObject.toMovieClip.gInitialized == true) {
+                this.gPreserveCache = true;
+                this.gSkipHeader = true;
+                this.destroy();
+                this.setImagePath(transitionObject.toImagePath);
+                this.init();
+                this.gSkipHeader = false;
+                this.gPreserveCache = false;
+                transitionObject.toMovieClip.getInitializationData(this);
+                this._initialX = transitionObject.toX;
+                this._initialY = transitionObject.toY;
+                this._initialZoom = transitionObject.toZoom;
+                this.buildPyramid(this.gImageWidth, this.gImageHeight, this.gPyramidType, this.gTileSize, this.gMinTier);
+                this._initialX = 0;
+                this._initialY = 0;
+                this._initialZoom = -1;
+                this.setEnabled(true);
+                this.updateView(true);
+                this.setEnabled(false);
+            } else {
+                waitForDownload = false;
+                this.gPreserveCache = true;
+                this.setImagePath(transitionObject.toImagePath);
+                this._initialX = transitionObject.toX;
+                this._initialY = transitionObject.toY;
+                this._initialZoom = transitionObject.toZoom;
+                this.setEnabled(true);
+                this.setView(transitionObject.toX, transitionObject.toY, transitionObject.toZoom);
+                this.updateView(true);
+                this.setEnabled(false);
+                this.gPreserveCache = false;
+            }
+        } else {
+            this.setEnabled(true);
+            this.setView(transitionObject.toX, transitionObject.toY, transitionObject.toZoom);
+            this.updateView(true);
+            this.setEnabled(false);
+        }
+        this.gInTransition = true;
+        if (waitForDownload == true) {
+            this.gCurrentTransitionObject.callbackID = this.registerCallback("DownloadComplete", "this.effectComplete");
+            this.checkTileQueue();
+            updateAfterEvent();
+        } else {
+            this.gCurrentTransitionObject.callbackID = -1;
+            this.effectComplete(this, 100);
+        }
+    };
+    ZoomifyViewerClass.prototype.effectComplete = function (instance, percentComplete) {
+        if ((percentComplete == 100) && (instance == this)) {
+            if (this.gCurrentTransitionObject.callbackID != -1) {
+                this.unregisterCallback("DownloadComplete", this.gCurrentTransitionObject.callbackID);
+            }
+            this.gCurrentTransitionObject.callbackID = -1;
+            this.gCurrentTier_mc._visible = true;
+            this.gCurrentTierOld_mc._visible = true;
+            this.gCurrentTierBackground_mc._visible = true;
+            this.gInTransition = false;
+            this.setEnabled(true);
+            this.updateView(true);
+            this.setLabelVisibility(this.gCurrentTransitionObject.labelVisibility);
+            var tempInt = (getTimer() - this.gTransitionTimeChecker);
+            this.callEffectCompleteCallback();
+            updateAfterEvent();
+            this.gMoveTransitionClipDelayID = -1;
+            if ((this.gCurrentTransitionObject.imageEffectDuration == 0) && (this.gDoImmediateClipRemoval == true)) {
+                this.moveTransitionClipDelay();
+            } else {
+                this.gMoveTransitionClipDelayID = setInterval(this, "moveTransitionClipDelay", 1);
+            }
+        }
+    };
+    ZoomifyViewerClass.prototype.moveTransitionClipDelay = function () {
+        if (this.gMoveTransitionClipDelayID != -1) {
+            clearInterval(this.gMoveTransitionClipDelayID);
+        }
+        this.gCurrentTransitionObject.toMovieClip._x = this.gOffscreenX;
+        this.gCurrentTransitionObject.toMovieClip._visible = false;
+    };
+    ZoomifyViewerClass.prototype.callEffectCompleteCallback = function () {
+        if (this.gCurrentTransitionObject.toDuration < 0) {
+            if (((this.gCurrentTransitionObject.fromDuration >= 0) && (this.gCurrentTransitionObject.zoomCompleteCallback != "")) && (this.gCurrentTransitionObject.zoomCompleteCallback != undefined)) {
+                eval (this.gCurrentTransitionObject.zoomCompleteCallback)(this, this.gCurrentTransitionObject);
+            }
+        } else if ((this.gCurrentTransitionObject.imageEffectCompleteCallback != "") && (this.gCurrentTransitionObject.imageEffectCompleteCallback != undefined)) {
+            eval (this.gCurrentTransitionObject.imageEffectCompleteCallback)(this, this.gCurrentTransitionObject);
+        }
+    };
+    ZoomifyViewerClass.prototype.zoomToView = function (x, y, zoom, duration, intervalRate, callback, callbackData) {
+        if (this.gEnabled == false) {
+            return(undefined);
+        }
+        if (this.gInitialized == true) {
+            this.stopZoomToView();
+            if (zoom == -1) {
+                zoom = this.calculateScreenZoom();
+            }
+            this.gStartZoomX = this.getX();
+            this.gStartZoomY = this.getY();
+            this.gStartZoomZoom = this.getZoom();
+            this.gCurrentZoomX = this.getX();
+            this.gCurrentZoomY = this.getY();
+            this.gCurrentZoomZoom = this.getZoom();
+            this.gEndZoomX = x;
+            this.gEndZoomY = y;
+            this.gEndZoomZoom = zoom;
+            this.gZoomDuration = duration;
+            this.gZoomStartTime = getTimer();
+            this.gCurrentZoomTime = this.gZoomStartTime;
+            this.gZoomStepX = -1;
+            this.gZoomToViewIntervalID = setInterval(this, "zoomToViewInterval", intervalRate, callback, callbackData);
+            this.gOldMaxZoom = this._maxZoom;
+            this.gOldMinZoom = this._minZoom;
+            if (this.gOldMaxZoom < zoom) {
+                this._maxZoom = zoom;
+            }
+            if (((this.gOldMinZoom != -1) && (this.gOldMinZoom > zoom)) || ((this.gOldMinZoom == -1) && (zoom > this.calculateScreenZoom()))) {
+                this._minZoom = zoom;
+            }
+            this.gCurrentZoomToViewStep = 0;
+        } else {
+            this.gSavedZoomToView = true;
+            this.gEndZoomX = x;
+            this.gEndZoomY = y;
+            this.gEndZoomZoom = zoom;
+            this.gZoomDuration = duration;
+            this.gZoomIntervalRate = intervalRate;
+        }
+    };
+    ZoomifyViewerClass.prototype.zoomToViewInterval = function (callback, callbackData) {
+        var currentTime = getTimer();
+        var timeElapsed = (currentTime - this.gZoomStartTime);
+        var stepNumber = ((this.gCurrentZoomToViewStep + ((this.gZoomDuration - timeElapsed) / (currentTime - this.gCurrentZoomTime))) + 1);
+        this.gCurrentZoomToViewStep++;
+        if (this.gZoomDuration > 0) {
+            this.gCurrentZoomX = this.gStartZoomX + ((timeElapsed * (this.gEndZoomX - this.gStartZoomX)) / this.gZoomDuration);
+            this.gCurrentZoomY = this.gStartZoomY + ((timeElapsed * (this.gEndZoomY - this.gStartZoomY)) / this.gZoomDuration);
+        } else {
+            this.gCurrentZoomX = this.gEndZoomX;
+            this.gCurrentZoomY = this.gEndZoomY;
+        }
+        var zoomBig;
+        var zoomSmall;
+        var zoomScale;
+        if (this.gEndZoomZoom == this.gStartZoomZoom) {
+            zoomScale = 1;
+            this.gCurrentZoomZoom = this.gEndZoomZoom;
+        } else if (this.gEndZoomZoom > this.gStartZoomZoom) {
+            zoomBig = this.gEndZoomZoom;
+            zoomSmall = this.gStartZoomZoom;
+            zoomScale = Math.pow(Math.E, Math.log(zoomBig / zoomSmall) / stepNumber);
+            this.gCurrentZoomZoom = this.getZoom() * zoomScale;
+        } else {
+            zoomSmall = this.gEndZoomZoom;
+            zoomBig = this.gStartZoomZoom;
+            zoomScale = Math.pow(Math.E, Math.log(zoomBig / zoomSmall) / stepNumber);
+            this.gCurrentZoomZoom = this.getZoom() / zoomScale;
+        }
+        this.gCurrentZoomTime = currentTime;
+        var atDestination = true;
+        var tempEnabled = this.gEnabled;
+        this.setEnabled(true);
+        if ((((((this.gCurrentZoomX < (this.gEndZoomX - 0.01)) || (this.gCurrentZoomX > (this.gEndZoomX + 0.01))) || (this.gCurrentZoomY < (this.gEndZoomY - 0.01))) || (this.gCurrentZoomY > (this.gEndZoomY + 0.01))) || (this.gCurrentZoomZoom < (this.gEndZoomZoom - 0.01))) || (this.gCurrentZoomZoom > (this.gEndZoomZoom + 0.01))) {
+            this.gPanPositionX = this.gCurrentZoomX;
+            this.gPanPositionY = this.gCurrentZoomY;
+            this.fillView();
+            this.gZoomFactor = zoomScale;
+            if (this.gEndZoomZoom > this.gStartZoomZoom) {
+                this.zoomIn();
+            } else if (this.gEndZoomZoom < this.gStartZoomZoom) {
+                this.zoomOut();
+            }
+            this.gZoomFactor = -1;
+            updateAfterEvent();
+            atDestination = false;
+        }
+        if (((getTimer() - this.gZoomStartTime) >= this.gZoomDuration) || (atDestination == true)) {
+            if (callback != "this.doImageEffect") {
+                this.setView(this.gEndZoomX, this.gEndZoomY, this.gEndZoomZoom);
+                this.updateView(true);
+            } else {
+                this.gPanPositionX = this.gEndZoomX;
+                this.gPanPositionY = this.gEndZoomY;
+                this.fillView();
+            }
+            if ((callback != "") && (callback != undefined)) {
+                eval (callback)(callbackData);
+            }
+            this.stopZoomToView();
+        }
+        this.setEnabled(tempEnabled);
+    };
+    ZoomifyViewerClass.prototype.stopZoomToView = function () {
+        if (this.gZoomToViewIntervalID != -1) {
+            clearInterval(this.gZoomToViewIntervalID);
+            this.gZoomToViewIntervalID = -1;
+            this.gHaltViewMessages = false;
+            this._maxZoom = this.gOldMaxZoom;
+            this._minZoom = this.gOldMinZoom;
+        }
+    };
+    ZoomifyViewerClass.prototype.sendMessage = function (mesg) {
+        if (((this.gHaltViewMessages == false) && (mesg != this.gLastViewSent)) && (this.gEnabled == true)) {
+            if (this.gLastViewSent != "First Message") {
+                var i = 0;
+                while (i < this.gCommServerCallback.length) {
+                    eval (this.gCommServerCallback[i])(mesg);
+                    i++;
+                }
+            }
+            this.gLastViewSent = mesg;
+        }
+    };
+    ZoomifyViewerClass.prototype.receiveMessage = function (mesg) {
+        var messageArray = mesg.split(":");
+        if (messageArray[1] == "setView") {
+            if (this.gZoomToViewIntervalID != -1) {
+                clearInterval(this.gZoomToViewIntervalID);
+                this.gZoomToViewIntervalID = -1;
+            }
+            this.gHaltViewMessages = true;
+            this.zoomToView(parseFloat(messageArray[2]), parseFloat(messageArray[3]), parseFloat(messageArray[4]), 2000, 10, "", "");
+        } else {
+            var i = 0;
+            while (i < this.gCommServerMessageReceivedCallback.length) {
+                eval (this.gCommServerMessageReceivedCallback[i])(messageArray);
+                i++;
+            }
+        }
+    };
+    #endinitclip
+
+
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 50 MovieClip "labelText_mc" in Symbol 51 MovieClip [LabelText_mc] Frame 1
+//----------------------------------------------------------------------
+on (press) {
+    trace("Clicked!");
+    this.StartDragLabel(true);
+}
+on (release) {
+    this.StopDragLabel();
+}
+on (releaseOutside) {
+    this.StopDragLabel();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 14 Button
+//----------------------------------------------------------------------
+on (release) {
+    this.getImageInstance().resetView();
+    this.adjustSlider();
+}
+﻿
+//----------------------------------------------------------------------
+//Symbol 56 MovieClip [tier_mc] Frame 1
+//----------------------------------------------------------------------
+    stop();
+﻿
+//----------------------------------------------------------------------
+//Symbol 35 Button
+//----------------------------------------------------------------------
+on (press) {
+    this._parent.sliderPressed();
+    this.startDrag();
+    this.intervalID = setInterval(this._parent, "sliderDragged", 1);
+}
+on (release) {
+    clearInterval(this.intervalID);
+    this.stopDrag();
+    _parent.sliderReleased();
+}
+on (releaseOutside) {
+    clearInterval(this.intervalID);
+    this.stopDrag();
+    _parent.sliderReleased();
+}
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 62 MovieClip [ZoomifyViewerSymbol] "ZoomifyViewerInstance" in Frame 1
+//----------------------------------------------------------------------
+//component parameters
+onClipEvent (initialize) {
+    _imagePath = "Enter /path/foldername or /path/imagename.extension";
+    _devFolderPath = "Enables stage preview.  Control | Test Movie for value to enter.";
+    _byteHandlerURL = "Leave blank unless publishing a PFF, JP2, or MrSid file";
+    _mapFilePath = "Leave blank unless using Xml to map directories";
+    _visible  = true;
+    _focus = true;
+    _initialX = 0;
+    _initialY = 0;
+    _initialZoom = -1;
+    _minZoom = -1;
+    _maxZoom = 100;
+    _showSplash = true;
+    _precacheTransitions = true;
+    _preloadTransitions = false;
+    _previewWidth = 0;
+    _previewHeight = 0;
+}
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 62 MovieClip [ZoomifyViewerSymbol] "navigationImage" in Symbol 63 MovieClip [ZoomifyNavWindowSymbol] Frame 1
+//----------------------------------------------------------------------
+//component parameters
+onClipEvent (initialize) {
+    _imagePath = "Enter /path/foldername or /path/imagename.extension";
+    _devFolderPath = "Enables stage preview.  Control | Test Movie for value to enter.";
+    _byteHandlerURL = "Leave blank unless publishing a PFF, JP2, or MrSid file";
+    _mapFilePath = "Leave blank unless using Xml to map directories";
+    _visible  = true;
+    _focus = true;
+    _initialX = 0;
+    _initialY = 0;
+    _initialZoom = -1;
+    _minZoom = -1;
+    _maxZoom = 100;
+    _showToolbar = false;
+    _showSplash = true;
+    _showSlider = true;
+}
+on (press) {
+    startDrag (_parent.navRect_mc);
+    this._parent.navRectPressed();
+}
+on (release) {
+    stopDrag();
+    _parent.navRectReleased();
+}
+on (releaseOutside) {
+    stopDrag();
+    _parent.navRectReleased();
+}
+﻿
+//----------------------------------------------------------------------
+//Instance of Symbol 37 MovieClip [ZoomifyToolbarSymbol] "ToolbarStandardInstance" in Frame 1
+//----------------------------------------------------------------------
+//component parameters
+onClipEvent (initialize) {
+    _targetZoomifyViewer = "ZoomifyViewerInstance";
+    _showSlider = true;
+}
