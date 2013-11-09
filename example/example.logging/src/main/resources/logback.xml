@@ -26,6 +26,8 @@
 		<appender-ref ref="my.appender.file" />
 	</logger>
 
+	<logger name="com.slavi.example.logging.Log4J" level="info" />
+
 	<root level="debug">
 		<appender-ref ref="STDOUT" />
 	</root>
