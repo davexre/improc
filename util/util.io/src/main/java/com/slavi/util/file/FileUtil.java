@@ -1,5 +1,6 @@
 package com.slavi.util.file;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -139,6 +140,13 @@ public class FileUtil {
 		return sb.toString();
 	}
 
+	public static byte[] streamToByteArray(InputStream is) throws IOException {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		copyStream(is, os);
+		is.close();
+		return os.toByteArray();
+	}
+	
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {
 		byte buf[] = new byte[256];
 		int len;

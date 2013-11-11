@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sun Oct 27 19:37:24 EET 2013:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-0141-fafd-e036-000000b78218 
+on database directory memory:/home/slavian/S/git/image-process/work/MyDbTest with class loader sun.misc.Launcher$AppClassLoader@9c5842 
+Loaded from file:/home/slavian/.m2/repository/org/apache/derby/derby/10.10.1.1/derby-10.10.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_21-b11
+user.dir=/home/slavian/S/git/image-process/work
+os.name=Linux
+os.arch=i386
+os.version=3.8.0-22-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
