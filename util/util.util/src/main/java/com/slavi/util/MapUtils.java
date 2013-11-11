@@ -169,4 +169,23 @@ public class MapUtils {
 				updateInto.remove(key);
 		}
 	}
+
+	/**
+	 * <pre>
+	 *   updateInto(before) intersect second      =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222     2222222222222222
+	 *     11111111111111         22222222222222       22222222222222
+	 *     111111111111             222222222222         222222222222
+	 *     1111111111                 2222222222           2222222222
+	 *     11111111                     22222222             22222222
+	 *     111111                         222222               222222
+	 *     1111                             2222                 2222
+	 *     11                                 22                   22
+	 * </pre>
+	 */
+	public static void mapCopyInto(Map updateInto, Map second) {
+		updateInto.clear();
+		updateInto.putAll(second);
+	}
 }
