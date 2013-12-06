@@ -24,6 +24,9 @@ public class ObjectToProperties {
 		
 		String initialPrefix;
 		
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
+		
 		private String getProperty(String key) {
 			return properties.getProperty(key);
 		}
@@ -57,10 +60,10 @@ public class ObjectToProperties {
 				});
 				for (Field field : fields) {
 					int modifiers = field.getModifiers();
-//					if (field.isSynthetic())
-//						continue;
-//					if (Modifier.isTransient(modifiers))
-//						continue;
+					if (ignoreSyntheticProperties && field.isSynthetic())
+						continue;
+					if (ignoreTransientProperties && Modifier.isTransient(modifiers))
+						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
 					Class fieldType = field.getType();
@@ -205,6 +208,9 @@ public class ObjectToProperties {
 		
 		String initialPrefix;
 		
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
+		
 		private void setProperty(String key, String value) {
 			properties.setProperty(key, value);
 		}
@@ -268,10 +274,10 @@ public class ObjectToProperties {
 					});
 					for (Field field : fields) {
 						int modifiers = field.getModifiers();
-//						if (field.isSynthetic())
-//							continue;
-//						if (Modifier.isTransient(modifiers))
-//							continue;
+						if (ignoreSyntheticProperties && field.isSynthetic())
+							continue;
+						if (ignoreTransientProperties && Modifier.isTransient(modifiers))
+							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
 						Class fieldType = field.getType();

@@ -337,6 +337,42 @@ public class Util {
 		return value == null ? "" : value.trim();
 	}
 	
+	/**
+	 * This returns a new string with all surrounding whitespace removed and
+	 * internal whitespace normalized to a single space. If only whitespace
+	 * exists, the empty string is returned.
+	 * <p>Per XML 1.0 Production 3 whitespace includes: #x20, #x9, #xD, #xA</p>
+	 * 
+	 * @param str string to be normalized.
+	 * @return normalized string or empty string
+	 * 
+	 * @see org.jdom.Text#normalizeString
+	 */
+	public static String normalizeString(String str) {
+		if (str == null)
+			return "";
+
+		char[] c = str.toCharArray();
+		char[] n = new char[c.length];
+		boolean white = true;
+		int pos = 0;
+		for (int i = 0; i < c.length; i++) {
+			if (" \t\n\r".indexOf(c[i]) != -1) {
+				if (!white) {
+					n[pos++] = ' ';
+					white = true;
+				}
+			} else {
+				n[pos++] = c[i];
+				white = false;
+			}
+		}
+		if (white && pos > 0) {
+			pos--;
+		}
+		return new String(n, 0, pos);
+	}
+	
 	public static String arrayToString(double array[]) {
 		if (array == null)
 			return "";

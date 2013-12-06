@@ -173,11 +173,11 @@ public class ObjectToPropertiesTest {
 	
 	public static void main(String[] args) throws Exception {
 		System.out.println("ObjectToPropertiesTest2");
-//		new ObjectToPropertiesTest().serializeClass();
-//		new ObjectToPropertiesTest().typedArrayTest();
+		new ObjectToPropertiesTest().serializeClass();
+		new ObjectToPropertiesTest().typedArrayTest();
 		new ObjectToPropertiesTest().doHardTest();
-//		new ObjectToPropertiesTest().partialHardTest();
-//		new ObjectToPropertiesTest().simplifiedHardTest();
+		new ObjectToPropertiesTest().partialHardTest();
+		new ObjectToPropertiesTest().simplifiedHardTest();
 		System.out.println("Done.");
 	}
 }

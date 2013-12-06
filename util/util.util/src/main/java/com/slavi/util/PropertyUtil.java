@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -124,8 +125,9 @@ public class PropertyUtil {
 	
 	public static ArrayList<String> propertiesToSortedStringList(Properties properties) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		OutputStreamWriter writer = new OutputStreamWriter(out);
 		try {
-			properties.store(out, null);
+			properties.store(writer, null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,5 +1,6 @@
 package com.slavi.util;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -187,5 +188,107 @@ public class MapUtils {
 	public static void mapCopyInto(Map updateInto, Map second) {
 		updateInto.clear();
 		updateInto.putAll(second);
+	}
+	
+	//////////////////////////////////////////////////////////////////
+	
+	/**
+	 * @see java.awt.geom.Area.exclusiveOr()
+	 * <pre>
+	 *   updateInto(before) xor second            =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222
+	 *     11111111111111         22222222222222     11            22
+	 *     111111111111             222222222222     1111        2222
+	 *     1111111111                 2222222222     111111    222222
+	 *     11111111                     22222222     1111111122222222
+	 *     111111                         222222     111111    222222
+	 *     1111                             2222     1111        2222
+	 *     11                                 22     11            22
+	 * </pre>
+	 */
+	public static void collectionXor(Collection updateInto, Collection second) {
+		for (Object i : second) {
+			if (updateInto.contains(i))
+				updateInto.remove(i);
+			else
+				updateInto.add(i);
+		}
+	}
+
+	/**
+	 * @see java.awt.geom.Area.add()
+	 * <pre>
+	 *   updateInto(before) add second            =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222     1111111111111111
+	 *     11111111111111         22222222222222     1111111111111122
+	 *     111111111111             222222222222     1111111111112222
+	 *     1111111111                 2222222222     1111111111222222
+	 *     11111111                     22222222     1111111122222222
+	 *     111111                         222222     111111    222222
+	 *     1111                             2222     1111        2222
+	 *     11                                 22     11            22
+	 * </pre>
+	 */
+	public static void collectionAdd(Collection updateInto, Collection second) {
+		updateInto.addAll(second);
+	}
+
+	/**
+	 * @see java.awt.geom.Area.intersect()
+	 * <pre>
+	 *   updateInto(before) intersect second      =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222     1111111111111111
+	 *     11111111111111         22222222222222       111111111111
+	 *     111111111111             222222222222         11111111
+	 *     1111111111                 2222222222           1111
+	 *     11111111                     22222222
+	 *     111111                         222222
+	 *     1111                             2222
+	 *     11                                 22
+	 * </pre>
+	 */
+	public static void collectionIntersect(Collection updateInto, Collection second) {
+		updateInto.retainAll(second);
+	}
+
+	/**
+	 * @see java.awt.geom.Area.subtract()
+	 * <pre>
+	 *   updateInto(before) intersect second      =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222
+	 *     11111111111111         22222222222222     11
+	 *     111111111111             222222222222     1111
+	 *     1111111111                 2222222222     111111
+	 *     11111111                     22222222     11111111
+	 *     111111                         222222     111111
+	 *     1111                             2222     1111
+	 *     11                                 22     11
+	 * </pre>
+	 */
+	public static void collectionSubtract(Collection updateInto, Collection second) {
+		updateInto.removeAll(second);
+	}
+
+	/**
+	 * <pre>
+	 *   updateInto(before) intersect second      =  updateInto(after)
+	 *
+	 *     1111111111111111     2222222222222222     2222222222222222
+	 *     11111111111111         22222222222222       22222222222222
+	 *     111111111111             222222222222         222222222222
+	 *     1111111111                 2222222222           2222222222
+	 *     11111111                     22222222             22222222
+	 *     111111                         222222               222222
+	 *     1111                             2222                 2222
+	 *     11                                 22                   22
+	 * </pre>
+	 */
+	public static void collectionCopyInto(Collection updateInto, Collection second) {
+		updateInto.retainAll(second);
+		updateInto.addAll(second);
 	}
 }

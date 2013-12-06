@@ -8,22 +8,29 @@ import java.nio.charset.Charset;
 public class StringPrintStream extends PrintStream {
 
 	public StringPrintStream() {
-		super(new ByteArrayOutputStream());
+		this(new ByteArrayOutputStream());
 	}
+
+	ByteArrayOutputStream localOutput;
 	
+	public StringPrintStream(ByteArrayOutputStream out) {
+		super(out);
+		localOutput = out;
+	}
+
 	public String toString() {
-		return new String(((ByteArrayOutputStream) out).toByteArray(), Charset.forName("UTF-8"));
+		return new String(localOutput.toByteArray(), Charset.forName("UTF-8"));
 	}
 
 	public String toString(Charset cs) {
-		return new String(((ByteArrayOutputStream) out).toByteArray(), cs);
+		return new String(localOutput.toByteArray(), cs);
 	}
 	
 	public byte[] toByteArray() {
-		return ((ByteArrayOutputStream) out).toByteArray();
+		return localOutput.toByteArray();
 	}
 	
 	public OutputStream getOutputStream() {
-		return out;
+		return localOutput;
 	}
 }
