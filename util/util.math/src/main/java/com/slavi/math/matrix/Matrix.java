@@ -14,7 +14,7 @@ public class Matrix {
 	/**
 	 * The elements of the matrix.
 	 */
-	private double m[][];
+	private double m[];
 
 	/**
 	 * Number of columns
@@ -181,7 +181,9 @@ public class Matrix {
 		}
 		sizeX = newSizeX;
 		sizeY = newSizeY;
-		m = new double[newSizeX][newSizeY];
+		int newSize = newSizeX * newSizeY;
+		if (m == null || m.length != newSize)
+			m = new double[newSize];
 	}
 
 	/**
@@ -203,7 +205,7 @@ public class Matrix {
 	 * element is atX=0, atY=0.
 	 */
 	public double getItem(int atX, int atY) {
-		return m[atX][atY];
+		return m[atX + atY * sizeX];
 	}
 
 	/**
@@ -211,7 +213,7 @@ public class Matrix {
 	 * is atX=0, atY=0.
 	 */
 	public void setItem(int atX, int atY, double aValue) {
-		m[atX][atY] = aValue;
+		m[atX + atY * sizeX] = aValue;
 	}
 
 	/**
@@ -219,7 +221,7 @@ public class Matrix {
 	 * @see Matrix#getVectorItem(int)
 	 */
 	public int getVectorSize() {
-		return sizeX * sizeY;
+		return m == null ? 0 : m.length; // sizeX * sizeY;
 	}
 
 	/**
@@ -240,14 +242,14 @@ public class Matrix {
 	 * @return The value at the specified position.
 	 */
 	public double getVectorItem(int aIndex) {
-		return getItem(aIndex % sizeX, aIndex / sizeX);
+		return m[aIndex]; // getItem(aIndex % sizeX, aIndex / sizeX);
 	}
 
 	/**
 	 * @see Matrix#getVectorItem(int)
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
-		setItem(aIndex % sizeX, aIndex / sizeX, aValue);
+		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
 	/**

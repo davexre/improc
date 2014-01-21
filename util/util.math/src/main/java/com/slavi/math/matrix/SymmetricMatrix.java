@@ -106,7 +106,8 @@ public class SymmetricMatrix {
 			return;
 		}
 		sizeM = aSizeM;
-		m = new double[getVectorSize()];
+		int newSize = ((sizeM + 1) * sizeM) >> 1;
+		m = new double[newSize];
 	}
 
 	/**
@@ -150,7 +151,7 @@ public class SymmetricMatrix {
 	 * @see SymmetricMatrix#getVectorItem(int)
 	 */
 	public int getVectorSize() {
-		return ((sizeM + 1) * sizeM) >> 1;
+		return m == null ? 0 : m.length; // ((sizeM + 1) * sizeM) >> 1;
 	}
 
 	/**
