@@ -174,4 +174,37 @@ public class MathUtil {
 			eps /= 10.0f;
 		}
 	}
+
+	/**
+	 * GCD - Greatest Common Divisor
+	 * 
+	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
+	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
+	 *
+	 */
+	public static int gcd(int a, int b) {
+		while (b != 0) {
+			int t = b;
+			b = a % b;
+			a = t;
+		}
+		return a;
+	}
+
+	/**
+	 * GCD - Greatest Common Divisor
+	 * 
+	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
+	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
+	 *
+	 */
+	public static long gcd(long a, long b) {
+		while (b != 0) {
+			long t = b;
+			b = a % b;
+			a = t;
+		}
+		return a;
+	}
+
 }

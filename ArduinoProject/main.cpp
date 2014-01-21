@@ -18,7 +18,7 @@ void __cxa_guard_abort (__guard *) {};
 //#define MAINCLASS AnalogSensorTest
 //#define MAINCLASS RotaryEncoderAcellerationTest
 //#define MAINCLASS PWM_Led
-#define MAINCLASS ButtonTest
+#define MAINCLASS PressureSensor
 //#define MAINCLASS MemoryTest
 
 DefineClass(MAINCLASS);
