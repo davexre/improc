@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<!--[if IE 6]>
+<html id="ie6" lang="en-US">
+<![endif]-->
+<!--[if IE 7]>
+<html id="ie7" lang="en-US">
+<![endif]-->
+<!--[if IE 8]>
+<html id="ie8" lang="en-US">
+<![endif]-->
+<!--[if !(IE 6) | !(IE 7) | !(IE 8)  ]><!-->
+<html lang="en-US"><!--<![endif]--><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<title>Capacitance measurement with the Arduino Uno | PIC Tutorials</title>
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="stylesheet" type="text/css" media="all" href="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/style_002.css">
+<link rel="pingback" href="http://wordpress.codewrite.co.uk/pic/xmlrpc.php">
+<!--[if lt IE 9]>
+<script src="http://wordpress.codewrite.co.uk/pic/wp-content/themes/twentyeleven/js/html5.js" type="text/javascript"></script>
+<![endif]-->
+<link rel="alternate" type="application/rss+xml" title="PIC Tutorials » Feed" href="http://wordpress.codewrite.co.uk/pic/feed/">
+<link rel="alternate" type="application/rss+xml" title="PIC Tutorials » Comments Feed" href="http://wordpress.codewrite.co.uk/pic/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="PIC Tutorials » Capacitance measurement with the Arduino Uno Comments Feed" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/feed/">
+<link rel="stylesheet" id="cptchStylesheet-css" href="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/style.css" type="text/css" media="all">
+<script type="text/javascript" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/comment-reply.js"></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://wordpress.codewrite.co.uk/pic/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://wordpress.codewrite.co.uk/pic/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="nRF24L01 Test board PCB" href="http://wordpress.codewrite.co.uk/pic/2014/01/13/nrf24l01-test-board-pcb/">
+<link rel="next" title="Arduino Capacitance Meter Resolution" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/arduino-cap-meter-res/">
+<meta name="generator" content="WordPress 3.8">
+<link rel="canonical" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/">
+<link rel="shortlink" href="http://wordpress.codewrite.co.uk/pic/?p=229">
+	<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+</head>
+
+<body class="single single-post postid-229 single-format-standard single-author singular two-column right-sidebar">
+<div id="page" class="hfeed">
+	<header id="branding" role="banner">
+			<hgroup>
+				<h1 id="site-title"><span><a href="http://wordpress.codewrite.co.uk/pic/" title="PIC Tutorials" rel="home">PIC Tutorials</a></span></h1>
+				<h2 id="site-description">Electronics and Programming Simplified</h2>
+			</hgroup>
+
+						<a href="http://wordpress.codewrite.co.uk/pic/">
+									<img src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/cropped-header1.png" alt="" height="288" width="1000">
+							</a>
+			
+								<form method="get" id="searchform" action="http://wordpress.codewrite.co.uk/pic/">
+		<label for="s" class="assistive-text">Search</label>
+		<input class="field" name="s" id="s" placeholder="Search" type="text">
+		<input class="submit" name="submit" id="searchsubmit" value="Search" type="submit">
+	</form>
+			
+			<nav id="access" role="navigation">
+				<h3 class="assistive-text">Main menu</h3>
+								<div class="skip-link"><a class="assistive-text" href="#content" title="Skip to primary content">Skip to primary content</a></div>
+				<div class="skip-link"><a class="assistive-text" href="#secondary" title="Skip to secondary content">Skip to secondary content</a></div>
+								<div class="menu"><ul><li><a href="http://wordpress.codewrite.co.uk/pic/">Home</a></li><li class="page_item page-item-2"><a href="http://wordpress.codewrite.co.uk/pic/about/">About</a></li></ul></div>
+			</nav><!-- #access -->
+	</header><!-- #branding -->
+
+
+	<div id="main">
+
+		<div id="primary">
+			<div id="content" role="main">
+
+				
+					<nav id="nav-single">
+						<h3 class="assistive-text">Post navigation</h3>
+						<span class="nav-previous"><a href="http://wordpress.codewrite.co.uk/pic/2014/01/13/nrf24l01-test-board-pcb/" rel="prev"><span class="meta-nav">←</span> Previous</a></span>
+						<span class="nav-next"><a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/arduino-cap-meter-res/" rel="next">Next <span class="meta-nav">→</span></a></span>
+					</nav><!-- #nav-single -->
+
+					
+<article id="post-229" class="post-229 post type-post status-publish format-standard hentry category-general">
+	<header class="entry-header">
+		<h1 class="entry-title">Capacitance measurement with the Arduino Uno</h1>
+
+				<div class="entry-meta">
+			<span class="sep">Posted on </span><a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/" title="4:06 pm" rel="bookmark"><time class="entry-date" datetime="2014-01-21T16:06:19+00:00">January 21, 2014</time></a><span class="by-author"> <span class="sep"> by </span> <span class="author vcard"><a class="url fn n" href="http://wordpress.codewrite.co.uk/pic/author/jon/" title="View all posts by jon" rel="author">jon</a></span></span>		</div><!-- .entry-meta -->
+			</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<p>You can buy meters, like this one for instance:</p>
+<p><a title="PEAK LCR40" href="http://www.peakelec.co.uk/acatalog/jz_lcr40.html"><img class="alignnone size-medium wp-image-231" style="color: #333333; font-style: normal;" alt="Peak_LCR40" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/Peak_LCR40-300x201.jpg" height="201" width="300"></a></p>
+<p>that measure capacitance, but where’s the fun in that?!</p>
+<p>If you’ve got an Arduino, why not build one instead?</p>
+<p>There are lots of examples of how to do this on the internet, but I’m
+ going to suggest an incredibly simple way to it. Let’s start with the 
+theory.</p>
+<p>Consider the following circuit:</p>
+<p><a href="http://wordpress.codewrite.co.uk/pic/wp-content/uploads/sites/2/2014/01/SimpleCapacitanceTester.png"><img class="alignnone size-medium wp-image-232" alt="SimpleCapacitanceTester" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/SimpleCapacitanceTester-300x226.png" height="226" width="300"></a></p>
+<p>CT is the capacitor under test. We start with both capacitors 
+discharged and A2 at 0 volts. When we raise A2 to 5 volts a current will
+ flow through both capacitors. The voltage on A0 will settle to within 
+1% of it’s final value within 30ns. The value that A0 will settle to is 
+proportional to the ratio of CT divided by the total capacitance, C1 + 
+CT. The formulas that we are going to need are:</p>
+<p><a href="http://wordpress.codewrite.co.uk/pic/wp-content/uploads/sites/2/2014/01/CapTestFormulas3.png"><img class="alignnone size-full wp-image-300" alt="CapTestFormulas3" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/CapTestFormulas3.png" height="297" width="284"></a></p>
+<p>We will use the ADC to measure VA0. VA2 is actually 5 volts, &nbsp;so
+ VA0 will vary from 0 to 5 volts, but we can use the ADC value instead, 
+to make the calculations easier. Obviously we should then use the 
+maximum ADC value (1023) for VA2. The ADC readings we can expect will 
+range from about 33 for CT = 1pF to about 993 for CT = 1nF (1000pF).</p>
+<p>So now we are ready to build the circuit and write the code. Right? 
+Well, not quite. In the circuit above we have specified C1 as 30pF. But 
+the Arduino will have some stray capacitance on the board and in the 
+micro-controller. About 30pF of stray capacitance. We’re going to use 
+this to make our circuit simpler – we are going to remove C1. But we 
+need to work out how much stray capacitance there is, so we can plug it 
+into the formulas above. But first, we’ll build the circuit and write 
+the code.</p>
+<p>The circuit is surprisingly easy. In fact there isn’t a circuit now. We’re going to use the Arduino as follows:</p>
+<p><a href="http://wordpress.codewrite.co.uk/pic/wp-content/uploads/sites/2/2014/01/CapTestBoard1.jpg"><img class="alignnone size-medium wp-image-236" alt="CapTestBoard1" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/CapTestBoard1-300x168.jpg" height="168" width="300"></a></p>
+<p>The capacitor is the capacitor under test between A0 and A2. The 
+capacitors on the right are the capacitors that I am going to test a bit
+ later on.</p>
+<p>The code looks like this:</p>
+<pre>const int OUT_PIN = A2;
+const int IN_PIN = A0;
+
+//Capacitance between IN_PIN and Ground
+//Stray capacitance is always present. Extra capacitance can be added to
+//allow higher capacitance to be measured.
+const float IN_STRAY_CAP_TO_GND = 24.48; //initially this was 30.00
+const float IN_EXTRA_CAP_TO_GND = 0.0;
+const float IN_CAP_TO_GND  = IN_STRAY_CAP_TO_GND + IN_EXTRA_CAP_TO_GND;
+const int MAX_ADC_VALUE = 1023;
+
+void setup()
+{
+  pinMode(OUT_PIN, OUTPUT);
+  //digitalWrite(OUT_PIN, LOW);  //This is the default state for outputs
+  pinMode(IN_PIN, OUTPUT);
+  //digitalWrite(IN_PIN, LOW);
+
+  Serial.begin(115200);
+}
+
+void loop()
+{
+  //Capacitor under test between OUT_PIN and IN_PIN
+  //Rising high edge on OUT_PIN
+  pinMode(IN_PIN, INPUT);
+  digitalWrite(OUT_PIN, HIGH);
+  int val = analogRead(IN_PIN);
+
+  //Clear everything for next measurement
+  digitalWrite(OUT_PIN, LOW);
+  pinMode(IN_PIN, OUTPUT);
+
+  //Calculate and print result
+
+  float capacitance = (float)val * IN_CAP_TO_GND / (float)(MAX_ADC_VALUE - val);
+
+  Serial.print(F("Capacitance Value = "));
+  Serial.print(capacitance, 3);
+  Serial.print(F(" pF ("));
+  Serial.print(val);
+  Serial.println(F(") "));
+
+  while (millis() % 500 != 0)
+    ;    
+}</pre>
+<p>The code above loops round every half second, applying a 5V pulse to 
+the capacitor, and measuring the voltage the other side. It then prints 
+out the calculated capacitance (and raw ADC value).</p>
+<p>If we try this out it won’t be very accurate. That is because the 
+stray capacitance isn’t exactly 30pF. So we need to calibrate it. I did 
+this with a 100pF capacitor. My multimeter reckons that it actually has a
+ value of 102pF. The reading I get on my Arduino board is 125pF (raw ADC
+ value 825). So if we put VA0 = 825, VA2 = 1023 and CT = 102 into the 
+second equation, this tells us that C1 is 24.48pF. So I 
+changed&nbsp;IN_STRAY_CAP_TO_GND to 24.48 and uploaded this to the 
+Arduino. This time the value displayed on the serial monitor is 102pF 
+(most of the time!).</p>
+<p><a href="http://wordpress.codewrite.co.uk/pic/wp-content/uploads/sites/2/2014/01/CapTestSerialMon1.png"><img class="alignnone size-medium wp-image-241" alt="CapTestSerialMon1" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/CapTestSerialMon1-300x124.png" height="124" width="300"></a></p>
+<p>I tried it out with the following capacitors:</p>
+<p><a href="http://wordpress.codewrite.co.uk/pic/wp-content/uploads/sites/2/2014/01/MiscCap1.jpg"><img class="alignnone size-medium wp-image-243" alt="MiscCap1" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/MiscCap1-300x168.jpg" height="168" width="300"></a></p>
+<p>This was the results of my tests:</p>
+<table cellpadding="0" cellspacing="0" border="0" width="189">
+<colgroup>
+<col width="63">
+<col width="126"> </colgroup>
+<tbody>
+<tr>
+<td height="17" width="63">Capacitor</td>
+<td width="126">Reading</td>
+</tr>
+<tr>
+<td height="7"></td>
+<td></td>
+</tr>
+<tr>
+<td height="17">-</td>
+<td>0.072 pF (3)</td>
+</tr>
+<tr>
+<td height="17">15J</td>
+<td>15.461 pF (396)</td>
+</tr>
+<tr>
+<td height="17">22J</td>
+<td>23.403 pF (500)</td>
+</tr>
+<tr>
+<td height="17">47J</td>
+<td>48.532 pF (680)</td>
+</tr>
+<tr>
+<td height="17">101J</td>
+<td>102.000 pF (825)</td>
+</tr>
+<tr>
+<td height="17">471K</td>
+<td>448.030 pF (970)</td>
+</tr>
+<tr>
+<td height="17">102K</td>
+<td>1064.348 pF (1000)</td>
+</tr>
+<tr>
+<td height="17">392K</td>
+<td>3553.097 pF (1016)</td>
+</tr>
+<tr>
+<td height="17">472K</td>
+<td>4984.128 pF (1018)</td>
+</tr>
+</tbody>
+</table>
+<p>I was curious to know how accurate this might be, so I worked it out. <a title="Aduino Uno Capacitance Meter Resolution" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/arduino-cap-meter-res/">You can see the results of my analysis here</a>.
+ My conclusion was that you could expect a resolution of about 1% 
+between 3.5pF and 225pF, and about 5% between 0.5pF and 1300pF. I 
+haven’t worked the accuracy and linearity yet – I need to get hold of 
+some very accurate reference capacitors (or a very accurate meter) for 
+that.</p>
+<p>You can build your own capacitor, and do experiments, <a title="Experiments with the Arduino Capacitance Meter" href="http://wordpress.codewrite.co.uk/pic/2014/01/22/experiments-with-uno-cap-meter/%20%E2%80%8E">which I have demonstrated here</a>.</p>
+<p>If you want to build on this or make a complete LCR meter, I <a title="Arduino LCR Meter Ideas" href="http://wordpress.codewrite.co.uk/pic/2014/01/22/arduino-lcr-meter-ideas/">have some ideas here</a>.</p>
+			</div><!-- .entry-content -->
+
+	<footer class="entry-meta">
+		This entry was posted in <a href="http://wordpress.codewrite.co.uk/pic/category/general/" title="View all posts in General" rel="category tag">General</a> by <a href="http://wordpress.codewrite.co.uk/pic/author/jon/">jon</a>. Bookmark the <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/" title="Permalink to Capacitance measurement with the Arduino Uno" rel="bookmark">permalink</a>.		
+			</footer><!-- .entry-meta -->
+</article><!-- #post-229 -->
+
+						<div id="comments">
+	
+	
+			<h2 id="comments-title">
+			16 thoughts on “<span>Capacitance measurement with the Arduino Uno</span>”		</h2>
+
+		
+		<ol class="commentlist">
+				<li class="post pingback">
+		<p>Pingback: <a href="http://hackaday.com/2014/01/22/capacitance-measurement-with-the-arduino-uno/" rel="external nofollow" class="url">hackaday.com/2014/01/22/capacitance-measurement-with-the-arduino-uno</a></p>
+	</li><!-- #comment-## -->
+	<li class="post pingback">
+		<p>Pingback: <a href="http://5jcodelabs.com/howtomrj/capacitance-measurement-with-the-arduino-uno/" rel="external nofollow" class="url">5jcodelabs.com/howtomrj/capacitance-measurement-with-the-arduino-uno</a></p>
+	</li><!-- #comment-## -->
+	<li class="comment even thread-even depth-1" id="li-comment-260">
+		<article id="comment-260" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/0af9e4dd7878141d709abe91d5136f9f.jpeg" class="avatar avatar-68 photo" height="68" width="68"><span class="fn">flegmatoid</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-260"><time datetime="2014-01-23T08:08:19+00:00">January 23, 2014 at 8:08 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>nice post<br>
+In the photo I can see you’re using USB power supply. With no doubt that
+ accounts for  the “error” in your measurements, since mostly never 
+you’ll get the precise 5V reference on your USB port.<br>
+To compensate this you could use some software sorcery: <a href="https://code.google.com/p/tinkerit/wiki/SecretVoltmeter" rel="nofollow">https://code.google.com/p/tinkerit/wiki/SecretVoltmeter</a>, or better the hardware hack – add MCP1541 to vRef, or some even more accurate (thus 10x more expensive) device, like LT1021.<br>
+I did personally added LT1021 (free samples available from linear.com) –
+ now I can calibrate expensive voltmeters with my Arduino.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=260#respond" onclick='return addComment.moveForm("comment-260", "260", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment odd alt depth-2" id="li-comment-268">
+		<article id="comment-268" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/c08312fbd7a38ca3efa2e68177219108.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">Mark Olson</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-268"><time datetime="2014-01-23T19:27:47+00:00">January 23, 2014 at 7:27 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>I don’t see anything in the code that
+ assumes that MAX_ADC_VALUE corresponds to 5V. This code should work 
+equally well over a range of +5V supply voltages, so long as the +5V 
+supply is stable over the measurement period.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=268#respond" onclick='return addComment.moveForm("comment-268", "268", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1" id="li-comment-261">
+		<article id="comment-261" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/ad6b1c11653f4fceb739ad2f0ce9bc6f.png" class="avatar avatar-68 photo" height="68" width="68"><span class="fn"><a href="http://none./" rel="external nofollow" class="url">Kashan Ahmad</a></span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-261"><time datetime="2014-01-23T08:29:58+00:00">January 23, 2014 at 8:29 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>Excellent idea and implementation. Will definitely give it a try. Keep up the good work <img src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/icon_smile.gif" alt=":)" class="wp-smiley"> </p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=261#respond" onclick='return addComment.moveForm("comment-261", "261", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+	<li class="comment odd alt thread-even depth-1" id="li-comment-263">
+		<article id="comment-263" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/a37322c098e2de658e4fe3dadce8cf19.jpeg" class="avatar avatar-68 photo" height="68" width="68"><span class="fn"><a href="http://bayesianadventures.wordpress.com/" rel="external nofollow" class="url">aswan korula</a></span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-263"><time datetime="2014-01-23T12:28:02+00:00">January 23, 2014 at 12:28 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>Great piece of work!! I will have to try this out at once.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=263#respond" onclick='return addComment.moveForm("comment-263", "263", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1" id="li-comment-264">
+		<article id="comment-264" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/7552ec1d4288d7f4890775615b9d4803.png" class="avatar avatar-68 photo" height="68" width="68"><span class="fn">Dan</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-264"><time datetime="2014-01-23T16:24:38+00:00">January 23, 2014 at 4:24 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>Hey great job one problem, your “second equation” is incorrect, you meant to put Va0 in the denominator. Thanks for this!</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=264#respond" onclick='return addComment.moveForm("comment-264", "264", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-jon bypostauthor odd alt depth-2" id="li-comment-266">
+		<article id="comment-266" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/dc462521dac0765c59cc0734e6aea62e.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">jon</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-266"><time datetime="2014-01-23T18:37:55+00:00">January 23, 2014 at 6:37 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>Well spotted! I could say that was a 
+“deliberate mistake” – but it wasn’t, it was just a mistake. Thanks 
+again for spotting that.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=266#respond" onclick='return addComment.moveForm("comment-266", "266", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-even depth-1" id="li-comment-265">
+		<article id="comment-265" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/021ad775e3f1de625c42e7f20ac41a95.jpeg" class="avatar avatar-68 photo" height="68" width="68"><span class="fn">Antonio</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-265"><time datetime="2014-01-23T18:09:11+00:00">January 23, 2014 at 6:09 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>in the void loop() i don’t understand the while(1) loop.<br>
+Why the while(1) loop?</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=265#respond" onclick='return addComment.moveForm("comment-265", "265", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-jon bypostauthor odd alt depth-2" id="li-comment-267">
+		<article id="comment-267" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/dc462521dac0765c59cc0734e6aea62e.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">jon</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-267"><time datetime="2014-01-23T18:44:02+00:00">January 23, 2014 at 6:44 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>You are absolutely correct. The 
+while(1) loop is completely unnecessary since loop() will be called 
+continuously – so I have removed it. Thanks.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=267#respond" onclick='return addComment.moveForm("comment-267", "267", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1" id="li-comment-269">
+		<article id="comment-269" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/c916d37dc778e7d6cec114b4681afa15_002.png" class="avatar avatar-68 photo" height="68" width="68"><span class="fn">Tron9000</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-269"><time datetime="2014-01-23T19:58:50+00:00">January 23, 2014 at 7:58 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>Nice, simple and by that merit elegant, whats not to like – well done.</p>
+<p>I am right in thinking there must be a limit to the largest capacitor
+ you can measure. The maximum current these outputs can source is 20mA?</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=269#respond" onclick='return addComment.moveForm("comment-269", "269", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-jon bypostauthor odd alt depth-2" id="li-comment-270">
+		<article id="comment-270" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/dc462521dac0765c59cc0734e6aea62e.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">jon</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-270"><time datetime="2014-01-23T21:40:38+00:00">January 23, 2014 at 9:40 pm</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>It shouldn’t matter how much current 
+can be sourced (or the rise time) – the result should be the same. The 
+only problem may be damaging the microcontroller, but it should be fine 
+up to about 100uF. To be on the safe side you could include series 
+resistors, but this might mean longer delays are required to reach a 
+steady state.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=270#respond" onclick='return addComment.moveForm("comment-270", "270", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment even depth-3" id="li-comment-272">
+		<article id="comment-272" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/5262b78659c2ae209c64c73cf3092f47.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">doctek</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-272"><time datetime="2014-01-24T05:18:52+00:00">January 24, 2014 at 5:18 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>A current-limiting resistor is a good
+ idea. A cap looks like a dead short to ground when you first apply the 
+5V to it. Long term, this could damage an output pin. To limit 5V to 
+20mA requires a 250 Ohm resistor – make it 270 to be safe. An RC circuit
+ will reach 90% of its final value in 2.2RC. So a 100pF capacitor in 
+series with a 270 Ohm resistor will reach 4.5V in 59 nanoseconds. This 
+can be a source of error as the cap being tested gets larger. One way to
+ test these is to put them into an oscillator and measure the resulting 
+frequency.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=272#respond" onclick='return addComment.moveForm("comment-272", "272", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment odd alt depth-4" id="li-comment-273">
+		<article id="comment-273" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/c916d37dc778e7d6cec114b4681afa15.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">tron9000</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-273"><time datetime="2014-01-24T09:51:54+00:00">January 24, 2014 at 9:51 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>this was my thinking. say someone 
+building a supercap project saw this and, without thought, just hooked 
+it up straight as show – the cap will look like a dead S/C and would 
+damage the arduino. Maybe and extension of this project could be 
+employing some circuitry to accommodate large caps accurately? Or you 
+done on this one Jon?</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=273#respond" onclick='return addComment.moveForm("comment-273", "273", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-jon bypostauthor even depth-5" id="li-comment-274">
+		<article id="comment-274" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/dc462521dac0765c59cc0734e6aea62e.png" class="avatar avatar-39 photo" height="39" width="39"><span class="fn">jon</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-274"><time datetime="2014-01-24T11:47:29+00:00">January 24, 2014 at 11:47 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>As long as the capacitor is 
+discharged it should be ok… because we only apply a very short pulse 
+(~100us – the time it takes to do the ADC conversion using 
+analogRead()), and then discharge (which presumably would  take another 
+100us). After that we wait ~499,800us before we have another go.<br>
+The only problem would be if someone hooked up a charged capacitor, but 
+that could destroy the Arduino even if the I/O pins were set as inputs. I
+ guess you could add an external resistor, but how big should that be? 
+Someone could still hook up a capacitor charged up to hundreds of volts…</p>
+</div>
+
+			<div class="reply">
+							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment odd alt thread-even depth-1" id="li-comment-271">
+		<article id="comment-271" class="comment">
+			<footer class="comment-meta">
+				<div class="comment-author vcard">
+					<img alt="" src="Capacitance%20measurement%20with%20the%20Arduino%20Uno_files/1442e3157a4464cfd4c1236a31ee1b66.png" class="avatar avatar-68 photo" height="68" width="68"><span class="fn">Srikanth</span> on <a href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#comment-271"><time datetime="2014-01-24T04:30:54+00:00">January 24, 2014 at 4:30 am</time></a> <span class="says">said:</span>
+									</div><!-- .comment-author .vcard -->
+
+				
+			</footer>
+
+			<div class="comment-content"><p>How to measure the  power factor 
+along with the capacitance. I have a very large capacitor. I don’t know 
+its value. So I wanted to know the powerfactor so I can purchase in 
+large.</p>
+</div>
+
+			<div class="reply">
+				<a class="comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/?replytocom=271#respond" onclick='return addComment.moveForm("comment-271", "271", "respond", "229")'>Reply <span>↓</span></a>			</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+		</ol>
+
+		
+		
+	
+									<div id="respond" class="comment-respond">
+				<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="http://wordpress.codewrite.co.uk/pic/2014/01/21/cap-meter-with-arduino-uno/#respond" style="display:none;">Cancel reply</a></small></h3>
+									<form action="http://wordpress.codewrite.co.uk/pic/wp-comments-post.php" method="post" id="commentform" class="comment-form">
+																			<p class="comment-notes">Your email address will not be published. Required fields are marked <span class="required">*</span></p>							<p class="comment-form-author"><label for="author">Name <span class="required">*</span></label> <input id="author" name="author" size="30" aria-required="true" type="text"></p>
+<p class="comment-form-email"><label for="email">Email <span class="required">*</span></label> <input id="email" name="email" size="30" aria-required="true" type="text"></p>
+<p class="comment-form-url"><label for="url">Website</label> <input id="url" name="url" size="30" type="text"></p>
+<p class="cptch_block"><br>		<input name="cptch_result" value="aQnt" type="hidden">
+		<input name="cptch_time" value="1390569453" type="hidden">
+		<input value="Version: 2.4" type="hidden">
+		three + 7 =  <input id="cptch_input" autocomplete="off" name="cptch_number" maxlength="2" size="2" aria-required="true" required="required" style="margin-bottom:0;display:inline;font-size: 12px;width: 40px;" type="text">	</p>												<p class="comment-form-comment"><label for="comment">Comment</label> <textarea id="comment" name="comment" cols="45" rows="8" aria-required="true"></textarea></p>						<p class="form-allowed-tags">You may use these <abbr title="HyperText Markup Language">HTML</abbr> tags and attributes:  <code>&lt;a
+ href="" title=""&gt; &lt;abbr title=""&gt; &lt;acronym title=""&gt; 
+&lt;b&gt; &lt;blockquote cite=""&gt; &lt;cite&gt; &lt;code&gt; &lt;del 
+datetime=""&gt; &lt;em&gt; &lt;i&gt; &lt;q cite=""&gt; &lt;strike&gt; 
+&lt;strong&gt; </code></p>						<p class="form-submit">
+							<input name="submit" id="submit" value="Post Comment" type="submit">
+							<input name="comment_post_ID" value="229" id="comment_post_ID" type="hidden">
+<input name="comment_parent" id="comment_parent" value="0" type="hidden">
+						</p>
+						<p style="display: none;"><input id="akismet_comment_nonce" name="akismet_comment_nonce" value="374ad96426" type="hidden"></p>					</form>
+							</div><!-- #respond -->
+			
+</div><!-- #comments -->
+
+				
+			</div><!-- #content -->
+		</div><!-- #primary -->
+
+
+	</div><!-- #main -->
+
+	<footer id="colophon" role="contentinfo">
+
+			
+
+			<div id="site-generator">
+								<a href="http://wordpress.org/" title="Semantic Personal Publishing Platform">Proudly powered by WordPress</a>
+			</div>
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+
+
+</body></html>
