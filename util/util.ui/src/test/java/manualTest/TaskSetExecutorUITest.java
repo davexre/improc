@@ -1,14 +1,17 @@
 package manualTest;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.ui.SwtUtil;
 
 public class TaskSetExecutorUITest {
-	static class MyJob implements Callable<Void> {
+	static class MyJob implements Callable {
 		ExecutorService exec;
 		int taskCount;
 		
@@ -16,12 +19,12 @@ public class TaskSetExecutorUITest {
 			this.exec = exec;
 			this.taskCount = taskCount;
 		}
-		
-		public Void call() throws Exception {
+
+		public Object call() throws Exception {
 			TaskSetExecutor ts = new TaskSetExecutor(exec) {
 				public void onError(Object task, Throwable e) throws Exception {
 					ExampleTask t = (ExampleTask) task;
-					System.out.println("ERROR in task " + t.taskName + " -> " + e.getMessage());
+					System.out.println("onERROR in task " + t.taskName + " -> " + Util.exceptionToString(e));
 				}
 				
 				public void onTaskFinished(Object task, Object result) throws Exception {
@@ -50,7 +53,8 @@ public class TaskSetExecutorUITest {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		ExecutorService exec = Util.newBlockingThreadPoolExecutor(2);
+//		ExecutorService exec = Util.newBlockingThreadPoolExecutor(2);
+		ExecutorService exec = new ThreadPoolExecutor(2, 2, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(100));
 //		ExecutorService exec = new FakeThreadExecutor();
 		int maxTasks = 10;
 		try {

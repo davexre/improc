@@ -1,3 +1,8 @@
+SWT
+===
+http://stackoverflow.com/questions/5096299/maven-project-swt-3-5-dependency-any-official-public-repo
+
+
 Tomcat
 ======
 

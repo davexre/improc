@@ -112,8 +112,6 @@ public class WaitDialog {
 		}
 		boolean result = !taskProgress.isAborted();
 		shell.dispose();
-		taskProgress = null;
-		shell = null;
 		return result;
 	}
 	

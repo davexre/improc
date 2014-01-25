@@ -27,10 +27,6 @@ public class TaskSetExecutor {
 		
 		public Void call() {
 			synchronized (tasks) {
-				if (aborted) {
-					isDone();
-					return null;
-				}
 				runningTasks++;
 			}
 			try {
@@ -47,16 +43,18 @@ public class TaskSetExecutor {
 				synchronized (tasks) {
 					if (firstExceptionThatOccured == null)
 						firstExceptionThatOccured = t;
-					abort();
 				}
+				abort();
 				try {
 					onError(task, t);
 				} catch (Throwable t2) {
 				}
-			}
-			synchronized (tasks) {
-				runningTasks--;
-				finishedTasks++;
+				return null;
+			} finally {
+				synchronized (tasks) {
+					runningTasks--;
+					finishedTasks++;
+				}
 			}
 			isDone();
 			return null;
@@ -68,15 +66,18 @@ public class TaskSetExecutor {
 	Throwable firstExceptionThatOccured = null; 
 	
 	public void abort() {
+		boolean oldAborted;
 		synchronized (tasks) {
-			if (!aborted) {
-				for (Future<?> task : tasks) {
-					task.cancel(true);
-				}
-			}
+			oldAborted = aborted;
 			aborted = true;
-			isDone();
+			addingFinished = true;
 		}
+		if (!oldAborted) {
+			for (Future<?> task : tasks) {
+				task.cancel(true);
+			}
+		}
+		isDone();
 	}
 	
 	final ExecutorService exec;
@@ -124,25 +125,24 @@ public class TaskSetExecutor {
 	boolean onFinallyInvoked = false;
 	public boolean isDone() {
 		// The onFinally() must be called outside a synchronized block 
-		boolean localOnFinallyInvoked;
+		boolean tmpOnFinallyInvoked;
 		synchronized (tasks) {
-			if (!addingFinished) {
-				return false;
-			}
 			if (aborted) {
 				if (runningTasks != 0) {
 					return false;
 				}
 			} else if (exec.isShutdown()) {
 				abort();
+			} else if (!addingFinished) {
+				return false;
 			} else if (finishedTasks != tasks.size()) {
 				return false;
 			}
-			localOnFinallyInvoked = onFinallyInvoked;
+			tmpOnFinallyInvoked = onFinallyInvoked;
 			onFinallyInvoked = true;
 		}
 		// Invoke onFinally if not already invoked.
-		if (!localOnFinallyInvoked) {
+		if (!tmpOnFinallyInvoked) {
 			try {
 				onFinally();
 			} catch (Throwable t) {
@@ -155,15 +155,12 @@ public class TaskSetExecutor {
 	}
 	
 	public boolean isCanceled() {
-		synchronized (tasks) {
-			if (aborted)
-				return true;
-			if (exec.isShutdown()) {
-				abort();
-				return true;
-			}					
-			return aborted;
+		if (aborted)
+			return true;
+		if (exec.isShutdown()) {
+			abort();
 		}
+		return aborted;
 	}
 	
 	private void internalAdd(Object task) {
@@ -171,15 +168,10 @@ public class TaskSetExecutor {
 			abort();
 			throw new NullPointerException();
 		}
-		if (addingFinished) {
+		if (addingFinished || Thread.currentThread().isInterrupted()) {
 			abort();
-			throw new RejectedExecutionException();
-		}				
-		if (aborted) {
-			throw new RejectedExecutionException();
 		}
-		if (Thread.currentThread().isInterrupted()) {
-			abort();
+		if (aborted) {
 			throw new RejectedExecutionException();
 		}
 		Future<Void> future = null;
@@ -188,9 +180,13 @@ public class TaskSetExecutor {
 			synchronized (tasks) {
 				if (addingFinished || aborted) {
 					future.cancel(true);
+					throw new RejectedExecutionException();
 				}
 				tasks.add(future);
 			}
+		} catch (RejectedExecutionException t) {
+			abort();
+			throw t;
 		} catch (Throwable t) {
 			abort();
 			throw new RejectedExecutionException(t);
