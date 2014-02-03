@@ -1,0 +1,36 @@
+Public Function SL(years, lihwa As Double) As Double
+' Сложна лихва
+    SL = (1 + lihwa) ^ years
+End Function
+
+Public Function SS(years, lihwa As Double) As Double
+' Сегашна стойност
+    SS = 1 / (1 + lihwa) ^ years
+End Function
+
+Public Function APA(years, lihwa As Double) As Double
+' Сложна лихва върху 1 ежегодно (Бъдеща стойност на анюитет)
+' Фонодв фактор
+    APA = ((1 + lihwa) ^ years - 1) / lihwa
+End Function
+
+Public Function AAPA(years, lihwa As Double) As Double
+' Ежегоден "ПОТЪВАЩ" фонд
+    AAPA = lihwa / ((1 + lihwa) ^ years - 1)
+End Function
+
+Public Function YP(years, lihwa As Double) As Double
+' Години покупка (Анюитетен фактор/сегашна стойност на 1 годишно)
+' SS(APA)
+    Dim tmp As Double
+    tmp = (1 + lihwa) ^ years
+    YP = (tmp - 1) / (tmp * lihwa)
+End Function
+
+Public Function BrojVnoski(suma, vnoska, lihva As Double) As Double
+' Изчислява брой вноски за постигане на дадена сума при дадени вноска и лихвен процент
+' За изчисляване на брой вноски за погасяване на заем при дадени вноска и лихвен процент,
+'    лихвеният процент се задава със знак минус
+' Удобно е да се използва със CEILING (прави ROUND-TO-UPPER-VALUE)
+    BrojVnoski = Log(suma * lihva / vnoska + 1) / Log(1 + lihva)
+End Function
