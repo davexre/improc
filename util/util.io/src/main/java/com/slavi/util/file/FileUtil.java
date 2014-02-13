@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
@@ -133,8 +134,9 @@ public class FileUtil {
 		return new String(os.toByteArray());
 */
 		StringBuilder sb = new StringBuilder();
+		InputStreamReader reader = new InputStreamReader(is);
 		int b;
-		while ((b = is.read()) >= 0) {
+		while ((b = reader.read()) >= 0) {
 			sb.append((char)b);
 		}
 		return sb.toString();
@@ -145,6 +147,53 @@ public class FileUtil {
 		copyStream(is, os);
 		is.close();
 		return os.toByteArray();
+	}
+
+	public static class RedirectStream implements Runnable {
+		InputStream is;
+		OutputStream os;
+		boolean logErrors;
+		boolean closeStreams;
+		
+		public RedirectStream(InputStream is, OutputStream os, boolean closeStreams, boolean logErrors) {
+			this.is = is;
+			this.os = os;
+			this.logErrors = logErrors;
+			this.closeStreams = closeStreams;
+		}
+		
+		public void run() {
+			try {
+				byte buf[] = new byte[256];
+				int len;
+				while ((len = is.read(buf)) >= 0) {
+					os.write(buf, 0, len);
+				}
+			} catch (IOException e) {
+				if (logErrors)
+					e.printStackTrace();
+			}
+			if (closeStreams) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					if (logErrors)
+						e.printStackTrace();
+				}
+				try {
+					os.close();
+				} catch (IOException e) {
+					if (logErrors)
+						e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public static void copyStreamAsynch(InputStream is, OutputStream os, boolean closeStreams, boolean logErrors) {
+		Thread thread = new Thread(new RedirectStream(is, os, closeStreams, logErrors), "Asynch stream copy");
+		//thread.setDaemon(true);
+		thread.start();
 	}
 	
 	public static void copyStream(InputStream is, OutputStream os) throws IOException {

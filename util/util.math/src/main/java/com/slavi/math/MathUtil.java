@@ -1,6 +1,8 @@
 package com.slavi.math;
 
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class MathUtil {
 	public static final double eps = calcDoubleEps();
@@ -207,4 +209,25 @@ public class MathUtil {
 		return a;
 	}
 
+	public static int gcd(Set<Integer> data) {
+		Set<Integer> set = new HashSet<>(data);
+		Set<Integer> newSet = new HashSet<>();
+		while (data.size() > 1) {
+			newSet.clear();
+			Integer first = null;
+			for (Integer i : data) {
+				if (first == null) {
+					first = i;
+					continue;
+				}
+				newSet.add(MathUtil.gcd(first, i));
+			}
+			
+			Set<Integer> dummy = data;
+			data = set;
+			set = dummy;
+		}
+		return data.size() > 0 ? data.iterator().next() : 0;
+	}
+	
 }
