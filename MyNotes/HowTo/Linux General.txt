@@ -1,0 +1,13 @@
+
+HDD check upon boot
+===================
+
+* check the current settings
+tune2fs -l /dev/sda1
+
+* check ONLY once a month
+tune2fs -i 1m -c 0 /dev/sda1
+
+
+
+

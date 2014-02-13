@@ -1,13 +1,13 @@
 Setup HP LaserJet P1005 on Ubuntu
 =================================
 
-1. Download and install from
-http://hplipopensource.com/hplip-web/install/manual/distros/ubuntu.html
+1. Download (the tar) from
+// OLD: http://hplipopensource.com/hplip-web/install/manual/distros/ubuntu.html
+http://sourceforge.net/projects/hplip/files/hplip/
 
-2. run hp-setup
+2. run ihplip-install
 
 3. Add to startup applications hp-systray
-
 
 * Error code "System Request 1806"
 info taken from
