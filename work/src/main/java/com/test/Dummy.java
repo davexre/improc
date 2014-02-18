@@ -1,12 +1,7 @@
 package com.test;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Dummy implements Serializable {
 

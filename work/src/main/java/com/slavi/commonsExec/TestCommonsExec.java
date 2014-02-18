@@ -1,7 +1,5 @@
 package com.slavi.commonsExec;
 
-import java.io.ByteArrayInputStream;
-
 import com.slavi.util.file.FileUtil;
 
 public class TestCommonsExec {
