@@ -393,7 +393,7 @@ public abstract class MyDelaunay2 {
 	}
 	
 	public String triangle2String(Triangle t) {
-		String isOk = MyDelaunay.isTriangleOk(t) ? "  " : "* ";
+		String isOk = t.isTriangleOk() ? "  " : "* ";
 		String id = Integer.toString(triangles.indexOf(t));
 		String a = Integer.toString(getPointId(t.a));
 		String b = Integer.toString(getPointId(t.b));

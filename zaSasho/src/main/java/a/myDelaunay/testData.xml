@@ -1,5 +1,5 @@
 <tests>
-<!-- 	<test>
+	<test>
 		<name>Error in flip</name>
 		<points>
 			<point x=" 38.0" y=" 79.0"/>
@@ -9,7 +9,6 @@
 			<point x="115.0" y="108.0"/>
 		</points>
 	</test>
--->
 
 	<test>
 		<name>Not connected point</name>
@@ -21,7 +20,40 @@
 			<point x="400.0" y="100.0"/>
 		</points>
 	</test>
-<!--
+	
+	<test>
+		<name>4 points in line</name>
+		<points>
+			<point x="100.0" y="100.0"/>
+			<point x="200.0" y="100.0"/>
+			<point x="400.0" y="100.0"/>
+			<point x="300.0" y="100.0"/>
+		</points>
+	</test>
+	
+	<test>
+		<name>diamond</name>
+		<points>
+			<point x="39.0"  y="63.0"/>
+			<point x="139.0" y="63.0"/>
+			<point x="188.0" y="63.0"/>
+			<point x="257.0" y="63.0"/>
+			<point x="221.0" y="9.0"/>
+			<point x="165.0" y="258.0"/>
+		</points>
+	</test>
+	
+	<test>
+		<name>diamond</name>
+		<points>
+			<point x="100.0" y="100.0"/>
+			<point x="200.0" y="100.0"/>
+			<point x="200.0" y="200.0"/>
+			<point x="100.0" y="182.0"/>
+			<point x="150.0" y="150.0"/>
+		</points>
+	</test>
+	
 	<test>
 		<name>5 points in a line</name>
 		<points>
@@ -32,5 +64,49 @@
 			<point x="500.0" y="500.0"/>
 		</points>
 	</test>
- -->
+	
+	<test>
+		<name>5 points in a diamond with 3 in a line</name>
+		<points>
+			<point x="38.0" y="79.0"/>
+			<point x="84.0" y="138.0"/>
+			<point x="90.0" y="21.0"/>
+			<point x="135.0" y="79.0"/>
+			<point x="121.0" y="79.0"/>
+		</points>
+	</test>
+
+	<test>
+		<name>triangle not flipped</name>
+		<points>
+			<point x="38.0" y="79.0"/>
+			<point x="84.0" y="138.0"/>
+			<point x="135.0" y="79.0"/>
+			<point x="200.0" y="79.0"/>
+			<point x="90.0" y="175.0"/>
+		</points>
+	</test>
+	
+	<test>
+		<name>endless loop in flip</name>
+		<points>
+			<point x="38.0" y="79.0"/>
+			<point x="84.0" y="138.0"/>
+			<point x="135.0" y="79.0"/>
+			<point x="410.0" y="79.0"/>
+			<point x="190.0" y="79.0"/>
+		</points>
+	</test>
+	
+	<test>
+		<name>bug in original voroglide</name>
+		<points>
+			<point x="100" y="100"/>
+			<point x="200" y="200"/>
+			<point x="200" y="100"/>
+			<point x="500" y="100"/>
+			<point x="250" y="200"/>
+		</points>
+	</test>
+	
 </tests>

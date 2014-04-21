@@ -105,11 +105,11 @@ public class Triangle {
 	 */
 	public boolean isCCW() {
 		if (c == null)
-			return false;
+			return true;
 		return GeometryUtil.isCCW(a, b, c);
 	}
 	
-	public void rotateClockWise() {
+	public void rotateCounterClockWise() {
 		Point2D.Double tmpP = a;
 		a = b;
 		b = c;
@@ -120,7 +120,7 @@ public class Triangle {
 		ca = tmpT;
 	}
 
-	public void rotateCounterClockWise() {
+	public void rotateClockWise() {
 		Point2D.Double tmpP = a;
 		a = c;
 		c = b;
@@ -138,21 +138,22 @@ public class Triangle {
 		InvalidRotation,
 	}
 	
-	public TriangleRotation rotateAndMatchA(Point2D.Double pointA) {
-		if (pointA == null)
+	public TriangleRotation rotateAndMatchA(Point2D.Double point) {
+		if (point == null)
 			return TriangleRotation.InvalidRotation;
-		if (pointA == a) {
+		if (point == a) {
 			return TriangleRotation.None;
 		}
-		if (pointA == b) {
+		if (point == b) {
 			rotateCounterClockWise();
 			return TriangleRotation.CCW;
 		}
-		if (pointA == c) {
+		if (point == c) {
 			rotateClockWise();
 			return TriangleRotation.CW;
 		}
-		return TriangleRotation.InvalidRotation;
+		throw new Error();
+		//return TriangleRotation.InvalidRotation;
 	}
 	
 	public void unrotate(TriangleRotation rotation) {
@@ -169,5 +170,47 @@ public class Triangle {
 		default:
 			throw new RuntimeException("WTF?");
 		}
+	}
+	
+	public Point2D.Double getNotAdjacentPoint(Triangle adjacentTriangle) {
+		if (!containsPoint(adjacentTriangle.a))
+			return adjacentTriangle.a;
+		if (!containsPoint(adjacentTriangle.b))
+			return adjacentTriangle.b;
+		if (!containsPoint(adjacentTriangle.c))
+			return adjacentTriangle.c;
+		return null;
+	}
+	
+	public boolean containsPoint(Point2D.Double p) {
+		return ((p != null) && (
+				(a == p) ||
+				(b == p) ||
+				(c == p)));
+	}
+	
+	public boolean isTriangleOk() {
+		if (
+			getAb().containsPoint(a) &&
+			getAb().containsPoint(b) &&
+			getBc().containsPoint(b) &&
+			getCa().containsPoint(a)) {
+			if (c == null) {
+				if (getBc().c == null && 
+					getCa().c == null)
+					return true;
+				return false;
+			}
+			if (getBc().containsPoint(c) &&
+				getCa().containsPoint(c))
+				return true;
+			if (!isCCW())
+				return false;
+			if (a == b || b == c || a == c)
+				return false;
+			if (GeometryUtil.pointToLine(a, b, c) != GeometryUtil.PointToLinePosition.NegativePlane)
+				return false;
+		}
+		return false;
 	}
 }

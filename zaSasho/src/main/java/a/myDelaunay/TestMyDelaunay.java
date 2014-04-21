@@ -121,7 +121,7 @@ public class TestMyDelaunay {
 	}
 	
 	
-	static void makeTestImage(TestData test, MyDelaunay d, String fouPart) throws Exception {
+	static File makeTestImage(TestData test, MyDelaunay d, String fouPart) throws Exception {
 		double w = test.extent.width * 0.1;
 		double h = test.extent.height * 0.1;
 		Rectangle2D.Double ext = new Rectangle2D.Double(
@@ -153,10 +153,12 @@ public class TestMyDelaunay {
 			drawPoint(tr, g, p, Integer.toString(i));
 		}
 		
-		ImageIO.write(bo, "png", new File(Const.workDir, "test " + test.name + " " + fouPart + ".png"));
+		File fou = new File(Const.workDir, "test " + test.name + " " + fouPart + ".png");
+		ImageIO.write(bo, "png", fou);
+		return fou;
 	}
 	
-	static void test1(TestData test) throws Exception {
+	static void testAndMakeImageForEachAddedPoint(TestData test) throws Exception {
 		MyDelaunay d = new MyDelaunay() {
 			public int getPointId(Point2D p) {
 				return points.indexOf(p);
@@ -175,11 +177,44 @@ public class TestMyDelaunay {
 		makeTestImage(test, d, "final");
 	}
 	
+	static void dumpPoints(TestData test) {
+		for (int i = 0; i < test.points.size(); i++) {
+			Point2D p = test.points.get(i);
+			System.out.println("points.add(new Point2D.Double(" + p.getX() + ", " + p.getY() + "));");
+		}
+	}
+	
+	static void testAndMakeImageOnError(TestData test) throws Exception {
+		MyDelaunay d = new MyDelaunay() {
+			public int getPointId(Point2D p) {
+				return points.indexOf(p);
+			}
+		};
+
+		for (int i = 0; i < test.points.size(); i++) {
+			Point2D.Double p = test.points.get(i);
+			try {
+				d.insertPoint(p);
+			} catch (Throwable t) {
+				dumpPoints(test);
+				throw t;
+			}
+			if (!d.isTopologyOk()) {
+				System.out.println("Error in test " + test.name + " at point " + i);
+				d.isTopologyOk();
+				System.out.println("Created image " + makeTestImage(test, d, Integer.toString(i)).getAbsolutePath());
+				d.dumpTriangles("-----");
+				throw new Error("Error in test " + test.name + " at point " + i);
+			}
+		}
+		
+	}
+	
 	public static void main(String[] args) throws Exception {
 		ArrayList<TestData> tests = readTests();
 		for (TestData test : tests) {
 			System.out.println("Using data for test \"" + test.name + "\"");
-			test1(test);
+			testAndMakeImageOnError(test);
 		}
 		System.out.println("Done.");
 	}

@@ -33,6 +33,12 @@ import a.obsolete.socketListenerThread;
 
 public class VoronoiApplet extends Applet implements ajUpdateable {
 
+	void addPoint(int x, int y) {
+		ajPoint p = new ajPoint(x, y);
+		delau.insertPoint(p);
+		canvas.add(p);
+	}
+	
 	public void init() {
 		String s = getParameter("FrameWidth");
 		String s1 = getParameter("FrameHeight");
@@ -89,6 +95,14 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		frame.add("Center", canvas);
 		canvas.unsetOffscreen();
 		delau = new ajExtendDelaunay(canvas);
+		
+		addPoint(100, 100);
+		addPoint(200, 200);
+		addPoint(200, 100);
+		addPoint(500, 100);
+		addPoint(250, 200);
+//		addPoint(210, 180);
+		
 		recFrame = new Frame("Recorder");
 		stepFrame = new Frame("Step Mode");
 		ajButtonImages ajbuttonimages = new ajButtonImages(this);
