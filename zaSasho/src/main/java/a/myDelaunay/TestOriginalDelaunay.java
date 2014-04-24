@@ -49,7 +49,7 @@ public class TestOriginalDelaunay {
 		}
 		return r;
 	}
-
+	
 	static void drawTriangle(Graphics g, ajTriangle t) {
 		g.setColor(Color.black);
 		g.drawLine(
@@ -71,40 +71,43 @@ public class TestOriginalDelaunay {
 		}
 	}
 
-	static void drawTriangleCenter(Graphics g, ajTriangle t, ArrayList<ajTriangle> triangles) {
+	static double distance(ajPoint a, ajPoint b) {
+		return Math.hypot(a.getX() - b.getX(), a.getY() - b.getY());
+	}
+
+	static double inscribedCircle(ajPoint a, ajPoint b, ajPoint c, ajPoint center) {
+		double ab = distance(a, b);
+		double bc = distance(b, c);
+		double ca = distance(c, a);
+		double p = ab + bc + ca;
+		if (p == 0) {
+			center.setX(a.getX());
+			center.setY(a.getY());
+			return 0;
+		}
+		center.setX((a.getX() * bc + b.getX() * ca + c.getX() * ab) / p); 
+		center.setY((a.getY() * bc + b.getY() * ca + c.getY() * ab) / p);
+		p *= 0.5;
+		return Math.sqrt((p - ab) * (p - bc) * (p - ca) / p);
+	}
+
+	static void drawTriangleCenter(Graphics g, ajTriangle t, String label) {
+		if (label == null && "".equals(label))
+			return;
 		ajPoint p;
 		if (t.c != null) {
-			p = t.circumcircle().c;
+			p = new ajPoint();
+			inscribedCircle(t.a, t.b, t.c, p);
 			g.setColor(Color.blue);
 		} else {
 			p = new ajPoint(
-					(t.a.getX() + t.b.getX()) * 0.5,
-					(t.a.getY() + t.b.getY()) * 0.5);
+					(2 * t.a.getX() + t.b.getX()) / 3,
+					(2 * t.a.getY() + t.b.getY()) / 3);
 			g.setColor(Color.red);
 		}
-		String text = Integer.toString(triangles.indexOf(t));
-		g.drawChars(text.toCharArray(), 0, text.length(),
-			(int) p.getX(),
-			(int) p.getY());
+		g.drawString(label, (int) p.getX(), (int) p.getY());
 	}
 
-	protected static int controlNodeWidth = 3;
-	
-	protected static int controlNodeHeight = 3;
-
-	static void drawPoint(Graphics g, ajPoint p, String label) {
-		g.setColor(Color.lightGray);
-		g.fillRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-				2 * controlNodeWidth, 2 * controlNodeHeight);
-		g.setColor(Color.black);
-		g.drawRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-				2 * controlNodeWidth, 2 * controlNodeHeight);
-		
-		g.drawString(label,
-			(int) (p.x + controlNodeWidth + controlNodeWidth),
-			(int) (p.y - controlNodeHeight));
-	}
-	
 	public static ArrayList<ajTriangle> getTriangles(ajTriangle root) {
 		ArrayList<ajTriangle> r = new ArrayList<ajTriangle>();
 		recursiveAddTriangle(root, r);
@@ -141,52 +144,55 @@ public class TestOriginalDelaunay {
 				"\tca=" + ca;
 	}
 
+	public static File makeTestImage(TestData test, ajDelaunay d, String fouPart) throws Exception {
+		// Calc image extent
+		int border = 20;
+		BufferedImage bo = new BufferedImage(
+				(int) test.extent.width + border + border, 
+				(int) test.extent.height + border + border, 
+				BufferedImage.TYPE_INT_RGB);
+		Graphics g = bo.getGraphics();
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, bo.getWidth(), bo.getHeight());
+		g.translate(
+				(int) (border - test.extent.x), 
+				(int) (border - test.extent.y));
 
-	static void test1(TestData test) throws IOException {
+		// draw
+		ArrayList<ajTriangle> triangles = getTriangles(d.root);
+		for (ajTriangle t : triangles) {
+			drawTriangle(g, t);
+		}
+		for (int i = 0; i < triangles.size(); i++) {
+			ajTriangle t = triangles.get(i);
+			drawTriangleCenter(g, t, Integer.toString(i));
+		}
+		for (int i = 0; i < test.points.size(); i++) {
+			ajPoint p = test.points.get(i);
+			Utils.drawPoint(g, (int) p.x, (int) p.y, Color.black, Integer.toString(i));
+		}
+		
+		File fou = new File(Const.workDir, "test " + test.name + " " + fouPart + ".png");
+		ImageIO.write(bo, "png", fou);
+		return fou;
+	}
+
+	static void testAndMakeImageOnError(TestData test, boolean makeImageForEachAddedPoint) throws Exception {
 		ajDelaunay d = new ajDelaunay(null);
 		
 		for (int i = 0; i < test.points.size(); i++) {
 			ajPoint p = test.points.get(i);
 			d.insertPoint(p);
+			if (makeImageForEachAddedPoint)
+				makeTestImage(test, d, Integer.toString(i));
 		}
-
-		double w = test.extent.width * 0.1;
-		double h = test.extent.height * 0.1;
-		Rectangle2D.Double ext = new Rectangle2D.Double(
-				test.extent.getX() - w,
-				test.extent.getY() - h,
-				test.extent.getWidth() + w + w,
-				test.extent.getHeight() + h + h);
-		
-		BufferedImage bo = new BufferedImage((int) ext.getWidth(), (int) ext.getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics g = bo.getGraphics();
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, bo.getWidth(), bo.getHeight());
-		g.translate((int) -ext.getX(), (int) -ext.getY()); 
-		
-		ArrayList<ajTriangle> triangles = getTriangles(d.root);
-		for (ajTriangle t : triangles) {
-			System.out.println(triangle2String(t, triangles, test.points));
-			drawTriangle(g, t);
-		}
-		
-		g.setColor(Color.blue);
-		for (ajTriangle t : triangles) {
-			drawTriangleCenter(g, t, triangles);
-		}
-		for (int i = 0; i < test.points.size(); i++) {
-			ajPoint p = test.points.get(i);
-			drawPoint(g, p, Integer.toString(i));
-		}
-		
-		ImageIO.write(bo, "png", new File(Const.workDir, "test " + test.name + ".png"));
 	}
 	
 	public static void main(String[] args) throws Exception {
 		ArrayList<TestData> tests = readTests();
 		for (TestData test : tests) {
 			System.out.println("Using data for test \"" + test.name + "\"");
-			test1(test);
+			testAndMakeImageOnError(test, true);
 		}
 		System.out.println("Done.");
 	}

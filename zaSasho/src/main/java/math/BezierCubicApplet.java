@@ -80,6 +80,6 @@ public class BezierCubicApplet extends BasePointsListApplet {
 			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
 		}
 		System.out.println(spline.p3);
-		paintPoints(g);
+		super.paint(g);
 	}
 }

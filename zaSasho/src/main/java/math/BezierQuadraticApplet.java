@@ -76,6 +76,6 @@ public class BezierQuadraticApplet extends BasePointsListApplet {
 			System.out.println(p);
 			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
 		}
-		paintPoints(g);
+		super.paint(g);
 	}
 }

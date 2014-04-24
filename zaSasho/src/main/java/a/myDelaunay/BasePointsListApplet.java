@@ -17,10 +17,6 @@ public class BasePointsListApplet extends Applet {
 	
 	protected ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 	
-	protected static int controlNodeWidth = 3;
-	
-	protected static int controlNodeHeight = 3;
-
 	protected int selectedIndex = -1;
 
 	void fixPoint(Point2D.Double p) {
@@ -62,10 +58,10 @@ public class BasePointsListApplet extends Applet {
 				selectedIndex = -1;
 				for (int i = 0; i < points.size(); i++) {
 					Point2D.Double p = points.get(i);
-					if ((p.x - controlNodeWidth <= x) && 
-						(x <= p.x + controlNodeWidth) && 
-						(p.y - controlNodeHeight <= y) && 
-						(y <= p.y + controlNodeHeight)) {
+					if ((p.x - Utils.controlNodeWidth <= x) && 
+						(x <= p.x + Utils.controlNodeWidth) && 
+						(p.y - Utils.controlNodeHeight <= y) && 
+						(y <= p.y + Utils.controlNodeHeight)) {
 						selectedIndex = i;
 						break;
 					}
@@ -99,26 +95,12 @@ public class BasePointsListApplet extends Applet {
 		addMouseMotionListener(listener);
 	}
 	
-	public void paintPoints(Graphics g) {
-		for (int i = 0; i < points.size(); i++) {
-			g.setColor(Color.lightGray);
-			Point2D.Double p = points.get(i);
-			g.fillRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-					2 * controlNodeWidth, 2 * controlNodeHeight);
-			g.setColor(i == selectedIndex ? Color.yellow : Color.black);
-			g.drawRect((int) (p.x - controlNodeWidth), (int) (p.y - controlNodeHeight), 
-					2 * controlNodeWidth, 2 * controlNodeHeight);
-			
-			if (drawPointIndex) {
-				String text = Integer.toString(i);
-				g.drawChars(text.toCharArray(), 0, text.length(),
-					(int) (p.getX() + controlNodeWidth + controlNodeWidth),
-					(int) (p.getY() - controlNodeHeight));
-			}
-		}
-	}
-	
 	public void paint(Graphics g) {
-		paintPoints(g);
+		for (int i = 0; i < points.size(); i++) {
+			Point2D.Double p = points.get(i);
+			Utils.drawPoint(g, (int) p.x, (int) p.y, 
+				i == selectedIndex ? Color.yellow : Color.black, 
+				drawPointIndex ? Integer.toString(i) : null);
+		}
 	}
 }

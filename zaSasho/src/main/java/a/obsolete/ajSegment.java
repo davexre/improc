@@ -50,60 +50,60 @@ public class ajSegment extends ajElement {
 		drawLineSegment(g, ajpoint.x, ajpoint.y, ajpoint1.x, ajpoint1.y);
 	}
 
-	public static void drawLineSegment(Graphics g, float f, float f1, float f2, float f3) {
-		float f4 = f2 - f;
-		float f5 = f3 - f1;
-		if (Math.abs(f4) >= Math.abs(f5)) {
-			if (f < -10000F) {
-				if (f2 < -10000F)
+	public static void drawLineSegment(Graphics g, float ax, float ay, float bx, float by) {
+		float dx = bx - ax;
+		float dy = by - ay;
+		if (Math.abs(dx) >= Math.abs(dy)) {
+			if (ax < -10000F) {
+				if (bx < -10000F)
 					return;
-				f1 = (f5 / f4) * (-10000F - f) + f1;
-				f = -10000F;
-			} else if (f > 10000F) {
-				if (f2 > 10000F)
+				ay = (dy / dx) * (-10000F - ax) + ay;
+				ax = -10000F;
+			} else if (ax > 10000F) {
+				if (bx > 10000F)
 					return;
-				f1 = (f5 / f4) * (10000F - f) + f1;
-				f = 10000F;
+				ay = (dy / dx) * (10000F - ax) + ay;
+				ax = 10000F;
 			}
-			if (f2 < -10000F) {
-				f3 = (f5 / f4) * (-10000F - f2) + f3;
-				f2 = -10000F;
-			} else if (f2 > 10000F) {
-				f3 = (f5 / f4) * (10000F - f2) + f3;
-				f2 = 10000F;
+			if (bx < -10000F) {
+				by = (dy / dx) * (-10000F - bx) + by;
+				bx = -10000F;
+			} else if (bx > 10000F) {
+				by = (dy / dx) * (10000F - bx) + by;
+				bx = 10000F;
 			}
-			if (f1 < -10000F && f3 < -10000F || f1 > 10000F && f3 > 10000F)
+			if (ay < -10000F && by < -10000F || ay > 10000F && by > 10000F)
 				return;
 		} else {
-			if (f1 < -10000F) {
-				if (f3 < -10000F)
+			if (ay < -10000F) {
+				if (by < -10000F)
 					return;
-				f = (f4 / f5) * (-10000F - f1) + f;
-				f1 = -10000F;
-			} else if (f1 > 10000F) {
-				if (f3 > 10000F)
+				ax = (dx / dy) * (-10000F - ay) + ax;
+				ay = -10000F;
+			} else if (ay > 10000F) {
+				if (by > 10000F)
 					return;
-				f = (f4 / f5) * (10000F - f1) + f;
-				f1 = 10000F;
+				ax = (dx / dy) * (10000F - ay) + ax;
+				ay = 10000F;
 			}
-			if (f3 < -10000F) {
-				f2 = (f4 / f5) * (-10000F - f3) + f2;
-				f3 = -10000F;
-			} else if (f3 > 10000F) {
-				f2 = (f4 / f5) * (10000F - f3) + f2;
-				f3 = 10000F;
+			if (by < -10000F) {
+				bx = (dx / dy) * (-10000F - by) + bx;
+				by = -10000F;
+			} else if (by > 10000F) {
+				bx = (dx / dy) * (10000F - by) + bx;
+				by = 10000F;
 			}
-			if (f < -10000F && f2 < -10000F || f > 10000F && f2 > 10000F)
+			if (ax < -10000F && bx < -10000F || ax > 10000F && bx > 10000F)
 				return;
 		}
-		if (f < f2)
-			g.drawLine(Math.round(f), Math.round(f1), Math.round(f2), Math.round(f3));
+		if (ax < bx)
+			g.drawLine(Math.round(ax), Math.round(ay), Math.round(bx), Math.round(by));
 		else
-			g.drawLine(Math.round(f2), Math.round(f3), Math.round(f), Math.round(f1));
-		int i = Math.round(f);
-		int j = Math.round(f1);
-		int k = Math.round(f2);
-		int l = Math.round(f3);
+			g.drawLine(Math.round(bx), Math.round(by), Math.round(ax), Math.round(ay));
+		int i = Math.round(ax);
+		int j = Math.round(ay);
+		int k = Math.round(bx);
+		int l = Math.round(by);
 		if (i < k) {
 			g.drawLine(i, j, k, l);
 			if (!thinLines) {

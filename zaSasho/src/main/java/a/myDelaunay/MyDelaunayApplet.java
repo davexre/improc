@@ -1,5 +1,4 @@
 package a.myDelaunay;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,44 +49,7 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 		points.add(new Point2D.Double(84.0, 40.0));
 	}
 	
-	void drawTriangle(Graphics g, Triangle t) {
-		g.setColor(Color.black);
-		g.drawLine(
-			(int) t.a.getX(),
-			(int) t.a.getY(),
-			(int) t.b.getX(),
-			(int) t.b.getY());
-		if (t.c != null) {
-			g.drawLine(
-				(int) t.a.getX(),
-				(int) t.a.getY(),
-				(int) t.c.getX(),
-				(int) t.c.getY());
-			g.drawLine(
-				(int) t.b.getX(),
-				(int) t.b.getY(),
-				(int) t.c.getX(),
-				(int) t.c.getY());
-		}
-	}
 
-	void drawTriangleCenter(Graphics g, Triangle t, ArrayList<Triangle> triangles) {
-		Point2D.Double p;
-		if (t.c != null) {
-			p = t.getInscribedCircle().center;
-			g.setColor(Color.blue);
-		} else {
-			p = new Point2D.Double(
-					(t.a.getX() + t.b.getX()) * 0.5,
-					(t.a.getY() + t.b.getY()) * 0.5);
-			g.setColor(Color.red);
-		}
-		String text = Integer.toString(triangles.indexOf(t));
-		g.drawChars(text.toCharArray(), 0, text.length(),
-			(int) p.getX(),
-			(int) p.getY());
-	}
-	
 	public void paint(Graphics g) {
 		MyDelaunay d = new MyDelaunay() {
 			public int getPointId(Point2D p) {
@@ -103,15 +65,15 @@ public class MyDelaunayApplet extends BasePointsListApplet {
 			dumpPoints();
 			t.printStackTrace();
 		}
+		// draw
 		ArrayList<Triangle> triangles = new ArrayList<Triangle>(d.getTriangles());
 		for (Triangle t : triangles) {
-			drawTriangle(g, t);
+			Utils.drawTriangle(g, t);
 		}
-		
-		g.setColor(Color.blue);
-		for (Triangle t : triangles) {
-			drawTriangleCenter(g, t, triangles);
+		for (int i = 0; i < triangles.size(); i++) {
+			Triangle t = triangles.get(i);
+			Utils.drawTriangleCenter(g, t, Integer.toString(i));
 		}
-		paintPoints(g);
+		super.paint(g);
 	}
 }

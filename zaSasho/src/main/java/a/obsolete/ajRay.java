@@ -38,35 +38,35 @@ public class ajRay extends ajSegment {
 		drawRay(g, ajpoint.x, ajpoint.y, f, f1);
 	}
 
-	public static void drawRay(Graphics g, float f, float f1, float f2, float f3) {
-		float f4 = f2 - f;
-		float f5 = f3 - f1;
-		if (Math.abs(f4) >= Math.abs(f5)) {
-			if (f4 > 0.0F)
-				if (f > 10000F) {
+	public static void drawRay(Graphics g, float startX, float startY, float px, float py) {
+		float dx = px - startX;
+		float dy = py - startY;
+		if (Math.abs(dx) >= Math.abs(dy)) {
+			if (dx > 0.0F)
+				if (startX > 10000F) {
 					return;
 				} else {
-					ajSegment.drawLineSegment(g, f, f1, 10000F, (f5 / f4) * (10000F - f) + f1);
+					ajSegment.drawLineSegment(g, startX, startY, 10000F, (dy / dx) * (10000F - startX) + startY);
 					return;
 				}
-			if (f < -10000F) {
+			if (startX < -10000F) {
 				return;
 			} else {
-				ajSegment.drawLineSegment(g, f, f1, -10000F, (f5 / f4) * (-10000F - f) + f1);
+				ajSegment.drawLineSegment(g, startX, startY, -10000F, (dy / dx) * (-10000F - startX) + startY);
 				return;
 			}
 		}
-		if (f5 > 0.0F)
-			if (f1 > 10000F) {
+		if (dy > 0.0F)
+			if (startY > 10000F) {
 				return;
 			} else {
-				ajSegment.drawLineSegment(g, f, f1, (f4 / f5) * (10000F - f1) + f, 10000F);
+				ajSegment.drawLineSegment(g, startX, startY, (dx / dy) * (10000F - startY) + startX, 10000F);
 				return;
 			}
-		if (f1 < -10000F) {
+		if (startY < -10000F) {
 			return;
 		} else {
-			ajSegment.drawLineSegment(g, f, f1, (f4 / f5) * (-10000F - f1) + f, -10000F);
+			ajSegment.drawLineSegment(g, startX, startY, (dx / dy) * (-10000F - startY) + startX, -10000F);
 			return;
 		}
 	}
