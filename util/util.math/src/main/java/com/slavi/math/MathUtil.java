@@ -161,7 +161,7 @@ public class MathUtil {
 			if (one == onePlusEps) {
 				return eps;
 			}
-			eps /= 10.0;
+			eps /= 2.0;
 		}
 	}
 
@@ -173,7 +173,7 @@ public class MathUtil {
 			if (one == onePlusEps) {
 				return eps;
 			}
-			eps /= 10.0f;
+			eps /= 2.0f;
 		}
 	}
 

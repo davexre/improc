@@ -51,10 +51,6 @@ public class ajDelaunay extends ajElement {
 		showVor = flag;
 	}
 
-	public boolean showVoronoiState() {
-		return showVor;
-	}
-
 	public void showConvex(boolean flag) {
 		showHull = flag;
 	}

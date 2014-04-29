@@ -5,6 +5,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class GeometryUtil {
@@ -163,7 +164,7 @@ public class GeometryUtil {
 	/**
 	 * @return the vertex%points.size() at which the polygon deviates from a (nearly) straight line from v1
 	 */
-	private static int findAngleStart(ArrayList<Point2D> points, int startAt, double d2) {
+	private static int findAngleStart(List<? extends Point2D> points, int startAt, double d2) {
 		int len = points.size();
 		Point2D curPoint = points.get(startAt % len);
 		int nextPointIndex = startAt;
@@ -189,7 +190,7 @@ public class GeometryUtil {
 	 * points that are lieing on (almost) stright lines with in a distance d. The method MIGHT
 	 * return an invalid polygon, i.e. polygon containing less that 3 points.    
 	 */
-	public static ArrayList<Point2D> simplifyPolygon(ArrayList<Point2D> polygon, double d) {
+	public static ArrayList<Point2D> simplifyPolygon(List<? extends Point2D> polygon, double d) {
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
 		int startAt = -1;
@@ -347,15 +348,45 @@ public class GeometryUtil {
 	 * Code borrowed from http://www.java.net/node/673604
 	 * More info at http://paulbourke.net/geometry/
 	 */
-	public static Point2D lineIntersectsLine(Line2D line1, Line2D line2) {
+	public static Point2D.Double lineIntersectsLine(Point2D line1A, Point2D line1B, Point2D line2A, Point2D line2B) {
 		double a1, b1, c1, a2, b2, c2, denom;
-		a1 = line1.getY2() - line1.getY1();
-		b1 = line1.getX1() - line1.getX2();
-		c1 = line1.getX2() * line1.getY1() - line1.getX1() * line1.getY2();
+		a1 = line1B.getY() - line1A.getY();
+		b1 = line1A.getX() - line1B.getX();
+		c1 = line1B.getX() * line1A.getY() - line1A.getX() * line1A.getY();
 		// a1x + b1y + c1 = 0 line1 eq
-		a2 = line2.getY2() - line2.getY1();
-		b2 = line2.getX1() - line2.getX2();
-		c2 = line2.getX2() * line2.getY1() - line2.getX1() * line2.getY2();
+		a2 = line2B.getY() - line2A.getY();
+		b2 = line2A.getX() - line2B.getX();
+		c2 = line2B.getX() * line2A.getY() - line2A.getX() * line2B.getY();
+		// a2x + b2y + c2 = 0 line2 eq
+		denom = a1 * b2 - a2 * b1;
+		if (denom == 0)
+			return null;
+		return new Point2D.Double(
+				(b1 * c2 - b2 * c1) / denom, 
+				(a2 * c1 - a1 * c2) / denom);
+	}
+
+	public static Point2D.Double lineIntersectsLine(Line2D line1, Line2D line2) {
+		return lineIntersectsLine(
+				line1.getX1(), line1.getY1(),
+				line1.getX2(), line1.getY2(),
+				line2.getX1(), line1.getY1(),
+				line2.getX2(), line1.getY2());
+	}
+	
+	public static Point2D.Double lineIntersectsLine(
+			double line1X1, double line1Y1,
+			double line1X2, double line1Y2,
+			double line2X1, double line2Y1,
+			double line2X2, double line2Y2) {
+		double a1, b1, c1, a2, b2, c2, denom;
+		a1 = line1Y2 - line1Y1;
+		b1 = line1X1 - line1X2;
+		c1 = line1X2 * line1Y1 - line1X1 * line1Y2;
+		// a1x + b1y + c1 = 0 line1 eq
+		a2 = line2Y2 - line2Y1;
+		b2 = line2X1 - line2X2;
+		c2 = line2X2 * line2Y1 - line2X1 * line2Y2;
 		// a2x + b2y + c2 = 0 line2 eq
 		denom = a1 * b2 - a2 * b1;
 		if (denom == 0)

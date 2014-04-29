@@ -1,17 +1,16 @@
 package a.myDelaunay;
 
-import java.applet.Applet;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class BasePointsListApplet extends Applet {
+import javax.swing.JPanel;
+
+public class BasePointsListPanel extends JPanel {
 
 	protected boolean fixedNumberOfPoints = false;
 	
@@ -32,8 +31,7 @@ public class BasePointsListApplet extends Applet {
 			p.y = getHeight();
 	}
 	
-	public void init() {
-		setName(getClass().getName());
+	public BasePointsListPanel() {
 		MouseAdapter listener = new MouseAdapter() {
 			public void mouseDragged(MouseEvent e) {
 				int x = e.getX();

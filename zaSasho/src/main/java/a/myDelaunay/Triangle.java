@@ -5,9 +5,9 @@ import java.awt.geom.Point2D;
 import com.slavi.math.GeometryUtil;
 
 public class Triangle {
-	public Point2D.Double a;
-	public Point2D.Double b;
-	public Point2D.Double c;	// c == null -> Half plane
+	public Point2D a;
+	public Point2D b;
+	public Point2D c;	// c == null -> Half plane
 	
 	private Triangle ab;
 	private Triangle bc;		// bc == null -> Half plane
@@ -45,12 +45,12 @@ public class Triangle {
 
 	public Triangle() {}
 
-	public Triangle(Point2D.Double a, Point2D.Double b) {
+	public Triangle(Point2D a, Point2D b) {
 		this.a = a;
 		this.b = b;
 	}
 	
-	public Triangle(Point2D.Double a, Point2D.Double b, Point2D.Double c) {
+	public Triangle(Point2D a, Point2D b, Point2D c) {
 		this.a = a;
 		switch (GeometryUtil.pointToLine(a, b, c)) {
 		case GeometryUtil.PointToLinePosition.EqualsTheStartPoint:
@@ -110,7 +110,7 @@ public class Triangle {
 	}
 	
 	public void rotateCounterClockWise() {
-		Point2D.Double tmpP = a;
+		Point2D tmpP = a;
 		a = b;
 		b = c;
 		c = tmpP;
@@ -121,7 +121,7 @@ public class Triangle {
 	}
 
 	public void rotateClockWise() {
-		Point2D.Double tmpP = a;
+		Point2D tmpP = a;
 		a = c;
 		c = b;
 		b = tmpP;
@@ -138,7 +138,7 @@ public class Triangle {
 		InvalidRotation,
 	}
 	
-	public TriangleRotation rotateAndMatchA(Point2D.Double point) {
+	public TriangleRotation rotateAndMatchA(Point2D point) {
 		if (point == null)
 			return TriangleRotation.InvalidRotation;
 		if (point == a) {
@@ -172,7 +172,7 @@ public class Triangle {
 		}
 	}
 	
-	public Point2D.Double getNotAdjacentPoint(Triangle adjacentTriangle) {
+	public Point2D getNotAdjacentPoint(Triangle adjacentTriangle) {
 		if (!containsPoint(adjacentTriangle.a))
 			return adjacentTriangle.a;
 		if (!containsPoint(adjacentTriangle.b))
@@ -182,7 +182,7 @@ public class Triangle {
 		return null;
 	}
 	
-	public boolean containsPoint(Point2D.Double p) {
+	public boolean containsPoint(Point2D p) {
 		return ((p != null) && (
 				(a == p) ||
 				(b == p) ||

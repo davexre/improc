@@ -1,7 +1,8 @@
 package a.myDelaunay;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -15,6 +16,7 @@ import javax.imageio.ImageIO;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
+import com.slavi.math.ColorSetPick;
 import com.slavi.util.Const;
 import com.slavi.util.xml.XMLHelper;
 
@@ -22,8 +24,8 @@ public class TestMyDelaunay {
 
 	public static class TestData {
 		public String name;
-		public ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
-		public Rectangle2D.Double extent = new Rectangle2D.Double();
+		public ArrayList<Point2D> points = new ArrayList<Point2D>();
+		public Rectangle2D extent = new Rectangle2D.Double();
 	}
 	
 	public static ArrayList<TestData> readTests() throws JDOMException, IOException {
@@ -37,12 +39,12 @@ public class TestMyDelaunay {
 			boolean isFirst = true;
 			for (Object opoint : eltest.getChild("points").getChildren()) {
 				Element elpoint = (Element) opoint;
-				Point2D.Double point = new Point2D.Double(
+				Point2D point = new Point2D.Double(
 						Double.parseDouble(elpoint.getAttributeValue("x")),
 						Double.parseDouble(elpoint.getAttributeValue("y")));
 				testData.points.add(point);
 				if (isFirst) {
-					testData.extent.setRect(point.x, point.y, 0, 0);
+					testData.extent.setRect(point.getX(), point.getY(), 0, 0);
 					isFirst = false;
 				} else {
 					testData.extent.add(point);
@@ -55,17 +57,23 @@ public class TestMyDelaunay {
 
 	public static File makeTestImage(TestData test, MyDelaunay d, String fouPart) throws Exception {
 		// Calc image extent
-		int border = 20;
+		int border = 120;
+		ColorSetPick colorPick = new ColorSetPick();
+		Rectangle2D extent = new Rectangle2D.Double(
+				test.extent.getX() - border, 
+				test.extent.getY() - border, 
+				test.extent.getWidth() + border + border, 
+				test.extent.getHeight() + border + border);
 		BufferedImage bo = new BufferedImage(
-				(int) test.extent.width + border + border, 
-				(int) test.extent.height + border + border, 
+				(int) extent.getWidth(), 
+				(int) extent.getHeight(), 
 				BufferedImage.TYPE_INT_RGB);
-		Graphics g = bo.getGraphics();
+		Graphics2D g = (Graphics2D) bo.getGraphics();
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, bo.getWidth(), bo.getHeight());
 		g.translate(
-				(int) (border - test.extent.x), 
-				(int) (border - test.extent.y));
+				(int) (border - test.extent.getX()), 
+				(int) (border - test.extent.getY()));
 
 		// draw
 		ArrayList<Triangle> triangles = new ArrayList<Triangle>(d.getTriangles());
@@ -77,8 +85,16 @@ public class TestMyDelaunay {
 			Utils.drawTriangleCenter(g, t, Integer.toString(i));
 		}
 		for (int i = 0; i < test.points.size(); i++) {
-			Point2D.Double p = test.points.get(i);
-			Utils.drawPoint(g, (int) p.x, (int) p.y, Color.black, Integer.toString(i));
+			Point2D p = test.points.get(i);
+			Utils.drawPoint(g, (int) p.getX(), (int) p.getY(), Color.black, Integer.toString(i));
+		}
+		
+		ArrayList<Path2D> voronoi = MyVoronoi.computeVoroni(d, extent);
+		for (Path2D path : voronoi) {
+			g.setColor(colorPick.getNextColor(80));
+			g.fill(path);
+			g.setColor(Color.blue);
+			g.draw(path);
 		}
 		
 		File fou = new File(Const.workDir, "test " + test.name + " " + fouPart + ".png");
@@ -101,7 +117,7 @@ public class TestMyDelaunay {
 		};
 
 		for (int i = 0; i < test.points.size(); i++) {
-			Point2D.Double p = test.points.get(i);
+			Point2D p = test.points.get(i);
 			try {
 				d.insertPoint(p);
 			} catch (Throwable t) {

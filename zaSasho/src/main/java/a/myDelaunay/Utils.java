@@ -55,7 +55,7 @@ public class Utils {
 	public static void drawTriangleCenter(Graphics g, Triangle t, String label) {
 		if (label == null && "".equals(label))
 			return;
-		Point2D.Double p;
+		Point2D p;
 		if (t.c != null) {
 			p = t.getInscribedCircle().center;
 			g.setColor(Color.blue);

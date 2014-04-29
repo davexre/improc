@@ -97,6 +97,16 @@
 			<point x="190.0" y="79.0"/>
 		</points>
 	</test>
+
+	<test>
+		<name>roundoff errors lead to endless loop in flip</name>
+		<points>
+			<point x="40.0" y="80.0"/>
+			<point x="40.0" y="160.0"/>
+			<point x="120.0" y="80.0"/>
+			<point x="120.0" y="160.0"/>
+		</points>
+	</test>
 	
 	<test>
 		<name>bug in original voroglide</name>
@@ -108,5 +118,14 @@
 			<point x="250" y="200"/>
 		</points>
 	</test>
-	
+
+	<test>
+		<name>bug in voronoi</name>
+		<points>
+			<point x="38.0" y="79.0"/>
+			<point x="84.0" y="138.0"/>
+			<point x="145.0" y="79.0"/>
+		</points>
+	</test>
+
 </tests>

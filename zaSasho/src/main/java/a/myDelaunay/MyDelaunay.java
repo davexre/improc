@@ -17,7 +17,7 @@ public abstract class MyDelaunay {
 
 	public abstract int getPointId(Point2D p);
 	
-	public ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
+	public ArrayList<Point2D> points = new ArrayList<Point2D>();
 	public ArrayList<Triangle> triangles = new ArrayList<Triangle>();
 	public HashSet<Triangle> trianglesToCheck = new HashSet<Triangle>();
 	public Triangle root;
@@ -28,13 +28,13 @@ public abstract class MyDelaunay {
 		return triangles;
 	}
 	
-	public void insertPoint(Point2D.Double p) {
+	public void insertPoint(Point2D p) {
 		points.add(p);
 		if (points.size() == 1) {
 			return;
 		}
 		if (points.size() == 2) {
-			Point2D.Double a = points.get(0);
+			Point2D a = points.get(0);
 			root = new Triangle(a, p);
 			Triangle mirrorT = new Triangle(p, a);
 			triangles.add(root);
@@ -60,7 +60,7 @@ public abstract class MyDelaunay {
 		}
 	}
 	
-	private void doInsert(Triangle t, Point2D.Double p) {
+	private void doInsert(Triangle t, Point2D p) {
 		while (true) {
 			int abp = GeometryUtil.pointToLine(t.a, t.b, p);
 			switch (abp) {
@@ -191,7 +191,7 @@ public abstract class MyDelaunay {
 		}
 	}
 	
-	private void splitOnEdgeAB(Triangle left, Point2D.Double p) {
+	private void splitOnEdgeAB(Triangle left, Point2D p) {
 		Triangle tmp;
 		Triangle right = new Triangle(p, left.b);
 		Triangle mirrorLeft = new Triangle(p, left.a);
@@ -237,7 +237,7 @@ public abstract class MyDelaunay {
 	/**
 	 * Extends Outside, i.e. increase the convex hull of all the points.
 	 */
-	void extendOutside(Triangle t, Point2D.Double p) {
+	void extendOutside(Triangle t, Point2D p) {
 		// Triangle t is a "border" tirangle, i.e. t.c == null and t is also 
 		//   the "left most" triangle applicapble for extending to point p
 		Triangle leftT = new Triangle();
@@ -323,12 +323,13 @@ public abstract class MyDelaunay {
 		if ((t.c == null) || (t1.c == null)) {
 			return false;
 		}
-		Point2D.Double p = t.getNotAdjacentPoint(t1);
+		Point2D p = t.getNotAdjacentPoint(t1);
 		if (p == null)
 			return false;
-		if (!t.getCircumCircle().isPointInside(p)) {
+		if (!t.getCircumCircle().isPointInsideEps(p)) {
 			return false;
 		}
+		
 		if (t.getAb() == t1) {
 			// do nothing
 		} else if (t.getBc() == t1) {
@@ -372,15 +373,15 @@ public abstract class MyDelaunay {
 			if (t.c == null)
 				continue;
 			Circle c = t.getCircumCircle();
-			Point2D.Double p = t.getNotAdjacentPoint(t.getAb());
+			Point2D p = t.getNotAdjacentPoint(t.getAb());
 			if (p != null)
-				result &= !c.isPointInside(p);
+				result &= !c.isPointInsideEps(p);
 			p = t.getNotAdjacentPoint(t.getBc());
 			if (p != null)
-				result &= !c.isPointInside(p);
+				result &= !c.isPointInsideEps(p);
 			p = t.getNotAdjacentPoint(t.getCa());
 			if (p != null)
-				result &= !c.isPointInside(p);
+				result &= !c.isPointInsideEps(p);
 		}
 		return result;
 	}
