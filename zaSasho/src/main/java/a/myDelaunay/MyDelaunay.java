@@ -51,14 +51,22 @@ public abstract class MyDelaunay {
 		}
 
 		doInsert(root, p);
+		for (Triangle t : triangles)
+			t.flipCount = 0;
 		checkAndFlip();
+		for (Triangle t : triangles)
+			if (t.flipCount > individualMaxFlipCount)
+				individualMaxFlipCount = t.flipCount;
 		
+/*		
 		boolean isok = isTopologyOk();
 		if (!isok) {
 			dumpTriangles("bad topology");
 			throw new Error();
-		}
+		}*/
 	}
+	
+	public int individualMaxFlipCount = 0;
 	
 	private void doInsert(Triangle t, Point2D p) {
 		while (true) {
@@ -302,8 +310,11 @@ public abstract class MyDelaunay {
 		}
 	}
 	
-	void checkAndFlip() {
+	public void checkAndFlip() {
 		while (!trianglesToCheck.isEmpty()) {
+			if (trianglesToCheck.size() > maxToFlip)
+				maxToFlip = trianglesToCheck.size();
+			
 			Iterator<Triangle> it = trianglesToCheck.iterator();
 			Triangle t = it.next();
 			it.remove();
@@ -317,6 +328,23 @@ public abstract class MyDelaunay {
 				flipAdjacentTriangles(t, ca))
 				; // do nothing
 		}
+	}
+	
+	public int maxToFlip = 0;
+	public int flipCount = 0;
+	
+	void dumpFlipInfo(Triangle t1, Triangle t2) {
+		int it1 = triangles.indexOf(t1);
+		int it2 = triangles.indexOf(t2);
+/*		if (it1 > it2) {
+			int tmp = it1;
+			it1 = it2;
+			it2 = tmp;
+			Triangle tmpT = t1;
+			t1 = t2;
+			t2 = tmpT;
+		}
+*/		System.out.println("Flip\t" + it1 + "\t" + it2 + "\t" + t1.flipCount + "/" + t2.flipCount);
 	}
 	
 	boolean flipAdjacentTriangles(Triangle t, Triangle t1) {
@@ -339,6 +367,10 @@ public abstract class MyDelaunay {
 		} else {
 			return false; // triangles are no longer andjacent...
 		}
+		flipCount++;
+		t.flipCount++;
+		t1.flipCount++;
+//		dumpFlipInfo(t, t1);
 		t1.rotateAndMatchA(t.b);
 
 		Triangle tmp = t.getBc();
@@ -414,5 +446,13 @@ public abstract class MyDelaunay {
 				"\tab=" + ab + (abOk ? "" : "*") +
 				"\tbc=" + bc + (bcOk ? "" : "*") +
 				"\tca=" + ca + (caOk ? "" : "*");
+	}
+	
+	public void dumpStatistics() {
+		System.out.println("Individual max Flip count: " + individualMaxFlipCount);
+		System.out.println("MaxToFlip:  " + maxToFlip);
+		System.out.println("Flip count: " + flipCount);
+		System.out.println("Triangles:  " + triangles.size());
+		System.out.println("Points:     " + points.size());
 	}
 }

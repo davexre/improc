@@ -130,9 +130,10 @@ public class TestMyDelaunay {
 				d.dumpTriangles("-----");
 				throw new Error("Error in test " + test.name + " at point " + i);
 			}
-			if (makeImageForEachAddedPoint)
-				makeTestImage(test, d, Integer.toString(i));
+//			if (makeImageForEachAddedPoint)
+//				makeTestImage(test, d, Integer.toString(i));
 		}
+		d.dumpStatistics();
 	}
 	
 	public static void main(String[] args) throws Exception {

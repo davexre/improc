@@ -128,17 +128,20 @@ public class MyVoronoi {
 			line2Y2 = lowerLeft.getY();
 			break;
 		}
-		Point2D mid = GeometryUtil.midPoint(a, b);
+		double wa = getPointWeight(a);
+		double wb = getPointWeight(b);
+		Point2D splitPoint = GeometryUtil.splitPoint(a, b, wa / (wa+wb));
+		//Point2D splitPoint = GeometryUtil.midPoint(a, b);
 		double bx = b.getX() - a.getX();
 		double by = b.getY() - a.getY();
 		double angle = Math.atan2(by, bx) + MathUtil.PIover2; // atan2(y, x) + pi/2 = atan2(x, y)
-		bx = mid.getX() + 100 * Math.cos(angle);
-		by = mid.getY() + 100 * Math.sin(angle);
+		bx = splitPoint.getX() + 100 * Math.cos(angle);
+		by = splitPoint.getY() + 100 * Math.sin(angle);
 		
-		Point2D r = GeometryUtil.lineIntersectsLine(mid.getX(), mid.getY(), bx, by, line2X1, line2Y1, line2X2, line2Y2);
+		Point2D r = GeometryUtil.lineIntersectsLine(splitPoint.getX(), splitPoint.getY(), bx, by, line2X1, line2Y1, line2X2, line2Y2);
 		if (r == null)
 			return null;
-		int pos = pointToLine(mid.getX(), mid.getY(), bx, by, r.getX(), r.getY());
+		int pos = pointToLine(splitPoint.getX(), splitPoint.getY(), bx, by, r.getX(), r.getY());
 		if (pos == GeometryUtil.PointToLinePosition.AfterTheEndPoint || 
 			pos == GeometryUtil.PointToLinePosition.Inside ||
 			pos == GeometryUtil.PointToLinePosition.EqualsTheEndPoint) {
@@ -178,6 +181,15 @@ public class MyVoronoi {
 		}
 		r.closePath();
 		return r;
+	}
+
+	static double getPointWeight(Point2D p) {
+		if (p instanceof DataWithWeight) {
+			return ((DataWithWeight) p).getWeight();
+		} else {
+			return 1;
+		}
+			
 	}
 	
 	public static ArrayList<Path2D> computeVoroni(MyDelaunay d, Rectangle2D voronoiExtent) {
@@ -241,8 +253,52 @@ public class MyVoronoi {
 						pathPoints.add(endp);
 					}
 				} else {
-					Point2D c = t1.getCircumCircle().center;
-					pathPoints.add(c);
+					double wa = getPointWeight(t1.a);
+					double wb = getPointWeight(t1.b);
+					double wc = getPointWeight(t1.c);
+					
+					Point2D a1 = GeometryUtil.splitPoint(t1.a, t1.b, wa / (wa+wb));
+					double b1x = t1.b.getX() - t1.a.getX();
+					double b1y = t1.b.getY() - t1.a.getY();
+					double angle1 = Math.atan2(b1y, b1x) + MathUtil.PIover2; // atan2(y, x) + pi/2 = atan2(x, y)
+					b1x = a1.getX() + 100 * Math.cos(angle1);
+					b1y = a1.getY() + 100 * Math.sin(angle1);
+
+					Point2D a2 = GeometryUtil.splitPoint(t1.b, t1.c, wb / (wb+wc));
+					double b2x = t1.c.getX() - t1.b.getX();
+					double b2y = t1.c.getY() - t1.b.getY();
+					double angle2 = Math.atan2(b2y, b2x) + MathUtil.PIover2; // atan2(y, x) + pi/2 = atan2(x, y)
+					b2x = a2.getX() + 100 * Math.cos(angle2);
+					b2y = a2.getY() + 100 * Math.sin(angle2);
+					
+					Point2D a3 = GeometryUtil.splitPoint(t1.c, t1.a, wc / (wc+wa));
+					double b3x = t1.a.getX() - t1.c.getX();
+					double b3y = t1.a.getY() - t1.c.getY();
+					double angle3 = Math.atan2(b3y, b3x) + MathUtil.PIover2; // atan2(y, x) + pi/2 = atan2(x, y)
+					b3x = a3.getX() + 100 * Math.cos(angle3);
+					b3y = a3.getY() + 100 * Math.sin(angle3);
+
+					Point2D c1 = GeometryUtil.lineIntersectsLine(
+							a1.getX(), a1.getY(), b1x, b1y, 
+							a2.getX(), a2.getY(), b2x, b2y);
+
+					Point2D c2 = GeometryUtil.lineIntersectsLine(
+							a1.getX(), a1.getY(), b1x, b1y, 
+							a3.getX(), a3.getY(), b3x, b3y);
+
+					Point2D c3 = GeometryUtil.lineIntersectsLine(
+							a2.getX(), a2.getY(), b2x, b2y, 
+							a3.getX(), a3.getY(), b3x, b3y);
+
+					double dist = c1.distance(c2);
+					dist = Math.max(dist, c1.distance(c3));
+					dist = Math.max(dist, c2.distance(c3));
+					
+//					System.out.println("DIST: " + MathUtil.d20(dist));
+					Circle ccircle = t1.getCircumCircle();
+					Point2D c = ccircle.center;
+					
+					pathPoints.add(dummy ? c3 : c1);
 				}
 				
 				t1 = getNextTriangle(t1, p);
@@ -255,4 +311,6 @@ public class MyVoronoi {
 		}
 		return r;
 	}
+	
+	public static boolean dummy = false;
 }

@@ -5,6 +5,8 @@ import java.awt.geom.Point2D;
 import com.slavi.math.GeometryUtil;
 
 public class Triangle {
+	public int flipCount = 0;
+	
 	public Point2D a;
 	public Point2D b;
 	public Point2D c;	// c == null -> Half plane

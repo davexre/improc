@@ -7,38 +7,170 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import javax.swing.AbstractAction;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import com.slavi.math.ColorSetPick;
 
 public class ZaSasho extends JApplet {
 
+	public static class MyPointWithWeight extends Point2D.Double implements DataWithWeight {
+		double weight = 1.0;
+		
+		public MyPointWithWeight() {
+		}
+		
+		public MyPointWithWeight(double x, double y) {
+			super(x, y);
+		}
+		
+		public MyPointWithWeight(double x, double y, double weight) {
+			super(x, y);
+			this.weight = weight;
+		}
+		
+		public double getWeight() {
+			return weight;
+		}
+		
+		public void setWeight(double weight) {
+			this.weight = weight;
+		}
+	}
+	
 	MyDelaunayPanel delaunayPanel;
 	JCheckBox cbTriangles;
 	JCheckBox cbPolygons;
 	
-	class MyDelaunayPanel extends BasePointsListPanel {
+	class MyDelaunayPanel extends JComponent {
+		protected boolean drawPointIndex = false;
+		
+		protected ArrayList<MyPointWithWeight> points = new ArrayList<MyPointWithWeight>();
+		
+		protected int selectedIndex = -1;
+		
+		private boolean mouseButton1Down = false;
+
+		void fixPoint(Point2D p) {
+			double x = p.getX();
+			double y = p.getY();
+			if (x < 0) 
+				x = 0;
+			if (y < 0)
+				y = 0;
+			if (x >= getWidth())
+				x = getWidth();
+			if (y >= getHeight())
+				y = getHeight();
+			p.setLocation(x, y);
+		}
+		
 		public MyDelaunayPanel() {
+			MouseAdapter listener = new MouseAdapter() {
+				public void mouseDragged(MouseEvent e) {
+					int x = e.getX();
+					int y = e.getY();
+					if ((selectedIndex >= 0) && mouseButton1Down) {
+						Point2D p = points.get(selectedIndex);
+						p.setLocation(x, y);
+						fixPoint(p);
+						repaint();
+					}
+				}
+
+				public void mouseReleased(MouseEvent e) {
+					if (e.getButton() == MouseEvent.BUTTON1) {
+						mouseButton1Down = false;
+					}
+					repaint();
+				}
+				
+				public void mousePressed(MouseEvent e) {
+					int x = e.getX();
+					int y = e.getY();
+
+					selectedIndex = -1;
+					for (int i = 0; i < points.size(); i++) {
+						Point2D p = points.get(i);
+						if ((p.getX() - Utils.controlNodeWidth <= x) && 
+							(x <= p.getX() + Utils.controlNodeWidth) && 
+							(p.getY() - Utils.controlNodeHeight <= y) && 
+							(y <= p.getY() + Utils.controlNodeHeight)) {
+							selectedIndex = i;
+							break;
+						}
+					}
+
+					if (e.getButton() == MouseEvent.BUTTON1) {
+						mouseButton1Down = true;
+						
+						if (selectedIndex >= 0) {
+							if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0) {
+								// delete point
+								points.remove(selectedIndex);
+								selectedIndex = -1;
+							} else {
+								MyPointWithWeight p = points.get(selectedIndex);
+								p.setLocation(x, y);
+								fixPoint(p);
+							}
+							repaint();
+						} else {
+							MyPointWithWeight p = new MyPointWithWeight(x, y);
+							points.add(p);
+							selectedIndex = points.size() - 1;
+							repaint();
+						}
+					}
+				}
+			};
+
+			setRequestFocusEnabled(true);
+			
+			addMouseListener(listener);
+			addMouseMotionListener(listener);
+			AbstractAction keyListener = new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					char c = e.getActionCommand().charAt(0);
+					if ('1' <= c || c <= '9') {
+						if (selectedIndex >= 0) {
+							MyPointWithWeight p = (MyPointWithWeight) points.get(selectedIndex);
+							p.setWeight(c - '0');
+							repaint();
+						}
+					}
+				}
+			};
+			
+			for (Character c = '1'; c <= '9'; c++) {
+				getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), c);
+				getActionMap().put(c, keyListener);
+			}
 			drawPointIndex = true;
 			
-			points.add(new Point2D.Double(40.0, 80.0));
-			points.add(new Point2D.Double(40.0, 160.0));
-			points.add(new Point2D.Double(120.0, 80.0));
-			points.add(new Point2D.Double(120.0, 160.0));
+			points.add(new MyPointWithWeight(40.0, 80.0));
+			points.add(new MyPointWithWeight(40.0, 160.0));
+			points.add(new MyPointWithWeight(120.0, 80.0));
+			points.add(new MyPointWithWeight(120.0, 160.0));
 		}
 	
 		public void dumpPoints() {
 			System.out.println("=== Dump points ===");
-			for (Point2D p : points) {
-				System.out.println("points.add(new Point2D.Double(" + p.getX() + ", " + p.getY() + "));");
+			for (MyPointWithWeight p : points) {
+				System.out.println("points.add(new MyPointWithWeight(" + p.getX() + ", " + p.getY() + ", " + p.getWeight() + "));");
 			}
 			System.out.println("======");
 		}
@@ -87,7 +219,12 @@ public class ZaSasho extends JApplet {
 					Utils.drawTriangleCenter(g, t, Integer.toString(i));
 				}
 			}
-			super.paint(g);
+			for (int i = 0; i < points.size(); i++) {
+				MyPointWithWeight p = (MyPointWithWeight) points.get(i);
+				Utils.drawPoint(g, (int) p.getX(), (int) p.getY(), 
+					i == selectedIndex ? Color.yellow : Color.black, 
+					drawPointIndex ? Integer.toString(i) + "(" + Integer.toString((int) p.getWeight()) + ")" : null);
+			}
 		}
 	}
 	
@@ -114,7 +251,9 @@ public class ZaSasho extends JApplet {
 		panel.add(btn, c);
 		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				delaunayPanel.dumpPoints();
+				// delaunayPanel.dumpPoints();
+				MyVoronoi.dummy = !MyVoronoi.dummy;
+				repaint();
 			}
 		});
 		

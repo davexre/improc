@@ -5,9 +5,9 @@ import java.awt.Graphics;
 import java.awt.geom.Point2D;
 
 public class Utils {
-	public static int controlNodeWidth = 3;
+	public static int controlNodeWidth = 5;
 	
-	public static int controlNodeHeight = 3;
+	public static int controlNodeHeight = 5;
 
 	public static void drawPoint(Graphics g, int x, int y, Color c, String label) {
 		g.setColor(Color.lightGray);
