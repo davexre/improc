@@ -10,7 +10,7 @@ static const int ledPin = 13; // the number of the LED pin
 
 static Button btn;
 static bool lightOn = false;
-static TicksPerSecond tps;
+static TicksPerSecond<> tps;
 
 unsigned long start, count;
 

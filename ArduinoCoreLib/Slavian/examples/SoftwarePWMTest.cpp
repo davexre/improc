@@ -25,7 +25,7 @@ static SimpleMenuWithSerialPrint menu;
 
 static SoftwarePWM spwm;
 
-static TicksPerSecond tps;
+static TicksPerSecond<> tps;
 
 static void updateRotaryEncoder() {
 	menu.updateRotaryEncoder();

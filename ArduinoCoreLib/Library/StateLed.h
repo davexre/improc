@@ -42,7 +42,7 @@ private:
 	/**
 	 * Led on/off blink sequences. See the example above.
 	 */
-	const unsigned int *(*stateDelays); // All Delays AND the stateDelays array must be stored in PROGMEM
+	const unsigned int *const (*stateDelays); // All Delays AND the stateDelays array must be stored in PROGMEM
 
 public:
 	/**
@@ -60,8 +60,14 @@ public:
 	 * 		Specifies how states will be shown - a single blink
 	 * 		or via a continuous blinking loop.
 	 */
-	void initialize(DigitalOutputPin *pin, const unsigned int *(*stateDelays),
-			const short int numberOfStates, const bool looped = true);
+	void initialize(DigitalOutputPin *pin, const unsigned int *const (*stateDelays),
+			const short int numberOfStates, const bool looped = true) {
+		this->looped = looped;
+		this->numberOfStates = numberOfStates;
+		this->stateDelays = stateDelays;
+		led.initialize(pin);
+		setState(0);
+	}
 
 	/**
 	 * Updates the on/off state of the led. This method should be
@@ -75,7 +81,12 @@ public:
 	/**
 	 * Sets looped state of the blinking led.
 	 */
-	void setLooped(const bool looped);
+	void setLooped(const bool looped) {
+		if (this->looped != looped) {
+			this->looped = looped;
+			led.playBlink(stateDelays[state], looped ? -1 : 1);
+		}
+	}
 
 	/**
 	 * Sets the led blink sequence to the new state.
@@ -83,7 +94,16 @@ public:
 	 * modulus of the total number of states, i.e.
 	 * acceptedState = state % numberOfStates;
 	 */
-	void setState(short int state);
+	void setState(short int state) {
+		if (state >= numberOfStates)
+			state %= numberOfStates;
+		if (state < 0)
+			state = numberOfStates - 1 + state % numberOfStates;
+		if ((this->state != state) || (!led.isPlaying())) {
+			this->state = state;
+			led.playBlink((unsigned int *)pgm_read_word(&(stateDelays[state])), looped ? -1 : 1);
+		}
+	}
 
 	/**
 	 * Starts playing the next state.

@@ -1,4 +1,4 @@
-#include "Arduino.h"
+#include <Arduino.h>
 #include "DigitalIO.h"
 #include "AdvButton.h"
 #include "StateLed.h"
@@ -28,7 +28,7 @@ static AdvButton btn;
 static RotaryEncoderAcceleration rotor;
 static bool lightOn = false;
 
-static const unsigned int PROGMEM *states[] = {
+static const unsigned int * const states[] PROGMEM = {
 		BLINK_SLOW,
 		BLINK_FAST
 };

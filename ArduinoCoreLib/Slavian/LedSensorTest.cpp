@@ -10,7 +10,7 @@ static const int ledSensorPinP = 9;
 
 static bool isLedOn = false;
 static unsigned long time;
-static TicksPerSecond tps;
+static TicksPerSecond<> tps;
 static float light;
 
 void LedSensorTest::setup() {

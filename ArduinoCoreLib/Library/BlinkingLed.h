@@ -21,21 +21,69 @@ private:
 	signed short int playCount;
 	bool lightOn;
 
-	unsigned int getNextDelay(void);
+	unsigned int getNextDelay(void) {
+		unsigned int result;
+		uint8_t oldSREG = SREG;
+		cli();
+		if (isPlaying()) {
+			result = pgm_read_word(&(delays[curDelay++]));
+			if (result == 0) {
+				lightOn = false;
+				curDelay = 0;
+				if (playCount > 0)
+					playCount--;
+				if (playCount != 0) {
+					result = pgm_read_word(&(delays[curDelay++]));
+					if (result == 0) {
+						curDelay = 0;
+						playCount = 0;
+					}
+				}
+			}
+		} else {
+			result = 0;
+		}
+		SREG = oldSREG;
+		return result;
+	}
 public:
 	/**
 	 * Initializes the class.
 	 *
 	 * pin	The pin number the led is attached to.
 	 */
-	void initialize(DigitalOutputPin *pin);
+	void initialize(DigitalOutputPin *pin) {
+		this->pin = pin;
+		this->delays = NULL;
+		curDelay = 0;
+		lightOn = false;
+		playCount = 0;
+		toggleTime = 0;
+	}
 
 	/**
 	 * Updates the on/off state of the led. This method should be
 	 * placed in the main loop of the program or might be invoked
 	 * from an interrupt.
 	 */
-	void update(void);
+	void update(void) {
+		if (isPlaying()) {
+			unsigned long now = millis();
+			if ((signed long) (now - toggleTime) >= 0) {
+				unsigned int delta = getNextDelay();
+				if (delta == 0) {
+					lightOn = false;
+				} else {
+					lightOn = !lightOn;
+				}
+				toggleTime = now + delta;
+				pin->setState(lightOn);
+			}
+		} else {
+			lightOn = false;
+			pin->setState(false);
+		}
+	}
 
 	/**
 	 * Starts playing the current blink sequence of led on/offs.
@@ -46,7 +94,15 @@ public:
 	 * 			current blink sequence. A negative value -1 means
 	 * 			loop forever.
 	 */
-	void play(const signed short int playCount);
+	void play(const signed short int playCount) {
+		if (delays != NULL) {
+			if (!isPlaying()) {
+				toggleTime = millis();
+			}
+			this->playCount = playCount;
+			update();
+		}
+	}
 
 	/**
 	 * Starts playing the current blink sequence of led on/offs.
@@ -60,7 +116,22 @@ public:
 	 * 			current blink sequence. A negative value -1 means
 	 * 			loop forever.
 	 */
-	void playBlink(const unsigned int *delays, signed short int playCount);
+	void playBlink(const unsigned int *delays, signed short int playCount) {
+		if (delays == NULL)
+			playCount = 0;
+		if (delays == this->delays) {
+			this->playCount = playCount;
+		} else {
+			disableInterrupts();
+			curDelay = 0;
+			this->delays = delays;
+			this->playCount = playCount;
+			lightOn = false;
+			restoreInterrupts();
+			toggleTime = millis();
+		}
+		update();
+	}
 
 	/**
 	 * Starts playing the current blink sequence.
@@ -111,13 +182,29 @@ const unsigned int BLINK_DELAY_LONG = 500;
 const unsigned int BLINK_DELAY_MEDIUM = 250;
 const unsigned int BLINK_DELAY_SHORT = 50;
 
-extern const unsigned int PROGMEM BLINK_SLOW[];
-extern const unsigned int PROGMEM BLINK_MEDIUM[];
-extern const unsigned int PROGMEM BLINK_FAST[];
-extern const unsigned int PROGMEM BLINK_OFF[];
-extern const unsigned int PROGMEM BLINK1[];
-extern const unsigned int PROGMEM BLINK2[];
-extern const unsigned int PROGMEM BLINK3[];
-extern const unsigned int PROGMEM BLINK_ON[];
+const unsigned int BLINK_SLOW[] PROGMEM = {
+		BLINK_DELAY_LONG, BLINK_DELAY_LONG,
+		0};
+const unsigned int BLINK_MEDIUM[] PROGMEM = {
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int BLINK_FAST[] PROGMEM = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
+		0};
+const unsigned int BLINK_OFF[] PROGMEM = {0};
+const unsigned int BLINK_ON[] PROGMEM = {BLINK_DELAY_SHORT, 0};
+
+const unsigned int BLINK1[] PROGMEM = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int BLINK2[] PROGMEM = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
+		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
+		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
+		0};
+const unsigned int BLINK3[] PROGMEM = {
+		BLINK_DELAY_SHORT, BLINK_DELAY_LONG,
+		0};
 
 #endif

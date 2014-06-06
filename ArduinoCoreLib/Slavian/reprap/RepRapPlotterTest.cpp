@@ -27,7 +27,7 @@ static DigitalOutputArduinoPin diLedPin;
 static DigitalInputArduinoPin diRotorPinA;
 static DigitalInputArduinoPin diRotorPinB;
 
-static const unsigned int PROGMEM *states[] = {
+static const unsigned int *const states[] PROGMEM = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,

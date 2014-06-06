@@ -22,7 +22,7 @@ static SerialReader reader;
 static DigitalInputArduinoPin diButtonPin;
 static DigitalOutputArduinoPin diLedPin;
 
-static const unsigned int PROGMEM *states[] = {
+static const unsigned int *const states[] PROGMEM = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_FAST,
@@ -30,7 +30,7 @@ static const unsigned int PROGMEM *states[] = {
 		BLINK_ON, BLINK_OFF
 };
 
-const unsigned int *(*st);
+const unsigned int *const (*st);
 
 static const char PROGMEM str[] = "This is a sample string 2 that is stored in PROGMEM";
 

@@ -20,7 +20,7 @@ static DigitalInputArduinoPin diButtonPin;
 
 static char buf[20];
 static SerialReader reader;
-static TicksPerSecond tps;
+static TicksPerSecond<> tps;
 
 void PressureSensor::setup() {
 	pinMode(ledPin, OUTPUT);

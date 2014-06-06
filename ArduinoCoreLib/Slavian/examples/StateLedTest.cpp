@@ -15,7 +15,7 @@ static StateLed led;
 static SerialReader reader;
 static char buf[200];
 
-static const unsigned int PROGMEM *states[] = {
+static const unsigned int *const states[] PROGMEM = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_FAST,

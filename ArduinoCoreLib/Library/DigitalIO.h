@@ -2,6 +2,7 @@
 #define DIGITAL_IO_H
 
 #include <Arduino.h>
+#include "utils.h"
 
 static const uint8_t DigitalInputShiftRegisterMaxPins = 9;
 static const uint8_t DigitalOutputShiftRegisterMaxPins = 17;
@@ -29,7 +30,9 @@ public:
 		this->inputPin = inputPin;
 	}
 
-	virtual bool getState();
+	virtual bool getState() {
+		return !inputPin->getState();
+	}
 };
 
 ///////// DigitalInputArduinoPin
@@ -40,9 +43,27 @@ private:
 
 	volatile uint8_t *inputRegister;
 public:
-	void initialize(const uint8_t arduinoPin, const bool enablePullup);
+	void initialize(const uint8_t arduinoPin, const bool enablePullup) {
+		bit = digitalPinToBitMask(arduinoPin);
+		uint8_t port = digitalPinToPort(arduinoPin);
+		inputRegister = portInputRegister(port);
+		pinMode(arduinoPin, INPUT);
 
-	virtual bool getState();
+		volatile uint8_t *outputRegister = portOutputRegister(port);
+		if (enablePullup) {
+			disableInterrupts();
+			*outputRegister |= bit;
+			restoreInterrupts();
+		} else {
+			disableInterrupts();
+			*outputRegister &= ~bit;
+			restoreInterrupts();
+		}
+	}
+
+	virtual bool getState() {
+		return (*inputRegister & bit);
+	}
 };
 
 ///////// DigitalOutputArduinoPin
@@ -55,44 +76,72 @@ private:
 
 	bool lastState;
 public:
-	void initialize(const uint8_t arduinoPin, const bool initialValue = 0);
+	void initialize(const uint8_t arduinoPin, const bool initialValue = 0) {
+		bit = digitalPinToBitMask(arduinoPin);
+		uint8_t port = digitalPinToPort(arduinoPin);
+		outputRegister = portOutputRegister(port);
+		pinMode(arduinoPin, OUTPUT);
+		setState(initialValue);
+	}
 
-	virtual bool getState();
+	virtual bool getState() {
+		return lastState;
+	}
 
-	virtual void setState(const bool value);
+	virtual void setState(const bool value) {
+		lastState = value;
+		if (value) {
+			disableInterrupts();
+			*outputRegister |= bit;
+			restoreInterrupts();
+		} else {
+			disableInterrupts();
+			*outputRegister &= ~bit;
+			restoreInterrupts();
+		}
+	}
 };
 
 ///////// DigitalInputShiftRegisterPin
 
-class DigitalInputShiftRegister;
+template <class InputShiftRegister>
 class DigitalInputShiftRegisterPin : public DigitalInputPin {
 private:
-	DigitalInputShiftRegister *parent;
+	InputShiftRegister *parent;
 
 	uint8_t devicePin;
 public:
-	void initialize(DigitalInputShiftRegister *parent, const uint8_t devicePin);
+	void initialize(InputShiftRegister *parent, const uint8_t devicePin) {
+		this->parent = parent;
+		this->devicePin = devicePin;
+	}
 
-	virtual bool getState();
+	virtual bool getState() {
+		return parent->getState(devicePin);
+	}
 };
 
 ///////// DigitalInputShiftRegister
 
 class DigitalInputShiftRegister {
 protected:
-	DigitalInputShiftRegisterPin pinHandlers[DigitalInputShiftRegisterMaxPins];
+	DigitalInputShiftRegisterPin<DigitalInputShiftRegister> pinHandlers[DigitalInputShiftRegisterMaxPins];
 	uint8_t inputBuffer[DigitalInputShiftRegisterBufferSize];
 	uint8_t inputPinsCount;
 public:
-	friend class DigitalInputShiftRegisterPin;
-
-	bool getState(const uint8_t shiftRegisterPin);
+	bool getState(const uint8_t shiftRegisterPin) {
+		return shiftRegisterPin >= getInputPinsCount() ? 0 :
+			inputBuffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
+	}
 
 	inline uint8_t getInputPinsCount() {
 		return inputPinsCount;
 	}
 
-	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin);
+	DigitalInputPin *createPinHandler(const uint8_t shiftRegisterPin) {
+		pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+		return &pinHandlers[shiftRegisterPin];
+	}
 };
 
 /**
@@ -133,37 +182,84 @@ public:
 	 * Initializes the class. Should be invoked from the setup() method.
 	 * The Q7_pin should be with a disabled internal pull-up resistor.
 	 */
-	void initialize(uint8_t inputPinsCount, DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin);
+	void initialize(uint8_t inputPinsCount, DigitalOutputPin *PE_pin, DigitalOutputPin *CP_pin, DigitalInputPin *Q7_pin) {
+		if (DigitalInputShiftRegisterMaxPins > inputPinsCount)
+			inputPinsCount = DigitalInputShiftRegisterMaxPins;
+		this->inputPinsCount = inputPinsCount;
+		this->PE_pin = PE_pin;
+		this->CP_pin = CP_pin;
+		this->Q7_pin = Q7_pin;
+
+		PE_pin->setState(false);
+		CP_pin->setState(false);
+
+		for (int i = sizeof(inputBuffer) - 1; i >= 0; i--) {
+			inputBuffer[i] = 0;
+		}
+	}
 
 	/**
 	 * Updates the state of the shift register.
 	 * This method should be placed in the main loop of the program.
 	 */
-	void update();
+	void update() {
+		// Load data into register
+		CP_pin->setState(false);
+		PE_pin->setState(false);
+		CP_pin->setState(true);
+
+		// Start reading
+		PE_pin->setState(true);
+		uint8_t mask = 1;
+		uint8_t *buf = inputBuffer;
+		for (uint8_t i = 0; i < inputPinsCount; i++) {
+			if (Q7_pin->getState()) {
+				*buf |= mask;
+			} else {
+				*buf &= ~mask;
+			}
+			CP_pin->setState(false);
+			CP_pin->setState(true);
+			mask <<= 1;
+			if (mask == 0) {
+				buf++;
+				mask = 1;
+			}
+		}
+
+		PE_pin->setState(false);
+		CP_pin->setState(false);
+	}
 };
 
 /**
  * Based on the datasheet for 74HC164 - No output latch - output data is shifted "on the fly".
  * The 74HC595 Has output latches
  */
-
-class DigitalOutputShiftRegister_74HC164;
-class DigitalOutputShiftRegister_74HC164_Pin : public DigitalOutputPin {
+template <class OutputShiftRegister>
+class DigitalOutputShiftRegisterPin : public DigitalOutputPin {
 private:
-	DigitalOutputShiftRegister_74HC164 *parent;
+	OutputShiftRegister *parent;
 
 	uint8_t devicePin;
 public:
-	void initialize(DigitalOutputShiftRegister_74HC164 *parent, const uint8_t devicePin);
+	void initialize(OutputShiftRegister *parent, const uint8_t devicePin) {
+		this->parent = parent;
+		this->devicePin = devicePin;
+	}
 
-	virtual bool getState();
+	virtual bool getState() {
+		return parent->getState(devicePin);
+	}
 
-	virtual void setState(const bool value);
+	virtual void setState(const bool value) {
+		parent->setState(devicePin, value);
+	}
 };
 
 class DigitalOutputShiftRegister_74HC164 {
 protected:
-	DigitalOutputShiftRegister_74HC164_Pin pinHandlers[DigitalOutputShiftRegisterMaxPins];
+	DigitalOutputShiftRegisterPin<DigitalOutputShiftRegister_74HC164> pinHandlers[DigitalOutputShiftRegisterMaxPins];
 	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
 	uint8_t outputPinsCount;
 	bool modified;
@@ -174,45 +270,82 @@ public:
 	/**
 	 * Initializes the class. Should be invoked from the setup() method.
 	 */
-	void initialize(uint8_t outputPinsCount, DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin);
+	void initialize(uint8_t outputPinsCount, DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin) {
+		if (DigitalInputShiftRegisterMaxPins > outputPinsCount)
+			outputPinsCount = DigitalInputShiftRegisterMaxPins;
+		this->outputPinsCount = outputPinsCount;
+		this->CP_pin = CP_pin;
+		this->DS_pin = DS_pin;
+		modified = true;
+
+		CP_pin->setState(false);
+		DS_pin->setState(false);
+
+		for (int i = sizeof(outputBuffer) - 1; i >= 0; i--) {
+			outputBuffer[i] = 0;
+		}
+		update();
+	}
 
 	/**
 	 * Updates the state of the shift register.
 	 * This method should be placed in the main loop of the program.
 	 */
-	void update();
+	void update() {
+		if (modified) {
+			modified = false;
+			uint8_t mask = 1 << ((outputPinsCount - 1) & 0b0111);
+			uint8_t *buf = &outputBuffer[(outputPinsCount - 1) >> 3];
+			for (uint8_t i = 0; i < outputPinsCount; i++) {
+				CP_pin->setState(false);
+				DS_pin->setState(*buf & mask);
+				CP_pin->setState(true);
+				mask >>= 1;
+				if (mask == 0) {
+					buf--;
+					mask = 0x80;
+				}
+			}
+			CP_pin->setState(false);
+			DS_pin->setState(false);
+		}
+	}
 
-	bool getState(const uint8_t shiftRegisterPin);
+	bool getState(const uint8_t shiftRegisterPin) {
+		return shiftRegisterPin >= getOutputPinsCount() ? 0 :
+			outputBuffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
+	}
 
-	void setState(const uint8_t shiftRegisterPin, const bool value);
+	void setState(const uint8_t shiftRegisterPin, const bool value) {
+		if (shiftRegisterPin < getOutputPinsCount()) {
+			uint8_t mask = 1 << (shiftRegisterPin & 0b0111);
+			uint8_t *buf = &outputBuffer[shiftRegisterPin >> 3];
+			if ((*buf & mask) ^ (value)) {
+				modified = true;
+				if (value)
+					*buf |= mask;
+				else
+					*buf &= ~mask;
+			}
+		}
+	}
 
 	inline uint8_t getOutputPinsCount() {
 		return outputPinsCount;
 	}
 
-	DigitalOutputShiftRegister_74HC164_Pin *createPinHandler(const uint8_t shiftRegisterPin);
+	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin) {
+		pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+		return &pinHandlers[shiftRegisterPin];
+	}
 };
 
 /**
  * Based on the datasheet for 74HC595 - Has output latch.
  */
-class DigitalOutputShiftRegister_74HC595;
-class DigitalOutputShiftRegister_74HC595_Pin : public DigitalOutputPin {
-private:
-	DigitalOutputShiftRegister_74HC595 *parent;
-
-	uint8_t devicePin;
-public:
-	void initialize(DigitalOutputShiftRegister_74HC595 *parent, const uint8_t devicePin);
-
-	virtual bool getState();
-
-	virtual void setState(const bool value);
-};
-
 class DigitalOutputShiftRegister_74HC595 {
 protected:
-	DigitalOutputShiftRegister_74HC595_Pin pinHandlers[DigitalOutputShiftRegisterMaxPins];
+	DigitalOutputShiftRegisterPin<DigitalOutputShiftRegister_74HC595> pinHandlers[DigitalOutputShiftRegisterMaxPins];
 	uint8_t writeOutputMode;
 	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
 	uint8_t fakeBuffer[DigitalOutputShiftRegisterBufferSize];
@@ -258,23 +391,104 @@ public:
 	 * 			outputs will be set to zero before the new values are written, i.e. this is the
 	 * 			timeout necessary for the MOSFETs in a H-Bridge to close and avoid shortcircuit.
 	 */
-	void initialize(uint8_t outputPinsCount, WriteOutputMode writeOutputMode, DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin);
+	void initialize(uint8_t outputPinsCount, WriteOutputMode writeOutputMode, DigitalOutputPin *SH_pin, DigitalOutputPin *ST_pin, DigitalOutputPin *DS_pin) {
+		if (DigitalOutputShiftRegisterMaxPins > outputPinsCount)
+			outputPinsCount = DigitalOutputShiftRegisterMaxPins;
+		this->outputPinsCount = outputPinsCount;
+		this->SH_pin = SH_pin;
+		this->ST_pin = ST_pin;
+		this->DS_pin = DS_pin;
+		this->writeOutputMode = writeOutputMode;
+		modified = true;
+
+		SH_pin->setState(false);
+		ST_pin->setState(false);
+		DS_pin->setState(false);
+
+		for (int i = sizeof(outputBuffer) - 1; i >= 0; i--) {
+			fakeBuffer[i] = outputBuffer[i] = 0;
+		}
+		update();
+	}
 
 	/**
 	 * Updates the state of the shift register.
 	 * This method should be placed in the main loop of the program.
 	 */
-	void update();
+	void update() {
+		if (modified || (writeOutputMode == DigitalOutputShiftRegister_74HC595::WriteOnEveryUpdate)) {
+			ST_pin->setState(false);
+			if ((writeOutputMode == BeforeWriteZeroAllOutputs) ||
+				(writeOutputMode == BeforeWriteZeroOnlyModifiedOutputs)) {
+				DS_pin->setState(false);	// Only 0 on the output
+				uint8_t mask = 1 << ((outputPinsCount - 1) & 0b0111);
+				uint8_t *buf = &outputBuffer[(outputPinsCount - 1) >> 3];
+				for (uint8_t i = 0; i < outputPinsCount; i++) {
+					SH_pin->setState(false);
+					if (writeOutputMode == BeforeWriteZeroOnlyModifiedOutputs) {
+						DS_pin->setState(*buf & mask);
+						mask >>= 1;
+						if (mask == 0) {
+							buf--;
+							mask = 0x80;
+						}
+					}
+					SH_pin->setState(true);
+				}
+				ST_pin->setState(true);
+				ST_pin->setState(false);
+			}
 
-	bool getState(const uint8_t shiftRegisterPin);
+			modified = false;
+			uint8_t mask = 1 << ((outputPinsCount - 1) & 0b0111);
+			uint8_t *buf = &outputBuffer[(outputPinsCount - 1) >> 3];
+			// ST_pin->setState(false); // already done above
+			for (uint8_t i = 0; i < outputPinsCount; i++) {
+				SH_pin->setState(false);
+				DS_pin->setState(*buf & mask);
+				SH_pin->setState(true);
+				mask >>= 1;
+				if (mask == 0) {
+					buf--;
+					mask = 0x80;
+				}
+			}
+			SH_pin->setState(false);
+			DS_pin->setState(false);
+			ST_pin->setState(true);
+			ST_pin->setState(false);
+		}
+	}
 
-	void setState(uint8_t shiftRegisterPin, const bool value);
+	bool getState(const uint8_t shiftRegisterPin) {
+		return shiftRegisterPin >= getOutputPinsCount() ? 0 :
+			outputBuffer[shiftRegisterPin >> 3] & (1 << (shiftRegisterPin & 0b0111));
+	}
+
+	void setState(uint8_t shiftRegisterPin, const bool value) {
+		if (shiftRegisterPin < getOutputPinsCount()) {
+			uint8_t mask = 1 << (shiftRegisterPin & 0b0111);
+			shiftRegisterPin >>= 3;
+			uint8_t *buf = &outputBuffer[shiftRegisterPin];
+			if ((*buf & mask) ^ (value)) {
+				modified = true;
+				fakeBuffer[shiftRegisterPin] &= ~mask;
+				if (value)
+					*buf |= mask;
+				else
+					*buf &= ~mask;
+			}
+		}
+	}
 
 	inline uint8_t getOutputPinsCount() {
 		return outputPinsCount;
 	}
 
-	DigitalOutputShiftRegister_74HC595_Pin *createPinHandler(const uint8_t shiftRegisterPin);
+	DigitalOutputPin *createPinHandler(const uint8_t shiftRegisterPin) {
+		pinHandlers[shiftRegisterPin].initialize(this, shiftRegisterPin);
+		return &pinHandlers[shiftRegisterPin];
+	}
 };
 
 #endif

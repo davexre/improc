@@ -34,18 +34,43 @@ public:
 	 * 		The user provided buffer for character data. The buffer is considered
 	 * 		empty once the method readln() is invoked.
 	 */
-	void initialize(const long serialBoudRate, const int bufferSize, char *buffer);
+	void initialize(const long serialBoudRate, const int bufferSize, char *buffer) {
+		Serial.begin(serialBoudRate);
+		setBuffer(bufferSize, buffer);
+	}
 
 	/**
 	 * Reads any data available on the Serial port.
 	 * This method should be placed in the main loop of the program.
 	 */
-	void update(void);
+	void update(void) {
+		if (eol)
+			return;
+		while ((bufferSize > bufferFull + 1) && (Serial.available() > 0)) {
+			char c = Serial.read();
+			if ((c == '\n') || (c == '\r')) {
+				eol = true;
+				buffer[bufferFull] = 0;
+				break;
+			}
+			buffer[bufferFull++] = c;
+			buffer[bufferFull] = 0;
+		}
+		if (bufferSize <= bufferFull + 1) {
+			eol = true;
+		}
+	}
 
 	/**
 	 * Set a new buffer.
 	 */
-	void setBuffer(const int bufferSize, char *buffer);
+	void setBuffer(const int bufferSize, char *buffer) {
+		this->bufferFull = 0;
+		this->bufferSize = bufferSize;
+		this->buffer = buffer;
+		this->buffer[0] = 0;
+		eol = false;
+	}
 
 	/**
 	 * Returns a pointer to the user specified buffer if there is data availabe
@@ -53,7 +78,14 @@ public:
 	 * data in the buffer should be processed before the next invokation of
 	 * the update() method. The character data is a zero terminated string.
 	 */
-	char *readln();
+	char *readln() {
+		if (eol) {
+			eol = false;
+			bufferFull = 0;
+			return buffer;
+		}
+		return NULL;
+	}
 
 	/**
 	 * Returns TRUE if the LF (Line Feed) character is reached.

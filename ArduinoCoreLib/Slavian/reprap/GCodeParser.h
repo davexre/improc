@@ -4,24 +4,25 @@
 #include <stdlib.h>
 
 ////////////// GCODE
-
-#define CommandFlad_G (1<<0)
-#define CommandFlad_M (1<<1)
-#define CommandFlad_P (1<<2)
-#define CommandFlad_X (1<<3)
-#define CommandFlad_Y (1<<4)
-#define CommandFlad_Z (1<<5)
-#define CommandFlad_I (1<<6)
-#define CommandFlad_N (1<<7)
-#define CommandFlad_CHECKSUM (1<<8)
-#define CommandFlad_F (1<<9)
-#define CommandFlad_S (1<<10)
-#define CommandFlad_Q (1<<11)
-#define CommandFlad_R (1<<12)
-#define CommandFlad_E (1<<13)
-#define CommandFlad_T (1<<14)
-#define CommandFlad_J (1<<15)
-#define CommandFlad_K (1<<16)
+enum GCodeCommandFlag {
+	CommandFlad_G = (1L<<0),
+	CommandFlad_M = (1L<<1),
+	CommandFlad_P = (1L<<2),
+	CommandFlad_X = (1L<<3),
+	CommandFlad_Y = (1L<<4),
+	CommandFlad_Z = (1L<<5),
+	CommandFlad_I = (1L<<6),
+	CommandFlad_N = (1L<<7),
+	CommandFlad_CHECKSUM = (1L<<8),
+	CommandFlad_F = (1L<<9),
+	CommandFlad_S = (1L<<10),
+	CommandFlad_Q = (1L<<11),
+	CommandFlad_R = (1L<<12),
+	CommandFlad_E = (1L<<13),
+	CommandFlad_T = (1L<<14),
+	CommandFlad_J = (1L<<15),
+	CommandFlad_K = (1L<<16)
+};
 
 class GCodeParser {
 public:
@@ -88,9 +89,125 @@ public:
 
 	long commandOccuraceFlag;
 
-	void initialize();
-	void initVars();
-	bool parse(char *line);
+	void initialize() {
+		gCode = GCodeParser::GCode_NoCommand;
+		initVars();
+	}
+
+	void initVars() {
+		commandOccuraceFlag = 0;
+		mCode = GCodeParser::MCode_NoCommand;
+		speed = feedRate = X = Y = Z = E = 0;
+		P = T = S = I = J = R = Q = N = 0;
+	}
+
+	static byte calculateChecksum(const char *line) {
+		byte result = 0;
+		while (true) {
+			char c = *(line++);
+			if ((c == '*') || (c == ';') || (c == '/') || (c == 0))
+				return result;
+			result ^= c;
+		}
+	}
+
+	bool parse(char *line) {
+		initVars();
+		byte checksum = calculateChecksum(line);
+		char cmd = *(line++);
+		switch (cmd) {
+		case 'G':
+			gCode = (GCodeParser::GCode) strtol(line, &line, 10);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_G;
+			break;
+
+		case 'M':
+			mCode = (GCodeParser::MCode) strtol(line, &line, 10);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_M;
+			break;
+
+		case 'T':
+			T = strtol(line, &line, 10);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_T;
+			break;
+
+		case 'S':
+			S = strtod(line, &line);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_S;
+			break;
+
+		case 'P':
+			P = strtod(line, &line);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_P;
+			break;
+
+		case 'X':
+			X = (long) (strtod(line, &line) * 1000.0f);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_X;
+			break;
+		case 'Y':
+			Y = (long) (strtod(line, &line) * 1000.0f);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_Y;
+			break;
+		case 'Z':
+			Z = (long) (strtod(line, &line) * 1000.0f);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_Z;
+			break;
+		case 'E':
+			E = (long) (strtod(line, &line) * 1000.0f);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_E;
+			break;
+
+		case 'I':
+			I = strtod(line, &line);
+			commandOccuraceFlag |= GCodeCommandFlag::CommandFlad_I;
+			break;
+
+		case 'J':
+			J = strtod(line, &line);
+			commandOccuraceFlag |= CommandFlad_J;
+			break;
+
+		case 'F':
+			feedRate = (long) strtod(line, &line); // TODO: may be a multiplier constant is needed
+			commandOccuraceFlag |= CommandFlad_F;
+			break;
+
+		case 'K':
+			speed = (long) strtod(line, &line); // TODO: may be a multiplier constant is needed
+			commandOccuraceFlag |= CommandFlad_K;
+			break;
+
+		case 'R':
+			R = strtod(line, &line);
+			commandOccuraceFlag |= CommandFlad_R;
+			break;
+
+		case 'Q':
+			Q = strtod(line, &line);
+			commandOccuraceFlag |= CommandFlad_Q;
+			break;
+
+		case 'N':
+			N = strtol(line, &line, 10);
+			commandOccuraceFlag |= CommandFlad_N;
+			break;
+
+		case '*':
+			if (strtol(line, &line, 10) != checksum)
+				return false;
+	//		commandOccuraceFlag |= CommandFlad_CHECKSUM;
+			break;
+
+		case ';': // This is comment ignore till the end of line
+		case '/':
+		case 0: // Empty string
+		default:
+			break;
+		}
+
+		return true;
+	}
 };
 
 #endif

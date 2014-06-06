@@ -38,7 +38,14 @@ private:
 	bool _isValueLooped;
 	bool _hasValueChanged;
 public:
-	void initialize(const long minVal = 0, const long maxVal = 1000, const bool looped = false);
+	void initialize(const long minVal = 0, const long maxVal = 1000, const bool looped = false) {
+		_isValueLooped = looped;
+		_hasValueChanged = true;
+		valueChangeEnabled = true;
+		value = minVal;
+		minValue = minVal;
+		maxValue = maxVal;
+	}
 
 	inline void setValueChangeEnabled(const bool newValueChengeEnabled) {
 		valueChangeEnabled = newValueChengeEnabled;
@@ -76,7 +83,21 @@ public:
 	 * Sets the #value# of the encoder. If the update method is called from an
 	 * interrupt use the safe method getValue() instead.
 	 */
-	void setValue_unsafe(const long newValue);
+	void setValue_unsafe(long newValue) {
+		if (_isValueLooped) {
+			long delta = maxValue - minValue + 1;
+			if (delta <= 0)
+				delta = 1;
+			while (newValue > maxValue)
+				newValue -= delta;
+			while (newValue < minValue)
+				newValue += delta;
+			value = newValue;
+		} else {
+			value = constrain(newValue, minValue, maxValue);
+		}
+		_hasValueChanged = true;
+	}
 
 	inline long peekValue() {
 		disableInterrupts();
@@ -110,7 +131,13 @@ public:
 	 * the #value# if it is out of bounds.
 
 	 */
-	void setMinMax(const long newMinValue, const long newMaxValue);
+	void setMinMax(const long newMinValue, const long newMaxValue) {
+		disableInterrupts();
+		minValue = newMinValue;
+		maxValue = newMaxValue;
+		setValue_unsafe(value);
+		restoreInterrupts();
+	}
 };
 
 /**
@@ -134,19 +161,49 @@ private:
 public:
 	Button pinA;
 	Button pinB;
-	TicksPerSecond tps;
+	TicksPerSecond<> tps;
 
 	/**
 	 * Initializes the class, sets ports (pinA and pinB) to input mode.
 	 */
-	void initialize(DigitalInputPin *pinA, DigitalInputPin *pinB);
+	void initialize(DigitalInputPin *pinA, DigitalInputPin *pinB) {
+		initialState.initialize(0, 1000, false);
+		state = &initialState;
+		this->pinA.initialize(pinA, 1);
+		this->pinB.initialize(pinB, 1);
+		tps.initialize();
+	}
 
 	/**
 	 * Updates the state of the rotary encoder.
 	 * This method should be placed in the main loop of the program or
 	 * might be invoked from an interrupt.
 	 */
-	void update();
+	void update() {
+		pinA.update(); // toggle
+		pinB.update(); // direction
+
+		if (state->valueChangeEnabled && isTicked()) {
+			tps.tick();
+			tps.update();
+			int speed = constrain(tps.getIntTPS_unsafe(), MIN_TPS, MAX_TPS) - MIN_TPS;
+			long delta = max(1, (state->maxValue - state->minValue) / TICKS_AT_MAX_SPEED_FOR_FULL_SPAN);
+
+			// Linear acceleration (very sensitive - not comfortable)
+			// long step = 1 + delta * speed / (MAX_TPS - MIN_TPS);
+
+			// Exponential acceleration - square (OK for [maxValue - minValue] = up to 5000)
+			// long step = 1 + delta * speed * speed / ((MAX_TPS - MIN_TPS) * (MAX_TPS - MIN_TPS));
+
+			// Exponential acceleration - cubic (most comfortable)
+			long step = 1 + delta * speed * speed * speed /
+					((MAX_TPS - MIN_TPS) * (MAX_TPS - MIN_TPS) * (MAX_TPS - MIN_TPS));
+
+			state->setValue_unsafe(state->getValue_unsafe() + (isIncrementing() ? step : -step));
+		} else {
+			tps.update();
+		}
+	}
 
 	/**
 	 * Has the rotary encoder been ticked at the last update

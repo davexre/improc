@@ -10,8 +10,7 @@
  * Speed is measured TPS_TIMES_PER_PERIOD times.
  * This value should be atleast 2.
  */
-#define TPS_TIMES_PER_PERIOD 3
-
+template<int TPS_TIMES_PER_PERIOD=3>
 class TicksPerSecond {
 private:
 	/**
@@ -50,7 +49,16 @@ public:
 	 * 		This means that for 1/2 second all ticks will be counted and the value
 	 * 		for ticks per second will be calculated.
 	 */
-	void initialize(const unsigned int holdLastTimeoutMillis = 500);
+	void initialize(const unsigned int holdLastTimeoutMillis = 500) {
+		lastTime = millis();
+		for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
+			counters[i] = 0;
+			started[i] = lastTime;
+		}
+		dT = 1;
+		curCounter = 0;
+		deltaTime = holdLastTimeoutMillis / TPS_TIMES_PER_PERIOD;
+	}
 
 	/**
 	 * Calculates and updates the ticks per second value.
@@ -59,9 +67,24 @@ public:
 	 * interrupt the "safe" methods getTPS(), getIntTPS() for getting the ticks per
 	 * second value should be used.
 	 */
-	void update();
+	void update() {
+		unsigned long now = millis();
+		if (now - lastTime >= deltaTime) {
+			counters[curCounter] = 0;
+			lastTime = started[curCounter++] = now;
+			if (curCounter >= TPS_TIMES_PER_PERIOD)
+				curCounter = 0;
+		}
+		dT = now - started[curCounter];
+		if (dT == 0)
+			dT = 1; // This is a division by zero protection.
+	}
 
-	void tick();
+	void tick() {
+		for (byte i = 0; i < TPS_TIMES_PER_PERIOD; i++) {
+			counters[i]++;
+		}
+	}
 
 	/**
 	 * Returns the ticks per second value.
@@ -78,7 +101,9 @@ public:
 	 * Returns the ticks per second value.
 	 * This is "thread unsafe" method.
 	 */
-	float getTPS_unsafe();
+	float getTPS_unsafe() {
+		return ((float)(counters[curCounter]) * 1000.0f) / (float)dT;
+	}
 
 	/**
 	 * Returns the ticks per second value as integer.
@@ -95,7 +120,9 @@ public:
 	 * Returns the ticks per second value as integer.
 	 * This is "thread unsafe" method.
 	 */
-	int getIntTPS_unsafe();
+	int getIntTPS_unsafe() {
+		return (counters[curCounter] * 1000UL) / dT;
+	}
 
 	/**
 	 * Smoothes a value.
@@ -121,7 +148,10 @@ public:
 	 *   tps.smooth(analogRead(2), val2);
 	 * }
 	 */
-	void smooth(const int data, float *smoothedValue, const int timesPerSecond = 1);
+	void smooth(const int data, float *smoothedValue, const int timesPerSecond = 1) {
+		float scale = getTPS() / timesPerSecond;
+		*smoothedValue = (data + (*smoothedValue) * scale) / (scale + 1);
+	}
 };
 
 #endif

@@ -41,8 +41,8 @@ static BlinkingLed led;
 static char buf[20];
 
 static SerialReader reader;
-static TicksPerSecond tps;
-static TicksPerSecond currentTPS;
+static TicksPerSecond<> tps;
+static TicksPerSecond<> currentTPS;
 
 static void showStatus(bool aborting) {
 	Serial.print(isPlaying ? "1" : "0");

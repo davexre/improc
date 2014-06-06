@@ -43,14 +43,33 @@ public:
 	 * debounceMillis
 	 * 			The button debounce time in milliseconds.
 	 */
-	void initialize(DigitalInputPin *pin, const unsigned int debounceMillis = 10);
+	void initialize(DigitalInputPin *pin, const unsigned int debounceMillis = 10) {
+		buttonPin = pin;
+		debounce = debounceMillis;
+		lastToggleTime = millis();
+		lastState = currentState = buttonPin->getState();
+	}
 
 	/**
 	 * Updates the state of the rotary knob.
 	 * This method should be placed in the main loop of the program or
 	 * might be invoked from an interrupt.
 	 */
-	void update(void);
+	void update(void) {
+		bool curReading = buttonPin->getState();
+		unsigned long now = millis();
+		lastState = currentState;
+		if (curReading != currentState) {
+			if (now - lastToggleTime >= debounce) {
+				// Button state has not changed for #debounce# milliseconds. Consider it is stable.
+				currentState = curReading;
+			}
+			lastToggleTime = now;
+		} else if (now - lastToggleTime >= debounce) {
+			// Forward the last toggle time a bit
+			lastToggleTime = now - debounce - 1;
+		}
+	}
 
 	/**
 	 * Has the button stated changed from isUp to isDown at the last update.
@@ -89,7 +108,10 @@ public:
 		return (currentState != lastState);
 	}
 
-	void reset();
+	void reset() {
+		lastState = currentState;
+		lastToggleTime = millis() - debounce - 1;
+	}
 };
 
 #endif

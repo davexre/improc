@@ -16,7 +16,7 @@ static int smoothBuffer[numberOfSensors][smoothBufferSize];
 
 static SmoothValue sval[numberOfSensors];
 
-static TicksPerSecond tps;
+static TicksPerSecond<> tps;
 static BlinkingLed led;
 static SerialReader reader;
 

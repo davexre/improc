@@ -5,11 +5,11 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="de.innot.avreclipse.configuration.app.release.2110510534" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<externalSettings/>
 				<extensions>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -46,7 +46,8 @@
 								<option id="de.innot.avreclipse.compiler.option.optimize.packstruct.662881994" name="Pack structs (-fpack-struct)" superClass="de.innot.avreclipse.compiler.option.optimize.packstruct" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.ubitfields.25200421" name="bitfields are unsigned (-funsigned-bitfields)" superClass="de.innot.avreclipse.compiler.option.language.ubitfields" value="true" valueType="boolean"/>
 								<option id="de.innot.avreclipse.compiler.option.language.uchar.763801476" name="char is unsigned (-funsigned-char)" superClass="de.innot.avreclipse.compiler.option.language.uchar" value="true" valueType="boolean"/>
-								<option id="de.innot.avreclipse.compiler.option.optimize.other.842965010" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
+								<option id="de.innot.avreclipse.compiler.option.optimize.other.842965010" name="Other Optimization Flags" superClass="de.innot.avreclipse.compiler.option.optimize.other" value="-std=&quot;c++11&quot; -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
+								<option id="de.innot.avreclipse.compiler.option.otherflags.1973295841" name="Other flags" superClass="de.innot.avreclipse.compiler.option.otherflags" value="" valueType="string"/>
 								<inputType id="de.innot.avreclipse.compiler.winavr.input.147511324" name="C Source Files" superClass="de.innot.avreclipse.compiler.winavr.input"/>
 							</tool>
 							<tool id="de.innot.avreclipse.tool.cppcompiler.app.release.1258885126" name="AVR C++ Compiler" superClass="de.innot.avreclipse.tool.cppcompiler.app.release">
@@ -64,7 +65,7 @@
 									<listOptionValue builtIn="false" value="c"/>
 								</option>
 								<option id="de.innot.avreclipse.linker.option.nosyms.715274508" name="Omit Symbols (-s)" superClass="de.innot.avreclipse.linker.option.nosyms" value="false" valueType="boolean"/>
-								<option id="de.innot.avreclipse.linker.option.otherlinkargs.2086310124" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="-fvtable-gc -fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
+								<option id="de.innot.avreclipse.linker.option.otherlinkargs.2086310124" name="Other Arguments" superClass="de.innot.avreclipse.linker.option.otherlinkargs" value="-fdata-sections -ffunction-sections -Wl,--gc-sections " valueType="string"/>
 								<inputType id="de.innot.avreclipse.tool.linker.input.1503643778" name="OBJ Files" superClass="de.innot.avreclipse.tool.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
