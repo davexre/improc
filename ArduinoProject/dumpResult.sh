@@ -21,7 +21,8 @@ echo ... >> ${fou}
 echo "Print final symbols sizes (b - .bss; d - .data; t - .text; v/w - weak)" >> ${fou}
 echo ... >> ${fou}
 echo ... >> ${fou}
-avr-nm -td --size-sort -C ${fin}|sort -f -k 2,2 -k 1,1 >> ${fou}
+# avr-nm -td --size-sort -C ${fin}|sort -f -k 2,2 -k 3,3 >> ${fou}
+avr-nm -td --size-sort -C ${fin}|sort -f -k 3,5 >> ${fou}
 echo ... >> ${fou}
 echo ... >> ${fou}
 avr-objdump -h -C -S ${fin} >> ${fou}

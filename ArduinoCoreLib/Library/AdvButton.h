@@ -3,41 +3,41 @@
 
 #include "Button.h"
 
-#define ADV_BUTTON_REPEAT_DELAY_MILLIS 1000
-#define ADV_BUTTON_REPEAT_RATE_MILLIES 50
-
-#define ADV_BUTTON_LONG_CLICK_MILLIES 600
-
-#define ADV_BUTTON_DBLCLICK_MAX_DELAY 400
-
-enum AdvButtonState {
-	AdvButtonState_NONE,
-	AdvButtonState_CLICK,
-	AdvButtonState_LONG_CLICK,
-	AdvButtonState_DOUBLE_CLICK,
-	AdvButtonState_AUTOREPEAT_CLICK
-};
-
 class AdvButton {
+public:
+	enum AdvButtonState {
+		NONE,
+		CLICK,
+		LONG_CLICK,
+		DOUBLE_CLICK,
+		AUTOREPEAT_CLICK
+	};
+
+private:
+	static const unsigned long ADV_BUTTON_REPEAT_DELAY_MILLIS = 1000;
+	static const unsigned long ADV_BUTTON_REPEAT_RATE_MILLIES = 50;
+	static const unsigned long ADV_BUTTON_LONG_CLICK_MILLIES = 600;
+	static const unsigned long ADV_BUTTON_DBLCLICK_MAX_DELAY = 400;
+
 	Button button;
 	unsigned long previousTimeButtonUp;
 	unsigned long timeButtonDown;
 	unsigned long timeNextAutorepeatToggle;
 	bool autoRepeatEnabled;
 	bool autoButtonStarted;
-	byte buttonState;
+	AdvButtonState buttonState;
 public:
 	void initialize(DigitalInputPin *pin, const bool autoRepeatEnabled, const unsigned int debounceMillis = 10) {
 		button.initialize(pin, debounceMillis);
 		this->autoRepeatEnabled = autoRepeatEnabled;
 		timeNextAutorepeatToggle = previousTimeButtonUp = timeButtonDown = 0;
 		autoButtonStarted = false;
-		buttonState = AdvButtonState_NONE;
+		buttonState = NONE;
 	}
 
 	void update(void) {
 		button.update();
-		buttonState = AdvButtonState_NONE;
+		buttonState = NONE;
 		unsigned long now = millis();
 		if (button.isToggled()) {
 			if (button.isDown()) {
@@ -49,9 +49,9 @@ public:
 				// Just released
 				if (!autoButtonStarted) {
 					if (now - previousTimeButtonUp <= ADV_BUTTON_DBLCLICK_MAX_DELAY) {
-						buttonState = AdvButtonState_DOUBLE_CLICK;
+						buttonState = DOUBLE_CLICK;
 					} else {
-						buttonState = AdvButtonState_CLICK;
+						buttonState = CLICK;
 					}
 				}
 				if (autoButtonStarted && (!autoRepeatEnabled)) {
@@ -66,18 +66,18 @@ public:
 				if (now >= timeNextAutorepeatToggle) {
 					timeNextAutorepeatToggle = now + ADV_BUTTON_REPEAT_RATE_MILLIES;
 					autoButtonStarted = true;
-					buttonState = AdvButtonState_AUTOREPEAT_CLICK;
+					buttonState = AUTOREPEAT_CLICK;
 				}
 			} else {
 				if ((!autoButtonStarted) && (now - timeButtonDown >= ADV_BUTTON_LONG_CLICK_MILLIES)) {
 					autoButtonStarted = true;
-					buttonState = AdvButtonState_LONG_CLICK;
+					buttonState = LONG_CLICK;
 				}
 			}
 		}
 	}
 
-	inline byte getButtonState() {
+	inline AdvButtonState getButtonState() {
 		return buttonState;
 	}
 
@@ -94,7 +94,7 @@ public:
 	 * When this method returns true the method isClicked() will ALSO be true.
 	 */
 	inline bool isDoubleClicked() {
-		return (buttonState == AdvButtonState_DOUBLE_CLICK);
+		return (buttonState == DOUBLE_CLICK);
 	}
 
 	/**
@@ -102,14 +102,14 @@ public:
 	 * When this method returns true the method isClicked() will ALSO be true.
 	 */
 	inline bool isLongClicked() {
-		return (buttonState == AdvButtonState_LONG_CLICK);
+		return (buttonState == LONG_CLICK);
 	}
 
 	/**
 	 * Returns true if buttonState is anything else but AdvButtonState_DOUBLE_CLICK.
 	 */
 	inline bool isClicked() {
-		return (buttonState != AdvButtonState_NONE);
+		return (buttonState != NONE);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public:
 		autoButtonStarted = false;
 		timeButtonDown = millis();
 		timeNextAutorepeatToggle = timeButtonDown + ADV_BUTTON_REPEAT_DELAY_MILLIS;
-		buttonState = AdvButtonState_NONE;
+		buttonState = NONE;
 	}
 
 	inline bool isButtonPressed(void) {

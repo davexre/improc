@@ -46,20 +46,20 @@ void AnalogSensorTest::setup() {
 
 static void showStatus() {
 	Serial.print(tps.getTPS());
-	Serial.print("\t");
+	Serial_print("\t");
 	for (int i = 0; i < numberOfSensors; i++) {
-			Serial.print("\t");
+			Serial_print("\t");
 		if (i > 0) {
 		}
 		Serial.print(sval[i].getAvg());
-		Serial.print("\t");
+		Serial_print("\t");
 		Serial.print(sval[i].getMin());
-		Serial.print("\t");
+		Serial_print("\t");
 		Serial.print(sval[i].getMax());
 	}
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print(smoothedVal);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) mySmoothVal);
 	Serial.println();
 }

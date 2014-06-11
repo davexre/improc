@@ -5,13 +5,14 @@
 #include <avr/interrupt.h>
 #include <utils.h>
 
-#define TIMERONE_MAXCOMPARE 65536UL
+
 
 class TimerOne {
 private:
 	static void emptyTimerOneRoutine() {
 	}
 
+	static const unsigned long TIMERONE_MAXCOMPARE = 65536;
 public:
 	void initialize() {
 		// Use no clock source, timer diabled.

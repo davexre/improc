@@ -179,7 +179,7 @@ public:
 			MenuItem *cur = menuItems[currentMenu];
 			long curValue = cur->encoderState.peekValue();
 			Serial.print(cur->title);
-			Serial.print(PSTR(": "));
+			Serial_print(": ");
 			switch (cur->getMenuItemType()) {
 			case MENU_ITEM_ENUM:
 				Serial.println(((MenuItemEnum*)cur)->items[curValue]);

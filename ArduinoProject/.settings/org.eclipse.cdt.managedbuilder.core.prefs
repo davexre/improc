@@ -1,7 +1,8 @@
-#Tue Aug 03 14:23:36 EEST 2010
 eclipse.preferences.version=1
 environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/CPATH/delimiter=;
 environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/CPATH/operation=remove
+environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/CPLUS_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/CPLUS_INCLUDE_PATH/operation=remove
 environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/C_INCLUDE_PATH/delimiter=;
 environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/C_INCLUDE_PATH/operation=remove
 environment/buildEnvironmentInclude/de.innot.avreclipse.configuration.app.release.2110510534/append=true

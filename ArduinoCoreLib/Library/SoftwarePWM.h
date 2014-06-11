@@ -3,7 +3,6 @@
 
 #include "DigitalIO.h"
 
-#define MaxPeriodMillis (60UL * 1000UL)
 /**
  * Performs a Pulse Width Modulation on a DigitalOutputPin using
  * the program main loop and not a timer. This is non-precise
@@ -12,6 +11,8 @@
  */
 class SoftwarePWM {
 private:
+	static const unsigned long MaxPeriodMillis = 60UL * 1000UL;
+
 	DigitalOutputPin *pin;
 
 	unsigned int frequencyCyclesPerMinute;

@@ -3,8 +3,8 @@
 #include "Button.h"
 
 class ButtonTest {
-	const int buttonPin = 4; // the number of the pushbutton pin
-	const int ledPin = 13; // the number of the LED pin
+	static const int buttonPin = 4;	// the number of the pushbutton pin
+	static const int ledPin = 13;	// the number of the LED pin
 
 	Button btn;
 	bool lightOn = false;

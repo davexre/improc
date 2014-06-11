@@ -46,21 +46,21 @@ static TicksPerSecond<> currentTPS;
 
 static void showStatus(bool aborting) {
 	Serial.print(isPlaying ? "1" : "0");
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print(aborting ? "1" : "0");
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) pressure);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) cellTemperature);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) mosfetTemperature);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) ambientTemperature);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print((int) current);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print(maxPressure);
-	Serial.print("\t");
+	Serial_print("\t");
 	Serial.print(maxCurrent);
 	Serial.println();
 }

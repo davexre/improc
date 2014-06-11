@@ -4,28 +4,6 @@
 #include "TicksPerSecond.h"
 #include "Button.h"
 
-/**
- * Minimum rotary encoder tick per second to start acceleration.
- * If the speed of ticking is below this value no acceleration
- * is considered, i.e. ticking is by 1.
- */
-#define MIN_TPS 5
-
-/**
- * Maximum rotary encoder tick per second when accelerating.
- * If the speed of ticking is above this value then acceleration
- * is considered at full speed.
- */
-#define MAX_TPS 30
-
-/**
- * The number of ticks that a rotary encoder should make at full speed
- * to go from minValue to maxValue. If rotary encoder has 20 ticks for
- * a 360 degrees rotation then 5 rotations at full speed will be needed
- * to go from minValue to maxValue.
- */
-#define TICKS_AT_MAX_SPEED_FOR_FULL_SPAN 100
-
 class RotaryEncoderAcceleration;
 
 class RotaryEncoderState {
@@ -156,6 +134,28 @@ public:
  */
 class RotaryEncoderAcceleration {
 private:
+	/**
+	 * Minimum rotary encoder tick per second to start acceleration.
+	 * If the speed of ticking is below this value no acceleration
+	 * is considered, i.e. ticking is by 1.
+	 */
+	const int MIN_TPS = 5;
+
+	/**
+	 * Maximum rotary encoder tick per second when accelerating.
+	 * If the speed of ticking is above this value then acceleration
+	 * is considered at full speed.
+	 */
+	const int MAX_TPS = 30;
+
+	/**
+	 * The number of ticks that a rotary encoder should make at full speed
+	 * to go from minValue to maxValue. If rotary encoder has 20 ticks for
+	 * a 360 degrees rotation then 5 rotations at full speed will be needed
+	 * to go from minValue to maxValue.
+	 */
+	const int TICKS_AT_MAX_SPEED_FOR_FULL_SPAN = 100;
+
 	RotaryEncoderState initialState;
 	RotaryEncoderState *state;
 public:

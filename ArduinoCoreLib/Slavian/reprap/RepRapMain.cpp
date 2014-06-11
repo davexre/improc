@@ -78,7 +78,7 @@ void RepRapMain::setup() {
 	led.initialize(&diLedPin, states, size(states), true);
 	led.setState(btn.isAutoRepeatEnabled());
 
-	Serial.println("ok");
+	Serial_println("ok");
 }
 
 void RepRapMain::loop() {

@@ -54,10 +54,13 @@ turns out to be the true variance by virtue of associative principle.
 
 #include <float.h>
 
-//#define sqr(x) ((x)*(x))
 
 class Statistics {
   public:
+	template <typename T> inline const T sqr(const T x) const {
+		return x*x;
+	};
+
     Statistics(int numSamples) : mNumSamples(numSamples), mCurrNumSamples(0), mTotal(0), mRefVariance(0), mMin(FLT_MAX), mMax(-FLT_MAX) {}
 
     void setNewSampleSize(int numSamples)

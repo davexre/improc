@@ -182,28 +182,28 @@ const unsigned int BLINK_DELAY_LONG = 500;
 const unsigned int BLINK_DELAY_MEDIUM = 250;
 const unsigned int BLINK_DELAY_SHORT = 50;
 
-const unsigned int BLINK_SLOW[] PROGMEM = {
+static constexpr unsigned int BLINK_SLOW[] PROGMEM = {
 		BLINK_DELAY_LONG, BLINK_DELAY_LONG,
 		0};
-const unsigned int BLINK_MEDIUM[] PROGMEM = {
+static constexpr unsigned int BLINK_MEDIUM[] PROGMEM = {
 		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
 		0};
-const unsigned int BLINK_FAST[] PROGMEM = {
+static constexpr unsigned int BLINK_FAST[] PROGMEM = {
 		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
 		0};
-const unsigned int BLINK_OFF[] PROGMEM = {0};
-const unsigned int BLINK_ON[] PROGMEM = {BLINK_DELAY_SHORT, 0};
+static constexpr unsigned int BLINK_OFF[] PROGMEM = {0};
+static constexpr unsigned int BLINK_ON[] PROGMEM = {BLINK_DELAY_SHORT, 0};
 
-const unsigned int BLINK1[] PROGMEM = {
+static constexpr unsigned int BLINK1[] PROGMEM = {
 		BLINK_DELAY_SHORT, BLINK_DELAY_SHORT,
 		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
 		0};
-const unsigned int BLINK2[] PROGMEM = {
+static constexpr unsigned int BLINK2[] PROGMEM = {
 		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
 		BLINK_DELAY_SHORT, BLINK_DELAY_MEDIUM,
 		BLINK_DELAY_MEDIUM, BLINK_DELAY_MEDIUM,
 		0};
-const unsigned int BLINK3[] PROGMEM = {
+static constexpr unsigned int BLINK3[] PROGMEM = {
 		BLINK_DELAY_SHORT, BLINK_DELAY_LONG,
 		0};
 

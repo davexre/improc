@@ -109,6 +109,23 @@ void delayLoop(const unsigned long millis) {
 	}
 }
 
+#define Serial_print(string) Serial.pgm_print(PSTR(string))
+#define Serial_println(string) Serial.pgm_println(PSTR(string))
+
+template <typename T> inline const T sqr(const T x) {
+	return x*x;
+};
+
+template<typename T> inline void MIN(T &variable, const T value) {
+	if (variable > value)
+		variable = value;
+}
+
+template<typename T> inline void MAX(T &variable, const T value) {
+	if (variable < value)
+		variable = value;
+}
+/*
 #define DUMMY(type) \
 inline void MIN(type &variable, type value) { \
 	if (variable > value) \
@@ -136,6 +153,7 @@ DUMMY(signed long)
 DUMMY(unsigned long)
 DUMMY(float)
 #undef DUMMY
+*/
 
 #define DefineClass(className) \
 class className { \

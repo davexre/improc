@@ -24,8 +24,8 @@ void OpticalSensorTest::loop() {
 	if ((millis() - last > 500) || btn.isPressed()) {
 		last = millis();
 		Serial.print(analogRead(0));
-//		Serial.print("\t");
+//		Serial_print("\t");
 //		Serial.print(analogRead(5));
-		Serial.print("\n");
+		Serial_print("\n");
 	}
 }

@@ -54,11 +54,13 @@ turns out to be the true variance by virtue of associative principle.
 
 #include <limits.h>
 
-#define sqr(x) ((x)*(x))
-
 class IntStatistics {
   public:
-    IntStatistics(int numSamples) : mNumSamples(numSamples), mCurrNumSamples(0), mTotal(0), mRefVariance(0), mMin(INT_MAX), mMax(INT_MIN) {}
+	template <typename T> inline const T sqr(const T x) const {
+		return x*x;
+	};
+
+	IntStatistics(int numSamples) : mNumSamples(numSamples), mCurrNumSamples(0), mTotal(0), mRefVariance(0), mMin(INT_MAX), mMax(INT_MIN) {}
 
     void setNewSampleSize(int numSamples)
     {
