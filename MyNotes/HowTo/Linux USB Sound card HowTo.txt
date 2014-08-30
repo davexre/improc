@@ -2,7 +2,7 @@ Setup USB Sound card to be set as default sound device upon hotplug on Ubuntu
 =============================================================================
 
 1. Add a udev rule file
-/etc/udev/rule.d/00-my-sound-card.rules
+/etc/udev/rules.d/00-my-sound-card.rules
 ========================================================
 ACTION!="add", GOTO="EOF"
 SUBSYSTEM=="sound", ATTR{id}=="Device", RUN+="/home/slavian/.bin/waitAndRunSelectUSBSoundCard.sh"

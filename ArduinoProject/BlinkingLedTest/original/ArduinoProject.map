@@ -1,0 +1,605 @@
+Archive member included because of file (symbol)
+
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+                              ./main.o (malloc)
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                              ./main.o (init)
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+                              ./main.o (BlinkingLedTest::loop())
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o) (BlinkingLed::initialize(DigitalOutputPin*))
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o) (Button::update())
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o) (DigitalOutputArduinoPin::initialize(unsigned char, bool))
+/home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o) (pinMode)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o)
+                              /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o (exit)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(memcpy.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o) (memcpy)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+                              /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o) (_exit)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+                              ./main.o (__do_copy_data)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+                              ./main.o (__do_clear_bss)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+                              /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o) (__do_global_ctors)
+/home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_tablejump.o)
+                              /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o) (__tablejump__)
+
+Discarded input sections
+
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+ .text          0x00000000        0x0 ./main.o
+ .data          0x00000000        0x0 ./main.o
+ .bss           0x00000000        0x0 ./main.o
+ .text.__cxa_pure_virtual
+                0x00000000        0x0 ./main.o
+ .text.__cxa_guard_acquire
+                0x00000000        0x0 ./main.o
+ .text.__cxa_guard_release
+                0x00000000        0x0 ./main.o
+ .text.__cxa_guard_abort
+                0x00000000        0x0 ./main.o
+ .text._ZdlPv   0x00000000        0x0 ./main.o
+ .text._Znwj    0x00000000        0x0 ./main.o
+ .bss.mainClass
+                0x00000000        0x0 ./main.o
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .text.malloc   0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .text.free     0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .text.realloc  0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .data.__brkval
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .bss.__flp     0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .data.__brkval_maximum
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(malloc.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .text.micros   0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .text.delayMicroseconds
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .text.delay    0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .rodata._ZTV16DigitalOutputPin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .rodata._ZTV15DigitalInputPin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+ .text._ZN11BlinkingLed4playEs
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+ .text._ZN6Button5resetEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN24DigitalInvertingInputPin8getStateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN28DigitalInputShiftRegisterPin10initializeEP25DigitalInputShiftRegisterh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN28DigitalInputShiftRegisterPin8getStateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN25DigitalInputShiftRegister8getStateEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN25DigitalInputShiftRegister16createPinHandlerEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN33DigitalInputShiftRegister_74HC16610initializeEhP16DigitalOutputPinS1_P15DigitalInputPin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN33DigitalInputShiftRegister_74HC1666updateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC164_Pin10initializeEP34DigitalOutputShiftRegister_74HC164h
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC164_Pin8getStateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC164_Pin8setStateEb
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC1646updateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC16410initializeEhP16DigitalOutputPinS1_
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC1648getStateEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC1648setStateEhb
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC16416createPinHandlerEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC595_Pin10initializeEP34DigitalOutputShiftRegister_74HC595h
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC595_Pin8getStateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC5956updateEv
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC59510initializeEhNS_15WriteOutputModeEP16DigitalOutputPinS2_S2_
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC5958getStateEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC5958setStateEhb
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN38DigitalOutputShiftRegister_74HC595_Pin8setStateEb
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text._ZN34DigitalOutputShiftRegister_74HC59516createPinHandlerEh
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .rodata._ZTV38DigitalOutputShiftRegister_74HC595_Pin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .rodata._ZTV38DigitalOutputShiftRegister_74HC164_Pin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .rodata._ZTV28DigitalInputShiftRegisterPin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .rodata._ZTV24DigitalInvertingInputPin
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+ .text          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+ .data          0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+ .bss           0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+ .text.digitalWrite
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+ .text.digitalRead
+                0x00000000        0x0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(memcpy.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(memcpy.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(memcpy.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+ .text.libgcc   0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+ .text.libgcc   0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+ .text.libgcc   0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+ .text          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_tablejump.o)
+ .data          0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_tablejump.o)
+ .bss           0x00000000        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_tablejump.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+LOAD ./main.o
+LOAD /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libm.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a
+LOAD /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000      0x786
+ *(.vectors)
+ .vectors       0x00000000       0x68 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+                0x00000000                __vectors
+                0x00000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+ *(.progmem*)
+ .progmem.data  0x00000068       0x36 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                0x0000007a                BLINK_OFF
+                0x0000008a                BLINK2
+                0x00000080                BLINK1
+                0x00000068                BLINK_SLOW
+                0x00000098                BLINK3
+                0x0000006e                BLINK_MEDIUM
+                0x0000007c                BLINK_ON
+                0x00000074                BLINK_FAST
+ .progmem.data  0x0000009e       0x5a /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+                0x0000009e                port_to_mode_PGM
+                0x000000bc                digital_pin_to_port_PGM
+                0x000000d0                digital_pin_to_bit_mask_PGM
+                0x000000a8                port_to_output_PGM
+                0x000000b2                port_to_input_PGM
+                0x000000e4                digital_pin_to_timer_PGM
+                0x000000f8                . = ALIGN (0x2)
+                0x000000f8                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x000000f8        0x0 linker stubs
+ *(.trampolines*)
+                0x000000f8                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x000000f8                __ctors_start = .
+ *(.ctors)
+ .ctors         0x000000f8        0x2 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+                0x000000fa                __ctors_end = .
+                0x000000fa                __dtors_start = .
+ *(.dtors)
+                0x000000fa                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x000000fa        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+                0x000000fa                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x000000fa        0xc /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x00000106       0x16 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_copy_data.o)
+                0x00000106                __do_copy_data
+ .init4         0x0000011c       0x10 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_clear_bss.o)
+                0x0000011c                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ .init6         0x0000012c       0x16 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_ctors.o)
+                0x0000012c                __do_global_ctors
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x00000142        0x8 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+ *(.init9)
+ *(.text)
+ .text          0x0000014a        0x4 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+                0x0000014a                __vector_22
+                0x0000014a                __vector_1
+                0x0000014a                __vector_24
+                0x0000014a                __vector_12
+                0x0000014a                __bad_interrupt
+                0x0000014a                __vector_6
+                0x0000014a                __vector_3
+                0x0000014a                __vector_23
+                0x0000014a                __vector_25
+                0x0000014a                __vector_11
+                0x0000014a                __vector_13
+                0x0000014a                __vector_17
+                0x0000014a                __vector_19
+                0x0000014a                __vector_7
+                0x0000014a                __vector_5
+                0x0000014a                __vector_4
+                0x0000014a                __vector_9
+                0x0000014a                __vector_2
+                0x0000014a                __vector_21
+                0x0000014a                __vector_15
+                0x0000014a                __vector_8
+                0x0000014a                __vector_14
+                0x0000014a                __vector_10
+                0x0000014a                __vector_18
+                0x0000014a                __vector_20
+ .text          0x0000014e        0x6 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o)
+                0x0000014e                exit
+                0x00000154                . = ALIGN (0x2)
+ *(.text.*)
+ .text.main     0x00000154        0xe ./main.o
+                0x00000154                main
+ .text.__vector_16
+                0x00000162       0x90 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                0x00000162                __vector_16
+ .text.millis   0x000001f2       0x1c /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                0x000001f2                millis
+ .text.init     0x0000020e       0x76 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                0x0000020e                init
+ .text._GLOBAL__I__ZN15BlinkingLedTest5setupEv
+                0x00000284       0x1a /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .text._ZN15BlinkingLedTest4loopEv
+                0x0000029e       0x32 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+                0x0000029e                BlinkingLedTest::loop()
+ .text._ZN15BlinkingLedTest5setupEv
+                0x000002d0       0x3e /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+                0x000002d0                BlinkingLedTest::setup()
+ .text._ZN11BlinkingLed10initializeEP16DigitalOutputPin
+                0x0000030e       0x1c /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                0x0000030e                BlinkingLed::initialize(DigitalOutputPin*)
+ .text._ZN11BlinkingLed12getNextDelayEv
+                0x0000032a       0xb0 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                0x0000032a                BlinkingLed::getNextDelay()
+ .text._ZN11BlinkingLed6updateEv
+                0x000003da       0xa4 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                0x000003da                BlinkingLed::update()
+ .text._ZN11BlinkingLed9playBlinkEPKjs
+                0x0000047e       0x4a /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLed.o)
+                0x0000047e                BlinkingLed::playBlink(unsigned int const*, short)
+ .text._ZN6Button6updateEv
+                0x000004c8       0xbe /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+                0x000004c8                Button::update()
+ .text._ZN6Button10initializeEP15DigitalInputPinj
+                0x00000586       0x3e /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(Button.o)
+                0x00000586                Button::initialize(DigitalInputPin*, unsigned int)
+ .text._ZN22DigitalInputArduinoPin8getStateEv
+                0x000005c4       0x24 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x000005c4                DigitalInputArduinoPin::getState()
+ .text._ZN23DigitalOutputArduinoPin8getStateEv
+                0x000005e8        0x6 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x000005e8                DigitalOutputArduinoPin::getState()
+ .text._ZN23DigitalOutputArduinoPin8setStateEb
+                0x000005ee       0x2a /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x000005ee                DigitalOutputArduinoPin::setState(bool)
+ .text._ZN23DigitalOutputArduinoPin10initializeEhb
+                0x00000618       0x60 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x00000618                DigitalOutputArduinoPin::initialize(unsigned char, bool)
+ .text._ZN22DigitalInputArduinoPin10initializeEhb
+                0x00000678       0x80 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x00000678                DigitalInputArduinoPin::initialize(unsigned char, bool)
+ .text.pinMode  0x000006f8       0x7e /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring_digital.o)
+                0x000006f8                pinMode
+ .text.libgcc   0x00000776        0xc /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_tablejump.o)
+                0x0000077a                __tablejump__
+                0x00000776                __tablejump2__
+                0x00000782                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x00000782        0x0 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+                0x00000782                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x00000782        0x4 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/avr5/libgcc.a(_exit.o)
+ *(.fini0)
+                0x00000786                _etext = .
+
+.data           0x00800100        0xe load address 0x00000786
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ .rodata._ZTV23DigitalOutputArduinoPin
+                0x00800100        0x8 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x00800100                vtable for DigitalOutputArduinoPin
+ .rodata._ZTV22DigitalInputArduinoPin
+                0x00800108        0x6 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(DigitalIO.o)
+                0x00800108                vtable for DigitalInputArduinoPin
+ *(.gnu.linkonce.d*)
+                0x0080010e                . = ALIGN (0x2)
+                0x0080010e                _edata = .
+                0x0080010e                PROVIDE (__data_end, .)
+
+.bss            0x0080010e       0x2a load address 0x00000794
+                0x0080010e                PROVIDE (__bss_start, .)
+ *(.bss)
+ *(.bss*)
+ .bss.timer0_overflow_count
+                0x0080010e        0x4 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                0x0080010e                timer0_overflow_count
+ .bss.timer0_millis
+                0x00800112        0x4 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+                0x00800112                timer0_millis
+ .bss._ZL12timer0_fract
+                0x00800116        0x1 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(wiring.o)
+ .bss._ZL8diLedPin
+                0x00800117        0x6 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .bss._ZL11diButtonPin
+                0x0080011d        0x5 /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .bss._ZL3btn   0x00800122        0xa /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ .bss._ZL3led   0x0080012c        0xc /home/slavian/S/git/image-process/ArduinoCoreLib/Release/libArduinoCoreLib.a(BlinkingLedTest.o)
+ *(COMMON)
+                0x00800138                PROVIDE (__bss_end, .)
+                0x00000786                __data_load_start = LOADADDR (.data)
+                0x00000794                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00800138        0x0
+                0x00800138                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00800138                PROVIDE (__noinit_end, .)
+                0x00800138                _end = .
+                0x00800138                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab           0x00000000      0x768
+ *(.stab)
+ .stab          0x00000000      0x6b4 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+ .stab          0x000006b4       0x30 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(exit.o)
+                                 0x3c (size before relaxing)
+ .stab          0x000006e4       0x84 /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/libc.a(memcpy.o)
+                                 0x90 (size before relaxing)
+
+.stabstr        0x00000000       0xae
+ *(.stabstr)
+ .stabstr       0x00000000       0xae /home/slavian/S/arduino/arduino-1.5.2/hardware/tools/avr/bin/../lib/gcc/avr/4.3.2/../../../avr/lib/avr5/crtm328p.o
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges
+ *(.debug_aranges)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info
+ *(.debug_info)
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev
+ *(.debug_abbrev)
+
+.debug_line
+ *(.debug_line)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str
+ *(.debug_str)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(ArduinoProject.elf elf32-avr)
+LOAD linker stubs

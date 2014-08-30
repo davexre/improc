@@ -1,0 +1,1021 @@
+...
+AVR Memory Usage
+----------------
+Device: atmega328p
+
+Program:    1940 bytes (5.9% Full)
+(.text + .data + .bootloader)
+
+Data:         56 bytes (2.7% Full)
+(.data + .bss + .noinit)
+
+
+...
+...
+   text	   data	    bss	    dec	    hex	filename
+   1926	     14	     42	   1982	    7be	ArduinoProject.elf
+...
+...
+
+ArduinoProject.elf:     file format elf32-avr
+
+Contents of section .data:
+ 800100 00000000 f402f702 00000000 e202      ..............  
+...
+...
+Print final symbols sizes (b - .bss; d - .data; t - .text; v/w - weak)
+...
+...
+00000001 b timer0_fract
+00000004 B timer0_millis
+00000004 B timer0_overflow_count
+00000005 b diButtonPin
+00000006 b diLedPin
+00000010 b btn
+00000012 b led
+00000002 T BLINK_OFF
+00000004 T BLINK_ON
+00000006 T BLINK3
+00000006 T BLINK_FAST
+00000006 T BLINK_MEDIUM
+00000006 T BLINK_SLOW
+00000006 T DigitalOutputArduinoPin::getState()
+00000006 T exit
+00000010 T BLINK1
+00000010 T port_to_input_PGM
+00000010 T port_to_mode_PGM
+00000010 T port_to_output_PGM
+00000014 T BLINK2
+00000014 T main
+00000020 T digital_pin_to_bit_mask_PGM
+00000020 T digital_pin_to_port_PGM
+00000020 T digital_pin_to_timer_PGM
+00000026 t global constructors keyed to _ZN15BlinkingLedTest5setupEv
+00000028 T BlinkingLed::initialize(DigitalOutputPin*)
+00000028 T millis
+00000036 T DigitalInputArduinoPin::getState()
+00000042 T DigitalOutputArduinoPin::setState(bool)
+00000050 T BlinkingLedTest::loop()
+00000062 T BlinkingLedTest::setup()
+00000062 T Button::initialize(DigitalInputPin*, unsigned int)
+00000074 T BlinkingLed::playBlink(unsigned int const*, short)
+00000096 T DigitalOutputArduinoPin::initialize(unsigned char, bool)
+00000118 T init
+00000126 T pinMode
+00000128 T DigitalInputArduinoPin::initialize(unsigned char, bool)
+00000144 T __vector_16
+00000164 T BlinkingLed::update()
+00000176 T BlinkingLed::getNextDelay()
+00000190 T Button::update()
+00000006 V vtable for DigitalInputArduinoPin
+00000008 V vtable for DigitalOutputArduinoPin
+...
+...
+
+ArduinoProject.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         0000000e  00800100  00000786  0000081a  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000786  00000000  00000000  00000094  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          0000002a  0080010e  00000794  00000828  2**0
+                  ALLOC
+  3 .stab         00000768  00000000  00000000  00000828  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  4 .stabstr      000000ae  00000000  00000000  00000f90  2**0
+                  CONTENTS, READONLY, DEBUGGING
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 7d 00 	jmp	0xfa	; 0xfa <__ctors_end>
+   4:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+   8:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+   c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  10:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  14:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  18:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  1c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  20:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  24:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  28:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  2c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  30:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  34:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  38:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  3c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  40:	0c 94 b1 00 	jmp	0x162	; 0x162 <__vector_16>
+  44:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  48:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  4c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  50:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  54:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  58:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  5c:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  60:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+  64:	0c 94 a5 00 	jmp	0x14a	; 0x14a <__bad_interrupt>
+
+00000068 <BLINK_SLOW>:
+  68:	f4 01 f4 01 00 00                                   ......
+
+0000006e <BLINK_MEDIUM>:
+  6e:	fa 00 fa 00 00 00                                   ......
+
+00000074 <BLINK_FAST>:
+  74:	32 00 32 00 00 00                                   2.2...
+
+0000007a <BLINK_OFF>:
+	...
+
+0000007c <BLINK_ON>:
+  7c:	32 00 00 00                                         2...
+
+00000080 <BLINK1>:
+  80:	32 00 32 00 fa 00 fa 00 00 00                       2.2.......
+
+0000008a <BLINK2>:
+  8a:	32 00 fa 00 32 00 fa 00 fa 00 fa 00 00 00           2...2.........
+
+00000098 <BLINK3>:
+  98:	32 00 f4 01 00 00                                   2.....
+
+0000009e <port_to_mode_PGM>:
+  9e:	00 00 00 00 24 00 27 00 2a 00                       ....$.'.*.
+
+000000a8 <port_to_output_PGM>:
+  a8:	00 00 00 00 25 00 28 00 2b 00                       ....%.(.+.
+
+000000b2 <port_to_input_PGM>:
+  b2:	00 00 00 00 23 00 26 00 29 00                       ....#.&.).
+
+000000bc <digital_pin_to_port_PGM>:
+  bc:	04 04 04 04 04 04 04 04 02 02 02 02 02 02 03 03     ................
+  cc:	03 03 03 03                                         ....
+
+000000d0 <digital_pin_to_bit_mask_PGM>:
+  d0:	01 02 04 08 10 20 40 80 01 02 04 08 10 20 01 02     ..... @...... ..
+  e0:	04 08 10 20                                         ... 
+
+000000e4 <digital_pin_to_timer_PGM>:
+  e4:	00 00 00 07 00 02 01 00 00 03 04 06 00 00 00 00     ................
+  f4:	00 00 00 00                                         ....
+
+000000f8 <__ctors_start>:
+  f8:	42 01       	movw	r8, r4
+
+000000fa <__ctors_end>:
+  fa:	11 24       	eor	r1, r1
+  fc:	1f be       	out	0x3f, r1	; 63
+  fe:	cf ef       	ldi	r28, 0xFF	; 255
+ 100:	d8 e0       	ldi	r29, 0x08	; 8
+ 102:	de bf       	out	0x3e, r29	; 62
+ 104:	cd bf       	out	0x3d, r28	; 61
+
+00000106 <__do_copy_data>:
+ 106:	11 e0       	ldi	r17, 0x01	; 1
+ 108:	a0 e0       	ldi	r26, 0x00	; 0
+ 10a:	b1 e0       	ldi	r27, 0x01	; 1
+ 10c:	e6 e8       	ldi	r30, 0x86	; 134
+ 10e:	f7 e0       	ldi	r31, 0x07	; 7
+ 110:	02 c0       	rjmp	.+4      	; 0x116 <.do_copy_data_start>
+
+00000112 <.do_copy_data_loop>:
+ 112:	05 90       	lpm	r0, Z+
+ 114:	0d 92       	st	X+, r0
+
+00000116 <.do_copy_data_start>:
+ 116:	ae 30       	cpi	r26, 0x0E	; 14
+ 118:	b1 07       	cpc	r27, r17
+ 11a:	d9 f7       	brne	.-10     	; 0x112 <.do_copy_data_loop>
+
+0000011c <__do_clear_bss>:
+ 11c:	11 e0       	ldi	r17, 0x01	; 1
+ 11e:	ae e0       	ldi	r26, 0x0E	; 14
+ 120:	b1 e0       	ldi	r27, 0x01	; 1
+ 122:	01 c0       	rjmp	.+2      	; 0x126 <.do_clear_bss_start>
+
+00000124 <.do_clear_bss_loop>:
+ 124:	1d 92       	st	X+, r1
+
+00000126 <.do_clear_bss_start>:
+ 126:	a8 33       	cpi	r26, 0x38	; 56
+ 128:	b1 07       	cpc	r27, r17
+ 12a:	e1 f7       	brne	.-8      	; 0x124 <.do_clear_bss_loop>
+
+0000012c <__do_global_ctors>:
+ 12c:	10 e0       	ldi	r17, 0x00	; 0
+ 12e:	ca ef       	ldi	r28, 0xFA	; 250
+ 130:	d0 e0       	ldi	r29, 0x00	; 0
+ 132:	04 c0       	rjmp	.+8      	; 0x13c <.do_global_ctors_start>
+
+00000134 <.do_global_ctors_loop>:
+ 134:	22 97       	sbiw	r28, 0x02	; 2
+ 136:	fe 01       	movw	r30, r28
+ 138:	0e 94 bd 03 	call	0x77a	; 0x77a <__tablejump__>
+
+0000013c <.do_global_ctors_start>:
+ 13c:	c8 3f       	cpi	r28, 0xF8	; 248
+ 13e:	d1 07       	cpc	r29, r17
+ 140:	c9 f7       	brne	.-14     	; 0x134 <.do_global_ctors_loop>
+ 142:	0e 94 aa 00 	call	0x154	; 0x154 <main>
+ 146:	0c 94 a7 00 	jmp	0x14e	; 0x14e <exit>
+
+0000014a <__bad_interrupt>:
+ 14a:	0c 94 00 00 	jmp	0	; 0x0 <__heap_end>
+
+0000014e <exit>:
+ 14e:	f8 94       	cli
+ 150:	0c 94 c1 03 	jmp	0x782	; 0x782 <_exit>
+
+00000154 <main>:
+ 154:	0e 94 07 01 	call	0x20e	; 0x20e <init>
+ 158:	0e 94 68 01 	call	0x2d0	; 0x2d0 <BlinkingLedTest::setup()>
+ 15c:	0e 94 4f 01 	call	0x29e	; 0x29e <BlinkingLedTest::loop()>
+ 160:	fd cf       	rjmp	.-6      	; 0x15c <main+0x8>
+
+00000162 <__vector_16>:
+ 162:	1f 92       	push	r1
+ 164:	0f 92       	push	r0
+ 166:	0f b6       	in	r0, 0x3f	; 63
+ 168:	0f 92       	push	r0
+ 16a:	11 24       	eor	r1, r1
+ 16c:	2f 93       	push	r18
+ 16e:	3f 93       	push	r19
+ 170:	8f 93       	push	r24
+ 172:	9f 93       	push	r25
+ 174:	af 93       	push	r26
+ 176:	bf 93       	push	r27
+ 178:	80 91 12 01 	lds	r24, 0x0112
+ 17c:	90 91 13 01 	lds	r25, 0x0113
+ 180:	a0 91 14 01 	lds	r26, 0x0114
+ 184:	b0 91 15 01 	lds	r27, 0x0115
+ 188:	30 91 16 01 	lds	r19, 0x0116
+ 18c:	01 96       	adiw	r24, 0x01	; 1
+ 18e:	a1 1d       	adc	r26, r1
+ 190:	b1 1d       	adc	r27, r1
+ 192:	23 2f       	mov	r18, r19
+ 194:	2d 5f       	subi	r18, 0xFD	; 253
+ 196:	2d 37       	cpi	r18, 0x7D	; 125
+ 198:	20 f0       	brcs	.+8      	; 0x1a2 <__vector_16+0x40>
+ 19a:	2d 57       	subi	r18, 0x7D	; 125
+ 19c:	01 96       	adiw	r24, 0x01	; 1
+ 19e:	a1 1d       	adc	r26, r1
+ 1a0:	b1 1d       	adc	r27, r1
+ 1a2:	20 93 16 01 	sts	0x0116, r18
+ 1a6:	80 93 12 01 	sts	0x0112, r24
+ 1aa:	90 93 13 01 	sts	0x0113, r25
+ 1ae:	a0 93 14 01 	sts	0x0114, r26
+ 1b2:	b0 93 15 01 	sts	0x0115, r27
+ 1b6:	80 91 0e 01 	lds	r24, 0x010E
+ 1ba:	90 91 0f 01 	lds	r25, 0x010F
+ 1be:	a0 91 10 01 	lds	r26, 0x0110
+ 1c2:	b0 91 11 01 	lds	r27, 0x0111
+ 1c6:	01 96       	adiw	r24, 0x01	; 1
+ 1c8:	a1 1d       	adc	r26, r1
+ 1ca:	b1 1d       	adc	r27, r1
+ 1cc:	80 93 0e 01 	sts	0x010E, r24
+ 1d0:	90 93 0f 01 	sts	0x010F, r25
+ 1d4:	a0 93 10 01 	sts	0x0110, r26
+ 1d8:	b0 93 11 01 	sts	0x0111, r27
+ 1dc:	bf 91       	pop	r27
+ 1de:	af 91       	pop	r26
+ 1e0:	9f 91       	pop	r25
+ 1e2:	8f 91       	pop	r24
+ 1e4:	3f 91       	pop	r19
+ 1e6:	2f 91       	pop	r18
+ 1e8:	0f 90       	pop	r0
+ 1ea:	0f be       	out	0x3f, r0	; 63
+ 1ec:	0f 90       	pop	r0
+ 1ee:	1f 90       	pop	r1
+ 1f0:	18 95       	reti
+
+000001f2 <millis>:
+ 1f2:	8f b7       	in	r24, 0x3f	; 63
+ 1f4:	f8 94       	cli
+ 1f6:	20 91 12 01 	lds	r18, 0x0112
+ 1fa:	30 91 13 01 	lds	r19, 0x0113
+ 1fe:	40 91 14 01 	lds	r20, 0x0114
+ 202:	50 91 15 01 	lds	r21, 0x0115
+ 206:	8f bf       	out	0x3f, r24	; 63
+ 208:	b9 01       	movw	r22, r18
+ 20a:	ca 01       	movw	r24, r20
+ 20c:	08 95       	ret
+
+0000020e <init>:
+ 20e:	78 94       	sei
+ 210:	84 b5       	in	r24, 0x24	; 36
+ 212:	82 60       	ori	r24, 0x02	; 2
+ 214:	84 bd       	out	0x24, r24	; 36
+ 216:	84 b5       	in	r24, 0x24	; 36
+ 218:	81 60       	ori	r24, 0x01	; 1
+ 21a:	84 bd       	out	0x24, r24	; 36
+ 21c:	85 b5       	in	r24, 0x25	; 37
+ 21e:	82 60       	ori	r24, 0x02	; 2
+ 220:	85 bd       	out	0x25, r24	; 37
+ 222:	85 b5       	in	r24, 0x25	; 37
+ 224:	81 60       	ori	r24, 0x01	; 1
+ 226:	85 bd       	out	0x25, r24	; 37
+ 228:	ee e6       	ldi	r30, 0x6E	; 110
+ 22a:	f0 e0       	ldi	r31, 0x00	; 0
+ 22c:	80 81       	ld	r24, Z
+ 22e:	81 60       	ori	r24, 0x01	; 1
+ 230:	80 83       	st	Z, r24
+ 232:	e1 e8       	ldi	r30, 0x81	; 129
+ 234:	f0 e0       	ldi	r31, 0x00	; 0
+ 236:	10 82       	st	Z, r1
+ 238:	80 81       	ld	r24, Z
+ 23a:	82 60       	ori	r24, 0x02	; 2
+ 23c:	80 83       	st	Z, r24
+ 23e:	80 81       	ld	r24, Z
+ 240:	81 60       	ori	r24, 0x01	; 1
+ 242:	80 83       	st	Z, r24
+ 244:	e0 e8       	ldi	r30, 0x80	; 128
+ 246:	f0 e0       	ldi	r31, 0x00	; 0
+ 248:	80 81       	ld	r24, Z
+ 24a:	81 60       	ori	r24, 0x01	; 1
+ 24c:	80 83       	st	Z, r24
+ 24e:	e1 eb       	ldi	r30, 0xB1	; 177
+ 250:	f0 e0       	ldi	r31, 0x00	; 0
+ 252:	80 81       	ld	r24, Z
+ 254:	84 60       	ori	r24, 0x04	; 4
+ 256:	80 83       	st	Z, r24
+ 258:	e0 eb       	ldi	r30, 0xB0	; 176
+ 25a:	f0 e0       	ldi	r31, 0x00	; 0
+ 25c:	80 81       	ld	r24, Z
+ 25e:	81 60       	ori	r24, 0x01	; 1
+ 260:	80 83       	st	Z, r24
+ 262:	ea e7       	ldi	r30, 0x7A	; 122
+ 264:	f0 e0       	ldi	r31, 0x00	; 0
+ 266:	80 81       	ld	r24, Z
+ 268:	84 60       	ori	r24, 0x04	; 4
+ 26a:	80 83       	st	Z, r24
+ 26c:	80 81       	ld	r24, Z
+ 26e:	82 60       	ori	r24, 0x02	; 2
+ 270:	80 83       	st	Z, r24
+ 272:	80 81       	ld	r24, Z
+ 274:	81 60       	ori	r24, 0x01	; 1
+ 276:	80 83       	st	Z, r24
+ 278:	80 81       	ld	r24, Z
+ 27a:	80 68       	ori	r24, 0x80	; 128
+ 27c:	80 83       	st	Z, r24
+ 27e:	10 92 c1 00 	sts	0x00C1, r1
+ 282:	08 95       	ret
+
+00000284 <global constructors keyed to _ZN15BlinkingLedTest5setupEv>:
+ 284:	84 e0       	ldi	r24, 0x04	; 4
+ 286:	91 e0       	ldi	r25, 0x01	; 1
+ 288:	90 93 18 01 	sts	0x0118, r25
+ 28c:	80 93 17 01 	sts	0x0117, r24
+ 290:	8c e0       	ldi	r24, 0x0C	; 12
+ 292:	91 e0       	ldi	r25, 0x01	; 1
+ 294:	90 93 1e 01 	sts	0x011E, r25
+ 298:	80 93 1d 01 	sts	0x011D, r24
+ 29c:	08 95       	ret
+
+0000029e <BlinkingLedTest::loop()>:
+ 29e:	82 e2       	ldi	r24, 0x22	; 34
+ 2a0:	91 e0       	ldi	r25, 0x01	; 1
+ 2a2:	0e 94 64 02 	call	0x4c8	; 0x4c8 <Button::update()>
+ 2a6:	8c e2       	ldi	r24, 0x2C	; 44
+ 2a8:	91 e0       	ldi	r25, 0x01	; 1
+ 2aa:	0e 94 ed 01 	call	0x3da	; 0x3da <BlinkingLed::update()>
+ 2ae:	80 91 25 01 	lds	r24, 0x0125
+ 2b2:	88 23       	and	r24, r24
+ 2b4:	61 f4       	brne	.+24     	; 0x2ce <BlinkingLedTest::loop()+0x30>
+ 2b6:	80 91 24 01 	lds	r24, 0x0124
+ 2ba:	88 23       	and	r24, r24
+ 2bc:	41 f0       	breq	.+16     	; 0x2ce <BlinkingLedTest::loop()+0x30>
+ 2be:	8c e2       	ldi	r24, 0x2C	; 44
+ 2c0:	91 e0       	ldi	r25, 0x01	; 1
+ 2c2:	6a e8       	ldi	r22, 0x8A	; 138
+ 2c4:	70 e0       	ldi	r23, 0x00	; 0
+ 2c6:	41 e0       	ldi	r20, 0x01	; 1
+ 2c8:	50 e0       	ldi	r21, 0x00	; 0
+ 2ca:	0e 94 3f 02 	call	0x47e	; 0x47e <BlinkingLed::playBlink(unsigned int const*, short)>
+ 2ce:	08 95       	ret
+
+000002d0 <BlinkingLedTest::setup()>:
+ 2d0:	0f 93       	push	r16
+ 2d2:	1f 93       	push	r17
+ 2d4:	0d e1       	ldi	r16, 0x1D	; 29
+ 2d6:	11 e0       	ldi	r17, 0x01	; 1
+ 2d8:	c8 01       	movw	r24, r16
+ 2da:	64 e0       	ldi	r22, 0x04	; 4
+ 2dc:	41 e0       	ldi	r20, 0x01	; 1
+ 2de:	0e 94 3c 03 	call	0x678	; 0x678 <DigitalInputArduinoPin::initialize(unsigned char, bool)>
+ 2e2:	82 e2       	ldi	r24, 0x22	; 34
+ 2e4:	91 e0       	ldi	r25, 0x01	; 1
+ 2e6:	b8 01       	movw	r22, r16
+ 2e8:	4a e0       	ldi	r20, 0x0A	; 10
+ 2ea:	50 e0       	ldi	r21, 0x00	; 0
+ 2ec:	0e 94 c3 02 	call	0x586	; 0x586 <Button::initialize(DigitalInputPin*, unsigned int)>
+ 2f0:	07 e1       	ldi	r16, 0x17	; 23
+ 2f2:	11 e0       	ldi	r17, 0x01	; 1
+ 2f4:	c8 01       	movw	r24, r16
+ 2f6:	6d e0       	ldi	r22, 0x0D	; 13
+ 2f8:	40 e0       	ldi	r20, 0x00	; 0
+ 2fa:	0e 94 0c 03 	call	0x618	; 0x618 <DigitalOutputArduinoPin::initialize(unsigned char, bool)>
+ 2fe:	8c e2       	ldi	r24, 0x2C	; 44
+ 300:	91 e0       	ldi	r25, 0x01	; 1
+ 302:	b8 01       	movw	r22, r16
+ 304:	0e 94 87 01 	call	0x30e	; 0x30e <BlinkingLed::initialize(DigitalOutputPin*)>
+ 308:	1f 91       	pop	r17
+ 30a:	0f 91       	pop	r16
+ 30c:	08 95       	ret
+
+0000030e <BlinkingLed::initialize(DigitalOutputPin*)>:
+ 30e:	fc 01       	movw	r30, r24
+ 310:	71 83       	std	Z+1, r23	; 0x01
+ 312:	60 83       	st	Z, r22
+ 314:	13 82       	std	Z+3, r1	; 0x03
+ 316:	12 82       	std	Z+2, r1	; 0x02
+ 318:	14 82       	std	Z+4, r1	; 0x04
+ 31a:	13 86       	std	Z+11, r1	; 0x0b
+ 31c:	12 86       	std	Z+10, r1	; 0x0a
+ 31e:	11 86       	std	Z+9, r1	; 0x09
+ 320:	15 82       	std	Z+5, r1	; 0x05
+ 322:	16 82       	std	Z+6, r1	; 0x06
+ 324:	17 82       	std	Z+7, r1	; 0x07
+ 326:	10 86       	std	Z+8, r1	; 0x08
+ 328:	08 95       	ret
+
+0000032a <BlinkingLed::getNextDelay()>:
+ 32a:	dc 01       	movw	r26, r24
+ 32c:	6f b7       	in	r22, 0x3f	; 63
+ 32e:	f8 94       	cli
+ 330:	19 96       	adiw	r26, 0x09	; 9
+ 332:	4d 91       	ld	r20, X+
+ 334:	5c 91       	ld	r21, X
+ 336:	1a 97       	sbiw	r26, 0x0a	; 10
+ 338:	41 15       	cp	r20, r1
+ 33a:	51 05       	cpc	r21, r1
+ 33c:	09 f4       	brne	.+2      	; 0x340 <BlinkingLed::getNextDelay()+0x16>
+ 33e:	48 c0       	rjmp	.+144    	; 0x3d0 <BlinkingLed::getNextDelay()+0xa6>
+ 340:	14 96       	adiw	r26, 0x04	; 4
+ 342:	2c 91       	ld	r18, X
+ 344:	14 97       	sbiw	r26, 0x04	; 4
+ 346:	82 2f       	mov	r24, r18
+ 348:	90 e0       	ldi	r25, 0x00	; 0
+ 34a:	88 0f       	add	r24, r24
+ 34c:	99 1f       	adc	r25, r25
+ 34e:	12 96       	adiw	r26, 0x02	; 2
+ 350:	ed 91       	ld	r30, X+
+ 352:	fc 91       	ld	r31, X
+ 354:	13 97       	sbiw	r26, 0x03	; 3
+ 356:	e8 0f       	add	r30, r24
+ 358:	f9 1f       	adc	r31, r25
+ 35a:	2f 5f       	subi	r18, 0xFF	; 255
+ 35c:	14 96       	adiw	r26, 0x04	; 4
+ 35e:	2c 93       	st	X, r18
+ 360:	14 97       	sbiw	r26, 0x04	; 4
+ 362:	85 91       	lpm	r24, Z+
+ 364:	94 91       	lpm	r25, Z+
+ 366:	00 97       	sbiw	r24, 0x00	; 0
+ 368:	51 f5       	brne	.+84     	; 0x3be <BlinkingLed::getNextDelay()+0x94>
+ 36a:	1b 96       	adiw	r26, 0x0b	; 11
+ 36c:	1c 92       	st	X, r1
+ 36e:	1b 97       	sbiw	r26, 0x0b	; 11
+ 370:	14 96       	adiw	r26, 0x04	; 4
+ 372:	1c 92       	st	X, r1
+ 374:	14 97       	sbiw	r26, 0x04	; 4
+ 376:	14 16       	cp	r1, r20
+ 378:	15 06       	cpc	r1, r21
+ 37a:	34 f4       	brge	.+12     	; 0x388 <BlinkingLed::getNextDelay()+0x5e>
+ 37c:	41 50       	subi	r20, 0x01	; 1
+ 37e:	50 40       	sbci	r21, 0x00	; 0
+ 380:	1a 96       	adiw	r26, 0x0a	; 10
+ 382:	5c 93       	st	X, r21
+ 384:	4e 93       	st	-X, r20
+ 386:	19 97       	sbiw	r26, 0x09	; 9
+ 388:	19 96       	adiw	r26, 0x09	; 9
+ 38a:	8d 91       	ld	r24, X+
+ 38c:	9c 91       	ld	r25, X
+ 38e:	1a 97       	sbiw	r26, 0x0a	; 10
+ 390:	89 2b       	or	r24, r25
+ 392:	f1 f0       	breq	.+60     	; 0x3d0 <BlinkingLed::getNextDelay()+0xa6>
+ 394:	14 96       	adiw	r26, 0x04	; 4
+ 396:	2c 91       	ld	r18, X
+ 398:	14 97       	sbiw	r26, 0x04	; 4
+ 39a:	82 2f       	mov	r24, r18
+ 39c:	90 e0       	ldi	r25, 0x00	; 0
+ 39e:	88 0f       	add	r24, r24
+ 3a0:	99 1f       	adc	r25, r25
+ 3a2:	12 96       	adiw	r26, 0x02	; 2
+ 3a4:	ed 91       	ld	r30, X+
+ 3a6:	fc 91       	ld	r31, X
+ 3a8:	13 97       	sbiw	r26, 0x03	; 3
+ 3aa:	e8 0f       	add	r30, r24
+ 3ac:	f9 1f       	adc	r31, r25
+ 3ae:	2f 5f       	subi	r18, 0xFF	; 255
+ 3b0:	14 96       	adiw	r26, 0x04	; 4
+ 3b2:	2c 93       	st	X, r18
+ 3b4:	14 97       	sbiw	r26, 0x04	; 4
+ 3b6:	85 91       	lpm	r24, Z+
+ 3b8:	94 91       	lpm	r25, Z+
+ 3ba:	00 97       	sbiw	r24, 0x00	; 0
+ 3bc:	11 f0       	breq	.+4      	; 0x3c2 <BlinkingLed::getNextDelay()+0x98>
+ 3be:	9c 01       	movw	r18, r24
+ 3c0:	09 c0       	rjmp	.+18     	; 0x3d4 <BlinkingLed::getNextDelay()+0xaa>
+ 3c2:	14 96       	adiw	r26, 0x04	; 4
+ 3c4:	1c 92       	st	X, r1
+ 3c6:	14 97       	sbiw	r26, 0x04	; 4
+ 3c8:	1a 96       	adiw	r26, 0x0a	; 10
+ 3ca:	1c 92       	st	X, r1
+ 3cc:	1e 92       	st	-X, r1
+ 3ce:	19 97       	sbiw	r26, 0x09	; 9
+ 3d0:	20 e0       	ldi	r18, 0x00	; 0
+ 3d2:	30 e0       	ldi	r19, 0x00	; 0
+ 3d4:	6f bf       	out	0x3f, r22	; 63
+ 3d6:	c9 01       	movw	r24, r18
+ 3d8:	08 95       	ret
+
+000003da <BlinkingLed::update()>:
+ 3da:	ef 92       	push	r14
+ 3dc:	ff 92       	push	r15
+ 3de:	0f 93       	push	r16
+ 3e0:	1f 93       	push	r17
+ 3e2:	cf 93       	push	r28
+ 3e4:	df 93       	push	r29
+ 3e6:	ec 01       	movw	r28, r24
+ 3e8:	89 85       	ldd	r24, Y+9	; 0x09
+ 3ea:	9a 85       	ldd	r25, Y+10	; 0x0a
+ 3ec:	89 2b       	or	r24, r25
+ 3ee:	99 f1       	breq	.+102    	; 0x456 <BlinkingLed::update()+0x7c>
+ 3f0:	0e 94 f9 00 	call	0x1f2	; 0x1f2 <millis>
+ 3f4:	7b 01       	movw	r14, r22
+ 3f6:	8c 01       	movw	r16, r24
+ 3f8:	8d 81       	ldd	r24, Y+5	; 0x05
+ 3fa:	9e 81       	ldd	r25, Y+6	; 0x06
+ 3fc:	af 81       	ldd	r26, Y+7	; 0x07
+ 3fe:	b8 85       	ldd	r27, Y+8	; 0x08
+ 400:	a8 01       	movw	r20, r16
+ 402:	97 01       	movw	r18, r14
+ 404:	28 1b       	sub	r18, r24
+ 406:	39 0b       	sbc	r19, r25
+ 408:	4a 0b       	sbc	r20, r26
+ 40a:	5b 0b       	sbc	r21, r27
+ 40c:	57 fd       	sbrc	r21, 7
+ 40e:	30 c0       	rjmp	.+96     	; 0x470 <BlinkingLed::update()+0x96>
+ 410:	ce 01       	movw	r24, r28
+ 412:	0e 94 95 01 	call	0x32a	; 0x32a <BlinkingLed::getNextDelay()>
+ 416:	9c 01       	movw	r18, r24
+ 418:	00 97       	sbiw	r24, 0x00	; 0
+ 41a:	11 f4       	brne	.+4      	; 0x420 <BlinkingLed::update()+0x46>
+ 41c:	1b 86       	std	Y+11, r1	; 0x0b
+ 41e:	04 c0       	rjmp	.+8      	; 0x428 <BlinkingLed::update()+0x4e>
+ 420:	8b 85       	ldd	r24, Y+11	; 0x0b
+ 422:	91 e0       	ldi	r25, 0x01	; 1
+ 424:	89 27       	eor	r24, r25
+ 426:	8b 87       	std	Y+11, r24	; 0x0b
+ 428:	c9 01       	movw	r24, r18
+ 42a:	a0 e0       	ldi	r26, 0x00	; 0
+ 42c:	b0 e0       	ldi	r27, 0x00	; 0
+ 42e:	8e 0d       	add	r24, r14
+ 430:	9f 1d       	adc	r25, r15
+ 432:	a0 1f       	adc	r26, r16
+ 434:	b1 1f       	adc	r27, r17
+ 436:	8d 83       	std	Y+5, r24	; 0x05
+ 438:	9e 83       	std	Y+6, r25	; 0x06
+ 43a:	af 83       	std	Y+7, r26	; 0x07
+ 43c:	b8 87       	std	Y+8, r27	; 0x08
+ 43e:	a8 81       	ld	r26, Y
+ 440:	b9 81       	ldd	r27, Y+1	; 0x01
+ 442:	ed 91       	ld	r30, X+
+ 444:	fc 91       	ld	r31, X
+ 446:	11 97       	sbiw	r26, 0x01	; 1
+ 448:	02 80       	ldd	r0, Z+2	; 0x02
+ 44a:	f3 81       	ldd	r31, Z+3	; 0x03
+ 44c:	e0 2d       	mov	r30, r0
+ 44e:	cd 01       	movw	r24, r26
+ 450:	6b 85       	ldd	r22, Y+11	; 0x0b
+ 452:	09 95       	icall
+ 454:	0d c0       	rjmp	.+26     	; 0x470 <BlinkingLed::update()+0x96>
+ 456:	1b 86       	std	Y+11, r1	; 0x0b
+ 458:	e8 81       	ld	r30, Y
+ 45a:	f9 81       	ldd	r31, Y+1	; 0x01
+ 45c:	a0 81       	ld	r26, Z
+ 45e:	b1 81       	ldd	r27, Z+1	; 0x01
+ 460:	12 96       	adiw	r26, 0x02	; 2
+ 462:	2d 91       	ld	r18, X+
+ 464:	3c 91       	ld	r19, X
+ 466:	13 97       	sbiw	r26, 0x03	; 3
+ 468:	cf 01       	movw	r24, r30
+ 46a:	60 e0       	ldi	r22, 0x00	; 0
+ 46c:	f9 01       	movw	r30, r18
+ 46e:	09 95       	icall
+ 470:	df 91       	pop	r29
+ 472:	cf 91       	pop	r28
+ 474:	1f 91       	pop	r17
+ 476:	0f 91       	pop	r16
+ 478:	ff 90       	pop	r15
+ 47a:	ef 90       	pop	r14
+ 47c:	08 95       	ret
+
+0000047e <BlinkingLed::playBlink(unsigned int const*, short)>:
+ 47e:	cf 93       	push	r28
+ 480:	df 93       	push	r29
+ 482:	ec 01       	movw	r28, r24
+ 484:	61 15       	cp	r22, r1
+ 486:	71 05       	cpc	r23, r1
+ 488:	11 f4       	brne	.+4      	; 0x48e <BlinkingLed::playBlink(unsigned int const*, short)+0x10>
+ 48a:	40 e0       	ldi	r20, 0x00	; 0
+ 48c:	50 e0       	ldi	r21, 0x00	; 0
+ 48e:	8a 81       	ldd	r24, Y+2	; 0x02
+ 490:	9b 81       	ldd	r25, Y+3	; 0x03
+ 492:	68 17       	cp	r22, r24
+ 494:	79 07       	cpc	r23, r25
+ 496:	19 f4       	brne	.+6      	; 0x49e <BlinkingLed::playBlink(unsigned int const*, short)+0x20>
+ 498:	5a 87       	std	Y+10, r21	; 0x0a
+ 49a:	49 87       	std	Y+9, r20	; 0x09
+ 49c:	0f c0       	rjmp	.+30     	; 0x4bc <BlinkingLed::playBlink(unsigned int const*, short)+0x3e>
+ 49e:	8f b7       	in	r24, 0x3f	; 63
+ 4a0:	f8 94       	cli
+ 4a2:	1c 82       	std	Y+4, r1	; 0x04
+ 4a4:	7b 83       	std	Y+3, r23	; 0x03
+ 4a6:	6a 83       	std	Y+2, r22	; 0x02
+ 4a8:	5a 87       	std	Y+10, r21	; 0x0a
+ 4aa:	49 87       	std	Y+9, r20	; 0x09
+ 4ac:	1b 86       	std	Y+11, r1	; 0x0b
+ 4ae:	8f bf       	out	0x3f, r24	; 63
+ 4b0:	0e 94 f9 00 	call	0x1f2	; 0x1f2 <millis>
+ 4b4:	6d 83       	std	Y+5, r22	; 0x05
+ 4b6:	7e 83       	std	Y+6, r23	; 0x06
+ 4b8:	8f 83       	std	Y+7, r24	; 0x07
+ 4ba:	98 87       	std	Y+8, r25	; 0x08
+ 4bc:	ce 01       	movw	r24, r28
+ 4be:	0e 94 ed 01 	call	0x3da	; 0x3da <BlinkingLed::update()>
+ 4c2:	df 91       	pop	r29
+ 4c4:	cf 91       	pop	r28
+ 4c6:	08 95       	ret
+
+000004c8 <Button::update()>:
+ 4c8:	9f 92       	push	r9
+ 4ca:	af 92       	push	r10
+ 4cc:	bf 92       	push	r11
+ 4ce:	cf 92       	push	r12
+ 4d0:	df 92       	push	r13
+ 4d2:	ef 92       	push	r14
+ 4d4:	ff 92       	push	r15
+ 4d6:	0f 93       	push	r16
+ 4d8:	1f 93       	push	r17
+ 4da:	cf 93       	push	r28
+ 4dc:	df 93       	push	r29
+ 4de:	ec 01       	movw	r28, r24
+ 4e0:	a8 81       	ld	r26, Y
+ 4e2:	b9 81       	ldd	r27, Y+1	; 0x01
+ 4e4:	ed 91       	ld	r30, X+
+ 4e6:	fc 91       	ld	r31, X
+ 4e8:	11 97       	sbiw	r26, 0x01	; 1
+ 4ea:	01 90       	ld	r0, Z+
+ 4ec:	f0 81       	ld	r31, Z
+ 4ee:	e0 2d       	mov	r30, r0
+ 4f0:	cd 01       	movw	r24, r26
+ 4f2:	09 95       	icall
+ 4f4:	98 2e       	mov	r9, r24
+ 4f6:	0e 94 f9 00 	call	0x1f2	; 0x1f2 <millis>
+ 4fa:	7b 01       	movw	r14, r22
+ 4fc:	8c 01       	movw	r16, r24
+ 4fe:	8b 81       	ldd	r24, Y+3	; 0x03
+ 500:	8a 83       	std	Y+2, r24	; 0x02
+ 502:	ac 80       	ldd	r10, Y+4	; 0x04
+ 504:	bd 80       	ldd	r11, Y+5	; 0x05
+ 506:	ce 80       	ldd	r12, Y+6	; 0x06
+ 508:	df 80       	ldd	r13, Y+7	; 0x07
+ 50a:	68 85       	ldd	r22, Y+8	; 0x08
+ 50c:	79 85       	ldd	r23, Y+9	; 0x09
+ 50e:	98 16       	cp	r9, r24
+ 510:	a1 f0       	breq	.+40     	; 0x53a <Button::update()+0x72>
+ 512:	a8 01       	movw	r20, r16
+ 514:	97 01       	movw	r18, r14
+ 516:	2a 19       	sub	r18, r10
+ 518:	3b 09       	sbc	r19, r11
+ 51a:	4c 09       	sbc	r20, r12
+ 51c:	5d 09       	sbc	r21, r13
+ 51e:	cb 01       	movw	r24, r22
+ 520:	a0 e0       	ldi	r26, 0x00	; 0
+ 522:	b0 e0       	ldi	r27, 0x00	; 0
+ 524:	28 17       	cp	r18, r24
+ 526:	39 07       	cpc	r19, r25
+ 528:	4a 07       	cpc	r20, r26
+ 52a:	5b 07       	cpc	r21, r27
+ 52c:	08 f0       	brcs	.+2      	; 0x530 <Button::update()+0x68>
+ 52e:	9b 82       	std	Y+3, r9	; 0x03
+ 530:	ec 82       	std	Y+4, r14	; 0x04
+ 532:	fd 82       	std	Y+5, r15	; 0x05
+ 534:	0e 83       	std	Y+6, r16	; 0x06
+ 536:	1f 83       	std	Y+7, r17	; 0x07
+ 538:	1a c0       	rjmp	.+52     	; 0x56e <Button::update()+0xa6>
+ 53a:	9b 01       	movw	r18, r22
+ 53c:	40 e0       	ldi	r20, 0x00	; 0
+ 53e:	50 e0       	ldi	r21, 0x00	; 0
+ 540:	d8 01       	movw	r26, r16
+ 542:	c7 01       	movw	r24, r14
+ 544:	8a 19       	sub	r24, r10
+ 546:	9b 09       	sbc	r25, r11
+ 548:	ac 09       	sbc	r26, r12
+ 54a:	bd 09       	sbc	r27, r13
+ 54c:	82 17       	cp	r24, r18
+ 54e:	93 07       	cpc	r25, r19
+ 550:	a4 07       	cpc	r26, r20
+ 552:	b5 07       	cpc	r27, r21
+ 554:	60 f0       	brcs	.+24     	; 0x56e <Button::update()+0xa6>
+ 556:	20 95       	com	r18
+ 558:	30 95       	com	r19
+ 55a:	40 95       	com	r20
+ 55c:	50 95       	com	r21
+ 55e:	2e 0d       	add	r18, r14
+ 560:	3f 1d       	adc	r19, r15
+ 562:	40 1f       	adc	r20, r16
+ 564:	51 1f       	adc	r21, r17
+ 566:	2c 83       	std	Y+4, r18	; 0x04
+ 568:	3d 83       	std	Y+5, r19	; 0x05
+ 56a:	4e 83       	std	Y+6, r20	; 0x06
+ 56c:	5f 83       	std	Y+7, r21	; 0x07
+ 56e:	df 91       	pop	r29
+ 570:	cf 91       	pop	r28
+ 572:	1f 91       	pop	r17
+ 574:	0f 91       	pop	r16
+ 576:	ff 90       	pop	r15
+ 578:	ef 90       	pop	r14
+ 57a:	df 90       	pop	r13
+ 57c:	cf 90       	pop	r12
+ 57e:	bf 90       	pop	r11
+ 580:	af 90       	pop	r10
+ 582:	9f 90       	pop	r9
+ 584:	08 95       	ret
+
+00000586 <Button::initialize(DigitalInputPin*, unsigned int)>:
+ 586:	0f 93       	push	r16
+ 588:	1f 93       	push	r17
+ 58a:	8c 01       	movw	r16, r24
+ 58c:	fc 01       	movw	r30, r24
+ 58e:	71 83       	std	Z+1, r23	; 0x01
+ 590:	60 83       	st	Z, r22
+ 592:	51 87       	std	Z+9, r21	; 0x09
+ 594:	40 87       	std	Z+8, r20	; 0x08
+ 596:	0e 94 f9 00 	call	0x1f2	; 0x1f2 <millis>
+ 59a:	f8 01       	movw	r30, r16
+ 59c:	64 83       	std	Z+4, r22	; 0x04
+ 59e:	75 83       	std	Z+5, r23	; 0x05
+ 5a0:	86 83       	std	Z+6, r24	; 0x06
+ 5a2:	97 83       	std	Z+7, r25	; 0x07
+ 5a4:	a0 81       	ld	r26, Z
+ 5a6:	b1 81       	ldd	r27, Z+1	; 0x01
+ 5a8:	ed 91       	ld	r30, X+
+ 5aa:	fc 91       	ld	r31, X
+ 5ac:	11 97       	sbiw	r26, 0x01	; 1
+ 5ae:	01 90       	ld	r0, Z+
+ 5b0:	f0 81       	ld	r31, Z
+ 5b2:	e0 2d       	mov	r30, r0
+ 5b4:	cd 01       	movw	r24, r26
+ 5b6:	09 95       	icall
+ 5b8:	f8 01       	movw	r30, r16
+ 5ba:	83 83       	std	Z+3, r24	; 0x03
+ 5bc:	82 83       	std	Z+2, r24	; 0x02
+ 5be:	1f 91       	pop	r17
+ 5c0:	0f 91       	pop	r16
+ 5c2:	08 95       	ret
+
+000005c4 <DigitalInputArduinoPin::getState()>:
+ 5c4:	dc 01       	movw	r26, r24
+ 5c6:	13 96       	adiw	r26, 0x03	; 3
+ 5c8:	ed 91       	ld	r30, X+
+ 5ca:	fc 91       	ld	r31, X
+ 5cc:	14 97       	sbiw	r26, 0x04	; 4
+ 5ce:	20 81       	ld	r18, Z
+ 5d0:	40 e0       	ldi	r20, 0x00	; 0
+ 5d2:	30 e0       	ldi	r19, 0x00	; 0
+ 5d4:	12 96       	adiw	r26, 0x02	; 2
+ 5d6:	8c 91       	ld	r24, X
+ 5d8:	90 e0       	ldi	r25, 0x00	; 0
+ 5da:	28 23       	and	r18, r24
+ 5dc:	39 23       	and	r19, r25
+ 5de:	23 2b       	or	r18, r19
+ 5e0:	09 f0       	breq	.+2      	; 0x5e4 <DigitalInputArduinoPin::getState()+0x20>
+ 5e2:	41 e0       	ldi	r20, 0x01	; 1
+ 5e4:	84 2f       	mov	r24, r20
+ 5e6:	08 95       	ret
+
+000005e8 <DigitalOutputArduinoPin::getState()>:
+ 5e8:	fc 01       	movw	r30, r24
+ 5ea:	85 81       	ldd	r24, Z+5	; 0x05
+ 5ec:	08 95       	ret
+
+000005ee <DigitalOutputArduinoPin::setState(bool)>:
+ 5ee:	fc 01       	movw	r30, r24
+ 5f0:	65 83       	std	Z+5, r22	; 0x05
+ 5f2:	a3 81       	ldd	r26, Z+3	; 0x03
+ 5f4:	b4 81       	ldd	r27, Z+4	; 0x04
+ 5f6:	22 81       	ldd	r18, Z+2	; 0x02
+ 5f8:	66 23       	and	r22, r22
+ 5fa:	31 f0       	breq	.+12     	; 0x608 <DigitalOutputArduinoPin::setState(bool)+0x1a>
+ 5fc:	9f b7       	in	r25, 0x3f	; 63
+ 5fe:	f8 94       	cli
+ 600:	8c 91       	ld	r24, X
+ 602:	82 2b       	or	r24, r18
+ 604:	8c 93       	st	X, r24
+ 606:	06 c0       	rjmp	.+12     	; 0x614 <DigitalOutputArduinoPin::setState(bool)+0x26>
+ 608:	9f b7       	in	r25, 0x3f	; 63
+ 60a:	f8 94       	cli
+ 60c:	8c 91       	ld	r24, X
+ 60e:	20 95       	com	r18
+ 610:	28 23       	and	r18, r24
+ 612:	2c 93       	st	X, r18
+ 614:	9f bf       	out	0x3f, r25	; 63
+ 616:	08 95       	ret
+
+00000618 <DigitalOutputArduinoPin::initialize(unsigned char, bool)>:
+ 618:	ff 92       	push	r15
+ 61a:	0f 93       	push	r16
+ 61c:	1f 93       	push	r17
+ 61e:	8c 01       	movw	r16, r24
+ 620:	86 2f       	mov	r24, r22
+ 622:	f4 2e       	mov	r15, r20
+ 624:	26 2f       	mov	r18, r22
+ 626:	30 e0       	ldi	r19, 0x00	; 0
+ 628:	f9 01       	movw	r30, r18
+ 62a:	e0 53       	subi	r30, 0x30	; 48
+ 62c:	ff 4f       	sbci	r31, 0xFF	; 255
+ 62e:	e4 91       	lpm	r30, Z+
+ 630:	d8 01       	movw	r26, r16
+ 632:	12 96       	adiw	r26, 0x02	; 2
+ 634:	ec 93       	st	X, r30
+ 636:	12 97       	sbiw	r26, 0x02	; 2
+ 638:	24 54       	subi	r18, 0x44	; 68
+ 63a:	3f 4f       	sbci	r19, 0xFF	; 255
+ 63c:	f9 01       	movw	r30, r18
+ 63e:	94 91       	lpm	r25, Z+
+ 640:	e9 2f       	mov	r30, r25
+ 642:	f0 e0       	ldi	r31, 0x00	; 0
+ 644:	ee 0f       	add	r30, r30
+ 646:	ff 1f       	adc	r31, r31
+ 648:	e8 55       	subi	r30, 0x58	; 88
+ 64a:	ff 4f       	sbci	r31, 0xFF	; 255
+ 64c:	25 91       	lpm	r18, Z+
+ 64e:	34 91       	lpm	r19, Z+
+ 650:	14 96       	adiw	r26, 0x04	; 4
+ 652:	3c 93       	st	X, r19
+ 654:	2e 93       	st	-X, r18
+ 656:	13 97       	sbiw	r26, 0x03	; 3
+ 658:	61 e0       	ldi	r22, 0x01	; 1
+ 65a:	0e 94 7c 03 	call	0x6f8	; 0x6f8 <pinMode>
+ 65e:	d8 01       	movw	r26, r16
+ 660:	ed 91       	ld	r30, X+
+ 662:	fc 91       	ld	r31, X
+ 664:	02 80       	ldd	r0, Z+2	; 0x02
+ 666:	f3 81       	ldd	r31, Z+3	; 0x03
+ 668:	e0 2d       	mov	r30, r0
+ 66a:	c8 01       	movw	r24, r16
+ 66c:	6f 2d       	mov	r22, r15
+ 66e:	09 95       	icall
+ 670:	1f 91       	pop	r17
+ 672:	0f 91       	pop	r16
+ 674:	ff 90       	pop	r15
+ 676:	08 95       	ret
+
+00000678 <DigitalInputArduinoPin::initialize(unsigned char, bool)>:
+ 678:	df 92       	push	r13
+ 67a:	ef 92       	push	r14
+ 67c:	ff 92       	push	r15
+ 67e:	0f 93       	push	r16
+ 680:	1f 93       	push	r17
+ 682:	7c 01       	movw	r14, r24
+ 684:	86 2f       	mov	r24, r22
+ 686:	d4 2e       	mov	r13, r20
+ 688:	26 2f       	mov	r18, r22
+ 68a:	30 e0       	ldi	r19, 0x00	; 0
+ 68c:	f9 01       	movw	r30, r18
+ 68e:	e0 53       	subi	r30, 0x30	; 48
+ 690:	ff 4f       	sbci	r31, 0xFF	; 255
+ 692:	e4 91       	lpm	r30, Z+
+ 694:	d7 01       	movw	r26, r14
+ 696:	12 96       	adiw	r26, 0x02	; 2
+ 698:	ec 93       	st	X, r30
+ 69a:	12 97       	sbiw	r26, 0x02	; 2
+ 69c:	24 54       	subi	r18, 0x44	; 68
+ 69e:	3f 4f       	sbci	r19, 0xFF	; 255
+ 6a0:	f9 01       	movw	r30, r18
+ 6a2:	04 91       	lpm	r16, Z+
+ 6a4:	10 e0       	ldi	r17, 0x00	; 0
+ 6a6:	00 0f       	add	r16, r16
+ 6a8:	11 1f       	adc	r17, r17
+ 6aa:	f8 01       	movw	r30, r16
+ 6ac:	ee 54       	subi	r30, 0x4E	; 78
+ 6ae:	ff 4f       	sbci	r31, 0xFF	; 255
+ 6b0:	25 91       	lpm	r18, Z+
+ 6b2:	34 91       	lpm	r19, Z+
+ 6b4:	14 96       	adiw	r26, 0x04	; 4
+ 6b6:	3c 93       	st	X, r19
+ 6b8:	2e 93       	st	-X, r18
+ 6ba:	13 97       	sbiw	r26, 0x03	; 3
+ 6bc:	60 e0       	ldi	r22, 0x00	; 0
+ 6be:	0e 94 7c 03 	call	0x6f8	; 0x6f8 <pinMode>
+ 6c2:	f8 01       	movw	r30, r16
+ 6c4:	e8 55       	subi	r30, 0x58	; 88
+ 6c6:	ff 4f       	sbci	r31, 0xFF	; 255
+ 6c8:	a5 91       	lpm	r26, Z+
+ 6ca:	b4 91       	lpm	r27, Z+
+ 6cc:	f7 01       	movw	r30, r14
+ 6ce:	22 81       	ldd	r18, Z+2	; 0x02
+ 6d0:	dd 20       	and	r13, r13
+ 6d2:	29 f0       	breq	.+10     	; 0x6de <DigitalInputArduinoPin::initialize(unsigned char, bool)+0x66>
+ 6d4:	9f b7       	in	r25, 0x3f	; 63
+ 6d6:	f8 94       	cli
+ 6d8:	8c 91       	ld	r24, X
+ 6da:	82 2b       	or	r24, r18
+ 6dc:	05 c0       	rjmp	.+10     	; 0x6e8 <DigitalInputArduinoPin::initialize(unsigned char, bool)+0x70>
+ 6de:	9f b7       	in	r25, 0x3f	; 63
+ 6e0:	f8 94       	cli
+ 6e2:	8c 91       	ld	r24, X
+ 6e4:	20 95       	com	r18
+ 6e6:	82 23       	and	r24, r18
+ 6e8:	8c 93       	st	X, r24
+ 6ea:	9f bf       	out	0x3f, r25	; 63
+ 6ec:	1f 91       	pop	r17
+ 6ee:	0f 91       	pop	r16
+ 6f0:	ff 90       	pop	r15
+ 6f2:	ef 90       	pop	r14
+ 6f4:	df 90       	pop	r13
+ 6f6:	08 95       	ret
+
+000006f8 <pinMode>:
+ 6f8:	cf 93       	push	r28
+ 6fa:	df 93       	push	r29
+ 6fc:	48 2f       	mov	r20, r24
+ 6fe:	50 e0       	ldi	r21, 0x00	; 0
+ 700:	ca 01       	movw	r24, r20
+ 702:	80 53       	subi	r24, 0x30	; 48
+ 704:	9f 4f       	sbci	r25, 0xFF	; 255
+ 706:	fc 01       	movw	r30, r24
+ 708:	34 91       	lpm	r19, Z+
+ 70a:	44 54       	subi	r20, 0x44	; 68
+ 70c:	5f 4f       	sbci	r21, 0xFF	; 255
+ 70e:	fa 01       	movw	r30, r20
+ 710:	84 91       	lpm	r24, Z+
+ 712:	88 23       	and	r24, r24
+ 714:	69 f1       	breq	.+90     	; 0x770 <pinMode+0x78>
+ 716:	90 e0       	ldi	r25, 0x00	; 0
+ 718:	88 0f       	add	r24, r24
+ 71a:	99 1f       	adc	r25, r25
+ 71c:	fc 01       	movw	r30, r24
+ 71e:	e2 56       	subi	r30, 0x62	; 98
+ 720:	ff 4f       	sbci	r31, 0xFF	; 255
+ 722:	a5 91       	lpm	r26, Z+
+ 724:	b4 91       	lpm	r27, Z+
+ 726:	fc 01       	movw	r30, r24
+ 728:	e8 55       	subi	r30, 0x58	; 88
+ 72a:	ff 4f       	sbci	r31, 0xFF	; 255
+ 72c:	c5 91       	lpm	r28, Z+
+ 72e:	d4 91       	lpm	r29, Z+
+ 730:	66 23       	and	r22, r22
+ 732:	51 f4       	brne	.+20     	; 0x748 <pinMode+0x50>
+ 734:	2f b7       	in	r18, 0x3f	; 63
+ 736:	f8 94       	cli
+ 738:	8c 91       	ld	r24, X
+ 73a:	93 2f       	mov	r25, r19
+ 73c:	90 95       	com	r25
+ 73e:	89 23       	and	r24, r25
+ 740:	8c 93       	st	X, r24
+ 742:	88 81       	ld	r24, Y
+ 744:	89 23       	and	r24, r25
+ 746:	0b c0       	rjmp	.+22     	; 0x75e <pinMode+0x66>
+ 748:	62 30       	cpi	r22, 0x02	; 2
+ 74a:	61 f4       	brne	.+24     	; 0x764 <pinMode+0x6c>
+ 74c:	2f b7       	in	r18, 0x3f	; 63
+ 74e:	f8 94       	cli
+ 750:	8c 91       	ld	r24, X
+ 752:	93 2f       	mov	r25, r19
+ 754:	90 95       	com	r25
+ 756:	89 23       	and	r24, r25
+ 758:	8c 93       	st	X, r24
+ 75a:	88 81       	ld	r24, Y
+ 75c:	83 2b       	or	r24, r19
+ 75e:	88 83       	st	Y, r24
+ 760:	2f bf       	out	0x3f, r18	; 63
+ 762:	06 c0       	rjmp	.+12     	; 0x770 <pinMode+0x78>
+ 764:	9f b7       	in	r25, 0x3f	; 63
+ 766:	f8 94       	cli
+ 768:	8c 91       	ld	r24, X
+ 76a:	83 2b       	or	r24, r19
+ 76c:	8c 93       	st	X, r24
+ 76e:	9f bf       	out	0x3f, r25	; 63
+ 770:	df 91       	pop	r29
+ 772:	cf 91       	pop	r28
+ 774:	08 95       	ret
+
+00000776 <__tablejump2__>:
+ 776:	ee 0f       	add	r30, r30
+ 778:	ff 1f       	adc	r31, r31
+
+0000077a <__tablejump__>:
+ 77a:	05 90       	lpm	r0, Z+
+ 77c:	f4 91       	lpm	r31, Z+
+ 77e:	e0 2d       	mov	r30, r0
+ 780:	09 94       	ijmp
+
+00000782 <_exit>:
+ 782:	f8 94       	cli
+
+00000784 <__stop_program>:
+ 784:	ff cf       	rjmp	.-2      	; 0x784 <__stop_program>
