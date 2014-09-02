@@ -10,10 +10,9 @@ CXXFLAGS = \
  -I"src/arduino" \
  -I"src/Library" \
  -I"src/Slavian" \
- -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections \
- -fno-keep-static-consts -fdata-sections -ffunction-sections \
+ -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-keep-static-consts \
  -std="c++11" -funsigned-char -funsigned-bitfields -fno-exceptions -mmcu=atmega328p -DF_CPU=16000000UL
-LDFLAGS  = -Wl,--gc-sections -mrelax -mmcu=atmega328p
+LDFLAGS  = -Wl,--gc-sections -Wl,-s -mrelax -mmcu=atmega328p
 
 rwildcard=$(foreach d,$(notdir $(wildcard $1$2*)),$(call rwildcard,$1,$2$d/,$3) $(filter $(subst *,%,$3),$2$d))
 SOURCE_FILES := $(call rwildcard, $(SOURCE_DIR),, *.cpp *.c)
@@ -23,7 +22,7 @@ OBJS         := $(addprefix $(OUTPUT_DIR), $(addsuffix .o, $(basename $(SOURCE_F
 
 define c_build
 @mkdir -p $(dir $@)
-$(CXX) $(CXXFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -c -o "$@" "$<"
+$(CXX) $(CXXFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@ $(@:%.o=%.d)" -c -o "$@" "$<"
 @((avr-nm $@ | grep " T main$$" > /dev/null) && (echo $(patsubst %.o,%.elf,$@): $@>$(@:.o=.exec))) & true
 endef
 
@@ -62,7 +61,7 @@ define lib_dump
 	avr-nm -td -C -S "$(1)" >> "$(2)"
 endef
 
-$(OUTPUT_DIR)%.elf: $(OUTPUT_DIR)%.exec
+$(OUTPUT_DIR)%.elf: $(OUTPUT_DIR)%.o $(LIB)
 	avr-g++ $(LDFLAGS) -L$(OUTPUT_DIR) -Wl,-Map,$(@:.elf=.map),--cref -o "$@" $(@:.elf=.o) -l$(LIB_NAME)
 	@$(call obj_dump,$(@:.elf=.o),$(@:.elf=.lss))
 	avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex "$(@)" "$(@:.elf=.hex)"
@@ -80,10 +79,41 @@ $(LIB): $(LIB_OBJS)
 all_exec: $(LIB) $(EXEC_FILES:.exec=.elf);
 endif
 
+upload_file := $(firstword $(call rwildcard,,$(OUTPUT_DIR), */$(file).hex))
+upload_files = $(sort $(basename $(notdir $(call rwildcard,,$(OUTPUT_DIR), *.hex))))
+
+define list_hex_files
+	echo "\\n"
+	echo Upload a HEX file to Arduino using:
+	echo "\\n"
+	echo make upload file=[name of hex file]
+	echo "\\n"
+	echo Available hex files:
+	echo ====================
+	echo " $(foreach i,$(upload_files),$i\\n)"
+endef
+
+.PHONY: list
+list:
+	@$(call list_hex_files)
+
 .PHONY: all
 all: $(OBJS)
 	make all_exec
+	make list
+	@echo All done.
 
 .PHONY: clean
 clean:
 	rm -fr $(OUTPUT_DIR)
+
+.PHONY: qq2
+qq2:
+	@echo $(file)
+
+.PHONY: upload
+upload:
+	@$(if $(upload_file),\
+	avrdude -pm328p -cstk500v1 -P/dev/ttyUSB0 -b57600 -D -Uflash:w:"$(upload_file)":a,\
+	echo "\nHEX file not found\n"; $(call list_hex_files); false \
+	)
