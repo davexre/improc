@@ -11,6 +11,10 @@ Gnome 3
 sudo apt-get install gnome-shell ubuntu-gnome-desktop
 sudo apt-get install gnome-weather gnome-music gnome-maps cheese gnome-documents
 
+Enable Control-Alt-Backspace
+============================
+sudo dpkg-reconfigure keyboard-configuration
+
 HDD check upon boot
 ===================
 

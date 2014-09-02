@@ -155,11 +155,6 @@ public class TaskSetExecutor {
 	}
 	
 	public boolean isCanceled() {
-		if (aborted)
-			return true;
-		if (exec.isShutdown()) {
-			abort();
-		}
 		return aborted;
 	}
 	
@@ -205,6 +200,7 @@ public class TaskSetExecutor {
 		synchronized (tasks) {
 			addingFinished = true;
 		}
+		isDone();
 	}
 	
 	public void get() throws InterruptedException, ExecutionException, TimeoutException {

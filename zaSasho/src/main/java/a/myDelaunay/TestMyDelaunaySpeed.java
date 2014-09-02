@@ -10,7 +10,7 @@ public class TestMyDelaunaySpeed {
 
 	void doIt() throws Exception {
 		ArrayList<Point2D.Double> generatedPoints = new ArrayList<Point2D.Double>();
-		int maxPoints = 10000;
+		int maxPoints = 100000;
 		
 		int sizeX = Math.max(1, (int) Math.sqrt(maxPoints));
 		int sizeY = (int) Math.ceil((double) maxPoints / sizeX);
@@ -29,14 +29,14 @@ public class TestMyDelaunaySpeed {
 				curX * step + rnd.nextDouble(),
 				curY * step + rnd.nextDouble());
 */
-//			Point2D.Double p = new Point2D.Double(curX * step, curY * step);
-			Point2D.Double p = new Point2D.Double(rnd.nextDouble() * sizeX, rnd.nextDouble() * sizeY);
-			for (Point2D.Double i : generatedPoints) {
+			Point2D.Double p = new Point2D.Double(curX * step, curY * step);
+//			Point2D.Double p = new Point2D.Double(rnd.nextDouble() * sizeX, rnd.nextDouble() * sizeY);
+/*			for (Point2D.Double i : generatedPoints) {
 				if (i.distance(p) < 0.00001) {
 					p = null;
 					break;
 				}
-			}
+			}*/
 			if (p != null) {
 				generatedPoints.add(p);
 				curX++;
@@ -49,8 +49,18 @@ public class TestMyDelaunaySpeed {
 			}
 		};
 		Marker.mark();
-		for (Point2D.Double p : generatedPoints) {
-			d.insertPoint(p);
+		if (false) {
+			for (Point2D.Double p : generatedPoints) {
+				d.insertPoint(p);
+			}
+		} else {
+			while (!generatedPoints.isEmpty()) {
+				int n = generatedPoints.size() - 1;
+				if (n > 0)
+					n = rnd.nextInt(n);
+				Point2D.Double p = generatedPoints.remove(n);
+				d.insertPoint(p);
+			}
 		}
 //		d.checkAndFlip();
 		Marker.release();
