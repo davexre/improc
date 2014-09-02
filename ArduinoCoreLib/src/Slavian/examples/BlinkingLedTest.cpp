@@ -3,6 +3,7 @@
 #include "BlinkingLed.h"
 #include "Button.h"
 
+template<typename dummy=void>
 class BlinkingLedTest {
 	static const int buttonPin = 4;		// the number of the pushbutton pin
 	static const int ledPin = 13;		// the number of the LED pin
@@ -12,7 +13,7 @@ class BlinkingLedTest {
 
 	DigitalOutputArduinoPin diLedPin;
 	DigitalInputArduinoPin diButtonPin;
-
+public:
 	void initialize(void) {
 		diButtonPin.initialize(buttonPin, true);
 		btn.initialize(&diButtonPin);
@@ -28,3 +29,5 @@ class BlinkingLedTest {
 		}
 	}
 };
+
+DefineClassTemplate(BlinkingLedTest)

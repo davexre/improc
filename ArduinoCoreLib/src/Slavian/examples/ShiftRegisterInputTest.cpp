@@ -15,7 +15,7 @@ class ShiftRegisterInputTest {
 
 	StateLed led;
 
-	DigitalInputShiftRegister_74HC166 shiftRegisterInput;
+	DigitalInputShiftRegister_74HC166<> shiftRegisterInput;
 	DigitalOutputArduinoPin diLedPin;
 	DigitalOutputArduinoPin diShiftRegisterInputPinPE;
 	DigitalOutputArduinoPin diShiftRegisterInputPinCP;
@@ -71,6 +71,7 @@ const unsigned int *const ShiftRegisterInputTest<dummy>::states[] = {
 		BLINK_SLOW,
 		BLINK_MEDIUM,
 		BLINK_OFF,
-		BLINK_FAST,
 		BLINK1, BLINK2, BLINK3
 };
+
+DefineClassTemplate(ShiftRegisterInputTest)

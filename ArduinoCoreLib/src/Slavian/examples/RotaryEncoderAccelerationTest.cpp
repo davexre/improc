@@ -97,3 +97,5 @@ const unsigned int *const RotaryEncoderAccelerationTest<dummy>::states[] = {
 
 template<typename dummy>
 RotaryEncoderAcceleration RotaryEncoderAccelerationTest<dummy>::rotor;
+
+DefineClassTemplate(RotaryEncoderAccelerationTest)

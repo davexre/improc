@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "Button.h"
 
+template<typename dummy=void>
 class ButtonTest {
 	static const int buttonPin = 4;	// the number of the pushbutton pin
 	static const int ledPin = 13;	// the number of the LED pin
@@ -26,3 +27,4 @@ public:
 	}
 };
 
+DefineClassTemplate(ButtonTest)

@@ -43,7 +43,7 @@ static DigitalOutputArduinoPin diShiftRegisterOutputPinSH;
 static DigitalOutputArduinoPin diShiftRegisterOutputPinST;
 static DigitalOutputArduinoPin diShiftRegisterOutputPinDS;
 
-static DigitalOutputShiftRegister_74HC595 extenderOut;
+static DigitalOutputShiftRegister_74HC595<> extenderOut;
 
 void ShiftRegisterOutputTest2::setup() {
 	diButtonPin.initialize(buttonPin, true);
@@ -61,7 +61,7 @@ void ShiftRegisterOutputTest2::setup() {
 	diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH, false);
 	diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST, false);
 	diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS, false);
-	extenderOut.initialize(DigitalOutputShiftRegisterPinsCount, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroAllOutputs,
+	extenderOut.initialize(DigitalOutputShiftRegisterPinsCount, DigitalOutputShiftRegister_74HC595<>::BeforeWriteZeroAllOutputs,
 			&diShiftRegisterOutputPinSH,
 			&diShiftRegisterOutputPinST,
 			&diShiftRegisterOutputPinDS);

@@ -23,7 +23,7 @@ static const unsigned int *const states[] PROGMEM = {
 		BLINK1, BLINK2, BLINK3
 };
 
-static DigitalOutputShiftRegister_74HC164 shiftRegisterOutput;
+static DigitalOutputShiftRegister_74HC164<> shiftRegisterOutput;
 static DigitalInputArduinoPin diButtonPin;
 static DigitalOutputArduinoPin diLedPin;
 static DigitalOutputArduinoPin diShiftRegisterOutputPinCP;

@@ -36,8 +36,8 @@ static const unsigned int * const states[] PROGMEM = {
 static char readerBuffer[100];
 static SerialReader reader;
 
-static DigitalOutputShiftRegister_74HC595 extenderOutput;
-static DigitalInputShiftRegister_74HC166 extenderInput;
+static DigitalOutputShiftRegister_74HC595<> extenderOutput;
+static DigitalInputShiftRegister_74HC166<> extenderInput;
 
 static TemperatureSensor *extruderTemperatureSensor;
 static TemperatureSensor *bedTemperatureSensor;

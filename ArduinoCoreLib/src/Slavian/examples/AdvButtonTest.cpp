@@ -49,3 +49,5 @@ const unsigned int *const AdvButtonTest<dummy>::states[] = {
 	BLINK_SLOW,
 	BLINK_FAST
 };
+
+DefineClassTemplate(AdvButtonTest)

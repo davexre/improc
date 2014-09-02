@@ -26,12 +26,8 @@
  * real cooperative scheduler.
  */
 
-/* SPP:
-static void __empty() {
+// SPP: Added extern "C"
+extern "C" void __empty() {
 	// Empty
 }
-void yield(void) __attribute__ ((weak, alias("__empty")));
-*/
-void yield(void) {
-	// Empty
-}
+extern "C" void yield(void) __attribute__ ((weak, alias("__empty")));

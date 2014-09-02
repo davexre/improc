@@ -119,8 +119,8 @@ private:
 		}
 	}
 public:
-	DigitalOutputShiftRegister_74HC595 extenderOutput;
-	DigitalInputShiftRegister_74HC166 extenderInput;
+	DigitalOutputShiftRegister_74HC595<> extenderOutput;
+	DigitalInputShiftRegister_74HC166<> extenderInput;
 
 	StepperMotorMosfetHBridge motorX;
 	StepperMotorMosfetHBridge motorY;
@@ -141,7 +141,7 @@ public:
 		diShiftRegisterOutputPinSH.initialize(shiftRegisterOutputPinSH);
 		diShiftRegisterOutputPinST.initialize(shiftRegisterOutputPinST);
 		diShiftRegisterOutputPinDS.initialize(shiftRegisterOutputPinDS);
-		extenderOutput.initialize(17, DigitalOutputShiftRegister_74HC595::BeforeWriteZeroOnlyModifiedOutputs, // WARNING: This is REALLY important when using H-Bridges!!!
+		extenderOutput.initialize(17, DigitalOutputShiftRegister_74HC595<>::BeforeWriteZeroOnlyModifiedOutputs, // WARNING: This is REALLY important when using H-Bridges!!!
 				&diShiftRegisterOutputPinSH,
 				&diShiftRegisterOutputPinST,
 				&diShiftRegisterOutputPinDS);

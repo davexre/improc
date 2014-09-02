@@ -33,7 +33,7 @@ static const unsigned int *const states[] PROGMEM = {
 const unsigned int *const (*st);
 
 static const char PROGMEM str[] = "This is a sample string 2 that is stored in PROGMEM";
-
+/*
 static void print(const unsigned int *data) {
     int curDelay = 0;
     unsigned int res;
@@ -42,7 +42,7 @@ static void print(const unsigned int *data) {
     }
     Serial.println();
 }
-
+*/
 void MemoryTest::setup() {
 	diButtonPin.initialize(buttonPin, true);
 	btn.initialize(&diButtonPin, false);
@@ -55,11 +55,12 @@ void MemoryTest::setup() {
     Serial.pgm_println(PSTR("This is a sample string that is stored in PROGMEM"));
     Serial.pgm_println(str);
 
+/* FIXME: does not compile ?!?
     st = states;
     for (int i = 0; i < size(states); i++) {
     	print((unsigned int *)pgm_read_word(&(st[i])));
     }
-
+*/
 //	Serial.println("abcde");
 //    Serial.println("Press the button to stop");
 }

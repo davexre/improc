@@ -4,12 +4,6 @@
 #include <Arduino.h>
 #include "utils.h"
 
-static const uint8_t DigitalInputShiftRegisterMaxPins = 9;
-static const uint8_t DigitalOutputShiftRegisterMaxPins = 17;
-
-static const uint8_t DigitalInputShiftRegisterBufferSize = (DigitalInputShiftRegisterMaxPins + 8) / 8;
-static const uint8_t DigitalOutputShiftRegisterBufferSize = (DigitalOutputShiftRegisterMaxPins + 8) / 8;
-
 class DigitalInputPin {
 public:
 	virtual bool getState() = 0;
@@ -123,10 +117,11 @@ public:
 
 ///////// DigitalInputShiftRegister
 
+template<uint8_t DigitalInputShiftRegisterMaxPins=9>
 class DigitalInputShiftRegister {
 protected:
 	DigitalInputShiftRegisterPin<DigitalInputShiftRegister> pinHandlers[DigitalInputShiftRegisterMaxPins];
-	uint8_t inputBuffer[DigitalInputShiftRegisterBufferSize];
+	uint8_t inputBuffer[(DigitalInputShiftRegisterMaxPins + 8) / 8];
 	uint8_t inputPinsCount;
 public:
 	bool getState(const uint8_t shiftRegisterPin) {
@@ -172,7 +167,8 @@ public:
  * DigitalInputPin(15)-> Chip 2, pin D0
  * DigitalInputPin(16)-> Chip 2, pin DS
  */
-class DigitalInputShiftRegister_74HC166 : public DigitalInputShiftRegister {
+template<uint8_t DigitalInputShiftRegisterMaxPins=9>
+class DigitalInputShiftRegister_74HC166 : public DigitalInputShiftRegister<DigitalInputShiftRegisterMaxPins> {
 protected:
 	DigitalOutputPin *PE_pin;
 	DigitalOutputPin *CP_pin;
@@ -193,8 +189,8 @@ public:
 		PE_pin->setState(false);
 		CP_pin->setState(false);
 
-		for (int i = sizeof(inputBuffer) - 1; i >= 0; i--) {
-			inputBuffer[i] = 0;
+		for (int i = sizeof(this->inputBuffer) - 1; i >= 0; i--) {
+			this->inputBuffer[i] = 0;
 		}
 	}
 
@@ -211,8 +207,8 @@ public:
 		// Start reading
 		PE_pin->setState(true);
 		uint8_t mask = 1;
-		uint8_t *buf = inputBuffer;
-		for (uint8_t i = 0; i < inputPinsCount; i++) {
+		uint8_t *buf = this->inputBuffer;
+		for (uint8_t i = 0; i < this->inputPinsCount; i++) {
 			if (Q7_pin->getState()) {
 				*buf |= mask;
 			} else {
@@ -257,10 +253,11 @@ public:
 	}
 };
 
+template<uint8_t DigitalOutputShiftRegisterMaxPins=17>
 class DigitalOutputShiftRegister_74HC164 {
 protected:
 	DigitalOutputShiftRegisterPin<DigitalOutputShiftRegister_74HC164> pinHandlers[DigitalOutputShiftRegisterMaxPins];
-	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
+	uint8_t outputBuffer[(DigitalOutputShiftRegisterMaxPins + 8) / 8];
 	uint8_t outputPinsCount;
 	bool modified;
 
@@ -271,8 +268,8 @@ public:
 	 * Initializes the class. Should be invoked from the setup() method.
 	 */
 	void initialize(uint8_t outputPinsCount, DigitalOutputPin *CP_pin, DigitalOutputPin *DS_pin) {
-		if (DigitalInputShiftRegisterMaxPins > outputPinsCount)
-			outputPinsCount = DigitalInputShiftRegisterMaxPins;
+		if (DigitalOutputShiftRegisterMaxPins > outputPinsCount)
+			outputPinsCount = DigitalOutputShiftRegisterMaxPins;
 		this->outputPinsCount = outputPinsCount;
 		this->CP_pin = CP_pin;
 		this->DS_pin = DS_pin;
@@ -343,12 +340,13 @@ public:
 /**
  * Based on the datasheet for 74HC595 - Has output latch.
  */
+template<uint8_t DigitalOutputShiftRegisterMaxPins=17>
 class DigitalOutputShiftRegister_74HC595 {
 protected:
 	DigitalOutputShiftRegisterPin<DigitalOutputShiftRegister_74HC595> pinHandlers[DigitalOutputShiftRegisterMaxPins];
 	uint8_t writeOutputMode;
-	uint8_t outputBuffer[DigitalOutputShiftRegisterBufferSize];
-	uint8_t fakeBuffer[DigitalOutputShiftRegisterBufferSize];
+	uint8_t outputBuffer[(DigitalOutputShiftRegisterMaxPins + 8) / 8];
+	uint8_t fakeBuffer[(DigitalOutputShiftRegisterMaxPins + 8) / 8];
 	uint8_t outputPinsCount;
 	bool modified;
 

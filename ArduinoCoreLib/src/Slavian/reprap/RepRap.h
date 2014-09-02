@@ -20,9 +20,9 @@ inline long pow2(long x) {
 	return x*x;
 }
 
-class RepRap {
-	static constexpr char pgm_OK[] PROGMEM = "ok";
+static constexpr char pgm_OK[] PROGMEM = "ok";
 
+class RepRap {
 private:
 	enum RepRapMode {
 		Idle = 0,

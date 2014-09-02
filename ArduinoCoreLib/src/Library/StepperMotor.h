@@ -45,36 +45,17 @@ class StepperMotorBA6845FS : public StepperMotor {
 	/**
 	 * Half power consumption, lower torque
 	 */
-	static constexpr uint8_t motorStatesBA6845FS_HalfPower[] = {
-			0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
-			0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
-			0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
-			0b00011  // H-bridge 1 - Stop,    H-bridge 2 - Reverse
-	};
+	static const uint8_t motorStatesBA6845FS_HalfPower[];
 
 	/**
 	 * Full power consumption & torque
 	 */
-	static constexpr uint8_t motorStatesBA6845FS_FullPower[] = {
-			0b00111, // H-bridge 1 - Forward, H-bridge 2 - Reverse
-			0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
-			0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
-			0b01111  // H-bridge 1 - Reverse, H-bridge 2 - Reverse
-	};
+	static const uint8_t motorStatesBA6845FS_FullPower[];
 
 	/**
 	 * Higher (double) precision, variable power consumption & torque
 	 */
-	static constexpr uint8_t motorStatesBA6845FS_DoublePrecision[] = {
-			0b00100, // H-bridge 1 - Forward, H-bridge 2 - Stop
-			0b00101, // H-bridge 1 - Forward, H-bridge 2 - Forward
-			0b00001, // H-bridge 1 - Stop,    H-bridge 2 - Forward
-			0b01101, // H-bridge 1 - Reverse, H-bridge 2 - Forward
-			0b01100, // H-bridge 1 - Reverse, H-bridge 2 - Stop
-			0b01111, // H-bridge 1 - Reverse, H-bridge 2 - Reverse
-			0b00011, // H-bridge 1 - Stop,    H-bridge 2 - Reverse
-			0b00111  // H-bridge 1 - Forward, H-bridge 2 - Reverse
-	};
+	static const uint8_t motorStatesBA6845FS_DoublePrecision[];
 public:
 	void initialize(
 			StepperMotor::SteppingMotorMode motorMode,
@@ -151,36 +132,18 @@ class StepperMotorMosfetHBridge : public StepperMotor {
 	/**
 	 * Full power consumption & torque
 	 */
-	static constexpr uint8_t motorStatesMosfetHBridge_FullPower[] = {
-			0b01010,
-			0b00110,
-			0b00101,
-			0b01001
-	};
+	static const uint8_t motorStatesMosfetHBridge_FullPower[] PROGMEM;
 
 	/**
 	 * Half power consumption, lower torque
 	 */
-	static constexpr uint8_t motorStatesMosfetHBridge_HalfPower[] = {
-			0b01000,
-			0b00010,
-			0b00100,
-			0b00001,
-	};
+	static const uint8_t motorStatesMosfetHBridge_HalfPower[] PROGMEM;
 
 	/**
 	 * Higher (double) precision, variable power consumption & torque
 	 */
-	static constexpr uint8_t motorStatesMosfetHBridge_DoublePrecision[] = {
-			0b01000,
-			0b01010,
-			0b00010,
-			0b00110,
-			0b00100,
-			0b00101,
-			0b00001,
-			0b01001,
-	};
+	static const uint8_t motorStatesMosfetHBridge_DoublePrecision[] PROGMEM;
+
 public:
 
 	void initialize(
@@ -211,20 +174,20 @@ public:
 				index = maxSteps - 1;
 		}
 		currentState = (index << 2) | mode;
-		uint8_t state;
+		const uint8_t *state;
 		switch (mode) {
 		case DoublePrecision:
-			state = motorStatesMosfetHBridge_DoublePrecision[index];
+			state = &motorStatesMosfetHBridge_DoublePrecision[index];
 			break;
 		case FullPower:
-			state = motorStatesMosfetHBridge_FullPower[index];
+			state = &motorStatesMosfetHBridge_FullPower[index];
 			break;
 		case HalfPower:
 		default:
-			state = motorStatesMosfetHBridge_HalfPower[index];
+			state = &motorStatesMosfetHBridge_HalfPower[index];
 			break;
 		}
-		setState(state);
+		setState(pgm_read_byte(state));
 	}
 
 	virtual void stop() {
@@ -395,8 +358,8 @@ public:
 		return delayBetweenStepsMicros;
 	}
 
-	static constexpr char pgm_Up[] PROGMEM = "Up";
-	static constexpr char pgm_Down[] PROGMEM = "Down";
+	static const char pgm_Up[] PROGMEM;
+	static const char pgm_Down[] PROGMEM;
 
 	void debugPrint() {
 		Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(isMoving() ? 'T':'F');

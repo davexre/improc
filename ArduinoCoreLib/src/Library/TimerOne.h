@@ -5,8 +5,6 @@
 #include <avr/interrupt.h>
 #include <utils.h>
 
-
-
 class TimerOne {
 private:
 	static void emptyTimerOneRoutine() {

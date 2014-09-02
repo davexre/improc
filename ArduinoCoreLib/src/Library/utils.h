@@ -27,7 +27,7 @@ long voltage = millivolts * measured / 1023; // answer is in millivolts
 You don’t have to call readVcc everytime – just often enough to track the battery voltage.
 
  */
-template <typename dummy>
+template <typename dummy=void>
 long readVcc() {
 	// Read 1.1V reference against AVcc
 	// set the reference to Vcc and the measurement to the internal 1.1V reference
@@ -99,7 +99,7 @@ const auto myatol = myatoint<long>;
 #define delayLoopExtraCalculations 52
 #define delayLoopCPUCyclesPerIteration 10
 
-template <typename dummy>
+template <typename dummy=void>
 void delayLoop(const unsigned long millis) {
 	unsigned long loop = ((F_CPU / 1000) / delayLoopCPUCyclesPerIteration)
 			* millis - delayLoopExtraCalculations;
@@ -112,7 +112,7 @@ void delayLoop(const unsigned long millis) {
 #define Serial_print(string) Serial.pgm_print(PSTR(string))
 #define Serial_println(string) Serial.pgm_println(PSTR(string))
 
-template <typename T> inline const T sqr(const T x) {
+template<typename T> inline const T sqr(const T x) {
 	return x*x;
 };
 
@@ -160,6 +160,27 @@ class className { \
 public: \
 	static void setup(); \
 	static void loop(); \
+}; \
+ \
+className mainClass; \
+extern "C" int main (void) \
+{ \
+	init(); \
+	mainClass.setup(); \
+	for (;;) \
+		mainClass.loop(); \
+	return 0; \
+}
+
+#define DefineClassTemplate(className) \
+className<> mainClass; \
+extern "C" int main (void) \
+{ \
+	init(); \
+	mainClass.initialize(); \
+	for (;;) \
+		mainClass.update(); \
+	return 0; \
 }
 
 #endif
