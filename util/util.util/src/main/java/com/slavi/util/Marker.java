@@ -128,4 +128,14 @@ public class Marker {
 		System.out.println(m.toString());
 		return m;
 	}
+	
+	public synchronized static void releaseAndMark() {
+		release();
+		mark();
+	}
+
+	public synchronized static void releaseAndMark(String markName) {
+		release();
+		mark(markName);
+	}
 }

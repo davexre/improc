@@ -67,8 +67,8 @@ public class ObjectToXML {
 					int modifiers = field.getModifiers();
 //					if (field.isSynthetic())
 //						continue;
-//					if (Modifier.isTransient(modifiers))
-//						continue;
+					if (Modifier.isTransient(modifiers))
+						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
 					Class fieldType = field.getType();
@@ -303,8 +303,8 @@ public class ObjectToXML {
 						int modifiers = field.getModifiers();
 //						if (field.isSynthetic())
 //							continue;
-//						if (Modifier.isTransient(modifiers))
-//							continue;
+						if (Modifier.isTransient(modifiers))
+							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
 						Class fieldType = field.getType();

@@ -106,7 +106,7 @@ public class Derby {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main2(String[] args) throws Exception {
 //		EmbeddedDriver driver = new EmbeddedDriver(); //Class.forName(driver).newInstance();
 
 		dbToXmlDemo();
@@ -116,7 +116,7 @@ public class Derby {
 
 		QueryRunner qr = new QueryRunner(ds);
 		qr.update("insert into emp(name, position) values (?,?)", "kuku", "pipi");
-		List<Emp> emps = qr.query("select * from emp", new BeanListHandler(Emp.class));
+		List<Emp> emps = (List) qr.query("select * from emp", new BeanListHandler(Emp.class));
 		for (Emp e : emps) {
 			System.out.println(e.id + "\t" + e.name + "\t" + e.position);
 		}
@@ -124,5 +124,10 @@ public class Derby {
 		// DriverManager.getConnection("jdbc:derby:memory:MyDbTest;shutdown=true");
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		System.out.println("Done.");
+	}
+	
+	public static void main(String[] args) throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:derby:memory:MyDbTest;create=true");
+		System.out.println(conn.getClass());
 	}
 }
