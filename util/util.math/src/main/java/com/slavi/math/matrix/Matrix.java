@@ -204,6 +204,9 @@ public class Matrix {
 	 * element is atX=0, atY=0.
 	 */
 	public double getItem(int atX, int atY) {
+		if (atX < 0 || atX >= sizeX ||
+			atY < 0 || atY >= sizeY)
+			throw new IndexOutOfBoundsException();
 		return m[atX + atY * sizeX];
 	}
 
@@ -212,6 +215,9 @@ public class Matrix {
 	 * is atX=0, atY=0.
 	 */
 	public void setItem(int atX, int atY, double aValue) {
+		if (atX < 0 || atX >= sizeX ||
+				atY < 0 || atY >= sizeY)
+				throw new IndexOutOfBoundsException();
 		m[atX + atY * sizeX] = aValue;
 	}
 
@@ -241,6 +247,8 @@ public class Matrix {
 	 * @return The value at the specified position.
 	 */
 	public double getVectorItem(int aIndex) {
+		if (aIndex < 0 || aIndex >= m.length)
+			throw new IndexOutOfBoundsException();
 		return m[aIndex]; // getItem(aIndex % sizeX, aIndex / sizeX);
 	}
 
@@ -248,6 +256,8 @@ public class Matrix {
 	 * @see Matrix#getVectorItem(int)
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
+		if (aIndex < 0 || aIndex >= m.length)
+			throw new IndexOutOfBoundsException();
 		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
@@ -618,6 +628,33 @@ public class Matrix {
 		}
 	}
 
+	/**
+	 * Returns the sum of the squares of all elements of the matrix.
+	 */
+	public double sumPow2() {
+		double D = 0;
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				double v = getItem(i, j);
+				D += v*v;
+			}
+		return D;
+	}
+	
+	/**
+	 * Normalizes the matrix so that the sum of the squares of all element is 1.
+	 */
+	public boolean normalizePow2() {
+		double D = sumPow2();
+		if (D == 0) {
+			make0();
+			return false;
+		}
+		D = 1 / Math.sqrt(D);
+		rMul(D);
+		return true;
+	}
+	
 	/**
 	 * Makes a copy of the matrix.
 	 * 

@@ -129,6 +129,8 @@ public class SymmetricMatrix {
 			atX = atY;
 			atY = tmp;
 		}
+		if (atY < 0 || atY >= sizeM)
+			throw new IndexOutOfBoundsException();
 		return m[((atX * (atX + 1)) >> 1) + atY];
 	}
 
@@ -143,6 +145,8 @@ public class SymmetricMatrix {
 			atX = atY;
 			atY = tmp;
 		}
+		if (atY < 0 || atY >= sizeM)
+			throw new IndexOutOfBoundsException();
 		m[((atX * (atX + 1)) >> 1) + atY] = aValue;
 	}
 
@@ -180,6 +184,8 @@ public class SymmetricMatrix {
 	 * @return The value
 	 */
 	public double getVectorItem(int aIndex) {
+		if (aIndex < 0 || aIndex >= m.length)
+			throw new IndexOutOfBoundsException();
 		return m[aIndex];
 	}
 

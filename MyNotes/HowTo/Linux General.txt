@@ -51,6 +51,7 @@ classicmenu-indicator
 cvs
 dconf-tools
 debhelper
+dhex
 doublecmd-common
 dpkg-dev
 filezilla
