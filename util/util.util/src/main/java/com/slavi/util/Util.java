@@ -420,6 +420,7 @@ public class Util {
 	}
 
 	public static String exceptionToString(Throwable t) {
+		if (t == null) return "NULL";
 		StringWriter result = new StringWriter();
 		PrintWriter out = new PrintWriter(result);
 		t.printStackTrace(out);

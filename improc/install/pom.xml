@@ -21,6 +21,7 @@
 						<configuration>
 							<target>
 								<ant antfile="maven-ant-build.xml" target="main" />
+								<ant antfile="maven-ant-build.xml" target="code_j3d_org" />
 							</target>
 						</configuration>
 					</execution>

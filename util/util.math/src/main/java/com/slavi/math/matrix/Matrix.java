@@ -99,7 +99,7 @@ public class Matrix {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
-				result.append(String.format(Locale.US, "%1$10.4f\t",
+				result.append(String.format(Locale.US, "%1$10.4f",
 						new Object[] { new Double(getItem(i, j)) } ));
 			}
 			result.append("");
@@ -135,9 +135,8 @@ public class Matrix {
 		for (int j = 0; j < sizeY; j++) {
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
-					result.append("\t");
-				result.append(String.format(Locale.US, "%1$10.4f",new Object[] { new Double(getItem(i, j)) } ));
-//				result.append(.getItem(i, j]);
+					result.append(" ");
+				result.append(MathUtil.d4(getItem(i, j)));
 			}
 			result.append("\n");
 		}

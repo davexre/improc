@@ -322,7 +322,7 @@ public class ZYZ_7ParamsLearner extends PanoTransformer {
 		lsa = new LeastSquaresAdjust(getNumberOfParams(), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		if (!lsa.calculateWithDebug(false)) 
+		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();

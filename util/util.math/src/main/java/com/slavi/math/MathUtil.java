@@ -26,11 +26,11 @@ public class MathUtil {
 	}
 	
 	public static String l10(long d) {
-		return String.format(Locale.US, "%1$11d", d);
+		return String.format(Locale.US, "%1$10d", d);
 	}
 	
 	public static String d4(double d) {
-		return String.format(Locale.US, "%1$11.4f", d);
+		return String.format(Locale.US, "%1$10.4f", d);
 	}
 	
 	public static String d2(double d) {

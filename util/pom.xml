@@ -5,17 +5,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.slavi</groupId>
-		<artifactId>util</artifactId>
+		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>util.util</artifactId>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.slavi</groupId>
-			<artifactId>util.math</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+	<artifactId>util</artifactId>
+	<packaging>pom</packaging>
+	
+	<modules>
+		<module>util.math</module>
+		<module>util.util</module>
+		<module>util.sound</module>
+		<module>util.io</module>
+		<module>util.ui</module>
+	</modules>
 </project>

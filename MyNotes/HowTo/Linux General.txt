@@ -36,6 +36,7 @@ XnView Multi Platform
 
 apt-packages
 ------------
+alien
 amule
 apt-file
 aptitude
@@ -44,18 +45,24 @@ audacious
 avr-libc
 avrdude
 binutils-avr
+build-essential
 calibre
 classicmenu-indicator
 cvs
 dconf-tools
+debhelper
 doublecmd-common
+dpkg-dev
 filezilla
 gbgoffice
 gdb-avr 
 gcc-avr
+gconf-editor
+ghex
 gimp
 git
 gmobilemedia
+gnome-color-chooser
 gparted
 handbrake
 hugin
@@ -96,4 +103,10 @@ The stanza in question should be apparent:
 <distance name="bottom_height" value="5"/>
 
 
-
+Gnome desktop tweaks
+====================
+gsettings set org.gnome.desktop.background show-desktop-icons true
+gsettings set org.gnome.nautilus.desktop home-icon-visible true
+gsettings set org.gnome.nautilus.desktop trash-icon-visible true
+// shows mounted volumes
+gsettings set org.gnome.nautilus.desktop volumes-visible true
