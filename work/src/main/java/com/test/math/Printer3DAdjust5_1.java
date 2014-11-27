@@ -151,7 +151,7 @@ public class Printer3DAdjust5_1 {
 			System.out.print("L:"+MathUtil.d4(L) + "\tM:" + m);
 		}
 		
-		if (!lsa.calculateWithDebug(true)) {
+		if (!lsa.calculate()) {
 			throw new RuntimeException("Calculation failed");
 		}
 

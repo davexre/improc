@@ -1,11 +1,17 @@
 package com.slavi.math.adjust;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 
 public class LeastSquaresAdjust {
+	private Logger log = LoggerFactory.getLogger(getClass());
 
+	private Logger log_measurements = LoggerFactory.getLogger(getClass().getName() + ".measurements");
+	
 	private int numCoefsPerCoordinate;
 
 	private int numCoordinates;
@@ -99,40 +105,54 @@ public class LeastSquaresAdjust {
 	}
 
 	public double precision = 1.0 / 10000.0;
-	
-	public boolean calculateWithDebug(boolean alwaysPrint) {
+
+	public boolean calculate() {
 		if (!canCalculate()) {
-			System.out.println("Can not calculate. Not enough data.");
+			log.error("Can not calculate. Not enough data.");
 			return false;
+		}
+		if (log.isInfoEnabled()) {
+			double sumP = getSumP();
+			if (sumP == 0.0)
+				sumP = 1E-100;
+			log.info("Measurements: " + measurementCount +
+					", [P]: " + MathUtil.d4(getSumP()) + 
+					", Sqrt([PLL]/[P]): " + MathUtil.d4(getMedianSquareError())
+			);
 		}
 		SymmetricMatrix nmCopy = nm.makeCopy();
 		if (!nm.inverse()) {
-			System.out.println("Inverse of normal matrix failed.");
-			nmCopy.printM("Normal matrix");
-			apl.printM("APL");
+			log.error("Inverse of normal matrix failed.");
+			if (log.isDebugEnabled()) {
+				log.debug("Normal matrix\n" + nmCopy.toString());
+				log.debug("APL\n" + apl.toString());
+			}
 			return false;
 		}
 		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeM());
 		nmCopy.mMul(nm, tmp);
 		double deviation = tmp.getSquaredDeviationFromE();
-		System.out.println("Inverse of normal matrix precision (squared deviation from E) is: " + MathUtil.d4(deviation));
+		log.info("Inverse of normal matrix precision (squared deviation from E) is: " + MathUtil.d4(deviation));
 		if (deviation > precision) {
-			System.out.println("Inverse of normal matrix non-reliable.");
+			log.error("Inverse of normal matrix non-reliable.");
 		}
-		if (alwaysPrint || (deviation > precision)) {
-			nmCopy.makeSquareMatrix().printM("Normal matrix");
-			nm.printM("Inverted Normal Matrix");
-			tmp.printM("NM * (NM')");
-			apl.printM("APL");
+		if (log.isTraceEnabled() || (deviation > precision)) {
+			log.info("Normal matrix\n" + nmCopy.makeSquareMatrix().toString());
+			log.info("Inverted Normal Matrix\n" + nm.toString());
+			log.info("NM * (NM')\n" + tmp.toString());
+			log.info("APL\n" + apl.toString());
 		}
 		if (deviation > precision) {
 			return false;
 		}
 		calculateUnknowns();
+		if (log.isDebugEnabled()) {
+			log.debug("UNKNOWNS\n" + unknown.toString());
+		}
 		return true;
 	}
 	
-	public boolean calculate() {
+	public boolean calculateNoNm_Validation() {
 		if (!canCalculate())
 			return false;
 		if (!nm.inverse())
@@ -150,9 +170,12 @@ public class LeastSquaresAdjust {
 	}
 
 	public void addMeasurement(Matrix m, double weight, double L, int coordinate) {
-		if ((coordinate < 0) || (coordinate >= numCoordinates) || (m.getSizeX() != numCoefsPerCoordinate) || (m.getSizeY() != 1))
+		if ((coordinate < 0) || (coordinate >= numCoordinates) || (m.getSizeX() != numCoefsPerCoordinate) || (m.getSizeY() != 1) || (weight <= 0.0))
 			throw new IllegalArgumentException("Invalid measurement added to Least Square Adjustment.");
 		measurementCount++;
+		if (log_measurements.isDebugEnabled()) {
+			log_measurements.debug(String.format("N:%1$3d, L:%2$10.4f, A:%3$s", measurementCount, L, m.toOneLineString()));
+		}
 		double ll = L * L;
 		sumPLL += weight * ll;
 		sumP += weight;
@@ -176,11 +199,12 @@ public class LeastSquaresAdjust {
 	}
 
 	/**
-	 * Ср.кв.гр.на измерване с тежест единица sqrt([PLL]/(n-u))
+	 * Ср.кв.гр.на измерване с тежест единица sqrt([PLL]/[P])
 	 */
 	public double getMedianSquareError() {
-		return measurementCount == getRequiredMeasurements() ? 0.0 : 
-			Math.sqrt(sumPLL / (measurementCount - numCoefsPerCoordinate));
+		if (sumP == 0.0)
+			return Double.POSITIVE_INFINITY;
+		return Math.sqrt(sumPLL / sumP);
 	}
 
 	public SymmetricMatrix getNm() {

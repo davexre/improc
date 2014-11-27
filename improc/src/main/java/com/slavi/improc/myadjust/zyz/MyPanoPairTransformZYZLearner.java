@@ -280,7 +280,7 @@ public class MyPanoPairTransformZYZLearner extends PanoTransformer {
 		lsa = new LeastSquaresAdjust((adjustOriginForScale ? 1 : 0) + images.size() * (adjustForScale ? 4 : 3), 1);
 		calculateNormalEquations();
 		// Calculate Unknowns
-		if (!lsa.calculateWithDebug(true)) 
+		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();

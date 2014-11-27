@@ -310,7 +310,7 @@ public class SpherePanoTransformLearner extends PanoTransformer {
 		m1.mMul(m2, m3);		
 		m3.printM("M3");
 */
-		if (!lsa.calculateWithDebug(false)) 
+		if (!lsa.calculate()) 
 			return result;
 		// Build transformer
 		Matrix u = lsa.getUnknown();
