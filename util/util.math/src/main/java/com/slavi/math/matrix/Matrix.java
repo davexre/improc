@@ -335,6 +335,16 @@ public class Matrix {
 	}
 
 	/**
+	 * Performs an abs to the elements of the matrix and stores the result in dest matrix.
+	 */
+	public void termAbs(Matrix dest) {
+		dest.resize(sizeX, sizeY);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				dest.setItem(i, j, Math.abs(getItem(i, j)));
+	}
+
+	/**
 	 * Performs an element by element multiplication of two matrices of equal
 	 * size and stores the result in dest matrix. If the dest matrix is of
 	 * incorrect size it will be resized to the same size as the source matrix.

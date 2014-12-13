@@ -66,6 +66,7 @@ gmobilemedia
 gnome-color-chooser
 gparted
 handbrake
+httrack
 hugin
 htop
 inkscape
