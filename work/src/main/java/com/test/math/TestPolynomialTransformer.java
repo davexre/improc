@@ -4,9 +4,17 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.DiagonalMatrix;
 
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.PolynomialTransformLearner;
@@ -141,7 +149,7 @@ public class TestPolynomialTransformer {
 		fin.close();
 	}
 	
-	public TestPolynomialTransformer(int numCoordinates, BufferedReader fin) throws IOException {
+	public void initialize(int numCoordinates, BufferedReader fin) throws IOException {
 		this.numCoordinates = numCoordinates;
 		points = new ArrayList<MyTestData>();
 		// read points
@@ -209,8 +217,8 @@ public class TestPolynomialTransformer {
 		{2, 3, "PolynomialTransformerTest-wgs-70.txt"},
 		{3, 2, "PolynomialTransformerTest-us-cities.txt"}			
 	};
-	
-	public static void main(String[] args) throws Exception {
+
+	void doIt() throws Exception {
 		int testNo = 0;
 		BufferedReader fin = new BufferedReader(new FileReader(
 			TestPolynomialTransformer.class.getResource(
@@ -218,19 +226,63 @@ public class TestPolynomialTransformer {
 		int finCoordinates = (Integer)tests[testNo][1];
 		int polynomPower = (Integer)tests[testNo][0];
 		
-		TestPolynomialTransformer tester = new TestPolynomialTransformer(finCoordinates, fin);
+		initialize(finCoordinates, fin);
 		fin.close();
 		
 		//tester.readTransformer();
 //		System.out.println("------ powers ---------");
 //		System.out.println(tester.transformer.polynomPowers.toString());
 //		System.out.println("-------------");
-		tester.learn(polynomPower);
+		learn(polynomPower);
 
 		
-		System.out.println(tester.transformer.toString());
-		Matrix delta = tester.learner.computeTransformedTargetDelta(true);
+		System.out.println(transformer.toString());
+		Matrix delta = learner.computeTransformedTargetDelta(true);
 		System.out.println("==== max discrepancy ====");
 		System.out.println(delta.toString());
+		
+		/////////////////////////////
+		// Now do the same using Apache Math
+		
+		MultivariateVectorFunction modelFunction = new MultivariateVectorFunction() {
+			public double[] value(double[] arg0) throws IllegalArgumentException {
+				return null;
+			}
+		};
+		
+		MultivariateMatrixFunction modelFunctionJacobian = new MultivariateMatrixFunction() {
+			public double[][] value(double[] arg0) throws IllegalArgumentException {
+				return null;
+			}
+		};
+
+		double[] target = new double[learner.outputSize * points.size()];
+		int targetIndex = 0;
+		for (MyTestData point : points) {
+			Matrix dest = point.getValue().coords;
+			for (int i = 0; i < dest.getVectorSize(); i++) {
+				target[targetIndex++] = dest.getVectorItem(i);
+			}
+		}
+		final double[] weights = new double[target.length];
+		Arrays.fill(weights, 1.0);
+		double x[] = new double[learner.inputSize];
+		Arrays.fill(x, 0);
+		
+		LeastSquaresBuilder builder = new LeastSquaresBuilder();
+		builder
+			.model(modelFunction, modelFunctionJacobian)
+			.target(target)
+			.weight(new DiagonalMatrix(weights))
+			.start(x)
+			.maxIterations(20);
+		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		Optimum optimum = optimizer.optimize(builder.build());
+		
+	}
+
+	public static void main(String[] args) throws Exception {
+		new TestPolynomialTransformer().doIt();
+		System.out.println("Done.");
 	}
 }
