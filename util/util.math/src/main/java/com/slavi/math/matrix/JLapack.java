@@ -1114,8 +1114,8 @@ public class JLapack {
 			tmpQ = Q;
 		} else {
 			Src.lqDecomposition(tauP);
-			Src.lqDecomositionGetQ(tauP, V);
-			Src.lqDecomositionGetL(RL);
+			Src.lqDecompositionGetQ(tauP, V);
+			Src.lqDecompositionGetL(RL);
 			tmpU = V;
 			tmpV = Q;
 			tmpQ = U;

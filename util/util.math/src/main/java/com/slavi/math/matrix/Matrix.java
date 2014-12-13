@@ -999,8 +999,8 @@ public class Matrix {
 	public void lq(Matrix q, Matrix tau) {
 		q.resize(getSizeY(), getSizeY());
 		lqDecomposition(tau);
-		lqDecomositionGetQ(tau, q);
-		lqDecomositionGetL(this);
+		lqDecompositionGetQ(tau, q);
+		lqDecompositionGetL(this);
 	}
 
 	// //////////
@@ -1047,14 +1047,14 @@ public class Matrix {
 		}
 	}
 	
-	public void lqDecomositionGetL(Matrix l) {
+	public void lqDecompositionGetL(Matrix l) {
 		l.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				l.setItem(i, j, i > j ? 0.0 : getItem(i, j));
 	}
 
-	public void lqDecomositionGetQ(Matrix tau, Matrix q) {
+	public void lqDecompositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeY()) || (tau.getSizeY() != 1))
 			throw new IllegalArgumentException("Invalid parameter");
 		
