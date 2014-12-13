@@ -335,6 +335,21 @@ public class Matrix {
 	}
 
 	/**
+	 * Performs an element by element abs of this matrix
+	 * and stores the result in dest matrix. If the dest matrix is of
+	 * incorrect size it will be resized to the same size as this matrix.
+	 * The formula is:<br>
+	 * <tt>dest[i, j] = Math.abs(this[i, j])<br>
+	 * </tt>
+	 */
+	public void termAbs(Matrix dest) {
+		dest.resize(sizeX, sizeY);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				dest.setItem(i, j, Math.abs(getItem(i, j)));
+	}
+
+	/**
 	 * Performs an element by element multiplication of two matrices of equal
 	 * size and stores the result in dest matrix. If the dest matrix is of
 	 * incorrect size it will be resized to the same size as the source matrix.
@@ -989,8 +1004,8 @@ public class Matrix {
 	public void lq(Matrix q, Matrix tau) {
 		q.resize(getSizeY(), getSizeY());
 		lqDecomposition(tau);
-		lqDecomositionGetQ(tau, q);
-		lqDecomositionGetL(this);
+		lqDecompositionGetQ(tau, q);
+		lqDecompositionGetL(this);
 	}
 
 	// //////////
@@ -1037,14 +1052,14 @@ public class Matrix {
 		}
 	}
 	
-	public void lqDecomositionGetL(Matrix l) {
+	public void lqDecompositionGetL(Matrix l) {
 		l.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				l.setItem(i, j, i > j ? 0.0 : getItem(i, j));
 	}
 
-	public void lqDecomositionGetQ(Matrix tau, Matrix q) {
+	public void lqDecompositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeY()) || (tau.getSizeY() != 1))
 			throw new IllegalArgumentException("Invalid parameter");
 		

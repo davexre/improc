@@ -51,16 +51,17 @@ public class TestPolynomialTransformer {
 		int size;
 		
 		public MyTestPolynomialTransformer(int polynomPower, int size) {
-			super(polynomPower);
+			super();
 			this.size = size;
+			initialize(polynomPower);
 		}
 
 		public int getInputSize() {
-			return 0;
+			return size;
 		}
 
 		public int getOutputSize() {
-			return 0;
+			return size;
 		}
 
 		public double getSourceCoord(MyPoint item, int coordIndex) {

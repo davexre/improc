@@ -26,8 +26,8 @@ public class MatrixLqDecompositionTest {
 		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 
 		a.lqDecomposition(tmp);
-		a.lqDecomositionGetQ(tmp, u);
-		a.lqDecomositionGetL(v);
+		a.lqDecompositionGetQ(tmp, u);
+		a.lqDecompositionGetL(v);
 
 //		u.printM("U2");
 //		v.printM("V2");

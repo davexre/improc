@@ -17,7 +17,14 @@ public abstract class PolynomialTransformer<InputType, OutputType> extends BaseT
 	private double tmpSrc[];	// used by transform() method
 	private double tmpDest[]; 	// used by transform() method
 	
+	protected PolynomialTransformer() {
+	}
+	
 	public PolynomialTransformer(int polynomPower) {
+		initialize(polynomPower);
+	}
+	
+	protected void initialize(int polynomPower) {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
 		this.polynomPower = polynomPower;
