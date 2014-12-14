@@ -15,6 +15,7 @@ import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.transform.PolynomialTransformLearner;
@@ -246,13 +247,13 @@ public class TestPolynomialTransformer {
 		
 		MultivariateVectorFunction modelFunction = new MultivariateVectorFunction() {
 			public double[] value(double[] arg0) throws IllegalArgumentException {
-				return null;
+				return arg0.clone();
 			}
 		};
 		
 		MultivariateMatrixFunction modelFunctionJacobian = new MultivariateMatrixFunction() {
 			public double[][] value(double[] arg0) throws IllegalArgumentException {
-				return null;
+				return new double[][] { arg0.clone() };
 			}
 		};
 
@@ -275,7 +276,9 @@ public class TestPolynomialTransformer {
 			.target(target)
 			.weight(new DiagonalMatrix(weights))
 			.start(x)
-			.maxIterations(20);
+			.checkerPair(new SimpleVectorValueChecker(1e-6, 1e-6))
+			.maxEvaluations(100)
+			.maxIterations(25);
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		Optimum optimum = optimizer.optimize(builder.build());
 		
