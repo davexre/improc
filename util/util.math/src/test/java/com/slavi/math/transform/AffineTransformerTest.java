@@ -3,7 +3,19 @@ package com.slavi.math.transform;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.BlockRealMatrix;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +37,7 @@ public class AffineTransformerTest {
 		jTransform.translate(100.567, 200.123);
 		
 		ArrayList<TransformerDataTestImpl> points = new ArrayList<TransformerDataTestImpl>();
-		for (int xcounter = 0; xcounter < 2; xcounter++) {
+		for (int xcounter = 1; xcounter < 4; xcounter++) {
 			for (int ycounter = 0; ycounter < 2; ycounter++) {
 				Point2D.Double sd = new Point2D.Double(xcounter, ycounter);
 				TransformerDataTestImpl pair = new TransformerDataTestImpl(jTransform, sd);
@@ -120,5 +132,69 @@ public class AffineTransformerTest {
 		
 		Assert.assertTrue(delta.is0(precision));
 		transformBackward();
+		
+		/////////////////////////////
+		// Now do the same using Apache Math
+		ArrayList<TransformerDataTestImpl> points = (ArrayList) learner.items;
+		
+		Matrix matrixA = new Matrix(learner.outputSize * points.size(), learner.inputSize * learner.outputSize);
+		matrixA.make0();
+		Matrix matrixL = new Matrix(1, learner.outputSize * points.size());
+		double [] target = new double[learner.outputSize * points.size()];
+		
+		for (int p = 0; p < points.size(); p++) {
+			TransformerDataTestImpl data = points.get(p);
+			for (int i = 0; i < learner.outputSize; i++) {
+				for (int j = 0; j < learner.inputSize; j++) {
+					double v = j == 0 ? data.getKey().getX() : data.getKey().getY();
+					matrixA.setItem(learner.outputSize * p + i, learner.inputSize * i + j, v);
+				}
+				double v = i == 0 ? data.getValue().getX() : data.getValue().getY();
+				target[learner.outputSize * p + i] = v;
+				matrixL.setItem(0, learner.outputSize * p + i, v);
+			}
+		}
+		Matrix matrixB = matrixA.makeCopy();
+		//matrixB.transpose(matrixA);
+		final RealMatrix A = new BlockRealMatrix(matrixA.toArray());
+
+		MultivariateVectorFunction modelFunction = new MultivariateVectorFunction() {
+			public double[] value(double[] arg0) throws IllegalArgumentException {
+				return A.operate(arg0);
+			}
+		};
+		
+		MultivariateMatrixFunction modelFunctionJacobian = new MultivariateMatrixFunction() {
+			public double[][] value(double[] arg0) throws IllegalArgumentException {
+				return A.getData();
+			}
+		};
+		
+		final double[] weights = new double[learner.outputSize * points.size()];
+		Arrays.fill(weights, 1.0);
+		double x[] = new double[learner.inputSize * learner.outputSize];
+		Arrays.fill(x, 0);
+		
+		LeastSquaresBuilder builder = new LeastSquaresBuilder();
+		builder
+			.model(modelFunction, modelFunctionJacobian)
+			.target(target)
+			.weight(new DiagonalMatrix(weights))
+			.start(x)
+			.checkerPair(new SimpleVectorValueChecker(1e-6, 1e-6))
+			.maxEvaluations(100)
+			.maxIterations(25);
+		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		Optimum optimum = optimizer.optimize(builder.build());
+
+		RealVector v = new ArrayRealVector(A.transpose().operate(target));
+		RealVector diff = v.add(optimum.getPoint().mapMultiply(-1));
+		System.out.println(optimum.getResiduals().getDimension());
+		System.out.println(Arrays.toString(optimum.getPoint().toArray()));
+		System.out.println(Arrays.toString(diff.toArray()));
+	}
+	
+	public static void main(String[] args) throws Exception {
+		new AffineTransformerTest().testAffineTransformer();
 	}
 }

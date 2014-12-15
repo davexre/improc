@@ -14,7 +14,11 @@ import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.optim.SimpleVectorValueChecker;
 
 import com.slavi.math.matrix.Matrix;
@@ -245,26 +249,39 @@ public class TestPolynomialTransformer {
 		/////////////////////////////
 		// Now do the same using Apache Math
 		
+		Matrix matrixA = new Matrix(learner.outputSize * points.size(), learner.inputSize);
+		for (int p = 0; p < points.size(); p++) {
+			MyTestData data = points.get(p);
+			for (int i = 0; i < learner.outputSize; i++) {
+				for (int j = 0; j < learner.inputSize; j++) {
+					matrixA.setItem(learner.outputSize * p + i, j, data.getKey().coords.getItem(j, 0));
+				}
+			}
+		}
+		final RealMatrix A = new BlockRealMatrix(matrixA.toArray());
+		
+		Matrix matrixL = new Matrix(1, learner.outputSize * points.size());
+		double [] target = new double[learner.outputSize * points.size()];
+		for (int p = 0; p < points.size(); p++) {
+			MyTestData data = points.get(p);
+			for (int i = 0; i < learner.outputSize; i++) {
+				target[learner.outputSize * p + i] = data.getValue().coords.getItem(i, 0);
+				matrixL.setItem(0, learner.outputSize * p + i, data.getValue().coords.getItem(i, 0));
+			}
+		}
+		
 		MultivariateVectorFunction modelFunction = new MultivariateVectorFunction() {
 			public double[] value(double[] arg0) throws IllegalArgumentException {
-				return arg0.clone();
+				return A.operate(arg0);
 			}
 		};
 		
 		MultivariateMatrixFunction modelFunctionJacobian = new MultivariateMatrixFunction() {
 			public double[][] value(double[] arg0) throws IllegalArgumentException {
-				return new double[][] { arg0.clone() };
+				return A.getData();
 			}
 		};
-
-		double[] target = new double[learner.outputSize * points.size()];
-		int targetIndex = 0;
-		for (MyTestData point : points) {
-			Matrix dest = point.getValue().coords;
-			for (int i = 0; i < dest.getVectorSize(); i++) {
-				target[targetIndex++] = dest.getVectorItem(i);
-			}
-		}
+		
 		final double[] weights = new double[target.length];
 		Arrays.fill(weights, 1.0);
 		double x[] = new double[learner.inputSize];
@@ -282,6 +299,11 @@ public class TestPolynomialTransformer {
 		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
 		Optimum optimum = optimizer.optimize(builder.build());
 		
+		RealVector v = new ArrayRealVector(A.operate(target));
+		RealVector diff = v.add(optimum.getResiduals().mapMultiply(-1));
+		System.out.println(optimum.getResiduals().getDimension());
+		System.out.println(Arrays.toString(optimum.getResiduals().toArray()));
+		System.out.println(Arrays.toString(diff.toArray()));
 	}
 
 	public static void main(String[] args) throws Exception {

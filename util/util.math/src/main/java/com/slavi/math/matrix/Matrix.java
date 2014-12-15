@@ -167,6 +167,16 @@ public class Matrix {
 			fou.print("\n");
 		}
 	}
+	
+	public double[][] toArray() {
+		double [][] r = new double[getSizeX()][getSizeY()];
+		for (int i = getSizeX() - 1; i >= 0; i--) {
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				r[i][j] = getItem(i, j);
+			}
+		}
+		return r;
+	}
 
 	/**
 	 * Resizes the matrix if the new size differs from the current matrix size.
