@@ -137,7 +137,7 @@ public class AffineTransformerTest {
 		// Now do the same using Apache Math
 		ArrayList<TransformerDataTestImpl> points = (ArrayList) learner.items;
 		
-		Matrix matrixA = new Matrix(learner.outputSize * points.size(), learner.inputSize * learner.outputSize);
+		Matrix matrixA = new Matrix(learner.outputSize * points.size(), (learner.inputSize + 1) * learner.outputSize);
 		matrixA.make0();
 		Matrix matrixL = new Matrix(1, learner.outputSize * points.size());
 		double [] target = new double[learner.outputSize * points.size()];
@@ -147,16 +147,18 @@ public class AffineTransformerTest {
 			for (int i = 0; i < learner.outputSize; i++) {
 				for (int j = 0; j < learner.inputSize; j++) {
 					double v = j == 0 ? data.getKey().getX() : data.getKey().getY();
-					matrixA.setItem(learner.outputSize * p + i, learner.inputSize * i + j, v);
+					matrixA.setItem(learner.outputSize * p + i, (learner.inputSize + 1) * i + j, v);
 				}
+				matrixA.setItem(learner.outputSize * p + i, (learner.inputSize + 1) * i + learner.inputSize, 1);
 				double v = i == 0 ? data.getValue().getX() : data.getValue().getY();
 				target[learner.outputSize * p + i] = v;
 				matrixL.setItem(0, learner.outputSize * p + i, v);
 			}
 		}
-		Matrix matrixB = matrixA.makeCopy();
+		//Matrix matrixB = matrixA.makeCopy();
 		//matrixB.transpose(matrixA);
 		final RealMatrix A = new BlockRealMatrix(matrixA.toArray());
+		//final RealMatrix B = new BlockRealMatrix(matrixB.toArray());
 
 		MultivariateVectorFunction modelFunction = new MultivariateVectorFunction() {
 			public double[] value(double[] arg0) throws IllegalArgumentException {
@@ -172,7 +174,7 @@ public class AffineTransformerTest {
 		
 		final double[] weights = new double[learner.outputSize * points.size()];
 		Arrays.fill(weights, 1.0);
-		double x[] = new double[learner.inputSize * learner.outputSize];
+		double x[] = new double[(learner.inputSize + 1) * learner.outputSize];
 		Arrays.fill(x, 0);
 		
 		LeastSquaresBuilder builder = new LeastSquaresBuilder();
