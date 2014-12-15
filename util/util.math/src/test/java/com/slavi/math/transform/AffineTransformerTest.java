@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.fitting.leastsquares.GaussNewtonOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresBuilder;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
@@ -186,11 +187,12 @@ public class AffineTransformerTest {
 			.checkerPair(new SimpleVectorValueChecker(1e-6, 1e-6))
 			.maxEvaluations(100)
 			.maxIterations(25);
-		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+//		LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+		GaussNewtonOptimizer optimizer = new GaussNewtonOptimizer();
 		Optimum optimum = optimizer.optimize(builder.build());
 
-		RealVector v = new ArrayRealVector(A.transpose().operate(target));
-		RealVector diff = v.add(optimum.getPoint().mapMultiply(-1));
+		RealVector v = new ArrayRealVector(A.operate(optimum.getPoint()));
+		RealVector diff = v.mapMultiplyToSelf(-1).add( new ArrayRealVector(target));
 		System.out.println(optimum.getResiduals().getDimension());
 		System.out.println(Arrays.toString(optimum.getPoint().toArray()));
 		System.out.println(Arrays.toString(diff.toArray()));
