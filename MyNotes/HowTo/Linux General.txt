@@ -104,6 +104,16 @@ The stanza in question should be apparent:
 <distance name="right_width" value="5"/>
 <distance name="bottom_height" value="5"/>
 
+Change Tooltip color
+====================
+http://askubuntu.com/questions/70599/how-to-change-tooltip-background-color-in-unity
+Edit the files:
+usr/share/themes/Ambiance/gtk-3.0/settings.ini
+/usr/share/themes/Ambiance/gtk-3.0/gtk.css
+/usr/share/themes/Ambiance/gtk-2.0/gtkrc
+replacing the tooltip foreground and backround color, with the #000000 and the #f5f5b5 color, respectively
+
+
 
 Gnome desktop tweaks
 ====================
