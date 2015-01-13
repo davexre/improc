@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.RotationXYZ;
@@ -327,8 +327,8 @@ public class Printer3DAdjust2_1 {
 		adjOffsetY += U.getItem(0, 8);
 		adjPaperAlpha = MathUtil.fixAngle2PI(adjPaperAlpha + U.getItem(0, 9));
 
-		boolean rotated = false;
 		/*
+		boolean rotated = false;
 		
 		if (shallRotate(adjAlpha1)) {
 			adjAlpha1 = MathUtil.fixAngleMPI_PI(adjAlpha1 + Math.PI);

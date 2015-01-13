@@ -3,12 +3,12 @@ package com.test.ui;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-import org.jdom.transform.XSLTransformException;
-import org.jdom.transform.XSLTransformer;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+import org.jdom2.transform.XSLTransformException;
+import org.jdom2.transform.XSLTransformer;
 
 import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;

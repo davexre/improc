@@ -295,8 +295,8 @@ public class MyVoronoi {
 					dist = Math.max(dist, c2.distance(c3));
 					
 //					System.out.println("DIST: " + MathUtil.d20(dist));
-					Circle ccircle = t1.getCircumCircle();
-					Point2D c = ccircle.center;
+					//Circle ccircle = t1.getCircumCircle();
+					//Point2D c = ccircle.center;
 					
 					pathPoints.add(dummy ? c3 : c1);
 				}

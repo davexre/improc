@@ -1,6 +1,6 @@
 package com.slavi.io.xml;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import com.slavi.math.transform.Helmert2DTransformer;
 import com.slavi.util.xml.XMLHelper;

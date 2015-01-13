@@ -5,7 +5,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Assert;
 
 import com.slavi.util.StringPrintStream;

@@ -1,6 +1,6 @@
 package com.slavi.io.xml;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.util.xml.XMLHelper;
