@@ -1,7 +1,7 @@
 package com.slavi.io.xml;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
 
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;

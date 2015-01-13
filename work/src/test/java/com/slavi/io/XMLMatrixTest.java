@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

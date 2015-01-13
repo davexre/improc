@@ -10,7 +10,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 public class SimpleBeanToXML {
 	public static class Read implements ObjectRead {

@@ -3,7 +3,7 @@ package com.slavi.io;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 import org.junit.Assert;
 
 import com.slavi.util.io.ObjectRead;

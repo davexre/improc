@@ -1,0 +1,12 @@
+=========
+Check for artifact updates (newer versions of a library)
+http://mojo.codehaus.org/versions-maven-plugin/display-dependency-updates-mojo.html
+mvn versions:display-dependency-updates
+=========
+Find duplicated classes in project dependacies
+http://mojo.codehaus.org/extra-enforcer-rules/banDuplicateClasses.html
+mvn enforcer:enforce
+=========
+Convert maven project to Eclipse Web Dynamic Project
+mvn eclipse:eclipse -Dwtpversion=R7
+=========

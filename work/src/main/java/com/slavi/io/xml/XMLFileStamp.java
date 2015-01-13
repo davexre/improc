@@ -2,7 +2,7 @@ package com.slavi.io.xml;
 
 import java.util.Date;
 
-import org.jdom.Element;
+import org.jdom2.Element;
 
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;

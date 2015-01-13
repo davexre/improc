@@ -59,7 +59,7 @@ public class Dummy3 {
 		Matrix a = new Matrix(3, 3);
 		Matrix b = a.makeCopy();
 		Matrix c = a.makeCopy();
-		Matrix d = a.makeCopy();
+		//Matrix d = a.makeCopy();
 
 		r1.printM("R1");
 		r2.printM("R2");

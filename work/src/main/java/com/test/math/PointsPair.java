@@ -1,7 +1,7 @@
 package com.test.math;
 
-import org.jdom.Element;
-import org.jdom.JDOMException;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
 
 import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;

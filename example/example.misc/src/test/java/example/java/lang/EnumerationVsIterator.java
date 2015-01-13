@@ -7,7 +7,6 @@ import java.util.Vector;
 import org.junit.Assert;
 
 import com.slavi.util.Marker;
-import com.slavi.util.testUtil.TestUtil;
 
 public class EnumerationVsIterator {
 	public static void main(String[] args) {
