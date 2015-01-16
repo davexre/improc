@@ -10,7 +10,7 @@ CXXFLAGS = \
  -I"src/arduino" \
  -I"src/Library" \
  -I"src/Slavian" \
- -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-keep-static-consts -fpermissive \
+ -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-keep-static-consts -fpermissive -g \
  -std="c++11" -funsigned-char -funsigned-bitfields -fno-exceptions -mmcu=atmega328p -DF_CPU=16000000UL
 LDFLAGS  = -Wl,--gc-sections -Wl,-s -mrelax -mmcu=atmega328p
 
@@ -39,7 +39,7 @@ define obj_dump
 	avr-size --format=Berkeley --mcu=atmega328p "$(1)" >> "$(2)"
 	echo ... >> "$(2)"
 	echo ... >> "$(2)"
-	avr-objdump -s -j .data "$(1)" >> "$(2)"
+	avr-objdump -Cs "$(1)" >> "$(2)"
 	echo ... >> "$(2)"
 	echo ... >> "$(2)"
 	echo "Print final symbols sizes (b - .bss; d - .data; t - .text; v/w - weak)" >> "$(2)"
@@ -106,10 +106,6 @@ all: $(OBJS)
 .PHONY: clean
 clean:
 	rm -fr $(OUTPUT_DIR)
-
-.PHONY: qq2
-qq2:
-	@echo $(file)
 
 .PHONY: upload
 upload:
