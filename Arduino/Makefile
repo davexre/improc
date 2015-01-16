@@ -10,7 +10,7 @@ CXXFLAGS = \
  -I"src/arduino" \
  -I"src/Library" \
  -I"src/Slavian" \
- -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-keep-static-consts \
+ -Wall -Os -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-keep-static-consts -fpermissive \
  -std="c++11" -funsigned-char -funsigned-bitfields -fno-exceptions -mmcu=atmega328p -DF_CPU=16000000UL
 LDFLAGS  = -Wl,--gc-sections -Wl,-s -mrelax -mmcu=atmega328p
 

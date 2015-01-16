@@ -59,6 +59,7 @@
   #define SERIAL_BUFFER_SIZE 64
 #endif
 
+// SPP
 #define BufferIndex uint8_t
 
 struct ring_buffer
@@ -109,24 +110,19 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
 #if !defined(USART0_RX_vect) && defined(USART1_RX_vect)
 // do nothing - on the 32u4 the first USART is USART1
 #else
-#if !defined(USART_RX_vect) && !defined(SIG_USART0_RECV) && \
-    !defined(SIG_UART0_RECV) && !defined(USART0_RX_vect) && \
-	!defined(SIG_UART_RECV)
+#if !defined(USART_RX_vect) && !defined(USART0_RX_vect) && \
+    !defined(USART_RXC_vect)
   #error "Don't know what the Data Received vector is called for the first UART"
 #else
   void serialEvent() __attribute__((weak));
   void serialEvent() {}
   #define serialEvent_implemented
 #if defined(USART_RX_vect)
-  SIGNAL(USART_RX_vect)
-#elif defined(SIG_USART0_RECV)
-  SIGNAL(SIG_USART0_RECV)
-#elif defined(SIG_UART0_RECV)
-  SIGNAL(SIG_UART0_RECV)
+  ISR(USART_RX_vect)
 #elif defined(USART0_RX_vect)
-  SIGNAL(USART0_RX_vect)
-#elif defined(SIG_UART_RECV)
-  SIGNAL(SIG_UART_RECV)
+  ISR(USART0_RX_vect)
+#elif defined(USART_RXC_vect)
+  ISR(USART_RXC_vect) // ATmega8
 #endif
   {
   #if defined(UDR0)
@@ -154,7 +150,7 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
   void serialEvent1() __attribute__((weak));
   void serialEvent1() {}
   #define serialEvent1_implemented
-  SIGNAL(USART1_RX_vect)
+  ISR(USART1_RX_vect)
   {
     if (bit_is_clear(UCSR1A, UPE1)) {
       unsigned char c = UDR1;
@@ -163,15 +159,13 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
       unsigned char c = UDR1;
     };
   }
-#elif defined(SIG_USART1_RECV)
-  #error SIG_USART1_RECV
 #endif
 
 #if defined(USART2_RX_vect) && defined(UDR2)
   void serialEvent2() __attribute__((weak));
   void serialEvent2() {}
   #define serialEvent2_implemented
-  SIGNAL(USART2_RX_vect)
+  ISR(USART2_RX_vect)
   {
     if (bit_is_clear(UCSR2A, UPE2)) {
       unsigned char c = UDR2;
@@ -180,15 +174,13 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
       unsigned char c = UDR2;
     };
   }
-#elif defined(SIG_USART2_RECV)
-  #error SIG_USART2_RECV
 #endif
 
 #if defined(USART3_RX_vect) && defined(UDR3)
   void serialEvent3() __attribute__((weak));
   void serialEvent3() {}
   #define serialEvent3_implemented
-  SIGNAL(USART3_RX_vect)
+  ISR(USART3_RX_vect)
   {
     if (bit_is_clear(UCSR3A, UPE3)) {
       unsigned char c = UDR3;
@@ -197,8 +189,6 @@ inline void store_char(unsigned char c, ring_buffer *buffer)
       unsigned char c = UDR3;
     };
   }
-#elif defined(SIG_USART3_RECV)
-  #error SIG_USART3_RECV
 #endif
 
 void serialEventRun(void)
@@ -480,7 +470,7 @@ size_t HardwareSerial::write(uint8_t c)
   BufferIndex i = _tx_buffer->head + 1;	// SPP:
   if (i >= SERIAL_BUFFER_SIZE)
     i = 0;
-
+	
   // If the output buffer is full, there's nothing for it other than to 
   // wait for the interrupt handler to empty it a bit
   // ???: return 0 here instead?

@@ -53,6 +53,7 @@ dconf-tools
 debhelper
 dhex
 doublecmd-common
+doublecmd-gtk
 dpkg-dev
 filezilla
 gbgoffice

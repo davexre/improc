@@ -1,8 +1,9 @@
 /*
-  pins_arduino.h - Pin definition functions for Arduino
+  pins_arduino.h - Pin definition functions for Arduino Robot Control Board
   Part of Arduino - http://www.arduino.cc/
 
-  Copyright (c) 2007 David A. Mellis
+  Copyright (c) 2913 D. Cuartielles, X. Yang (Arduino Verkstad)
+  Copyright (c) 2012 D. Cuartielles, N. de la Riva, I. Gallego, E. Gallego
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -19,7 +20,7 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id: wiring.h 249 2007-02-03 16:52:51Z mellis $
+  $Id: pins_arduino.h 1 2013-03-16 20:47:51Z cuartielles $
 */
 
 #ifndef Pins_Arduino_h
@@ -27,71 +28,7 @@
 
 #include <avr/pgmspace.h>
 
-// Workaround for wrong definitions in "iom32u4.h".
-// This should be fixed in the AVR toolchain.
-#undef UHCON
-#undef UHINT
-#undef UHIEN
-#undef UHADDR
-#undef UHFNUM
-#undef UHFNUML
-#undef UHFNUMH
-#undef UHFLEN
-#undef UPINRQX
-#undef UPINTX
-#undef UPNUM
-#undef UPRST
-#undef UPCONX
-#undef UPCFG0X
-#undef UPCFG1X
-#undef UPSTAX
-#undef UPCFG2X
-#undef UPIENX
-#undef UPDATX
-#undef TCCR2A
-#undef WGM20
-#undef WGM21
-#undef COM2B0
-#undef COM2B1
-#undef COM2A0
-#undef COM2A1
-#undef TCCR2B
-#undef CS20
-#undef CS21
-#undef CS22
-#undef WGM22
-#undef FOC2B
-#undef FOC2A
-#undef TCNT2
-#undef TCNT2_0
-#undef TCNT2_1
-#undef TCNT2_2
-#undef TCNT2_3
-#undef TCNT2_4
-#undef TCNT2_5
-#undef TCNT2_6
-#undef TCNT2_7
-#undef OCR2A
-#undef OCR2_0
-#undef OCR2_1
-#undef OCR2_2
-#undef OCR2_3
-#undef OCR2_4
-#undef OCR2_5
-#undef OCR2_6
-#undef OCR2_7
-#undef OCR2B
-#undef OCR2_0
-#undef OCR2_1
-#undef OCR2_2
-#undef OCR2_3
-#undef OCR2_4
-#undef OCR2_5
-#undef OCR2_6
-#undef OCR2_7
-
-#define NUM_DIGITAL_PINS  30
-#define NUM_ANALOG_INPUTS 12
+#define ARDUINO_MODEL_USB_PID	0x0038
 
 #define TX_RX_LED_INIT	DDRD |= (1<<5), DDRB |= (1<<0)
 #define TXLED0			PORTD |= (1<<5)
@@ -99,9 +36,17 @@
 #define RXLED0			PORTB |= (1<<0)
 #define RXLED1			PORTB &= ~(1<<0)
 
+#define D0 TKD0
+#define D1 TKD1
+#define D2 TKD2
+#define D3 TKD3
+#define D4 TKD4
+#define D5 TKD5
+
+static const uint8_t RX  = 0;
+static const uint8_t TX  = 1;
 static const uint8_t SDA = 2;
 static const uint8_t SCL = 3;
-#define LED_BUILTIN 13
 
 // Map SPI port to 'new' pins D14..D17
 static const uint8_t SS   = 17;
@@ -124,10 +69,26 @@ static const uint8_t A9 = 27;	// D9
 static const uint8_t A10 = 28;	// D10
 static const uint8_t A11 = 29;	// D12
 
-#define digitalPinToPCICR(p)    ((((p) >= 8 && (p) <= 11) || ((p) >= 14 && (p) <= 17) || ((p) >= A8 && (p) <= A10)) ? (&PCICR) : ((uint8_t *)0))
-#define digitalPinToPCICRbit(p) 0
-#define digitalPinToPCMSK(p)    ((((p) >= 8 && (p) <= 11) || ((p) >= 14 && (p) <= 17) || ((p) >= A8 && (p) <= A10)) ? (&PCMSK0) : ((uint8_t *)0))
-#define digitalPinToPCMSKbit(p) ( ((p) >= 8 && (p) <= 11) ? (p) - 4 : ((p) == 14 ? 3 : ((p) == 15 ? 1 : ((p) == 16 ? 2 : ((p) == 17 ? 0 : (p - A8 + 4))))))
+// Specific Mapping for the Control Board
+static const uint8_t KEY 	= 18;  	// AD0
+static const uint8_t MUX_IN = 24; 	// ADC8 - A6
+static const uint8_t MUXA 	= 6;  	// D5 - TKD4
+static const uint8_t MUXB 	= 11;  	// D11
+static const uint8_t MUXC 	= 12;  	// D12 - TKD5
+static const uint8_t MUXD 	= 13;   // D13
+static const uint8_t BUZZ 	= 5;   	// D5
+static const uint8_t POT 	= 23;  	// AD5
+static const uint8_t DC_LCD = 10; 	// D10
+static const uint8_t LCD_CS = 9;  	// D9
+static const uint8_t RST_LCD = 7; 	// D6
+static const uint8_t CARD_CS = 8;   // D8
+static const uint8_t TKD0	 = 19;  // ADC6 - A1
+static const uint8_t TKD1	 = 20;  // ADC5 - A2
+static const uint8_t TKD2	 = 21;  // ADC4 - A3
+static const uint8_t TKD3	 = 22;  // ADC1 - A4
+static const uint8_t TKD4	 = 6;   // D5 - MUXA
+static const uint8_t TKD5	 = 12;  // D12 - MUXC
+static const uint8_t LED1	 = 17;  // D17 - RX_Led
 
 //	__AVR_ATmega32U4__ has an unusual mapping of pins to channels
 extern const uint8_t PROGMEM analog_pin_to_channel_PGM[];
@@ -141,41 +102,38 @@ extern const uint8_t PROGMEM analog_pin_to_channel_PGM[];
 // for the analog output (software PWM).  Analog input
 // pins are a separate set.
 
-// ATMEL ATMEGA32U4 / ARDUINO LEONARDO
+// ARDUINO LEONARDO / ARDUINO ROBOT CONTROL / ATMEGA 32U4 / FUNCTION / REGISTER 
 //
-// D0				PD2					RXD1/INT2
-// D1				PD3					TXD1/INT3
-// D2				PD1		SDA			SDA/INT1
-// D3#				PD0		PWM8/SCL	OC0B/SCL/INT0
-// D4		A6		PD4					ADC8
-// D5#				PC6		???			OC3A/#OC4A
-// D6#		A7		PD7		FastPWM		#OC4D/ADC10
-// D7				PE6					INT6/AIN0
+// D0		RX					PD2		RX			RXD1/INT2
+// D1		TX					PD3		TX			TXD1/INT3
+// D2		SDA					PD1		SDA			SDA/INT1
+// D3#		SCL					PD0		PWM8/SCL	OC0B/SCL/INT0
+// D4		MUX_IN		A6		PD4					ADC8
+// D5#		BUZZ				PC6		???			OC3A/#OC4A
+// D6#		MUXA/TKD4	A7		PD7		FastPWM		#OC4D/ADC10
+// D7		RST_LCD				PE6					INT6/AIN0
 //
-// D8		A8		PB4					ADC11/PCINT4
-// D9#		A9		PB5		PWM16		OC1A/#OC4B/ADC12/PCINT5
-// D10#		A10		PB6		PWM16		OC1B/0c4B/ADC13/PCINT6
-// D11#				PB7		PWM8/16		0C0A/OC1C/#RTS/PCINT7
-// D12		A11		PD6					T1/#OC4D/ADC9
-// D13#				PC7		PWM10		CLK0/OC4A
+// D8		CARD_CS		A8		PB4					ADC11/PCINT4
+// D9#		LCD_CS		A9		PB5		PWM16		OC1A/#OC4B/ADC12/PCINT5
+// D10#		DC_LCD		A10		PB6		PWM16		OC1B/0c4B/ADC13/PCINT6
+// D11#		MUXB				PB7		PWM8/16		0C0A/OC1C/#RTS/PCINT7
+// D12		MUXC/TKD5	A11		PD6					T1/#OC4D/ADC9
+// D13#		MUXD				PC7		PWM10		CLK0/OC4A
 //
-// A0		D18		PF7					ADC7
-// A1		D19		PF6					ADC6
-// A2		D20 	PF5					ADC5
-// A3		D21 	PF4					ADC4
-// A4		D22		PF1					ADC1
-// A5		D23 	PF0					ADC0
+// A0		KEY			D18		PF7					ADC7
+// A1		TKD0		D19		PF6					ADC6
+// A2		TKD1		D20 	PF5					ADC5
+// A3		TKD2		D21 	PF4					ADC4
+// A4		TKD3		D22		PF1					ADC1
+// A5		POT			D23 	PF0					ADC0
 //
-// New pins D14..D17 to map SPI port to digital pins
+// MISO		MISO		D14		PB3					MISO,PCINT3
+// SCK		SCK			D15		PB1					SCK,PCINT1
+// MOSI		MOSI		D16		PB2					MOSI,PCINT2
+// SS		RX_LED		D17		PB0					RXLED,SS/PCINT0
 //
-// MISO		D14		PB3					MISO,PCINT3
-// SCK		D15		PB1					SCK,PCINT1
-// MOSI		D16		PB2					MOSI,PCINT2
-// SS		D17		PB0					RXLED,SS/PCINT0
-//
-// TXLED			PD5
-// RXLED		    PB0
-// HWB				PE2					HWB
+// TXLED	TX_LED		PD5
+// HWB					PE2					HWB
 
 // these arrays map port names (e.g. port B) to the
 // appropriate addresses for various functions (e.g. reading
@@ -210,7 +168,7 @@ const uint16_t PROGMEM port_to_input_PGM[] = {
 	(uint16_t) &PINF,
 };
 
-const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+const uint8_t PROGMEM digital_pin_to_port_PGM[30] = {
 	PD, // D0 - PD2
 	PD,	// D1 - PD3
 	PD, // D2 - PD1
@@ -247,7 +205,7 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PD, // D29 / D12 - A11 - PD6
 };
 
-const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
+const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[30] = {
 	_BV(2), // D0 - PD2
 	_BV(3),	// D1 - PD3
 	_BV(1), // D2 - PD1
@@ -284,7 +242,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 	_BV(6), // D29 / D12 - A11 - PD6
 };
 
-const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
+const uint8_t PROGMEM digital_pin_to_timer_PGM[18] = {
 	NOT_ON_TIMER,	
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
@@ -304,24 +262,9 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	
 	NOT_ON_TIMER,	
 	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
-	NOT_ON_TIMER,
 };
 
-const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
+const uint8_t PROGMEM analog_pin_to_channel_PGM[12] = {
 	7,	// A0				PF7					ADC7
 	6,	// A1				PF6					ADC6	
 	5,	// A2				PF5					ADC5	
@@ -356,6 +299,5 @@ const uint8_t PROGMEM analog_pin_to_channel_PGM[] = {
 #define SERIAL_PORT_MONITOR        Serial
 #define SERIAL_PORT_USBVIRTUAL     Serial
 #define SERIAL_PORT_HARDWARE       Serial1
-#define SERIAL_PORT_HARDWARE_OPEN  Serial1
 
 #endif /* Pins_Arduino_h */
