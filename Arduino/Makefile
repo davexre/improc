@@ -5,7 +5,7 @@ OUTPUT_DIR := output/
 LIB_NAME   := Arduino
 LIB        := $(OUTPUT_DIR)lib$(LIB_NAME).a
 
-CXX      = avr-g++
+CXX      = avr-gcc
 CXXFLAGS = \
  -I"src/arduino" \
  -I"src/Library" \
