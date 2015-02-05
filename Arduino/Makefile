@@ -5,7 +5,9 @@ OUTPUT_DIR := output/
 LIB_NAME   := Arduino
 LIB        := $(OUTPUT_DIR)lib$(LIB_NAME).a
 
-CXX      = avr-g++
+CXX      = avr-gcc
+# Idea borrowed from WString.h: added compiler options -felide-constructors -std=c++0x 
+# -felide-constructors -std=c++0x
 CXXFLAGS = \
  -I"src/arduino" \
  -I"src/Library" \
