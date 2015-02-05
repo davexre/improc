@@ -13,7 +13,7 @@ public class TestMyDelaunaySpeed {
 		int maxPoints = 100000;
 		
 		int sizeX = Math.max(1, (int) Math.sqrt(maxPoints));
-		int sizeY = (int) Math.ceil((double) maxPoints / sizeX);
+//		int sizeY = (int) Math.ceil((double) maxPoints / sizeX);
 		int curX = 0;
 		int curY = 0;
 		int step = 10;

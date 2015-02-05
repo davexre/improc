@@ -60,6 +60,7 @@ gbgoffice
 gdb-avr 
 gcc-avr
 gconf-editor
+geeqie
 ghex
 gimp
 git
