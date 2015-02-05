@@ -60,17 +60,23 @@ gbgoffice
 gdb-avr 
 gcc-avr
 gconf-editor
+geany
+geany-plugin-pg
+geany-plugin-shiftcolumn
+gedit-plugins
 ghex
 gimp
 git
 gmobilemedia
 gnome-color-chooser
+gnupg-agent
 gparted
 handbrake
 httrack
 hugin
 htop
 inkscape
+kde-baseapps-bin
 kdenlive
 librecad
 libreoffice
@@ -81,7 +87,9 @@ openssh-server
 ppa-purge
 p7zip
 pavucontrol
+pinentry-curses
 rar
+seahorse
 screen
 soundconverter
 smplayer
@@ -94,6 +102,27 @@ virtualbox-qt
 vlc
 wammu
 
+GEdit settings for editing password protected files
+===================================================
+1. sudo apt-get intall gedit-plugins gnupg-agent seahorse
+2. In GEdit enable the plugin "External tools"
+3. In Tools/"Manage External Tools" add the tool:
+Name: encrypt/decrypt
+Shortcut key: F12
+Save: Nothing
+Input: Current document
+Output: Replace current document
+Applicability: All documents, All languages
+Script to execute:
+--------------- start of script
+#!/bin/bash
+stdin=$(cat)
+if [ "${stdin:0:27}" == "-----BEGIN PGP MESSAGE-----"  ]; then 
+	echo "$stdin" | gpg -d --no-tty - 2>/dev/null
+else
+	echo "$stdin" | gpg -ac --no-tty -
+fi
+--------------- end of script
 
 Change the border width of windows in Gnome
 ===========================================
