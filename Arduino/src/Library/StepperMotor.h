@@ -362,16 +362,16 @@ public:
 	static const char pgm_Down[] PROGMEM;
 
 	void debugPrint() {
-		Serial.pgm_print(PSTR("isMoving:       ")); Serial.println(isMoving() ? 'T':'F');
-		Serial.pgm_print(PSTR("remaining steps:")); Serial.println(remainingSteps);
-		Serial.pgm_print(PSTR("cur step:       ")); Serial.println(getStep());
+		Serial.print(F("isMoving:       ")); Serial.println(isMoving() ? 'T':'F');
+		Serial.print(F("remaining steps:")); Serial.println(remainingSteps);
+		Serial.print(F("cur step:       ")); Serial.println(getStep());
 		Serial.println();
-		Serial.pgm_print(PSTR("start button:   ")); Serial.pgm_println(startButton->getState() ? pgm_Up : pgm_Down);
-		Serial.pgm_print(PSTR("end button:     ")); Serial.pgm_println(endButton->getState() ? pgm_Up : pgm_Down);
+		Serial.print(F("start button:   ")); Serial.println(startButton->getState() ? pgm_Up : pgm_Down);
+		Serial.print(F("end button:     ")); Serial.println(endButton->getState() ? pgm_Up : pgm_Down);
 		Serial.println();
-		Serial.pgm_print(PSTR("movement mode:  ")); Serial.println((int)movementMode);
-		Serial.pgm_print(PSTR("lastTimestMicro:")); Serial.println(lastTimestampMicros);
-		Serial.pgm_print(PSTR("delay b/n steps:")); Serial.println(delayBetweenStepsMicros);
+		Serial.print(F("movement mode:  ")); Serial.println((int)movementMode);
+		Serial.print(F("lastTimestMicro:")); Serial.println(lastTimestampMicros);
+		Serial.print(F("delay b/n steps:")); Serial.println(delayBetweenStepsMicros);
 	}
 };
 
