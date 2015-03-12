@@ -8,7 +8,7 @@ ARDUINO_LIB_FOLDER := $(SOURCE_DIR)ArduinoLibrary/
 INCLUDE_FOLDERS = $(dir $(wildcard $(SOURCE_DIR)*/) $(wildcard $(ARDUINO_LIB_FOLDER)*/))
 INCLUDE = $(foreach dir,$(INCLUDE_FOLDERS),-I"$(dir)" )
 
-MAIN_FILE  = main.cpp
+MAIN_FILE  = arduino/main.cpp
 MAIN_O     = $(OUTPUT_DIR)$(MAIN_FILE:.cpp=.o)
 MAIN_EXEC  = $(OUTPUT_DIR)$(MAIN_FILE:.cpp=.exec)
 
@@ -48,7 +48,7 @@ define obj_dump
 	avr-size --format=Berkeley --mcu=atmega328p "$(1)" >> "$(2)"
 	echo ... >> "$(2)"
 	echo ... >> "$(2)"
-	avr-objdump -Cs "$(1)" >> "$(2)"
+	avr-objdump -Cs -j .data "$(1)" >> "$(2)"
 	echo ... >> "$(2)"
 	echo ... >> "$(2)"
 	echo "Print final symbols sizes (b - .bss; d - .data; t - .text; v/w - weak)" >> "$(2)"
