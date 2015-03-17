@@ -1,0 +1,60 @@
+.card {
+	display: inline-block;
+	font-family: "Monospace";
+	color: black;
+	transition-timing-function: ease;
+	transition-duration: 1s;
+	position: relative;
+
+	width: 170px;
+	height: 250px;
+	margin: 5px;
+	border-style: dashed;
+	border-color: #CCC;
+	border-width: 1px;
+}
+
+.card:hover, .card.hover_effect {
+	rule:properties;
+	background-color: #FF5A00;
+	border-color: black;
+}
+
+.card a {
+	color: inherit;
+	font-style: inherit;
+	text-decoration: inherit;
+}
+
+.card .pic {
+	float: left;
+	display: block;
+	width: 100%;
+	height: 50px;
+	background-color: green;
+	position: absolute;
+	bottom: 0px;
+	color: black;
+}
+
+.card .info {
+	float: left;
+	display: block;
+	height: 100%;
+	color: #EEE;
+}
+
+.card .info:hover {
+	color: white;
+}
+
+.clear {
+	clear: both;
+}
+
+.cardHolder {
+	text-align: center;
+	background-color: #EEE;
+	padding: 5px;
+}
+

@@ -1,0 +1,13 @@
+Problem with hover on touch screen devices:
+===========================================
+1. http://stackoverflow.com/a/8877902/2243209
+2. http://stackoverflow.com/questions/2851663/how-do-i-simulate-a-hover-with-a-touch-in-touch-enabled-browsers
+3. http://www.prowebdesign.ro/how-to-deal-with-hover-on-touch-screen-devices/
+4. http://www.prowebdesign.ro/tutorials/hover-on-tablets/index2.html#
+
+Effects with hover:
+===================
+http://tympanus.net/Tutorials/OriginalHoverEffects/index9.html
+
+
+
