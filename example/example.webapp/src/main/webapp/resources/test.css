@@ -6,7 +6,7 @@
 	transition-duration: 1s;
 	position: relative;
 
-	width: 170px;
+	width: 150px;
 	height: 250px;
 	margin: 5px;
 	border-style: dashed;
@@ -30,11 +30,16 @@
 	float: left;
 	display: block;
 	width: 100%;
-	height: 50px;
-	background-color: green;
+	height: 100px;
+	background-image: url(2-bw.png);
+	background-size: 100% auto;
 	position: absolute;
 	bottom: 0px;
 	color: black;
+}
+
+.card .pic:hover {
+	background-image: url(2-color.png);
 }
 
 .card .info {
