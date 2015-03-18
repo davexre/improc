@@ -11,14 +11,15 @@
 <body>
 
 <p>Text text text</p>
+
 <div class="containerTable">
 <div class="containerCell">
 <div class="cardHolder">
-<div class="card"><a href="?id=1"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></a></div>
-<div class="card"><a href="?id=2"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></a></div>
-<div class="card"><a href="?id=3"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></a></div>
-<div class="card"><a href="?id=4"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></a></div>
-<div class="card"><a href="?id=5"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></a></div>
+<div class="card" data-url="?id=1"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></div>
+<div class="card" data-url="?id=2"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></div>
+<div class="card" data-url="?id=3"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></div>
+<div class="card" data-url="?id=4"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></div>
+<div class="card" data-url="?id=5"><span>This is explanatory text about where this link will drop you.</span><img src="2-small.gif"/></div>
 <div class="clear"></div>
 </div>
 </div>
@@ -43,8 +44,10 @@ $(document).ready(function() {
 			if (!$(this).hasClass('alreadyClicked')) {
 				e.preventDefault();
 				$(this).addClass('alreadyClicked');
+				return;
 			}
 		}
+		window.open($(this).attr("data-url"))
 	});
 });
 </script>
