@@ -14,8 +14,8 @@ body {
 	z-index: -1;
 	width: 100%;
 	height: 100%;
-	-webkit-animation: dropDown 1s 0s 1 linear both;
-	animation: dropDown 1s 0s 1 linear both;
+/* 	-webkit-animation: dropDown 1s 0s 1 linear both;
+	animation: dropDown 1s 0s 1 linear both; */
 }
 
 @keyframes dropDown {
@@ -42,9 +42,10 @@ body {
 	font-size: 9pt;
 
 	cursor: pointer;
-	width: 250px;
-	height: 200px;
+	width: 324px;
+	height: 260px;
 	margin: 5px;
+	border: 0px solid white;
 	border-radius: 15px;
 	transition-timing-function: ease;
 	transition-duration: 0.4s;
@@ -52,10 +53,11 @@ body {
 
 .card img {
 	display: block;
-	width: 100%;
-	height: auto;
+	width: 324px;
+	height: 200px;
 	position: absolute;
 	bottom: 0px;
+	left: 0px;
 }
 
 .card a {
@@ -77,8 +79,8 @@ body {
 }
 
 .selected {
-	-webkit-animation: myanim 0.2s 0s 1 alternate both;
-	animation: myanim 0.2s 0s 1 alternate both;
+/* 	-webkit-animation: myanim 0.2s 0s 1 alternate both;
+	animation: myanim 0.2s 0s 1 alternate both; */
 	background-color: #FF5A00;
 }
 
