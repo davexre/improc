@@ -97,6 +97,7 @@ smplayer
 smtube
 subversion
 synaptic
+traceroute
 ubuntu-restricted-extras
 unison-gtk
 virtualbox-qt
