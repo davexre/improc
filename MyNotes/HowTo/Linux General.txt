@@ -83,11 +83,13 @@ librecad
 libreoffice
 mc
 meld
+nemo
+nemo-fileroller
 octave
 openssh-server
 ppa-purge
 p7zip
-pavucontrol
+avucontrol
 pinentry-curses
 rar
 seahorse
@@ -99,16 +101,26 @@ subversion
 synaptic
 traceroute
 ubuntu-restricted-extras
+unace
 unison-gtk
+unrar
+unzip
 virtualbox-qt
 vlc
 wammu
+zip
 
 GEdit settings for editing password protected files
 ===================================================
-1. sudo apt-get intall gedit-plugins gnupg-agent seahorse
-2. In GEdit enable the plugin "External tools"
-3. In Tools/"Manage External Tools" add the tool:
+1. sudo apt-get install gedit-plugins gnupg-agent seahorse
+2. Add to .bashrc or .profile
+--------------- Start of .bashrc
+##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
+GPG_TTY=$(tty)
+export GPG_TTY
+--------------- End of .bashrc
+3. In GEdit enable the plugin "External tools"
+4. In Tools/"Manage External Tools" add the tool:
 Name: encrypt/decrypt
 Shortcut key: F12
 Save: Nothing
@@ -147,6 +159,12 @@ usr/share/themes/Ambiance/gtk-3.0/settings.ini
 /usr/share/themes/Ambiance/gtk-2.0/gtkrc
 replacing the tooltip foreground and backround color, with the #000000 and the #f5f5b5 color, respectively
 
+Replace Nautilus with Nemo
+==========================
+sudo apt-get install nemo nemo-fileroller
+xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+gsettings set org.gnome.desktop.background show-desktop-icons false
+gsettings set org.nemo.desktop show-desktop-icons true
 
 
 Gnome desktop tweaks
