@@ -1,0 +1,91 @@
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+
+=========================== Отворени транзакции-not committed or rollbacked ===========================
+select t.XID "Transaction ID", t.START_TIME "Tr.start", s.USERNAME, s.sid || ',' || s.serial# "sid,serial#", 
+	t.STATUS "Tr.status", s.STATUS "Sess.status", s.STATE "Sess.state", 
+	s.MACHINE, s.PROGRAM, 
+	t.LOG_IO "Tr.Logical I/O", t.PHY_IO "Tr.Physical I/O", 
+	nvl(q.SQL_FULLTEXT, prev_q.SQL_FULLTEXT) "SQL"
+from v$session s
+join v$transaction t on t.ses_addr = s.saddr
+left join v$sqlarea q on s.SQL_ID=q.SQL_ID
+left join v$sqlarea prev_q on s.PREV_SQL_ID=prev_q.SQL_ID; 
+
+=========================== Статистики за текущата сесия ===========================
+spool my_stats
+
+select name, value
+from v$statname sn
+join v$mystat ms on sn.statistic# = ms.statistic#
+where ms.value != 0;
+
+select event, total_waits, total_timeouts, time_waited, max_wait
+from
+	(select /*+ no_merge */ sid from v$mystat where rownum = 1) ms
+	join v$session_event se on se.sid = ms.sid;
+
+select stat_name, value
+from
+	(select /*+ no_merge */ sid from v$mystat where rownum = 1) ms,
+	join v$sess_time_model tm on tm.sid = ms.sid
+where tm.value != 0;
+
+spool off
+
+=========================== Списък с активни сесии и изълнявани заявки ===========================
+select q.SQL_FULLTEXT, s.SADDR, 'alter system kill session ''' || s.SID || ', ' || s.SERIAL# || ''';' kill, s.USERNAME, s.STATUS, s.PROGRAM
+from v$session s 
+join v$sqlarea q on s.SQL_ID=q.SQL_ID
+order by s.STATUS;
+
+=========================== Обновяване на статистики и sql explain plan ===========================
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('<schema name>');
+alter system flush shared_pool;
+
+=========================== Генериране на alter table команди за всички constraint "on delete cascade" ===========================
+WHENEVER SQLERROR CONTINUE;
+set serveroutput on;
+begin
+	for i in (
+
+with 
+d as 
+(select t.*, level lvl, REGEXP_REPLACE(sys_connect_by_path('"' || t.column_name || '"', ','), '^,', '') cols
+from
+	(select cc.*, c.r_owner, c.r_constraint_name
+	from user_constraints c 
+	join user_cons_columns cc on c.owner=cc.owner and c.CONSTRAINT_NAME=cc.CONSTRAINT_NAME
+	where c.constraint_type='R' and nvl(c.delete_rule, 'NO ACTION') <> 'CASCADE') t 
+start with t.position=1
+connect by prior t.owner=t.owner and prior t.constraint_name=t.constraint_name and prior t.position+1=t.position),
+
+dd as (
+select d.owner, d.constraint_name, max(lvl) lvl
+from d
+group by d.owner, d.constraint_name)
+
+select cmd
+from (
+	select 'alter table "' || d.table_name || '" drop constraint "' || d.constraint_name || '"' cmd, d.table_name, d.constraint_name, 1 orderby
+	from d
+	join dd on d.owner=dd.owner and d.constraint_name=dd.constraint_name and d.lvl=dd.lvl
+
+	union all
+
+	select 'alter table "' || d.table_name || '" add constraint "' || d.constraint_name || '" foreign key (' || d.cols || ') references "' || pk.table_name || '" on delete cascade' cmd, d.table_name, d.constraint_name, 2 orderby
+	from d
+	join dd on d.owner=dd.owner and d.constraint_name=dd.constraint_name and d.lvl=dd.lvl
+	join user_constraints pk on d.r_owner=pk.owner and d.r_constraint_name=pk.constraint_name
+	)
+order by table_name, constraint_name, orderby
+
+	)
+	loop
+		dbms_output.put_line(i.cmd || ';');
+		--execute immediate i.cmd;
+	end loop;
+end;
+
