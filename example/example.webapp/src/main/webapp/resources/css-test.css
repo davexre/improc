@@ -1,0 +1,12 @@
+
+.s1 {
+	display: inline-block;
+	width: 150px;
+	border: 1px solid green;
+}
+
+div[myattr] a {
+	text-decoration: none;
+	color: red;
+}
+

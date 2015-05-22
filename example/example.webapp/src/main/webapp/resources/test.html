@@ -1,52 +1,62 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<title>До работа с колело</title>
-<link href="test.css" rel="stylesheet" />
-<script type="text/javascript" src="jquery-2.1.3.min.js"></script>
-</head>
-
-<!-- <body ontouchstart=""> -->
-<body>
-
-<div class="containerTable">
-<div class="containerCell">
-<div class="cardHolder">
-<div class="card" data-url="?id=1"><span>This is explanatory text about where this link will drop you.</span><img src="1.gif"/></div>
-<div class="card" data-url="?id=2"><span>This is explanatory text about where this link will drop you.</span><img src="2.gif"/></div>
-<div class="card" data-url="?id=3"><span>This is explanatory text about where this link will drop you.</span><img src="3.gif"/></div>
-<div class="clear"></div>
-<div class="card" data-url="?id=4"><span>This is explanatory text about where this link will drop you.</span><img src="4.gif"/></div>
-<div class="card" data-url="?id=5"><span>This is explanatory text about where this link will drop you.</span><img src="5.gif"/></div>
-</div>
-</div>
-</div>
-
-<script type="text/javascript">
-$(document).ready(function() {
-	$('.card').bind('mouseenter', function(e) {
-		$(this).addClass('selected');
-	});
-	$('.card').bind('touchstart', function(e) {
-		$(this).addClass('touched');
-	});
-	$('.card').bind('mouseleave', function(e) {
-		$(this).removeClass('selected');
-		$(this).removeClass('touched');
-		$(this).removeClass('alreadyClicked');
-	});
-	$('.card').bind('click', function(e) {
-		if ($(this).hasClass('touched')) {
-			if (!$(this).hasClass('alreadyClicked')) {
+	<title>До работа с колело</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<meta name="viewport" content="width=device-width">
+	<link href="front-page.css" rel="stylesheet" />
+	<script type='text/javascript' src='jquery.js'></script>
+	<script type="text/javascript">
+	jQuery(document).ready(function() {
+		jQuery('.card').bind('mouseenter', function(e) {
+			//jQuery(this).addClass('selected');
+		});
+		jQuery('.card').bind('touchstart', function(e) {
+			jQuery(this).addClass('touched');
+		});
+		jQuery('.card').bind('mouseleave', function(e) {
+			jQuery(this).removeClass('selected');
+			jQuery(this).removeClass('touched');
+			jQuery(this).removeClass('alreadyClicked');
+		});
+		jQuery('.card').bind('click', function(e) {
+			if (jQuery(this).hasClass('touched')) {
+				if (!jQuery(this).hasClass('alreadyClicked')) {
+					e.preventDefault();
+					jQuery(this).addClass('alreadyClicked');
+					return;
+				}
+			} else if (!jQuery(this).hasClass('selected')) {
 				e.preventDefault();
-				$(this).addClass('alreadyClicked');
+				jQuery(this).addClass('selected');
 				return;
 			}
-		}
-		window.open($(this).attr("data-url"), "_self")
+			//window.open(jQuery(this).attr("data-url"), "_self")
+		});
 	});
-});
-</script>
+	</script>
+</head>
+
+<body>
+
+<div class="pageContainer">
+<div class="scrollableContainer">
+<div class="containerTable">
+<div class="containerCell">
+<div class="dummy"></div>
+<div class="cardHolder">
+<a class="card" href="?id=1"><span class="card-content"><span class="card-text">ЗА КАМПАНИЯТА</span></span><img src="1.gif"/></a>
+<a class="card" href="?id=2"><span class="card-content"><span class="card-text">УЧАСТВАЙ<br/><span style="font-weight: normal; font-size: 11pt;">Вход / Регистрация</span></span></span><img src="2.gif"/></a>
+<a class="card" href="?id=3"><span class="card-content"><span class="card-text">КЛАСИРАНЕ</span></span><img src="3.gif"/></a>
+<div class="clear"></div>
+<a class="card" href="?id=4"><span class="card-content"><span class="card-text">ОРГАНИЗАТОРИ</span></span><img src="4.gif"/></a>
+<a class="card" href="?id=5"><span class="card-content"><span class="card-text">ИСТОРИЯ</span></span><img src="5.gif"/></a>
+</div>
+<div class="dummy"></div>
+</div>
+</div>
+</div>
+</div>
+
 </body>
 </html>
