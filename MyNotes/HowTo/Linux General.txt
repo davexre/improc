@@ -143,7 +143,7 @@ Change the border width of windows in Gnome
 http://ubuntuforums.org/showthread.php?t=439329
 
 To change border widths, simply open up the theme's Metacity XML file. 
-For example, Human's theme is located in /usr/share/themes/Human/metacity-1/metacity-theme-1.xml
+For example, Human's theme is located in /usr/share/themes/Ambiance/metacity-1/metacity-theme-1.xml
 
 The stanza in question should be apparent:
 <distance name="left_width" value="5"/>
