@@ -31,3 +31,4 @@ public:
 };
 
 DefineClassTemplate(BlinkingLedTest)
+

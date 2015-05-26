@@ -11,7 +11,7 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.xpath.XPath;
 
 public class Dummy2 {
-	public static void main2(String[] args) throws JDOMException, IOException {
+	public static void main(String[] args) throws JDOMException, IOException {
 		Document doc = new SAXBuilder(false).build(new StringReader(new String(
 				"<users>   " + "<user id='13423'>"
 						+ "<firstname>Andre</firstname>" + "</user>"
@@ -21,7 +21,8 @@ public class Dummy2 {
 						+ "</users>")));
 
 		// Build the xpath expression
-		XPath xpathExpression = XPath.newInstance("//*[@id=32424]");
+		//XPath xpathExpression = XPath.newInstance("//*[@id=32424]");
+		XPath xpathExpression = XPath.newInstance("//user");
 		
 
 		// Apply xpath and fetch all matching nodes
