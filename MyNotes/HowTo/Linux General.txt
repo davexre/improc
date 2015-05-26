@@ -55,6 +55,7 @@ dhex
 doublecmd-common
 doublecmd-gtk
 dpkg-dev
+ffmpeg
 filezilla
 gbgoffice
 gdb-avr 
@@ -83,6 +84,7 @@ librecad
 libreoffice
 mc
 meld
+melt
 nemo
 nemo-fileroller
 octave
@@ -108,6 +110,7 @@ unzip
 virtualbox-qt
 vlc
 wammu
+zenity
 zip
 
 GEdit settings for editing password protected files
@@ -163,7 +166,7 @@ Replace Nautilus with Nemo
 ==========================
 sudo apt-get install nemo nemo-fileroller
 xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
-gsettings set org.gnome.desktop.background show-desktop-icons false
+gsettings set org.gnome.desktop.background show-desktop-icons true
 gsettings set org.nemo.desktop show-desktop-icons true
 
 
