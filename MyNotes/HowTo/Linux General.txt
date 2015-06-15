@@ -174,3 +174,13 @@ gsettings set org.gnome.nautilus.desktop home-icon-visible true
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
 // shows mounted volumes
 gsettings set org.gnome.nautilus.desktop volumes-visible true
+
+FIX: Under GNOME Flashback Ubuntu's notify-send will not show popup messages
+============================================================================
+https://bugs.launchpad.net/ubuntu/+source/gnome-panel/+bug/1247362
+1) sudo vi /etc/xdg/autostart/notification-daemon.desktop
+replace
+AutostartCondition=GNOME3 unless-session gnome
+with
+AutostartCondition=false
+2) reboot or sudo killall notification-daemon
