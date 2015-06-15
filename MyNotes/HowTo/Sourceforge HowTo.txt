@@ -22,4 +22,3 @@ mkdir <REPONAME>
 git --git-dir=<REPONAME> init --shared=all --bare
 Pull/Push URL
 ssh://slavianp@image-process.git.sourceforge.net/gitroot/image-process/<REPONAME>
-
