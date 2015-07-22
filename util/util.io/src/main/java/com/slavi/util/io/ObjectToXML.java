@@ -34,15 +34,22 @@ public class ObjectToXML {
 		List<Element> itemElements;
 
 		boolean setToNullMissingProperties;
+		
+		public final boolean readTransientFields;
 
 		public Read(Element root) {
-			this(root, true);
+			this(root, true, false);
+		}
+
+		public Read(Element root, boolean setToNullMissingProperties) {
+			this(root, setToNullMissingProperties, false);
 		}
 		
-		public Read(Element root, boolean setToNullMissingProperties) {
+		public Read(Element root, boolean setToNullMissingProperties, boolean readTransientFields) {
 			itemElements = root.getChildren("object");
 			Collections.sort(itemElements, new CompareByIndex());
 			this.setToNullMissingProperties = setToNullMissingProperties;
+			this.readTransientFields = readTransientFields;
 		}
 		
 		public void loadPropertiesToObject(Element element, Object object) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException, SecurityException, NoSuchMethodException, InvocationTargetException {
@@ -67,7 +74,7 @@ public class ObjectToXML {
 					int modifiers = field.getModifiers();
 //					if (field.isSynthetic())
 //						continue;
-					if (Modifier.isTransient(modifiers))
+					if (!readTransientFields && Modifier.isTransient(modifiers))
 						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
@@ -238,8 +245,15 @@ public class ObjectToXML {
 		
 		Element root;
 		
+		public final boolean outputTransientFields;
+		
 		public Write(Element root) {
+			this(root, false);
+		}
+
+		public Write(Element root, boolean outputTransientFields) {
 			this.root = root;
+			this.outputTransientFields = outputTransientFields;
 		}
 		
 		public void objectToXML(Element element, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -303,7 +317,7 @@ public class ObjectToXML {
 						int modifiers = field.getModifiers();
 //						if (field.isSynthetic())
 //							continue;
-						if (Modifier.isTransient(modifiers))
+						if (!outputTransientFields && Modifier.isTransient(modifiers))
 							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
