@@ -35,21 +35,17 @@ public class ObjectToXML {
 
 		boolean setToNullMissingProperties;
 		
-		public final boolean readTransientFields;
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
 
 		public Read(Element root) {
-			this(root, true, false);
+			this(root, true);
 		}
 
 		public Read(Element root, boolean setToNullMissingProperties) {
-			this(root, setToNullMissingProperties, false);
-		}
-		
-		public Read(Element root, boolean setToNullMissingProperties, boolean readTransientFields) {
 			itemElements = root.getChildren("object");
 			Collections.sort(itemElements, new CompareByIndex());
 			this.setToNullMissingProperties = setToNullMissingProperties;
-			this.readTransientFields = readTransientFields;
 		}
 		
 		public void loadPropertiesToObject(Element element, Object object) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException, SecurityException, NoSuchMethodException, InvocationTargetException {
@@ -72,9 +68,9 @@ public class ObjectToXML {
 				});
 				for (Field field : fields) {
 					int modifiers = field.getModifiers();
-//					if (field.isSynthetic())
-//						continue;
-					if (!readTransientFields && Modifier.isTransient(modifiers))
+					if (ignoreSyntheticProperties && field.isSynthetic())
+						continue;
+					if (ignoreTransientProperties && Modifier.isTransient(modifiers))
 						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
@@ -245,15 +241,11 @@ public class ObjectToXML {
 		
 		Element root;
 		
-		public final boolean outputTransientFields;
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
 		
 		public Write(Element root) {
-			this(root, false);
-		}
-
-		public Write(Element root, boolean outputTransientFields) {
 			this.root = root;
-			this.outputTransientFields = outputTransientFields;
 		}
 		
 		public void objectToXML(Element element, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
@@ -315,9 +307,9 @@ public class ObjectToXML {
 					});
 					for (Field field : fields) {
 						int modifiers = field.getModifiers();
-//						if (field.isSynthetic())
-//							continue;
-						if (!outputTransientFields && Modifier.isTransient(modifiers))
+						if (ignoreSyntheticProperties && field.isSynthetic())
+							continue;
+						if (ignoreTransientProperties && Modifier.isTransient(modifiers))
 							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
