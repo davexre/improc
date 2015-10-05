@@ -34,11 +34,14 @@ public class ObjectToXML {
 		List<Element> itemElements;
 
 		boolean setToNullMissingProperties;
+		
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
 
 		public Read(Element root) {
 			this(root, true);
 		}
-		
+
 		public Read(Element root, boolean setToNullMissingProperties) {
 			itemElements = root.getChildren("object");
 			Collections.sort(itemElements, new CompareByIndex());
@@ -65,9 +68,9 @@ public class ObjectToXML {
 				});
 				for (Field field : fields) {
 					int modifiers = field.getModifiers();
-//					if (field.isSynthetic())
-//						continue;
-					if (Modifier.isTransient(modifiers))
+					if (ignoreSyntheticProperties && field.isSynthetic())
+						continue;
+					if (ignoreTransientProperties && Modifier.isTransient(modifiers))
 						continue;
 					if (Modifier.isStatic(modifiers))
 						continue;
@@ -238,6 +241,9 @@ public class ObjectToXML {
 		
 		Element root;
 		
+		public boolean ignoreTransientProperties = false;
+		public boolean ignoreSyntheticProperties = false;
+		
 		public Write(Element root) {
 			this.root = root;
 		}
@@ -301,9 +307,9 @@ public class ObjectToXML {
 					});
 					for (Field field : fields) {
 						int modifiers = field.getModifiers();
-//						if (field.isSynthetic())
-//							continue;
-						if (Modifier.isTransient(modifiers))
+						if (ignoreSyntheticProperties && field.isSynthetic())
+							continue;
+						if (ignoreTransientProperties && Modifier.isTransient(modifiers))
 							continue;
 						if (Modifier.isStatic(modifiers))
 							continue;
