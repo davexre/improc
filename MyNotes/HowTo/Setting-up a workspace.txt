@@ -24,6 +24,7 @@ Setting-up a workspace:
 	* AVR Eclipse Plugin
 	* Quick Bookmarks Plugin
 	* Subversive (SVN version control)
+	* Eclipse plugin for LESS
 	* Toad Extension for Eclipse
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
