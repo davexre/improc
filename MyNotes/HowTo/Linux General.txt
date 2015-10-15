@@ -103,6 +103,7 @@ smplayer
 smtube
 subversion
 synaptic
+sysv-rc-conf
 traceroute
 ubuntu-restricted-extras
 unace
