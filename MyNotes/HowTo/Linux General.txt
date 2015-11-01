@@ -57,6 +57,7 @@ doublecmd-gtk
 dpkg-dev
 ffmpeg
 filezilla
+freecad
 gbgoffice
 gdb-avr 
 gcc-avr
@@ -87,6 +88,7 @@ meld
 melt
 nemo
 nemo-fileroller
+npm
 octave
 openssh-server
 ppa-purge
@@ -101,6 +103,7 @@ smplayer
 smtube
 subversion
 synaptic
+sysv-rc-conf
 traceroute
 ubuntu-restricted-extras
 unace
@@ -112,6 +115,11 @@ vlc
 wammu
 zenity
 zip
+
+additional install
+------------------
+sudo npm install -g grunt-cli
+
 
 GEdit settings for editing password protected files
 ===================================================
