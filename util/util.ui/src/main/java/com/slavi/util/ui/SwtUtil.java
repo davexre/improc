@@ -230,16 +230,7 @@ public class SwtUtil {
 			return;
 		}
 		shell.pack();
-		shell.open();
-		SwtUtil.centerShell(shell);
-		Display display = shell.getDisplay();
-		if (display == null)
-			display = Display.getDefault();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		shell.dispose();
+		openModal(shell, true);
 	}
 		
 	/**
@@ -432,20 +423,28 @@ public class SwtUtil {
 			}
 		});
 		shell.pack();
-		centerShell(shell);
-		shell.open();
-
-		Display display = shell.getDisplay();
-		while(!shell.isDisposed()){
-			if(!display.readAndDispatch())
-				display.sleep();
-		}
-		shell.dispose();
+		openModal(shell, true);
 		return result.get();
 	}
 	
 	private static WaitDialog waitDialog;
 	private static final Object waitDialogSynch = new Object();
+	
+	public static void openModal(Shell shell, boolean centerShell) {
+		if (shell == null)
+			return;
+		if (centerShell)
+			centerShell(shell);
+		shell.open();
+		Display display = shell.getDisplay();
+		while(!shell.isDisposed()){
+			if (Thread.currentThread().isInterrupted()) {
+				shell.dispose();
+			} else if(!display.readAndDispatch()) {
+				display.sleep();
+			}
+		}
+	}
 	
 	public static void activeWaitDialogAbortTask() {
 		synchronized (waitDialogSynch) {

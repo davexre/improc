@@ -28,11 +28,26 @@ public class PDImageMapBuffer implements DWindowedImage {
 	 * range [0..1].
 	 */
 	public PDImageMapBuffer(BufferedImage image) {
-		sizeX = image.getWidth(); 
-		sizeY = image.getHeight();
-		extent = new Rectangle(sizeX, sizeY);
-		pixels = new double[sizeX][sizeY];
-
+		sizeX = -1; 
+		sizeY = -1;
+		load(image);
+	}
+	
+	public void resize(int sizeX, int sizeY) {
+		if (sizeX < 0 || sizeY < 0)
+			throw new IllegalArgumentException();
+		
+		if (sizeX != this.sizeX && sizeY != this.sizeY) {
+			this.sizeX = sizeX;
+			this.sizeY = sizeY;
+			extent = new Rectangle(sizeX, sizeY);
+			pixels = new double[sizeX][sizeY];
+		}
+	}
+	
+	public void load(BufferedImage image) {
+		resize(image.getWidth(), image.getHeight());
+		
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
 				int c = image.getRGB(i, j);

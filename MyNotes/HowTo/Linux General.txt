@@ -48,6 +48,7 @@ binutils-avr
 build-essential
 calibre
 classicmenu-indicator
+cmake
 cvs
 dconf-tools
 debhelper

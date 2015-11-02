@@ -10,7 +10,7 @@ Setting-up a workspace:
 	* JavaScript Development Tools
 	* C/C++ Development Tools
 	* Linux Tools
-	* ShellEd (Update site http://sourceforge.net/projects/shelled/files/shelled/update/)
+	* ?? ShellEd (Update site http://sourceforge.net/projects/shelled/files/shelled/update/)
 	* Mongrel (Tomcat plugin)
 	* Web,XML,Java EE and OSGi Enterprise Development/
 		* Eclipse Java EE Developer Tools
@@ -18,14 +18,14 @@ Setting-up a workspace:
 		* Eclipse Web Developer Tools
 		* Eclipse XML Editors and Tools
 		* Eclipse XSL Developer Tools
-		* Rich Ajax Platform (RAP) Tools
+		* ?? Rich Ajax Platform (RAP) Tools
 		* Web Page Editor
 	Install from "Eclipse Market Place"
 	* AVR Eclipse Plugin
 	* Quick Bookmarks Plugin
-	* Subversive (SVN version control)
+	* ?? Subversive (SVN version control)
 	* Eclipse plugin for LESS
-	* Toad Extension for Eclipse
+	* ?? Toad Extension for Eclipse
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
 	Settings
