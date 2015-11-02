@@ -23,6 +23,7 @@ Setting-up a workspace:
 	Install from "Eclipse Market Place"
 	* AVR Eclipse Plugin
 	* Quick Bookmarks Plugin
+	* Optimizer for Eclipse
 	* ?? Subversive (SVN version control)
 	* Eclipse plugin for LESS
 	* ?? Toad Extension for Eclipse
