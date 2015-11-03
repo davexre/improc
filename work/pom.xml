@@ -10,6 +10,26 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>procamtracker</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>procamcalib</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacpp</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacv</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.sarxos</groupId>
 			<artifactId>webcam-capture</artifactId>
 			<version>0.3.10</version>

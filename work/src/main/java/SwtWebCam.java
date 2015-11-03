@@ -46,12 +46,12 @@ public class SwtWebCam {
 	long countWebcamPaints;
 	
 	void processImage(BufferedImage image) {
-		DWindowedImage img = new PDImageMapBuffer(image);
+/*		DWindowedImage img = new PDImageMapBuffer(image);
 		DWindowedImage magnitude = new PDImageMapBuffer(img.getExtent());
 		PComputeMagnitude.computeMagnitude(img, magnitude);
 		//PComputeDirection.computeDirection(img, magnitude);
 		BufferedImage process = DWindowedImageUtils.toImage(magnitude);
-		image.getGraphics().drawImage(process, 0, 0, null);
+		image.getGraphics().drawImage(process, 0, 0, null);*/
 	}
 	
 	void doIt() throws Exception {
