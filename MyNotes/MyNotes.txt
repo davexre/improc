@@ -7,6 +7,19 @@ Tomcat
 ======
 
 
+SSH with VNC
+============
+ssh username@machine -p port -L 5900:localhost:5900
+start "Remina Remote Desktop Client" or remmina
+create a new connection:
+Protocol: VNC - Virtual Network Computing
+Basic/Server: localhost:5900
+
+// enable remote access
+gconftool-2 --set --type=bool /desktop/gnome/remote_access/enabled true
+// start vino-server
+/usr/lib/vino/vino-server
+
 
 
 =====================

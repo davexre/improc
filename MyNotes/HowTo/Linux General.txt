@@ -96,6 +96,7 @@ ppa-purge
 p7zip
 avucontrol
 pinentry-curses
+python-pip
 rar
 seahorse
 screen
