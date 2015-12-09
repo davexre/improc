@@ -1,0 +1,13 @@
+Setup USB WiFi Ralink Technology, Corp. MT7601U Wireless Adapter on Ubuntu
+==========================================================================
+
+http://askubuntu.com/questions/457061/ralink-148f7601-wifi-adapter-installation
+
+>> lsusb
+Bus 001 Device 010: ID 148f:7601 Ralink Technology, Corp. MT7601U Wireless Adapter
+
+sudo apt-add-repository ppa:thopiekar/mt7601
+sudo apt-get update
+sudo apt-get install mt7601-sta-dkms
+sudo modprobe mt7601-sta
+iwconfig

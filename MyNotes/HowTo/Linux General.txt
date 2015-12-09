@@ -82,11 +82,13 @@ htop
 inkscape
 kde-baseapps-bin
 kdenlive
+lame
 librecad
 libreoffice
 mc
 meld
 melt
+mplayer2
 nemo
 nemo-fileroller
 npm
