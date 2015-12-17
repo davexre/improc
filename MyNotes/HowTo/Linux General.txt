@@ -96,7 +96,7 @@ octave
 openssh-server
 ppa-purge
 p7zip
-avucontrol
+pavucontrol
 pinentry-curses
 rar
 seahorse
@@ -106,6 +106,7 @@ smplayer
 smtube
 subversion
 synaptic
+synfigstudio
 sysv-rc-conf
 traceroute
 ubuntu-restricted-extras
@@ -180,7 +181,6 @@ xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
 gsettings set org.gnome.desktop.background show-desktop-icons true
 gsettings set org.nemo.desktop show-desktop-icons true
 
-
 Gnome desktop tweaks
 ====================
 gsettings set org.gnome.desktop.background show-desktop-icons true
@@ -188,6 +188,8 @@ gsettings set org.gnome.nautilus.desktop home-icon-visible true
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
 // shows mounted volumes
 gsettings set org.gnome.nautilus.desktop volumes-visible true
+// Move Gnome window controls/buttons on the right
+gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
 
 FIX: Under GNOME Flashback Ubuntu's notify-send will not show popup messages
 ============================================================================
