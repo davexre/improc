@@ -1,4 +1,5 @@
 /*
+ * Reference: https://en.wikipedia.org/wiki/Statistical_region_merging
  * Source: http://www.lix.polytechnique.fr/~nielsen/Srmjava.java
  */
 

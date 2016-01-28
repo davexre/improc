@@ -45,6 +45,7 @@ public class SwtWebCam {
 	long countPaints;
 	long countWebcamPaints;
 	
+	
 	void processImage(BufferedImage image) {
 /*		DWindowedImage img = new PDImageMapBuffer(image);
 		DWindowedImage magnitude = new PDImageMapBuffer(img.getExtent());
@@ -96,6 +97,8 @@ public class SwtWebCam {
 		countWebcamPaints = 0;
 		
 		canvas.addPaintListener(new PaintListener() {
+			ImageData imageData = null;
+
 			public void paintControl(PaintEvent e) {
 				Rectangle r = e.gc.getClipping();
 				e.gc.setBackground(new Color(e.gc.getDevice(), 0, 0, 0));
@@ -105,14 +108,7 @@ public class SwtWebCam {
 					if (image == null)
 						return;
 					processImage(image);
-					Raster raster = image.getRaster();
-					for (int x = 0; x < image.getWidth(); x++) {
-						for (int y = 0; y < image.getHeight(); y++) {
-							raster.getPixel(x, y, pixel);
-							int pixelValue = (pixel[0] << 16) | (pixel[1] << 8) | (pixel[2]);
-							imageData.setPixel(x, y, pixelValue & 0xffffff);
-						}
-					}
+					imageData = SwtUtil.copyAwtImage(image, imageData);
 					countPaints++;
 					if (lastPaintMillis == 0) {
 						lastPaintMillis = System.currentTimeMillis();
@@ -123,10 +119,10 @@ public class SwtWebCam {
 								MathUtil.d2(webcam.getFPS());
 					}
 				}
-				Image img = new Image(e.gc.getDevice(), imageData);
-				e.gc.drawImage(img, 0, 0);
+				Image swtImage = new Image(e.gc.getDevice(), imageData);
+				e.gc.drawImage(swtImage, 0, 0);
 				e.gc.drawText(fps, 10, 100);
-				img.dispose();
+				swtImage.dispose();
 			}
 		});
 		shell.setLayout(new FillLayout());
