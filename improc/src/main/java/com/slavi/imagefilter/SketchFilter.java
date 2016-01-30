@@ -18,10 +18,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 
+import com.slavi.image.DWindowedImageUtils;
+import com.slavi.image.PDImageMapBuffer;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.util.Const;
 
 public class SketchFilter implements BufferedImageFilter {
-//	DImageMap theImage;
+	PDImageMapBuffer theImage;
 	
 	int threshold1 = 50;
 	
@@ -52,33 +55,33 @@ public class SketchFilter implements BufferedImageFilter {
 	}
 
 	public void setImage(BufferedImage image) {
-//		if (image == null)
-//			theImage = null;
-//		else
-//			theImage = new DImageMap(image);
-//		Statistics stat = theImage.calcStatistics();
-//		System.out.println(stat);
+		if (image == null)
+			theImage = null;
+		else
+			theImage = new PDImageMapBuffer(image);
+		Statistics stat = DWindowedImageUtils.calcStatistics(theImage);
+		System.out.println(stat);
 	}
 	
-//	private static final double borderColorValue = 0;
+	private static final double borderColorValue = 0;
 	
 	public BufferedImage getFilteredImage() {
-//		if (theImage == null)
+		if (theImage == null)
 			return null;
-/*	
-		DImageMap dest = new DImageMap(theImage.getSizeX(), theImage.getSizeY());
+	
+		PDImageMapBuffer dest = new PDImageMapBuffer(theImage.getExtent());
 		
-		for (int i = theImage.getSizeX() - 1; i >= 0; i--) {
-			dest.setPixel(i, 0, borderColorValue);
-			dest.setPixel(i, theImage.getSizeY() - 1, borderColorValue);
+		for (int i = theImage.maxX(); i >= theImage.minX(); i--) {
+			dest.setPixel(i, theImage.minY(), borderColorValue);
+			dest.setPixel(i, theImage.maxY(), borderColorValue);
 		}
-		for (int j = theImage.getSizeY() - 1; j >= 0; j--) {
-			dest.setPixel(0, j, borderColorValue);
-			dest.setPixel(theImage.getSizeX() - 1, j, borderColorValue);
+		for (int j = theImage.maxY(); j >= theImage.minY(); j--) {
+			dest.setPixel(theImage.minY(), j, borderColorValue);
+			dest.setPixel(theImage.maxX(), j, borderColorValue);
 		}
 		
-		for (int i = theImage.getSizeX() - 2; i > 0; i--)
-			for (int j = theImage.getSizeY() - 2; j > 0; j--) {
+		for (int i = theImage.maxX() - 1; i > theImage.minX(); i--)
+			for (int j = theImage.maxY() - 1; j > theImage.minY(); j--) {
 				double curColor = theImage.getPixel(i, j);
 				double d = 0;
 
@@ -95,9 +98,9 @@ public class SketchFilter implements BufferedImageFilter {
 				
 				dest.setPixel(i, j, 1-d);
 			}
-*/				
-/*		for (int i = theImage.getSizeX() - 2; i > 0; i--)
-			for (int j = theImage.getSizeY() - 2; j > 0; j--) {
+/*
+		for (int i = theImage.maxX() - 1; i > theImage.minX(); i--)
+			for (int j = theImage.maxY() - 1; j > theImage.minY(); j--) {
 				
 				d *= 255;
 				
@@ -109,8 +112,8 @@ public class SketchFilter implements BufferedImageFilter {
 			}
 */
 		
-//		BufferedImage r = dest.toImage();
-//		return r;
+		BufferedImage r = DWindowedImageUtils.toImage(dest);
+		return r;
 /*		int w = theImage.getSizeX();
 		int h = theImage.getSizeY();
 		BufferedImage r = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

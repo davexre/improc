@@ -1,8 +1,5 @@
 package com.slavi.imagefilter;
 
-import java.awt.Canvas;
-import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +7,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.awt.SWT_AWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -30,7 +26,7 @@ public class ImageFilter {
 	Display display;
 	Shell shell;
 	
-	Canvas imageCanvas;
+	//Canvas imageCanvas;
 	Label lblCurFile;
 	
 	int outputImageSizeX;
@@ -41,6 +37,8 @@ public class ImageFilter {
 
 	BufferedImageFilter imageFilter;
 
+	SwtDisplayImage displayImage;
+	
 	public ImageFilter(BufferedImageFilter imageFilter) {
 		this.imageFilter = imageFilter;
 	}
@@ -56,8 +54,8 @@ public class ImageFilter {
 			outputImageSizeX = outputImage.getWidth();
 			outputImageSizeY = outputImage.getHeight();
 		}
-		if (imageCanvas != null)
-			imageCanvas.repaint();
+		displayImage.setBufferedImage(outputImage);
+		displayImage.setZoom(0);
 	}
 
 	public void setSourceImage(BufferedImage image) {
@@ -139,31 +137,8 @@ public class ImageFilter {
 		imageGroup.setLayoutData(gridData);
 		imageGroup.setLayout(new FillLayout());
 		imageGroup.setText("Image");
-		composite = new Composite(imageGroup, SWT.EMBEDDED);
-		composite.setLayout(new FillLayout());
-		final Frame imageFrame = SWT_AWT.new_Frame(composite);
-		imageCanvas = new Canvas() {
-			private static final long serialVersionUID = 1L;
-			public void paint (Graphics g) {
-				int cx = imageCanvas.getWidth() - 1;
-				int cy = imageCanvas.getHeight() - 1;
-				g.clearRect(0, 0, cx, cy);
-				if ((outputImageSizeX == 0) || (outputImageSizeX == 0)) 
-					return;
-				int sx = cx;
-				int sy = outputImageSizeY * sx / outputImageSizeX;
-				if (sy > cy) {
-					sy = cy;
-					sx = outputImageSizeX * sy / outputImageSizeY;
-				}
-				g.drawImage(outputImage,
-						(cx - sx) / 2, (cy - sy) / 2, (cx + sx) / 2, (cy + sy) / 2,
-						0, 0, outputImageSizeX, outputImageSizeY,
-						imageFrame);
-			}
-		};
-		imageFrame.add(imageCanvas);
-				
+		displayImage = new SwtDisplayImage(imageGroup, 0);
+		
 		// Create the "Filter parameters" group
 		Group filterGroup = new Group(shell, SWT.NONE);
 		gridData = new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
