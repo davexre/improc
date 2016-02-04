@@ -94,7 +94,7 @@ public class WaitDialog {
 		});
 
 		shell.pack();
-		shell.setSize(300, 100);
+		// shell.setSize(300, 100); // This is no longer necessary and was commented out because caused poorly sized boxes. 
 		SwtUtil.centerShell(shell);
 		shell.open();
 		

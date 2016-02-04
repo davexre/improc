@@ -212,7 +212,7 @@ public class TaskSetExecutor {
 			abort();
 		synchronized (tasks) {
 			if (aborted)
-				throw new CancellationException();
+				throw new InterruptedException();
 			if (!addingFinished) {
 				abort();
 				throw new CancellationException("Can not get result prior calling addFinished.");
