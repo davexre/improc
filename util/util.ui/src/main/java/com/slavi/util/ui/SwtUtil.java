@@ -504,7 +504,6 @@ public class SwtUtil {
 			(dest.width != src.getWidth() || (dest.height != src.getHeight())) ||
 			(dest.palette.redMask != 0xff0000) || (dest.palette.greenMask != 0xff00) || (dest.palette.blueMask != 0xff) ||
 			(!dest.palette.isDirect)) {
-			System.out.println("created new imagedata.");
 			dest = new ImageData(src.getWidth(), src.getHeight(), 24, new PaletteData(0xff0000, 0xff00, 0xff));
 		}
 		for (int x = dest.width - 1; x >= 0; x--)
