@@ -2,6 +2,7 @@ package com.test;
 
 import java.io.Serializable;
 import java.net.URLEncoder;
+import java.util.Locale;
 
 public class Dummy implements Serializable {
 
@@ -11,7 +12,8 @@ public class Dummy implements Serializable {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Dummy().doIt();
+//		new Dummy().doIt();
+		System.out.println(System.getProperty( "os.arch" ).toLowerCase( Locale.US ));
 		System.out.println("Done.");
 	}
 }
