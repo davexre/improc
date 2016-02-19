@@ -1,0 +1,8 @@
+Read more:
+==========
+http://www.openimaj.org/apidocs/index.html
+
+org.openimaj.image.analysis.algorithm
+org.openimaj.image.feature.global
+
+

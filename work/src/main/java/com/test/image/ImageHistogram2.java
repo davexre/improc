@@ -27,6 +27,7 @@ import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
+import org.swtchart.ISeriesSet;
 
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
@@ -48,15 +49,19 @@ public class ImageHistogram2 {
 	Composite imageRect;
 	String fdir = ".";
 		
+	private void addChartData(Chart chart, String dataName, int color) {
+		ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, dataName);
+//		lineSeries.setYSeries(data);
+		lineSeries.setLineColor(Display.getDefault().getSystemColor(color));
+		lineSeries.enableArea(false);
+		lineSeries.setSymbolType(PlotSymbolType.NONE);
+//		chart.getAxisSet().adjustRange();
+	}
+	
 	private Chart makeChart(Composite parent, String dataName, int color) {
         Chart chart = new Chart(parent, SWT.NONE);
         chart.getTitle().setText(dataName);
-        ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, dataName);
-//        lineSeries.setYSeries(data);
-        lineSeries.setLineColor(Display.getDefault().getSystemColor(color));
-        lineSeries.enableArea(true);
-        lineSeries.setSymbolType(PlotSymbolType.NONE);
-//        chart.getAxisSet().adjustRange();
+        addChartData(chart, dataName, color);
         chart.getLegend().setVisible(false);
         for (IAxis axis : chart.getAxisSet().getAxes()) {
         	axis.getTitle().setVisible(false);
@@ -143,17 +148,21 @@ public class ImageHistogram2 {
 		System.out.println("V[255] = " + v[255]);
 		System.out.println("Pixels = " + bi.getWidth() * bi.getHeight());
 		
-		setChartData(chartR, r);
-		setChartData(chartG, g);
-		setChartData(chartB, b);
-		setChartData(chartL, l);
-		setChartData(chartV, v);
-		setChartData(chartS, s);
+		setChartData(chartR, 0, r);
+		setChartData(chartR, 1, g);
+		setChartData(chartR, 2, b);
+
+		
+		setChartData(chartG, 0, g);
+		setChartData(chartB, 0, b);
+		setChartData(chartL, 0, l);
+		setChartData(chartV, 0, v);
+		setChartData(chartS, 0, s);
 		imageRect.redraw();
 	}
 	
-	private void setChartData(Chart chart, double data[]) {
-		chart.getSeriesSet().getSeries()[0].setYSeries(data);
+	private void setChartData(Chart chart, int seriesIndex, double data[]) {
+		chart.getSeriesSet().getSeries()[seriesIndex].setYSeries(data);
 		chart.getAxisSet().adjustRange();
 		chart.redraw();
 	}
@@ -225,6 +234,10 @@ public class ImageHistogram2 {
         parent.setLayout(new FillLayout(SWT.VERTICAL));
         
         chartR = makeChart(parent, "Red", SWT.COLOR_RED);
+        addChartData(chartR, "Green", SWT.COLOR_GREEN);
+        addChartData(chartR, "Blue", SWT.COLOR_BLUE);
+        
+        
         chartG = makeChart(parent, "Green", SWT.COLOR_GREEN);
         chartB = makeChart(parent, "Blue", SWT.COLOR_BLUE);
 
