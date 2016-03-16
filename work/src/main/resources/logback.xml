@@ -33,7 +33,7 @@
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />
 	<logger level="error" name="org.apache.commons.digester" />
 	<logger level="error" name="org.apache.commons.beanutils" />
-	<logger level="error" name="org.eclipse.persistence" />
+	<logger level="debug" name="org.eclipse.persistence" />
 	<logger level="info"  name="org.springframework" />
 	<logger level="error" name="Derby" />
 
