@@ -1,0 +1,34 @@
+Install
+=======
+sudo apt-get install nodejs npm
+
+Make npm global registry user-based and available to current OS user
+====================================================================
+mkdir -p $HOME/bin/npm
+vi $HOME/.profile
+------------- add to $HOME/.profile -------------
+export $NPM_HOME=$HOME/bin/npm
+PATH=$NPM_HOME/bin:$PATH
+-------------------------------------------------
+
+Install npm packages (global)
+=============================
+npm install -g npm grunt-cli jshint
+npm adduser
+npm login
+npm logout
+
+Create a new project
+====================
+npm init -y
+npm install <package_name>[@<version>] --save --save-dev
+npm outdated [-g]
+npm update [-g]
+npm version <patch | minor | major>
+npm publish
+npm dedupe
+
+Cache & settings
+================
+Cache folder -> ~/.npm
+Settings     -> ~/.npmrc

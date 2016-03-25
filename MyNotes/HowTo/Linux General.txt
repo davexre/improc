@@ -121,10 +121,6 @@ wammu
 zenity
 zip
 
-additional install
-------------------
-sudo npm install -g grunt-cli
-
 
 GEdit settings for editing password protected files
 ===================================================
