@@ -26,6 +26,7 @@ Setting-up a workspace:
 	* Optimizer for Eclipse
 	* ?? Subversive (SVN version control)
 	* Eclipse plugin for LESS
+	* Tern Eclipse IDE (JavaScript analyzer)
 	* ?? Toad Extension for Eclipse
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
