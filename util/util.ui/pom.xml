@@ -10,40 +10,12 @@
 	</parent>
 	<artifactId>util.ui</artifactId>
 
-	<properties>
-		<swt.version>4.5.1</swt.version>
-	</properties>
-
-	<repositories>
-		<repository>
-			<id>maven-eclipse-repo</id>
-			<url>http://maven-eclipse.github.io/maven</url>
-		</repository>
-	</repositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.util</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
-		
-<!-- 		<dependency>
-			<groupId>org.eclipse</groupId>
-			<artifactId>swt</artifactId>
-			<version>3.3.0-v3346</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.swt.gtk.linux</groupId>
-			<artifactId>x86</artifactId>
-			<version>3.3.0-v3346</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.swt.win32.win32</groupId>
-			<artifactId>x86</artifactId>
-			<version>3.3.0-v3346</version>
-		</dependency>
- -->
 	</dependencies>
 	
 	<profiles>
@@ -59,7 +31,6 @@
 				<dependency>
 					<groupId>org.eclipse.swt</groupId>
 					<artifactId>org.eclipse.swt.gtk.linux.x86</artifactId>
-					<version>${swt.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -75,7 +46,6 @@
 				<dependency>
 					<groupId>org.eclipse.swt</groupId>
 					<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
-					<version>${swt.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>

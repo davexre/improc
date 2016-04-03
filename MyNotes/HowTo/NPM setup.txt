@@ -7,13 +7,15 @@ Make npm global registry user-based and available to current OS user
 mkdir -p $HOME/bin/npm
 vi $HOME/.profile
 ------------- add to $HOME/.profile -------------
-export $NPM_HOME=$HOME/bin/npm
+export NPM_HOME=$HOME/bin/npm
 PATH=$NPM_HOME/bin:$PATH
 -------------------------------------------------
+npm config set prefix $NPM_HOME
+npm config set scope @slavianp
 
 Install npm packages (global)
 =============================
-npm install -g npm grunt-cli jshint
+npm install -g npm grunt grunt-cli jshint
 npm adduser
 npm login
 npm logout

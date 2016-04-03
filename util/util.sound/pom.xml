@@ -15,33 +15,27 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>soundlibs</artifactId>
-			<version>1.2</version>
 		</dependency>
 -->
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>vorbisspi</artifactId>
-			<version>1.0.3-1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>jorbis</artifactId>
-			<version>0.0.17-2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>tritonus-share</artifactId>
-			<version>0.3.7-2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>mp3spi</artifactId>
-			<version>1.9.5-1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>jlayer</artifactId>
-			<version>1.0.1-1</version>
 		</dependency>
 	</dependencies>
 </project>

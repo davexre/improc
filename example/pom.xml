@@ -7,7 +7,6 @@
 		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-
 	<artifactId>example</artifactId>
 	<packaging>pom</packaging>
 

@@ -3,3 +3,5 @@ Release
 output/
 output_1.0.6/
 output_1.0.6-1/
+!.project
+!.cproject

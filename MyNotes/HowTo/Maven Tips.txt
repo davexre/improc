@@ -4,7 +4,75 @@ http://mojo.codehaus.org/versions-maven-plugin/display-dependency-updates-mojo.h
 mvn versions:display-dependency-updates
 =========
 Find duplicated classes in project dependacies
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.ning.maven.plugins</groupId>
+				<artifactId>maven-duplicate-finder-plugin</artifactId>
+				<version>1.0.9</version>
+				<configuration>
+					<!-- <printEqualFiles>true</printEqualFiles> -->
+				</configuration>
+				<executions>
+					<execution>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+=========
+Find duplicated classes in project dependacies
 http://mojo.codehaus.org/extra-enforcer-rules/banDuplicateClasses.html
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.0</version>
+					<configuration>
+						<rules>
+							<banCircularDependencies/>
+							<banDuplicateClasses>
+								<!--
+								<ignoreClasses>
+									<ignoreClass>com.xyz.i18n.Messages</ignoreClass>
+									<ignoreClass>org.apache.commons.logging.*</ignoreClass>
+								</ignoreClasses>
+								-->
+								<findAllDuplicates>true</findAllDuplicates>
+							</banDuplicateClasses>
+	
+							<enforceBytecodeVersion>
+								<maxJdkVersion>${maven.compiler.source}</maxJdkVersion>
+							</enforceBytecodeVersion>
+						</rules>
+						<fail>false</fail>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>verify</phase>
+							<goals>
+								<goal>enforce</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.codehaus.mojo</groupId>
+							<artifactId>extra-enforcer-rules</artifactId>
+							<version>1.0-beta-3</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 mvn enforcer:enforce
 =========
 Convert maven project to Eclipse Web Dynamic Project

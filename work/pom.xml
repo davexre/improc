@@ -10,9 +10,6 @@
 
 	<properties>
 		<platform.dependencies>true</platform.dependencies>
-		<openimaj.version>1.4-SNAPSHOT</openimaj.version>
-		<spring-framework.version>4.1.1.RELEASE</spring-framework.version>
-		<spring-data-jpa.version>1.6.2.RELEASE</spring-data-jpa.version>
 	</properties>
 
 	<dependencies>
@@ -20,17 +17,10 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<version>${spring-data-jpa.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -51,43 +41,33 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
-			<version>${spring-data-jpa.version}</version>
 		</dependency>
 
 		<!-- JPA -->
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>javax.persistence</artifactId>
-			<version>2.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>eclipselink</artifactId>
-			<version>2.6.0-M3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>image-local-features</artifactId>
-			<version>${openimaj.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>camera-calibration</artifactId>
-			<version>${openimaj.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>faces</artifactId>
-			<version>${openimaj.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>core-video-capture</artifactId>
-			<version>${openimaj.version}</version>
 		</dependency>
 	
 		<dependency>
@@ -177,7 +157,6 @@
 			<version>7.5-1.1</version>
 		</dependency>
 	
-
 		<dependency>
 			<groupId>org.bytedeco</groupId>
 			<artifactId>procamtracker</artifactId>
@@ -198,6 +177,7 @@
 			<artifactId>javacv</artifactId>
 			<version>1.1</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.github.sarxos</groupId>
 			<artifactId>webcam-capture</artifactId>
@@ -207,7 +187,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
-			<version>3.4.1</version>
 		</dependency>
 
 		<dependency>
@@ -218,112 +197,84 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.5.0</version>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-xc</artifactId>
 			<version>1.9.13</version>
 		</dependency>
-
+ -->
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
-			<version>2.11.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<version>10.11.1.1</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>commons-dbutils</groupId>
 			<artifactId>commons-dbutils</artifactId>
-			<version>1.6</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.apache.ddlutils</groupId>
 			<artifactId>ddlutils</artifactId>
-			<version>1.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
-			<version>1.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.34</version>
 		</dependency>
 		<dependency>
 			<groupId>jaxen</groupId>
 			<artifactId>jaxen</artifactId>
-			<version>1.1.4</version>
 		</dependency>
 	
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>improc</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.sound</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.math</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.io</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.util</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.ui</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>reprap</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
 		</dependency>
 	</dependencies>
-	
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
-				<version>${spring-framework.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>

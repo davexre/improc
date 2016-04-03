@@ -18,4 +18,34 @@
 		<module>util.io</module>
 		<module>util.ui</module>
 	</modules>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.math</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.util</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.sound</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.io</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.ui</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
