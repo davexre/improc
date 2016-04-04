@@ -5,7 +5,7 @@
 
 	<groupId>com.slavi</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>${com.slavi.version}</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -15,6 +15,7 @@
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
 		<platform.dependencies>true</platform.dependencies>
 
+		<com.slavi.version>1.0.0-SNAPSHOT</com.slavi.version>
 		<slf4j.version>1.7.10</slf4j.version>
 		<java3d.version>1.5.2</java3d.version>
 		<swt.version>4.5.1</swt.version>
@@ -81,67 +82,67 @@
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.math</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.util</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.sound</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.io</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.ui</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>improc</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>reprap</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>zaSasho</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>work</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.logging</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.misc</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.resources</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.webapp</artifactId>
-				<version>${project.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 
 			<!-- Testing -->
@@ -478,6 +479,25 @@
 	</dependencyManagement>
 
 	<build>
+		<defaultGoal>compile</defaultGoal>
+		
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+
+			<resource>
+				<filtering>false</filtering>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
