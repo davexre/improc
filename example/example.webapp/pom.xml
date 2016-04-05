@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.slavi</groupId>
 		<artifactId>example</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>${com.slavi.version}</version>
 	</parent>
 	<artifactId>example.webapp</artifactId>
 	<packaging>war</packaging>
@@ -16,7 +16,6 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
