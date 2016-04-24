@@ -1,9 +1,13 @@
 =========
 Check for artifact updates (newer versions of a library)
+http://www.mojohaus.org/versions-maven-plugin/
 http://mojo.codehaus.org/versions-maven-plugin/display-dependency-updates-mojo.html
 mvn versions:display-dependency-updates
+mvn versions:display-plugin-updates
 =========
-Find duplicated classes in project dependacies
+Find duplicated classes in project dependacies:
+mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:check
+
 	<build>
 		<plugins>
 			<plugin>
