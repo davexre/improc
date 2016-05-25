@@ -183,6 +183,23 @@ Gnome desktop tweaks
 gsettings set org.gnome.desktop.background show-desktop-icons true
 gsettings set org.gnome.nautilus.desktop home-icon-visible true
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
+// do not show preview icons on files and folders
+gsettings set org.gnome.nautilus.preferences show-image-thumbnails "'never'"
+gsettings set org.gnome.nautilus.preferences show-directory-item-counts "'never'"
+gsettings set org.gnome.nautilus.preferences default-folder-view "'list-view'"
+gsettings set org.gnome.nautilus.preferences sort-directories-first true
+gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+
+gsettings set org.nemo.preferences show-image-thumbnails "'never'"
+gsettings set org.nemo.preferences show-directory-item-counts "'never'"
+gsettings set org.nemo.preferences show-icon-text "'never'"
+gsettings set org.nemo.preferences show-full-path-titles true
+gsettings set org.nemo.preferences show-location-entry true
+gsettings set org.nemo.preferences show-new-folder-icon-toolbar true
+gsettings set org.nemo.preferences default-folder-view "'list-view'"
+
+gsettings org.gnome.desktop.thumbnailers disable-all true
+
 // shows mounted volumes
 gsettings set org.gnome.nautilus.desktop volumes-visible true
 // Move Gnome window controls/buttons on the right
