@@ -1,8 +1,8 @@
 Install Gnome in Ubuntu
 =======================
+Gnome 2
 sudo apt-get install gnome-session-flashback
 sudo apt-get install compizconfig-settings-manager
-
 LXDM (Lubuntu)
 sudo apt-get install lxde lubuntu-core lubuntu-icon-theme lubuntu-restricted-extras
 XFCE (Xubuntu)
@@ -36,91 +36,92 @@ XnView Multi Platform
 
 apt-packages
 ------------
-alien
-amule
-apt-file
-aptitude
-atop
-audacious
-avr-libc
-avrdude
-binutils-avr
-build-essential
-calibre
-classicmenu-indicator
-cmake
-cvs
-dconf-tools
-debhelper
-dhex
-doublecmd-common
-doublecmd-gtk
-dpkg-dev
-ffmpeg
-filezilla
-freecad
-gbgoffice
-gdb-avr 
-gcc-avr
-gconf-editor
-geeqie
-geany
-geany-plugin-pg
-geany-plugin-shiftcolumn
-gedit-plugins
-ghex
-gimp
-git
-gmobilemedia
-gnome-color-chooser
-gnupg-agent
-gparted
-handbrake
-httrack
-hugin
-htop
-inkscape
-kde-baseapps-bin
-kdenlive
-lame
-librecad
-libreoffice
-mc
-meld
-melt
-mplayer2
-nemo
-nemo-fileroller
-npm
-octave
-openssh-server
-ppa-purge
-p7zip
-pavucontrol
-pinentry-curses
-python-pip
-rar
-seahorse
-screen
-soundconverter
-smplayer
-smtube
-subversion
-synaptic
-synfigstudio
-sysv-rc-conf
-traceroute
-ubuntu-restricted-extras
-unace
-unison-gtk
-unrar
-unzip
-virtualbox-qt
-vlc
-wammu
-zenity
+sudo apt-get install \
+alien                       \
+amule                       \
+apt-file                    \
+aptitude                    \
+atop                        \
+audacious                   \
+avr-libc                    \
+avrdude                     \
+binutils-avr                \
+build-essential             \
+calibre                     \
+classicmenu-indicator       \
+cmake                       \
+cvs                         \
+dconf-tools                 \
+debhelper                   \
+dhex                        \
+doublecmd-common            \
+doublecmd-gtk               \
+dpkg-dev                    \
+ffmpeg                      \
+filezilla                   \
+freecad                     \
+gbgoffice                   \
+gdb-avr                     \
+gcc-avr                     \
+gconf-editor                \
+geeqie                      \
+geany                       \
+geany-plugin-pg             \
+geany-plugin-shiftcolumn    \
+gedit-plugins               \
+ghex                        \
+gimp                        \
+git                         \
+gmobilemedia                \
+gnome-color-chooser         \
+gnupg-agent                 \
+gparted                     \
+handbrake                   \
+httrack                     \
+hugin                       \
+htop                        \
+inkscape                    \
+kde-baseapps-bin            \
+kdenlive                    \
+lame                        \
+librecad                    \
+libreoffice                 \
+mc                          \
+meld                        \
+melt                        \
+mplayer2                    \
+nemo                        \
+nemo-fileroller             \
+npm                         \
+octave                      \
+openssh-server              \
+ppa-purge                   \
+p7zip                       \
+pavucontrol                 \
+pinentry-curses             \
+python-pip                  \
+rar                         \
+seahorse                    \
+screen                      \
+soundconverter              \
+smplayer                    \
+smtube                      \
+subversion                  \
+synaptic                    \
+synfigstudio                \
+sysv-rc-conf                \
+traceroute                  \
+ubuntu-restricted-extras    \
+unace                       \
+unison-gtk                  \
+unrar                       \
+unzip                       \
+virtualbox-qt               \
+vlc                         \
+wammu                       \
+xbacklight                  \
+zenity                      \
 zip
-
 
 GEdit settings for editing password protected files
 ===================================================
@@ -183,6 +184,23 @@ Gnome desktop tweaks
 gsettings set org.gnome.desktop.background show-desktop-icons true
 gsettings set org.gnome.nautilus.desktop home-icon-visible true
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
+// do not show preview icons on files and folders
+gsettings set org.gnome.nautilus.preferences show-image-thumbnails "'never'"
+gsettings set org.gnome.nautilus.preferences show-directory-item-counts "'never'"
+gsettings set org.gnome.nautilus.preferences default-folder-view "'list-view'"
+gsettings set org.gnome.nautilus.preferences sort-directories-first true
+gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+
+gsettings set org.nemo.preferences show-image-thumbnails "'never'"
+gsettings set org.nemo.preferences show-directory-item-counts "'never'"
+gsettings set org.nemo.preferences show-icon-text "'never'"
+gsettings set org.nemo.preferences show-full-path-titles true
+gsettings set org.nemo.preferences show-location-entry true
+gsettings set org.nemo.preferences show-new-folder-icon-toolbar true
+gsettings set org.nemo.preferences default-folder-view "'list-view'"
+
+gsettings org.gnome.desktop.thumbnailers disable-all true
+
 // shows mounted volumes
 gsettings set org.gnome.nautilus.desktop volumes-visible true
 // Move Gnome window controls/buttons on the right
@@ -197,3 +215,12 @@ AutostartCondition=GNOME3 unless-session gnome
 with
 AutostartCondition=false
 2) reboot or sudo killall notification-daemon
+
+Change laptop screen backlight
+==============================
+sudo apt-get install xbacklight
+* increase 10%
+xbacklight -inc 10
+* decrease 10%
+xbacklight -dec 10
+
