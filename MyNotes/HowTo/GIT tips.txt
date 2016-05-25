@@ -1,0 +1,6 @@
+Reset/restore a subdirectory
+============================
+cd <git_repository_root>
+git checkout HEAD -- <sub_directory_to_hard_reset>
+
+
