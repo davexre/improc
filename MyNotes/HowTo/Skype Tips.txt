@@ -1,0 +1,24 @@
+Troubleshoot links
+==================
+http://superuser.com/questions/989815/skype-unable-to-receive-group-chat-messages
+
+Skype protocol special commands
+===============================
+https://en.wikipedia.org/wiki/Microsoft_Notification_Protocol
+
+Paste the command in any chat window.
+
+/showplaces - show where you are currently connected
+/dumpmsnp - show details about your connection
+/msnp24 - restart the protocol. also fixes some communication issues
+
+Configuration file
+==================
+~/.Skype/<your_skype_username>/config.xml
+
+Fixing a can not connect issues:
+1. Ensure you close any existing skype instance(check by ps aux and kill -9 skype_PID).
+2. Delete the HomeServer tag in config.xml. Either empty the tag or delete the line should works.
+3. Start the skype. It should works now.
+4. Check config.xml again, the tag should automatically updated with new hostname.
+5. If you test with this new hostname with traceroute, it should go to last line which are not ***.
