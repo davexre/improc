@@ -10,6 +10,7 @@ vi $HOME/.profile
 export NPM_HOME=$HOME/bin/npm
 PATH=$NPM_HOME/bin:$PATH
 -------------------------------------------------
+--- config settings are stored in ~/.npmrc
 npm config set prefix $NPM_HOME
 npm config set scope @slavianp
 
