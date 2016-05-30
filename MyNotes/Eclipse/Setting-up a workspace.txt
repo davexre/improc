@@ -11,7 +11,7 @@ Setting-up a workspace:
 	* C/C++ Development Tools
 	* Linux Tools
 	* ?? ShellEd (Update site http://sourceforge.net/projects/shelled/files/shelled/update/)
-	* Mongrel (Tomcat plugin)
+	* ?? Mongrel (Tomcat plugin)
 	* Web,XML,Java EE and OSGi Enterprise Development/
 		* Eclipse Java EE Developer Tools
 		* Eclipse Java Web Developer Tools
@@ -22,11 +22,12 @@ Setting-up a workspace:
 		* Web Page Editor
 	Install from "Eclipse Market Place"
 	* AVR Eclipse Plugin
+	* Eclipse JST Server Adapters (Apache Tomcat, JOnAS, J2EE)
 	* Quick Bookmarks Plugin
 	* Optimizer for Eclipse
-	* ?? Subversive (SVN version control)
 	* Eclipse plugin for LESS
 	* Tern Eclipse IDE (JavaScript analyzer)
+	* ?? Subversive (SVN version control)
 	* ?? Toad Extension for Eclipse
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
