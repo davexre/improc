@@ -246,6 +246,10 @@
 
 		<dependency>
 			<groupId>com.slavi</groupId>
+			<artifactId>util.log</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.slavi</groupId>
 			<artifactId>util.sound</artifactId>
 		</dependency>
 		<dependency>

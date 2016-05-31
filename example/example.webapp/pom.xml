@@ -14,6 +14,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>example.resources</artifactId>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>

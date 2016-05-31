@@ -12,6 +12,7 @@
 	<packaging>pom</packaging>
 	
 	<modules>
+		<module>util.log</module>
 		<module>util.math</module>
 		<module>util.util</module>
 		<module>util.sound</module>
