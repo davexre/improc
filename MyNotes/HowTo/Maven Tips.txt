@@ -4,6 +4,10 @@ http://www.mojohaus.org/versions-maven-plugin/
 http://mojo.codehaus.org/versions-maven-plugin/display-dependency-updates-mojo.html
 mvn versions:display-dependency-updates
 mvn versions:display-plugin-updates
+
+========= Remove the project dependencies from the local repository, and optionally re-resolve them =========
+mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
+
 =========
 Find duplicated classes in project dependacies:
 mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:check
