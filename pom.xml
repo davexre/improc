@@ -540,6 +540,12 @@
 				</plugin>
 
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.6</version>
+				</plugin>
+
+				<plugin>
 					<groupId>com.ning.maven.plugins</groupId>
 					<artifactId>maven-duplicate-finder-plugin</artifactId>
 					<version>1.0.9</version>
