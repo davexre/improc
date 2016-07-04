@@ -7,9 +7,12 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
+import javax.persistence.Query;
 import javax.persistence.SynchronizationType;
 import javax.sql.DataSource;
 
@@ -27,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
+import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.util.StringPrintStream;
 
 public class JpaCreate {
@@ -85,6 +89,23 @@ public class JpaCreate {
 		StringPrintStream out = new StringPrintStream();
 		mapper.writeValue(out, ed);
 		System.out.println(out.toString());
+		
+		System.out.println("---------------------");
+		em.getTransaction().begin();
+		for (int i = 0; i < 10; i++) {
+			MyEntity ent = new MyEntity();
+			ent.setData ("Data  for entity No " + i);
+			ent.setData1("Data1 for entity No " + i);
+			ent.setData2("Data2 for entity No " + i);
+			em.merge(ent);
+		}
+		Query q = em.createQuery("select new com.slavi.derbi.jpa.entity.MyEntity(e.id, e.data1) from MyEntity e where e.id = 1", MyEntity.class);
+		List<MyEntity> r = q.getResultList();
+		for (MyEntity i : r) {
+			System.out.println(i);
+		}
+		em.getTransaction().commit();
+		System.out.println("---------------------");
 		
 		em.close();
 	}
