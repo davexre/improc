@@ -1,7 +1,10 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
@@ -79,9 +82,10 @@ public class Dummy {
 	}
 
 	public static void main(String[] args) {
-        System.out.println("Os name: " + System.getProperty("os.name"));
-        System.out.println("Os arch: " + System.getProperty("os.arch"));
-        System.out.println("Os version: " + System.getProperty("os.version"));
+		String str = " asd   qwe  ,   zxcaaazzz bbb  ";
+		// for (String s : StringUtils.split(str, ", ")) // str.split("( *, *)"))
+		for (String s : str.split("((aaa)|,|(\\s))+", 0))
+			System.out.println(s);
 	}
 	public static void main2(String[] args) throws Exception {
 //		Thread.sleep(5000);

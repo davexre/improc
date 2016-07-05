@@ -9,10 +9,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 @Entity
 @Table(name = "my_entity")
 @Access(AccessType.FIELD)
-public class MyEntity {
+public class MyEntityPartial {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;
@@ -20,19 +23,6 @@ public class MyEntity {
 	@Column
 	String data;
 
-	@Column
-	String data1;
-
-	@Column
-	String data2;
-
-	public MyEntity() {}
-	
-	public MyEntity(int id, String data1) {
-		this.id = id;
-		this.data1 = data1;
-	}
-	
 	public int getId() {
 		return id;
 	}
@@ -49,24 +39,8 @@ public class MyEntity {
 		this.data = data;
 	}
 
-	public String getData1() {
-		return data1;
-	}
-
-	public void setData1(String data1) {
-		this.data1 = data1;
-	}
-
-	public String getData2() {
-		return data2;
-	}
-
-	public void setData2(String data2) {
-		this.data2 = data2;
-	}
-
 	@Override
 	public String toString() {
-		return "MyEntity [id=" + id + ", data=" + data + ", data1=" + data1 + ", data2=" + data2 + "]";
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 }

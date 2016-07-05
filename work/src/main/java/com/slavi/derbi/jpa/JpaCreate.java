@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
 import com.slavi.derbi.jpa.entity.MyEntity;
+import com.slavi.derbi.jpa.entity.MyEntityPartial;
 import com.slavi.util.StringPrintStream;
 
 public class JpaCreate {
@@ -99,9 +100,9 @@ public class JpaCreate {
 			ent.setData2("Data2 for entity No " + i);
 			em.merge(ent);
 		}
-		Query q = em.createQuery("select new com.slavi.derbi.jpa.entity.MyEntity(e.id, e.data1) from MyEntity e where e.id = 1", MyEntity.class);
-		List<MyEntity> r = q.getResultList();
-		for (MyEntity i : r) {
+		Query q = em.createQuery("select e from MyEntityPartial e where e.id = 1", MyEntityPartial.class);
+		List<MyEntityPartial> r = q.getResultList();
+		for (MyEntityPartial i : r) {
 			System.out.println(i);
 		}
 		em.getTransaction().commit();
