@@ -10,7 +10,8 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
 
 =========
 Find duplicated classes in project dependacies:
-mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:check
+mvn org.basepom.maven:duplicate-finder-maven-plugin:check
+#### mvn com.ning.maven.plugins:maven-duplicate-finder-plugin:check
 
 	<build>
 		<plugins>

@@ -9,13 +9,21 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<slf4j.version>1.7.10</slf4j.version>
+		<com.slavi.version>1.0.0-SNAPSHOT</com.slavi.version>
+
+		<slf4j.version>1.7.21</slf4j.version>
 		<java3d.version>1.5.2</java3d.version>
 		<swt.version>4.5.1</swt.version>
-		<spring-framework.version>4.1.1.RELEASE</spring-framework.version>
-		<spring-data-jpa.version>1.6.2.RELEASE</spring-data-jpa.version>
-		<openimaj.version>1.4-SNAPSHOT</openimaj.version>
-		<slavi-bom.version>1.0.0-SNAPSHOT</slavi-bom.version>
+		<spring-framework.version>4.2.6.RELEASE</spring-framework.version>
+		<spring-data-jpa.version>1.10.1.RELEASE</spring-data-jpa.version>
+		<openimaj.version>1.3.1</openimaj.version>
+
+		<!-- 
+		The version of the jackson library can not be in the range [2.7.0-2.7.4] (all versions tested) because 
+		of a bug - breaks functionality in spring abstract controlers with methods having a parameter 
+		annotated with @RequestBody
+		-->
+		<com.fasterxml.jackson.version>2.6.6</com.fasterxml.jackson.version>
 	</properties>
 
 	<dependencyManagement>
@@ -23,79 +31,83 @@
 			<!-- Mine -->
 			<dependency>
 				<groupId>com.slavi</groupId>
+				<artifactId>util.log</artifactId>
+				<version>${com.slavi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
 				<artifactId>util.math</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.util</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.sound</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.io</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.ui</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>improc</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>reprap</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>zaSasho</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>work</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.logging</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.misc</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.resources</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>example.webapp</artifactId>
-				<version>${slavi-bom.version}</version>
+				<version>${com.slavi.version}</version>
 			</dependency>
 
-			<!-- Testing 
+			<!-- Testing -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.12</version>
-				<scope>test</scope>
-			</dependency>  -->
+			</dependency>
 
-			<!--  Logging - logback
+			<!--  Logging - logback -->
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
@@ -130,9 +142,9 @@
 				<groupId>uk.org.lidalia</groupId>
 				<artifactId>sysout-over-slf4j</artifactId>
 				<version>1.0.2</version>
-			</dependency>  -->
+			</dependency>
 			
-			<!-- Java3D
+			<!-- Java3D -->
 			<dependency>
 				<groupId>java3d</groupId>
 				<artifactId>j3d-core</artifactId>
@@ -152,9 +164,9 @@
 				<groupId>org.j3d.code</groupId>
 				<artifactId>org.j3d.code</artifactId>
 				<version>1.1.0</version>
-			</dependency> -->
+			</dependency>
 
-			<!-- SWT
+			<!-- SWT -->
 			<dependency>
 				<groupId>org.swtchart</groupId>
 				<artifactId>swtchart</artifactId>
@@ -169,9 +181,9 @@
 				<groupId>org.eclipse.swt</groupId>
 				<artifactId>org.eclipse.swt.gtk.linux.x86_64</artifactId>
 				<version>${swt.version}</version>
-			</dependency> -->
+			</dependency>
 	
-			<!-- Spring
+			<!-- Spring -->
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
@@ -194,43 +206,124 @@
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
 				<version>${spring-data-jpa.version}</version>
-			</dependency> -->
+			</dependency>
 
-			<!-- JPA
+			<!-- Web -->
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>jstl</artifactId>
+				<version>1.2</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet.jsp</groupId>
+				<artifactId>javax.servlet.jsp-api</artifactId>
+				<version>2.3.2-b01</version>
+			</dependency>
+
+			<!-- JPA -->
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
-				<version>2.1.0</version>
+				<version>2.1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>eclipselink</artifactId>
-				<version>2.6.0-M3</version>
-			</dependency> -->
+				<version>2.6.3</version>
+			</dependency>
 
-			<!-- Openimaj (image processing)
+			<!-- Openimaj (image processing) -->
 			<dependency>
 				<groupId>org.openimaj</groupId>
 				<artifactId>image-local-features</artifactId>
 				<version>${openimaj.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>xmlpull</artifactId>
+						<groupId>xmlpull</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>stax-api</artifactId>
+						<groupId>stax</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>minlog</artifactId>
+						<groupId>com.esotericsoftware.minlog</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.openimaj</groupId>
 				<artifactId>camera-calibration</artifactId>
 				<version>${openimaj.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>stax-api</artifactId>
+						<groupId>stax</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.openimaj</groupId>
 				<artifactId>faces</artifactId>
 				<version>${openimaj.version}</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>stax-api</artifactId>
+						<groupId>stax</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>xmlpull</artifactId>
+						<groupId>xmlpull</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.openimaj</groupId>
 				<artifactId>core-video-capture</artifactId>
 				<version>${openimaj.version}</version>
-			</dependency> -->
+				<exclusions>
+					<exclusion>
+						<artifactId>log4j</artifactId>
+						<groupId>log4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>dx</artifactId>
+						<groupId>com.google.android.tools</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
-			<!-- Apache Common
+			<!-- Apache Common -->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
@@ -247,12 +340,38 @@
 				<version>2.4</version>
 			</dependency>
 			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>1.9.2</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.4</version>
-			</dependency> -->
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-collections4</artifactId>
+				<version>4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>4.3.1</version>
+				<exclusions>
+					<exclusion>
+						<artifactId>commons-logging</artifactId>
+						<groupId>commons-logging</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>1.3.1</version>
+			</dependency>
 
-			<!-- DB
+			<!-- DB -->
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
@@ -264,6 +383,11 @@
 				<version>5.1.34</version>
 			</dependency>
 			<dependency>
+				<groupId>org.xerial</groupId>
+				<artifactId>sqlite-jdbc</artifactId>
+				<version>3.8.5-pre1</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-dbutils</groupId>
 				<artifactId>commons-dbutils</artifactId>
 				<version>1.6</version>
@@ -271,9 +395,40 @@
 			<dependency>
 				<groupId>org.apache.ddlutils</groupId>
 				<artifactId>ddlutils</artifactId>
-			</dependency> -->
+				<version>1.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-beanutils</groupId>
+						<artifactId>commons-beanutils-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<artifactId>jaxen</artifactId>
+						<groupId>jaxen</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>stax-api</artifactId>
+						<groupId>stax</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>xml-apis</artifactId>
+						<groupId>xml-apis</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>saxpath</artifactId>
+						<groupId>saxpath</groupId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 
-			<!-- Sound
+			<!-- Sound -->
 			<dependency>
 				<groupId>com.googlecode.soundlibs</groupId>
 				<artifactId>soundlibs</artifactId>
@@ -303,26 +458,41 @@
 				<groupId>com.googlecode.soundlibs</groupId>
 				<artifactId>jlayer</artifactId>
 				<version>1.0.1-1</version>
-			</dependency> -->
+			</dependency>
 			
-			<!-- Jackson 
+			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
-				<version>2.7-1</version>
+				<version>${com.fasterxml.jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.7-1</version>
+				<version>${com.fasterxml.jackson.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>2.7-1</version>
-			</dependency> -->
+				<version>${com.fasterxml.jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-xml</artifactId>
+				<version>${com.fasterxml.jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.module</groupId>
+				<artifactId>jackson-module-jaxb-annotations</artifactId>
+				<version>${com.fasterxml.jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.woodstox</groupId>
+				<artifactId>woodstox-core-asl</artifactId>
+				<version>4.4.1</version>
+			</dependency>
 			
-			<!-- Miscelaneous 
+			<!-- Miscelaneous -->
 			<dependency>
 				<groupId>org.rxtx</groupId>
 				<artifactId>rxtx</artifactId>
@@ -334,6 +504,11 @@
 				<version>2.0.2</version>
 			</dependency>
 			<dependency>
+				<groupId>org.jsoup</groupId>
+				<artifactId>jsoup</artifactId>
+				<version>1.7.2</version>
+			</dependency>
+			<dependency>
 				<groupId>xerces</groupId>
 				<artifactId>xercesImpl</artifactId>
 				<version>2.11.0</version>
@@ -342,7 +517,12 @@
 				<groupId>jaxen</groupId>
 				<artifactId>jaxen</artifactId>
 				<version>1.1.4</version>
-			</dependency> -->
+			</dependency>
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>2.3</version>
+			</dependency>
 			
 		</dependencies>
 	</dependencyManagement>
