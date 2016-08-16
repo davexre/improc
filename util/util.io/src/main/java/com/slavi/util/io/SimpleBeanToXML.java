@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import org.jdom2.Element;
 
@@ -70,25 +71,25 @@ public class SimpleBeanToXML {
 	}
 
 	private static Object xmlToObjectArray(Element root, Class arrayType, boolean setToNullMissingProperties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, IntrospectionException {
-		// array
-		String arraySizeStr = root.getAttributeValue("size");
-		if (arraySizeStr == null)
-			return null;
-		int arraySize = Integer.parseInt(arraySizeStr);
-		if (arraySize < 0)
-			return null;
-		
-		Object array = Array.newInstance(arrayType, arraySize);
+		ArrayList items = new ArrayList();
 		for (Object i : root.getChildren("item")) {
 			Element e = (Element) i;
-			int index = Integer.parseInt(e.getAttributeValue("index"));
 			Object item = xmlToObject(e, arrayType, setToNullMissingProperties);
 			if (item == null) {
 				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
 					continue;
 			}
-			
-			Array.set(array, index, item);
+			items.add(item);
+		}
+		
+		Object array = Array.newInstance(arrayType, items.size());
+		for (int i = 0; i < items.size(); i++) {
+			Object item = items.get(i);
+			if (item == null) {
+				if (arrayType.isPrimitive() || (!setToNullMissingProperties))
+					continue;
+			}
+			Array.set(array, i, item);
 		}
 		return array;
 	}
@@ -225,13 +226,11 @@ public class SimpleBeanToXML {
 		} else if (objectClass.getComponentType() != null) {
 			// array
 			int length = Array.getLength(object);
-			root.setAttribute("size", Integer.toString(length));
 			for (int i = 0; i < length; i++) {
 				Object o = Array.get(object, i);
 				if (o == null)
 					continue;
 				Element item = new Element("item");
-				item.setAttribute("index", Integer.toString(i));
 				objectToXml(item, o);
 				root.addContent(item);
 			}

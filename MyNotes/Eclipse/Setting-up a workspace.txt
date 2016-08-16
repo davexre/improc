@@ -23,7 +23,6 @@ Setting-up a workspace
 	* JavaScript Development Tools
 	* C/C++ Development Tools
 	* Linux Tools
-	* ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
 	* ?? ShellEd (Update site http://sourceforge.net/projects/shelled/files/shelled/update/)
 	* ?? Mongrel (Tomcat plugin)
 	* Web,XML,Java EE and OSGi Enterprise Development/
@@ -40,6 +39,7 @@ Setting-up a workspace
 	* Quick Bookmarks Plugin
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
+	* ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
 	* Tern Eclipse IDE (JavaScript analyzer)
 	* ?? Subversive (SVN version control)
 	* ?? Toad Extension for Eclipse
