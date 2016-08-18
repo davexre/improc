@@ -1,0 +1,23 @@
+Bash manual
+===========
+http://www.gnu.org/software/bash/manual/bashref.html
+
+Abort script if any command returns non 0 exit code, i.e. "Abort on error" (exit code $? > 0)
+=============================================================================================
+#!/bin/bash
+function finally() {
+	echo "On Finally"
+}
+trap "finally" EXIT
+trap 'echo "Error in ${BASH_SOURCE}:${LINENO}. Exit code is $? running \"${BASH_COMMAND}\""' ERR
+
+echo "Enter"
+false
+echo "After false 1"
+
+set -e
+
+echo "Before false 2"
+false
+echo "This will not execute"
+

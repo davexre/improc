@@ -60,6 +60,7 @@ dmsetup                     \
 doublecmd-common            \
 doublecmd-gtk               \
 dpkg-dev                    \
+expect                      \
 ffmpeg                      \
 filezilla                   \
 freecad                     \
