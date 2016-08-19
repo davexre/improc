@@ -28,6 +28,7 @@ tune2fs -i 1m -c 0 /dev/sda1
 Usefull Linux software
 ======================
 HP-LIP
+veracrypt
 google chrome
 google earth
 draft sight - registered with mail.bg
@@ -49,12 +50,14 @@ avrdude                     \
 binutils-avr                \
 build-essential             \
 calibre                     \
+cheese                      \
 classicmenu-indicator       \
 cmake                       \
 cvs                         \
 dconf-tools                 \
 debhelper                   \
 dhex                        \
+dmsetup                     \
 doublecmd-common            \
 doublecmd-gtk               \
 dpkg-dev                    \
@@ -62,8 +65,10 @@ expect                      \
 ffmpeg                      \
 filezilla                   \
 freecad                     \
+g++                         \
 gbgoffice                   \
 gdb-avr                     \
+gcc                         \
 gcc-avr                     \
 gconf-editor                \
 geeqie                      \
@@ -74,8 +79,10 @@ gedit-plugins               \
 ghex                        \
 gimp                        \
 git                         \
+gksu                        \
 gmobilemedia                \
 gnome-color-chooser         \
+gnome-search-tool           \
 gnupg-agent                 \
 gparted                     \
 handbrake                   \
@@ -83,6 +90,7 @@ httrack                     \
 hugin                       \
 htop                        \
 inkscape                    \
+jedit                       \
 kde-baseapps-bin            \
 kdenlive                    \
 lame                        \
@@ -103,6 +111,7 @@ pavucontrol                 \
 pinentry-curses             \
 python-pip                  \
 rar                         \
+remmina                     \
 seahorse                    \
 screen                      \
 soundconverter              \
@@ -153,6 +162,20 @@ else
 fi
 --------------- end of script
 
+Setup VeraCrypt
+===============
+1. Install veracrypt
+2. sudo apt-get install dmsetup gksu
+3. Add allowed users to sudoers
+sudo visudo -f /etc/sudoers.d/veracrypt
+-------------------------
+<user name>      ALL=(ALL:ALL) NOPASSWD:/usr/bin/veracrypt
+-------------------------
+4. Add launcher
+/usr/bin/gksudo -S -g /usr/bin/veracrypt
+5. Launch VeraCrypt, setup encrypted files, mount points, add to favoriets
+Use default mount options: dmask=077,fmask=177
+
 Change the border width of windows in Gnome
 ===========================================
 http://ubuntuforums.org/showthread.php?t=439329
@@ -183,10 +206,11 @@ gsettings set org.nemo.desktop show-desktop-icons true
 
 Gnome desktop tweaks
 ====================
+gsettings set /desktop/gnome/interface/enable_animations
 gsettings set org.gnome.desktop.background show-desktop-icons true
 gsettings set org.gnome.nautilus.desktop home-icon-visible true
 gsettings set org.gnome.nautilus.desktop trash-icon-visible true
-// do not show preview icons on files and folders
+# do not show preview icons on files and folders
 gsettings set org.gnome.nautilus.preferences show-image-thumbnails "'never'"
 gsettings set org.gnome.nautilus.preferences show-directory-item-counts "'never'"
 gsettings set org.gnome.nautilus.preferences default-folder-view "'list-view'"
@@ -203,10 +227,12 @@ gsettings set org.nemo.preferences default-folder-view "'list-view'"
 
 gsettings org.gnome.desktop.thumbnailers disable-all true
 
-// shows mounted volumes
+# shows mounted volumes
 gsettings set org.gnome.nautilus.desktop volumes-visible true
-// Move Gnome window controls/buttons on the right
+# Move Gnome window controls/buttons on the right
 gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
+
+gconftool -s /desktop/gnome/interface/enable_animations false --type bool
 
 FIX: Under GNOME Flashback Ubuntu's notify-send will not show popup messages
 ============================================================================
@@ -225,4 +251,9 @@ sudo apt-get install xbacklight
 xbacklight -inc 10
 * decrease 10%
 xbacklight -dec 10
+
+Disable apport
+==============
+sudo vi /etc/default/apport
+enable=0
 

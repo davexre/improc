@@ -1,0 +1,11 @@
+irdadump
+ls /dev/irc*
+ls /dev/ttyU*
+ps aux|grep irat
+irattach /dev/ttyUSB0 -d ma600 -s
+cat /proc/net/irda/discovery
+irdaping  
+picocom -b 9600 /dev/ircomm0
+ps aux|grep pico
+lsof|grep irc
+
