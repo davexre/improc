@@ -1,6 +1,7 @@
 Install Gnome in Ubuntu
 =======================
 Gnome 2
+sudo apt-get install ubuntu-mate-core ubuntu-mate-desktop
 sudo apt-get install gnome-session-flashback
 sudo apt-get install compizconfig-settings-manager
 LXDM (Lubuntu)
