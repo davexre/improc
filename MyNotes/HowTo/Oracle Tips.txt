@@ -1,4 +1,8 @@
-=========================== TITLE ===========================
+=========================== SQL Developer ===========================
+Nice plugin to unwrap package bodies (if wrapped)
+https://www.salvis.com/blog/plsql-unwrapper-for-sql-developer/
+To be installed from Help/Check for updates, Install from local file, select the downloaded file.
+
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 =========================== TITLE ===========================

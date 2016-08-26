@@ -257,3 +257,15 @@ Disable apport
 sudo vi /etc/default/apport
 enable=0
 
+Usefull settings for .profile
+=============================
+# make default less search case not-sesitive
+export LESS="-i"
+
+export NPM_HOME=$HOME/bin/npm-global
+export JAVA_HOME=$HOME/bin/java
+export M2_HOME=$HOME/bin/apache-maven-3.2.3
+export ANT_HOME=$HOME/bin/apache-ant-1.7.1
+export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$ANT_HOME/bin:$NPM_HOME/bin:$PATH
+##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
+export GPG_TTY=$(tty)
