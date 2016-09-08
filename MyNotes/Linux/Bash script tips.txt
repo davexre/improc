@@ -1,0 +1,46 @@
+Bash manual
+===========
+http://www.gnu.org/software/bash/manual/bashref.html
+
+Bash libraries
+==============
+https://dberkholz.com/2011/04/07/bash-shell-scripting-libraries/
+https://code.google.com/archive/p/bsfl/
+
+Braces vs parenthesis
+=====================
+#!/bin/bash
+pushd . > /dev/null
+pwd
+( cd / ; pwd ; )
+pwd
+{ cd / ; pwd ; }
+pwd
+popd  > /dev/null
+
+Variables
+=========
+* Define a constant
+declare -r TRUE=0
+* Local variable
+local myvar=some value
+
+Abort script if any command returns non 0 exit code, i.e. "Abort on error" (exit code $? > 0)
+=============================================================================================
+#!/bin/bash
+function finally() {
+	echo "On Finally"
+}
+trap "finally" EXIT
+trap 'echo "Error in ${BASH_SOURCE}:${LINENO}. Exit code is $? running \"${BASH_COMMAND}\""' ERR
+
+echo "Enter"
+false
+echo "After false 1"
+
+set -e
+
+echo "Before false 2"
+false
+echo "This will not execute"
+

@@ -11,8 +11,8 @@ udevadm test <device path from udevadm monitor>
 ========================================================
 ACTION="add", SUBSYSTEM=="sound", ATTR{id}=="Device", RUN+="/home/slavian/.bin/waitAndRunSelectUSBSoundCard.sh"
 
-#ACTION="add", SUBSYSTEM=="input", ATTR{ID_VENDOR_ID}="045e", NAME="input/event9", ATTR{ID_USB_DRIVER}="usbhid", 
-#  ATTR{ID_SERIAL}="C-Media_Electronics_Inc._Microsoft_LifeChat_LX-3000", 
+#ACTION="add", SUBSYSTEM=="input", ENV{ID_VERSION_ID}="045e", NAME="input/event9", ATTR{idUsbDriver}="usbhid", 
+#  ATTR{idSerial}="C-Media_Electronics_Inc._Microsoft_LifeChat_LX-3000", ATTR{idModel}="USBSND"
 #  RUN+="/bin/bash -c 'ssh spetrov@localhost /home/spetrov/bin/selectUSBSoundCard.sh'"
 ========================================================
 
