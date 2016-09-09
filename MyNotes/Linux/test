@@ -6,8 +6,24 @@ SCRIPT_HOME=`dirname "$SCRIPT_HOME"`
 . "$SCRIPT_HOME/my_utils.sh"
 #. "$SCRIPT_HOME/bashlib/bsfl.sh"
 
-LOG_FILE=/dev/tty
-
 #msg_status "Hello world" "OK"
-log you are not root
+#log you are not root
 #echo "$(date -R): asd"
+#log_file
+#log "|$LOG_FILE|"
+
+trap_errors
+
+function someFunction() {
+	makeError
+}
+
+#log $(default_string "" "$@")
+#trap_errors
+
+someFunction
+
+#untrap_errors
+
+someFunction
+

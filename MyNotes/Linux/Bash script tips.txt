@@ -31,7 +31,13 @@ Abort script if any command returns non 0 exit code, i.e. "Abort on error" (exit
 function finally() {
 	echo "On Finally"
 }
-trap "finally" EXIT
+
+trap 'finally' EXIT
+# NOTE: In trap ALWAYS use SINGLE QUOTES, not DOUBLE QUOTES, i.e.
+# do use
+# trap 'some command ${LINENO}'
+# do not use
+# trap "some command ${LINENO}"
 trap 'echo "Error in ${BASH_SOURCE}:${LINENO}. Exit code is $? running \"${BASH_COMMAND}\""' ERR
 
 echo "Enter"
