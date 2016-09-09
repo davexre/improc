@@ -49,6 +49,7 @@ avr-libc                    \
 avrdude                     \
 binutils-avr                \
 build-essential             \
+bum                         \
 calibre                     \
 cheese                      \
 classicmenu-indicator       \
@@ -155,7 +156,7 @@ Script to execute:
 --------------- start of script
 #!/bin/bash
 stdin=$(cat)
-if [ "${stdin:0:27}" == "-----BEGIN PGP MESSAGE-----"  ]; then 
+if [ "${stdin:0:27}" == "-----BEGIN PGP MESSAGE-----"  ]; then
 	echo "$stdin" | gpg -d --no-tty - 2>/dev/null
 else
 	echo "$stdin" | gpg -ac --no-tty -
@@ -180,7 +181,7 @@ Change the border width of windows in Gnome
 ===========================================
 http://ubuntuforums.org/showthread.php?t=439329
 
-To change border widths, simply open up the theme's Metacity XML file. 
+To change border widths, simply open up the theme's Metacity XML file.
 For example, Human's theme is located in /usr/share/themes/Ambiance/metacity-1/metacity-theme-1.xml
 
 The stanza in question should be apparent:
@@ -269,3 +270,36 @@ export ANT_HOME=$HOME/bin/apache-ant-1.7.1
 export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$ANT_HOME/bin:$NPM_HOME/bin:$PATH
 ##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
 export GPG_TTY=$(tty)
+
+Disable bluetooth on startup
+============================
+#http://askubuntu.com/a/2568/475269
+sudoedit /etc/rc.local
+# add this
+rfkill block bluetooth
+exit 0
+
+Ubuntu startup scripts & locations
+==================================
+# Grub config
+sudoedit /etc/default/grub
+sudo update-grub2
+
+runlevel		# Show runlevel
+init			# Change runlevel
+/etc/rc.local	# Script executed upon changing the runlevel. Usually does nothing.
+
+# Bash startup scripts
+/etc/profile
+/etc/bash.bashrc
+/etc/profile.d/*.sh
+~/.profile
+~/.bashrc
+~/.bash_aliases
+/etc/bash_completion
+
+# X-server startup scripts
+/etc/xdg/autostart/*.desktop
+
+
+
