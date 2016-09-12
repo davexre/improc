@@ -1,6 +1,19 @@
 Setup USB Sound card to be set as default sound device upon hotplug on Ubuntu
 =============================================================================
 
+I. Preffered way
+
+http://askubuntu.com/questions/158241/automatically-change-sound-input-output-device
+* To test if it will work
+pacmd load-module module-switch-on-connect
+
+* To autoenable it:
+On success we can add the following line to /etc/pulse/default.pa or
+cp /etc/pulse/default.pa ~/.config/pulse/default.pa and then add the line:
+load-module module-switch-on-connect
+
+II. Using udev.rules (not so automatic)
+
 0. Identify device
 udevadm monitor -p
 udevadm info -a --path <device path from udevadm monitor>
@@ -11,7 +24,7 @@ udevadm test <device path from udevadm monitor>
 ========================================================
 ACTION="add", SUBSYSTEM=="sound", ATTR{id}=="Device", RUN+="/home/slavian/.bin/waitAndRunSelectUSBSoundCard.sh"
 
-#ACTION="add", SUBSYSTEM=="input", ENV{ID_VERSION_ID}="045e", NAME="input/event9", ATTR{idUsbDriver}="usbhid", 
+#ACTION="add", SUBSYSTEM=="input", ENV{ID_VERSION_ID}="045e", NAME="input/event9", ATTR{idUsbDriver}="usbhid",
 #  ATTR{idSerial}="C-Media_Electronics_Inc._Microsoft_LifeChat_LX-3000", ATTR{idModel}="USBSND"
 #  RUN+="/bin/bash -c 'ssh spetrov@localhost /home/spetrov/bin/selectUSBSoundCard.sh'"
 ========================================================
@@ -53,13 +66,13 @@ notify-send "Sound card changed" "USB Sound card selected"
 ========================================================
 #!/bin/bash
 
-# Automatically select USB sound devices 
+# Automatically select USB sound devices
 # Copyright (C) 2013 Stephen Ostermiller
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -67,7 +80,7 @@ notify-send "Sound card changed" "USB Sound card selected"
 #
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, 
+# Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 
 out=/home/spetrov/usbsoundcard.log
@@ -94,7 +107,7 @@ then
         echo "ACTION==\"add\", SUBSYSTEM==\"usb\", DRIVERS==\"snd-usb-audio\", RUN+=\"$script\"" > $rulefile
         service udev restart
     fi
-    rulefile=/usr/lib/pm-utils/sleep.d/99usbaudio    
+    rulefile=/usr/lib/pm-utils/sleep.d/99usbaudio
     if [ -e $rulefile ]
     then
         echo "pm-utils sleep/wake rule already exists: $rulefile"
