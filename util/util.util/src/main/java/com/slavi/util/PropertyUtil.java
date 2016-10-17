@@ -13,14 +13,23 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @deprecated Use org.apache.commons.lang3.text.StrSubstitutor or
+ * org.apache.commons.jexl3.JexlEngine or
+ * org.apache.velocity.app.VelocityEngine or
+ * freemarker.template.Configuration
+ * javax.script.ScriptEngineManager.getEngineByName("JavaScript") or
+ * javax.script.ScriptEngineManager.getEngineByName("groovy") or
+ * org.springframework.expression.spel.standard.SpelExpressionParser
+ */
 public class PropertyUtil {
 	static final int MAX_VARIABLE_SUBSTITUTIONS = 1000;
-	
+
 	/**
 	 * Performs variable substitution in <code>str</code> with the values
 	 * of keys found in the <code>properties</code>.
 	 * <p>
-	 * The variable are specified as <b>${VARIABLE_NAME}</b>. Nesting of 
+	 * The variable are specified as <b>${VARIABLE_NAME}</b>. Nesting of
 	 * variables is SUPPORTED.
 	 * <pre>
 	 * Properties p = new Properties();
@@ -36,11 +45,11 @@ public class PropertyUtil {
 	 * If no value could be found for a specified key in the properties then
 	 * the token <b>${VARIABLE_NAME}</b> is removed and evaluation continues.
 	 * <p>
-	 * In order to prevent endles loop using cyclic evaluation a maximum of 
-	 * {@link #MAX_VARIABLE_SUBSTITUTIONS} will be made. If the number maximum 
-	 * of substitutions is exceeded the method returns the result of the last 
-	 * evaluation. 
-	 *  
+	 * In order to prevent endles loop using cyclic evaluation a maximum of
+	 * {@link #MAX_VARIABLE_SUBSTITUTIONS} will be made. If the number maximum
+	 * of substitutions is exceeded the method returns the result of the last
+	 * evaluation.
+	 *
 	 * @see #mergeProperties(Properties, Map)
 	 * @see #makeProperties()
 	 */
@@ -50,7 +59,7 @@ public class PropertyUtil {
 		final Pattern vars = Pattern.compile("\\$\\{(((?!\\$\\{)[^}])+)\\}");
 		Matcher m = vars.matcher(str);
 		int substituionsCount = 0;
-		
+
 		while (m.find() && (substituionsCount < MAX_VARIABLE_SUBSTITUTIONS)) {
 			substituionsCount++;
 			StringBuilder sb = new StringBuilder();
@@ -70,7 +79,7 @@ public class PropertyUtil {
 					} catch (Exception e) {
 						modifiersAsInt = Integer.MIN_VALUE;
 					}
-					
+
 					if (modifiersAsInt != Integer.MIN_VALUE) {
 						formatStr = "%" + Integer.toString(modifiersAsInt) + "s";
 					} else if ("R".equalsIgnoreCase(modifiers)) {
@@ -78,7 +87,7 @@ public class PropertyUtil {
 					} else if ("L".equalsIgnoreCase(modifiers)) {
 						formatStr = "%-" + Integer.toString(innerToken.length() + 3) + "s";
 					}
-					
+
 					sb.append(String.format(formatStr, envVal));
 					modified = true;
 				}
@@ -93,7 +102,7 @@ public class PropertyUtil {
 	}
 
 	/**
-	 * Evaluates the values in the evaluateProperties using 
+	 * Evaluates the values in the evaluateProperties using
 	 * the {@link #substituteVars(String, Properties)} method and merges
 	 * the result into the mergeIntoProperties.
 	 * @see #substituteVars(String, Properties)
@@ -108,10 +117,10 @@ public class PropertyUtil {
 			mergeIntoProperties.setProperty(propertyName, value);
 		}
 	}
-	
+
 	/**
-	 * Returns a Properties map containitng the merge result 
-	 * of System.getProperties() and System.getenv() using 
+	 * Returns a Properties map containitng the merge result
+	 * of System.getProperties() and System.getenv() using
 	 * the {@link #mergeProperties(Properties, Map)}.
 	 * @see #substituteVars(String, Properties)
 	 * @see #mergeProperties(Properties, Map)
@@ -122,7 +131,7 @@ public class PropertyUtil {
 		mergeProperties(res, System.getenv());
 		return res;
 	}
-	
+
 	public static ArrayList<String> propertiesToSortedStringList(Properties properties) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		OutputStreamWriter writer = new OutputStreamWriter(out);
@@ -154,7 +163,7 @@ public class PropertyUtil {
 	public static String propertiesToString(Properties properties) throws IOException {
 		ArrayList<String> lines = propertiesToSortedStringList(properties);
 		StringBuilder sb = new StringBuilder();
-		for (String line : lines) { 
+		for (String line : lines) {
 			sb.append(line);
 			sb.append('\n');
 		}

@@ -301,5 +301,13 @@ init			# Change runlevel
 # X-server startup scripts
 /etc/xdg/autostart/*.desktop
 
+Determine the NetBIOS/Windows name of a machine by IP
+=====================================================
+http://stackoverflow.com/a/37115634/2243209
+nmblookup -A <ip>
+
+sudo apt-get install nbtscan
+nbtscan <ip>
+
 
 

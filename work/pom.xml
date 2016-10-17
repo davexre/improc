@@ -65,13 +65,13 @@
 			<groupId>org.openimaj</groupId>
 			<artifactId>core-video-capture</artifactId>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacpp</artifactId>
 			<version>1.1</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.bytedeco.javacpp-presets</groupId>
 			<artifactId>opencv</artifactId>
@@ -152,7 +152,7 @@
 			<artifactId>cuda</artifactId>
 			<version>7.5-1.1</version>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.bytedeco</groupId>
 			<artifactId>procamtracker</artifactId>
@@ -168,13 +168,18 @@
 			<artifactId>javacv</artifactId>
 			<version>1.1</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.sarxos</groupId>
 			<artifactId>webcam-capture</artifactId>
 			<version>0.3.11</version>
 		</dependency>
-	
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-math3</artifactId>
@@ -211,12 +216,12 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>commons-dbutils</groupId>
 			<artifactId>commons-dbutils</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.apache.ddlutils</groupId>
 			<artifactId>ddlutils</artifactId>
@@ -231,7 +236,7 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>improc</artifactId>
@@ -272,6 +277,10 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
 		</dependency>
 	</dependencies>
 </project>

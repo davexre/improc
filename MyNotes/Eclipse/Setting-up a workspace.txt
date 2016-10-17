@@ -40,6 +40,7 @@ Setting-up a workspace
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
 	* LiClipseText
+	* Eclipse Class Decompiler
 	* ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
 	* Tern Eclipse IDE (JavaScript analyzer)
 	* ?? Subversive (SVN version control)
