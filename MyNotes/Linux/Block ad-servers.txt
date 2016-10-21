@@ -1,0 +1,12 @@
+#!/bin/bash
+# Obtain a new ad-server list from http://pgl.yoyo.org/adservers/serverlist.php
+cd /tmp
+wget "http://pgl.yoyo.org/adservers/serverlist.php?hostformat=bindconfig&showintro=1&startdate[day]=&startdate[month]=&startdate[year]=" -O fresh
+grep zone fresh > blacklist
+rm -f fresh
+sed -i 's/{/IN {/g' blacklist
+sed -i 's/null.zone.file/\/etc\/bind\/null.zone.file/g' blacklist
+rm -f /etc/bind/blacklist
+mv blacklist /etc/bind
+rndc reload
+exit 0

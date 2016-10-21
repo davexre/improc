@@ -103,6 +103,7 @@ melt                        \
 mplayer2                    \
 nemo                        \
 nemo-fileroller             \
+nmon                        \
 npm                         \
 octave                      \
 openssh-server              \
