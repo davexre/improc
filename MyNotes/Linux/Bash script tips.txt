@@ -22,8 +22,21 @@ Variables
 =========
 * Define a constant
 declare -r TRUE=0
+
 * Local variable
 local myvar=some value
+
+* default values
+PARAM1_IP=${1:-'172.0.0.1'}
+
+* script home
+SCRIPT_HOME=$(dirname $(readlink -f "${0}"))
+or
+SCRIPT_HOME=$(dirname "$(realpath -m "${0}")")
+or better
+SCRIPT_HOME=$(realpath -m "${0}")
+SCRIPT_HOME=$(dirname "${SCRIPT_HOME}");
+
 
 Abort script if any command returns non 0 exit code, i.e. "Abort on error" (exit code $? > 0)
 =============================================================================================

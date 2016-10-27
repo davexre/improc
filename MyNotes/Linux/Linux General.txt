@@ -90,6 +90,7 @@ handbrake                   \
 httrack                     \
 hugin                       \
 htop                        \
+iftop                       \
 inkscape                    \
 jedit                       \
 kde-baseapps-bin            \
@@ -101,6 +102,7 @@ mc                          \
 meld                        \
 melt                        \
 mplayer2                    \
+ncdu                        \
 nemo                        \
 nemo-fileroller             \
 nmon                        \

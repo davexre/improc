@@ -20,6 +20,59 @@ end;
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 
+=========================== Use shell script to iterate over a recordset ===========================
+(su - oracle -l -c "sqlplus -L -S -s md/vss@mddb" << EOF
+set head off
+set feedback off
+set pagesize 0
+select table_name, status from user_tables where rownum < 6 order by table_name
+EOF
+) | while read tableName tableStatus
+do
+	echo "table name=$tableName, stat=$tableStatus"
+done
+
+if (($? > 0)); then
+	echo "Error"
+	exit 1;
+fi;
+echo "Done."
+
+=== OR
+
+#!/bin/bash
+RESULT=$(su - oracle -l -c "sqlplus -L -S -s md/vss@mddb" << EOF
+set serveroutput on
+set head off
+set verify off
+set feedback off
+var a number
+begin
+	for rec in
+		(select table_name, status from user_tables where rownum < 6 order by table_name)
+	loop
+	dbms_output.put_line(rec.table_name || ',' || rec.status);
+	end loop;
+	:a := 1;
+end;
+/
+exit :a
+EOF
+)
+
+if (($? > 0)); then
+	echo "Error"
+	exit 1;
+fi;
+
+IFS=","
+echo "$RESULT" | while read tableName tableStatus
+do
+	echo "table name=$tableName, stat=$tableStatus"
+done
+
+echo "Done."
+
 =========================== Отворени транзакции-not committed or rollbacked ===========================
 select t.XID "Transaction ID", t.START_TIME "Tr.start", s.USERNAME, s.sid || ',' || s.serial# "sid,serial#",
 	t.STATUS "Tr.status", s.STATUS "Sess.status", s.STATE "Sess.state",
@@ -64,7 +117,13 @@ alter system flush shared_pool;
 
 =========================== Генериране на alter table команди за всички constraint "on delete cascade" ===========================
 WHENEVER SQLERROR CONTINUE;
-set serveroutput on;
+WHENEVER OSERROR EXIT FAILURE;
+set linesize 32767
+set serveroutput on
+set pagesize 0
+set wrap off
+set trimout on
+set trimspool on
 begin
 	for i in (
 
