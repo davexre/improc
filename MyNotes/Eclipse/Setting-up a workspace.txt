@@ -39,10 +39,10 @@ Setting-up a workspace
 	* Quick Bookmarks Plugin
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
-	* LiClipseText
-	* Eclipse Class Decompiler
-	* ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
-	* Tern Eclipse IDE (JavaScript analyzer)
+	* ?? LiClipseText
+	* ?? Eclipse Class Decompiler
+	* ?? ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
+	* ?? Tern Eclipse IDE (JavaScript analyzer)
 	* ?? Subversive (SVN version control)
 	* ?? Toad Extension for Eclipse
 	Other plugins
