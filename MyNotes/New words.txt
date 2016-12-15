@@ -2,6 +2,7 @@ attire
 canard
 chore
 churn
+clumpy
 collateralize
 conundrum
 cronyism
@@ -15,11 +16,14 @@ dredge
 dwindling
 flagging
 flog
+fluke
 foment
 forfeit
 frigid
 fudge
 furl
+herald
+inception
 indemnity
 intromission
 jibe
@@ -38,6 +42,7 @@ peril
 plume
 precarious
 proboscis
+prodigious
 prong
 putrid
 savvy
@@ -51,6 +56,7 @@ slurp up
 smear
 stalk
 stifle
+subtle
 subversion
 sway
 revamped
