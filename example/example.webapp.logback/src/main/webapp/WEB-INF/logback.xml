@@ -1,4 +1,6 @@
 <configuration scan="true" scanPeriod="30 seconds">
+	<!-- <include file="/path/to/file" /> -->
+
 	<appender name="my.appender.file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${tempDir}/log/mylog.log</file>
 		<encoder>
