@@ -15,5 +15,6 @@
 		<module>example.misc</module>
 		<module>example.resources</module>
 		<module>example.webapp</module>
+		<module>example.webapp.logback</module>
 	</modules>
 </project>
