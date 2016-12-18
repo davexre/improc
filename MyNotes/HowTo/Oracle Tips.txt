@@ -19,6 +19,61 @@ end;
 
 =========================== TITLE ===========================
 =========================== TITLE ===========================
+=========================== TITLE ===========================
+
+=========================== Complex select into statement with custom object, containing arrays ===========================
+create or replace type my_vod as object (
+	id number,
+	title varchar2(200),
+	price number(5,2)
+);
+/
+
+create or replace type my_vod_filter as object (
+	id number,
+	name varchar2(200)
+);
+/
+
+create or replace type my_vod_filter_response as object (
+	vods my_vod_arr,
+	filters my_vod_filter_arr
+);
+/
+
+create or replace type my_vod_tab as table of my_vod;
+/
+create or replace type my_vod_filter_tab as table of my_vod_filter;
+/
+create or replace type my_vod_filter_response as object (
+	vods my_vod_tab,
+	filters my_vod_filter_tab
+);
+/
+
+set serveroutput on;
+declare
+	r my_vod_filter_response;
+begin
+	with 
+	va_data as (
+		select new my_vod(1, 'asd 1', 2.345) v from dual union all
+		select new my_vod(2, 'asd 2', 2.346) from dual union all
+		select new my_vod(3, 'asd 3', 2.347) from dual
+	),
+	fa_data as (
+		select new my_vod_filter(1, 'f1') f from dual union all
+		select new my_vod_filter(2, 'f2') from dual union all
+		select new my_vod_filter(3, 'f3') from dual
+	)
+	select new my_vod_filter_response(
+		CAST (MULTISET (select v from va_data) as my_vod_tab),
+		CAST (MULTISET (select f from fa_data) as my_vod_filter_tab))
+	into r from dual;
+
+	dbms_output.put_line('---');
+end;
+/
 
 =========================== Use shell script to iterate over a recordset ===========================
 (su - oracle -l -c "sqlplus -L -S -s md/vss@mddb" << EOF
