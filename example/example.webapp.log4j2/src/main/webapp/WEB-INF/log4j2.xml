@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration monitorInterval="30">
+	<properties>
+		<property name="logDir">${log4j:configParentLocation}/log/</property>
+	</properties>
+	
+	<appenders>
+		<console name="STDOUT" target="SYSTEM_OUT">
+			<patternLayout pattern="%date{HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n" />
+		</console>
+
+		<servlet name="servlet">
+			<patternLayout pattern="%date{HH:mm:ss.SSS}|%-5level|%-10logger|[%X{userId}]| %msg%n" />
+		</servlet>
+
+		<rollingFile name="rolling.file.appender" fileName="${logDir}/mylog.log" filePattern="${logDir}/mylog_%i.log">
+			<patternLayout pattern="%date{dd.MM.yyyy HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n" />
+			<policies>
+				<sizeBasedTriggeringPolicy size="5 MB" />
+			</policies>
+			<defaultRolloverStrategy max="4" />
+		</rollingFile>
+	</appenders>
+
+	<loggers>
+		<logger name="uk.org.lidalia.sysoutslf4j.context" level="all" />
+		<logger name="example" level="all" />
+		
+		<root level="all">
+			<appenderRef ref="rolling.file.appender" />
+			<appenderRef ref="STDOUT" />
+		</root>
+	</loggers>
+</configuration>

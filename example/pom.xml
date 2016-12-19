@@ -16,5 +16,6 @@
 		<module>example.resources</module>
 		<module>example.webapp</module>
 		<module>example.webapp.logback</module>
+		<module>example.webapp.log4j2</module>
 	</modules>
 </project>
