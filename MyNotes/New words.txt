@@ -14,6 +14,7 @@ diligent
 doctored
 dredge
 dwindling
+encroachment
 flagging
 flog
 fluke
@@ -23,8 +24,10 @@ frigid
 fudge
 furl
 herald
+illegible
 inception
 indemnity
+innocuous
 intromission
 jibe
 lambaste
@@ -41,6 +44,7 @@ peduncle
 peril
 plume
 precarious
+preclude
 proboscis
 prodigious
 prong
@@ -54,11 +58,14 @@ shun
 slander
 slurp up
 smear
+spout
 stalk
+starched
 stifle
 subtle
 subversion
 sway
+remnant
 revamped
 taint
 tenuous
