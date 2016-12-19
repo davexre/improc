@@ -1,4 +1,4 @@
-package example.webapp.logback;
+package example.webapp.logging;
 
 import java.util.logging.Level;
 import java.util.logging.LogManager;

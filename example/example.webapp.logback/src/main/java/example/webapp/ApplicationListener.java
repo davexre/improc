@@ -1,4 +1,4 @@
-package example.webapp.logback;
+package example.webapp;
 
 import java.net.URL;
 
@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
+import example.webapp.logging.JUL;
+import example.webapp.logging.SystemOut;
 
 @WebListener
 public class ApplicationListener implements ServletContextListener {

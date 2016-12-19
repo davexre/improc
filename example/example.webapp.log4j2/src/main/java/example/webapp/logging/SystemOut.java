@@ -1,4 +1,4 @@
-package example.webapp.logback;
+package example.webapp.logging;
 
 import uk.org.lidalia.sysoutslf4j.context.LogLevel;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;

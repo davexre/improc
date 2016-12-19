@@ -1,4 +1,4 @@
-package example.webapp.logback;
+package example.webapp.logging;
 
 import org.apache.log4j.Logger;
 

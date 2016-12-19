@@ -1,9 +1,9 @@
-<%@page import="example.webapp.logback.JUL"%>
-<%@page import="example.webapp.logback.JCL"%>
-<%@page import="example.webapp.logback.SystemOut"%>
-<%@page import="example.webapp.logback.SLF4J"%>
-<%@page import="example.webapp.logback.Log4J"%>
-<%@page import="example.webapp.logback.JUL"%>
+<%@page import="example.webapp.logging.JUL"%>
+<%@page import="example.webapp.logging.JCL"%>
+<%@page import="example.webapp.logging.SystemOut"%>
+<%@page import="example.webapp.logging.SLF4J"%>
+<%@page import="example.webapp.logging.Log4J"%>
+<%@page import="example.webapp.logging.JUL"%>
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@taglib prefix="c"			uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn"			uri="http://java.sun.com/jsp/jstl/functions" %>

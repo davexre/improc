@@ -1,17 +1,20 @@
-package example.webapp.logback;
+package example.webapp.logging;
 
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-public class JUL {
-	static Logger log = Logger.getLogger(JUL.class.getName());
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
+public class JUL {
 	public static void initialise() {
-		LogManager.getLogManager(). reset();
+		LogManager.getLogManager().reset();
+		SLF4JBridgeHandler.install();
 		Logger.getGlobal().setLevel(Level.FINEST);
 	}
 	
+	static Logger log = Logger.getLogger(JUL.class.getName());
+
 	public static void doLog() {
 		log.info   ("JUL: This is an info message");
 		log.fine   ("JUL: This is a fine message");

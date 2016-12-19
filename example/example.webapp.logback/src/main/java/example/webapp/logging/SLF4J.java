@@ -1,4 +1,4 @@
-package example.webapp.logback;
+package example.webapp.logging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
