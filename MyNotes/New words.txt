@@ -1,4 +1,7 @@
+anew
+animosity
 attire
+bode
 canard
 chore
 churn
@@ -41,6 +44,7 @@ murky
 noose
 oyster
 peduncle
+penchant
 peril
 plume
 precarious

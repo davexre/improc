@@ -30,5 +30,7 @@ public class PrivateMethodInheritance {
 	public static void main(String[] args) {
 		Base b = new Child();
 		b.exec();
+		b.privateMethod();
+		((Child) b).privateMethod();
 	}
 }

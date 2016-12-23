@@ -9,8 +9,13 @@ public class StaticClassInitialization {
 	}
 	
 	public static class ClassB {
+		public static final String someConstant = "ClassB.Constant";
 		static {
 			System.out.println("Class B static initialization.");
+		}
+		
+		public static String getSomeString() {
+			return "ClassB.getSomeString";
 		}
 	}
 	
@@ -32,10 +37,13 @@ public class StaticClassInitialization {
 	}
 	
 	public static void main(String[] args) {
-//		System.out.println("Main started.");
-//		StaticClassInitializator a = new StaticClassInitializator();
-//		StaticClassInitializator b = new StaticClassInitializator();
-//		ClassC classC = new ClassC();
+		System.out.println("Main started.");
+		StaticClassInitialization a = new StaticClassInitialization();
+		StaticClassInitialization b = new StaticClassInitialization();
+		ClassC classC = new ClassC();
+		System.out.println(ClassB.class.getName());
+		System.out.println(ClassB.someConstant);
+		System.out.println(ClassB.getSomeString());
 		System.out.println("Main finished.");
 	}
 }
