@@ -35,3 +35,12 @@ Cache & settings
 ================
 Cache folder -> ~/.npm
 Settings     -> ~/.npmrc
+
+Usefull npm commands
+====================
+* show *released* versions of a package
+npm show angular-aria@* version
+* undocumented: show all versions, including pre-relase
+npm show angular-aria versions
+* install a specific version of a package
+npm install angular-aria@1.5.10 --save
