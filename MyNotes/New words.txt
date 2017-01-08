@@ -1,3 +1,6 @@
+abet
+abide
+adrift
 ashen
 anew
 animosity
@@ -12,6 +15,7 @@ collateralize
 collude
 compelling
 conundrum
+corroborate
 cronyism
 crustacean
 culprits
@@ -20,11 +24,13 @@ debacle
 destitute
 diligent
 doctored
+dodge
 dredge
 drivel
 dwindling
 encroachment
 excruciating
+famine
 flagging
 flog
 fluke
@@ -35,6 +41,7 @@ fringe
 fudge
 furl
 herald
+hiatus
 ilk
 illegible
 inception
@@ -50,6 +57,7 @@ lucrative
 lumpy
 meekly
 mendacity
+meticulous
 militate
 monger
 mongering
@@ -64,10 +72,14 @@ plume
 precarious
 preclude
 proboscis
+proclivity
 prodigious
 prong
 putrid
 quackery
+remnant
+revamped
+ruth
 savvy
 scathingly
 scorch
@@ -76,6 +88,7 @@ shoehorn
 shrug off
 shun
 slander
+sloppy
 slurp up
 smear
 spout
@@ -83,11 +96,11 @@ stalk
 stampede
 starched
 stifle
+subpoena
 subtle
 subversion
+succinctly
 sway
-remnant
-revamped
 taint
 tarnish
 tenuous
@@ -99,5 +112,6 @@ trough
 ulterior
 vex
 vengeance
+vindicate
 visceral
 withering
