@@ -5,6 +5,7 @@ ashen
 anew
 animosity
 attire
+belittle
 bode
 canard
 chastise
@@ -15,6 +16,7 @@ collateralize
 collude
 compelling
 conundrum
+contempt
 corroborate
 cronyism
 crustacean
@@ -29,6 +31,7 @@ dredge
 drivel
 dwindling
 encroachment
+exacerbate
 excruciating
 famine
 flagging
@@ -52,6 +55,7 @@ jibe
 keen
 lambaste
 libel
+loathe
 loom
 lucrative
 lumpy
@@ -91,11 +95,15 @@ slander
 sloppy
 slurp up
 smear
+soar
+soot
+sore
 spout
 stalk
 stampede
 starched
 stifle
+stroll
 subpoena
 subtle
 subversion
@@ -112,6 +120,7 @@ trough
 ulterior
 vex
 vengeance
+vile
 vindicate
 visceral
 withering

@@ -87,3 +87,8 @@ mvn enforcer:enforce
 Convert maven project to Eclipse Web Dynamic Project
 mvn eclipse:eclipse -Dwtpversion=R7
 =========
+
+=====================
+mvn archetype:create -DgroupId=test.maven.web -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp
+
+	            	<tomcat-url>http://localhost:8080/manager/html</tomcat-url>

@@ -21,8 +21,12 @@ gconftool-2 --set --type=bool /desktop/gnome/remote_access/enabled true
 /usr/lib/vino/vino-server
 
 
+Interesting & Usefull open source projects
+==========================================
+* Big List of Naughty Strings
+The Big List of Naughty Strings is an evolving list of strings which have a high probability of 
+causing issues when used as user-input data. This is intended for use in helping both automated 
+and manual QA testing; useful for whenever your QA engineer walks into a bar.
+https://github.com/minimaxir/big-list-of-naughty-strings
 
-=====================
-mvn archetype:create -DgroupId=test.maven.web -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp
 
-	            	<tomcat-url>http://localhost:8080/manager/html</tomcat-url>
