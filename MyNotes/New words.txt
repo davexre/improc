@@ -37,6 +37,7 @@ famine
 flagging
 flog
 fluke
+fluster
 foment
 forfeit
 frigid
