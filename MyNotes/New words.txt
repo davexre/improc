@@ -4,6 +4,7 @@ adrift
 ashen
 anew
 animosity
+arrears
 attire
 belittle
 bode
@@ -37,6 +38,7 @@ famine
 flagging
 flog
 fluke
+fluster
 foment
 forfeit
 frigid
@@ -68,6 +70,7 @@ mongering
 murky
 noose
 oyster
+parsimony
 peduncle
 penchant
 peril
