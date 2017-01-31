@@ -9,6 +9,7 @@ attire
 belittle
 bode
 canard
+canvasser
 chastise
 chore
 churn
@@ -24,27 +25,34 @@ crustacean
 culprits
 dainty
 debacle
+descent
 destitute
 diligent
+dissent
 doctored
 dodge
+dossier
 dredge
 drivel
+drove
 dwindling
 encroachment
 exacerbate
 excruciating
 famine
+fickle
 flagging
 flog
 fluke
 fluster
 foment
 forfeit
+fray
 frigid
 fringe
 fudge
 furl
+garner
 herald
 hiatus
 ilk
@@ -56,6 +64,7 @@ intromission
 jibe
 keen
 lambaste
+lax
 libel
 loathe
 loom
@@ -76,6 +85,7 @@ peduncle
 penchant
 peril
 pester
+pinnacle
 plume
 precarious
 preclude
@@ -86,6 +96,8 @@ prong
 putrid
 quackery
 remnant
+reprisal
+resurgent
 revamped
 ruth
 savvy
@@ -95,11 +107,14 @@ shoddy
 shoehorn
 shrug off
 shun
+skein
 slander
+slavishly
 sloppy
 slurp up
 smear
 soar
+solemn
 soot
 sore
 spout
@@ -128,4 +143,6 @@ vengeance
 vile
 vindicate
 visceral
+waver
+whim
 withering
