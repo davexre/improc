@@ -17,6 +17,7 @@ clumpy
 collateralize
 collude
 compelling
+congruent
 conundrum
 contempt
 corroborate
@@ -31,6 +32,7 @@ diligent
 dissent
 doctored
 dodge
+doggedly
 dossier
 dredge
 drivel
@@ -42,6 +44,7 @@ excruciating
 famine
 fickle
 flagging
+flinch
 flog
 fluke
 fluster
@@ -60,6 +63,7 @@ illegible
 inception
 indemnity
 innocuous
+intrepid
 intromission
 jibe
 keen
@@ -122,7 +126,9 @@ stalk
 stance
 stampede
 starched
+staunch
 stifle
+stint
 stroll
 subpoena
 subtle
@@ -143,6 +149,7 @@ vengeance
 vile
 vindicate
 visceral
+voracious
 waver
 whim
 withering

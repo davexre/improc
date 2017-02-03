@@ -1,5 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.Arrays;
 
 import javax.imageio.ImageIO;
@@ -82,10 +83,8 @@ public class Dummy {
 	}
 
 	public static void main(String[] args) {
-		String str = " asd   qwe  ,   zxcaaazzz bbb  ";
-		// for (String s : StringUtils.split(str, ", ")) // str.split("( *, *)"))
-		for (String s : str.split("((aaa)|,|(\\s))+", 0))
-			System.out.println(s);
+		String str = "asd*qew";
+		System.out.println(URLEncoder.encode(str));
 	}
 	public static void main2(String[] args) throws Exception {
 //		Thread.sleep(5000);
