@@ -22,6 +22,7 @@ import org.apache.ddlutils.model.Database;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40;
 import org.apache.derby.jdbc.EmbeddedDataSource40;
 
+import com.slavi.dbutil.ScriptRunner;
 import com.slavi.util.StringPrintStream;
 
 public class Derby {

@@ -15,6 +15,7 @@
 		<module>util.log</module>
 		<module>util.math</module>
 		<module>util.util</module>
+		<module>util.dbutil</module>
 		<module>util.sound</module>
 		<module>util.io</module>
 		<module>util.ui</module>

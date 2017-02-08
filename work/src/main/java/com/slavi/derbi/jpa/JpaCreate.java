@@ -121,7 +121,7 @@ public class JpaCreate {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.setProperty("derby.stream.error.method", "com.slavi.derbi.jpa.DerbyLogOverSlf4j.getLogger");
+		System.setProperty("derby.stream.error.method", "com.slavi.dbutil.DerbyLogOverSlf4j.getLogger");
 		new JpaCreate().doIt();
 		System.out.println("Done.");
 	}

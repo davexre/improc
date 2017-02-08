@@ -21,6 +21,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  * This class contains utility static methods for general purpose.  
  */
@@ -501,5 +504,17 @@ public class Util {
 				return i;
 		}
 		return -1;
+	}
+	
+	public static String objectToString(Object o) {
+		return ReflectionToStringBuilder.toString(o, ToStringStyle.SHORT_PREFIX_STYLE);	
+	}
+	
+	public static <T> T nvl(T value, T defaultValue) {
+		return value == null ? defaultValue : value;
+	}
+	
+	public static <T> T nvl2(Object value, T valueIfNotNull, T valueIfNull) {
+		return value == null ? valueIfNull : valueIfNotNull;
 	}
 }

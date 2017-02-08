@@ -1,4 +1,4 @@
-package com.slavi.derbi.jpa;
+package com.slavi.dbutil;
 
 import java.io.Writer;
 
@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  * Code borrowed from
  * http://www.burnison.ca/articles/redirecting-derbylog-to-an-slf4j-logger
  * 
- * set the java or Derby property
+ * set the java (java -D) or Derby property (/derby.properties)
  * derby.stream.error.method=com.cement.misc.DerbyLogOverSlf4j.getLogger
  */
 public class DerbyLogOverSlf4j extends Writer {

@@ -286,6 +286,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
+			<artifactId>util.dbutil</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.slavi</groupId>
 			<artifactId>util.ui</artifactId>
 		</dependency>
 		<dependency>

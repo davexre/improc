@@ -1,4 +1,4 @@
-package com.slavi.derbi;
+package com.slavi.dbutil;
 
 /*
  * Modified by Pantelis Sopasakis <chvng@mail.ntua.gr> to take care of DILIMITER

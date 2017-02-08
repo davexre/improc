@@ -1,4 +1,4 @@
-package com.slavi.util.db;
+package com.slavi.dbutil;
 
 import java.io.IOException;
 import java.io.InputStream;
