@@ -1,0 +1,11 @@
+Change the logging format of Tomcat
+===================================
+$TOMCAT_HOME/conf.loggin.properties
+java.util.logging.SimpleFormatter.format=%4$-5s|%3$-40s| %5$s %6$s %n
+java.util.logging.ConsoleHandler.formatter = java.util.logging.SimpleFormatter
+
+Logging of Tomcat from Eclipse
+==============================
+Open tomcat launch configuration, Arguments, VM Arguments:
+-Djava.util.logging.SimpleFormatter.format="%4$-1.1s|%3$-40s| %5$s %6$s %n"
+-Djava.util.logging.ConsoleHandler.formatter=java.util.logging.SimpleFormatter

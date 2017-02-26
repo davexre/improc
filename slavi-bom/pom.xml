@@ -219,6 +219,12 @@
 				<groupId>org.springframework.data</groupId>
 				<artifactId>spring-data-jpa</artifactId>
 				<version>${spring-data-jpa.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jcl-over-slf4j</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Web -->
@@ -253,6 +259,26 @@
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.moxy</artifactId>
 				<version>2.6.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>org.eclipse.persistence.jpa</artifactId>
+				<version>2.6.3</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>commonj.sdo</artifactId>
+				<version>2.1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.1.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>1.0.4</version>
 			</dependency>
 
 			<!-- Openimaj (image processing) -->
