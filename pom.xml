@@ -14,11 +14,21 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.test.skip>true</maven.test.skip>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+		<dateFormat>yyyy.MM.dd HH:mm:ss Z</dateFormat>
 		<platform.dependencies>true</platform.dependencies>
+
+		<maven.test.skip>true</maven.test.skip>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
+
+	<scm>
+		<url>https://github.com/slavianp/improc</url>
+		<connection>scm:git:https://github.com/slavianp/improc.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/slavianp/improc.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 
 	<prerequisites>
 		<maven>3.0</maven>
@@ -90,12 +100,37 @@
 					</execution>
 				</executions>
 				<configuration>
-					<dateFormat>yyyy.MM.dd HH:mm:ss</dateFormat>
+					<dateFormat>${dateFormat}</dateFormat>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
 					<generateGitPropertiesFilename>${project.build.outputDirectory}/META-INF/git-info.properties</generateGitPropertiesFilename>
 					<format>properties</format>
 				</configuration>
 			</plugin>
+<!-- 
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>create-metadata</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>create</goal>
+							<goal>create-metadata</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<timestampFormat>${dateFormat}</timestampFormat>
+					<addOutputDirectoryToResources>true</addOutputDirectoryToResources>
+					<outputName>/META-INF/build.properties</outputName>
+					<properties>
+						<branch>${scmBranch}</branch>
+					</properties>
+				</configuration>
+			</plugin>
+ -->
 		</plugins>
 
 		<pluginManagement>
@@ -177,6 +212,19 @@
 							<version>1.0-beta-3</version>
 						</dependency>
 					</dependencies>
+				</plugin>
+				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+					<configuration>
+						<autoVersionSubmodules>true</autoVersionSubmodules>
+						<useReleaseProfile>true</useReleaseProfile>
+						<scmCommentPrefix>Relese: </scmCommentPrefix>
+						<tagNameFormat>R-@{project.version}</tagNameFormat>
+						<updateDependencies>true</updateDependencies>
+					</configuration>
 				</plugin>
 				
 				<plugin>

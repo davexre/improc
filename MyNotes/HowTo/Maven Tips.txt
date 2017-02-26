@@ -91,4 +91,12 @@ mvn eclipse:eclipse -Dwtpversion=R7
 =====================
 mvn archetype:create -DgroupId=test.maven.web -DartifactId=webapp -DarchetypeArtifactId=maven-archetype-webapp
 
-	            	<tomcat-url>http://localhost:8080/manager/html</tomcat-url>
+mvn release:clean clean
+mvn release:prepare -B		# enable maven batch mode, do not prompt
+mvn release:prepare -B -DreleaseVersion=1.2.3
+mvn release:rollback
+mvn release:perform
+mvn release:update-versions -DdevelopmentVersion=1.0.0-SNAPSHOT
+
+mvn scm:validate
+
