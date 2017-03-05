@@ -1,16 +1,16 @@
 .DEFAULT_GOAL = all
 
-SOURCE_DIR := src/
-OUTPUT_DIR := output/
+SOURCE_DIR := src
+OUTPUT_DIR := output
 LIB_NAME   := Arduino
-LIB        := $(OUTPUT_DIR)lib$(LIB_NAME).a
-ARDUINO_LIB_FOLDER := $(SOURCE_DIR)ArduinoLibrary/
-INCLUDE_FOLDERS = $(dir $(wildcard $(SOURCE_DIR)*/) $(wildcard $(ARDUINO_LIB_FOLDER)*/))
+LIB        := $(OUTPUT_DIR)/lib$(LIB_NAME).a
+ARDUINO_LIB_FOLDER := $(SOURCE_DIR)/ArduinoLibrary
+INCLUDE_FOLDERS = $(wildcard $(SOURCE_DIR)/*) $(wildcard $(ARDUINO_LIB_FOLDER)/*)
 INCLUDE = $(foreach dir,$(INCLUDE_FOLDERS),-I"$(dir)" )
 
 MAIN_FILE  = arduino/main.cpp
-MAIN_O     = $(OUTPUT_DIR)$(MAIN_FILE:.cpp=.o)
-MAIN_EXEC  = $(OUTPUT_DIR)$(MAIN_FILE:.cpp=.exec)
+MAIN_O     = $(OUTPUT_DIR)/$(MAIN_FILE:.cpp=.o)
+MAIN_EXEC  = $(OUTPUT_DIR)/$(MAIN_FILE:.cpp=.exec)
 
 CXX      = avr-gcc
 # Idea borrowed from WString.h: added compiler options -felide-constructors -std=c++0x 
@@ -21,9 +21,9 @@ CXXFLAGS = $(INCLUDE) \
  -std="c++11" -funsigned-char -funsigned-bitfields -fno-exceptions -mmcu=atmega328p -DF_CPU=16000000UL
 LDFLAGS  = -Wl,--gc-sections -mrelax -mmcu=atmega328p -lm -lc
 
-rwildcard=$(foreach d,$(notdir $(wildcard $1$2*)),$(call rwildcard,$1,$2$d/,$3) $(filter $(subst *,%,$3),$2$d))
-SOURCE_FILES := $(call rwildcard, $(SOURCE_DIR),, *.cpp *.c)
-OBJS         := $(addprefix $(OUTPUT_DIR), $(addsuffix .o, $(basename $(SOURCE_FILES))))
+rwildcard=$(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2) $(filter $2,$d))
+SOURCE_FILES := $(call rwildcard, $(SOURCE_DIR),%.cpp %.c)
+OBJS := $(patsubst $(SOURCE_DIR)/%,$(OUTPUT_DIR)/%,$(addsuffix .o, $(basename $(SOURCE_FILES))))
 
 -include $(OBJS:.o=.d)
 
@@ -35,10 +35,10 @@ $(CXX) $(CXXFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@ $(@:%.o=%.d)" -c -o "$@" "$
 @((avr-nm $@ | grep " T main$$" > /dev/null) && (echo $(patsubst %.o,%.elf,$@): $@>$(subst .o,.exec,$(@)))) & true
 endef
 
-$(OUTPUT_DIR)%.o: $(SOURCE_DIR)%.c
+$(OUTPUT_DIR)/%.o: $(SOURCE_DIR)/%.c
 	$(call c_build)
 
-$(OUTPUT_DIR)%.o: $(SOURCE_DIR)%.cpp
+$(OUTPUT_DIR)/%.o: $(SOURCE_DIR)/%.cpp
 	$(call c_build)
 
 define obj_dump
@@ -70,7 +70,7 @@ define lib_dump
 	avr-nm -td -C -S "$(1)" >> "$(2)"
 endef
 
-$(OUTPUT_DIR)%.elf: $(OUTPUT_DIR)%.o $(LIB)
+$(OUTPUT_DIR)/%.elf: $(OUTPUT_DIR)/%.o $(LIB)
 	avr-g++ $(LDFLAGS) -L$(OUTPUT_DIR) -Wl,-Map,$(@:.elf=.map),--cref -o "$@" $(@:.elf=.o) \
 		$(if $(shell (avr-nm $(@:.elf=.o) | grep " T loop$$" > /dev/null) && (echo EXEC)),$(MAIN_O)) \
 		 -l$(LIB_NAME)
@@ -78,7 +78,7 @@ $(OUTPUT_DIR)%.elf: $(OUTPUT_DIR)%.o $(LIB)
 	avr-objcopy -R .eeprom -R .fuse -R .lock -R .signature -O ihex "$(@)" "$(@:.elf=.hex)"
 
 ifeq ($(MAKECMDGOALS),all_exec)
-EXEC_FILES := $(filter-out $(MAIN_EXEC),$(call rwildcard,,$(OUTPUT_DIR), *.exec))
+EXEC_FILES := $(filter-out $(MAIN_EXEC),$(call rwildcard,$(OUTPUT_DIR),%.exec))
 LIB_OBJS := $(filter-out $(subst .exec,.o,$(EXEC_FILES) $(MAIN_EXEC)),$(OBJS))
 -include $(EXEC_FILES)
 
@@ -90,8 +90,8 @@ $(LIB): $(LIB_OBJS)
 all_exec: $(LIB) $(EXEC_FILES:.exec=.elf);
 endif
 
-upload_file := $(firstword $(call rwildcard,,$(OUTPUT_DIR), */$(file).hex))
-upload_files = $(sort $(basename $(notdir $(call rwildcard,,$(OUTPUT_DIR), *.hex))))
+upload_file := $(firstword $(call rwildcard,$(OUTPUT_DIR),%/$(file).hex))
+upload_files = $(sort $(basename $(notdir $(call rwildcard,$(OUTPUT_DIR),%.hex))))
 
 define list_hex_files
 	echo "\\n"

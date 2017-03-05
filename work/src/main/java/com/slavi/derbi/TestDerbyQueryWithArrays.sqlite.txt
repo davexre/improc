@@ -2,18 +2,15 @@ create table asd(id int, txt1 varchar(10));
 create table qwe(id int, txt2 varchar(10));
 
 create table emp(
-	id integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
+	id integer primary key autoincrement,
 	name varchar(20), position varchar(20));
 insert into emp(name, position) values('jay','trainee');
 insert into emp(name, position) values('jayes','trainee');
 insert into emp(name, position) values('shail','trainee');
-insert into emp(name, position) values('delme','kuku');
 
 create table channel(
-	id integer not null GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),
-	name varchar(50),
-	
-	primary key (id)
+	id integer primary key autoincrement,
+	name varchar(50)
 );
 
 create table channelSettings(
