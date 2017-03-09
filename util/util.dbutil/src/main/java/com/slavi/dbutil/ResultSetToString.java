@@ -309,6 +309,7 @@ public class ResultSetToString {
 			recordsToShow--;
 		}
 		r.append(delim);
+		rs.close();
 		return r.toString();
 	}
 

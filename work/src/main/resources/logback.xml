@@ -36,6 +36,7 @@
 	<logger level="debug" name="org.eclipse.persistence" />
 	<logger level="info"  name="org.springframework" />
 	<logger level="error" name="Derby" />
+	<logger level="error" name="hsqldb.db" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />
