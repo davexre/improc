@@ -39,6 +39,7 @@ Setting-up a workspace
 	* Quick Bookmarks Plugin
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
+	* P4Eclipse + Perforce Folder Diff Support
 	* ?? LiClipseText
 	* ?? Eclipse Class Decompiler
 	* ?? ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)

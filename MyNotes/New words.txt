@@ -9,6 +9,7 @@ arrears
 assuage
 attire
 belittle
+bequeath
 bode
 canard
 canvasser
@@ -41,7 +42,9 @@ dredge
 drivel
 drove
 dwindling
+elude
 encroachment
+epitome
 exacerbate
 exemplar
 excruciating
@@ -88,6 +91,7 @@ mongering
 murky
 noose
 nugget
+oftentimes
 oyster
 palpable
 parsimony
@@ -114,6 +118,7 @@ ruth
 savvy
 scathingly
 scorch
+scupper
 shoddy
 shoehorn
 shrug off
@@ -121,6 +126,7 @@ shun
 skein
 slander
 slavishly
+slay
 sloppy
 slurp up
 smear

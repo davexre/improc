@@ -8,6 +8,9 @@ https://en.wikipedia.org/wiki/Microsoft_Notification_Protocol
 
 Paste the command in any chat window.
 
+/help
+/alertsoff
+/alertson
 /showplaces - show where you are currently connected
 /dumpmsnp - show details about your connection
 /msnp24 - restart the protocol. also fixes some communication issues
