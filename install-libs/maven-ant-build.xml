@@ -13,7 +13,7 @@
 	<target name="main">
 		<mkdir dir="${download}" />
 		<get dest="${download}" skipexisting="true">
-			<url url="https://netix.dl.sourceforge.net/project/swt-chart/SWTChart/0.8.0/org.swtchart_0.8.0.zip" />
+			<url url="https://netcologne.dl.sourceforge.net/project/swt-chart/SWTChart/0.8.0/org.swtchart_0.8.0.zip" />
 
 			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/j3d-1_5_2-src.zip" />
 			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/vecmath-1_5_2-src.zip" />

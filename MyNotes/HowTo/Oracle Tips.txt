@@ -316,3 +316,38 @@ FROM
 WHERE
 	element_no != 0
 ORDER BY ID, mod_str, element_no;
+
+
+=========================== Find most used and unused DB indexes ===========================
+----- List the indexes
+select a.executions_total, a.elapsed_time_total, i.*
+from dba_indexes i
+left join (
+	select p.object_owner, p.object_name, sum(s.executions_total) executions_total, sum(s.elapsed_time_total) elapsed_time_total
+	from WRH$_SQL_PLAN p
+	join WRH$_SQLTEXT t on p.snap_id = t.snap_id and p.dbid = t.dbid
+	join WRH$_SQLSTAT s on s.snap_id = t.snap_id and s.dbid = t.dbid and s.sql_id = t.sql_id
+	where
+		p.operation = 'INDEX' --and p.object_owner = 'MD'
+		group by p.object_owner, p.object_name
+	) a on i.owner = a.object_owner and i.index_name = a.object_name
+where
+	i.owner = 'MD'
+order by 
+	--i.owner, i.index_name, 
+	a.executions_total desc nulls first;
+
+----- Find which SQL-s are using the indexes
+select a.*, t.sql_text 
+from (
+	select p.object_owner, p.object_name, t.sql_id, sum(s.executions_total) executions_total, sum(s.elapsed_time_total) elapsed_time_total
+	from WRH$_SQL_PLAN p
+	join WRH$_SQLTEXT t on p.snap_id = t.snap_id and p.dbid = t.dbid
+	join WRH$_SQLSTAT s on s.snap_id = t.snap_id and s.dbid = t.dbid and s.sql_id = t.sql_id
+	where
+		p.operation = 'INDEX'
+		--and p.object_owner = 'MD'
+		--and p.object_name = 'CHANNEL_LINEUP_MAP_PK'
+	group by p.object_owner, p.object_name, t.sql_id) a
+join WRH$_SQLTEXT t on a.sql_id = t.sql_id
+order by executions_total desc;
