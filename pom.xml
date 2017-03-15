@@ -244,10 +244,13 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
+										<ignore>true</ignore>
+<!--
 										<execute>
 											<runOnIncremental>true</runOnIncremental>
 											<runOnConfiguration>true</runOnConfiguration>
 										</execute>
+-->
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
