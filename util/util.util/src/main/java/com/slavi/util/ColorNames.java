@@ -2,23 +2,23 @@ package com.slavi.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.slavi.math.MathUtil;
-
 public class ColorNames {
 
 	public static class ColorNameData implements Comparable<ColorNameData> {
-		String name;
-		int color;
-		double h;
-		double s;
-		double l;
+		public final String name;
+		public final int color;
+		public final double h;
+		public final double s;
+		public final double l;
 		
 		public ColorNameData(String name, int color, double hsl[]) {
 			this.name = name;
@@ -38,30 +38,52 @@ public class ColorNames {
 				r = name.compareTo(o.name);
 			return r;
 		}
+		
+		public String toString() {
+			return String.format("%s (0x%06X)", name, color);
+		}
 	}
 	
 	List<ColorNameData> colors = new ArrayList<>();
 
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < colors.size(); i++) {
+			sb.append(i);
+			sb.append(" ");
+			sb.append(colors.get(i).toString());
+			sb.append('\n');
+		}
+		return sb.toString();
+	}
+	
 	public ColorNames() throws IOException {
 		loadDefault();
 	}
 	
 	public void loadDefault() throws IOException {
-		try (InputStream is = getClass().getResourceAsStream("ColorNames.properties")) {
-			Properties colorNamesMapping = new Properties();
-			colorNamesMapping.load(is);
-			load(colorNamesMapping);
+		try (InputStream is = getClass().getResourceAsStream("ColorNames-full.properties")) {
+			load(is);
 		}
+	}
+
+	public void load(InputStream is) throws IOException {
+		Properties colorNamesMapping = new Properties();
+		colorNamesMapping.load(new InputStreamReader(is));
+		load(colorNamesMapping);
 	}
 	
 	public void load(Properties colorNamesMapping) throws IOException {
 		double tmp[] = new double[3];
+		HashSet<Integer> usedColors = new HashSet<>(); // used to remove duplicate colors
 		for (Map.Entry i : colorNamesMapping.entrySet()) {
 			String k = (String) i.getKey();
 			int color = Integer.decode(k);
-			ColorConversion.RGB.fromRGB(color, tmp);
-			ColorConversion.HSL.fromDRGB(tmp, tmp);
-			colors.add(new ColorNameData((String) i.getValue(), color, tmp));
+			if (usedColors.add(color)) {
+				ColorConversion.RGB.fromRGB(color, tmp);
+				ColorConversion.HSL.fromDRGB(tmp, tmp);
+				colors.add(new ColorNameData((String) i.getValue(), color, tmp));
+			}
 		}
 		Collections.sort(colors);
 	}
@@ -73,16 +95,31 @@ public class ColorNames {
 		return (angle < 0) ? C2PI + angle : angle;
 	}
 	
+	public static int fixIndex(int index, int size) {
+		if (size <= 0)
+			return -1;
+		index %= size;
+		if (index < 0)
+			index += size;
+		return index;
+	}
+	
 	/**
 	 * Returns -1 - choose A, 1 - choose B, 0 - A equals B
 	 */
 	public static int snap(double A, double value, double B) {
-		return Double.compare(A, B) == 0 ? 0 : Double.compare(Math.abs(value - A), Math.abs(value - B));
+		return Double.compare(Math.abs(value - A), Math.abs(value - B));
 	}
 	
+
 	public String color2Name(int color) {
+		ColorNameData cd = findClosestColor(color);
+		return cd == null ? "" : cd.name;
+	}
+	
+	public ColorNameData findClosestColor(int color) {
 		if (colors.size() == 0)
-			return "";
+			return null;
 		double tmp[] = new double[3];
 		ColorConversion.RGB.fromRGB(color, tmp);
 		ColorConversion.HSL.fromDRGB(tmp, tmp);
@@ -98,25 +135,25 @@ public class ColorNames {
 				return r;
 			}
 		});
+		ColorNameData cd;
 		if (index < 0) {
-			index = -index;
+			index = -index - 1;
 			ColorNameData cd2 = colors.get(index % colors.size());
 			index--;
-			ColorNameData cd1 = colors.get(index < 0 ? colors.size() - 1 : index);
-			double a = fixAngle2PI(cd2.h - cd1.h);
-			double b = fixAngle2PI(tmp[0] - cd1.h);
-		
+			cd = colors.get(index < 0 ? colors.size() - 1 : index);
+			double a = fixAngle2PI(tmp[0] - cd.h);
+			double b = fixAngle2PI(cd2.h - tmp[0]);
+			int r = snap(0, a, a + b);
+			if (r == 0) {
+				r = snap(cd.s, tmp[1], cd2.s);
+				if (r == 0)
+					r = snap(cd.l, tmp[2], cd2.l);
+			}
+			if (r > 0)
+				cd = cd2;
+		} else {
+			cd = colors.get(index);
 		}
-		System.out.println(index);
-		return "";
-	}
-	
-	void doIt() throws Exception {
-		color2Name(0x0000Fe);
-	}
-
-	public static void main(String[] args) throws Exception {
-		new ColorNames().doIt();
-		System.out.println("Done.");
+		return cd;
 	}
 }

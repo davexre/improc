@@ -44,6 +44,14 @@ public class ColorConversion {
 	}
 	
 	public static class RGB {
+		public static String toString(double DRGB[]) {
+			return toString(toRGB(DRGB));
+		}
+		
+		public static String toString(int color) {
+			return String.format("0x%06X", color);
+		}
+
 		public static void fromDRGB(double DRGB[], double rgb[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], rgb);
 		}
@@ -81,7 +89,7 @@ public class ColorConversion {
 			DRGB[0] = ((rgb >> 16) & 255) / 255.0;
 			DRGB[1] = ((rgb >> 8) & 255) / 255.0;
 			DRGB[2] = ((rgb) & 255) / 255.0;
-		}		
+		}
 	}
 
 	/**
@@ -96,6 +104,10 @@ public class ColorConversion {
 	 * DB - Blue [0..1]
 	 */
 	public static class HSV {
+		public static String toString(double hsv[]) {
+			return String.format("H:%.2f S:%.2f V:%.2f", hsv[0], hsv[1], hsv[2]);
+		}
+
 		public static void fromDRGB(double DRGB[], double hsv[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], hsv);
 		}
@@ -187,6 +199,10 @@ public class ColorConversion {
 	 * DB - Blue [0..1]
 	 */
 	public static class HSL {
+		public static String toString(double hsl[]) {
+			return String.format("H:%.2f S:%.2f L:%.2f", hsl[0], hsl[1], hsl[2]);
+		}
+
 		public static void fromDRGB(double DRGB[], double hsl[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], hsl);
 		}
@@ -284,6 +300,10 @@ public class ColorConversion {
 	 * DB - Blue [0..1]
 	 */
 	public static class CMYK {
+		public static String toString(double cmyk[]) {
+			return String.format("C:%.2f M:%.2f Y:%.2f K:.2f", cmyk[0], cmyk[1], cmyk[2], cmyk[3]);
+		}
+
 		public static void fromDRGB(double DRGB[], double cmyk[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], cmyk);
 		}
@@ -329,6 +349,10 @@ public class ColorConversion {
 	 * W - White (1) /black (-1)
 	 */
 	public static class RBW {
+		public static String toString(double rbw[]) {
+			return String.format("R:%.2f B:%.2f W:%.2f", rbw[0], rbw[1], rbw[2]);
+		}
+
 		public static void fromDRGB(double DRGB[], double rbw[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], rbw);
 		}
