@@ -4,6 +4,7 @@ public class ColorNamesTest {
 	
 	void doIt() throws Exception {
 		ColorNames cn = new ColorNames();
+		cn.loadDefault();
 		
 		System.out.println(cn);
 		int color = 0x0010Fe;

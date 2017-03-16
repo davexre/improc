@@ -520,4 +520,63 @@ public class ColorConversion {
 			HSV.toDRGB(DRGB, DRGB);
 		}
 	}
+
+	/**
+	 * WARNING: NON IDEMPOTENT! Calling fromDRGB and then toDRGB cat result in different values!
+	 * 
+	 * http://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#cvtcolor
+	 * http://www.poynton.com/notes/colour_and_gamma/ColorFAQ.html#RTFToC18
+	 * 
+	 * X - X [0..1]
+	 * Y - Y [0..1]
+	 * Z - Z [0..1]
+	 * 
+	 * DR - Red [0..1]
+	 * DG - Green [0..1]
+	 * DB - Blue [0..1]
+	 */
+	public static class XYZ {
+		public static String toString(double xyz[]) {
+			return String.format("X:%.2f Y:%.2f Z:%.2f", xyz[0], xyz[1], xyz[2]);
+		}
+
+		public static void fromDRGB(double DRGB[], double xyz[]) {
+			fromDRGB(DRGB[0], DRGB[1], DRGB[2], xyz);
+		}
+		
+		public static void toDRGB(double xyz[], double DRGB[]) {
+			toDRGB(xyz[0], xyz[1], xyz[2], DRGB);
+		}
+		
+		/**
+		 * @param xyz	dest[0] = X
+		 * 				dest[1] = Y
+		 * 				dest[2] = Z
+		 */
+		public static void fromDRGB(double DR, double DG, double DB, double xyz[]) {
+			clipDRGB(DR, DG, DB, xyz);
+			clipDRGB(
+				0.412453 * xyz[0] + 0.357580 * xyz[1] + 0.180423 * xyz[2],
+				0.212671 * xyz[0] + 0.715160 * xyz[1] + 0.072169 * xyz[2],
+				0.019334 * xyz[0] + 0.119193 * xyz[1] + 0.950227 * xyz[2],
+				xyz
+			);
+		}
+		
+		public static void toDRGB(double x, double y, double z, double DRGB[]) {
+			clipDRGB(x, y, z, DRGB);
+			/*clipDRGB(
+				3.240479 * DRGB[0] - 1.537150 * DRGB[1] - 0.498535 * DRGB[2],
+				-0.969256* DRGB[0] + 1.875992 * DRGB[1] + 0.041556 * DRGB[2],
+				0.055648 * DRGB[0] - 0.204043 * DRGB[1] + 1.057311 * DRGB[2],
+				DRGB
+			);*/
+			clipDRGB(
+				3.24048134320052660000 * DRGB[0] - 1.53715151627131830000 * DRGB[1] - 0.49853632616888780000 * DRGB[2],
+				-0.96925494999656840000* DRGB[0] + 1.87599000148989070000 * DRGB[1] + 0.04155592655829282000 * DRGB[2],
+				0.05564663913517715000 * DRGB[0] - 0.20404133836651123000 * DRGB[1] + 1.05731106964534430000 * DRGB[2],
+				DRGB
+			);
+		}
+	}
 }

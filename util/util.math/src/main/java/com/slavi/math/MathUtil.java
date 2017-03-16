@@ -28,7 +28,7 @@ public class MathUtil {
 	public static String l10(long d) {
 		return String.format(Locale.US, "%1$10d", d);
 	}
-	
+
 	public static String d4(double d) {
 		return String.format(Locale.US, "%1$10.4f", d);
 	}
@@ -57,11 +57,18 @@ public class MathUtil {
 	}
 	
 	/**
+	 * Returns -1 - choose A, 1 - choose B, 0 - Value is in the middle between A and B or A == B
+	 */
+	public static int snap(double A, double value, double B) {
+		return Double.compare(Math.abs(value - A), Math.abs(value - B));
+	}
+
+	/**
 	 * Returns a number from one range to another. Out-of-range values are re-mapped accordingly.
 	 * The "lower bounds" of either range may be larger or smaller than the "upper bounds". 
 	 */
 	public static double mapValue(double vale, double fromLow, double fromHigh, double toLow, double toHigh) {
-	  return (vale - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
+		return (vale - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
 	}
 	
 	/**
@@ -76,6 +83,18 @@ public class MathUtil {
 	 */
 	public static int clipValue(int value, int min, int max) {
 		return Math.min(max, Math.max(min, value));
+	}
+
+	/**
+	 * Returns the index "within" the 0..size-1 looping past the end if index is out of bounds.
+	 */
+	public static int fixIndex(int index, int size) {
+		if (size <= 0)
+			return -1;
+		index %= size;
+		if (index < 0)
+			index += size;
+		return index;
 	}
 	
 	/**

@@ -207,4 +207,32 @@ public class ColorConversionTest {
 			}
 		}
 	}
+
+	@Test
+	public void testXYZ() {
+		double rgb[] = new double[3];
+		double drgb[] = new double[3];
+		double xyz[] = new double[3];
+		double drgb2[] = new double[3];
+		double rgb2[] = new double[3];
+
+		for (int r = 0; r <= 255; r++) {
+			for (int g = 0; g <= 255; g++) {
+				for (int b = 0; b <= 255; b++) {
+					int color = r << 16 | g << 8 | b;
+					rgb[0] = r;
+					rgb[1] = g;
+					rgb[2] = b;
+
+					ColorConversion.RGB.toDRGB(rgb, drgb);
+					ColorConversion.XYZ.fromDRGB(drgb, xyz);
+					ColorConversion.XYZ.toDRGB(xyz, drgb2);
+					ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+
+					int color2 = ColorConversion.RGB.toRGB(drgb2);
+					Assert.assertEquals("Color not matched", color, color2);
+				}
+			}
+		}
+	}
 }

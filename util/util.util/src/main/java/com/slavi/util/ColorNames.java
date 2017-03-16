@@ -13,52 +13,29 @@ import java.util.Properties;
 
 public class ColorNames {
 
-	public static class ColorNameData implements Comparable<ColorNameData> {
-		public final String name;
-		public final int color;
-		public final double h;
-		public final double s;
-		public final double l;
-		
-		public ColorNameData(String name, int color, double hsl[]) {
-			this.name = name;
-			this.color = color;
-			this.h = hsl[0];
-			this.s = hsl[1];
-			this.l = hsl[2];
-		}
-
-		public int compareTo(ColorNameData o) {
-			int r = Double.compare(h, o.h);
-			if (r == 0)
-				r = Double.compare(s, o.s);
-			if (r == 0)
-				r = Double.compare(l, o.l);
-			if (r == 0)
-				r = name.compareTo(o.name);
-			return r;
-		}
-		
-		public String toString() {
-			return String.format("%s (0x%06X)", name, color);
-		}
+	public static final double C2PI = Math.PI * 2.0;
+	
+	public static double fixAngle2PI(double angle) {
+		angle %= C2PI;
+		return (angle < 0) ? C2PI + angle : angle;
 	}
 	
+	/**
+	 * Returns -1 - choose A, 1 - choose B, 0 - A equals B
+	 */
+	public static int snap(double A, double value, double B) {
+		return Double.compare(Math.abs(value - A), Math.abs(value - B));
+	}
+
 	List<ColorNameData> colors = new ArrayList<>();
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < colors.size(); i++) {
-			sb.append(i);
-			sb.append(" ");
 			sb.append(colors.get(i).toString());
 			sb.append('\n');
 		}
 		return sb.toString();
-	}
-	
-	public ColorNames() throws IOException {
-		loadDefault();
 	}
 	
 	public void loadDefault() throws IOException {
@@ -88,30 +65,6 @@ public class ColorNames {
 		Collections.sort(colors);
 	}
 	
-	public static final double C2PI = Math.PI * 2.0;
-	
-	public static double fixAngle2PI(double angle) {
-		angle %= C2PI;
-		return (angle < 0) ? C2PI + angle : angle;
-	}
-	
-	public static int fixIndex(int index, int size) {
-		if (size <= 0)
-			return -1;
-		index %= size;
-		if (index < 0)
-			index += size;
-		return index;
-	}
-	
-	/**
-	 * Returns -1 - choose A, 1 - choose B, 0 - A equals B
-	 */
-	public static int snap(double A, double value, double B) {
-		return Double.compare(Math.abs(value - A), Math.abs(value - B));
-	}
-	
-
 	public String color2Name(int color) {
 		ColorNameData cd = findClosestColor(color);
 		return cd == null ? "" : cd.name;

@@ -270,6 +270,26 @@ public class Matrix {
 			throw new IndexOutOfBoundsException();
 		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
+	
+	/**
+	 * @see Matrix#getVectorItem(int)
+	 */
+	public void loadFromVector(double vector[]) {
+		if (vector.length != getVectorSize())
+			throw new Error("Invalid argument");
+		for (int i = vector.length - 1; i >= 0 ; i--)
+			setVectorItem(i, vector[i]);
+	}
+	
+	/**
+	 * @see Matrix#getVectorItem(int)
+	 */
+	public double[] getVector() {
+		double vector[] = new double[getVectorSize()];
+		for (int i = vector.length - 1; i >= 0 ; i--)
+			vector[i] = getVectorItem(i);
+		return vector;
+	}
 
 	/**
 	 * Multiplies two matrices and stores the result in dest matrix. If the dest
