@@ -296,9 +296,10 @@ public class Matrix {
 	 * matrix is of incorrect size it will be resized. The formula is:<br>
 	 * <tt>dest = this * second<br>
 	 * </tt>
+	 * Requires: this != second != dest
 	 */
 	public void mMul(Matrix second, Matrix dest) {
-		if (sizeX != second.sizeY) {
+		if (sizeX != second.sizeY || this == second || this == dest || second == dest) {
 			throw new Error("Invalid argument");
 		}
 		dest.resize(second.sizeX, sizeY);
@@ -319,6 +320,7 @@ public class Matrix {
 	 * it will be resized to the same size as the source matrix. The formula is:<br>
 	 * <tt>dest[i, j] = this[i, j] + second[i, j]<br>
 	 * </tt>
+	 * Allows: this == second == dest
 	 */
 	public void mSum(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -337,6 +339,7 @@ public class Matrix {
 	 * formula is:<br>
 	 * <tt>dest[i, j] = this[i, j] - second[i, j]<br>
 	 * </tt>
+	 * Allows: this == second == dest
 	 */
 	public void mSub(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -366,6 +369,7 @@ public class Matrix {
 
 	/**
 	 * Performs an abs to the elements of the matrix and stores the result in dest matrix.
+	 * Allows: this == dest
 	 */
 	public void termAbs(Matrix dest) {
 		dest.resize(sizeX, sizeY);
@@ -381,6 +385,7 @@ public class Matrix {
 	 * The formula is:<br>
 	 * <tt>dest[i, j] = this[i, j] * second[i, j]<br>
 	 * </tt>
+	 * Allows: this == dest
 	 */
 	public void termMul(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -399,6 +404,7 @@ public class Matrix {
 	 * <tt>dest[i, j] = this[i, j] / second[i, j]<br>
 	 * </tt> <b>Warning:</b><i>If there is an element that is zero, an
 	 * exception will rise <code>java.lang.ArithmeticException</code>.</i>
+	 * Allows: this == second == dest
 	 */
 	public void termDiv(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -578,6 +584,7 @@ public class Matrix {
 	 * be resized. The formula is:<br>
 	 * <tt>dest[i, j] = max( this[i, j] , second[i, j] )<br>
 	 * </tt>
+	 * Allows: this == second == dest
 	 */
 	public void mMax(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -585,9 +592,11 @@ public class Matrix {
 		}
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--)
-				dest.setItem(i, j, (getItem(i, j) > second.getItem(i, j) ? getItem(i, j)
-						: second.getItem(i, j)));
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a > b ? a : b);
+			}
 	}
 
 	/**
@@ -596,6 +605,7 @@ public class Matrix {
 	 * be resized. The formula is:<br>
 	 * <tt>dest[i, j] = min( this[i, j] , second[i, j] )<br>
 	 * </tt>
+	 * Allows: this == second == dest
 	 */
 	public void mMin(Matrix second, Matrix dest) {
 		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
@@ -603,16 +613,22 @@ public class Matrix {
 		}
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--)
-				dest.setItem(i, j, (getItem(i, j) < second.getItem(i, j) ? getItem(i, j)
-						: second.getItem(i, j)));
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a < b ? a : b);
+			}
 	}
 
 	/**
 	 * Makes a transposed matirx of this matrix. If the dest matrix is of
 	 * incorrect size it will be resized.
+	 * Requires: this != dest
 	 */
 	public void transpose(Matrix dest) {
+		if (this == dest) {
+			throw new Error("Invalid argument");
+		}
 		dest.resize(sizeY, sizeX);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
@@ -709,6 +725,7 @@ public class Matrix {
 	/**
 	 * Copies this matrix to a destination. The destination is resized if
 	 * necessary.
+	 * Allows: this == dest
 	 */
 	public void copyTo(Matrix dest) {
 		dest.resize(sizeX, sizeY);
@@ -945,23 +962,24 @@ public class Matrix {
 		}
 		double D;
 		double result = 1;
-		Matrix cpy = makeCopy();
+		Matrix tmp = makeCopy();
 
 		for (int i = 0; i < sizeX; i++) {
-			if (cpy.getItem(i, i) == 0) {
+			if (tmp.getItem(i, i) == 0) {
 				boolean err = true;
 				for (int a = sizeY - 1; a > i; a--)
-					if (cpy.getItem(i, a) != 0) {
-						cpy.sumY(i, a);
+					if (tmp.getItem(i, a) != 0) {
+						tmp.sumY(i, a);
 						err = false;
+						break;
 					}
 				if (err)
 					return 0; // 0 -> the matrix has NO determinant
 			}
 
-			D = cpy.getItem(i, i);
+			D = tmp.getItem(i, i);
 			if (D != 1) {
-				cpy.mulY(i, 1 / D);
+				tmp.mulY(i, 1 / D);
 				result /= D;
 			}
 
@@ -969,9 +987,9 @@ public class Matrix {
 				if (a != i) {
 					D = getItem(a, i);
 					if (D != 0) {
-						cpy.mulY(a, -1 / D);
+						tmp.mulY(a, -1 / D);
 						result /= -D;
-						cpy.sumY(a, i);
+						tmp.sumY(a, i);
 					}
 				}
 		}
