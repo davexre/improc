@@ -32,7 +32,7 @@ public class Matrix {
 	public Matrix() {
 		resize(0, 0);
 	}
-	
+
 	/**
 	 * Creates a matrix with aSizeX columns and aSizeY rows and sets all
 	 * elements to 0.
@@ -43,7 +43,7 @@ public class Matrix {
 
 	/**
 	 * Compares two matrices element by element.
-	 * 
+	 *
 	 * @return Returns true if all the elements of the matrices are equal.
 	 */
 	public boolean equals(Object obj) {
@@ -75,7 +75,7 @@ public class Matrix {
 					return false;
 		return true;
 	}
-	
+
 	public String toMatlabString(String variableName) {
 		StringBuilder result = new StringBuilder();
 		result.append(variableName);
@@ -92,7 +92,7 @@ public class Matrix {
 		result.append("];");
 		return result.toString();
 	}
-	
+
 	public String toOneLineString() {
 		StringBuilder result = new StringBuilder();
 		for (int j = 0; j < sizeY; j++) {
@@ -106,7 +106,7 @@ public class Matrix {
 		}
 		return result.toString();
 	}
-	
+
 	public static Matrix fromOneLineString(String str) {
 		StringTokenizer st = new StringTokenizer(str, ";");
 		int sizeY = st.countTokens();
@@ -126,7 +126,7 @@ public class Matrix {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
@@ -149,7 +149,7 @@ public class Matrix {
 	public void load(BufferedReader fin) throws IOException {
 		for (int j = 0; j < sizeY; j++) {
 			StringTokenizer st = new StringTokenizer(fin.readLine());
-			for (int i = 0; i < sizeX; i++) 
+			for (int i = 0; i < sizeX; i++)
 				setItem(i, j, st.hasMoreTokens() ? Double.parseDouble(st.nextToken()) : 0.0);
 		}
 	}
@@ -167,7 +167,7 @@ public class Matrix {
 			fou.print("\n");
 		}
 	}
-	
+
 	public double[][] toArray() {
 		double [][] r = new double[getSizeX()][getSizeY()];
 		for (int i = getSizeX() - 1; i >= 0; i--) {
@@ -248,12 +248,12 @@ public class Matrix {
 	 *        a b c d<br>
 	 *        e f j h<br>
 	 *        i j k l<br>
-	 *       <br> 
+	 *       <br>
 	 *       The same matrix as vector [12] sizeX*sizeY = 4*3 = 12<br>
 	 *  &nbsp;a b c d e f j h i j k l     <br>
 	 *       | Y = 1 | Y = 2 | Y = 3 |    <br>
 	 * </tt>
-	 * 
+	 *
 	 * @return The value at the specified position.
 	 */
 	public double getVectorItem(int aIndex) {
@@ -270,7 +270,7 @@ public class Matrix {
 			throw new IndexOutOfBoundsException();
 		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
-	
+
 	/**
 	 * @see Matrix#getVectorItem(int)
 	 */
@@ -280,7 +280,17 @@ public class Matrix {
 		for (int i = vector.length - 1; i >= 0 ; i--)
 			setVectorItem(i, vector[i]);
 	}
-	
+
+	/**
+	 * @see Matrix#getVectorItem(int)
+	 */
+	public void loadFromVector(int vector[]) {
+		if (vector.length != getVectorSize())
+			throw new Error("Invalid argument");
+		for (int i = vector.length - 1; i >= 0 ; i--)
+			setVectorItem(i, vector[i]);
+	}
+
 	/**
 	 * @see Matrix#getVectorItem(int)
 	 */
@@ -484,7 +494,7 @@ public class Matrix {
 			}
 		return D;
 	}
-	
+
 	/**
 	 * Returns the minimum value of all elements of the matrix.
 	 */
@@ -500,7 +510,7 @@ public class Matrix {
 	}
 
 	/**
-	 * Return the matrix one norm value that is equal to the maximum of the 
+	 * Return the matrix one norm value that is equal to the maximum of the
 	 * column sums of the absolute values of the array elements.
 	 * <p>
 	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
@@ -513,18 +523,18 @@ public class Matrix {
 	 */
 	public double getOneNorm() {
 		double result = 0.0;
-		for (int i = sizeX - 1; i >= 0; i--) {  
+		for (int i = sizeX - 1; i >= 0; i--) {
 			double d = 0.0;
-			for (int j = sizeY - 1; j >= 0; j--)  
+			for (int j = sizeY - 1; j >= 0; j--)
 				d += Math.abs(getItem(i, j));
 			if (d > result)
 				result = d;
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Return the infinity norm of the matrix that is equal to the 
+	 * Return the infinity norm of the matrix that is equal to the
 	 * maximum of the row sums of the absolute values of the array elements.
 	 * <p>
 	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
@@ -537,16 +547,16 @@ public class Matrix {
 	 */
 	public double getNormInfinity() {
 		double result = 0.0;
-		for (int j = sizeY - 1; j >= 0; j--) { 
+		for (int j = sizeY - 1; j >= 0; j--) {
 			double d = 0.0;
-			for (int i = sizeX - 1; i >= 0; i--)  
+			for (int i = sizeX - 1; i >= 0; i--)
 				d += Math.abs(getItem(i, j));
 			if (d > result)
 				result = d;
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Return the Frobenius norm of the matrix.
 	 * <p>
@@ -561,7 +571,7 @@ public class Matrix {
 	public double getForbeniusNorm() {
 		double scale = 0.0;
 		double sum = 1.0;
-		for (int i = sizeX - 1; i >= 0; i--) 
+		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
 				double d = Math.abs(getItem(i, j));
 				if (d != 0.0) {
@@ -641,7 +651,7 @@ public class Matrix {
 	 * formula is:<br>
 	 * <tt>this[i, j] = this[i, j] / sum ( this[i, j] )<br>
 	 * </tt>
-	 * 
+	 *
 	 * @return Returns true on success.
 	 */
 	public boolean normalize() {
@@ -668,7 +678,7 @@ public class Matrix {
 		double minVal = maxVal;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				double value = getItem(i, j); 
+				double value = getItem(i, j);
 				if (maxVal < value)
 					maxVal = value;
 				if (minVal > value)
@@ -679,7 +689,7 @@ public class Matrix {
 			make0();
 		} else {
 			for (int i = sizeX - 1; i >= 0; i--)
-				for (int j = sizeY - 1; j >= 0; j--) 
+				for (int j = sizeY - 1; j >= 0; j--)
 					setItem(i, j, (getItem(i, j) - minVal) / delta);
 		}
 	}
@@ -696,7 +706,7 @@ public class Matrix {
 			}
 		return D;
 	}
-	
+
 	/**
 	 * Normalizes the matrix so that the sum of the squares of all element is 1.
 	 */
@@ -710,10 +720,10 @@ public class Matrix {
 		rMul(D);
 		return true;
 	}
-	
+
 	/**
 	 * Makes a copy of the matrix.
-	 * 
+	 *
 	 * @return Returns the new matrix.
 	 */
 	public Matrix makeCopy() {
@@ -754,7 +764,7 @@ public class Matrix {
 			}
 		return result;
 	}
-	
+
 	/**
 	 * Returns true if this matrix is the identity matrix
 	 */
@@ -762,13 +772,13 @@ public class Matrix {
 		tolerance = Math.abs(tolerance);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--) {
-				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j); 
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
 				if (Math.abs(d) > tolerance)
 					return false;
 			}
 		return true;
 	}
-	
+
 	public double getSquaredDeviationFrom0() {
 		double result = 0.0;
 		for (int i = sizeX - 1; i >= 0; i--)
@@ -778,7 +788,7 @@ public class Matrix {
 			}
 		return result;
 	}
-	
+
 	/**
 	 * Makes a zero matrix. All elements are set to 0.
 	 */
@@ -787,9 +797,9 @@ public class Matrix {
 			for (int j = sizeY - 1; j >= 0; j--)
 				setItem(i, j, 0.0);
 	}
-	
+
 	/**
-	 * Returns true if all elements are 0. 
+	 * Returns true if all elements are 0.
 	 */
 	public boolean is0(double tolerance) {
 		tolerance = Math.abs(tolerance);
@@ -888,7 +898,7 @@ public class Matrix {
 	 * Calculates the inverse matrix of this matrix. The algorithm calculates
 	 * the inverse matrix "in place" and does NOT create any intermediate
 	 * matrices.
-	 * 
+	 *
 	 * @return Returns true if the inverse matrix is computable. If the inverse
 	 *         matrix can not be computed this.make0 is called and the returned
 	 *         value is false.
@@ -952,7 +962,7 @@ public class Matrix {
 	/**
 	 * Computes the determinant of this matrix. While computing the determinant
 	 * creates internally a matrix of the same size as this.
-	 * 
+	 *
 	 * @return Returns the determinant of the matrix or 0 if the determinant is
 	 *         incomputable.
 	 */
@@ -1066,11 +1076,11 @@ public class Matrix {
 			double xnorm = 0.0;
 			for (int i = getSizeX() - 1; i > atIndex; i--)
 				xnorm = MathUtil.hypot(xnorm, getItem(i, atIndex));
-			if (xnorm == 0.0) { 
+			if (xnorm == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
 			}
-				
+
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
@@ -1084,17 +1094,17 @@ public class Matrix {
 			double tmp_tau = (beta - alpha) / beta;
 			tau.setItem(atIndex, 0, tmp_tau);
 			double scale = 1.0 / (alpha - beta);
-			for (int i = getSizeX() - 1; i > atIndex; i--) 
+			for (int i = getSizeX() - 1; i > atIndex; i--)
 				setItem(i, atIndex, scale * getItem(i, atIndex));
 			// End DLARFG
-			
+
 			// DGELQ2:109 Apply H(i) to A(i+1:m,i:n) from the right
 			setItem(atIndex, atIndex, 1.0);
 			svdDLARF_Y(atIndex, tmp_tau);
 			setItem(atIndex, atIndex, beta);
 		}
 	}
-	
+
 	public void lqDecompositionGetL(Matrix l) {
 		l.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
@@ -1105,7 +1115,7 @@ public class Matrix {
 	public void lqDecompositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeY()) || (tau.getSizeY() != 1))
 			throw new IllegalArgumentException("Invalid parameter");
-		
+
 		q.resize(getSizeX(), getSizeX());
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeX() - 1; j >= 0; j--)
@@ -1121,7 +1131,7 @@ public class Matrix {
 					q.setItem(i, atIndex, q.getItem(i, atIndex) * (-tmp_tau));
 				q.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				for (int i = atIndex - 1; i >= 0; i--)
-					q.setItem(i, atIndex, 0.0);				
+					q.setItem(i, atIndex, 0.0);
 			}
 		}
 	}
@@ -1137,7 +1147,7 @@ public class Matrix {
 	// private static final double SAFMIN = 1.0E-30; // 2.00416836E-292;
 	public void qrDecomposition(Matrix tau) {
 		int minXY = Math.min(sizeX, sizeY);
-		
+
 		if ((tau.getSizeX() < minXY) || (tau.getSizeY() < 1))
 			tau.resize(minXY, 1);
 		for (int atIndex = 0; atIndex < minXY; atIndex++) {
@@ -1150,11 +1160,11 @@ public class Matrix {
 			double xnorm = 0.0;
 			for (int j = getSizeY() - 1; j > atIndex; j--)
 				xnorm = MathUtil.hypot(xnorm, getItem(atIndex, j));
-			if (xnorm == 0.0) { 
+			if (xnorm == 0.0) {
 				tau.setItem(atIndex, 0, 0.0);
 				continue;
 			}
-				
+
 			double alpha = getItem(atIndex, atIndex);
 			//double beta = -SIGN(Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2)), alpha);
 			//double beta = Math.sqrt(Math.pow(alpha, 2) + Math.pow(xnorm, 2));
@@ -1168,24 +1178,24 @@ public class Matrix {
 			double tmp_tau = (beta - alpha) / beta;
 			tau.setItem(atIndex, 0, tmp_tau);
 			double scale = 1.0 / (alpha - beta);
-			for (int j = getSizeY() - 1; j > atIndex; j--) 
+			for (int j = getSizeY() - 1; j > atIndex; j--)
 				setItem(atIndex, j, scale * getItem(atIndex, j));
 			// End DLARFG
-			
+
 			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
 			setItem(atIndex, atIndex, 1.0);
 			svdDLARF_X(atIndex, tmp_tau);
 			setItem(atIndex, atIndex, beta);
 		}
 	}
-	
+
 	public void qrDecomositionGetR(Matrix r) {
 		r.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				r.setItem(i, j, i < j ? 0.0 : getItem(i, j));
 	}
-	
+
 	public void qrDecomositionGetQ(Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < getSizeX()) || (tau.getSizeY() < 1))
 			throw new IllegalArgumentException("Invalid parameter");
@@ -1204,11 +1214,11 @@ public class Matrix {
 					q.setItem(atIndex, j, q.getItem(atIndex, j) * (-tmp_tau));
 				q.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				for (int j = atIndex - 1; j >= 0; j--)
-					q.setItem(atIndex, j, 0.0);				
+					q.setItem(atIndex, j, 0.0);
 			}
 		}
 	}
-	
+
 	/**
 	 * DLARF applies a real elementary reflector H to a real m by n matrix
 	 * C, from either the left or the right. H is represented in the form
@@ -1221,9 +1231,9 @@ public class Matrix {
 
 		for (int i = getSizeX() - 1; i > atX; i--) {
 			double sum = 0.0;
-			for (int j = getSizeY() - 1; j >= atX; j--) 
+			for (int j = getSizeY() - 1; j >= atX; j--)
 				sum += getItem(i, j) * getItem(atX, j);
-			for (int j = getSizeY() - 1; j >= atX; j--) 
+			for (int j = getSizeY() - 1; j >= atX; j--)
 				setItem(i, j, getItem(i, j) - tau * sum * getItem(atX, j));
 		}
 	}
@@ -1239,18 +1249,18 @@ public class Matrix {
 	private void svdDLARF_Y(int atY, double tau) {
 		for (int j = getSizeY() - 1; j > atY; j--) {
 			double sum = 0.0;
-			for (int i = getSizeX() - 1; i >= atY; i--) 
+			for (int i = getSizeX() - 1; i >= atY; i--)
 				sum += getItem(i, j) * getItem(i, atY);
-			for (int i = getSizeX() - 1; i >= atY; i--) 
+			for (int i = getSizeX() - 1; i >= atY; i--)
 				setItem(i, j, getItem(i, j) - tau * sum * getItem(i, atY));
 		}
 	}
-	
+
 /*	public void luDecomposition() {
 		boolean found;
 		Matrix permMatr = new Matrix(getSizeX(), getSizeY());
 		permMatr.makeE();
-		
+
 		for (int k = 0; k < getSizeX(); k++)
 			for (int i = k + 1; k < getSizeX(); i++) {
 				if (getItem(k, k) == 0.0) {
@@ -1266,7 +1276,7 @@ public class Matrix {
 					if (!found)
 						throw new ArithmeticException("LU decomposition failed. Matrix is singular");
 				}
-				
+
 				throw new RuntimeException("not implemented");
 				// ????
 			}

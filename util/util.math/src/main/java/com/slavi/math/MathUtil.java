@@ -56,6 +56,14 @@ public class MathUtil {
 		return String.format(Locale.US, "% 4.0f°%2d'%4.1f\"", gr, min, sec);
 	}
 	
+	public static boolean isInRange(double value, double minValue, double maxValue) {
+		return minValue <= value && value <= maxValue;
+	}
+	
+	public static boolean isInRange(int value, int minValue, int maxValue) {
+		return minValue <= value && value <= maxValue;
+	}
+
 	/**
 	 * Returns -1 - choose A, 1 - choose B, 0 - Value is in the middle between A and B or A == B
 	 */
@@ -88,12 +96,22 @@ public class MathUtil {
 	/**
 	 * Returns the index "within" the 0..size-1 looping past the end if index is out of bounds.
 	 */
-	public static int fixIndex(int index, int size) {
+	public static int fixIndexLooped(int index, int size) {
 		if (size <= 0)
 			return -1;
 		index %= size;
 		if (index < 0)
 			index += size;
+		return index;
+	}
+
+	public static int fixIndex(int index, int size) {
+		if (index < 0)
+			index = 0;
+		if (index >= size)
+			index = size - 1;
+		if (size <= 0)
+			return -1;
 		return index;
 	}
 	
