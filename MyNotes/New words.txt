@@ -5,12 +5,14 @@ ashen
 allude
 anew
 animosity
+ardent
 arrears
 assuage
 attire
 belittle
 bequeath
 bode
+bonkers
 canard
 canvasser
 chastise
@@ -162,9 +164,11 @@ tumultuous
 ulterior
 vex
 vengeance
+vernacular
 vile
 vindicate
 visceral
+vociferous
 voracious
 waver
 whim

@@ -12,14 +12,14 @@ import com.slavi.util.Marker;
 
 
 public class Dummy {
-	
+
 	double r[] = new double[256];
 	double g[] = new double[256];
 	double b[] = new double[256];
 	double l[] = new double[256];
 	double s[] = new double[256];
 	double v[] = new double[256];
-	
+
 	double DRGB[] = new double[3];
 	double HSL[] = new double[3];
 //		double HSV[] = new double[3];
@@ -27,7 +27,7 @@ public class Dummy {
 
 		final int sizeX = bi.getWidth() - 1;
 		final int sizeY = bi.getHeight() - 1;
-		
+
 		int ffcount = 0;
 		for (int j = sizeY; j >= 0; j--) {
 			for (int i = sizeX; i >= 0; i--) {
@@ -45,7 +45,7 @@ public class Dummy {
 //				v[(int) Math.round(HSV[2] * 255.0)]++;
 			}
 		}
-		
+
 		// calc cumul
 /*		{
 			double cumul[] = s;
@@ -71,7 +71,7 @@ public class Dummy {
 				v[i] = c / sum;
 			}
 		}*/
-		
+
 /*		System.out.println("FF=" + ffcount);
 		System.out.println("R[255] = " + r[255]);
 		System.out.println("G[255] = " + g[255]);
