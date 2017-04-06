@@ -4,14 +4,10 @@ import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -19,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.ann.ANN;
-import com.slavi.ann.NNLayer;
 import com.slavi.ann.NNSimpleLayer;
 import com.slavi.ann.NNet;
 import com.slavi.math.MathUtil;
@@ -114,17 +109,20 @@ public class MnistData {
 	}
 
 	void doIt() throws Exception {
-		//downloadMnistFiles(new File(targetDir));
+		//downloadMnistFiles();
+		
+		Marker.mark("Read");
 		//List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
 		List<MnistPattern> pats = readMnistSet(trainingFileLabels, trainingFiles);
-
+		Marker.release();
+		
 		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
 
 		ObjectMapper mapper = Utils.jsonMapper();
 		int insize = 28*28;
-		NNet nnet = new NNet(NNSimpleLayer.class,
+		NNet nnet = new NNet(NNSimpleLayer3.class,
 				insize,
-				50, 10);
+				10, 10);
 		nnet.setLearningRate(1);
 		nnet.setMomentum(1);
 		nnet.eraseMemory();
@@ -132,6 +130,8 @@ public class MnistData {
 		int maxPattern = pats.size();
 		int maxPatternTrain = maxPattern / 2;
 
+		Marker.mark("Total");
+		Marker.mark("Train");
 		double input[] = new double[insize];
 		double op[] = new double[10];
 		//for (int epoch = 0; epoch < 1; epoch++)
@@ -149,7 +149,7 @@ public class MnistData {
 					er[i] = op[i] - er[i];
 				nnet.backPropagate(er);
 			}
-
+		Marker.releaseAndMark("Recall");
 		double max[] = new double[10];
 		ANN.zeroArray(max);
 
@@ -174,6 +174,7 @@ public class MnistData {
 			System.out.print(String.format("%8.5f ", max[i]));
 		System.out.println("]");
 		//System.out.println(mapper.writeValueAsString(nnet));
+		Marker.release();
 
 	}
 
