@@ -1,11 +1,13 @@
 package com.slavi.ann;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class NNet extends NNLayerBase {
 
-	private ArrayList<NNLayer> layers = new ArrayList<NNLayer>();
+	public List<NNLayer> layers = new ArrayList<NNLayer>();
 
 	public void setLearningRate(double learningRate) {
 		super.setLearningRate(learningRate);
@@ -19,11 +21,24 @@ public class NNet extends NNLayerBase {
 			layers.get(i).setLearningRate(learningRate);
 	}
 
-	// TODO: Fix this warning
-	@SuppressWarnings("unchecked")
 	public NNet(int sizeInput, int sizeOutput) {
-		this(sizeInput, new int[] { sizeInput * 2, sizeOutput }, 
+		this(sizeInput, new int[] { sizeInput * 2, sizeOutput },
 			new Class[] { NNClassicLayer.class, NNClassicLayer.class });
+	}
+
+	public NNet(ArrayList<NNLayer> layers) {
+		super(layers.get(0).getInput().length, layers.get(layers.size() - 1).getOutput().length);
+		this.layers = layers;
+	}
+
+	public NNet(Class<? extends NNLayer> layerClass, Integer ... sizes) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		super(sizes[0], sizes[sizes.length - 1]);
+		Integer startSize = sizes[0];
+		Constructor<? extends NNLayer> c = layerClass.getConstructor(int.class, int.class);
+		for (int i = 1; i < sizes.length; i++) {
+			layers.add(c.newInstance(new Integer(startSize), sizes[i]));
+			startSize = sizes[i];
+		}
 	}
 
 	public NNet(int sizeInput, int[] outputSizes, Class<? extends NNLayer>[] layerClasses) {

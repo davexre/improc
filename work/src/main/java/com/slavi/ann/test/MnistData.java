@@ -4,8 +4,10 @@ import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -14,6 +16,14 @@ import javax.imageio.ImageIO;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slavi.ann.ANN;
+import com.slavi.ann.NNLayer;
+import com.slavi.ann.NNSimpleLayer;
+import com.slavi.ann.NNet;
+import com.slavi.math.MathUtil;
+import com.slavi.util.Marker;
 
 public class MnistData {
 
@@ -105,12 +115,70 @@ public class MnistData {
 
 	void doIt() throws Exception {
 		//downloadMnistFiles(new File(targetDir));
-		List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
-		ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
+		//List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
+		List<MnistPattern> pats = readMnistSet(trainingFileLabels, trainingFiles);
+
+		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
+
+		ObjectMapper mapper = Utils.jsonMapper();
+		int insize = 28*28;
+		NNet nnet = new NNet(NNSimpleLayer.class,
+				insize,
+				50, 10);
+		nnet.setLearningRate(1);
+		nnet.setMomentum(1);
+		nnet.eraseMemory();
+
+		int maxPattern = pats.size();
+		int maxPatternTrain = maxPattern / 2;
+
+		double input[] = new double[insize];
+		double op[] = new double[10];
+		//for (int epoch = 0; epoch < 1; epoch++)
+			for (int index = 0;
+					index < maxPatternTrain; //pats.size()
+					index++) {
+				MnistPattern pat = pats.get(index);
+				for (int i = 0; i < insize; i++)
+					input[i] = MathUtil.mapValue(pat.image[i], 0, 255, 0, 1);
+				for (int i = 0; i < 10; i++)
+					op[i] = pat.label == i ? 1 : 0;
+				nnet.feedForward(input);
+				double[] er = nnet.getOutput();
+				for (int i = er.length - 1; i >= 0; i--)
+					er[i] = op[i] - er[i];
+				nnet.backPropagate(er);
+			}
+
+		double max[] = new double[10];
+		ANN.zeroArray(max);
+
+		for (int index = 0;
+				index < maxPattern; //pats.size()
+				index++) {
+			MnistPattern pat = pats.get(index);
+			for (int i = 0; i < insize; i++)
+				input[i] = MathUtil.mapValue(input[i], 0, 255, 0, 1);
+			for (int i = 0; i < 10; i++)
+				op[i] = pat.label == i ? 1 : 0;
+			nnet.feedForward(input);
+			double[] er = nnet.getOutput();
+			for (int i = er.length - 1; i >= 0; i--)
+				er[i] = op[i] - er[i];
+			for (int i = er.length - 1; i >= 0; i--)
+				max[i] = Math.max(max[i], er[i]);
+		}
+
+		System.out.print("[");
+		for (int i = 0; i < max.length; i++)
+			System.out.print(String.format("%8.5f ", max[i]));
+		System.out.println("]");
+		//System.out.println(mapper.writeValueAsString(nnet));
+
 	}
 
 	public static void main(String[] args) throws Exception {
 		new MnistData().doIt();
-		System.out.println("Done.");
+//		System.out.println("Done.");
 	}
 }

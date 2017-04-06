@@ -29,7 +29,10 @@ public class NNSimpleLayer extends NNLayerBase {
 	}
 
 	public void eraseMemory() {
-		ANN.randomizeMatrix(weight);
+		//ANN.randomizeMatrix(weight);
+		for (int j = output.length - 1; j >= 0; j--)
+			for (int i = input.length - 1; i >= 0; i--)
+				weight[i][j] = 0.5;
 	}
 
 	public void errorBackProp(double[] errorOutput) {
@@ -46,7 +49,7 @@ public class NNSimpleLayer extends NNLayerBase {
 		super.feedForward(inputPattern);
 		for (int i = input.length - 1; i >= 0; i--)
 			input[i] = inputPattern[i];
-		for (int j = output.length - 1; j >= 0; j++) {
+		for (int j = output.length - 1; j >= 0; j--) {
 			double r = 0;
 			for (int i = input.length - 1; i >= 0; i--)
 				r += input[i] * weight[i][j];

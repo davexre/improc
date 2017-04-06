@@ -1,13 +1,20 @@
 package com.slavi.ann;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class NNLayerBase implements NNLayer {
 
 	protected double learningRate;
 
 	protected double momentum;
 
+	@XmlTransient
 	protected double input[];
 
+	@XmlTransient
 	protected double output[];
 
 	public double[] getInput() {

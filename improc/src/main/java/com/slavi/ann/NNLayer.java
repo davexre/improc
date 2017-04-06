@@ -1,6 +1,8 @@
 package com.slavi.ann;
 
-public interface NNLayer {
+import java.io.Serializable;
+
+public interface NNLayer extends Serializable {
 
 	public double[] getInput();
 

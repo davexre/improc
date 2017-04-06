@@ -17,7 +17,16 @@ cos(90-a)= sin(a)
 
 Derivatives
 ===========
-(sinX)'		= cosX
-(cosX)'		= -sinX
-(tanX)'		= 1 / (cosX)^2
-(sqrt(X))'	= 1 / sqrt(X)
+(sinX)'			= cosX
+(cosX)'			= -sinX
+(tanX)'			= 1 + tanX^2 = 1 / (cosX)^2
+(arcsinX)'		= 1 / (sqrt(1-X^2))
+(arccosX)'		= - 1 / (sqrt(1-X^2))
+(arctanX)'		= 1 / (1 + X^2)
+(sqrt(X))'		= 1 / (2 * sqrt(X))
+(X^r)'			= r * X^(r-1)
+(e^X)'			= e^X
+(e^(-X))'		= -e^(-X)
+(f(X) * g(X))'	= (f'*g + f*g')
+(f(X) / g(X))'	= (f'*g - f*g') / g^2
+df(X)/dX		= (df(U(X))/dU(X)) * (dU(X)/dX)
