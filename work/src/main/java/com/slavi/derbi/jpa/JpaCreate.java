@@ -11,9 +11,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.Query;
-import javax.persistence.SynchronizationType;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -25,9 +23,7 @@ import org.apache.ddlutils.model.Database;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
 import com.slavi.derbi.jpa.entity.MyEntity;

@@ -1,9 +1,5 @@
 package com.slavi.adruino;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.slavi.ann.NNet;
 import com.slavi.math.MathUtil;
 

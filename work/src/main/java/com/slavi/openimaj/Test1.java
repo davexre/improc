@@ -1,29 +1,11 @@
 package com.slavi.openimaj;
 
-import java.util.ArrayList;
-
 import org.openimaj.image.FImage;
 import org.openimaj.image.MBFImage;
-import org.openimaj.image.analyser.ImageAnalyser;
 import org.openimaj.image.analysis.algorithm.EuclideanDistanceTransform;
-import org.openimaj.image.analysis.pyramid.SimplePyramid;
-import org.openimaj.image.processing.algorithm.DifferenceOfGaussian;
-import org.openimaj.image.processing.algorithm.MaskedRobustContrastEqualisation;
-import org.openimaj.image.processing.algorithm.MeanCenter;
-import org.openimaj.image.processing.convolution.FTriangleFilter;
-import org.openimaj.image.processing.edges.CannyEdgeDetector;
-import org.openimaj.image.processing.extraction.OrientedPolygonExtractionProcessor;
 import org.openimaj.image.processing.face.detection.FaceDetector;
 import org.openimaj.image.processing.face.detection.keypoints.FKEFaceDetector;
 import org.openimaj.image.processing.face.detection.keypoints.KEDetectedFace;
-import org.openimaj.image.processing.morphology.Open;
-import org.openimaj.image.processing.morphology.SequentialThin;
-import org.openimaj.image.processing.morphology.Skeleton;
-import org.openimaj.image.processing.morphology.Thicken;
-import org.openimaj.image.processing.threshold.OtsuThreshold;
-import org.openimaj.image.processing.transform.PiecewiseMeshWarp;
-import org.openimaj.image.processing.transform.SkewCorrector;
-import org.openimaj.image.processor.ImageProcessor;
 import org.openimaj.video.VideoDisplay;
 import org.openimaj.video.VideoDisplay.Mode;
 import org.openimaj.video.VideoDisplayListener;

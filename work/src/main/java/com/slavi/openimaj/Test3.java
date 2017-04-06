@@ -1,17 +1,10 @@
 package com.slavi.openimaj;
 
 import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import org.openimaj.image.DisplayUtilities;
 import org.openimaj.image.FImage;
 import org.openimaj.image.ImageUtilities;
 import org.openimaj.image.MBFImage;
-import org.openimaj.image.contour.Contour;
-import org.openimaj.image.contour.SuzukiContourProcessor;
-import org.openimaj.image.feature.dense.binarypattern.BasicLocalBinaryPattern;
-import org.openimaj.image.feature.dense.gradient.dsift.DenseSIFT;
 
 public class Test3 {
 

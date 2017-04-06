@@ -27,8 +27,6 @@ import org.swtchart.IAxis;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries.SeriesType;
-import org.swtchart.ISeriesSet;
-
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 import com.slavi.util.Marker;

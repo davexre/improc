@@ -13,15 +13,9 @@ import org.eclipse.swt.widgets.Shell;
 import com.github.sarxos.webcam.Webcam;
 import com.github.sarxos.webcam.WebcamEvent;
 import com.github.sarxos.webcam.WebcamListener;
-import com.slavi.image.DWindowedImage;
-import com.slavi.image.DWindowedImageUtils;
-import com.slavi.image.PDImageMapBuffer;
 import com.slavi.imagefilter.SwtDisplayImage;
-import com.slavi.improc.parallel.PComputeMagnitude;
 import com.slavi.math.MathUtil;
 import com.slavi.util.ui.SwtUtil;
-
-import jogamp.nativewindow.ResourceToolkitLock;
 
 public class SwtWebCam {
 	

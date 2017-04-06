@@ -1,5 +1,3 @@
-import java.util.Random;
-
 import com.slavi.util.Marker;
 
 public class Dummy2 {

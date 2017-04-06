@@ -1,11 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URLEncoder;
-import java.util.Arrays;
-
 import javax.imageio.ImageIO;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
