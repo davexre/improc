@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -15,10 +14,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.slavi.ann.ANN;
-import com.slavi.ann.NNet;
-import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 
 public class MnistData {
@@ -34,7 +29,7 @@ public class MnistData {
 	String testFileLabels = "t10k-labels-idx1-ubyte.gz";
 	String mnistFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
 
-	static class MnistPattern {
+	public static class MnistPattern {
 		public int patternNumber;
 		public byte label;
 		public byte image[];
@@ -55,7 +50,7 @@ public class MnistData {
 		}
 	}
 
-	void downloadMnistFiles() throws Exception {
+	public void downloadMnistFiles() throws Exception {
 		File mnistDir = new File(this.mnistDir);
 		mnistDir.mkdirs();
 		URL mnistUrl = new URL(this.mnistUrl);
@@ -68,7 +63,9 @@ public class MnistData {
 		}
 	}
 
-	List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
+	public List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
+		downloadMnistFiles();
+
 		File mnistDir = new File(this.mnistDir);
 		File labelsFile = new File(mnistDir, labelsFileName);
 		File imagesFile = new File(mnistDir, imagesFileName);
@@ -109,79 +106,21 @@ public class MnistData {
 		}
 	}
 
-	void doIt() throws Exception {
-		//downloadMnistFiles();
-
-		Marker.mark("Read");
-		//List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
-		List<MnistPattern> pats = readMnistSet(trainingFileLabels, trainingFiles);
-		Marker.release();
-
-		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
-
-		ObjectMapper mapper = Utils.jsonMapper();
-		int insize = 28*28;
-		NNet nnet = new NNet(NNSimpleLayer3.class,
-				insize,
-				10, 10);
-		nnet.setLearningRate(1);
-		nnet.setMomentum(1);
-		nnet.eraseMemory();
-
-		int maxPattern = pats.size();
-		int maxPatternTrain = maxPattern / 2;
-
-		Marker.mark("Total");
-		Marker.mark("Train");
-		double input[] = new double[insize];
-		double target[] = new double[10];
-		double error[] = new double[10];
-		//for (int epoch = 0; epoch < 1; epoch++)
-			for (int index = 0;
-					index < maxPatternTrain; //pats.size()
-					index++) {
-				MnistPattern pat = pats.get(index);
-				for (int i = 0; i < insize; i++)
-					input[i] = MathUtil.mapValue(pat.image[i], 0, 255, 0, 1);
-				for (int i = 0; i < 10; i++)
-					target[i] = pat.label == i ? 1 : 0;
-				nnet.feedForward(input);
-				double output[] = nnet.getOutput();
-				for (int i = error.length - 1; i >= 0; i--)
-					error[i] = output[i] - target[i];
-				nnet.backPropagate(error);
-			}
-		Marker.releaseAndMark("Recall");
-		double max[] = new double[10];
-		Arrays.fill(max, 0);
-
-		for (int index = 0;
-				index < maxPattern; //pats.size()
-				index++) {
-			MnistPattern pat = pats.get(index);
-			for (int i = 0; i < insize; i++)
-				input[i] = MathUtil.mapValue(input[i], 0, 255, 0, 1);
-			for (int i = 0; i < 10; i++)
-				target[i] = pat.label == i ? 1 : 0;
-			nnet.feedForward(input);
-			double output[] = nnet.getOutput();
-			for (int i = error.length - 1; i >= 0; i--)
-				error[i] = Math.abs(output[i] - target[i]);
-			for (int i = error.length - 1; i >= 0; i--)
-				max[i] = Math.max(max[i], error[i]);
-		}
-
-		System.out.print("[");
-		for (int i = 0; i < max.length; i++)
-			System.out.print(String.format("%8.5f ", max[i]));
-		System.out.println("]");
-		//System.out.println(mapper.writeValueAsString(nnet));
-		Marker.release();
-
+	public static List<MnistPattern> readMnistSet(boolean useTrainDataSet) throws Exception {
+		MnistData md = new MnistData();
+		if (useTrainDataSet)
+			return md.readMnistSet(md.trainingFileLabels, md.trainingFiles);
+		else
+			return md.readMnistSet(md.testFileLabels, md.testFiles);
 	}
 
 	public static void main(String[] args) throws Exception {
-		new MnistData().doIt();
-//		System.out.println("Done.");
+		Marker.mark("Read");
+		List<MnistPattern> pats = readMnistSet(false);
+		Marker.release();
+
+		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
+		System.out.println(pats.size());
+		System.out.println("Done.");
 	}
 }
