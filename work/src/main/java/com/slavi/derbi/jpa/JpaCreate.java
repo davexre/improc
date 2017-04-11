@@ -37,7 +37,7 @@ public class JpaCreate {
 		dbToXml(dataSource, out);
 		return out.toString();
 	}
-	
+
 	public static void dbToXml(DataSource dataSource, OutputStream out) throws SQLException, IOException {
 		Connection conn = dataSource.getConnection();
 		try {
@@ -65,13 +65,13 @@ public class JpaCreate {
 		EntityManager em = emf.createEntityManager();
 		// ... more
 		em.getTransaction().begin();
-		
+
 		DateStyle ds = new DateStyle();
 		ds.setFormat("dd.mm.yyyy");
 		ds = em.merge(ds);
 		em.getTransaction().commit();
 		em.getTransaction().begin();
-		
+
 		EntityWithDate ed = new EntityWithDate();
 		ed.setData("My data");
 		ed.setDateIdRef(ds.getDateId());
@@ -82,11 +82,11 @@ public class JpaCreate {
 
 		ed = em.find(EntityWithDate.class, edId);
 		ObjectMapper mapper = new ObjectMapper();
-		
+
 		StringPrintStream out = new StringPrintStream();
 		mapper.writeValue(out, ed);
 		System.out.println(out.toString());
-		
+
 		System.out.println("---------------------");
 		em.getTransaction().begin();
 		for (int i = 0; i < 10; i++) {
@@ -103,15 +103,15 @@ public class JpaCreate {
 		}
 		em.getTransaction().commit();
 		System.out.println("---------------------");
-		
+
 		em.close();
 	}
-	
+
 	void doIt() throws Exception {
 		ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", getClass());
 		DataSource dataSource = appContext.getBean("dataSource", DataSource.class);
 		createORMs(appContext);
-		
+
 		dbToXml(dataSource);
 		appContext.close();
 	}

@@ -32,13 +32,13 @@ public class Statistics {
 	public static final int CStatMD			= 0x0020;
 	// Съобщение 'There is(are) bad values'
 	public static final int CStatErrors		= 0x0040;
-	
+
 	public static final int CStatAll		= CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatErrors;
-	
+
 	public static final int CStatShort		= CStatJ | CStatMinMax | CStatErrors;
 
 	public static final int CStatDetail		= CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatErrors;
-	
+
 	public static final int CStatDefault	= CStatShort;
 
 	/**
@@ -66,7 +66,7 @@ public class Statistics {
 	/**
 	 * Централен момент от s-ти ред (D[2] = Дисперсия, стр.26,48
 	 * Variance = D[2] / Items.Count - 1
-	 * Standard deviation = Sqrt(Variance) 
+	 * Standard deviation = Sqrt(Variance)
 	 */
 	protected double D2;
 	protected double D3;
@@ -108,8 +108,8 @@ public class Statistics {
 
 	public void addValue(double value, double weight) {
 		if (weight < 0.0)
-			throw new IllegalArgumentException("Negative weight received by Statistics."); 
-		
+			throw new IllegalArgumentException("Negative weight received by Statistics.");
+
 		double absValue = Math.abs(value);
 		if (itemsCount == 0) {
 			MaxX = MinX = value;
@@ -117,7 +117,7 @@ public class Statistics {
 		} else {
 			if (value < MinX)
 				MinX = value;
-			if (value > MaxX) 
+			if (value > MaxX)
 				MaxX = value;
 			if (absValue < AbsMinX)
 				AbsMinX = absValue;
@@ -156,7 +156,7 @@ public class Statistics {
 		// стр.27,48
 		// Пресмятане на Асиметрия и Ексцес.
 		A = D3 == 0 ? 0 : D3 / Math.sqrt(Math.abs(D3));
-		E = D4 == 0 ? 0 : (D4 / Math.sqrt(Math.abs(D4))) - 3.0;  
+		E = D4 == 0 ? 0 : (D4 / Math.sqrt(Math.abs(D4))) - 3.0;
 
 		// стр.54,285
 		// Определяне на Доверителния интервал.
@@ -164,7 +164,7 @@ public class Statistics {
 		J_Start = M1 - r;
 		J_End = M1 + r;
 	}
-	
+
 	public int getItemsCount() {
 		return itemsCount;
 	}
@@ -268,44 +268,42 @@ public class Statistics {
 
 	private static final String nameFormatDec = "%-18s = %.4f\n";
 	private static final String nameFormatInt = "%-18s = %d\n";
-	
+
 	public String toString(int style) {
 		try (Formatter f = new Formatter()) {
-			StringBuilder b = new StringBuilder();
-			
-			b.append(f.format(nameFormatDec, "Average", getAvgValue()));
-			b.append(f.format(nameFormatInt, "Count", getItemsCount()));
-			b.append(f.format(nameFormatDec, "B", getB()));
+			f.format(nameFormatDec, "Average", getAvgValue());
+			f.format(nameFormatInt, "Count", getItemsCount());
+			f.format(nameFormatDec, "B", getB());
 			if ((style & CStatJ) != 0) {
-				b.append(f.format(nameFormatDec, "J start", getJ_Start()));
-				b.append(f.format(nameFormatDec, "J end", getJ_End()));
+				f.format(nameFormatDec, "J start", getJ_Start());
+				f.format(nameFormatDec, "J end", getJ_End());
 			}
 			if ((style & CStatAE) != 0) {
-				b.append(f.format(nameFormatDec, "A", getA()));
-				b.append(f.format(nameFormatDec, "E", getE()));
+				f.format(nameFormatDec, "A", getA());
+				f.format(nameFormatDec, "E", getE());
 			}
 			if ((style & CStatMinMax) != 0) {
-				b.append(f.format(nameFormatDec, "min", getMinX()));
-				b.append(f.format(nameFormatDec, "max", getMaxX()));
+				f.format(nameFormatDec, "min", getMinX());
+				f.format(nameFormatDec, "max", getMaxX());
 			}
 			if ((style & CStatAbs) != 0) {
-				b.append(f.format(nameFormatDec, "min(abs(X))", getAbsMinX()));
-				b.append(f.format(nameFormatDec, "max(abs(X))", getAbsMaxX()));
+				f.format(nameFormatDec, "min(abs(X))", getAbsMinX());
+				f.format(nameFormatDec, "max(abs(X))", getAbsMaxX());
 			}
 			if ((style & CStatDelta) != 0) {
-				b.append(f.format(nameFormatDec, "max-min", getMaxX() - getMinX()));
+				f.format(nameFormatDec, "max-min", getMaxX() - getMinX());
 			}
 			if ((style & CStatMD) != 0) {
 				for (int i = 2; i <= 4; i++) {
-					b.append(f.format(nameFormatDec, f.format("M[%d]", i), getM(i)));
+					f.format(nameFormatDec, f.format("M[%d]", i), getM(i));
 				}
 				for (int i = 2; i <= 4; i++) {
-					b.append(f.format(nameFormatDec, f.format("D[%d]", i), getD(i)));
+					f.format(nameFormatDec, f.format("D[%d]", i), getD(i));
 				}
 			}
-			if (((style & CStatErrors) != 0) && hasBadValues()) 
-				b.append("*** There is/are BAD value(s) ***");
-			return b.toString().trim();
+			if (((style & CStatErrors) != 0) && hasBadValues())
+				f.format("*** There is/are BAD value(s) ***");
+			return f.toString().trim();
 		}
 	}
 
@@ -356,7 +354,7 @@ public class Statistics {
 			for (int i = 2; i <= 4; i++)
 				b.append("\t" + Double.toString(getD(i)));
 		}
-		if (((style & CStatErrors) != 0) && hasBadValues()) 
+		if (((style & CStatErrors) != 0) && hasBadValues())
 			b.append("\tFAILED");
 		else
 			b.append("\tok");

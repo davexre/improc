@@ -13,14 +13,17 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.slavi.ann.ANN;
-import com.slavi.ann.NNSimpleLayer;
-import com.slavi.ann.NNet;
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
+import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
+/*
 
-public class MnistData {
+To check this: https://github.com/deepmind/sonnet
+more info: http://yann.lecun.com/exdb/publis/index.html#lecun-98
+
+*/
+public class MyMnistData {
 
 	Logger log = LoggerFactory.getLogger(getClass());
 
@@ -108,78 +111,101 @@ public class MnistData {
 		}
 	}
 
+	int insize = 28*28;
+	void patToInput(MnistPattern pat, Matrix dest) {
+		dest.resize(insize, 1);
+		for (int i = 0; i < insize; i++)
+			dest.setVectorItem(i, MathUtil.mapValue(pat.image[i], 0, 255, 0, 1));
+	}
+
+	void patToOutput(MnistPattern pat, Matrix dest) {
+		dest.resize(10, 1);
+		for (int i = 0; i < 10; i++)
+			dest.setVectorItem(i, pat.label == i ? 1 : 0);
+	}
+
 	void doIt() throws Exception {
 		//downloadMnistFiles();
 
 		Marker.mark("Read");
-		//List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
-		List<MnistPattern> pats = readMnistSet(trainingFileLabels, trainingFiles);
+		List<MnistPattern> pats = readMnistSet(testFileLabels, testFiles);
+		//List<MnistPattern> pats = readMnistSet(trainingFileLabels, trainingFiles);
 		Marker.release();
 
 		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
 
-		ObjectMapper mapper = Utils.jsonMapper();
-		int insize = 28*28;
-		NNet nnet = new NNet(NNSimpleLayer.class,
+		MyNet nnet = new MyNet(MyLayer.class,
 				insize,
+				700, 600, 500, 400, 300, 200, 100,
 				50, 10);
-		nnet.setLearningRate(1);
-		nnet.setMomentum(1);
 		nnet.eraseMemory();
 
-		int maxPattern = 1; //pats.size();
+		int maxPattern = 100; //pats.size();
 		int maxPatternTrain = maxPattern; // / 2;
 
 		Marker.mark("Total");
 		Marker.mark("Train");
-		double input[] = new double[insize];
-		double op[] = new double[10];
-		//for (int epoch = 0; epoch < 1; epoch++)
+		Matrix input = new Matrix(nnet.getSizeInput(), 1);
+		Matrix op = new Matrix(nnet.getSizeOutput(), 1);
+		for (int epoch = 0; epoch < 1; epoch++)
 			for (int index = 0;
 					index < maxPatternTrain; //pats.size()
 					index++) {
 				MnistPattern pat = pats.get(index);
-				for (int i = 0; i < insize; i++)
-					input[i] = MathUtil.mapValue(pat.image[i], 0, 255, 0, 1);
-				for (int i = 0; i < 10; i++)
-					op[i] = pat.label == i ? 1 : 0;
-				nnet.feedForward(input);
-				double[] er = nnet.getOutput();
-				for (int i = er.length - 1; i >= 0; i--)
-					er[i] = op[i] - er[i];
-				nnet.backPropagate(er);
+				patToInput(pat, input);
+				patToOutput(pat, op);
+				Matrix t = nnet.feedForward(input);
+				op.mSub(t, op);
+				nnet.backPropagate(op);
 			}
 		Marker.releaseAndMark("Recall");
-		double max[] = new double[10];
-		ANN.zeroArray(max);
 
+		nnet.layers.get(nnet.layers.size() - 1).tmpW.printM("last tmpW");
+		nnet.layers.get(nnet.layers.size() - 1).sumDW.printM("last sumDW");
+		nnet.applyTraining();
+
+		Matrix max = new Matrix(nnet.getSizeOutput(), 1);
+		max.make0();
+
+		Statistics st = new Statistics();
+		st.start();
+		Statistics st2 = new Statistics();
+		st2.start();
 		for (int index = 0;
 				index < maxPattern; //pats.size()
 				index++) {
 			MnistPattern pat = pats.get(index);
-			for (int i = 0; i < insize; i++)
-				input[i] = MathUtil.mapValue(input[i], 0, 255, 0, 1);
-			for (int i = 0; i < 10; i++)
-				op[i] = pat.label == i ? 1 : 0;
-			nnet.feedForward(input);
-			double[] er = nnet.getOutput();
-			for (int i = er.length - 1; i >= 0; i--)
-				er[i] = op[i] - er[i];
-			for (int i = er.length - 1; i >= 0; i--)
-				max[i] = Math.max(max[i], Math.abs(er[i]));
-		}
+			patToInput(pat, input);
+			patToOutput(pat, op);
+			Matrix t = nnet.feedForward(input);
+			op.mSub(t, op);
+			op.termAbs(op);
 
-		System.out.print("[");
-		for (int i = 0; i < max.length; i++)
-			System.out.print(String.format("%12.8f ", max[i]));
-		System.out.println("]");
-		//System.out.println(mapper.writeValueAsString(nnet));
+			for (int i = 0; i < op.getVectorSize(); i++) {
+				double e = op.getVectorItem(i);
+				if (e >= 0.5)
+					st.addValue(e);
+				else
+					st2.addValue(e);
+			}
+			//st.addValue(op.max());
+			//st2.addValue(op.min());
+			max.mMax(op, max);
+		}
+		st.stop();
+		st2.stop();
+
+		max.printM("MAX");
+		System.out.println(st.toString());
+		System.out.println("MIN");
+		System.out.println(st2.toString());
 		Marker.release();
+		nnet.layers.get(nnet.layers.size() - 1).weight.printM("last W");
 
 	}
 
 	public static void main(String[] args) throws Exception {
-		new MnistData().doIt();
+		new MyMnistData().doIt();
 //		System.out.println("Done.");
 	}
 }

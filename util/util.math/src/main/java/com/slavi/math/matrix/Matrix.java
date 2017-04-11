@@ -257,8 +257,6 @@ public class Matrix {
 	 * @return The value at the specified position.
 	 */
 	public double getVectorItem(int aIndex) {
-		if (aIndex < 0 || aIndex >= m.length)
-			throw new IndexOutOfBoundsException();
 		return m[aIndex]; // getItem(aIndex % sizeX, aIndex / sizeX);
 	}
 
@@ -266,8 +264,6 @@ public class Matrix {
 	 * @see Matrix#getVectorItem(int)
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
-		if (aIndex < 0 || aIndex >= m.length)
-			throw new IndexOutOfBoundsException();
 		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
@@ -739,9 +735,10 @@ public class Matrix {
 	 */
 	public void copyTo(Matrix dest) {
 		dest.resize(sizeX, sizeY);
-		for (int i = sizeX - 1; i >= 0; i--)
+		System.arraycopy(this.m, 0, dest.m, 0, this.m.length);
+/*		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.setItem(i, j, getItem(i, j));
+				dest.setItem(i, j, getItem(i, j));*/
 	}
 
 	/**

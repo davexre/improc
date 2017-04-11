@@ -3,6 +3,7 @@ package com.slavi.derbi.jpa.entity;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -19,9 +20,20 @@ public class MyEntityPartial {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;
-	
+
 	@Column
 	String data;
+
+	@Embedded
+	MyNestedData nestedData;
+
+	public MyNestedData getNestedData() {
+		return nestedData;
+	}
+
+	public void setNestedData(MyNestedData nestedData) {
+		this.nestedData = nestedData;
+	}
 
 	public int getId() {
 		return id;
