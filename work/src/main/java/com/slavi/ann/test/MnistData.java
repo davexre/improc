@@ -1,11 +1,13 @@
 package com.slavi.ann.test;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -15,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.ann.ANN;
-import com.slavi.ann.NNSimpleLayer;
 import com.slavi.ann.NNet;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
@@ -72,8 +73,8 @@ public class MnistData {
 		File labelsFile = new File(mnistDir, labelsFileName);
 		File imagesFile = new File(mnistDir, imagesFileName);
 		try (
-			DataInputStream labelsIs = new DataInputStream(new GZIPInputStream(new FileInputStream(labelsFile)));
-			DataInputStream imagesIs = new DataInputStream(new GZIPInputStream(new FileInputStream(imagesFile)))
+			DataInputStream labelsIs = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(labelsFile))));
+			DataInputStream imagesIs = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(imagesFile))));
 		) {
 			int magicNumber = labelsIs.readInt();
 			if (magicNumber != 2049)
@@ -120,20 +121,21 @@ public class MnistData {
 
 		ObjectMapper mapper = Utils.jsonMapper();
 		int insize = 28*28;
-		NNet nnet = new NNet(NNSimpleLayer.class,
+		NNet nnet = new NNet(NNSimpleLayer3.class,
 				insize,
-				50, 10);
+				10, 10);
 		nnet.setLearningRate(1);
 		nnet.setMomentum(1);
 		nnet.eraseMemory();
 
-		int maxPattern = 1; //pats.size();
-		int maxPatternTrain = maxPattern; // / 2;
+		int maxPattern = pats.size();
+		int maxPatternTrain = maxPattern / 2;
 
 		Marker.mark("Total");
 		Marker.mark("Train");
 		double input[] = new double[insize];
-		double op[] = new double[10];
+		double target[] = new double[10];
+		double error[] = new double[10];
 		//for (int epoch = 0; epoch < 1; epoch++)
 			for (int index = 0;
 					index < maxPatternTrain; //pats.size()
@@ -142,16 +144,16 @@ public class MnistData {
 				for (int i = 0; i < insize; i++)
 					input[i] = MathUtil.mapValue(pat.image[i], 0, 255, 0, 1);
 				for (int i = 0; i < 10; i++)
-					op[i] = pat.label == i ? 1 : 0;
+					target[i] = pat.label == i ? 1 : 0;
 				nnet.feedForward(input);
-				double[] er = nnet.getOutput();
-				for (int i = er.length - 1; i >= 0; i--)
-					er[i] = op[i] - er[i];
-				nnet.backPropagate(er);
+				double output[] = nnet.getOutput();
+				for (int i = error.length - 1; i >= 0; i--)
+					error[i] = output[i] - target[i];
+				nnet.backPropagate(error);
 			}
 		Marker.releaseAndMark("Recall");
 		double max[] = new double[10];
-		ANN.zeroArray(max);
+		Arrays.fill(max, 0);
 
 		for (int index = 0;
 				index < maxPattern; //pats.size()
@@ -160,18 +162,18 @@ public class MnistData {
 			for (int i = 0; i < insize; i++)
 				input[i] = MathUtil.mapValue(input[i], 0, 255, 0, 1);
 			for (int i = 0; i < 10; i++)
-				op[i] = pat.label == i ? 1 : 0;
+				target[i] = pat.label == i ? 1 : 0;
 			nnet.feedForward(input);
-			double[] er = nnet.getOutput();
-			for (int i = er.length - 1; i >= 0; i--)
-				er[i] = op[i] - er[i];
-			for (int i = er.length - 1; i >= 0; i--)
-				max[i] = Math.max(max[i], Math.abs(er[i]));
+			double output[] = nnet.getOutput();
+			for (int i = error.length - 1; i >= 0; i--)
+				error[i] = Math.abs(output[i] - target[i]);
+			for (int i = error.length - 1; i >= 0; i--)
+				max[i] = Math.max(max[i], error[i]);
 		}
 
 		System.out.print("[");
 		for (int i = 0; i < max.length; i++)
-			System.out.print(String.format("%12.8f ", max[i]));
+			System.out.print(String.format("%8.5f ", max[i]));
 		System.out.println("]");
 		//System.out.println(mapper.writeValueAsString(nnet));
 		Marker.release();

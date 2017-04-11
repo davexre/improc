@@ -19,19 +19,20 @@ public class NNSimpleLayer3 extends NNLayerBase {
 
 	public NNSimpleLayer3(int sizeInput, int sizeOutput) {
 		super(sizeInput, sizeOutput);
-		scale = 50.0 / sizeInput;
+		scale = 1.0; //50.0 / sizeInput;
 		weight = new double[sizeInput][sizeOutput];
 	}
 
+	// https://en.wikipedia.org/wiki/Backpropagation
 	public void backPropagate(double[] errorOutput) {
 		super.backPropagate(errorOutput);
-		errorBackProp(errorOutput);
 		for (int j = output.length - 1; j >= 0; j--) {
 			double r = scale * learningRate * errorOutput[j] * output[j] * (1 - output[j]);
 			for (int i = input.length - 1; i >= 0; i--) {
 				weight[i][j] += r * input[i];
 			}
 		}
+		errorBackProp(errorOutput);
 	}
 
 	public void eraseMemory() {
