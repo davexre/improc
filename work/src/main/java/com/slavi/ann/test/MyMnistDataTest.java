@@ -35,12 +35,12 @@ public class MyMnistDataTest {
 
 		MyNet nnet = new MyNet(MyLayer.class,
 				insize,
-				700, 600, 500, 400, 300, 200, 100,
+				//700, 600, 500, 400, 300, 200, 100,
 				50, 10);
 		nnet.eraseMemory();
 
-		int maxPattern = 100; //pats.size();
-		int maxPatternTrain = maxPattern; // / 2;
+		int maxPattern = pats.size();
+		int maxPatternTrain = maxPattern / 2;
 
 		Marker.mark("Total");
 		Marker.mark("Train");
