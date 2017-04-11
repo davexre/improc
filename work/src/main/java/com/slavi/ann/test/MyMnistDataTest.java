@@ -70,6 +70,8 @@ public class MyMnistDataTest {
 		st.start();
 		Statistics st2 = new Statistics();
 		st2.start();
+		Statistics st3 = new Statistics();
+		st3.start();
 		for (int index = 0;
 				index < maxPattern; //pats.size()
 				index++) {
@@ -77,6 +79,10 @@ public class MyMnistDataTest {
 			patToInput(pat, input);
 			patToOutput(pat, op);
 			Matrix t = nnet.feedForward(input);
+			for (int i = 0; i < op.getVectorSize(); i++) {
+				double e = t.getVectorItem(i);
+				st3.addValue(e);
+			}
 			op.mSub(t, op);
 			op.termAbs(op);
 
@@ -93,13 +99,21 @@ public class MyMnistDataTest {
 		}
 		st.stop();
 		st2.stop();
+		st3.stop();
 
 		max.printM("MAX");
 		System.out.println(st.toString());
 		System.out.println("MIN");
 		System.out.println(st2.toString());
+		System.out.println("Vals");
+		System.out.println(st3.toString());
 		Marker.release();
-		//nnet.layers.get(nnet.layers.size() - 1).weight.printM("last W");
+		
+		for (int index = 0; index < nnet.layers.size(); index++) {
+			MyLayer l = nnet.layers.get(index);
+			System.out.println("\nWeight " + index);
+			System.out.println(l.weight.calcItemStatistics());
+		}
 
 	}
 

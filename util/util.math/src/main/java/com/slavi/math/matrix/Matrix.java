@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
 
 public class Matrix {
 
@@ -1003,6 +1004,24 @@ public class Matrix {
 		return result;
 	}
 
+	public Statistics calcItemStatistics() {
+		return calcItemStatistics(null);
+	}
+	
+	/**
+	 * Calculates Statistics of all items in dest. Returns dest.
+	 * If dest is null a new Statistics object is created.
+	 */
+	public Statistics calcItemStatistics(Statistics dest) {
+		if (dest == null)
+			dest = new Statistics();
+		dest.start();
+		for (int i = getVectorSize() - 1; i >= 0; i--)
+			dest.addValue(getVectorItem(i));
+		dest.stop();
+		return dest;
+	}
+	
 	/**
 	 * Compares this matrix to the second and returns the correlation between
 	 * them.
