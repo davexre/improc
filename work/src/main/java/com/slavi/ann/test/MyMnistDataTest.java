@@ -54,7 +54,7 @@ public class MyMnistDataTest {
 				patToInput(pat, input);
 				patToOutput(pat, op);
 				Matrix t = nnet.feedForward(input);
-				op.mSub(t, op);
+				t.mSub(op, op);
 				nnet.backPropagate(op);
 			}
 		Marker.releaseAndMark("Recall");
@@ -83,7 +83,7 @@ public class MyMnistDataTest {
 				double e = t.getVectorItem(i);
 				st3.addValue(e);
 			}
-			op.mSub(t, op);
+			t.mSub(op, op);
 			op.termAbs(op);
 
 			for (int i = 0; i < op.getVectorSize(); i++) {
