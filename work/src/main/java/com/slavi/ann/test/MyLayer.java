@@ -123,8 +123,8 @@ public class MyLayer {
 				double dw = r * lastInput.getVectorItem(i) * learningRate;
 				tmpW.setItem(i, j, tmpW.getItem(i, j) + Math.abs(dw));
 				sumDW.setItem(i, j, sumDW.getItem(i, j) + dw);
-				weight.setItem(i, j, weight.getItem(i, j) + dw);
 				inputError.setVectorItem(i, inputError.getVectorItem(i) + r * weight.getItem(i, j));
+				weight.setItem(i, j, weight.getItem(i, j) + dw);
 			}
 		}
 		maxInputError.mMaxAbs(inputError, maxInputError);

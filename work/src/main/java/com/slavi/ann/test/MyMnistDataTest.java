@@ -55,7 +55,7 @@ public class MyMnistDataTest {
 				patToInput(pat, input);
 				patToOutput(pat, target);
 				Matrix t = nnet.feedForward(input);
-				target.mSub(t, target);
+				t.mSub(target, target);
 				nnet.backPropagate(target);
 			}
 		}
@@ -85,7 +85,7 @@ public class MyMnistDataTest {
 				double e = t.getVectorItem(i);
 				st3.addValue(e);
 			}
-			target.mSub(t, target);
+			t.mSub(target, target);
 			target.termAbs(target);
 
 			for (int i = 0; i < target.getVectorSize(); i++) {
