@@ -8,19 +8,28 @@ public class MyLayer {
 	Matrix output;
 	Matrix weight;
 
+	Matrix maxInputError;
+	Matrix tmpOutput;
 	Matrix tmpW;
 	Matrix sumDW;
 	int countDW;
 	double scale;
+	double learningRate;
 
-	public MyLayer(int sizeInput, int sizeOutput) {
+	public MyLayer(int sizeInput, int sizeOutput, double learningRate) {
 		lastInput = null;
 		inputError = new Matrix(sizeInput, 1);
+		maxInputError = new Matrix(sizeInput, 1);
+
 		output = new Matrix(sizeOutput, 1);
+		tmpOutput = new Matrix(sizeOutput, 1);
+
 		weight = new Matrix(sizeInput, sizeOutput);
 		tmpW = new Matrix(sizeInput, sizeOutput);
 		sumDW = new Matrix(sizeInput, sizeOutput);
+
 		scale = 5.0 / sizeInput;
+		this.learningRate = learningRate;
 		eraseMemory();
 	}
 
@@ -36,7 +45,18 @@ public class MyLayer {
 		//weight.makeR(0.5);
 		weight.make0();
 		inputError.make0();
+		maxInputError.make0();
 		output.make0();
+		tmpOutput.make0();
+		tmpW.make0();
+		sumDW.make0();
+	}
+
+	public void resetEpoch() {
+		inputError.make0();
+		maxInputError.make0();
+		output.make0();
+		tmpOutput.make0();
 		tmpW.make0();
 		sumDW.make0();
 	}
@@ -72,6 +92,7 @@ public class MyLayer {
 			output.setVectorItem(j, r);
 		}
 		applyActivation();
+		tmpOutput.mMaxAbs(output, tmpOutput);
 		return output;
 	}
 
@@ -97,15 +118,16 @@ public class MyLayer {
 		applyActivationDerivative(error);
 		inputError.make0();
 		for (int j = getSizeOutput() -1; j >= 0; j--) {
-			double r = output.getVectorItem(j); // * learningRate;
+			double r = output.getVectorItem(j);
 			for (int i = getSizeInput() -1; i >= 0; i--) {
-				double dw = r * lastInput.getVectorItem(i);
+				double dw = r * lastInput.getVectorItem(i) * learningRate;
 				tmpW.setItem(i, j, tmpW.getItem(i, j) + Math.abs(dw));
 				sumDW.setItem(i, j, sumDW.getItem(i, j) + dw);
 				weight.setItem(i, j, weight.getItem(i, j) + dw);
 				inputError.setVectorItem(i, inputError.getVectorItem(i) + r * weight.getItem(i, j));
 			}
 		}
+		maxInputError.mMaxAbs(inputError, maxInputError);
 		lastInput = null;
 		countDW++;
 		return inputError;

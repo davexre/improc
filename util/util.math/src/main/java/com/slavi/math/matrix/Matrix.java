@@ -589,6 +589,27 @@ public class Matrix {
 	 * Sets the elements of dest matrix to the maximum corresponding elements of
 	 * this and second matrix. If the dest matrix is of incorrect size it will
 	 * be resized. The formula is:<br>
+	 * <tt>dest[i, j] = max(abs(this[i, j]), abs(second[i, j]))<br>
+	 * </tt>
+	 * Allows: this == second == dest
+	 */
+	public void mMaxAbs(Matrix second, Matrix dest) {
+		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
+			throw new Error("Invalid argument");
+		}
+		dest.resize(sizeX, sizeY);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--) {
+				double a = Math.abs(getItem(i, j));
+				double b = Math.abs(second.getItem(i, j));
+				dest.setItem(i, j, a > b ? a : b);
+			}
+	}
+
+	/**
+	 * Sets the elements of dest matrix to the maximum corresponding elements of
+	 * this and second matrix. If the dest matrix is of incorrect size it will
+	 * be resized. The formula is:<br>
 	 * <tt>dest[i, j] = max( this[i, j] , second[i, j] )<br>
 	 * </tt>
 	 * Allows: this == second == dest
@@ -1007,7 +1028,7 @@ public class Matrix {
 	public Statistics calcItemStatistics() {
 		return calcItemStatistics(null);
 	}
-	
+
 	/**
 	 * Calculates Statistics of all items in dest. Returns dest.
 	 * If dest is null a new Statistics object is created.
@@ -1021,7 +1042,7 @@ public class Matrix {
 		dest.stop();
 		return dest;
 	}
-	
+
 	/**
 	 * Compares this matrix to the second and returns the correlation between
 	 * them.
