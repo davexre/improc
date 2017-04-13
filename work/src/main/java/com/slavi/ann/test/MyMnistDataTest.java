@@ -149,7 +149,7 @@ public class MyMnistDataTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new MyMnistDataTest().doIt2();
+		new MyMnistDataTest().doIt();
 //		System.out.println("Done.");
 	}
 }
