@@ -28,7 +28,7 @@ public class MyLayer {
 		tmpW = new Matrix(sizeInput, sizeOutput);
 		sumDW = new Matrix(sizeInput, sizeOutput);
 
-		scale = 5.0 / sizeInput;
+		scale = 1; //5.0 / sizeInput;
 		this.learningRate = learningRate;
 		eraseMemory();
 	}
@@ -42,7 +42,7 @@ public class MyLayer {
 	}
 
 	public void eraseMemory() {
-		//weight.makeR(0.5);
+		weight.makeR(0.5);
 		weight.make0();
 		inputError.make0();
 		maxInputError.make0();
