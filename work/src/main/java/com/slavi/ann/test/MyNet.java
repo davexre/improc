@@ -48,14 +48,6 @@ public class MyNet {
 		return input;
 	}
 
-	public Matrix errorBackProp(Matrix error) {
-		for (int i = layers.size() - 1; i >= 0; i--) {
-			MyLayer l = layers.get(i);
-			error = l.errorBackProp(error);
-		}
-		return error;
-	}
-
 	public Matrix backPropagate(Matrix error) {
 		for (int i = layers.size() - 1; i >= 0; i--) {
 			MyLayer l = layers.get(i);
