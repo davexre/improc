@@ -123,38 +123,50 @@ public class MyMnistDataTest {
 	void doIt2() throws Exception {
 		int sizeInput = 16;
 		int sizeOutput = 4;
-		//MyLayer l = new MyLayer(sizeInput, sizeOutput, 1);
+		//MyLayer l = new MyLayer(sizeInput, sizeOutput, 4);
 		MyNet l = new MyNet(MyLayer.class, 16, 10, 4);
 		Matrix input = new Matrix(sizeInput, 1);
-		Matrix output = new Matrix(sizeOutput, 1);
 		Matrix error = new Matrix(sizeOutput, 1);
 		Matrix target = new Matrix(sizeOutput, 1);
 
 		l.eraseMemory();
-		for (int epoch = 0; epoch < 4; epoch++)
-		for (int index = 0;
-				index < sizeInput;
-				index++) {
-			System.out.println(index);
-			for (int i = 0; i < input.getVectorSize(); i++) {
-				input.setVectorItem(i, index % target.getVectorSize() == i ? 0.95 : 0.05);
+		for (int epoch = 0; epoch < 4; epoch++) {
+			System.out.println("---------- Epoch " + epoch);
+			for (int index = 0;
+					index < sizeInput;
+					index++) {
+				boolean print = index == 5;
+				if (print)
+				System.out.println(index);
+				for (int i = 0; i < input.getVectorSize(); i++) {
+					input.setVectorItem(i, index == i ? 0.95 : 0.05);
+				}
+				for (int i = 0; i < target.getVectorSize(); i++)
+					target.setVectorItem(i, (index & (1 << i)) == 0 ? 0.05 : 0.95);
+				Matrix output = l.feedForward(input);
+				if (print) {
+				System.out.print("I  " + input);
+				System.out.print("T  " + target);
+				System.out.print("O  " + output);
+				}
+				output.mSub(target, error);
+				if (print)
+				System.out.print("E  " + error);
+				Matrix inputError = l.backPropagate(error);
+				if (print)
+				System.out.print("IE " + inputError);
+				output = l.feedForward(input);
+				output.mSub(target, error);
+				if (print)
+				System.out.print("E  " + error);
+				if (print)
+					for (MyLayer ll : l.layers) {
+						ll.inputError.printM("Input error");
+						ll.output.printM("output");
+						ll.weight.printM("WEIGHT");
+					}
 			}
-			for (int i = 0; i < target.getVectorSize(); i++)
-				target.setVectorItem(i, (index & (1 << i)) == 0 ? 0.05 : 0.95);
-			Matrix t = l.feedForward(input);
-			System.out.print("I  " + input);
-			System.out.print("T  " + target);
-			System.out.print("O  " + t);
-			target.mSub(t, error);
-			System.out.print("E  " + error);
-			Matrix inputError = l.backPropagate(error);
-			System.out.print("IE " + inputError);
-			t = l.feedForward(input);
-			target.mSub(t, error);
-			System.out.print("E  " + error);
-			//l.weight.printM("WEIGHT");
 		}
-
 	}
 
 	public static void main(String[] args) throws Exception {

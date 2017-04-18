@@ -94,7 +94,7 @@ public class MyLayer {
 				tmpW.setItem(i, j, tmpW.getItem(i, j) + Math.abs(dw));
 				sumDW.setItem(i, j, sumDW.getItem(i, j) + dw);
 				inputError.setVectorItem(i, inputError.getVectorItem(i) + r * weight.getItem(i, j));
-				weight.setItem(i, j, weight.getItem(i, j) + dw);
+				weight.setItem(i, j, weight.getItem(i, j) - dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 			}
 		}
 		maxInputError.mMaxAbs(inputError, maxInputError);
