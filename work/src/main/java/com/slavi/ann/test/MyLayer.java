@@ -43,7 +43,7 @@ public class MyLayer {
 
 	public void eraseMemory() {
 		weight.makeR(0.5);
-		weight.make0();
+		//weight.make0();
 		inputError.make0();
 		maxInputError.make0();
 		output.make0();
@@ -105,12 +105,12 @@ public class MyLayer {
 
 	public String toString() {
 		StringBuilder r = new StringBuilder();
-		r.append("");
-		r.append(input);
-		
+		r.append("Input:     ");	r.append(input);
+		r.append("Output:    ");	r.append(output);
+		r.append("Input err: ");	r.append(inputError);
 		return r.toString();
 	}
-	
+
 	public void applyTraining() {
 		if (countDW == 0)
 			return;

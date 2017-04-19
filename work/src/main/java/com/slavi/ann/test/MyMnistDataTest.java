@@ -40,12 +40,14 @@ public class MyMnistDataTest {
 		nnet.eraseMemory();
 
 		int maxPattern = pats.size();
-		int maxPatternTrain = maxPattern / 2;
+		int maxPatternTrain = 10; //maxPattern / 2;
 
 		Marker.mark("Total");
 		Marker.mark("Train");
 		Matrix input = new Matrix(nnet.getSizeInput(), 1);
 		Matrix target = new Matrix(nnet.getSizeOutput(), 1);
+		Matrix error = new Matrix(nnet.getSizeOutput(), 1);
+
 		for (int epoch = 0; epoch < 1; epoch++) {
 			nnet.resetEpoch();
 			for (int index = 0;
@@ -54,9 +56,19 @@ public class MyMnistDataTest {
 				MnistPattern pat = pats.get(index);
 				patToInput(pat, input);
 				patToOutput(pat, target);
-				Matrix t = nnet.feedForward(input);
-				t.mSub(target, target);
-				nnet.backPropagate(target);
+				Matrix output = nnet.feedForward(input);
+
+				System.out.println(input.toMatlabString("I"));
+				System.out.println(target.toMatlabString("T"));
+				System.out.println(output.toMatlabString("O"));
+				//output.mSub(target, error);
+				target.mSub(output, error);
+				System.out.println(error.toMatlabString("E1"));
+				Matrix inputError = nnet.backPropagate(error);
+				System.out.println(inputError.toMatlabString("IE"));
+				output = nnet.feedForward(input);
+				target.mSub(output, error);
+				System.out.println(error.toMatlabString("E2"));
 			}
 		}
 		Marker.releaseAndMark("Recall");
@@ -80,16 +92,16 @@ public class MyMnistDataTest {
 			MnistPattern pat = pats.get(index);
 			patToInput(pat, input);
 			patToOutput(pat, target);
-			Matrix t = nnet.feedForward(input);
+			Matrix output = nnet.feedForward(input);
 			for (int i = 0; i < target.getVectorSize(); i++) {
-				double e = t.getVectorItem(i);
+				double e = output.getVectorItem(i);
 				st3.addValue(e);
 			}
-			t.mSub(target, target);
-			target.termAbs(target);
+			output.mSub(target, error);
+			error.termAbs(error);
 
-			for (int i = 0; i < target.getVectorSize(); i++) {
-				double e = target.getVectorItem(i);
+			for (int i = 0; i < error.getVectorSize(); i++) {
+				double e = error.getVectorItem(i);
 				if (e >= 0.5)
 					st.addValue(e);
 				else
@@ -97,7 +109,7 @@ public class MyMnistDataTest {
 			}
 			//st.addValue(op.max());
 			//st2.addValue(op.min());
-			max.mMax(target, max);
+			max.mMax(error, max);
 		}
 		st.stop();
 		st2.stop();
@@ -121,44 +133,45 @@ public class MyMnistDataTest {
 	}
 
 	void doIt2() throws Exception {
-		int sizeInput = 16;
+		int sizeInput = 15;
 		int sizeOutput = 4;
-		//MyLayer l = new MyLayer(sizeInput, sizeOutput, 1);
-		MyNet l = new MyNet(MyLayer.class, 16, 10, 4);
+		MyLayer l = new MyLayer(sizeInput, sizeOutput, 1);
+		//MyNet l = new MyNet(MyLayer.class, 16, 10, 4);
 		Matrix input = new Matrix(sizeInput, 1);
-		Matrix output = new Matrix(sizeOutput, 1);
 		Matrix error = new Matrix(sizeOutput, 1);
 		Matrix target = new Matrix(sizeOutput, 1);
 
 		l.eraseMemory();
-		for (int epoch = 0; epoch < 4; epoch++)
-		for (int index = 0;
-				index < sizeInput;
-				index++) {
-			System.out.println(index);
-			for (int i = 0; i < input.getVectorSize(); i++) {
-				input.setVectorItem(i, index % target.getVectorSize() == i ? 0.95 : 0.05);
+		for (int epoch = 0; epoch < 4; epoch++) {
+			System.out.println("---------------------\nEPOCH "  + epoch);
+			for (int index = 0;
+					index < sizeInput;
+					index++) {
+				System.out.println(index);
+				for (int i = 0; i < input.getVectorSize(); i++) {
+					input.setVectorItem(i, index == i ? 0.95 : 0.05);
+				}
+				for (int i = 0; i < target.getVectorSize(); i++)
+					target.setVectorItem(i, ((index + 1) & (1 << i)) == 0 ? 0.05 : 0.95);
+				Matrix output = l.feedForward(input);
+				System.out.println(input.toMatlabString("I"));
+				System.out.println(target.toMatlabString("T"));
+				System.out.println(output.toMatlabString("O"));
+				target.mSub(output, error);
+				System.out.println(error.toMatlabString("E1"));
+				Matrix inputError = l.backPropagate(error);
+				//System.out.println(inputError.toMatlabString("IE"));
+				output = l.feedForward(input);
+				target.mSub(output, error);
+				System.out.println(error.toMatlabString("E2"));
 			}
-			for (int i = 0; i < target.getVectorSize(); i++)
-				target.setVectorItem(i, (index & (1 << i)) == 0 ? 0.05 : 0.95);
-			Matrix t = l.feedForward(input);
-			System.out.print("I  " + input);
-			System.out.print("T  " + target);
-			System.out.print("O  " + t);
-			target.mSub(t, error);
-			System.out.print("E  " + error);
-			Matrix inputError = l.backPropagate(error);
-			System.out.print("IE " + inputError);
-			t = l.feedForward(input);
-			target.mSub(t, error);
-			System.out.print("E  " + error);
-			//l.weight.printM("WEIGHT");
+			System.out.println(l.weight.toMatlabString("W"));
 		}
 
 	}
 
 	public static void main(String[] args) throws Exception {
-		new MyMnistDataTest().doIt2();
+		new MyMnistDataTest().doIt();
 //		System.out.println("Done.");
 	}
 }

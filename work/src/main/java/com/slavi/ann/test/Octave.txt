@@ -1,0 +1,8 @@
+function r = f(O)
+	r = 1./(1 + exp(-O));
+endfunction
+
+O=W.*I;
+O=sum(O');
+f(O)
+
