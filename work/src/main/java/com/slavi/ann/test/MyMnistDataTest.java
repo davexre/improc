@@ -61,13 +61,12 @@ public class MyMnistDataTest {
 				System.out.println(input.toMatlabString("I"));
 				System.out.println(target.toMatlabString("T"));
 				System.out.println(output.toMatlabString("O"));
-				//output.mSub(target, error);
-				target.mSub(output, error);
+				output.mSub(target, error);
 				System.out.println(error.toMatlabString("E1"));
 				Matrix inputError = nnet.backPropagate(error);
 				System.out.println(inputError.toMatlabString("IE"));
 				output = nnet.feedForward(input);
-				target.mSub(output, error);
+				output.mSub(target, error);
 				System.out.println(error.toMatlabString("E2"));
 			}
 		}
@@ -161,13 +160,13 @@ public class MyMnistDataTest {
 				System.out.println(target.toMatlabString("T"));
 				System.out.println(output.toMatlabString("O"));
 				}
-				target.mSub(output, error);
+				output.mSub(target, error);
 				if (print)
 				System.out.println(error.toMatlabString("E1"));
 				Matrix inputError = l.backPropagate(error);
 				//System.out.println(inputError.toMatlabString("IE"));
 				output = l.feedForward(input);
-				target.mSub(output, error);
+				output.mSub(target, error);
 				if (print)
 				System.out.println(error.toMatlabString("E2"));
 				/*
@@ -177,7 +176,7 @@ public class MyMnistDataTest {
 						ll.output.printM("output");
 						ll.weight.printM("WEIGHT");
 					}
-				*/				
+				*/
 			}
 			System.out.println(l.weight.toMatlabString("W"));
 		}
@@ -185,7 +184,7 @@ public class MyMnistDataTest {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new MyMnistDataTest().doIt();
+		new MyMnistDataTest().doIt2();
 //		System.out.println("Done.");
 	}
 }
