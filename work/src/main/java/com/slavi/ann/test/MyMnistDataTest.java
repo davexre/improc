@@ -147,6 +147,8 @@ public class MyMnistDataTest {
 			for (int index = 0;
 					index < sizeInput;
 					index++) {
+				boolean print = index == 5;
+				if (print)
 				System.out.println(index);
 				for (int i = 0; i < input.getVectorSize(); i++) {
 					input.setVectorItem(i, index == i ? 0.95 : 0.05);
@@ -154,16 +156,28 @@ public class MyMnistDataTest {
 				for (int i = 0; i < target.getVectorSize(); i++)
 					target.setVectorItem(i, ((index + 1) & (1 << i)) == 0 ? 0.05 : 0.95);
 				Matrix output = l.feedForward(input);
+				if (print) {
 				System.out.println(input.toMatlabString("I"));
 				System.out.println(target.toMatlabString("T"));
 				System.out.println(output.toMatlabString("O"));
+				}
 				target.mSub(output, error);
+				if (print)
 				System.out.println(error.toMatlabString("E1"));
 				Matrix inputError = l.backPropagate(error);
 				//System.out.println(inputError.toMatlabString("IE"));
 				output = l.feedForward(input);
 				target.mSub(output, error);
+				if (print)
 				System.out.println(error.toMatlabString("E2"));
+				/*
+				if (print)
+					for (MyLayer ll : l.layers) {
+						ll.inputError.printM("Input error");
+						ll.output.printM("output");
+						ll.weight.printM("WEIGHT");
+					}
+				*/				
 			}
 			System.out.println(l.weight.toMatlabString("W"));
 		}
