@@ -8,6 +8,9 @@ mvn versions:display-plugin-updates
 ========= Remove the project dependencies from the local repository, and optionally re-resolve them =========
 mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
 
+========= Download dependencies, source & doc =========
+mvn dependency:resolve dependency:sources
+
 =========
 Find duplicated classes in project dependacies:
 mvn org.basepom.maven:duplicate-finder-maven-plugin:check
