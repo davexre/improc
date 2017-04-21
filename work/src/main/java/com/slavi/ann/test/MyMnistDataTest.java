@@ -12,6 +12,8 @@ import com.slavi.util.Marker;
 To check this: https://github.com/deepmind/sonnet
 more info: http://yann.lecun.com/exdb/publis/index.html#lecun-98
 
+https://github.com/ivan-vasilev/neuralnetworks
+
 */
 public class MyMnistDataTest {
 
