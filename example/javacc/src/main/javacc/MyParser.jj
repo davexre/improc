@@ -1,0 +1,90 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(MyParser)
+
+package com.slavi.parser;
+
+import java.lang.StringBuilder;
+import java.util.ArrayList;
+import org.apache.commons.lang3.StringEscapeUtils;
+
+public class MyParser {
+	public final StringBuilder sb = new StringBuilder();
+	public final ArrayList params = new ArrayList();
+}
+PARSER_END(MyParser) 
+
+SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n"
+}
+
+TOKEN: {
+	<AND: "and"> |
+	<OR:  "or"> |
+	<LPAREN: "("> |
+	<RPAREN: ")"> |
+	<EQUALS: ("="|"eq")> |
+	<NOTEQUAL: ("<>"|"!="|"nq")> |
+	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
+	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
+	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\"">
+}
+
+void parse():
+{
+}
+{
+	(
+		expression()
+	)?
+	<EOF>
+}
+
+void expression():
+{
+}
+{
+	queryTerm()
+	(
+		(
+			<AND> { sb.append(" and "); } |
+			<OR> { sb.append(" or "); }
+		)
+		queryTerm()
+	)*
+}
+
+void queryTerm():
+{
+	Token token;
+	String operation;
+}
+{
+	(token=<LABEL>) { sb.append(token.image); }
+	(
+		<EQUALS> { operation = "="; } |
+		<NOTEQUAL> { operation = "<>"; }
+	)
+	(
+		(token=<STRING> | token=<LABEL>) {
+			sb.append(operation);
+			sb.append("?");
+			params.add(token.image);
+		} |
+		token=<QUOTED_STRING> {
+			sb.append(operation);
+			sb.append("?");
+			params.add(StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)));
+		}
+	)
+	|
+	<LPAREN> { sb.append("("); }
+	expression()
+	<RPAREN> { sb.append(")"); }
+}
