@@ -96,7 +96,9 @@ public class JpaCreate {
 			ent.setData2("Data2 for entity No " + i);
 			em.merge(ent);
 		}
-		Query q = em.createQuery("select e from MyEntityPartial e where e.id = 1", MyEntityPartial.class);
+		Query q = em.createQuery("select e from MyEntityPartial e where id = 1", MyEntityPartial.class);
+		//em.getCriteriaBuilder().
+
 		List<MyEntityPartial> r = q.getResultList();
 		for (MyEntityPartial i : r) {
 			System.out.println(i);

@@ -6,17 +6,17 @@ import java.util.Set;
 
 public class MathUtil {
 	public static final double eps = calcDoubleEps();
-	
+
 	public static final double epsAngle = calcAngleEps(0);
-	
+
 	public static final double C2PI = Math.PI * 2.0;
-	
+
 	public static final double PIover2 = Math.PI / 2.0;
 
 	public static final double deg2rad = Math.PI / 180;
-	
+
 	public static final double rad2deg = 180 / Math.PI;
-	
+
 	public static final double rad2grad = 200 / Math.PI;
 
 	public static final double grad2rad = Math.PI / 200;
@@ -24,7 +24,7 @@ public class MathUtil {
 	public static String d20(double d) {
 		return String.format(Locale.US, "%1$1.20f", d);
 	}
-	
+
 	public static String l10(long d) {
 		return String.format(Locale.US, "%1$10d", d);
 	}
@@ -32,19 +32,19 @@ public class MathUtil {
 	public static String d4(double d) {
 		return String.format(Locale.US, "%1$10.4f", d);
 	}
-	
+
 	public static String d2(double d) {
 		return String.format(Locale.US, "%1$1.2f", d);
 	}
-	
+
 	public static String rad2radStr(double angle) {
 		return String.format(Locale.US, "%+9.7f rad", angle);
 	}
-	
+
 	public static String rad2gradStr(double angle) {
 		return String.format(Locale.US, "%+1.5f", angle * rad2grad);
 	}
-	
+
 	public static String rad2degStr(double angle) {
 		angle = angle * rad2deg;
 		double gr = (int) angle;
@@ -55,13 +55,25 @@ public class MathUtil {
 		double sec = (angle - min) * 60;
 		return String.format(Locale.US, "% 4.0f°%2d'%4.1f\"", gr, min, sec);
 	}
-	
+
 	public static boolean isInRange(double value, double minValue, double maxValue) {
 		return minValue <= value && value <= maxValue;
 	}
-	
+
 	public static boolean isInRange(int value, int minValue, int maxValue) {
 		return minValue <= value && value <= maxValue;
+	}
+
+	public static boolean isInBetween(double value, double A, double B) {
+		return A < B ?
+				A <= value && value <= B :
+				B <= value && value <= A;
+	}
+
+	public static boolean isInBetween(int value, int A, int B) {
+		return A < B ?
+				A <= value && value <= B :
+				B <= value && value <= A;
 	}
 
 	/**
@@ -73,19 +85,19 @@ public class MathUtil {
 
 	/**
 	 * Returns a number from one range to another. Out-of-range values are re-mapped accordingly.
-	 * The "lower bounds" of either range may be larger or smaller than the "upper bounds". 
+	 * The "lower bounds" of either range may be larger or smaller than the "upper bounds".
 	 */
 	public static double mapValue(double vale, double fromLow, double fromHigh, double toLow, double toHigh) {
 		return (vale - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
 	}
-	
+
 	/**
 	 * Returns the value if min <= value <= max else returns min or max respecively.
 	 */
 	public static double clipValue(double value, double min, double max) {
 		return Math.min(max, Math.max(min, value));
 	}
-	
+
 	/**
 	 * Returns the value if min <= value <= max else returns min or max respecively.
 	 */
@@ -114,7 +126,7 @@ public class MathUtil {
 			return -1;
 		return index;
 	}
-	
+
 	/**
 	 * Returns the specified angle in the range [0..2*pi)
 	 */
@@ -125,7 +137,7 @@ public class MathUtil {
 	}
 
 	/**
-	 * Returns the specified angle in the range (-pi..pi] 
+	 * Returns the specified angle in the range (-pi..pi]
 	 */
 	public static double fixAngleMPI_PI(double angle) {
 		angle += Math.PI;
@@ -134,7 +146,7 @@ public class MathUtil {
 //		angle += Math.PI;
 //		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI) - Math.PI;
 	}
-	
+
 	/**
 	 * Returns the specified angle in the range [0..pi)
 	 */
@@ -145,14 +157,14 @@ public class MathUtil {
 	}
 
 	/**
-	 * Transfer the sign of B on to A. 
+	 * Transfer the sign of B on to A.
 	 */
 	public static final double SIGN(double a, double b) {
 		return (b >= 0.0 ? Math.abs(a) : -Math.abs(a));
 	}
-	
-	/** 
-	 * sqrt(a^2 + b^2) without under/overflow. 
+
+	/**
+	 * sqrt(a^2 + b^2) without under/overflow.
 	 */
 	public static double hypot(double a, double b) {
 		double r;
@@ -169,10 +181,10 @@ public class MathUtil {
 		}
 		return r;
 	}
-	
+
 	/**
 	 * Calculates the machine precision for trigonometric functions.
-	 * @returns The maximum angle (epsAngle) in radians such that Math.cos(angle) == Math.cos(angle+epsAngle)  
+	 * @returns The maximum angle (epsAngle) in radians such that Math.cos(angle) == Math.cos(angle+epsAngle)
 	 */
 	private static double calcAngleEps(double angle) {
 		double eps = 1.0; // 1 radian
@@ -185,10 +197,10 @@ public class MathUtil {
 			eps /= 10.0;
 		}
 	}
-	
+
 	/**
 	 * Calculates the machine precision.
-	 * @returns The maximum eps such that 1.0 == 1.0 + eps  
+	 * @returns The maximum eps such that 1.0 == 1.0 + eps
 	 */
 	public static double calcDoubleEps() {
 		double one = 1.0;
@@ -216,7 +228,7 @@ public class MathUtil {
 
 	/**
 	 * GCD - Greatest Common Divisor
-	 * 
+	 *
 	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
 	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
 	 *
@@ -232,7 +244,7 @@ public class MathUtil {
 
 	/**
 	 * GCD - Greatest Common Divisor
-	 * 
+	 *
 	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
 	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
 	 *
@@ -259,12 +271,12 @@ public class MathUtil {
 				}
 				newSet.add(MathUtil.gcd(first, i));
 			}
-			
+
 			Set<Integer> dummy = data;
 			data = set;
 			set = dummy;
 		}
 		return data.size() > 0 ? data.iterator().next() : 0;
 	}
-	
+
 }

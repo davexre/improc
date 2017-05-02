@@ -1,5 +1,6 @@
 package com.slavi.ann.test;
 
+import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 
 public class MyLayer {
@@ -41,9 +42,32 @@ public class MyLayer {
 		return weight.getSizeY();
 	}
 
+	boolean isBetween(int value, int A, int B) {
+		return A < B ?
+			A <= value && value <= B :
+			!(B < value && value < A);
+	}
+
+	public void eraseWeights() {
+		if (weight.getSizeX() < weight.getSizeY()) {
+			throw new Error();
+		}
+		int w = (2 * weight.getSizeX()) / 3;
+		int off = weight.getSizeX() / weight.getSizeY();
+		for (int j = 0; j < weight.getSizeY(); j++) {
+			int start = MathUtil.fixIndexLooped(j * off, weight.getSizeX());
+			int end = MathUtil.fixIndexLooped(start + w, weight.getSizeX());
+			for (int i = 0; i < weight.getSizeX(); i++) {
+				boolean isInRange = isBetween(i, start, end);
+ 				weight.setItem(i, j, isInRange ? 0.95 : 0.05);
+			}
+		}
+	}
+
 	public void eraseMemory() {
-		weight.makeR(0.5);
+		//weight.makeR(0.5);
 		//weight.make0();
+		eraseWeights();
 		inputError.make0();
 		maxInputError.make0();
 		output.make0();

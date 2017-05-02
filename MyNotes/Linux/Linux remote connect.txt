@@ -9,6 +9,7 @@ scp -r -P 443 slavian@slavi.no-ip.org:/home/slavian/some_file_or_dir .
 Connect to home
 ===============
 ssh -p 443 slavian@slavi.no-ip.org -L 1234:localhost:5900
+vino-preferences
+/usr/lib/vino/vino-server
 remmina
 	localhost:1234
-

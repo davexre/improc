@@ -13,7 +13,10 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 public class MyParser {
 	public final StringBuilder sb = new StringBuilder();
-	public final ArrayList params = new ArrayList();
+	public final ArrayList paramVals = new ArrayList();
+	public final ArrayList paramNames = new ArrayList();
+	String lastField = "";
+	public String fieldPrefix = "";
 }
 PARSER_END(MyParser) 
 
@@ -66,7 +69,11 @@ void queryTerm():
 	String operation;
 }
 {
-	(token=<LABEL>) { sb.append(token.image); }
+	(token=<LABEL>) {
+		lastField = token.image;
+		sb.append(fieldPrefix);
+		sb.append(lastField);
+	}
 	(
 		<EQUALS> { operation = "="; } |
 		<NOTEQUAL> { operation = "<>"; }
@@ -75,12 +82,14 @@ void queryTerm():
 		(token=<STRING> | token=<LABEL>) {
 			sb.append(operation);
 			sb.append("?");
-			params.add(token.image);
+			paramVals.add(token.image);
+			paramNames.add(lastField);
 		} |
 		token=<QUOTED_STRING> {
 			sb.append(operation);
 			sb.append("?");
-			params.add(StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)));
+			paramVals.add(StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)));
+			paramNames.add(lastField);
 		}
 	)
 	|
