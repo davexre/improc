@@ -12,6 +12,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -25,9 +26,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.derbi.jpa.entity.DateStyle;
+import com.slavi.derbi.jpa.entity.Department;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
 import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.derbi.jpa.entity.MyEntityPartial;
+import com.slavi.derbi.jpa.entity.User;
 import com.slavi.util.StringPrintStream;
 
 public class JpaCreate {
@@ -66,6 +69,18 @@ public class JpaCreate {
 		// ... more
 		em.getTransaction().begin();
 
+		for (int i = 0; i < 5; i++)
+			em.persist(new Department("Department " + i));
+		List<Department> deparments = em.createQuery("select d from Department d", Department.class).getResultList();
+		for (int i = 0; i < 20; i++)
+			em.persist(new User("User " + i, deparments.get(i % deparments.size())));
+		List<User> users = em.createQuery("select u from User u join u.department d where u.department.name = 'Department 1'", User.class).getResultList();
+		for (User u : users)
+			System.out.println(u);
+		
+		if (true)
+			return;
+		
 		DateStyle ds = new DateStyle();
 		ds.setFormat("dd.mm.yyyy");
 		ds = em.merge(ds);
@@ -96,7 +111,7 @@ public class JpaCreate {
 			ent.setData2("Data2 for entity No " + i);
 			em.merge(ent);
 		}
-		Query q = em.createQuery("select e from MyEntityPartial e where id = 1", MyEntityPartial.class);
+		Query q = em.createQuery("select e from MyEntityPartial e where e.id = 1", MyEntityPartial.class);
 		//em.getCriteriaBuilder().
 
 		List<MyEntityPartial> r = q.getResultList();

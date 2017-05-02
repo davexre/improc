@@ -1,4 +1,4 @@
-package com.slavi.example.springBoot.example2.model;
+package com.slavi.derbi.jpa.entity;
 
 import java.util.Date;
 

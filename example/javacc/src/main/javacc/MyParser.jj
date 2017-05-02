@@ -34,9 +34,14 @@ TOKEN: {
 	<RPAREN: ")"> |
 	<EQUALS: ("="|"eq")> |
 	<NOTEQUAL: ("<>"|"!="|"nq")> |
-	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
+	<GREATER: (">"|"gt")> |
+	<GREATER_EQUAL: (">="|"ge")> |
+	<LESS: ("<"|"lt")> |
+	<LESS_EQUAL: ("<="|"le")> |
+	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9","."])*> |
 	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
-	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\"">
+	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\""> |
+	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'">
 }
 
 void parse():
@@ -75,8 +80,12 @@ void queryTerm():
 		sb.append(lastField);
 	}
 	(
-		<EQUALS> { operation = "="; } |
-		<NOTEQUAL> { operation = "<>"; }
+		<EQUALS>			{ operation = "=";  } |
+		<NOTEQUAL>			{ operation = "<>"; } |
+		<GREATER>			{ operation = ">";  } |
+		<GREATER_EQUAL>		{ operation = ">="; } |
+		<LESS>				{ operation = "<";  } |
+		<LESS_EQUAL>		{ operation = "<="; }
 	)
 	(
 		(token=<STRING> | token=<LABEL>) {
@@ -85,7 +94,7 @@ void queryTerm():
 			paramVals.add(token.image);
 			paramNames.add(lastField);
 		} |
-		token=<QUOTED_STRING> {
+		(token=<QUOTED_STRING> | token=<SINGLE_QUOTE_STRING>) {
 			sb.append(operation);
 			sb.append("?");
 			paramVals.add(StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)));

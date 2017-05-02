@@ -2,8 +2,6 @@ package com.slavi.parser.test;
 
 import java.io.StringReader;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import com.slavi.parser.MyParser;
 
 public class MyParserTest {
@@ -13,6 +11,6 @@ public class MyParserTest {
 		MyParser p = new MyParser(new StringReader(str));
 		p.parse();
 		System.out.println(p.sb.toString());
-		System.out.println(p.params);
+		System.out.println(p.paramVals);
 	}
 }

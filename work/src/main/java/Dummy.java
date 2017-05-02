@@ -1,7 +1,12 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
@@ -78,9 +83,16 @@ public class Dummy {
 		System.out.println("Pixels = " + bi.getWidth() * bi.getHeight());*/
 	}
 
-	public static void main(String[] args) {
-		String str = "asd*qew";
-		System.out.println(URLEncoder.encode(str));
+	public static void main(String[] args) throws Exception {
+		Date d = DateUtils.parseDate("2017-04-01T1:2:3.4+0800", new String[] {
+				"yyyy-MM-dd",
+				"yyyy-MM-dd'T'HH",
+				"yyyy-MM-dd'T'HH:mm",
+				"yyyy-MM-dd'T'HH:mm:ss",
+				"yyyy-MM-dd'T'HH:mm:ss.SSS",
+				"yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+		});
+		System.out.println(d);
 	}
 	public static void main2(String[] args) throws Exception {
 //		Thread.sleep(5000);

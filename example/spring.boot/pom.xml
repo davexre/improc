@@ -12,8 +12,19 @@
 		<version>1.5.3.RELEASE</version>
 		<relativePath></relativePath>
 	</parent>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>util.dbutil</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>javacc</artifactId>

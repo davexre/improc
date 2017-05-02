@@ -11,6 +11,8 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>javacc</module>
+		<module>spring.boot</module>
 		<module>example.logging</module>
 		<module>example.misc</module>
 		<module>example.resources</module>
