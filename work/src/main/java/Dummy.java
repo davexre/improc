@@ -84,15 +84,8 @@ public class Dummy {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Date d = DateUtils.parseDate("2017-04-01T1:2:3.4+0800", new String[] {
-				"yyyy-MM-dd",
-				"yyyy-MM-dd'T'HH",
-				"yyyy-MM-dd'T'HH:mm",
-				"yyyy-MM-dd'T'HH:mm:ss",
-				"yyyy-MM-dd'T'HH:mm:ss.SSS",
-				"yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-		});
-		System.out.println(d);
+		Class clazz = Double.class;
+		System.out.println(Number.class.isAssignableFrom(clazz));
 	}
 	public static void main2(String[] args) throws Exception {
 //		Thread.sleep(5000);

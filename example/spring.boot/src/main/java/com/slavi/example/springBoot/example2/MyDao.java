@@ -44,10 +44,10 @@ public class MyDao {
 	}
 
 	public List<User> dummy() throws Exception {
-		TypedQuery<User> query = em.createQuery("select u from User u join fetch Department d where d.name = 'Department 1'", User.class);
+		TypedQuery<User> query = em.createQuery("select u from User u left join u.department department where department.name = 'Department 1'", User.class);
 		return query.getResultList();
 	}
-	
+
 	public List<User> queryUser(String queryStr) throws Exception {
 		MyParser parser = new MyParser(new StringReader(queryStr));
 		parser.fieldPrefix = "u.";
@@ -60,10 +60,10 @@ public class MyDao {
 			ResultSetToString rss = new ResultSetToString();
 			System.out.println(rss.resultSetToString(rs));
 		}
-		
-		
-		
-/*		
+
+
+
+
 		String q = parser.sb.toString();
 		q = "select u from User u" + (StringUtils.isEmpty(q) ? "" : " where (" + parser.sb.toString() + ")");
 		System.out.println(q);
@@ -93,12 +93,12 @@ public class MyDao {
 			} else if (Boolean.class.isAssignableFrom(clazz)) {
 				o = Boolean.parseBoolean((String) o);
 			}
-			
+
 			query.setParameter(i + 1, o);
 			System.out.println(i + " -> " + o);
 		}
-*/
-		TypedQuery<User> query = em.createQuery("select u from User u where u.department.name = 1", User.class);
+
+		//TypedQuery<User> query = em.createQuery("select u from User u where u.department.name = 1", User.class);
 		return query.getResultList();
 	}
 }

@@ -38,10 +38,12 @@ TOKEN: {
 	<GREATER_EQUAL: (">="|"ge")> |
 	<LESS: ("<"|"lt")> |
 	<LESS_EQUAL: ("<="|"le")> |
-	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9","."])*> |
+	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
+	<LABEL_NESTED: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])* "." ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
 	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
 	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\""> |
-	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'">
+	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'"> |
+	<DOT: ".">
 }
 
 void parse():
@@ -74,11 +76,14 @@ void queryTerm():
 	String operation;
 }
 {
-	(token=<LABEL>) {
+	(token=<LABEL> {
 		lastField = token.image;
 		sb.append(fieldPrefix);
 		sb.append(lastField);
-	}
+	} | token=<LABEL_NESTED> {
+		lastField = token.image;
+		sb.append(lastField);
+	})
 	(
 		<EQUALS>			{ operation = "=";  } |
 		<NOTEQUAL>			{ operation = "<>"; } |

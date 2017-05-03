@@ -39,6 +39,7 @@
 		id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
 		p:dataSource-ref="dataSource"
+		
 		p:packagesToScan="com.slavi.derbi.jpa.entity">
 	
 		<property name="jpaVendorAdapter">
@@ -65,4 +66,10 @@
 			</props>
 		</property>
 	</bean>
+	
+	<bean id="transactionManager" 
+		class="org.springframework.orm.jpa.JpaTransactionManager"
+		p:dataSource-ref="dataSource" 
+		p:entityManagerFactory-ref="entityManagerFactory"
+	/>
 </beans>

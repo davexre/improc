@@ -7,41 +7,63 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.Department;
+import com.slavi.derbi.jpa.entity.DepartmentType;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
 import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.derbi.jpa.entity.MyEntityPartial;
+import com.slavi.derbi.jpa.entity.Role;
 import com.slavi.derbi.jpa.entity.User;
 import com.slavi.util.StringPrintStream;
 
+@Component
+@ComponentScan
+@EnableTransactionManagement
+@ImportResource("/com/slavi/derbi/jpa/JpaCreate-sping.xml")
 public class JpaCreate {
 
-	public static String dbToXml(DataSource dataSource) throws SQLException, IOException {
+	@Autowired
+	DataSource dataSource;
+
+	public String dbToXml() throws SQLException, IOException {
 		StringPrintStream out = new StringPrintStream();
-		dbToXml(dataSource, out);
+		dbToXml(out);
 		return out.toString();
 	}
 
-	public static void dbToXml(DataSource dataSource, OutputStream out) throws SQLException, IOException {
+	public void dbToXml(OutputStream out) throws SQLException, IOException {
 		Connection conn = dataSource.getConnection();
 		try {
 			Platform  platform = PlatformFactory.createNewPlatformInstance(dataSource);
@@ -63,36 +85,93 @@ public class JpaCreate {
 		connection.commit();
 	}
 
-	public void createORMs(ApplicationContext appContext) throws Exception {
-		EntityManagerFactory emf = appContext.getBean("entityManagerFactory", EntityManagerFactory.class);
-		EntityManager em = emf.createEntityManager();
-		// ... more
-		em.getTransaction().begin();
+	@PersistenceContext
+	EntityManager em;
 
+	@Transactional(transactionManager="transactionManager")
+	public void initialize() throws Exception {
+		DepartmentType types[] = DepartmentType.values();
 		for (int i = 0; i < 5; i++)
-			em.persist(new Department("Department " + i));
+			em.persist(new Department("Department " + i, types[i % types.length]));
 		List<Department> deparments = em.createQuery("select d from Department d", Department.class).getResultList();
-		for (int i = 0; i < 20; i++)
-			em.persist(new User("User " + i, deparments.get(i % deparments.size())));
-		List<User> users = em.createQuery("select u from User u join u.department d where u.department.name = 'Department 1'", User.class).getResultList();
+		User manager = null;
+		for (int i = 0; i < 20; i++) {
+			User user = new User("User " + i, deparments.get(i % deparments.size()));
+			if (i % 5 == 0) {
+				user.setRole(Role.MANAGER);
+			} else
+				user.setManager(manager);
+			em.persist(user);
+			if (i % 5 == 0) {
+				manager = em.find(User.class, user.getUsername());
+			}
+		}
+	}
+
+	@Transactional(transactionManager="transactionManager")
+	public void createORMs() throws Exception {
+		User manager = em.find(User.class, "User 0");
+		System.out.println(manager);
+		User user = em.find(User.class, "User 1");
+		System.out.println(user);
+
+		EntityType<User> etype = em.getMetamodel().entity(User.class);
+		for (Attribute attribute : etype.getAttributes()) {
+			ManagedType<User> mtype = attribute.getDeclaringType();
+			System.out.println(attribute);
+			System.out.println(attribute.isAssociation());
+		}
+		String paramVal = DepartmentType.FACTORY.name();
+		String paramName = "department.type";
+		String queryStr = "select distinct u from User u join u.department department left join u.manager m left join u.subordinate subordinate where subordinate.username=?1";
+		Object o = paramVal;
+		Attribute attribute = etype.getAttribute("department");
+		Class clazz = attribute.getJavaType();
+		if (attribute.isAssociation()) {
+		} else {
+			if (clazz.isEnum()) {
+				o = Enum.valueOf(clazz, (String) o);
+			} else if (Long.class.isAssignableFrom(clazz)) {
+				o = Long.parseLong((String) o);
+			} else if (Double.class.isAssignableFrom(clazz)) {
+				o = Double.parseDouble((String) o);
+			} else if (Date.class.isAssignableFrom(clazz)) {
+				o = DateUtils.parseDate((String) o, new String[] {
+						"yyyy",
+						"yyyy-MM",
+						"yyyy-MM-dd",
+						"yyyy-MM-dd'T'HH",
+						"yyyy-MM-dd'T'HH:mm",
+						"yyyy-MM-dd'T'HH:mm:ss",
+						"yyyy-MM-dd'T'HH:mm:ss.SSS",
+						"yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+				});
+			} else if (Boolean.class.isAssignableFrom(clazz)) {
+				o = Boolean.parseBoolean((String) o);
+			}
+
+		}
+		TypedQuery<User> query = em.createQuery(queryStr, User.class);
+		query.setParameter(1, "User 1");
+
+		System.out.println("\n\n--------------------");
+		System.out.println(queryStr);
+		List<User> users = query.getResultList();
 		for (User u : users)
 			System.out.println(u);
-		
+
 		if (true)
 			return;
-		
+
 		DateStyle ds = new DateStyle();
 		ds.setFormat("dd.mm.yyyy");
 		ds = em.merge(ds);
-		em.getTransaction().commit();
-		em.getTransaction().begin();
 
 		EntityWithDate ed = new EntityWithDate();
 		ed.setData("My data");
 		ed.setDateIdRef(ds.getDateId());
 		ed = em.merge(ed);
 
-		em.getTransaction().commit();
 		int edId = ed.getEntityWithDateId();
 
 		ed = em.find(EntityWithDate.class, edId);
@@ -103,7 +182,6 @@ public class JpaCreate {
 		System.out.println(out.toString());
 
 		System.out.println("---------------------");
-		em.getTransaction().begin();
 		for (int i = 0; i < 10; i++) {
 			MyEntity ent = new MyEntity();
 			ent.setData ("Data  for entity No " + i);
@@ -118,24 +196,18 @@ public class JpaCreate {
 		for (MyEntityPartial i : r) {
 			System.out.println(i);
 		}
-		em.getTransaction().commit();
 		System.out.println("---------------------");
-
-		em.close();
-	}
-
-	void doIt() throws Exception {
-		ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", getClass());
-		DataSource dataSource = appContext.getBean("dataSource", DataSource.class);
-		createORMs(appContext);
-
-		dbToXml(dataSource);
-		appContext.close();
 	}
 
 	public static void main(String[] args) throws Exception {
 		System.setProperty("derby.stream.error.method", "com.slavi.dbutil.DerbyLogOverSlf4j.getLogger");
-		new JpaCreate().doIt();
+		//ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", JpaCreate.class);
+		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext(JpaCreate.class);
+		JpaCreate bean = appContext.getBean(JpaCreate.class);
+		bean.initialize();
+		bean.createORMs();
+		bean.dbToXml();
+		appContext.close();
 		System.out.println("Done.");
 	}
 }

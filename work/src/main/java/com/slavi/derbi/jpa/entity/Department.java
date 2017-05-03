@@ -16,13 +16,16 @@ public class Department {
 
 	@Id @GeneratedValue
 	Integer id;
-	
+
 	String name;
-	
+
 	String description;
-	
-	public Department(String name) {
+
+	DepartmentType type;
+
+	public Department(String name, DepartmentType type) {
 		this.name = name;
-		this.description = "Description for " + name;
+		this.type = type;
+		this.description = "Description for " + name + "(" + type + ")";
 	}
 }

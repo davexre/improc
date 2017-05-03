@@ -1,9 +1,13 @@
 package com.slavi.derbi.jpa.entity;
 
 import java.util.Date;
+import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -30,9 +34,16 @@ public class User {
 	Boolean enabled;
 
 	Date created;
-	
+
 	@ManyToOne
 	Department department;
+
+	@JoinColumn(name="manager")
+	@ManyToOne
+	User manager;
+
+	@OneToMany(mappedBy="manager")
+	Set<User> subordinate;
 
 	public User(String username, Department department) {
 		this.username = this.name = username;
