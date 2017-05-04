@@ -123,7 +123,7 @@ public class JpaCreate {
 		}
 		String paramVal = DepartmentType.FACTORY.name();
 		String paramName = "department.type";
-		String queryStr = "select distinct u from User u join u.department department left join u.manager m left join u.subordinate subordinate where subordinate.username=?1";
+		String queryStr = "select distinct u from User u join u.subordinate subordinate join subordinate.department department where department.type=?1";
 		Object o = paramVal;
 		Attribute attribute = etype.getAttribute("department");
 		Class clazz = attribute.getJavaType();
@@ -152,7 +152,7 @@ public class JpaCreate {
 
 		}
 		TypedQuery<User> query = em.createQuery(queryStr, User.class);
-		query.setParameter(1, "User 1");
+		query.setParameter(1, DepartmentType.OFFICE);
 
 		System.out.println("\n\n--------------------");
 		System.out.println(queryStr);

@@ -1,0 +1,97 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(MyParser2)
+
+package com.slavi.parser;
+
+import java.lang.StringBuilder;
+import java.util.ArrayList;
+import javax.persistence.metamodel.EntityType;
+import org.apache.commons.lang3.StringEscapeUtils;
+
+public class MyParser2 {
+	public ParserHelper helper;
+}
+PARSER_END(MyParser2)
+
+SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n"
+}
+
+TOKEN: {
+	<AND: "and"> |
+	<OR:  "or"> |
+	<LPAREN: "("> |
+	<RPAREN: ")"> |
+	<LIKE: ("~="|"~"|"like")> |
+	<EQUALS: ("="|"eq")> |
+	<NOTEQUAL: ("<>"|"!="|"nq")> |
+	<GREATER: (">"|"gt")> |
+	<GREATER_EQUAL: (">="|"ge")> |
+	<LESS: ("<"|"lt")> |
+	<LESS_EQUAL: ("<="|"le")> |
+	<LABEL: (["A"-"Z","a"-"z","0"-"9","."])+> |
+	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
+	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\""> |
+	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'">
+}
+
+void parse():
+{
+}
+{
+	(
+		expression()
+	)?
+	<EOF>
+}
+
+void expression():
+{
+}
+{
+	queryTerm()
+	(
+		(
+			<AND>	{ helper.query.append(" and "); } |
+			<OR>	{ helper.query.append(" or "); }
+		)
+		queryTerm()
+	)*
+}
+
+void queryTerm():
+{
+	Token token;
+	String operation;
+	String field;
+	String value;
+}
+{
+	token=<LABEL>					{ field = token.image; }
+	(
+		<LIKE>						{ operation = "like"; } |
+		<EQUALS>					{ operation = "=";    } |
+		<NOTEQUAL>					{ operation = "<>";   } |
+		<GREATER>					{ operation = ">";    } |
+		<GREATER_EQUAL>				{ operation = ">=";   } |
+		<LESS>						{ operation = "<";    } |
+		<LESS_EQUAL>				{ operation = "<=";   }
+	)
+	(
+		token=<STRING>				{ value = token.image; } |
+		token=<LABEL>				{ value = token.image; } |
+		token=<QUOTED_STRING>		{ value = StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)); } |
+		token=<SINGLE_QUOTE_STRING>	{ value = StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)); }
+	)								{ helper.addQueryTerm(field, operation, value); }
+	|
+	<LPAREN>						{ helper.query.append("("); }
+	expression()
+	<RPAREN>						{ helper.query.append(")"); }
+}

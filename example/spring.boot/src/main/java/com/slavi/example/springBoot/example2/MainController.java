@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.slavi.example.springBoot.example2.model.Department;
+import com.slavi.example.springBoot.example2.model.DepartmentType;
+import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.example.springBoot.example2.model.User;
 import com.slavi.example.springBoot.example2.repository.DepartmentRepository;
 import com.slavi.example.springBoot.example2.repository.UserRepository;
@@ -33,6 +35,8 @@ public class MainController {
 
 	@PostConstruct
 	void initialize() throws Exception {
+		myDao.initialize();
+/*
 		for (int i = 0; i < 5; i++)
 			departmentRepository.save(new Department("Department " + i));
 		List<Department> deparments = departmentRepository.findAll();
@@ -40,7 +44,7 @@ public class MainController {
 			userRepository.save(new User("User " + i, deparments.get(i % deparments.size())));
 		List<User> users = myDao.dummy();
 		for (User u : users)
-			System.out.println(u);
+			System.out.println(u);*/
 	}
 
 
@@ -62,6 +66,7 @@ public class MainController {
 		//String queryStr = "(username=\"user1\")";
 		for (User u : myDao.queryUser(q)) {
 			out.println(u);
+			out.println();
 		}
 
 		return bo.toString();

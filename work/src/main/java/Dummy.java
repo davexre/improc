@@ -6,10 +6,13 @@ import java.util.Date;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
+
+import cern.colt.Arrays;
 
 
 public class Dummy {
@@ -86,6 +89,24 @@ public class Dummy {
 	public static void main(String[] args) throws Exception {
 		Class clazz = Double.class;
 		System.out.println(Number.class.isAssignableFrom(clazz));
+		System.out.println(Arrays.toString("a.b.cc".split("\\.")));
+		String s = "asd.qwe.";
+		Object o = DateUtils.parseDate((String) "2222", new String[] {
+				"HH",
+				"HH:mm",
+				"HH:mm:ss",
+				"HH:mm:ss.SSS",
+				"HH:mm:ss.SSSZ",
+				"yyyy",
+				"yyyy-MM",
+				"yyyy-MM-dd",
+				"yyyy-MM-dd'T'HH",
+				"yyyy-MM-dd'T'HH:mm",
+				"yyyy-MM-dd'T'HH:mm:ss",
+				"yyyy-MM-dd'T'HH:mm:ss.SSS",
+				"yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+		});
+		System.out.println(o);
 	}
 	public static void main2(String[] args) throws Exception {
 //		Thread.sleep(5000);

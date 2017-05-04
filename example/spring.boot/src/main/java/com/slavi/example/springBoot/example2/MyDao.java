@@ -1,30 +1,26 @@
 package com.slavi.example.springBoot.example2;
 
 import java.io.StringReader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.slavi.dbutil.ResultSetToString;
+import com.slavi.example.springBoot.example2.model.Department;
+import com.slavi.example.springBoot.example2.model.DepartmentType;
+import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.example.springBoot.example2.model.User;
 import com.slavi.example.springBoot.example2.repository.UserRepository;
-import com.slavi.parser.MyParser;
+import com.slavi.parser.MyParser2;
+import com.slavi.parser.ParserHelper;
 
 @Component
 public class MyDao {
@@ -38,6 +34,26 @@ public class MyDao {
 	UserRepository userRepository;
 
 	@Transactional(readOnly=false)
+	public void initialize() throws Exception {
+		DepartmentType types[] = DepartmentType.values();
+		for (int i = 0; i < 5; i++)
+			em.persist(new Department("Department " + i, types[i % types.length]));
+		List<Department> deparments = em.createQuery("select d from Department d", Department.class).getResultList();
+		User manager = null;
+		for (int i = 0; i < 20; i++) {
+			User user = new User("User " + i, deparments.get(i % deparments.size()));
+			if (i % 5 == 0) {
+				user.setRole(Role.MANAGER);
+			} else
+				user.setManager(manager);
+			em.persist(user);
+			if (i % 5 == 0) {
+				manager = em.find(User.class, user.getUsername());
+			}
+		}
+	}
+
+	@Transactional(readOnly=false)
 	public User makeAndGet(String name) {
 		em.persist(new User(name, null));
 		return em.find(User.class, name);
@@ -49,54 +65,27 @@ public class MyDao {
 	}
 
 	public List<User> queryUser(String queryStr) throws Exception {
-		MyParser parser = new MyParser(new StringReader(queryStr));
-		parser.fieldPrefix = "u.";
+		EntityType rootType = em.getMetamodel().entity(User.class);
+		MyParser2 parser = new MyParser2(new StringReader(queryStr));
+		parser.helper = new ParserHelper(em, rootType);
 		parser.parse();
 
-		try (Connection conn = dataSource.getConnection()) {
+/*		try (Connection conn = dataSource.getConnection()) {
 			PreparedStatement ps = conn.prepareStatement("select * from users where enabled = ?");
 			ps.setObject(1, "true");
 			ResultSet rs = ps.executeQuery();
 			ResultSetToString rss = new ResultSetToString();
 			System.out.println(rss.resultSetToString(rs));
 		}
+*/
 
-
-
-
-		String q = parser.sb.toString();
-		q = "select u from User u" + (StringUtils.isEmpty(q) ? "" : " where (" + parser.sb.toString() + ")");
+		String q = parser.helper.query.toString();
+		q = parser.helper.sql.toString() + (StringUtils.isEmpty(q) ? "" : " where " + q);
 		System.out.println(q);
+
 		TypedQuery<User> query = em.createQuery(q, User.class);
-		EntityType etype = em.getMetamodel().entity(User.class);
-
-		for (int i = 0; i < parser.paramVals.size(); i++) {
-			String paramName = (String) parser.paramNames.get(i);
-			Attribute a = etype.getAttribute(paramName);
-			Object o = parser.paramVals.get(i);
-			Class clazz = a.getJavaType();
-			if (Long.class.isAssignableFrom(clazz)) {
-				o = Long.parseLong((String) o);
-			} else if (Double.class.isAssignableFrom(clazz)) {
-				o = Double.parseDouble((String) o);
-			} else if (Date.class.isAssignableFrom(clazz)) {
-				o = DateUtils.parseDate((String) o, new String[] {
-						"yyyy",
-						"yyyy-MM",
-						"yyyy-MM-dd",
-						"yyyy-MM-dd'T'HH",
-						"yyyy-MM-dd'T'HH:mm",
-						"yyyy-MM-dd'T'HH:mm:ss",
-						"yyyy-MM-dd'T'HH:mm:ss.SSS",
-						"yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-				});
-			} else if (Boolean.class.isAssignableFrom(clazz)) {
-				o = Boolean.parseBoolean((String) o);
-			}
-
-			query.setParameter(i + 1, o);
-			System.out.println(i + " -> " + o);
-		}
+		for (int i = 0; i < parser.helper.paramVals.size(); i++)
+			query.setParameter(i + 1, parser.helper.paramVals.get(i));
 
 		//TypedQuery<User> query = em.createQuery("select u from User u where u.department.name = 1", User.class);
 		return query.getResultList();

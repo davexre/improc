@@ -4,25 +4,62 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Entity
-@Data
-@NoArgsConstructor
-@ToString
 public class Department {
 
 	@Id @GeneratedValue
 	Integer id;
-	
+
 	String name;
-	
+
 	String description;
-	
-	public Department(String name) {
+
+	DepartmentType type;
+
+	public Department() {}
+
+	public String toString() {
+		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+
+	public Department(String name, DepartmentType type) {
 		this.name = name;
-		this.description = "Description for " + name;
+		this.type = type;
+		this.description = "Description for " + name + "(" + type + ")";
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public DepartmentType getType() {
+		return type;
+	}
+
+	public void setType(DepartmentType type) {
+		this.type = type;
 	}
 }
