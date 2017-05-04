@@ -1,15 +1,19 @@
 package com.slavi.parser;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.PluralAttribute;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -131,7 +135,7 @@ public class ParserHelper {
 			query.append(fieldExpr).append(" ").append(operation).append(" ?");
 			paramVals.add(o);
 		} catch (Throwable e) {
-			log.error("Error parsing query", e);
+			log.debug("Error parsing query", e);
 			throw new ParseException("Error parsing field " + field + " " + operation + " " + fieldValue + ". Error message is " + e.getMessage());
 		}
 	}
@@ -145,5 +149,34 @@ public class ParserHelper {
 		root.alias = "t0.";
 		aliases.put("", root);
 		sql = new StringBuilder("select t0 from ").append(rootEntity.getName()).append(" t0");
+	}
+	
+	public static <T> List<T> parse(EntityManager em, Class<T> rootClass, Paging paging, String ... queries) throws ParseException {
+		EntityType rootEntity = em.getMetamodel().entity(rootClass);
+		ParserHelper helper = new ParserHelper(em, rootEntity);
+		StringBuilder q = new StringBuilder();
+		for (String query : queries) {
+			if (StringUtils.isEmpty(query))
+				continue;
+			MyParser2 parser = new MyParser2(new StringReader(query));
+			parser.helper = helper;
+			parser.parse();
+			if (helper.query.length() > 0) {
+				if (q.length() > 0)
+					q.append(" and ");
+				q.append("(").append(helper.query).append(")");
+			}
+		}
+		if (q.length() > 0)
+			q.insert(0, " where ");
+		q.insert(0, helper.sql);
+		
+		TypedQuery<T> query = em.createQuery(q.toString(), rootClass);
+		for (int i = 0; i < helper.paramVals.size(); i++)
+			query.setParameter(i + 1, helper.paramVals.get(i));
+		
+		query.setFirstResult((paging.getPage() - 1) * paging.getSize());
+		query.setMaxResults(paging.getSize());
+		return query.getResultList();
 	}
 }
