@@ -20,7 +20,9 @@ import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.example.springBoot.example2.model.User;
 import com.slavi.example.springBoot.example2.repository.UserRepository;
 import com.slavi.parser.MyParser2;
-import com.slavi.parser.ParserHelper;
+import com.slavi.parser.Filter;
+import com.slavi.parser.WebFilterParser;
+import com.slavi.parser.WebFilterParserState;
 
 @Component
 public class MyDao {
@@ -64,11 +66,10 @@ public class MyDao {
 		return query.getResultList();
 	}
 
-	public List<User> queryUser(String queryStr) throws Exception {
-		EntityType rootType = em.getMetamodel().entity(User.class);
-		MyParser2 parser = new MyParser2(new StringReader(queryStr));
-		parser.helper = new ParserHelper(em, rootType);
-		parser.parse();
+	public List<User> queryUser(String queryStr, Filter paging) throws Exception {
+		WebFilterParser<User> parser = new WebFilterParser(em, User.class);
+		parser.addQuery(queryStr, null);
+		return parser.execute(paging);
 
 /*		try (Connection conn = dataSource.getConnection()) {
 			PreparedStatement ps = conn.prepareStatement("select * from users where enabled = ?");
@@ -78,16 +79,7 @@ public class MyDao {
 			System.out.println(rss.resultSetToString(rs));
 		}
 */
-
-		String q = parser.helper.query.toString();
-		q = parser.helper.sql.toString() + (StringUtils.isEmpty(q) ? "" : " where " + q);
-		System.out.println(q);
-
-		TypedQuery<User> query = em.createQuery(q, User.class);
-		for (int i = 0; i < parser.helper.paramVals.size(); i++)
-			query.setParameter(i + 1, parser.helper.paramVals.get(i));
-
 		//TypedQuery<User> query = em.createQuery("select u from User u where u.department.name = 1", User.class);
-		return query.getResultList();
+		//return query.getResultList();
 	}
 }

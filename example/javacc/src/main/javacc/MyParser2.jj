@@ -7,13 +7,10 @@ PARSER_BEGIN(MyParser2)
 
 package com.slavi.parser;
 
-import java.lang.StringBuilder;
-import java.util.ArrayList;
-import javax.persistence.metamodel.EntityType;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 public class MyParser2 {
-	public ParserHelper helper;
+	public WebFilterParserState helper;
 }
 PARSER_END(MyParser2)
 
@@ -36,6 +33,7 @@ TOKEN: {
 	<GREATER_EQUAL: (">="|"ge")> |
 	<LESS: ("<"|"lt")> |
 	<LESS_EQUAL: ("<="|"le")> |
+	<NULL: "null"> |
 	<LABEL: (["A"-"Z","a"-"z","0"-"9","."])+> |
 	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
 	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\""> |
@@ -85,6 +83,7 @@ void queryTerm():
 		<LESS_EQUAL>				{ operation = "<=";   }
 	)
 	(
+		token=<NULL>				{ value = null; } |
 		token=<STRING>				{ value = token.image; } |
 		token=<LABEL>				{ value = token.image; } |
 		token=<QUOTED_STRING>		{ value = StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)); } |

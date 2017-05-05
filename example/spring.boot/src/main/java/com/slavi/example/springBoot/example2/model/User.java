@@ -3,19 +3,23 @@ package com.slavi.example.springBoot.example2.model;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name="users")
+@Access(AccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class User {
 	@Id
 	String username;
@@ -34,17 +38,14 @@ public class User {
 	Department department;
 
 	@JoinColumn(name="manager")
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	User manager;
 
-	@OneToMany(mappedBy="manager")
+	@XmlTransient
+	@OneToMany(mappedBy="manager", fetch=FetchType.LAZY)
 	Set<User> subordinate;
 
 	public User() {}
-
-	public String toString() {
-		return ReflectionToStringBuilder.toString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-	}
 
 	public User(String username, Department department) {
 		this.username = this.name = username;
@@ -55,6 +56,7 @@ public class User {
 		this.department = department;
 	}
 
+	@XmlTransient
 	public String getUsername() {
 		return username;
 	}
