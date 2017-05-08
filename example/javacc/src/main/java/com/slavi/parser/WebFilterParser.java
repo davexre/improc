@@ -2,10 +2,14 @@ package com.slavi.parser;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +48,21 @@ public class WebFilterParser<T> {
 		}
 	}
 
+	void buildOrderBy(String sort[]) {
+		ArrayList<Attribute> allAttributes = new ArrayList<>();
+		for (Attribute attr : (Set<Attribute>) helper.rootEntity.getAttributes()) {
+			allAttributes.add(attr);
+		}
+		Collections.sort(allAttributes, new Comparator<Attribute>() {
+			public int compare(Attribute o1, Attribute o2) {
+				//boolean o1Id = o1 instanceof Identifier
+				return 0;
+			}
+		});
+		
+	}
+	
+	
 	public List<T> execute(Filter paging) throws ParseException {
 		StringBuilder q = new StringBuilder();
 		q.append(helper.sql);
@@ -61,6 +80,7 @@ public class WebFilterParser<T> {
 			}
 		}
 		String sort = ""; //" order by t1.name, t0.username";
+		System.out.println(helper.rootEntity.getIdType());
 		q.append(sort);
 		System.out.println("\n\n\n" + q);
 		TypedQuery<T> query = helper.em.createQuery(q.toString(), rootClass);
