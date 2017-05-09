@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,6 +19,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.IdentifiableType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.Type;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -114,6 +116,7 @@ public class JpaCreate {
 		System.out.println(user);
 
 		EntityType<User> etype = em.getMetamodel().entity(User.class);
+
 		for (Attribute attribute : etype.getAttributes()) {
 			ManagedType<User> mtype = attribute.getDeclaringType();
 			System.out.println(attribute);
