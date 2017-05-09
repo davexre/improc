@@ -3,7 +3,6 @@ package com.slavi.parser;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +12,8 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang3.StringUtils;
+
+import com.slavi.parser.WebFilterParserState.AliasItem;
 
 public class WebFilterParser<T> {
 
@@ -48,40 +49,12 @@ public class WebFilterParser<T> {
 		}
 	}
 
-	void buildOrderBy(String sort[]) {
-		ArrayList<Attribute> allAttributes = new ArrayList<>();
-		for (Attribute attr : (Set<Attribute>) helper.rootEntity.getAttributes()) {
-			allAttributes.add(attr);
-		}
-		Collections.sort(allAttributes, new Comparator<Attribute>() {
-			public int compare(Attribute o1, Attribute o2) {
-				//boolean o1Id = o1 instanceof Identifier
-				return 0;
-			}
-		});
-		
-	}
-	
-	
 	public List<T> execute(Filter paging) throws ParseException {
 		StringBuilder q = new StringBuilder();
 		q.append(helper.sql);
 		if (where.length() > 0)
 			q.append(" where ");
-		q.append(where);
-
-		ArrayList<String> sortBy = new ArrayList();
-		if (paging != null && paging.getSort() != null) {
-			for (String i : paging.getSort()) {
-				String s[] = StringUtils.split(i, ",");
-				if (s != null)
-					for (String tmp : s)
-						sortBy.add(tmp);
-			}
-		}
-		String sort = ""; //" order by t1.name, t0.username";
-		System.out.println(helper.rootEntity.getIdType());
-		q.append(sort);
+		q.append(where).append(" order by ").append(helper.buildOrderBy(paging.sort));
 		System.out.println("\n\n\n" + q);
 		TypedQuery<T> query = helper.em.createQuery(q.toString(), rootClass);
 		for (int i = 0; i < helper.paramVals.size(); i++)

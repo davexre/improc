@@ -1,9 +1,11 @@
 package com.slavi.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Attribute;
@@ -173,6 +175,42 @@ public class WebFilterParserState {
 			log.debug("Error parsing query", e);
 			throw new ParseException("Error parsing field " + field + " " + operation + " " + fieldValue + ". Error message is " + e.getMessage());
 		}
+	}
+
+	String buildOrderBy(String sort[]) {
+		ArrayList<String> allAttributes = new ArrayList<>();
+		for (Attribute attr : (Set<Attribute>) rootEntity.getAttributes()) {
+			if (attr.isAssociation() || attr.isCollection())
+				continue;
+			allAttributes.add(attr.getName());
+		}
+		Collections.sort(allAttributes);
+
+		StringBuilder r = new StringBuilder();
+		if (sort != null)
+			for (String i : sort)
+				if (!StringUtils.isEmpty(i)) {
+					String field = i.trim();
+					String direction = " ASC";
+					if (field.startsWith("+"))
+						field = field.substring(1).trim();
+					else if (field.startsWith("-")) {
+						direction = " DESC";
+						field = field.substring(1).trim();
+					}
+					allAttributes.remove(field);
+					if (r.length() > 0)
+						r.append(',');
+					AliasItem alias = getAlias(getParent(field));
+					r.append(alias.alias).append(getName(field)).append(direction);
+				}
+		for (String field : allAttributes) {
+			if (r.length() > 0)
+				r.append(',');
+			AliasItem alias = getAlias(getParent(field));
+			r.append(alias.alias).append(getName(field)).append(" ASC");
+		}
+		return r.toString();
 	}
 
 	public WebFilterParserState(EntityManager em, EntityType rootEntity) {

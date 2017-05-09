@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -18,6 +18,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
+import javax.persistence.metamodel.Type;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -28,11 +29,9 @@ import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
@@ -116,6 +115,7 @@ public class JpaCreate {
 		System.out.println(user);
 
 		EntityType<User> etype = em.getMetamodel().entity(User.class);
+
 		for (Attribute attribute : etype.getAttributes()) {
 			ManagedType<User> mtype = attribute.getDeclaringType();
 			System.out.println(attribute);
