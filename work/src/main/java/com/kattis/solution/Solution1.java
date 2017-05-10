@@ -1,4 +1,4 @@
-package com.kattis.solution2;
+package com.kattis.solution;
 
 import java.io.BufferedInputStream;
 import java.util.HashSet;
