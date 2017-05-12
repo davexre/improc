@@ -1,3 +1,6 @@
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+
 =========================== Various links ===========================
 * Dynamic Performance (V$) Views
 https://docs.oracle.com/database/121/REFRN/GUID-A634ED26-2334-40F5-A016-22973F54BEDA.htm#REFRN-GUID-A634ED26-2334-40F5-A016-22973F54BEDA
@@ -37,9 +40,6 @@ select
 	module "Module"
 from gv$sql s
 order by cpu_time desc nulls last
-
-=========================== TITLE ===========================
-=========================== TITLE ===========================
 
 =========================== Complex select into statement with custom object, containing arrays ===========================
 create or replace type my_vod as object (
@@ -371,3 +371,38 @@ from (
 	group by p.object_owner, p.object_name, t.sql_id) a
 join WRH$_SQLTEXT t on a.sql_id = t.sql_id
 order by executions_total desc;
+
+=========================== Find SQL statements using literals ===========================
+Article URL: https://connormcdonald.wordpress.com/2016/05/30/sql-statements-using-literals/
+
+create or replace function replace_constants_in_sql(p_query in varchar2) return varchar2 as
+	l_query long;
+	l_char  nvarchar2(1);
+	l_in_quotes boolean default FALSE;
+begin
+	for i in 1 .. length(p_query) loop
+		l_char := substr(p_query,i,1);
+		if (l_char = '''' and l_in_quotes)
+		then
+			l_in_quotes := FALSE;
+		elsif (l_char = '''' and NOT l_in_quotes)
+		then
+			l_in_quotes := TRUE;
+			l_query := l_query || '''#';
+		end if;
+		if (NOT l_in_quotes) then
+			l_query := l_query || l_char;
+		end if;
+	end loop;
+	l_query := translate(l_query, '0123456789', '@@@@@@@@@@');
+	for i in 0 .. 8 loop
+		l_query := replace(l_query, lpad('@',10-i,'@'), '@');
+		l_query := replace(l_query, lpad(' ',10-i,' '), ' ');
+	end loop;
+	return upper(l_query);
+end;
+/
+with
+t1 as (select sql_text, replace_constants_in_sql(sql_text) sql_text_wo_constants from (select to_char(dbms_lob.substr(sql_fulltext, 4000)) sql_text from v$sqlarea)),
+t2 as (select row_number() over (order by count(*) desc) rank, count(*) occurances, sql_text_wo_constants from t1 group by sql_text_wo_constants)
+select t2.occurances, t1.sql_text from t1 join t2 on t1.sql_text_wo_constants = t2.sql_text_wo_constants where t2.rank<10 order by t2.rank, t2.occurances, t1.sql_text;
