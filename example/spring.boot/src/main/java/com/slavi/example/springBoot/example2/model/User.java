@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -14,19 +16,28 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name="users")
 @Access(AccessType.FIELD)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement
 public class User {
 	@Id
 	String username;
 
-	String name;
+	String displayName;
 
+	@Column(length=20)
+	@Convert(converter = RoleConverter.class)
 	Role role;
+
+	@XmlTransient
+	String password;
 
 	Integer someInt;
 
@@ -34,22 +45,25 @@ public class User {
 
 	Date created;
 
+	@XmlTransient
 	@ManyToOne
 	Department department;
 
+	@XmlTransient
 	@JoinColumn(name="manager")
 	@ManyToOne(fetch=FetchType.EAGER)
 	User manager;
 
 	@XmlTransient
+	@JsonIgnore
 	@OneToMany(mappedBy="manager", fetch=FetchType.LAZY)
 	Set<User> subordinate;
 
 	public User() {}
 
 	public User(String username, Department department) {
-		this.username = this.name = username;
-		role = Role.USER;
+		this.username = this.displayName = username;
+		role = Role.ROLE_USER;
 		enabled = true;
 		someInt = 12;
 		created = new Date();
@@ -65,12 +79,12 @@ public class User {
 		this.username = username;
 	}
 
-	public String getName() {
-		return name;
+	public String getDisplayName() {
+		return displayName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
 	}
 
 	public Role getRole() {
@@ -127,5 +141,13 @@ public class User {
 
 	public void setSubordinate(Set<User> subordinate) {
 		this.subordinate = subordinate;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 }

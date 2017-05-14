@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.slavi.example</groupId>
-	<artifactId>example.spring.boot</artifactId>
+	<artifactId>example.spring.boot.itest</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
 	<parent>
@@ -22,17 +22,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.slavi</groupId>
-			<artifactId>util.dbutil</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.slavi</groupId>
-			<artifactId>javacc</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
@@ -48,12 +37,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -65,25 +48,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>3.0.3</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

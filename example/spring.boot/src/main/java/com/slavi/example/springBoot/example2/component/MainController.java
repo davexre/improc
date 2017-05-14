@@ -1,4 +1,4 @@
-package com.slavi.example.springBoot.example2;
+package com.slavi.example.springBoot.example2.component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -24,7 +24,7 @@ import com.slavi.parser.Filter;
 public class MainController {
 
 	@Autowired
-	MyDao myDao;
+	Dao myDao;
 
 	@Autowired
 	DepartmentRepository departmentRepository;

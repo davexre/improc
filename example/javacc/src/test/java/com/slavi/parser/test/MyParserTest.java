@@ -10,7 +10,5 @@ public class MyParserTest {
 		String str = "(a=123)and(b=\"1\\\"c\")";
 		MyParser p = new MyParser(new StringReader(str));
 		p.parse();
-		System.out.println(p.sb.toString());
-		System.out.println(p.paramVals);
 	}
 }

@@ -1,19 +1,13 @@
 package com.slavi.parser;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.slavi.parser.WebFilterParserState.AliasItem;
 
 public class WebFilterParser<T> {
 
@@ -35,7 +29,7 @@ public class WebFilterParser<T> {
 			return;
 		helper.externalBindVariables = bindVariables;
 		helper.nextExternalBindVariable = 0;
-		MyParser2 parser = new MyParser2(new StringReader(query));
+		MyParser parser = new MyParser(new StringReader(query));
 		parser.helper = helper;
 		parser.parse();
 		if (helper.externalBindVariables != null &&

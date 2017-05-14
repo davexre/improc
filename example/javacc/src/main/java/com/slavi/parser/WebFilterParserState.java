@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class WebFilterParserState {
 	Logger log = LoggerFactory.getLogger(getClass());
 
-	public static class AliasItem {
+	static class AliasItem {
 		ManagedType type;
 		String alias;
 	}

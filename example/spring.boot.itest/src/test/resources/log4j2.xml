@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration monitorInterval="30">
+	<properties>
+		<property name="logDir">${log4j:configParentLocation}/log/</property>
+	</properties>
+	
+	<appenders>
+		<console name="STDOUT" target="SYSTEM_OUT">
+			<patternLayout pattern="%-1.-1level|%-40logger| %msg%n" />
+		</console>
+
+		<rollingFile name="rolling.file.appender" fileName="${logDir}/log.log" filePattern="${logDir}/log_%i.log">
+			<patternLayout pattern="%date{dd.MM.yyyy HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n" />
+			<policies>
+				<sizeBasedTriggeringPolicy size="5 MB" />
+			</policies>
+			<defaultRolloverStrategy max="4" />
+		</rollingFile>
+	</appenders>
+
+	<loggers>
+		<logger level="debug" name="com.slavi" />
+		<root level="error">
+			<appenderRef ref="STDOUT" />
+		</root>
+	</loggers>
+</configuration>

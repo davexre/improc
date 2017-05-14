@@ -7,16 +7,10 @@ PARSER_BEGIN(MyParser)
 
 package com.slavi.parser;
 
-import java.lang.StringBuilder;
-import java.util.ArrayList;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 public class MyParser {
-	public final StringBuilder sb = new StringBuilder();
-	public final ArrayList paramVals = new ArrayList();
-	public final ArrayList paramNames = new ArrayList();
-	String lastField = "";
-	public String fieldPrefix = "";
+	public WebFilterParserState helper;
 }
 PARSER_END(MyParser) 
 
@@ -32,18 +26,18 @@ TOKEN: {
 	<OR:  "or"> |
 	<LPAREN: "("> |
 	<RPAREN: ")"> |
+	<LIKE: ("~="|"~"|"like")> |
 	<EQUALS: ("="|"eq")> |
 	<NOTEQUAL: ("<>"|"!="|"nq")> |
 	<GREATER: (">"|"gt")> |
 	<GREATER_EQUAL: (">="|"ge")> |
 	<LESS: ("<"|"lt")> |
 	<LESS_EQUAL: ("<="|"le")> |
-	<LABEL: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
-	<LABEL_NESTED: ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])* "." ["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*> |
-	<STRING: (["A"-"Z","a"-"z","0"-"9"])+> |
+	<NULL: "null"> |
+	<LABEL: (["A"-"Z","a"-"z","0"-"9","_","."])+> |
+	<STRING: (["A"-"Z","a"-"z","0"-"9","_"])+> |
 	<QUOTED_STRING: "\"" (~["\""] | ("\\\""))* "\""> |
-	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'"> |
-	<DOT: ".">
+	<SINGLE_QUOTE_STRING: "'" (~["'"] | ("\\'"))* "'">
 }
 
 void parse():
@@ -63,8 +57,8 @@ void expression():
 	queryTerm()
 	(
 		(
-			<AND> { sb.append(" and "); } |
-			<OR> { sb.append(" or "); }
+			<AND>	{ helper.query.append(" and "); } |
+			<OR>	{ helper.query.append(" or "); }
 		)
 		queryTerm()
 	)*
@@ -74,40 +68,29 @@ void queryTerm():
 {
 	Token token;
 	String operation;
+	String field;
+	String value;
 }
 {
-	(token=<LABEL> {
-		lastField = token.image;
-		sb.append(fieldPrefix);
-		sb.append(lastField);
-	} | token=<LABEL_NESTED> {
-		lastField = token.image;
-		sb.append(lastField);
-	})
+	token=<LABEL>					{ field = token.image; }
 	(
-		<EQUALS>			{ operation = "=";  } |
-		<NOTEQUAL>			{ operation = "<>"; } |
-		<GREATER>			{ operation = ">";  } |
-		<GREATER_EQUAL>		{ operation = ">="; } |
-		<LESS>				{ operation = "<";  } |
-		<LESS_EQUAL>		{ operation = "<="; }
+		<LIKE>						{ operation = "like"; } |
+		<EQUALS>					{ operation = "=";    } |
+		<NOTEQUAL>					{ operation = "<>";   } |
+		<GREATER>					{ operation = ">";    } |
+		<GREATER_EQUAL>				{ operation = ">=";   } |
+		<LESS>						{ operation = "<";    } |
+		<LESS_EQUAL>				{ operation = "<=";   }
 	)
 	(
-		(token=<STRING> | token=<LABEL>) {
-			sb.append(operation);
-			sb.append("?");
-			paramVals.add(token.image);
-			paramNames.add(lastField);
-		} |
-		(token=<QUOTED_STRING> | token=<SINGLE_QUOTE_STRING>) {
-			sb.append(operation);
-			sb.append("?");
-			paramVals.add(StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)));
-			paramNames.add(lastField);
-		}
-	)
+		token=<NULL>				{ value = null; } |
+		token=<STRING>				{ value = token.image; } |
+		token=<LABEL>				{ value = token.image; } |
+		token=<QUOTED_STRING>		{ value = StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)); } |
+		token=<SINGLE_QUOTE_STRING>	{ value = StringEscapeUtils.unescapeJava(token.image.substring(1, token.image.length() - 1)); }
+	)								{ helper.addQueryTerm(field, operation, value); }
 	|
-	<LPAREN> { sb.append("("); }
+	<LPAREN>						{ helper.query.append("("); }
 	expression()
-	<RPAREN> { sb.append(")"); }
+	<RPAREN>						{ helper.query.append(")"); }
 }
