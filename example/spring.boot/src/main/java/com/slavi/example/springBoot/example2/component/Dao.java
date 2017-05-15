@@ -21,6 +21,7 @@ import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.example.springBoot.example2.model.User;
 import com.slavi.example.springBoot.example2.repository.UserRepository;
 import com.slavi.parser.Filter;
+import com.slavi.parser.PagedResult;
 import com.slavi.parser.ParseException;
 import com.slavi.parser.WebFilterParser;
 
@@ -94,12 +95,12 @@ public class Dao {
 		return query.getResultList();
 	}
 
-	public List<User> filterUsers(Filter filter) throws ParseException {
+	public PagedResult<User> filterUsers(Filter filter) throws ParseException {
 		WebFilterParser<User> parser = new WebFilterParser<>(em, User.class);
 		return parser.execute(filter);
 	}
-	
-	public List<User> queryUser(String queryStr, Filter paging) throws Exception {
+
+	public PagedResult<User> queryUser(String queryStr, Filter paging) throws Exception {
 		WebFilterParser<User> parser = new WebFilterParser(em, User.class);
 		parser.addQuery(queryStr, null);
 		return parser.execute(paging);

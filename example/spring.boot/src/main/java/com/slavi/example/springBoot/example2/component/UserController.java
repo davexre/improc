@@ -1,7 +1,5 @@
 package com.slavi.example.springBoot.example2.component;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.example.springBoot.example2.model.User;
 import com.slavi.parser.Filter;
+import com.slavi.parser.PagedResult;
 import com.slavi.parser.WebFilterParser;
 
 @RestController
@@ -79,7 +78,7 @@ public class UserController {
 	}
 
 	@RequestMapping(value="", method=RequestMethod.GET)
-	public @ResponseBody List<User> filterItems(Filter filter) throws Exception {
+	public @ResponseBody PagedResult<User> filterItems(Filter filter) throws Exception {
 		log.debug("Filter users {}", filter);
 		WebFilterParser<User> parser = new WebFilterParser<>(em, User.class);
 		if (!Utils.userHasRole(Role.ROLE_ADMIN))

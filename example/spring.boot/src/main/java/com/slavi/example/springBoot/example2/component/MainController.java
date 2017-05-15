@@ -44,7 +44,7 @@ public class MainController {
 		PrintStream out = new PrintStream(bo);
 		out.println("Your query:");
 		out.println(q);
-		for (User u : myDao.queryUser(q, paging)) {
+		for (User u : myDao.queryUser(q, paging).getItems()) {
 			out.println(u);
 			out.println();
 		}
@@ -54,7 +54,7 @@ public class MainController {
 	@RequestMapping(path="/q")
 	@ResponseBody
 	List q(@RequestParam(defaultValue="") String q, Filter paging) throws Exception {
-		List<User> r = myDao.queryUser(q, paging);
+		List<User> r = myDao.queryUser(q, paging).getItems();
 //		if (r.size() > 0)
 //			System.out.println("\n\n\n---------------- " + r.get(0).getSubordinate().size());
 		return r;

@@ -20,7 +20,10 @@
 
 	<loggers>
 		<logger level="debug" name="com.slavi" />
-		<root level="error">
+		<logger level="error" name="org.apache.http" />
+		<logger level="error" name="io.restassured" />
+		
+		<root level="debug">
 			<appenderRef ref="STDOUT" />
 		</root>
 	</loggers>

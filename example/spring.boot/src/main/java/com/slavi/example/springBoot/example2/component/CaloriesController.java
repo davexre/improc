@@ -1,7 +1,6 @@
 package com.slavi.example.springBoot.example2.component;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.slavi.example.springBoot.example2.model.Calories;
 import com.slavi.example.springBoot.example2.model.Role;
 import com.slavi.parser.Filter;
+import com.slavi.parser.PagedResult;
 import com.slavi.parser.WebFilterParser;
 
 @RestController
@@ -88,7 +88,7 @@ public class CaloriesController {
 	}
 
 	@RequestMapping(value="", method=RequestMethod.GET)
-	public @ResponseBody List<Calories> filterItems(Filter filter) throws Exception {
+	public @ResponseBody PagedResult<Calories> filterItems(Filter filter) throws Exception {
 		log.debug("Filter calories {}", filter);
 		WebFilterParser<Calories> parser = new WebFilterParser<>(em, Calories.class);
 		if (Utils.userHasRole(Role.ROLE_ADMIN)) {

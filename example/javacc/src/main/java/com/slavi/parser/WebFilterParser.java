@@ -43,7 +43,7 @@ public class WebFilterParser<T> {
 		}
 	}
 
-	public List<T> execute(Filter paging) throws ParseException {
+	public PagedResult<T> execute(Filter paging) throws ParseException {
 		StringBuilder q = new StringBuilder();
 		q.append(helper.sql);
 		if (where.length() > 0)
@@ -55,9 +55,16 @@ public class WebFilterParser<T> {
 			query.setParameter(i + 1, helper.paramVals.get(i));
 		if (paging != null) {
 			query.setFirstResult((paging.getPage() - 1) * paging.getSize());
-			query.setMaxResults(paging.getSize());
+			query.setMaxResults(paging.getSize() + 1);
 		}
-		return query.getResultList();
+		PagedResult<T> r = new PagedResult<>();
+		r.page = paging.page;
+		r.size = paging.size;
+		r.items = query.getResultList();
+		r.hasNext = r.items.size() > r.size;
+		if (r.hasNext)
+			r.items.remove(r.size);
+		return r;
 	}
 
 	public List<T> detachAll(List<T> items) {
