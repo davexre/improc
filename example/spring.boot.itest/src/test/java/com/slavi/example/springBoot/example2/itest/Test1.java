@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,16 +31,18 @@ public class Test1 extends RestAssured {
 		RestAssured.port = Integer.parseInt(subst.replace("${server.port}"));
 		RestAssured.basePath = subst.replace("${server.basePath}");
 		RestAssured.baseURI = subst.replace("${server.baseURI}");
+		
+		prepare();
 	}
 
-	RequestSpecification authorized;
-	@Before
-	public void prepare() throws Exception {
+	static RequestSpecification authorized;
+	//@BeforeClass
+	public static void prepare() throws Exception {
 		SessionFilter sessionFilter = new SessionFilter();
 		authorized = given().filter(sessionFilter).auth()
 			.form(
-				subst.replace("{login.admin.user}"), 
-				subst.replace("{login.admin.pass}"), 
+				subst.replace("${login.admin.user}"), 
+				subst.replace("${login.admin.pass}"), 
 				new FormAuthConfig("/login", "username", "password").withCsrfFieldName("_csrf")
 			);
 	}
@@ -52,29 +53,5 @@ public class Test1 extends RestAssured {
 		r.then().statusCode(200);
 		System.out.println(r.getBody().asString());
 
-	}
-
-	public static void main(String[] args) throws Exception {
-		beforeClass();
-/*		Properties prop = new Properties();
-		prop.load(new InputStreamReader(Test1.class.getResourceAsStream("/test.properties")));
-		Map map = new HashMap(prop);
-
-		SpelExpressionParser parser = new SpelExpressionParser();
-		TemplateParserContext templateContext = new TemplateParserContext();
-
-		StandardEvaluationContext context = new StandardEvaluationContext();
-		context.addPropertyAccessor(new MapAccessor());
-		context.setRootObject(map);
-		String spel = "#{ ['test.nested'] }";
-//		String spel = "['my.setting.test']";
-		Object o = parser.parseExpression(spel, templateContext).getValue(context);
-		System.out.println(o);
-
-		StrSubstitutor subst = new StrSubstitutor(prop);
-		System.out.println(subst.replace("asd ${test.substitute} qwe"));
-*/
-		new Test1().doIt();
-		System.out.println("Done.");
 	}
 }
