@@ -22,6 +22,7 @@ clumpy
 collateralize
 collude
 compelling
+comport
 congruent
 conundrum
 contempt
@@ -33,6 +34,7 @@ culprits
 dainty
 debacle
 delinquency
+demerit
 descent
 destitute
 diligent
@@ -86,8 +88,10 @@ loathe
 loom
 lucrative
 lumpy
+malevolent
 meekly
 mendacity
+merit
 meticulous
 militate
 monger
@@ -95,6 +99,7 @@ mongering
 murky
 noose
 nugget
+obnoxious
 oftentimes
 oyster
 palpable
