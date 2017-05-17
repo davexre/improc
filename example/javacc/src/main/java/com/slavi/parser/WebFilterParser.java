@@ -44,6 +44,10 @@ public class WebFilterParser<T> {
 	}
 
 	public PagedResult<T> execute(Filter paging) throws ParseException {
+		if (paging.q != null)
+			for (String s : paging.q) {
+				addQuery(s, null);
+			}
 		StringBuilder q = new StringBuilder();
 		q.append(helper.sql);
 		if (where.length() > 0)

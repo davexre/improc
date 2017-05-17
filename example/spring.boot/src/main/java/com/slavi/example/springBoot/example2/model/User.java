@@ -45,7 +45,7 @@ public class User {
 
 	Date created;
 
-	@XmlTransient
+	//@XmlTransient
 	@ManyToOne
 	Department department;
 

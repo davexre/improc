@@ -4,14 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
 @Entity
-@Data
-@NoArgsConstructor
-@ToString
 public class Department {
 
 	@Id @GeneratedValue
@@ -27,5 +20,37 @@ public class Department {
 		this.name = name;
 		this.type = type;
 		this.description = "Description for " + name + "(" + type + ")";
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public DepartmentType getType() {
+		return type;
+	}
+
+	public void setType(DepartmentType type) {
+		this.type = type;
 	}
 }

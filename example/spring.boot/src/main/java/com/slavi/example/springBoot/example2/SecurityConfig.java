@@ -47,7 +47,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
 			.antMatchers("/test*").anonymous()
-			.and().formLogin();
+			.and().formLogin()
+			.and().csrf().disable();
 	}
 
 }
