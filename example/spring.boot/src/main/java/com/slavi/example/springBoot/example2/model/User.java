@@ -19,8 +19,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
 @Table(name="users")
 @Access(AccessType.FIELD)
@@ -49,13 +47,12 @@ public class User {
 	@ManyToOne
 	Department department;
 
-	@XmlTransient
+	//@XmlTransient
 	@JoinColumn(name="manager")
-	@ManyToOne(fetch=FetchType.EAGER)
+	@ManyToOne
 	User manager;
 
 	@XmlTransient
-	@JsonIgnore
 	@OneToMany(mappedBy="manager", fetch=FetchType.LAZY)
 	Set<User> subordinate;
 

@@ -97,7 +97,8 @@ public class Dao {
 
 	public PagedResult<User> filterUsers(Filter filter) throws ParseException {
 		WebFilterParser<User> parser = new WebFilterParser<>(em, User.class);
-		return parser.execute(filter);
+		PagedResult<User> result = parser.execute(filter);
+		return parser.detachAll(result);
 	}
 
 	public PagedResult<User> queryUser(String queryStr, Filter paging) throws Exception {

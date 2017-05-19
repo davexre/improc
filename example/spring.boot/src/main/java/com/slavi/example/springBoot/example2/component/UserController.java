@@ -25,7 +25,7 @@ import com.slavi.parser.WebFilterParser;
 
 @RestController
 @RequestMapping("/users")
-@Secured({ "ROLE_MANAGER", "ROLE_ADMIN"})
+//@Secured({ "ROLE_MANAGER", "ROLE_ADMIN"})
 public class UserController {
 	protected final Logger log = LoggerFactory.getLogger(this.getClass());
 

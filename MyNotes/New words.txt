@@ -2,6 +2,7 @@ abet
 abide
 adrift
 ashen
+alleviate
 allude
 anew
 animosity
@@ -60,6 +61,7 @@ flagging
 flinch
 flog
 fluke
+flung
 fluster
 foment
 forfeit
@@ -68,6 +70,7 @@ frigid
 fringe
 fudge
 furl
+grappa
 garner
 herald
 hiatus
@@ -96,6 +99,7 @@ meticulous
 militate
 monger
 mongering
+moss
 murky
 noose
 nugget
@@ -144,6 +148,7 @@ solemn
 soot
 sore
 spout
+spurt
 stalk
 stance
 stampede

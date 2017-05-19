@@ -4,10 +4,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +18,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.slavi.example.springBoot.example3.component.Dao;
+
 @Configuration
 @ComponentScan
 @EnableTransactionManagement
@@ -33,7 +31,7 @@ public class Example3 {
 	static final Class<Example3> clazz = Example3.class;
 	static Logger log = LoggerFactory.getLogger(clazz);
 	static Properties appProperties = new Properties();
-	
+
 	static {
 		try (InputStream is = clazz.getResourceAsStream(clazz.getName() + ".properties")) {
 			if (is != null)
@@ -42,13 +40,8 @@ public class Example3 {
 			throw new Error(e);
 		}
 	}
-	
-	@Autowired
-	DataSource dataSource;
-	
-	@PersistenceContext
-	EntityManager em;
-/*	
+
+/*
 	@Bean
 	static LocalContainerEntityManagerFactoryBean getEntityManagerFactory(@Autowired DataSource dataSource) {
 		LocalContainerEntityManagerFactoryBean r = new LocalContainerEntityManagerFactoryBean();
@@ -61,19 +54,25 @@ public class Example3 {
 		r.setJpaProperties(appProperties);
 		return r;
 	}
-/*	
+ */
+/*
 	@Bean
 	static PlatformTransactionManager getTransactionManager(@Autowired DataSource dataSource, @Autowired EntityManagerFactory emf) {
 		JpaTransactionManager r = new JpaTransactionManager();
 		r.setDataSource(dataSource);
 		r.setEntityManagerFactory(emf);
 		return r;
-	}
-*/
+	}*/
+
+	@Autowired
+	Dao dao;
+
 	void springMain() throws Exception {
 		log.error("HI");
+		dao.populateInitialData();
+		dao.dummy();
 	}
-	
+
 	void doIt() throws Exception {
 		SpringApplication app = new SpringApplication(getClass());
 		app.setWebEnvironment(false);

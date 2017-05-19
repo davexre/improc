@@ -71,6 +71,11 @@ public class WebFilterParser<T> {
 		return r;
 	}
 
+	public PagedResult<T> detachAll(PagedResult<T> p) {
+		detachAll(p.items);
+		return p;
+	}
+
 	public List<T> detachAll(List<T> items) {
 		if (items != null)
 			for (T item : items)
