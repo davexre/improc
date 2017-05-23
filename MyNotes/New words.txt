@@ -15,6 +15,7 @@ bequeath
 bode
 bonkers
 canard
+candor
 canvasser
 chastise
 chore
@@ -25,6 +26,7 @@ collude
 compelling
 comport
 congruent
+conjecture
 conundrum
 contempt
 corroborate
@@ -38,6 +40,7 @@ delinquency
 demerit
 descent
 destitute
+devour
 diligent
 dissent
 doctored
@@ -72,11 +75,13 @@ fudge
 furl
 grappa
 garner
+gin
 herald
 hiatus
 hinder
 ilk
 illegible
+implausible
 inception
 indemnity
 innocuous
@@ -87,6 +92,7 @@ keen
 lambaste
 lax
 libel
+litigation
 loathe
 loom
 lucrative
@@ -123,6 +129,7 @@ prong
 purport
 putrid
 quackery
+reek
 remnant
 reprisal
 resurgent
@@ -132,6 +139,7 @@ savvy
 scathingly
 scorch
 scupper
+sheer
 shoddy
 shoehorn
 shrug off
@@ -157,6 +165,7 @@ staunch
 stifle
 stint
 stroll
+stymie
 subpoena
 subtle
 subversion
