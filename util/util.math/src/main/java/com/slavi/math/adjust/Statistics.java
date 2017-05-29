@@ -295,10 +295,10 @@ public class Statistics {
 			}
 			if ((style & CStatMD) != 0) {
 				for (int i = 2; i <= 4; i++) {
-					f.format(nameFormatDec, f.format("M[%d]", i), getM(i));
+					f.format(nameFormatDec, "M[" + i + "]", getM(i));
 				}
 				for (int i = 2; i <= 4; i++) {
-					f.format(nameFormatDec, f.format("D[%d]", i), getD(i));
+					f.format(nameFormatDec, "D[" + i + "]", getD(i));
 				}
 			}
 			if (((style & CStatErrors) != 0) && hasBadValues())
