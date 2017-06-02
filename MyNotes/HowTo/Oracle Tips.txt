@@ -5,6 +5,8 @@
 * Dynamic Performance (V$) Views
 https://docs.oracle.com/database/121/REFRN/GUID-A634ED26-2334-40F5-A016-22973F54BEDA.htm#REFRN-GUID-A634ED26-2334-40F5-A016-22973F54BEDA
 	** Interesting Views: V$ACTIVE_SESSION_HISTORY, 
+* PL/SQL functions & SQL tuning:
+	** https://oracle-base.com/articles/misc/efficient-function-calls-from-sql
 
 
 =========================== SQL Developer ===========================
