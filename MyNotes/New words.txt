@@ -108,6 +108,7 @@ mongering
 moss
 murky
 noose
+nudge
 nugget
 obnoxious
 oftentimes
@@ -129,6 +130,8 @@ prong
 purport
 putrid
 quackery
+quirk
+ravage
 reek
 remnant
 reprisal
@@ -153,6 +156,7 @@ slurp up
 smear
 soar
 solemn
+sombre
 soot
 sore
 spout
@@ -177,9 +181,12 @@ tenuous
 tier
 timid
 tinkering
+toil
 touting
 trough
+tug
 tumultuous
+tweezers
 ulterior
 vex
 vengeance
