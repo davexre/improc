@@ -133,6 +133,7 @@ unrar                       \
 unzip                       \
 virtualbox-qt               \
 vlc                         \
+vlc-plugin-fluidsynth       \
 wammu                       \
 xbacklight                  \
 zenity                      \
