@@ -161,6 +161,37 @@ join v$transaction t on t.ses_addr = s.saddr
 left join v$sqlarea q on s.SQL_ID=q.SQL_ID
 left join v$sqlarea prev_q on s.PREV_SQL_ID=prev_q.SQL_ID;
 
+=========================== Locked & locking sessions & SQLs ===========================
+select 
+	substr(to_char(w.session_id),1,5) wsid, 
+	p1.spid wpid,
+	substr(s1.username,1,12) "WAITING User",
+	substr(s1.osuser,1,8) "OS User",
+	substr(s1.program,1,20) "WAITING Program",
+	s1.client_info "WAITING Client",
+	sq1.sql_fulltext "WAITING SQL",
+	substr(tO_CHAR(h.session_id),1,5) HSID, p2.spid HPID,
+	substr(s2.username,1,12) "HOLDING User",
+	substr(s2.osuser,1,8) "OS User",
+	substr(s2.program,1,20) "HOLDING Program",
+	s2.client_info "HOLDING Client",
+	o.object_name "HOLDING Object",
+	sq2.sql_fulltext "HOLDING SQL"
+from gv$process p1
+left join gv$session s1 on s1.paddr = p1.addr
+left join dba_locks w on w.session_id = s1.sid
+left join dba_locks h on w.lock_type = h.lock_type and w.lock_id1 = h.lock_id1 and w.lock_id2 = h.lock_id2
+left join v$sql sq1 on s1.sql_id = sq1.sql_id
+join dba_objects o on s1.row_wait_obj# = o.object_id
+right join gv$session s2 on h.session_id = s2.sid
+right join gv$process p2 on s2.paddr = p2.addr
+right join v$sql sq2 on s2.sql_id = sq2.sql_id
+where w.last_convert > 60 and
+	h.mode_held != 'None' and
+	h.mode_held != 'Null' and
+	w.mode_requested != 'None'
+order by w.last_convert desc;
+
 =========================== Статистики за текущата сесия ===========================
 spool my_stats
 
