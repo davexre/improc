@@ -3,9 +3,11 @@ aggravate
 anguish
 bash
 bashful
+bluster
 detriment
 dilapidated
 dilation
+distress
 conceal
 ensue
 feign
@@ -26,6 +28,7 @@ meek
 morsel
 nip
 noose
+obstinate
 piety
 pock
 porpoise
@@ -40,11 +43,14 @@ seep
 scoff
 slander
 slush
+strutting
 soothe
+spat
 subdue
 submissive
 succumb
 squalid
+squander
 tantamount
 trample
 treason
