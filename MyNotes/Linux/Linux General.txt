@@ -51,6 +51,7 @@ binutils-avr                \
 build-essential             \
 bum                         \
 calibre                     \
+catfish                     \
 cheese                      \
 classicmenu-indicator       \
 cmake                       \
@@ -109,10 +110,11 @@ nmon                        \
 npm                         \
 octave                      \
 openssh-server              \
-ppa-purge                   \
 p7zip                       \
 pavucontrol                 \
 pinentry-curses             \
+pdfshufler                  \
+ppa-purge                   \
 python-pip                  \
 rar                         \
 remmina                     \
