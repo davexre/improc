@@ -18,7 +18,6 @@ sudo dpkg-reconfigure keyboard-configuration
 
 HDD check upon boot
 ===================
-
 * check the current settings
 tune2fs -l /dev/sda1
 
