@@ -319,5 +319,8 @@ nmblookup -A <ip>
 sudo apt-get install nbtscan
 nbtscan <ip>
 
+Ubuntu & multiple displays
+==========================
+Use xrandr to turn off and then on a VGA/DP monitor if it does not automatically start.
 
 

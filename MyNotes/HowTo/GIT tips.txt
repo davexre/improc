@@ -3,4 +3,24 @@ Reset/restore a subdirectory
 cd <git_repository_root>
 git checkout HEAD -- <sub_directory_to_hard_reset>
 
+git config --global push.default simple
 
+
+Revert a single file to a specific changelist
+=============================================
+1. Find the commit id 
+	git log -- /path/to/file
+2. Check the differences for the selected commit id
+	git diff commit_id commit_id~1 -- /path/to/file
+3. Revert the file
+	git checkout commit_id~1 -- /path/to/file
+
+Git completion
+==============
+* In bash
+curl -o ~/.git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+echo -e "\nsource ~/.git-completion.bash" >> ~/.bashrc
+
+* In tcsh
+curl -o ~/.git-completion.tcsh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.tcsh
+echo -e "\nsource ~/.git-completion.tcsh" >> ~/.cshrc

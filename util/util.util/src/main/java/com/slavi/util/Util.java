@@ -7,8 +7,10 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -77,11 +79,93 @@ public class Util {
 			dim = "T";
 			size /= 1024.0;
 		}
+		if (Math.abs(size) >= 800.0) {
+			dim = "E";
+			size /= 1024.0;
+		}
 		if (Math.floor(size) == size) 
 			return String.format(Locale.US, "%d %s", new Object[] { new Integer((int)size), dim } );
 		return String.format(Locale.US, "%.1f %s", new Object[] { new Double(size), dim } );
 	}
 
+	public static String getFormatBytes2(long bytes, boolean si) {
+		int unit = si ? 1000 : 1024;
+		if (bytes < unit)
+			return bytes + " B";
+		int exp = (int) (Math.log(bytes) / Math.log(unit));
+		// String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+		String pre = "KMGTPE".charAt(exp - 1) + (si ? "" : "i");
+		return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+	}
+
+	static class UnitName {
+		public final String name;
+		public final long scale;
+
+		public UnitName(String name, long scale) {
+			this.name = name;
+			this.scale = scale;
+		}
+
+		final static List<UnitName> byteSizeUnits = new ArrayList<>();
+		static {
+			long scale = 1;
+			long scaleSI = 1;
+
+			byteSizeUnits.add(new UnitName("B", scale));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("K", scale));
+			byteSizeUnits.add(new UnitName("KB", scale));
+			byteSizeUnits.add(new UnitName("KIB", scaleSI));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("M", scale));
+			byteSizeUnits.add(new UnitName("MB", scale));
+			byteSizeUnits.add(new UnitName("MIB", scaleSI));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("G", scale));
+			byteSizeUnits.add(new UnitName("GB", scale));
+			byteSizeUnits.add(new UnitName("GIB", scaleSI));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("T", scale));
+			byteSizeUnits.add(new UnitName("TB", scale));
+			byteSizeUnits.add(new UnitName("TIB", scaleSI));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("P", scale));
+			byteSizeUnits.add(new UnitName("PB", scale));
+			byteSizeUnits.add(new UnitName("PIB", scaleSI));
+
+			scale *= 1024;
+			scaleSI *= 1000;
+			byteSizeUnits.add(new UnitName("E", scale));
+			byteSizeUnits.add(new UnitName("EB", scale));
+			byteSizeUnits.add(new UnitName("EIB", scaleSI));
+		}
+	}
+
+    public static long parseFormattedBytes(String s) {
+        s = s.toUpperCase().trim();
+        long scale = 1;
+        for (int i = UnitName.byteSizeUnits.size() - 1; i >= 0; i--) {
+            UnitName un = UnitName.byteSizeUnits.get(i);
+            if (s.endsWith(un.name)) {
+                scale = un.scale;
+                s = s.substring(0, s.length() - un.name.length()).trim();
+                break;
+            }
+        }
+        return (long) (Double.parseDouble(s) * scale);
+    }
+	
 	/**
 	 * The code bellow is borrowed from WedSphinx
 	 * http://www.cs.cmu.edu/~rcm/websphinx
