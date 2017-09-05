@@ -52,6 +52,7 @@ bum                         \
 calibre                     \
 catfish                     \
 cheese                      \
+cifs-utils					\
 classicmenu-indicator       \
 cmake                       \
 cvs                         \
@@ -59,6 +60,7 @@ dconf-tools                 \
 debhelper                   \
 dhex                        \
 dmsetup                     \
+docker.io					\
 doublecmd-common            \
 doublecmd-gtk               \
 dpkg-dev                    \
@@ -119,6 +121,7 @@ rar                         \
 remmina                     \
 seahorse                    \
 screen                      \
+sshfs						\
 soundconverter              \
 smplayer                    \
 smtube                      \
@@ -181,6 +184,25 @@ sudo visudo -f /etc/sudoers.d/veracrypt
 /usr/bin/gksudo -S -g /usr/bin/veracrypt
 5. Launch VeraCrypt, setup encrypted files, mount points, add to favoriets
 Use default mount options: dmask=077,fmask=177
+
+Mount Network Volumes
+=====================
+* Windows
+https://wiki.ubuntu.com/MountWindowsSharesPermanently
+sudo apt-get install cifs-utils
+vi ~/.smbcredentials
+	username=<windows network username>
+	password=<windows network password>
+	domain=<windows network domain/workgroup>
+chmod 600 ~/.smbcredentials
+sudo vi /etc/fstab
+	/sharename /media/windowsshare cifs credentials=/home/ubuntuusername/.smbcredentials,iocharset=utf8,sec=ntlm 0 0
+sudo mount -a
+
+* Ssh mount point
+sudo apt-get install sshfs
+sshfs username@server:/foldername/ /local_mount_point
+
 
 Change the border width of windows in Gnome
 ===========================================
