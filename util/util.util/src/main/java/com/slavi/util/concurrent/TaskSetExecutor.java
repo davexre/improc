@@ -19,18 +19,19 @@ import java.util.concurrent.TimeoutException;
  * added the method {@link #addFinished()} must be invoked.   
  */
 public class TaskSetExecutor {
-	private class InternalTaskWrapper implements Callable<Void> {
+	@SuppressWarnings("rawtypes")
+	private class InternalTaskWrapper implements Callable {
 		final Object task;
 		InternalTaskWrapper(Object task) {
 			this.task = task;
 		}
 		
-		public Void call() {
+		public Object call() {
 			synchronized (tasks) {
 				runningTasks++;
 			}
+			Object result = null;
 			try {
-				Object result = null;
 				if (task instanceof Callable) {
 					result = ((Callable<?>) task).call();
 				} else if (task instanceof Runnable){
@@ -57,7 +58,7 @@ public class TaskSetExecutor {
 				}
 			}
 			isDone();
-			return null;
+			return result;
 		}
 	}
 	
@@ -158,7 +159,8 @@ public class TaskSetExecutor {
 		return aborted;
 	}
 	
-	private void internalAdd(Object task) {
+	@SuppressWarnings("unchecked")
+	private <T> Future<T> internalAdd(Object task) {
 		if (task == null) {
 			abort();
 			throw new NullPointerException();
@@ -169,7 +171,7 @@ public class TaskSetExecutor {
 		if (aborted) {
 			throw new RejectedExecutionException();
 		}
-		Future<Void> future = null;
+		Future<T> future = null;
 		try {
 			future = exec.submit(new InternalTaskWrapper(task));
 			synchronized (tasks) {
@@ -179,6 +181,7 @@ public class TaskSetExecutor {
 				}
 				tasks.add(future);
 			}
+			return future;
 		} catch (RejectedExecutionException t) {
 			abort();
 			throw t;
@@ -188,12 +191,12 @@ public class TaskSetExecutor {
 		}
 	}
 	
-	public void add(Runnable task) {
-		internalAdd(task);
+	public Future<Void> add(Runnable task) {
+		return internalAdd(task);
 	}
 
-	public void add(Callable<?> task) {
-		internalAdd(task);
+	public <T> Future<T> add(Callable<T> task) {
+		return internalAdd(task);
 	}
 	
 	public void addFinished() {
