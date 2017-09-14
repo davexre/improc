@@ -40,7 +40,7 @@ bum                         \
 calibre                     \
 catfish                     \
 cheese                      \
-cifs-utils					\
+cifs-utils                  \
 classicmenu-indicator       \
 cmake                       \
 cvs                         \
@@ -48,7 +48,7 @@ dconf-tools                 \
 debhelper                   \
 dhex                        \
 dmsetup                     \
-docker.io					\
+docker.io                   \
 doublecmd-common            \
 doublecmd-gtk               \
 dpkg-dev                    \
@@ -81,6 +81,7 @@ httrack                     \
 hugin                       \
 htop                        \
 iftop                       \
+imagemagick                 \
 inkscape                    \
 jedit                       \
 kde-baseapps-bin            \
@@ -97,6 +98,7 @@ nemo                        \
 nemo-fileroller             \
 nmon                        \
 npm                         \
+ocrmypdf                    \
 octave                      \
 openssh-server              \
 p7zip                       \
@@ -109,7 +111,7 @@ rar                         \
 remmina                     \
 seahorse                    \
 screen                      \
-sshfs						\
+sshfs                       \
 soundconverter              \
 smplayer                    \
 smtube                      \
@@ -117,6 +119,9 @@ subversion                  \
 synaptic                    \
 synfigstudio                \
 sysv-rc-conf                \
+tesseract-ocr               \
+tesseract-ocr-bul           \
+tesseract-ocr-eng           \
 traceroute                  \
 ubuntu-restricted-extras    \
 unace                       \
@@ -129,6 +134,7 @@ vlc-plugin-fluidsynth       \
 wammu                       \
 whois                       \
 xbacklight                  \
+xpdf                        \
 zenity                      \
 zip
 
