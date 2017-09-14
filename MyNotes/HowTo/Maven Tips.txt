@@ -11,6 +11,9 @@ mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
 ========= Download dependencies, source & doc =========
 mvn dependency:resolve dependency:sources
 
+========= Identify unused dependencies =========
+mvn dependency:analyze
+
 =========
 Find duplicated classes in project dependacies:
 mvn org.basepom.maven:duplicate-finder-maven-plugin:check

@@ -10,6 +10,7 @@ ardent
 arrears
 assuage
 attire
+backwater
 belittle
 bequeath
 bode
@@ -21,10 +22,12 @@ chastise
 chore
 churn
 clumpy
-collateralize
+coif
+collateral
 collude
 compelling
 comport
+concede
 congruent
 conjecture
 conundrum
@@ -33,15 +36,19 @@ corroborate
 covet
 cronyism
 crustacean
-culprits
+culprit
 dainty
 debacle
 delinquency
 demerit
+denigrate
 descent
 destitute
 devour
+disconcert
+disposition
 diligent
+disparage
 dissent
 doctored
 dodge
@@ -58,11 +65,13 @@ exacerbate
 exemplar
 excruciating
 famine
+feuding
 fickle
 fissure
 flagging
 flinch
 flog
+flounder
 fluke
 flung
 fluster
@@ -79,6 +88,7 @@ gin
 herald
 hiatus
 hinder
+ignominious
 ilk
 illegible
 implausible
@@ -137,6 +147,7 @@ remnant
 reprisal
 resurgent
 revamped
+rooster
 ruth
 savvy
 scathingly
@@ -159,6 +170,7 @@ solemn
 sombre
 soot
 sore
+splinter
 spout
 spurt
 stalk
@@ -174,6 +186,7 @@ subpoena
 subtle
 subversion
 succinctly
+swath
 sway
 taint
 tarnish
@@ -187,6 +200,7 @@ trough
 tug
 tumultuous
 tweezers
+ubiquitous
 ulterior
 vex
 vengeance
@@ -199,3 +213,4 @@ voracious
 waver
 whim
 withering
+yearn

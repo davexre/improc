@@ -1,0 +1,288 @@
+Install Gnome in Ubuntu
+=======================
+Gnome 2
+sudo apt-get install ubuntu-mate-core ubuntu-mate-desktop
+sudo apt-get install gnome-session-flashback
+sudo apt-get install compizconfig-settings-manager
+LXDM (Lubuntu)
+sudo apt-get install lxde lubuntu-core lubuntu-icon-theme lubuntu-restricted-extras
+XFCE (Xubuntu)
+sudo apt-get install xfce4
+Gnome 3
+sudo apt-get install gnome-shell ubuntu-gnome-desktop
+sudo apt-get install gnome-weather gnome-music gnome-maps cheese gnome-documents
+
+Usefull Linux software
+======================
+HP-LIP
+veracrypt
+google chrome
+google earth
+draft sight - registered with mail.bg
+art of illusion
+skype
+XnView Multi Platform
+
+apt-packages
+------------
+sudo apt-get install \
+alien                       \
+amule                       \
+apt-file                    \
+aptitude                    \
+atop                        \
+audacious                   \
+avr-libc                    \
+avrdude                     \
+binutils-avr                \
+build-essential             \
+bum                         \
+calibre                     \
+catfish                     \
+cheese                      \
+cifs-utils					\
+classicmenu-indicator       \
+cmake                       \
+cvs                         \
+dconf-tools                 \
+debhelper                   \
+dhex                        \
+dmsetup                     \
+docker.io					\
+doublecmd-common            \
+doublecmd-gtk               \
+dpkg-dev                    \
+expect                      \
+ffmpeg                      \
+filezilla                   \
+freecad                     \
+g++                         \
+gbgoffice                   \
+gdb-avr                     \
+gcc                         \
+gcc-avr                     \
+gconf-editor                \
+geeqie                      \
+geany                       \
+geany-plugin-pg             \
+geany-plugin-shiftcolumn    \
+gedit-plugins               \
+ghex                        \
+gimp                        \
+git                         \
+gksu                        \
+gmobilemedia                \
+gnome-color-chooser         \
+gnome-search-tool           \
+gnupg-agent                 \
+gparted                     \
+handbrake                   \
+httrack                     \
+hugin                       \
+htop                        \
+iftop                       \
+inkscape                    \
+jedit                       \
+kde-baseapps-bin            \
+kdenlive                    \
+lame                        \
+librecad                    \
+libreoffice                 \
+mc                          \
+meld                        \
+melt                        \
+mplayer2                    \
+ncdu                        \
+nemo                        \
+nemo-fileroller             \
+nmon                        \
+npm                         \
+octave                      \
+openssh-server              \
+p7zip                       \
+pavucontrol                 \
+pinentry-curses             \
+pdfshufler                  \
+ppa-purge                   \
+python-pip                  \
+rar                         \
+remmina                     \
+seahorse                    \
+screen                      \
+sshfs						\
+soundconverter              \
+smplayer                    \
+smtube                      \
+subversion                  \
+synaptic                    \
+synfigstudio                \
+sysv-rc-conf                \
+traceroute                  \
+ubuntu-restricted-extras    \
+unace                       \
+unison-gtk                  \
+unrar                       \
+unzip                       \
+virtualbox-qt               \
+vlc                         \
+vlc-plugin-fluidsynth       \
+wammu                       \
+whois                       \
+xbacklight                  \
+zenity                      \
+zip
+
+
+Change the border width of windows in Gnome
+===========================================
+http://ubuntuforums.org/showthread.php?t=439329
+
+To change border widths, simply open up the theme's Metacity XML file. 
+For example, Human's theme is located in /usr/share/themes/Ambiance/metacity-1/metacity-theme-1.xml
+
+The stanza in question should be apparent:
+<distance name="left_width" value="5"/>
+<distance name="right_width" value="5"/>
+<distance name="bottom_height" value="5"/>
+
+Change Tooltip color
+====================
+http://askubuntu.com/questions/70599/how-to-change-tooltip-background-color-in-unity
+Edit the files:
+usr/share/themes/Ambiance/gtk-3.0/settings.ini
+/usr/share/themes/Ambiance/gtk-3.0/gtk.css
+/usr/share/themes/Ambiance/gtk-2.0/gtkrc
+replacing the tooltip foreground and backround color, with the #000000 and the #f5f5b5 color, respectively
+
+Replace Nautilus with Nemo
+==========================
+sudo apt-get install nemo nemo-fileroller
+xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+gsettings set org.gnome.desktop.background show-desktop-icons true
+gsettings set org.nemo.desktop show-desktop-icons true
+
+Gnome desktop tweaks
+====================
+gsettings set /desktop/gnome/interface/enable_animations
+gsettings set org.gnome.desktop.background show-desktop-icons true
+gsettings set org.gnome.nautilus.desktop home-icon-visible true
+gsettings set org.gnome.nautilus.desktop trash-icon-visible true
+# do not show preview icons on files and folders
+gsettings set org.gnome.nautilus.preferences show-image-thumbnails "'never'"
+gsettings set org.gnome.nautilus.preferences show-directory-item-counts "'never'"
+gsettings set org.gnome.nautilus.preferences default-folder-view "'list-view'"
+gsettings set org.gnome.nautilus.preferences sort-directories-first true
+gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+
+gsettings set org.nemo.preferences show-image-thumbnails "'never'"
+gsettings set org.nemo.preferences show-directory-item-counts "'never'"
+gsettings set org.nemo.preferences show-icon-text "'never'"
+gsettings set org.nemo.preferences show-full-path-titles true
+gsettings set org.nemo.preferences show-location-entry true
+gsettings set org.nemo.preferences show-new-folder-icon-toolbar true
+gsettings set org.nemo.preferences default-folder-view "'list-view'"
+
+gsettings org.gnome.desktop.thumbnailers disable-all true
+
+# shows mounted volumes
+gsettings set org.gnome.nautilus.desktop volumes-visible true
+# Move Gnome window controls/buttons on the right
+gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
+
+gconftool -s /desktop/gnome/interface/enable_animations false --type bool
+
+FIX: Under GNOME Flashback Ubuntu's notify-send will not show popup messages
+============================================================================
+https://bugs.launchpad.net/ubuntu/+source/gnome-panel/+bug/1247362
+1) sudo vi /etc/xdg/autostart/notification-daemon.desktop
+replace
+AutostartCondition=GNOME3 unless-session gnome
+with
+AutostartCondition=false
+2) reboot or sudo killall notification-daemon
+
+Disable apport
+==============
+sudo vi /etc/default/apport
+enable=0
+
+Usefull settings for .profile
+=============================
+# make default less search case not-sesitive
+export LESS='-I -R'
+
+export NPM_HOME=$HOME/bin/npm-global
+export JAVA_HOME=$HOME/bin/java
+export M2_HOME=$HOME/bin/apache-maven-3.2.3
+export ANT_HOME=$HOME/bin/apache-ant-1.7.1
+export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$ANT_HOME/bin:$NPM_HOME/bin:$PATH
+##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
+export GPG_TTY=$(tty)
+
+Enable arrow keys in vi
+=======================
+vi ~/.vimrc
+-- or --
+vi ~/.exrc
+set nocompatible
+set ignorecase
+set showmatch
+if has("autocmd")
+  filetype plugin indent on
+endif
+
+Disable bluetooth on startup
+============================
+#http://askubuntu.com/a/2568/475269
+/etc/bluetooth/main.conf
+InitiallyPowered = true/false
+
+... or ...
+
+sudoedit /etc/rc.local
+# add this
+rfkill block bluetooth
+exit 0
+
+GEdit settings for editing password protected files
+===================================================
+1. sudo apt-get install gedit-plugins gnupg-agent seahorse
+2. Add to .bashrc or .profile
+--------------- Start of .bashrc
+##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
+GPG_TTY=$(tty)
+export GPG_TTY
+--------------- End of .bashrc
+3. In GEdit enable the plugin "External tools"
+4. In Tools/"Manage External Tools" add the tool:
+Name: encrypt/decrypt
+Shortcut key: F12
+Save: Nothing
+Input: Current document
+Output: Replace current document
+Applicability: All documents, All languages
+Script to execute:
+--------------- start of script
+#!/bin/bash
+stdin=$(cat)
+if [ "${stdin:0:27}" == "-----BEGIN PGP MESSAGE-----"  ]; then 
+	echo "$stdin" | gpg -d --no-tty - 2>/dev/null
+else
+	echo "$stdin" | gpg -ac --no-tty -
+fi
+--------------- end of script
+
+Setup VeraCrypt
+===============
+1. Install veracrypt
+2. sudo apt-get install dmsetup gksu
+3. Add allowed users to sudoers
+sudo visudo -f /etc/sudoers.d/veracrypt
+-------------------------
+<user name>      ALL=(ALL:ALL) NOPASSWD:/usr/bin/veracrypt
+-------------------------
+4. Add launcher
+/usr/bin/gksudo -S -g /usr/bin/veracrypt
+5. Launch VeraCrypt, setup encrypted files, mount points, add to favoriets
+Use default mount options: dmask=077,fmask=177
+
