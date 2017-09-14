@@ -50,6 +50,7 @@ avrdude                     \
 binutils-avr                \
 build-essential             \
 bum                         \
+catfish                     \
 calibre                     \
 cheese                      \
 classicmenu-indicator       \
@@ -135,6 +136,7 @@ virtualbox-qt               \
 vlc                         \
 vlc-plugin-fluidsynth       \
 wammu                       \
+whois                       \
 xbacklight                  \
 zenity                      \
 zip
@@ -277,12 +279,24 @@ export GPG_TTY=$(tty)
 
 Enable arrow keys in vi
 =======================
+vi ~/.vimrc
+-- or --
 vi ~/.exrc
 set nocompatible
+set ignorecase
+set showmatch
+if has("autocmd")
+  filetype plugin indent on
+endif
 
 Disable bluetooth on startup
 ============================
 #http://askubuntu.com/a/2568/475269
+/etc/bluetooth/main.conf
+InitiallyPowered = true/false
+
+... or ...
+
 sudoedit /etc/rc.local
 # add this
 rfkill block bluetooth
