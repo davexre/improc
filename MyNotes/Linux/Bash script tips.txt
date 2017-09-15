@@ -63,3 +63,34 @@ echo "Before false 2"
 false
 echo "This will not execute"
 
+
+More advanced useage of trap and error handling
+===============================================
+function onBashErrorHandler() {
+	case "${BASH_ERROR_LEVEL}" in
+		0 | IGNORE | NONE)
+			;;
+		1 | WARN)
+			echo "Warning in ${1}:${2}. Exit code is ${3} running ${4}"
+			;;
+		2 | EXIT)
+			echo "Error in ${1}:${2}. Exit code is ${3} running ${4}"
+			exit 1
+			;;
+	esac
+}
+BASH_ERROR_LEVEL=IGNORE
+set -E	# This is needed to have the same trap in sub-shells and shell function
+trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
+
+BASH_ERROR_LEVEL=IGNORE
+false # ignored
+BASH_ERROR_LEVEL=WARN
+false # warning
+BASH_ERROR_LEVEL=2
+false # error and exit 1
+echo "This one will not execute"
+
+
+
+
