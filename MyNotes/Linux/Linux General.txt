@@ -73,4 +73,14 @@ Use xrandr to turn off and then on a VGA/DP monitor if it does not automatically
 List sub-folders and their sizes
 ================================
 du -chd1
- 
+
+OCR a PDF
+=========
+cd into an empty folder
+rm a-*.jpg
+convert -density 300 <input file>.pdf -depth 8 a-%d.jpg
+(find . -name "a-*.jpg"|sort -n -k 2 -t -|xargs -I{} tesseract {} stdout -l bul) > output.txt
+
+
+
+
