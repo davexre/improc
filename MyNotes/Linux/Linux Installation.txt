@@ -122,6 +122,7 @@ sysv-rc-conf                \
 tesseract-ocr               \
 tesseract-ocr-bul           \
 tesseract-ocr-eng           \
+tmux                        \
 traceroute                  \
 ubuntu-restricted-extras    \
 unace                       \
