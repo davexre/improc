@@ -15,6 +15,13 @@ Revert a single file to a specific changelist
 3. Revert the file
 	git checkout commit_id~1 -- /path/to/file
 
+Avoid merged commit
+===================
+git commit -m "xxx"
+git pull --rebase remotes/origin/master
+or
+git rebase remotes/origin/master~1
+
 Git completion
 ==============
 * In bash

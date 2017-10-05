@@ -81,6 +81,7 @@ function onBashErrorHandler() {
 }
 BASH_ERROR_LEVEL=IGNORE
 set -E	# This is needed to have the same trap in sub-shells and shell function
+set -u	# This is to treap unset parameters/variables as errors
 trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
 
 BASH_ERROR_LEVEL=IGNORE
@@ -91,6 +92,24 @@ BASH_ERROR_LEVEL=2
 false # error and exit 1
 echo "This one will not execute"
 
+Make installation shell script with attached archive at the end
+===============================================================
+1) Prepare the script
+#!/bin/bash
+FOU=install.sh
+cp install-template.sh "$FOU"
+tar cz [list_of_file_that_will_be_part_of_archive] >> "$FOU"
+chmod +x "$FOU"
 
+2) The install-template.sh
+#!/bin/bash
+FILE=$0
+OUTPUT_DIR=target_folder
+OFFSET=$(($(grep -an '\.\.\.END_OF_SCRIPT\.\.\.' "$FILE" | head -n 1 | cut -d ':' -f 1) + 1))
+rm -fr "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" && (tail -n+$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
+# ... do some other stuff ...
+exit 0 # This exit is to prevent the bash interpeter go into the binary archive
+# The following is the "END_OF_SCRIPT", surrounded by dots, marker and must be followed by exactly one CR (end of line) character
+...END_OF_SCRIPT...
 
 
