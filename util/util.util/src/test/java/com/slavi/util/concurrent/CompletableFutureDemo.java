@@ -27,9 +27,9 @@ public class CompletableFutureDemo {
 	Supplier makeTask(final String name, final long delay, boolean shouldFail) {
 		return new Callable() {
 			public Object call() {
-				System.out.println("start " + name);
+				System.out.println("start " + name + (shouldFail ? " WILL fail" : ""));
 				if (shouldFail)
-					throw new RuntimeException();
+					throw new RuntimeException("Exception in " + name);
 				try {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
@@ -47,7 +47,7 @@ public class CompletableFutureDemo {
 				System.out.println("1");
 				return "1";
 			}).thenApply((x) -> {
-				System.out.println("2");
+				System.out.println("2 got X=" + x);
 				final CompletableFuture r = CompletableFuture.allOf(
 					IntStream
 						.rangeClosed(1, 10)
