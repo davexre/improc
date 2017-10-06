@@ -98,7 +98,7 @@ Make installation shell script with attached archive at the end
 #!/bin/bash
 FILE=$0
 OUTPUT_DIR=target_folder
-OFFSET=$(($(grep -an '\.\.\.END_OF_SCRIPT\.\.\.' "$FILE" | head -n 1 | cut -d ':' -f 1) + 1))
+OFFSET=$(($(grep -an '^___END_OF_SCRIPT___$' "$FILE" | head -n 1 | cut -d ':' -f 1) + 1))
 rm -fr "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" && (tail -n +$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
 # ... do some other stuff ...
 
@@ -109,7 +109,52 @@ cp install-template.sh "$FOU"
 echo >> "$FOU"
 echo 'exit 0' >> "$FOU"          # This exit is to prevent the bash interpeter go into the binary archive
 echo >> "$FOU"
-echo '...END_OF_SCRIPT...' >> "$FOU"
+echo '___END_OF_SCRIPT___' >> "$FOU"
 tar cz [list_of_file_that_will_be_part_of_archive] >> "$FOU"
 chmod +x "$FOU"
+
+Script with configuration section(s) at the end
+===============================================
+function findToken() {
+	grep -an "^${1}$" "$0" | head -n 1 | cut -d ':' -f 1
+}
+function extractData() {
+	local BEGIN=$(($(findToken "$1") + 1))
+	local END="${2:+$(findToken "$2")}"
+	local DATA=$(tail -n +$BEGIN "$0")
+	if [ ! -z "$END" ] ; then
+		DATA=$(echo -n "$DATA" | head -n $(($END - $BEGIN)))
+	fi
+	echo -n "$DATA" | grep -Ev '^\s*(#.*)?$'
+}
+extractData "___SCRIPT_DATA_SECTION_1___" "___SCRIPT_DATA_SECTION_2___"
+DATA2=$(extractData "___SCRIPT_DATA_SECTION_2___")
+### Now process the data in section 2
+IFS=$'\n'
+count=1
+for i in $DATA2 ; do 
+	IFS=$' \t\n'
+	echo Line $count
+	count=$(($count+1))
+	for j in $i ; do
+		echo '>> ' $j
+	done
+done
+
+exit 0
+
+___SCRIPT_DATA_SECTION_1___
+   
+
+asd
+	# qwe This is comment line
+zxc
+	
+
+___SCRIPT_DATA_SECTION_2___
+zzz		1	a
+aaa		2	b
+# aaa # This is comment line
+xxx		4  	d
+
 
