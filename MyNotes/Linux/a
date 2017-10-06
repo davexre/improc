@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function findToken() {
+	grep -an "\_\_\_${1}\_\_\_" "$0" | head -n 1 | cut -d ':' -f 1
+}
+
+function extractData() {
+	local BEGIN=$(($(findToken "$1") + 1))
+	local END="$2"
+	if [ ! -z "$END" ] ; then
+		END=$(findToken "$END")
+	fi
+
+	local DATA=$(tail -n +$BEGIN "$0")
+	echo "$END"
+	if [ ! -z "$END" ] ; then
+		DATA=$(echo -n "$DATA" | head -n $(($END - $BEGIN)))
+	fi
+	echo -n "$DATA" | grep -Ev '^\s*(#.*)?$'
+}
+
+##FILE=$0
+##OUTPUT_DIR=temp
+##DATA_BEGIN=$(($(findToken "$FILE" "SCRIPT_DATA_BEGIN") + 1))
+##DATA_END=$(findToken "$FILE" "SCRIPT_DATA_END")
+##
+##if [ -z "$DATA_END" ] ; then
+##	DATA=$(tail -n +$DATA_BEGIN "$FILE")
+##else
+##	DATA=$(tail -n +$DATA_BEGIN "$FILE" | head -n $(($DATA_END - $DATA_BEGIN)))
+##fi
+##echo "$DATA" | grep -Ev '^\s*(#.*)?$'
+
+extractData "SCRIPT_DATA_BEGIN" "SCRIPT_DATA_END"
+
+#mkdir -p "$OUTPUT_DIR" && (tail -n+$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
+
+exit 0
+
+___SCRIPT_DATA_BEGIN___
+   
+
+asd
+#qwe
+zxc
+	
+
+___SCRIPT_DATA_END___
+zzz
+zzz
