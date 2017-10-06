@@ -122,11 +122,12 @@ public class ProcessManager extends Composite {
 	}
 	
 	private void createWidgets() {
+		final ProcessManager that = this;
 		setLayout(new GridLayout());
 		addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				synchronized(refreshListeners) {
-					refreshListeners.remove(this);
+					refreshListeners.remove(that);
 				}
 			}
 		});

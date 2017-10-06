@@ -275,7 +275,7 @@ public class ajExtendDelaunay extends ajDelaunay {
 		super.canvas.add(new ajPoint(super.lastP), refreshPointLayer);
 	}
 
-	private ajTriangle startTriangulationTempA(ajPoint ajpoint, ajPoint ajpoint1, ajPoint ajpoint2) {
+	ajTriangle startTriangulationTempA(ajPoint ajpoint, ajPoint ajpoint1, ajPoint ajpoint2) {
 		ajTriangle ajtriangle = null;
 		int i = ajpoint2.pointToLine(ajpoint, ajpoint1);
 		if (i == 1 || i == 4)

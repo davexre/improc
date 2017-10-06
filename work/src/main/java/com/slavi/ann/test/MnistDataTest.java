@@ -3,7 +3,6 @@ package com.slavi.ann.test;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.ann.NNet;
 import com.slavi.ann.test.MnistData.MnistPattern;
 import com.slavi.math.MathUtil;
@@ -14,7 +13,7 @@ public class MnistDataTest {
 	void doIt() throws Exception {
 		List<MnistPattern> pats = MnistData.readMnistSet(false);
 
-		ObjectMapper mapper = Utils.jsonMapper();
+		//ObjectMapper mapper = Utils.jsonMapper();
 		int insize = 28*28;
 		NNet nnet = new NNet(NNSimpleLayer3.class,
 				insize,

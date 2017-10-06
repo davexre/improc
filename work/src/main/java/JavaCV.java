@@ -11,7 +11,6 @@ public class JavaCV {
 
 	public void run() {
 		VideoInputFrameGrabber grabber = new VideoInputFrameGrabber(0);
-		int i = 0;
 		try {
 			grabber.start();
 			Frame frame;

@@ -11,17 +11,14 @@
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.math</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.io</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.util</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

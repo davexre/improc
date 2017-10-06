@@ -1,18 +1,10 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
-
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
-
-import cern.colt.Arrays;
 
 
 public class Dummy {
@@ -32,12 +24,12 @@ public class Dummy {
 		final int sizeX = bi.getWidth() - 1;
 		final int sizeY = bi.getHeight() - 1;
 
-		int ffcount = 0;
+		//int ffcount = 0;
 		for (int j = sizeY; j >= 0; j--) {
 			for (int i = sizeX; i >= 0; i--) {
 				int color = bi.getRGB(i, j);
-				if (color == 0xffffff)
-					ffcount++;
+//				if (color == 0xffffff)
+//					ffcount++;
 				ColorConversion.RGB.fromRGB(color, DRGB);
 				r[(int) Math.round(DRGB[0] * 255.0)]++;
 				g[(int) Math.round(DRGB[1] * 255.0)]++;
@@ -87,7 +79,6 @@ public class Dummy {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Object o = 'a';
 		System.out.println(Character.class.isAssignableFrom(char.class));
 	}
 	public static void main2(String[] args) throws Exception {

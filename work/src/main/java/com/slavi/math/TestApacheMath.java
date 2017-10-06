@@ -2,7 +2,6 @@ package com.slavi.math;
 
 import java.util.Random;
 
-import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 

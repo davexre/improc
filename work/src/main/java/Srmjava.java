@@ -432,7 +432,7 @@ public class Srmjava extends Applet {
 	//
 	void OutputSegmentation() {
 		int i, j, index, indexb;
-		int r, g, b, a, rgba;
+		int r, g, b, rgba;
 
 		index = 0;
 
@@ -478,7 +478,7 @@ public class Srmjava extends Applet {
 
 	// Draw white borders delimiting perceptual regions
 	void DrawBorder() {
-		int i, j, k, l, C1, C2, reg, index;
+		int i, j, k, l, C1, C2, index;
 
 		for (i = 1; i < h; i++) // for each row
 			for (j = 1; j < w; j++) // for each column
@@ -508,7 +508,7 @@ public class Srmjava extends Applet {
 
 	public boolean loadImage(String file, URL url) {
 
-		Image grab = getImage(url, file);
+		/*Image grab =*/ getImage(url, file);
 
 		imageCanvas.repaint();
 		messageArea.setText("Image file: " + file + " loaded!");

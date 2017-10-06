@@ -1,5 +1,6 @@
 package com.test;
 
+@SuppressWarnings("unused")
 public class ReflectAB {
 	public class A {
 

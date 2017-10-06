@@ -1,12 +1,10 @@
 package com.slavi.util.concurrent;
 
-import java.util.Collections;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class CompletableFutureDemo {
 

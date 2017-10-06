@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,8 +17,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.IdentifiableType;
-import javax.persistence.metamodel.ManagedType;
-import javax.persistence.metamodel.Type;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -118,12 +115,12 @@ public class JpaCreate {
 		EntityType<User> etype = em.getMetamodel().entity(User.class);
 
 		for (Attribute attribute : etype.getAttributes()) {
-			ManagedType<User> mtype = attribute.getDeclaringType();
+			//ManagedType<User> mtype = attribute.getDeclaringType();
 			System.out.println(attribute);
 			System.out.println(attribute.isAssociation());
 		}
 		String paramVal = DepartmentType.FACTORY.name();
-		String paramName = "department.type";
+		//String paramName = "department.type";
 		String queryStr = "select distinct u from User u join u.subordinate subordinate join subordinate.department department where department.type=?1";
 		Object o = paramVal;
 		Attribute attribute = etype.getAttribute("department");

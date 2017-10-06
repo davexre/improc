@@ -172,7 +172,8 @@ public class MyMnistDataTest {
 				output.mSub(target, error);
 				if (print)
 					System.out.println(error.toMatlabString("E1"));
-				Matrix inputError = l.backPropagate(error);
+				//Matrix inputError =
+				l.backPropagate(error);
 				//System.out.println(inputError.toMatlabString("IE"));
 				output = l.feedForward(input);
 				output.mSub(target, error);
