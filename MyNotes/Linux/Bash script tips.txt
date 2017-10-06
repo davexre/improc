@@ -99,16 +99,17 @@ Make installation shell script with attached archive at the end
 FILE=$0
 OUTPUT_DIR=target_folder
 OFFSET=$(($(grep -an '\.\.\.END_OF_SCRIPT\.\.\.' "$FILE" | head -n 1 | cut -d ':' -f 1) + 1))
-rm -fr "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" && (tail -n+$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
+rm -fr "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" && (tail -n +$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
 # ... do some other stuff ...
-exit 0 # This exit is to prevent the bash interpeter go into the binary archive
-# The following is the "END_OF_SCRIPT", surrounded by dots, marker and must be followed by exactly one CR (end of line) character
-...END_OF_SCRIPT...
 
 2) Prepare the installation script
 #!/bin/bash
 FOU=install.sh
 cp install-template.sh "$FOU"
+echo >> "$FOU"
+echo 'exit 0' >> "$FOU"          # This exit is to prevent the bash interpeter go into the binary archive
+echo >> "$FOU"
+echo '...END_OF_SCRIPT...' >> "$FOU"
 tar cz [list_of_file_that_will_be_part_of_archive] >> "$FOU"
 chmod +x "$FOU"
 
