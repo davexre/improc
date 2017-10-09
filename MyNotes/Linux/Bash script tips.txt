@@ -96,9 +96,12 @@ Make installation shell script with attached archive at the end
 ===============================================================
 1) install-template.sh
 #!/bin/bash
+function findToken() {
+	grep -an "^${1}\$" "$0" | head -n 1 | cut -d ':' -f 1
+}
 FILE=$0
 OUTPUT_DIR=target_folder
-OFFSET=$(($(grep -an '^___END_OF_SCRIPT___$' "$FILE" | head -n 1 | cut -d ':' -f 1) + 1))
+OFFSET=$(($(findToken "___END_OF_SCRIPT___$") + 1))
 rm -fr "$OUTPUT_DIR" && mkdir -p "$OUTPUT_DIR" && (tail -n +$OFFSET "$FILE" | tar xz -C "$OUTPUT_DIR" --)
 # ... do some other stuff ...
 
@@ -116,19 +119,17 @@ chmod +x "$FOU"
 Script with configuration section(s) at the end
 ===============================================
 function findToken() {
-	grep -an "^${1}$" "$0" | head -n 1 | cut -d ':' -f 1
+	grep -an "^${1}\$" "$0" | head -n 1 | cut -d ':' -f 1
 }
 function extractData() {
-	local BEGIN=$(($(findToken "$1") + 1))
-	local END="${2:+$(findToken "$2")}"
-	local DATA=$(tail -n +$BEGIN "$0")
-	if [ ! -z "$END" ] ; then
-		DATA=$(echo -n "$DATA" | head -n $(($END - $BEGIN)))
-	fi
-	echo -n "$DATA" | grep -Ev '^\s*(#.*)?$'
+	local end=${2:+$(($2-$1-1))}
+	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -Ev '^\s*(#.*)?$'
 }
-extractData "___SCRIPT_DATA_SECTION_1___" "___SCRIPT_DATA_SECTION_2___"
-DATA2=$(extractData "___SCRIPT_DATA_SECTION_2___")
+DATA_OFFSET_1=$(findToken "___SCRIPT_DATA_SECTION_1___")
+DATA_OFFSET_2=$(findToken "___SCRIPT_DATA_SECTION_2___")
+DATA1=$(extractData $DATA_OFFSET_1 $DATA_OFFSET_2)
+echo "$DATA1"
+DATA2=$(extractData $DATA_OFFSET_2)
 ### Now process the data in section 2
 IFS=$'\n'
 count=1
@@ -158,3 +159,17 @@ aaa		2	b
 xxx		4  	d
 
 
+Script with configuration section "in the middle" and variable substitution
+===========================================================================
+#!/bin/bash
+MY_VAR='This will be replaced "inside" the configuration!'
+MY_DATA=$(cat << EOF
+This is some free text inside a script that can seemlessly handle
+variable substituion. Example: The following line
+>> \${MY_VAR} <<
+is replaced in by bash and becomes:
+>> ${MY_VAR} <<
+This might be quite usefull.
+EOF
+)
+echo "$MY_DATA"

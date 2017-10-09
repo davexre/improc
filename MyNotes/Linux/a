@@ -1,48 +1,60 @@
 #!/bin/bash
 
-function findToken() {
-	grep -an "^${1}$" "$0" | head -n 1 | cut -d ':' -f 1
+function init() {
+    RED="tput setaf 1"
+    GREEN="tput setaf 2"
+    YELLOW="tput setaf 3"
+    BLUE="tput setaf 4"
+    MAGENTA="tput setaf 5"
+    CYAN="tput setaf 6"
+    LIGHT_BLUE="$CYAN"
+    BOLD="tput bold"
+    DEFAULT="tput sgr0"
+    
+    RED_BG="tput setab 1"
+    GREEN_BG="tput setab 2"
+    YELLOW_BG="tput setab 3"
+    BLUE_BG="tput setab 4"
+    MAGENTA_BG="tput setab 5"
+    CYAN_BG="tput setab 6"
 }
 
-function extractData() {
-	local BEGIN=$(($(findToken "$1") + 1))
-	local END="${2:+$(findToken "$2")}"
-	local DATA=$(tail -n +$BEGIN "$0")
-	if [[ ! -z "$END" ]] ; then
-		DATA=$(echo -n "$DATA" | head -n $(($END - $BEGIN)))
-	fi
-	echo -n "$DATA" | grep -Ev '^\s*(#.*)?$'
+function defined() {
+    [[ ${!1-X} == ${!1-Y} ]]
 }
 
-#extractData "___SCRIPT_DATA_BEGIN___" "___SCRIPT_DATA_END___"
-#echo ---------------
-DATA=$(extractData "___SCRIPT_DATA_END___")
+function has_value() {
+    if defined $1; then
+        if [[ -n ${!1} ]]; then
+            return 0
+        fi
+    fi
+    return 1
+}
 
-echo "$DATA"
-IFS=$'\n'
-count=1
-for i in $DATA ; do 
-	echo Line $count
-	count=$(($count+1))
-	IFS=$' \t\n'
-	for j in $i ; do
-		echo '>> ' $j
-	done
-done
+function msg() {
+    MESSAGE="$1"
+    COLOR="$2"
 
-exit 0
+    if ! has_value COLOR
+    then
+        COLOR="$DEFAULT"
+    fi
 
-___SCRIPT_DATA_BEGIN___
-   
+    if has_value "MESSAGE"
+    then
+        $COLOR
+        echo "$MESSAGE" 
+        $DEFAULT
+        echo "$MESSAGE"
+    else
+        echo "-- no message received --"
+        echo "$MESSAGE"
+    fi
+}
 
-asd
-#qwe This is comment line
-zxc
-	
-
-___SCRIPT_DATA_END___
-zzz		1	a
-zzz		2	b
-#aaa	3	c
-xxx		4  	d
+init
+echo "Some message"
+msg "My message" "$RED"
+echo "Some message"
 
