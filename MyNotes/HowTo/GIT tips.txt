@@ -35,3 +35,7 @@ echo -e "\nsource ~/.git-completion.tcsh" >> ~/.cshrc
 Git squash/merge last two commits
 =================================
 git reset --soft HEAD~2
+
+Clean the git working folder
+============================
+git clean -fdx

@@ -29,4 +29,7 @@ causing issues when used as user-input data. This is intended for use in helping
 and manual QA testing; useful for whenever your QA engineer walks into a bar.
 https://github.com/minimaxir/big-list-of-naughty-strings
 
-
+AI & ML data sets
+=================
+http://yann.lecun.com/exdb/mnist/
+http://archive.ics.uci.edu/ml/datasets.html

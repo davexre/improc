@@ -119,7 +119,7 @@ chmod +x "$FOU"
 Script with configuration section(s) at the end
 ===============================================
 function findToken() {
-	grep -an "^${1}\$" "$0" | head -n 1 | cut -d ':' -f 1
+	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
 }
 function extractData() {
 	local end=${2:+$(($2-$1-1))}
