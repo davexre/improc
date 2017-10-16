@@ -28,6 +28,7 @@ public class TestJCommander {
 		@Parameter(names = {"-h", "-help", "--help"}, description = "Prints this help message", help = true)
 		boolean help = false;
 		
+		// This option will go at the end of the help message since it does not have a "long" version.
 		@Parameter(names = "-e", description = "Enable something")
 		boolean enable = false;
 		
@@ -46,7 +47,7 @@ public class TestJCommander {
 	}	
 	
 	void doIt() throws Exception {
-		String args[] = new String[] { "-e", "-sASD", "more parms", "-t", "a,b ,:c q", "and", "even more", " params " };
+		String args[] = new String[] { "-e", "-s ASD", "more parms", "-t", "a,b ,:c q", "and", "even more", " params ", " -h" };
 		MyArgs myArgs = new MyArgs();
 		JCommander jcmd = JCommander.newBuilder().addObject(myArgs).programName("myCmd").build();
 		try {
@@ -55,13 +56,11 @@ public class TestJCommander {
 			e.printStackTrace();
 			myArgs.help = true;
 		}
-		if (myArgs.help) {
-			jcmd.usage();
-			return;
-		}
 		System.out.println(myArgs);
 		System.out.println(myArgs.items.size());
-		
+		if (myArgs.help) {
+			jcmd.usage();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

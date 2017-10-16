@@ -1,22 +1,37 @@
 package com.slavi.cmdLineArgs;
 
+import java.util.Arrays;
+
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 public class JOptSimple {
 
-	void doIt() throws Exception {
-		String args[] = new String[] { "-e", "-sASD", "more parms", "-t", "a,b ,:c q", "and", "even more", "-tparams " };
-
+	OptionParser makeParserShort() {
 		OptionParser parser = new OptionParser( "es:t::h*?*." );
-		//OptionParser parser = new OptionParser();
-		//parser.accepts("e").description()describedAs("Enable something").defaultsTo(false);
-		//parser.accepts("s").with
+		return parser;
+	}
+
+	OptionParser makeParserLong() {
+		OptionParser parser = new OptionParser();
+		parser.acceptsAll(Arrays.asList("h", "help"), "Print this help message").forHelp();
+		parser.accepts("e", "Enable something"); //.withOptionalArg().ofType(boolean.class).defaultsTo(false);
+		parser.acceptsAll(Arrays.asList("s", "string"), "Specify some string input").withOptionalArg().ofType(String.class); //.defaultsTo(null);
+		parser.acceptsAll(Arrays.asList("t", "things"), "A comma or column separated list of stuff").withOptionalArg().ofType(String.class).withValuesSeparatedBy(",: \t\n\r\f"); //.defaultsTo(null);
+		return parser;
+	}
+	
+	void doIt() throws Exception {
+		String args[] = new String[] { "-e", "-sASD", "more parms", "-t", "a,b ,:c q", "and", "even more", "-tparams ", "-h" };
+
+		OptionParser parser = makeParserLong();
 		OptionSet o = parser.parse(args);
 		
-		System.out.println(o.has("e"));
-		System.out.println(o.valuesOf("t"));
-		System.out.println(o.nonOptionArguments());
+		System.out.println("-h -> " + o.has("h"));
+		System.out.println("-e -> " + o.has("e"));
+		System.out.println("-s -> " + o.valueOf("s"));
+		System.out.println("-t -> " + o.valuesOf("t"));
+		System.out.println("others -> " + o.nonOptionArguments());
 
 		parser.printHelpOn(System.out);
 	}
