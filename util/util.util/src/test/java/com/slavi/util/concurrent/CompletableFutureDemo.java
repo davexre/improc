@@ -2,6 +2,7 @@ package com.slavi.util.concurrent;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -41,7 +42,23 @@ public class CompletableFutureDemo {
 		}::call;
 	}
 
+	public static void throwingException() throws Exception {
+		System.out.println("Throwing exception");
+		throw new Exception("Throwing exception");
+	}
+	
 	void doIt() throws Exception {
+		CompletableFuture.supplyAsync(() -> {
+			try {
+				throwingException();
+			} catch (Exception e) {
+				throw new CompletionException(e);
+			}
+			return null;
+		}).get();
+	}
+	
+	void doIt2() throws Exception {
 		Object result = CompletableFuture
 			.supplyAsync(() -> {
 				System.out.println("1");

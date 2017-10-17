@@ -202,6 +202,19 @@ EOF
 )
 echo "$MY_DATA"
 
+Temporarily disable an alias-ed command
+=======================================
+Alias a command:		alias ls='ls --color=auto'
+See all aliases:		alias
+Start an alias:			ls		# this is run ls --color=auto
+Remove an alias:		unalias
+Disable an alias (even in script) and run the 'true', unaliased command:
+	\ls (parameters)
+	'ls' (parameters)
+	"ls" (parameters)
+	/bin/ls (parameters)
+	command ls (parameters)
+	command -p ls (parameters)
 
 Bash Redirections Cheat Sheet
 =============================
