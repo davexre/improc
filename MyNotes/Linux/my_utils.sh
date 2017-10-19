@@ -75,8 +75,12 @@ function log_error() {
 ##################################################################
 # STRING Processing
 function trim() {
+	local f_bak=$-
 	set -f
 	echo $*
+	if [[ $f_bak != *f* ]]; then
+		set +f
+	fi
 }
 
 ##################################################################

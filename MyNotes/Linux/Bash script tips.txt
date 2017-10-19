@@ -14,6 +14,21 @@ $-					-> Currently set flags in bash, see set --help
 $DISPLAY
 $LINES				-> Number of lines in current terminal
 
+Saving/restoring bash flags
+===========================
+* Save/restore all flags
+	save_opts=$(set +o)
+	echo Alter bash flags using set
+	eval "$save_opts"
+
+* Save/restore single flag
+	f_bak=$-
+	set -f
+	echo $*
+	if [[ $f_bak != *f* ]]; then
+		set +f
+	fi
+
 Temporary files
 ===============
 * Create a unique folder "in-memory"
@@ -50,21 +65,68 @@ popd  > /dev/null
 Variables
 =========
 * Define a constant
-declare -r TRUE=0
+	declare -r TRUE=0
+* Define a pointer to another variable
+	my_var="Some value"
+	declare -n my_pointer=my_var
+	echo $my_pointer
+* Define a "HashMap" variable
+	declare -A my_map
+	my_map[some key]="Some value"
+	echo ${my_map[some key]}
+* List of currently available functions
+	declare -F		or		declare -f
 
 * Local variable
-local myvar=some value
+	local myvar=some value
 
 * default values
-PARAM1_IP=${1:-'172.0.0.1'}
+	PARAM1_IP=${1:-'172.0.0.1'}
 
 * script home
-SCRIPT_HOME=$(dirname $(readlink -f "${0}"))
-or
-SCRIPT_HOME=$(dirname "$(realpath -m "${0}")")
-or better
-SCRIPT_HOME=$(realpath -m "${0}")
-SCRIPT_HOME=$(dirname "${SCRIPT_HOME}");
+	SCRIPT_HOME=$(dirname $(readlink -f "${0}"))
+	or
+	SCRIPT_HOME=$(dirname "$(realpath -m "${0}")")
+	or better
+	SCRIPT_HOME=$(realpath -m "${0}")
+	SCRIPT_HOME=$(dirname "${SCRIPT_HOME}");
+
+Check wether the script is executed or is sourced
+=================================================
+#!/bin/bash
+function isSourced() {
+	[[ "$0" = "$BASH_SOURCE" ]]
+}
+function getScriptExitStatement() {
+	isSourced && echo exit $1 || echo return $1
+}
+$(getScriptExitStatement 2)
+echo Will never execute
+
+Custom bash command line completion
+===================================
+The following script MUST be "source"d into ~/.bashrc
+#!/bin/bash
+function __my_command_complete() {
+	local numw=${#COMP_WORDS[@]}
+
+	COMPREPLY=()
+	case ${COMP_WORDS[1]} in
+		check | copy_id)
+			if [[ $numw -le 3 ]]; then
+				COMPREPLY=(aa1 a22 b33 bb4 b55 ccc)
+			fi
+			;;
+		copy_all)
+			;;
+		*)
+			COMPREPLY=(check copy_id copy_all)
+			;;
+	esac
+	COMPREPLY=($(compgen -W "${COMPREPLY[*]}" -- "${COMP_WORDS[COMP_CWORD]}"))
+	return 0
+}
+complete -F __my_command_complete my_command
 
 Processing command line parameters
 ==================================
