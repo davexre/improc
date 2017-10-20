@@ -91,8 +91,8 @@ Variables
 	SCRIPT_HOME=$(realpath -m "${0}")
 	SCRIPT_HOME=$(dirname "${SCRIPT_HOME}");
 
-Check wether the script is executed or is sourced
-=================================================
+Check whether the script is executed or is sourced
+==================================================
 #!/bin/bash
 function isSourced() {
 	[[ "$0" = "$BASH_SOURCE" ]]
@@ -240,14 +240,19 @@ function findToken() {
 }
 function extractData() {
 	local end=${2:+$(($2-$1-1))}
-	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -Ev '^\s*(#.*)?$'
+	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
 }
 DATA_OFFSET_1=$(findToken "___SCRIPT_DATA_SECTION_1___")
 DATA_OFFSET_2=$(findToken "___SCRIPT_DATA_SECTION_2___")
 DATA1=$(extractData $DATA_OFFSET_1 $DATA_OFFSET_2)
-echo "$DATA1"
 DATA2=$(extractData $DATA_OFFSET_2)
+echo "$DATA1"
 ### Now process the data in section 2
+while IFS=$' \t\n' read -a data ; do
+	echo "${#data[@]}"
+done <<< "$DATA2"
+
+### or use this one
 IFS=$'\n'
 count=1
 for i in $DATA2 ; do 

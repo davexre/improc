@@ -81,6 +81,10 @@ rm a-*.jpg
 convert -density 300 <input file>.pdf -depth 8 a-%d.jpg
 (find . -name "a-*.jpg"|sort -n -k 2 -t -|xargs -I{} tesseract {} stdout -l bul) > output.txt
 
+Some interesting tools
+======================
+biosdecode			read info from BIOS
+dmidecode			read info from BIOS
 
 
 

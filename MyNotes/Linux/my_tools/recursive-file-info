@@ -1,0 +1,18 @@
+#!/bin/bash
+
+function fileInfo() {
+	local s=$(stat -c "%s" "$1")
+	local n=$(basename "$1")
+	local d=$(dirname "$1")
+	echo -e "$s\t$d\t$n"
+}
+
+function listFiles() {
+	PATTERN=${2:-*}
+	IFS=$'\n'
+	for i in $(find . -type f -iname "$PATTERN") ; do
+		fileInfo "$i"
+	done
+}
+
+listFiles | sort -t $'\t' -k2,2d -k1,1g
