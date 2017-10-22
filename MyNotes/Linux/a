@@ -1,60 +1,310 @@
 #!/bin/bash
 
-function init() {
-    RED="tput setaf 1"
-    GREEN="tput setaf 2"
-    YELLOW="tput setaf 3"
-    BLUE="tput setaf 4"
-    MAGENTA="tput setaf 5"
-    CYAN="tput setaf 6"
-    LIGHT_BLUE="$CYAN"
-    BOLD="tput bold"
-    DEFAULT="tput sgr0"
-    
-    RED_BG="tput setab 1"
-    GREEN_BG="tput setab 2"
-    YELLOW_BG="tput setab 3"
-    BLUE_BG="tput setab 4"
-    MAGENTA_BG="tput setab 5"
-    CYAN_BG="tput setab 6"
+function findToken() {
+	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
 }
 
-function defined() {
-    [[ ${!1-X} == ${!1-Y} ]]
+function extractData() {
+	local end=${2:+$(($2-$1-1))}
+	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
 }
 
-function has_value() {
-    if defined $1; then
-        if [[ -n ${!1} ]]; then
-            return 0
-        fi
-    fi
-    return 1
+function fileInfo() {
+	local s=$(stat -c "%s" "$1")
+	local n=$(basename "$1")
+	local d=$(dirname "$1")
+	echo -e "$s\t$d\t$n"
 }
 
-function msg() {
-    MESSAGE="$1"
-    COLOR="$2"
-
-    if ! has_value COLOR
-    then
-        COLOR="$DEFAULT"
-    fi
-
-    if has_value "MESSAGE"
-    then
-        $COLOR
-        echo "$MESSAGE" 
-        $DEFAULT
-        echo "$MESSAGE"
-    else
-        echo "-- no message received --"
-        echo "$MESSAGE"
-    fi
+function listFiles() {
+	(find . -type f -iname "${1:-*}") |
+	(while IFS=$'\n' read -a i ; do
+		fileInfo "$i"
+	done)
 }
 
-init
-echo "Some message"
-msg "My message" "$RED"
-echo "Some message"
+function makeFilesListLocal() {
+	pushd . > /dev/null
+	cd "${localPath}"
+	listFiles > "${outDir}/filesA.txt"
+	popd > /dev/null
+}
+
+function makeFilesListRemote() {
+	(ssh -T ${connectStr} <<- EOF
+		set -e
+		$(declare -f fileInfo);
+		$(declare -f listFiles);
+		cd "${destPath}"
+		listFiles 1>&2
+	EOF
+	) 2> "${outDir}/filesB.txt" 1> /dev/null
+}
+
+function makeCompareDb() {
+	rm -f "${outDir}/ab.sqlite"
+	sqlite3 "${outDir}/ab.sqlite" <<- EOF
+		.bail on
+		
+		create table a (
+			fsize numeric(15),
+			fdir varchar(100),
+			fname varchar(100)
+		);
+		
+		create table b as select * from a;
+		
+		.separator "\t"
+		
+		.import "${outDir}/filesA.txt" a
+		.import "${outDir}/filesB.txt" b
+		
+		select f.fdir || '/' || f.fname
+		from (
+			select b.*
+				from b
+				left join a on a.fdir=b.fdir and a.fname=b.fname and a.fsize=b.fsize
+			where a.fname is null
+		) f
+		left join a on a.fname=f.fname and a.fsize=f.fsize
+		where a.fname is null
+		limit 3;
+	EOF
+}
+
+function copyUnmatchedFiles() {
+	makeFilesListLocal
+	makeFilesListRemote
+
+	(makeCompareDb) |
+	(while IFS=$'\n' read -a copyMe ; do
+		local target="${localTempDir}/${copyMe}"
+		local targetDir=$(dirname "${target}")
+		mkdir -p "${targetDir}"
+		scp -q -p "${connectStr}:\"${destPath}/${copyMe}\"" "${target}"
+	done)
+}
+
+function makeLocalFilesDb() {
+	if [[ -z $1 ]] ; then
+		makeFilesListLocal
+	fi
+	
+	local DATA_OFFSET=$(findToken "___CHECKED_FOLDERS_WIRH_DUPLICATES___")
+	(extractData ${DATA_OFFSET}) |
+	(while IFS=$'\t' read -a d ; do
+		if [[ -n d[0] && -n d[1] ]] ; then
+			echo -e ${d[0]}"\t"${d[1]}
+		fi
+	done) > "${outDir}/checked.txt"
+
+	rm -f "${dbFile}"
+	sqlite3 "${dbFile}" <<- EOF
+		.bail on
+		
+		create table a (
+			fsize numeric(15),
+			fdir varchar(100),
+			fname varchar(100)
+		);
+		
+		create table checked as select fdir fdir_a, fdir fdir_b from a where 1=2;
+		
+		.separator "\t"
+		
+		.import "${outDir}/filesA.txt" a
+		.import "${outDir}/checked.txt" checked
+	EOF
+}
+
+function dbDirs() {
+	local subdirs="${1:+and b.fdir='$1'}"
+
+	echo -e "count\tDirectory"
+	sqlite3 "${dbFile}" <<- EOF
+		.bail on
+		.separator "\t"
+
+		select count(*), b.fdir
+		from (
+			select distinct a.fdir, a.fname
+			from a
+			join a b on a.fname=b.fname
+			where
+				a.fdir != b.fdir
+				${subdirs}
+				and not exists(
+					select 1 
+					from checked c 
+					where 
+						(c.fdir_a=a.fdir and c.fdir_b=b.fdir) or
+						(c.fdir_a=b.fdir and c.fdir_b=a.fdir)
+					)
+		) b
+		group by b.fdir
+		order by 1 desc
+		limit 20;
+	EOF
+}
+
+function dbFiles() {
+	echo -e "sizeA\tsizeB\tfile"
+	sqlite3 "${dbFile}" <<- EOF
+		.bail on
+		.separator "\t"
+
+		select a.fsize fsizeA, b.fsize fsizeB, a.fname
+		from a
+		join a b on a.fname=b.fname
+		where
+			a.fdir!=b.fdir
+			and a.fdir='$1'
+			and b.fdir='$2'
+		order by 3
+		limit 20;
+	EOF
+}
+
+function dbShow() {
+	display "$localPath/$1/$3" &
+	display "$localPath/$2/$3" &
+}
+
+localPath="/home/slavian/Pictures"
+destPath="/home/radost/Pictures/2017/144PENTX"
+connectStr="radost@192.168.1.101"
+localTempDir="/home/slavian/S/git/image-process/MyNotes/Linux/t tt"
+outDir="${XDG_RUNTIME_DIR}/mydiff"
+dbFile="${outDir}/a.sqlite"
+
+set -e
+mkdir -p "${outDir}"
+
+case $1 in
+	copy)
+		copyUnmatchedFiles
+		;;
+	update)
+		makeLocalFilesDb "$2"
+		;;
+	q)
+		case $# in
+			1)
+				dbDirs
+				;;
+			2)
+				dbDirs "$2"
+				;;
+			3)
+				dbFiles "$2" "$3"
+				;;
+			4)
+				dbShow "$2" "$3" "$4"
+				;;
+		esac
+		;;
+	*)
+		echo "Usage:"
+		echo "   ./a copy"
+		echo "   ./a update [partial]"
+		echo "   ./a q ['folder' ['folder' ['filename']]]"
+		;;
+esac
+
+exit
+
+
+
+___COMMENTS___
+
+-- List folders with duplicate files
+select b.fdir, count(*)
+from (
+	select distinct a.fdir, a.fname
+	from a
+	join a b on a.fname=b.fname
+	where
+		a.fdir!=b.fdir
+		and b.fdir='./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia'
+		and not exists(
+			select 1 
+			from checked c 
+			where 
+				(c.fdir_a=a.fdir and c.fdir_b=b.fdir) or
+				(c.fdir_a=b.fdir and c.fdir_b=a.fdir)
+			)
+) b
+group by b.fdir
+order by 2 desc;
+
+-- Duplicated pictures in two folders
+select a.fsize, a.fname, b.fsize
+from a
+join a b on a.fname=b.fname
+where
+	a.fdir!=b.fdir
+	and a.fdir='./2009/20090901 Kumping Yg/Petia'
+	and b.fdir='./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia'
+order by a.fname;
+
+
+
+___CHECKED_FOLDERS_WIRH_DUPLICATES___
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./2009/20090901 Kumping Yg/Petia
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./2009/20090620 Petia swatba/100ND40X
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./2009/20090726 Akcia Veloaleia/Petia
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./2009/20090503 Gudevitsa/Petia/New Folder
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./2009/20090620 Petia swatba/101ND40X
+./2010/20100508 SVATBA/20100508 Svatba Snimki na Petia				./PrintMe/Сватба					###????
+./2007/20071020 Greece Kostur										./2004/20040904 Rila
+./2007/20071020 Greece Kostur										./2004/20041031 Tran
+./2007/20071020 Greece Kostur										./2004/20040810 Ravda
+./2007/20071020 Greece Kostur										./2004/20040903 Pravec
+./2009/20090901 Kumping Yg/Petia									./2009/20090726 Akcia Veloaleia/Petia
+./2009/20090901 Kumping Yg/Petia									./2009/20090620 Petia swatba/100ND40X
+./2009/20090901 Kumping Yg/Petia									./2009/20090620 Petia swatba/101ND40X
+./2009/20090901 Kumping Yg/Petia									./2009/20090503 Gudevitsa/Petia/New Folder
+./2009/20090901 Kumping Yg/Petia									./PrintMe/Сватба
+./2012/20120307 Slavi i Radi v Italia/05032012_tridente/100_0305	./2011/20110911 Po starata Jelezoputna linia na Sofia
+./2012/20120307 Slavi i Radi v Italia/05032012_tridente/100_0305	./2011/20110724 Iazovir Ticha/100PENTX
+./2012/20120307 Slavi i Radi v Italia/05032012_tridente/100_0305	./2011/20111030 Ekskurzia na Vitosha s Mamata i Tatikut
+./2011/20111116 Brno Chehia/Radi_pics_Brno							./2012/20120307 Slavi i Radi v Italia/06032012_baths&colosseo interior/100_0306
+./2004/20040600 V Bankia s Doichin i Orlin							./2007/20070622 Kayaci po Yantra
+./2004/20040600 V Bankia s Doichin i Orlin							./2007/20070631 Studen kladenec
+./2004/20040600 V Bankia s Doichin i Orlin							./2007/20070707 Zeleniada - selo Samoranovo
+./2007/20070311 Semkovo												./2004/20040300 Semkovo
+./2007/20070311 Semkovo												./2004/20040404 Suhodol
+./2007/20070311 Semkovo												./2004/20040321 Vitosha s Poli
+./2009/20090503 Gudevitsa/Petia/New Folder							./2009/20090726 Akcia Veloaleia/Petia
+./2009/20090503 Gudevitsa/Petia/New Folder							./PrintMe/Сватба
+./2009/20090503 Gudevitsa/Petia/New Folder							./2011/20110115 Pitka na Dobri
+./2009/20090503 Gudevitsa/Petia/New Folder							./2010/20101209 Izpisvane na Dobri
+./2009/20090726 Akcia Veloaleia/Petia								./2009/20090503 Gudevitsa/Petia/New Folder
+./2009/20090726 Akcia Veloaleia/Petia								./2009/20090620 Petia swatba/100ND40X
+./2009/20090726 Akcia Veloaleia/Petia								./PrintMe/Сватба
+./2009/20090620 Petia swatba/100ND40X								./2009/20090620 Petia swatba/101ND40X
+./2009/20090620 Petia swatba/100ND40X								./PrintMe/Сватба
+./2009/20090620 Petia swatba/100ND40X								./PrintMe/Морски
+./2009/20090620 Petia swatba/100ND40X								./2014/20141220 Коледа на колела
+./2004/20040810 Ravda												./2007/20070930 Iskur
+./2004/20040810 Ravda												./2007/20070930 Tsurkvata v Iliantsi
+./2004/20040810 Ravda												./2007/20070930 Rali Boiana
+./2009/20090503 Gudevitsa/Petia										./2015/20150506 Рожден ден на Петя до с.Боснек/2015-05-06 Chujpetlovo
+./2009/20090503 Gudevitsa/Petia										./PrintMe/Морски
+./2012/20120307 Slavi i Radi v Italia/04032012_colosseo/100_0304	./2011/20110615 Dunav
+./2012/20120307 Slavi i Radi v Italia/04032012_colosseo/100_0304	./2011/20110613 Berende
+./2012/20120307 Slavi i Radi v Italia/04032012_colosseo/100_0304	./2011/20110614 Dobri na gosti v Liulin
+./PrintMe/Сватба													./2009/20090620 Petia swatba/101ND40X
+./2006/20061118 Blagoevgrad Narodni tanci							./2001-2003/20031231 Ney Year's party		#'
+./2005/20050528 Rafting Struma/GTrendafilov							./2006/20060820 More - Smokinya
+./2005/20050528 Rafting Struma/GTrendafilov							./2006/20060722 Kurdjali
+./2009/20090620 Petia swatba/sv.Petia i Kaloian						./2005/20050300 Semkovo/Tenko
+./2009/20090620 Petia swatba/sv.Petia i Kaloian						./2011/20111116 Brno Chehia/marti_pics_Brno
+./2004/20040429 Karting												./2007/20070501 Asenovgrad
+./2004/20040429 Karting												./2007/20070408 Dobrich - Velikden
+./2007/20070219 Istanbul											./2004/20040208 Slavian & Poli v zapaden park
+./2007/20070219 Istanbul											./2004/20040103 Petia snimki ot Sofia
+./2017/100PENTX														./2016/100PENTX
+
+
 

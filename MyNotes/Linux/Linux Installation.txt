@@ -111,14 +111,15 @@ rar                         \
 remmina                     \
 seahorse                    \
 screen                      \
-sshfs                       \
-soundconverter              \
 smplayer                    \
 smtube                      \
+soundconverter              \
+sshfs                       \
 subversion                  \
 synaptic                    \
 synfigstudio                \
 sysv-rc-conf                \
+sqlite3                     \
 tesseract-ocr               \
 tesseract-ocr-bul           \
 tesseract-ocr-eng           \
