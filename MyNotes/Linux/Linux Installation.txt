@@ -294,3 +294,19 @@ sudo visudo -f /etc/sudoers.d/veracrypt
 5. Launch VeraCrypt, setup encrypted files, mount points, add to favoriets
 Use default mount options: dmask=077,fmask=177
 
+Linux i8kmon (fan control)
+==========================
+sudo apt-get install i8kutils
+vi /etc/i8kmon.cfg
+#####################
+# Report status on stdout, override with --verbose option
+set config(verbose) 1
+# Status check timeout (seconds), override with --timeout option
+set config(timeout) 20
+set config(0)   {{-1 0}  -1  30  -1  30}
+set config(1)   {{-1 1}  20  60  20  60}
+set config(2)   {{-1 2}  45  128  45  128}
+set config(3)   {{-1 2}  60  128  60  128}
+#####################
+systemctl start i8kmon.service
+
