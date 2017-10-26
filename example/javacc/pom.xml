@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.slavi</groupId>
-	<artifactId>javacc</artifactId>
+	<artifactId>example.javacc</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
 	<properties>
