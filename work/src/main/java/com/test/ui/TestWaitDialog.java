@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class TestWaitDialog {
 

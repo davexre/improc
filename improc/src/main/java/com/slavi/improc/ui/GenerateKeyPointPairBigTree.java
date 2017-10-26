@@ -8,7 +8,7 @@ import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class GenerateKeyPointPairBigTree implements Callable<KeyPointBigTree> {
 

@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swing;
 
 import java.awt.Color;
 import java.awt.Component;

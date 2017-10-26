@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class SettingsDialog {
 	

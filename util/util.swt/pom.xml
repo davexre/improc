@@ -8,7 +8,7 @@
 		<artifactId>util</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>util.ui</artifactId>
+	<artifactId>util.swt</artifactId>
 
 
 	<dependencies>

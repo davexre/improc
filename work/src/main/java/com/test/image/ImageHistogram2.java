@@ -31,7 +31,7 @@ import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 import com.slavi.util.Marker;
 import com.slavi.util.file.FindFileIterator;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class ImageHistogram2 {
 

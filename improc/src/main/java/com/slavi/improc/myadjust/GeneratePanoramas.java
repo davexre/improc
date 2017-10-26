@@ -24,7 +24,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class GeneratePanoramas implements Callable<Void> {
 

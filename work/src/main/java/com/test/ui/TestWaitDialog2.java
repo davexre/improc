@@ -14,8 +14,8 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
-import com.slavi.util.ui.SwtUtil;
-import com.slavi.util.ui.TaskProgress;
+import com.slavi.util.swt.SwtUtil;
+import com.slavi.util.swt.TaskProgress;
 
 public class TestWaitDialog2 {
 

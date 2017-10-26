@@ -1,12 +1,10 @@
 package com.slavi.util.file;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Map;
@@ -14,52 +12,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.comparator.CompositeFileComparator;
+import org.apache.commons.io.comparator.LastModifiedFileComparator;
+import org.apache.commons.io.comparator.SizeFileComparator;
+
 public class FileUtil {
-	/**
-	 * Remove a directory and all of its contents.
-	 * 
-	 * The results of executing File.delete() on a File object that represents a
-	 * directory seems to be platform dependent. This method removes the
-	 * directory and all of its contents.
-	 * 
-	 * Code borrowed from:
-	 * http://www.java2s.com/Tutorial/Java/0180__File/Removeadirectoryandallofitscontents.htm
-	 * 
-	 * @return true if the complete directory was removed, false if it could not
-	 *         be. If false is returned then some of the files in the directory
-	 *         may have been removed.
-	 */
-	public static boolean removeDirectory(File directory) {
-		if (directory == null)
-			return false;
-		if (!directory.exists())
-			return true;
-		if (!directory.isDirectory()) {
-			return directory.delete(); // This is a file. Delete it.
-		}
-
-		File[] list = directory.listFiles();
-		// On error continue removing files - remove as many as possible files
-		boolean result = true; 
-		// Some JVMs return null for File.list() when the
-		// directory is empty.
-		if (list != null) {
-			for (int i = 0; i < list.length; i++) {
-				File entry = list[i];
-				if (entry.isDirectory()) {
-					if (!removeDirectory(entry)) {
-						result = false;
-					}
-				} else if (!entry.delete()) {
-					result = false;
-				}
-			}
-		}
-
-		result &= directory.delete();
-		return result;
-	}
-	
 	public static boolean areFilesIdentical(File file1, File file2, boolean compareFileContent) throws IOException {
 		if ((file1 == null) || (file2 == null))
 			return false;
@@ -126,29 +85,6 @@ public class FileUtil {
 		}
 	}
 
-	public static String streamToString(InputStream is) throws IOException {
-/*
-		// This piece of code does not work on some characters like 0xFF,0xCF,0xA4 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		copyStream(is, os);
-		return new String(os.toByteArray());
-*/
-		StringBuilder sb = new StringBuilder();
-		InputStreamReader reader = new InputStreamReader(is);
-		int b;
-		while ((b = reader.read()) >= 0) {
-			sb.append((char)b);
-		}
-		return sb.toString();
-	}
-
-	public static byte[] streamToByteArray(InputStream is) throws IOException {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		copyStream(is, os);
-		is.close();
-		return os.toByteArray();
-	}
-
 	public static class RedirectStream implements Runnable {
 		InputStream is;
 		OutputStream os;
@@ -196,47 +132,12 @@ public class FileUtil {
 		thread.start();
 	}
 	
-	public static void copyStream(InputStream is, OutputStream os) throws IOException {
-		byte buf[] = new byte[256];
-		int len;
-		while ((len = is.read(buf)) >= 0) {
-			os.write(buf, 0, len);
-		}
-	}
-
-	public static void copyFile(File fromFile, File toFile) throws IOException {
-		copyFile(fromFile, toFile, true);
+	public static CompositeFileComparator getFileComparator() {
+		return new CompositeFileComparator(
+				new LastModifiedFileComparator(),
+				new SizeFileComparator());
 	}
 	
-	public static void copyFile(File fromFile, File toFile, boolean overrideIfFileExists) throws IOException {
-		if (toFile.isDirectory())
-			toFile = new File(toFile, fromFile.getName());
-
-		if (toFile.exists() && (!overrideIfFileExists))
-			return;
-		File parent = toFile.getParentFile();
-		if ((parent != null) && (!parent.exists())) {
-			 parent.mkdirs();
-		}
-
-		FileInputStream from = null;
-		FileOutputStream to = null;
-		try {
-			from = new FileInputStream(fromFile);
-			to = new FileOutputStream(toFile);
-			copyStream(from, to);
-		} finally {
-			try {
-				if (from != null)
-					from.close();
-			} finally {
-				if (to != null)
-					to.close();
-			}
-		}
-		toFile.setLastModified(fromFile.lastModified());
-	}
-
 	public static void copyFileIfDifferent(File fromFile, File toFile) throws IOException {
 		if (toFile.isDirectory())
 			toFile = new File(toFile, fromFile.getName());
@@ -246,7 +147,7 @@ public class FileUtil {
 			fromFile.length() == toFile.length()) {
 			return;
 		}
-		copyFile(fromFile, toFile, true);
+		FileUtils.copyFile(fromFile, toFile, true);
 	}
 
 
@@ -305,7 +206,7 @@ public class FileUtil {
 			if (!entry.isDirectory()) {
 				FileOutputStream fou = new FileOutputStream(f);
 				try {
-					copyStream(zin, fou);
+					IOUtils.copy(zin, fou);
 				} finally {
 					fou.close();
 				}
@@ -358,7 +259,7 @@ public class FileUtil {
 			ZipEntry entry = new ZipEntry(relativeFileName);
 			zos.putNextEntry(entry);
 			is = new FileInputStream(file);
-			copyStream(is, zos);
+			IOUtils.copy(is, zos);
 			zos.closeEntry();
 		} finally {
 			if (is != null) {
@@ -395,10 +296,10 @@ public class FileUtil {
 				zin.close();
 				zin = null;
 			}
-	        for (Map.Entry<String, InputStream> item : filesToReplace.entrySet()) {
-	        	InputStream itemfin = item.getValue();
-	        	if (itemfin == null)
-	        		continue;
+			for (Map.Entry<String, InputStream> item : filesToReplace.entrySet()) {
+				InputStream itemfin = item.getValue();
+				if (itemfin == null)
+					continue;
 				ZipEntry entryOut = new ZipEntry(item.getKey());
 				entryOut.setCompressedSize(-1);
 				zou.putNextEntry(entryOut);

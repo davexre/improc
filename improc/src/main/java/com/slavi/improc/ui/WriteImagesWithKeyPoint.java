@@ -12,7 +12,7 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.SafeImage;
 import com.slavi.util.concurrent.TaskSetExecutor;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class WriteImagesWithKeyPoint implements Callable<Void> {
 

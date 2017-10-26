@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swt;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;

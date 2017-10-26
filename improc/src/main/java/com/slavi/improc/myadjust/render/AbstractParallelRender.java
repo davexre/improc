@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.SafeImage;
 import com.slavi.improc.myadjust.GeneratePanoramas;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public abstract class AbstractParallelRender implements Callable<Void> {
 	GeneratePanoramas parent;

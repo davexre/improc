@@ -17,7 +17,7 @@ import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FindFileIterator;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class Improc {
 	

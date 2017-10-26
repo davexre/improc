@@ -18,6 +18,7 @@
 		<module>util.dbutil</module>
 		<module>util.sound</module>
 		<module>util.io</module>
-		<module>util.ui</module>
+		<module>util.swing</module>
+		<module>util.swt</module>
 	</modules>
 </project>

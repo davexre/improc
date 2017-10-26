@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class TaskSetExecutorUITest {
 	static class MyJob implements Callable {

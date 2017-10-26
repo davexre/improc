@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swt;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;

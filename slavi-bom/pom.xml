@@ -61,7 +61,12 @@
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
-				<artifactId>util.ui</artifactId>
+				<artifactId>util.swing</artifactId>
+				<version>${com.slavi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
+				<artifactId>util.swt</artifactId>
 				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>

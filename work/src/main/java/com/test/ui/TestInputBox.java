@@ -1,6 +1,6 @@
 package com.test.ui;
 
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class TestInputBox {
 	public static void main(String[] args) {

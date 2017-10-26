@@ -1,6 +1,6 @@
 package manualTest;
 
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class SystemMonitorTest {
 

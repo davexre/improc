@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swt;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -34,7 +34,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
 
 /**
  * This class contains utility methods for creating user interface using
@@ -218,7 +217,7 @@ public class SwtUtil {
 		});
 
 		try {
-			Browser browser = new Browser(shell, SWT.NONE);
+			Browser browser = new Browser(shell, SWT.MOZILLA | SWT.WEBKIT);
 			browser.setText(html);
 			browser.setSize(600, 450);
 			GridData layoutData = new GridData();

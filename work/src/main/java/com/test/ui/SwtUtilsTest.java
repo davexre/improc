@@ -12,7 +12,7 @@ import org.jdom2.transform.XSLTransformer;
 
 import com.slavi.io.xml.XMLMatrix;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class SwtUtilsTest {
 
@@ -46,6 +46,6 @@ public class SwtUtilsTest {
 	public static void main(String[] args) throws Exception {
 		SwtUtilsTest test = new SwtUtilsTest();
 		test.showHtmlTest();
-		test.openFileTest();
+		//test.openFileTest();
 	}
 }

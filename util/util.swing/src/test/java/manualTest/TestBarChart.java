@@ -1,8 +1,8 @@
-package com.test.ui;
+package manualTest;
 
 import javax.swing.JFrame;
 
-import com.slavi.util.ui.BarChart;
+import com.slavi.util.swing.BarChart;
 
 public class TestBarChart {
 	public static void main(String[] args) {

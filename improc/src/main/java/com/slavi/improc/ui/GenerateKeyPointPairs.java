@@ -9,8 +9,8 @@ import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.swt.SwtUtil;
 import com.slavi.util.tree.NearestNeighbours;
-import com.slavi.util.ui.SwtUtil;
 
 public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairList>> {
 

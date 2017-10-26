@@ -11,7 +11,7 @@ import com.slavi.math.AbstractConvexHullArea;
 import com.slavi.math.MathUtil;
 import com.slavi.math.transform.TransformLearnerResult;
 import com.slavi.util.concurrent.TaskSetExecutor;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
 

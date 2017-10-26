@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swt;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
-
 
 public class TaskProgress extends Composite {
 

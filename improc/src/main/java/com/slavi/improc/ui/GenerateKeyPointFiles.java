@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointListSaver;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class GenerateKeyPointFiles implements Callable<ArrayList<KeyPointList>> {
 

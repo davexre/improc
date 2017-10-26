@@ -18,7 +18,7 @@ import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
 import javax.swing.SpringLayout.Constraints;
 
-import com.slavi.util.ui.SwingUtil;
+import com.slavi.util.swing.SwingUtil;
 
 
 public class SwingUtilMakeSpringGrid {

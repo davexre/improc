@@ -1,4 +1,4 @@
-package com.slavi.util.ui;
+package com.slavi.util.swt;
 
 import java.net.URL;
 

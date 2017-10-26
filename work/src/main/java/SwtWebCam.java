@@ -15,7 +15,7 @@ import com.github.sarxos.webcam.WebcamEvent;
 import com.github.sarxos.webcam.WebcamListener;
 import com.slavi.imagefilter.SwtDisplayImage;
 import com.slavi.math.MathUtil;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class SwtWebCam {
 	
