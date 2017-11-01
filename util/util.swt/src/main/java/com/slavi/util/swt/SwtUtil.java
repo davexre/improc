@@ -216,20 +216,15 @@ public class SwtUtil {
 			}
 		});
 
-		try {
-			Browser browser = new Browser(shell, SWT.MOZILLA | SWT.WEBKIT);
-			browser.setText(html);
-			browser.setSize(600, 450);
-			GridData layoutData = new GridData();
-			layoutData.horizontalAlignment = SWT.FILL;
-			layoutData.verticalAlignment = SWT.FILL;
-			layoutData.grabExcessHorizontalSpace = true;
-			layoutData.grabExcessVerticalSpace = true;
-			browser.setLayoutData(layoutData);
-		} catch (SWTError e) {
-			System.out.println("Could not instantiate Browser: " + e.getMessage());
-			return;
-		}
+		Browser browser = new Browser(shell, SWT.MOZILLA | SWT.WEBKIT);
+		browser.setText(html);
+		browser.setSize(600, 450);
+		GridData layoutData = new GridData();
+		layoutData.horizontalAlignment = SWT.FILL;
+		layoutData.verticalAlignment = SWT.FILL;
+		layoutData.grabExcessHorizontalSpace = true;
+		layoutData.grabExcessVerticalSpace = true;
+		browser.setLayoutData(layoutData);
 		shell.pack();
 		openModal(shell, true);
 	}

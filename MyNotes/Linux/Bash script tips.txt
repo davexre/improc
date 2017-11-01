@@ -175,6 +175,11 @@ false
 echo "After false 1"
 
 set -e
+echo "Check the exit status with an active set -e"
+status=0; false || status=$?
+## or this
+false && status=0 || status=$?
+echo Last command exited with status $status.
 
 echo "Before false 2"
 false

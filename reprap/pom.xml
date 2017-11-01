@@ -46,7 +46,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
-			<artifactId>util.ui</artifactId>
+			<artifactId>util.swt</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>

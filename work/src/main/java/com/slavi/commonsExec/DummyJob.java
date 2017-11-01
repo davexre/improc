@@ -71,6 +71,12 @@ public class DummyJob {
 		timeout = Integer.parseInt(pargs.getOption("-n", "1000"));
 		silent = !"0".equals(pargs.getOption("-s", "0"));
 		
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			public void run() {
+				System.out.println("DummyJob shutdown hook.");
+			}
+		}));
+		
 		ThreadPoolExecutor exec = new ThreadPoolExecutor(numThreads + 1, numThreads + 1, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(1));
 		exec.submit(new DummyInput());
 		for (int i = 0; i < numThreads; i++) {

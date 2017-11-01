@@ -20,6 +20,12 @@
 		</encoder>
 	</appender>
 
+	<appender name="STDOUT2" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+ 			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<logger name="uk.org.lidalia.sysoutslf4j.context" level="none" additivity="false" />
 
 	<logger name="my.logger.file" level="all" additivity="false">
@@ -27,6 +33,11 @@
 	</logger>
 
 	<logger name="com.slavi.example.logging.Log4J" level="info" />
+
+	<logger name="dummyLogger" level="info" additivity="false">
+		<appender-ref ref="STDOUT2" />
+		<appender-ref ref="my.appender.file" />
+	</logger>
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

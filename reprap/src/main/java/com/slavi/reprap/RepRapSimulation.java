@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 import com.sun.j3d.loaders.Scene;
 
 public class RepRapSimulation implements RepRapPrinter, Runnable {

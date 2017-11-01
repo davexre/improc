@@ -47,6 +47,7 @@ Setting-up a workspace
 	* ?? Subversive (SVN version control)
 	* ?? Toad Extension for Eclipse
 	* Bash Editor
+	* JSON Editor
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
 	Settings

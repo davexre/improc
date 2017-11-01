@@ -16,7 +16,7 @@ public class TestCommonsExec {
 		Thread thread1 = new Thread(new Runnable() {
 			public void run() {
 				try {
-					System.out.println("Sleep for 2 sec");
+					System.out.println("Sleep for 5 sec");
 					Thread.sleep(5000);
 					System.out.println("killing process");
 					p.destroy();
@@ -31,9 +31,9 @@ public class TestCommonsExec {
 				System.out.println("Process should be killed");
 				while (true)
 					try {
-						p.exitValue();
-						//System.out.println(Integer.toString(p.waitFor()));
-					} catch (IllegalThreadStateException e) {
+						//p.exitValue();
+						System.out.println(Integer.toString(p.waitFor()));
+					} catch (IllegalThreadStateException | InterruptedException e) {
 						//e.printStackTrace();
 						break;
 					}

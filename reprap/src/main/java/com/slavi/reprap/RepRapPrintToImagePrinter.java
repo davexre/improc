@@ -9,8 +9,9 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FileUtils;
+
 import com.slavi.util.Const;
-import com.slavi.util.file.FileUtil;
 
 public class RepRapPrintToImagePrinter implements RepRapPrinter {
 	
@@ -23,7 +24,7 @@ public class RepRapPrintToImagePrinter implements RepRapPrinter {
 	}
 	
 	public void startPrinting(Rectangle2D bounds) throws Exception {
-		FileUtil.removeDirectory(outputDir);
+		FileUtils.deleteQuietly(outputDir);
 		outputDir.mkdirs();
 
 		bi = new BufferedImage(

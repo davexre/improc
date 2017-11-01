@@ -32,7 +32,7 @@ import org.swtchart.ISeries.SeriesType;
 import org.swtchart.ext.InteractiveChart;
 
 import com.slavi.util.Util;
-import com.slavi.util.ui.SwtUtil;
+import com.slavi.util.swt.SwtUtil;
 
 public class PlotComPortLogFile {
 
