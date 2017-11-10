@@ -24,7 +24,7 @@ Saving/restoring bash flags
 * Save/restore single flag
 	f_bak=$-
 	set -f
-	echo $*
+	echo $@
 	if [[ $f_bak != *f* ]]; then
 		set +f
 	fi
@@ -82,6 +82,9 @@ Variables
 
 * default values
 	PARAM1_IP=${1:-'172.0.0.1'}
+* all command line parameters
+	One should use "$@" instead of "$*". The $@ behaves like $* except that when quoted
+	the arguments are broken up properly if there are spaces in them.
 
 * script home
 	SCRIPT_HOME=$(dirname $(readlink -f "${0}"))
@@ -135,7 +138,7 @@ echo "Usage:"
 echo "  $0 -a -bd -c abdc qwe zxc"
 echo "  $0 -abdcabdc qwe zxc"
 echo
-while getopts "abc:d?" OPTNAME $* ; do
+while getopts "abc:d?" OPTNAME "$@" ; do
 	echo "($OPTIND): $OPTNAME = $OPTARG"
 done
 ### Process remaining parameters that are not options
