@@ -30,3 +30,16 @@ Derivatives
 (f(X) * g(X))'	= (f'*g + f*g')
 (f(X) / g(X))'	= (f'*g - f*g') / g^2
 df(X)/dX		= (df(U(X))/dU(X)) * (dU(X)/dX)
+
+Normal distribution
+===================
+https://www.thoughtco.com/normal-distribution-bell-curve-formula-3126278
+
+X - variable
+M - Mean X
+S - Sigma/Standard deviation
+Y - Y axis
+
+Y = e^( ((X-M)^2) / (2* S^2) ) / (S*sqrt(2*pi))
+
+

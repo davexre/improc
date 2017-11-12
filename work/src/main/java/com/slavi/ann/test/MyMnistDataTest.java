@@ -151,9 +151,9 @@ public class MyMnistDataTest {
 				boolean print = index == 0;
 				if (print)
 					for (MyLayer ll : l.layers) {
-						ll.inputError.printM("Input error");
-						ll.output.printM("output");
-						ll.weight.printM("WEIGHT");
+						System.out.println(ll.inputError.toMatlabString("Input_error"));
+						System.out.println(ll.output.toMatlabString("output"));
+						System.out.println(ll.weight.toMatlabString("W"));
 					}
 
 				if (print)

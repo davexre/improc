@@ -1,0 +1,28 @@
+#!/bin/bash
+function findToken() {
+	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
+}
+function extractData() {
+	local end=${2:+$(($2-$1-1))}
+	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
+}
+#DATA_OFFSET_1=$(findToken "___SCRIPT_DATA_SECTION_1___")
+#DATA1=$(extractData $DATA_OFFSET_1)
+#
+#while IFS=$'\n' read -a data ; do
+#	dn=$(dirname "$data")
+#	mkdir -p "$dn"
+#	scp -p "radost@192.168.1.101:\"/home/radost/Pictures/${data}\"" "$data"
+#	#echo "$data"
+#done <<< "$DATA1"
+
+(cat <<- EOF
+	asd
+qwe
+		zxc
+EOF
+) | less
+
+exit
+
+___SCRIPT_DATA_SECTION_1___

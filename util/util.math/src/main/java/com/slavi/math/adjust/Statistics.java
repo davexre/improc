@@ -22,7 +22,8 @@ public class Statistics {
 	public static final int CStatJ			= 0x0001;
 	// Асиметрия и ексцес
 	public static final int CStatAE			= 0x0002;
-	// Стойностите MinX и MaxX
+	// Стойностите MinX и MaxX	// Брой на "добрите", с които е изчислявано.
+
 	public static final int CStatMinMax		= 0x0004;
 	// Стойностите Min(Abs(X)) и Max(Abs(X))
 	public static final int CStatAbs		= 0x0008;
@@ -30,14 +31,16 @@ public class Statistics {
 	public static final int CStatDelta		= 0x0010;
 	// Таблица със начален (M) и централен (D) моменти
 	public static final int CStatMD			= 0x0020;
+	// Стандартно отклонение
+	public static final int CStatStdDev		= 0x0040;
 	// Съобщение 'There is(are) bad values'
-	public static final int CStatErrors		= 0x0040;
+	public static final int CStatErrors		= 0x1000;
 
-	public static final int CStatAll		= CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatErrors;
+	public static final int CStatAll		= CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatStdDev | CStatErrors;
 
-	public static final int CStatShort		= CStatJ | CStatMinMax | CStatErrors;
+	public static final int CStatShort		= CStatJ | CStatMinMax | CStatStdDev | CStatErrors;
 
-	public static final int CStatDetail		= CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatErrors;
+	public static final int CStatDetail		= CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatStdDev | CStatErrors;
 
 	public static final int CStatDefault	= CStatShort;
 
@@ -91,7 +94,7 @@ public class Statistics {
 	/**
 	 * @see #J_Start
 	 */
-	protected double  J_End;
+	protected double J_End;
 
 	protected double sumValues1;
 	protected double sumValues2;
@@ -125,11 +128,12 @@ public class Statistics {
 				AbsMaxX = absValue;
 		}
 		itemsCount++;
-		sumWeight += weight;
-		sumValues1 += value * weight;
-		sumValues2 += value * value * weight;
-		sumValues3 += value * value * value * weight;
-		sumValues4 += value * value * value * value * weight;
+		double tmp;
+		sumWeight  += (tmp  = weight);
+		sumValues1 += (tmp *= value);
+		sumValues2 += (tmp *= value);
+		sumValues3 += (tmp *= value);
+		sumValues4 += (tmp *= value);
 	}
 
 	public void start() {
@@ -255,7 +259,10 @@ public class Statistics {
 	}
 
 	public double getStdDeviation() {
-		return Math.sqrt(D2 / (getItemsCount() - 1));
+		//return Math.sqrt(D2 / (getItemsCount() - 1));
+		return Math.sqrt(
+				(getItemsCount() * sumValues2 - sumValues1 * sumValues1) /
+				(getItemsCount() * (getItemsCount() - 1)));
 	}
 
 	public boolean hasBadValues() {
@@ -271,9 +278,12 @@ public class Statistics {
 
 	public String toString(int style) {
 		try (Formatter f = new Formatter()) {
-			f.format(nameFormatDec, "Average", getAvgValue());
 			f.format(nameFormatInt, "Count", getItemsCount());
 			f.format(nameFormatDec, "B", getB());
+			f.format(nameFormatDec, "Average", getAvgValue());
+			if ((style & CStatStdDev) != 0) {
+				f.format(nameFormatDec, "Std deviation", getStdDeviation());
+			}
 			if ((style & CStatJ) != 0) {
 				f.format(nameFormatDec, "J start", getJ_Start());
 				f.format(nameFormatDec, "J end", getJ_End());
@@ -309,7 +319,9 @@ public class Statistics {
 
 	public static String toString2Header(int style) {
 		StringBuilder b = new StringBuilder();
-		b.append("Average\tCount\tB");
+		b.append("Count\tB\tAverage");
+		if ((style & CStatStdDev) != 0)
+			b.append("\tStd deviation");
 		if ((style & CStatJ) != 0)
 			b.append("\tJ start\tJ end");
 		if ((style & CStatAE) != 0)
@@ -322,9 +334,9 @@ public class Statistics {
 			b.append("\tmax-min");
 		if ((style & CStatMD) != 0) {
 			for (int i = 2; i <= 4; i++)
-				b.append("\tM[" + i + "]");
+				b.append("\tM[").append(i).append("]");
 			for (int i = 2; i <= 4; i++)
-				b.append("\tD[" + i + "]");
+				b.append("\tD[").append(i).append("]");
 		}
 		if ((style & CStatErrors) != 0)
 			b.append("\tResult");
@@ -337,22 +349,30 @@ public class Statistics {
 
 	public String toString2(int style) {
 		StringBuilder b = new StringBuilder();
-		b.append(Double.toString(this.getAvgValue()) + "\t" + Double.toString(this.getItemsCount()) + "\t" + Double.toString(this.B));
+		b.append(Double.toString(this.getItemsCount()));
+		b.append("\t").append(Double.toString(this.B));
+		b.append("\t").append(Double.toString(this.getAvgValue()));
+		if ((style & CStatStdDev) != 0)
+			b.append("\t").append(Double.toString(this.getStdDeviation()));
 		if ((style & CStatJ) != 0)
-			b.append("\t" + Double.toString(this.J_Start) + "\t" + Double.toString(this.J_End));
+			b.append("\t").append(Double.toString(this.J_Start))
+			.append("\t").append(Double.toString(this.J_End));
 		if ((style & CStatAE) != 0)
-			b.append("\t" + Double.toString(this.A) + "\t" + Double.toString(this.E));
+			b.append("\t").append(Double.toString(this.A))
+			.append("\t").append(Double.toString(this.E));
 		if ((style & CStatMinMax) != 0)
-			b.append("\t" + Double.toString(this.MinX) + "\t" + Double.toString(this.MaxX));
+			b.append("\t").append(Double.toString(this.MinX))
+			.append("\t").append(Double.toString(this.MaxX));
 		if ((style & CStatAbs) != 0)
-			b.append("\t" + Double.toString(this.AbsMinX) + "\t" + Double.toString(this.AbsMaxX));
+			b.append("\t").append(Double.toString(this.AbsMinX))
+			.append("\t").append(Double.toString(this.AbsMaxX));
 		if ((style & CStatDelta) != 0)
-			b.append("\t" + Double.toString(this.MaxX - this.MinX));
+			b.append("\t").append(Double.toString(this.MaxX - this.MinX));
 		if ((style & CStatMD) != 0) {
 			for (int i = 2; i <= 4; i++)
-				b.append("\t" + Double.toString(getM(i)));
+				b.append("\t").append(Double.toString(getM(i)));
 			for (int i = 2; i <= 4; i++)
-				b.append("\t" + Double.toString(getD(i)));
+				b.append("\t").append(Double.toString(getD(i)));
 		}
 		if (((style & CStatErrors) != 0) && hasBadValues())
 			b.append("\tFAILED");
