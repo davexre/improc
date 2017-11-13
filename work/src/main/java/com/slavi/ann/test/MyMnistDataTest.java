@@ -133,6 +133,10 @@ public class MyMnistDataTest {
 		}
 	}
 
+	void printM(Matrix m, String desc) {
+		System.out.println(m.toMatlabString(desc));
+	}
+	
 	void doIt2() throws Exception {
 		int sizeInput = 15;
 		int sizeOutput = 4;
@@ -150,14 +154,15 @@ public class MyMnistDataTest {
 					index++) {
 				boolean print = index == 0;
 				if (print)
-					for (MyLayer ll : l.layers) {
-						System.out.println(ll.inputError.toMatlabString("Input_error"));
-						System.out.println(ll.output.toMatlabString("output"));
-						System.out.println(ll.weight.toMatlabString("W"));
+					for (int i = 0; i < l.layers.size(); i++) {
+						MyLayer ll = l.layers.get(i);
+						printM(ll.inputError, ("IER " + i));
+						System.out.println(ll.output.toMatlabString("OUT " + i));
+						//System.out.println(ll.weight.toMatlabString("W"));
 					}
 
 				if (print)
-					System.out.println(index);
+					System.out.println("At index " + index);
 				for (int i = 0; i < input.getVectorSize(); i++) {
 					input.setVectorItem(i, index == i ? 0.95 : 0.05);
 				}
@@ -165,9 +170,9 @@ public class MyMnistDataTest {
 					target.setVectorItem(i, ((index + 1) & (1 << i)) == 0 ? 0.05 : 0.95);
 				Matrix output = l.feedForward(input);
 				if (print) {
-					System.out.println(input.toMatlabString("I"));
-					System.out.println(target.toMatlabString("T"));
-					System.out.println(output.toMatlabString("O"));
+					System.out.println(input.toMatlabString("Input"));
+					System.out.println(target.toMatlabString("Target"));
+					System.out.println(output.toMatlabString("Output"));
 				}
 				output.mSub(target, error);
 				if (print)

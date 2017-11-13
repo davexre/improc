@@ -98,13 +98,14 @@ public class Matrix {
 	public String toOneLineString() {
 		StringBuilder result = new StringBuilder();
 		for (int j = 0; j < sizeY; j++) {
+			if (j != 0)
+				result.append(";");
 			for (int i = 0; i < sizeX; i++) {
 				if (i != 0)
 					result.append(" ");
 				result.append(String.format(Locale.US, "%1$10.4f",
 						new Object[] { new Double(getItem(i, j)) } ));
 			}
-			result.append("");
 		}
 		return result.toString();
 	}

@@ -122,10 +122,10 @@ public class MatrixStatistics {
 		for (int i = m.getVectorSize() - 1; i >= 0; i--) {
 			double value = m.getVectorItem(i);
 			double tmp = weight;
-			sumValues1.setVectorItem(i, tmp *= value);
-			sumValues2.setVectorItem(i, tmp *= value);
-			sumValues3.setVectorItem(i, tmp *= value);
-			sumValues4.setVectorItem(i, tmp *= value);
+			sumValues1.setVectorItem(i, sumValues1.getVectorItem(i) + (tmp *= value));
+			sumValues2.setVectorItem(i, sumValues2.getVectorItem(i) + (tmp *= value));
+			sumValues3.setVectorItem(i, sumValues3.getVectorItem(i) + (tmp *= value));
+			sumValues4.setVectorItem(i, sumValues4.getVectorItem(i) + (tmp *= value));
 		}
 	}
 	
