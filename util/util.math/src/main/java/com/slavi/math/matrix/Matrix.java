@@ -361,8 +361,23 @@ public class Matrix {
 	}
 
 	/**
+	 * Performs an element by element abs and
+	 * stores the result in dest matrix. If the dest matrix is of incorrect size
+	 * it will be resized to the same size as the source matrix. The formula is:<br>
+	 * <tt>dest[i, j] = abs(this[i, j])<br>
+	 * </tt>
+	 * Allows: this == dest
+	 */
+	public void mAbs(Matrix dest) {
+		dest.resize(sizeX, sizeY);
+		for (int i = sizeX - 1; i >= 0; i--)
+			for (int j = sizeY - 1; j >= 0; j--)
+				dest.setItem(i, j, Math.abs(getItem(i, j)));
+	}
+
+	/**
 	 * Returns the dot product of the matrix. The formula is:<br>
-	 * <tt>Result = Sum( .getItem(i, j] )<br>
+	 * <tt>Result = Sum( this[i, j] * second[i, j] )<br>
 	 * </tt>
 	 */
 	public double dotProduct(Matrix second) {
@@ -372,7 +387,7 @@ public class Matrix {
 		double sum = 0;
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				sum += getItem(i, j);
+				sum += getItem(i, j) * second.getItem(i, j);
 		return sum;
 	}
 

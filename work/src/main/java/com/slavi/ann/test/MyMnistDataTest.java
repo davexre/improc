@@ -134,7 +134,8 @@ public class MyMnistDataTest {
 	}
 
 	void printM(Matrix m, String desc) {
-		System.out.println(m.toMatlabString(desc));
+		//System.out.println(m.toMatlabString(desc));
+		m.printM(desc);
 	}
 	
 	void doIt2() throws Exception {
@@ -147,8 +148,9 @@ public class MyMnistDataTest {
 		Matrix target = new Matrix(sizeOutput, 1);
 
 		l.eraseMemory();
-		for (int epoch = 0; epoch < 4; epoch++) {
+		for (int epoch = 0; epoch < 200; epoch++) {
 			System.out.println("---------------------\nEPOCH "  + epoch);
+			MatrixStatistics ms = new MatrixStatistics();
 			for (int index = 0;
 					index < sizeInput;
 					index++) {
@@ -156,9 +158,9 @@ public class MyMnistDataTest {
 				if (print)
 					for (int i = 0; i < l.layers.size(); i++) {
 						MyLayer ll = l.layers.get(i);
-						printM(ll.inputError, ("IER " + i));
-						System.out.println(ll.output.toMatlabString("OUT " + i));
-						//System.out.println(ll.weight.toMatlabString("W"));
+						printM(ll.inputError, "IER " + i);
+						printM(ll.output, "OUT " + i);
+						printM(ll.weight, "W");
 					}
 
 				if (print)
@@ -170,24 +172,27 @@ public class MyMnistDataTest {
 					target.setVectorItem(i, ((index + 1) & (1 << i)) == 0 ? 0.05 : 0.95);
 				Matrix output = l.feedForward(input);
 				if (print) {
-					System.out.println(input.toMatlabString("Input"));
-					System.out.println(target.toMatlabString("Target"));
-					System.out.println(output.toMatlabString("Output"));
+					printM(input, "Input");
+					printM(target, "Target");
+					printM(output, "Output");
 				}
 				output.mSub(target, error);
 				if (print)
-					System.out.println(error.toMatlabString("E1"));
+					printM(error, "E1");
 				//Matrix inputError =
+				
+				error.termAbs(output);
+				ms.addValue(output);
 				l.backPropagate(error);
-				//System.out.println(inputError.toMatlabString("IE"));
+				//printM(inputError, "IE");
 				output = l.feedForward(input);
 				output.mSub(target, error);
 				if (print)
-					System.out.println(error.toMatlabString("E2"));
-
-
+					printM(error, "E2");
 			}
 			//System.out.println(l.weight.toMatlabString("W"));
+			ms.stop();
+			System.out.println(ms.toString());
 		}
 
 	}
