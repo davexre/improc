@@ -1,5 +1,7 @@
 package com.slavi.ann.test;
 
+import java.util.Random;
+
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 
@@ -48,7 +50,14 @@ public class MyLayer {
 			B <= value && value <= A;
 	}
 
-	public void eraseWeights_NO() {
+	public void eraseWeights_0() {
+		Random r = new Random();
+		for (int i = weight.getVectorSize() - 1; i >= 0; i--) {
+			weight.setVectorItem(i, r.nextDouble());
+		}
+	}
+	
+	public void eraseWeights_1() {
 		if (weight.getSizeX() < weight.getSizeY()) {
 			throw new Error();
 		}
@@ -64,10 +73,7 @@ public class MyLayer {
 		}
 	}
 
-	public void eraseWeights() {
-		if (weight.getSizeX() < weight.getSizeY()) {
-			throw new Error();
-		}
+	public void eraseWeights_2() {
 		fillWeight(weight, 0.5);
 	}
 
@@ -89,7 +95,7 @@ public class MyLayer {
 	public void eraseMemory() {
 		//weight.makeR(0.5);
 		//weight.make0();
-		eraseWeights();
+		eraseWeights_2();
 		inputError.make0();
 		maxInputError.make0();
 		output.make0();

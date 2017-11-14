@@ -74,13 +74,17 @@ function log_error() {
 
 ##################################################################
 # STRING Processing
-function trim() {
+function trim2() {
 	local f_bak=$-
 	set -f
-	echo $*
+	echo $@
 	if [[ $f_bak != *f* ]]; then
 		set +f
 	fi
+}
+
+function trim() {
+	echo "$@" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
 }
 
 ##################################################################

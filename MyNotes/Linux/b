@@ -1,28 +1,61 @@
 #!/bin/bash
+
 function findToken() {
 	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
 }
+
 function extractData() {
 	local end=${2:+$(($2-$1-1))}
 	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
 }
-#DATA_OFFSET_1=$(findToken "___SCRIPT_DATA_SECTION_1___")
-#DATA1=$(extractData $DATA_OFFSET_1)
-#
-#while IFS=$'\n' read -a data ; do
-#	dn=$(dirname "$data")
-#	mkdir -p "$dn"
-#	scp -p "radost@192.168.1.101:\"/home/radost/Pictures/${data}\"" "$data"
-#	#echo "$data"
-#done <<< "$DATA1"
 
-(cat <<- EOF
-	asd
-qwe
-		zxc
-EOF
-) | less
+function make_cfg() {
+	for i in "${!cfg[@]}" ; do
+		echo "$i=${cfg[$i]}"
+	done
+}
+
+function generate_script_for_save() {
+	SCRIPT_TOKEN=$(findToken '___SCRIPT___')
+	head -n $SCRIPT_TOKEN "$0"
+	make_cfg
+}
+
+function save() {
+	local script=$(save)
+	echo "$script" > "$0"
+}
+
+function trim() {
+	echo "$@" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
+function read_cfg() {
+	unset cfg
+	declare -Ag cfg
+	local keys vals
+	local SCRIPT_TOKEN=$(findToken '___SCRIPT___')
+	local DATA=$(extractData SCRIPT_TOKEN)
+	readarray -t keys < <(echo "$DATA" | cut -d '=' -f 1)
+	readarray -t vals < <(echo "$DATA" | cut -d '=' -f 2-)
+	for i in "${!keys[@]}" ; do
+		cfg[$(trim "${keys[$i]}")]=$(trim $(echo -e "${vals[$i]}"))
+	done
+}
+
+read_cfg
+make_cfg
+
+#generate_script_for_save
+
+#DATA=$(make_cfg)
+#echo "$DATA"
+
+
 
 exit
 
-___SCRIPT_DATA_SECTION_1___
+___SCRIPT___
+ asd = Some \t data "${vals[@]}"
+   qwe = Some = data  
+

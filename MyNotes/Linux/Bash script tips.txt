@@ -79,6 +79,7 @@ Variables
 
 * Local variable
 	local myvar=some value
+	local myvar1 myvar2
 
 * default values
 	PARAM1_IP=${1:-'172.0.0.1'}

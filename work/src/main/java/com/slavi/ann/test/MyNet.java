@@ -17,7 +17,7 @@ public class MyNet {
 		this.sizeInput = sizeInput;
 		Constructor<? extends MyLayer> c = layerClass.getConstructor(int.class, int.class, double.class);
 		for (int i = 1; i < sizes.length; i++) {
-			layers.add(c.newInstance(sizeInput, sizes[i], 1d/i));
+			layers.add(c.newInstance(sizeInput, sizes[i], 1d));
 			sizeInput = sizes[i];
 		}
 		this.sizeOutput = sizeInput;
