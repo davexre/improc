@@ -159,17 +159,6 @@ function trim {
 }
 
 #
-# Dummy function to provide usage instructions.
-# Override this function if required.
-#
-show_usage () {
-   
-    MESSAGE="$1" 
-    echo "$MESSAGE"
-    exit 1
-}
-
-#
 # Checks if a variable is set to "y" or "yes".
 # Usefull for detecting if a configurable option is set or not.
 #

@@ -1,6 +1,10 @@
-Bash manual
+WEB Rsources
 ===========
+* Bash manual: 
 http://www.gnu.org/software/bash/manual/bashref.html
+
+* Sed documentation
+http://www.grymoire.com/Unix/Sed.html
 
 Bash libraries
 ==============
@@ -199,7 +203,7 @@ function onBashErrorHandler() {
 		1 | WARN)
 			echo "Warning in ${1}:${2}. Exit code is ${3} running ${4}"
 			;;
-		2 | EXIT)
+		2 | EXIT | *)
 			echo "Error in ${1}:${2}. Exit code is ${3} running ${4}"
 			exit 1
 			;;
@@ -207,7 +211,7 @@ function onBashErrorHandler() {
 }
 BASH_ERROR_LEVEL=IGNORE
 set -E	# This is needed to have the same trap in sub-shells and shell function
-set -u	# This is to treap unset parameters/variables as errors
+set -u	# This is to trap unset parameters/variables as errors
 trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
 
 BASH_ERROR_LEVEL=IGNORE
@@ -368,4 +372,3 @@ cmd 3>&1 1>&2 2>&3			Swap stdout and stderr of cmd.
 cmd > >(cmd1) 2> >(cmd2)	Send stdout of cmd to cmd1 and stderr of cmd to cmd2.
 cmd1 | cmd2 | cmd3 | cmd4
 echo ${PIPESTATUS[@]}		Find out the exit codes of all piped commands.
-

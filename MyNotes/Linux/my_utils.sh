@@ -1,16 +1,7 @@
 #!/bin/bash
-
-declare -r TRUE=0
-declare -r FALSE=1
-
 ##################################################################
-
-function script_home() {
-	local SCRIPT_HOME
-	SCRIPT_HOME=$(realpath "$0")
-	SCRIPT_HOME=$(dirname "$SCRIPT_HOME")
-	echo "$SCRIPT_HOME"
-}
+# This file should be sourced from uther scripts:
+#	source my_utils.sh
 
 ##################################################################
 ### LOGGING
@@ -110,26 +101,6 @@ function makeError() {
 }
 
 ##################################################################
-
-function onBashErrorHandler() {
-	case "${BASH_ERROR_LEVEL}" in
-		0 | IGNORE | NONE)
-			;;
-		1 | WARN)
-			echo "Warning in ${1}:${2}. Exit code is ${3} running ${4}"
-			;;
-		2 | EXIT)
-			echo "Error in ${1}:${2}. Exit code is ${3} running ${4}"
-			echo "Aborting..."
-			exit 1
-			;;
-	esac
-}
-BASH_ERROR_LEVEL=EXIT
-set -E		# This is needed to have the same trap in sub-shells and shell function
-trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
-
-##################################################################
 # Purpose: Return true if script is executed by the root user
 # Arguments: none
 # Return: True or False
@@ -160,10 +131,130 @@ EOF
 }
 
 ##################################################################
+### Bash file processing/configuration at the end of scrip
+##################################################################
+
+##################################################################
+# Searches the $0 file for marker $1 and returns the line number.
+# Usage: local myTokenAtLine=$(findToken "___SOME_MARKER___")
+# The script should contain the token ___SOME_MARKER___ somewhere 
+# at the end of the file. Remember to put an "exit" as last shell command
+# prior the token.
+function findToken() {
+	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
+}
+
+##################################################################
+# Extracts a data segment in $0.
+# Usage: 
+#	local myData=$(extractData "___DATA_1_MARKER___")
+#	local myData=$(extractData "___DATA_1_MARKER___" "___DATA_2_MARKER___")
+function extractData() {
+	local begin=$(findToken "$1")
+	local end=${2:+$(findToken "$2")}
+	end=${end:+$(($end-$begin-1))}
+	tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
+}
+
+##################################################################
+# Extracts a data segment in $0.
+# Usage: 
+#	local myDataLoc1=$(findToken "___DATA_1_MARKER___")
+#	local myDataLoc2=$(findToken "___DATA_2_MARKER___")
+#	local myData=$(extractDataLines $myDataLoc1)
+#	local myData=$(extractDataLines $myDataLoc1 $myDataLoc2)
+function extractDataLines() {
+	local begin="$1"
+	local end=${2:+$(($2-$begin-1))}
+	tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
+}
+
+##################################################################
+# Modifies the current script by replacing a data segment. See extractData
+# Usage:
+#	myData=$(echo -e "my multi-\nline data")
+#	replaceData "$myData" "___DATA_1_MARKER___"
+#	replaceData "$myData" "___DATA_1_MARKER___" "___DATA_2_MARKER___"
+function replaceData() {
+	local script=$(
+		local begin=$(findToken "$2")
+		head -n $begin "$0"
+		echo "$1"
+		if [[ -n $3 ]]; then
+			tail -n +$(findToken "$3") "$0"
+		fi
+	)
+	echo "$script" > "$0"
+}
+
+##################################################################
+# Property files-like configuration located in a data segment of 
+# the script. The configuration is read in a global variable called
+# cfg. The variable is associative array. Individual properties 
+# can be accessed by "${cfg[myPropertyKey]}". Both property keys
+# and values are trimmes. See extractData.
+# Usage:
+#	read_cfg "___DATA_1_MARKER___"
+#	read_cfg "___DATA_1_MARKER___" "___DATA_2_MARKER___"
+function read_cfg() {
+	unset cfg
+	declare -Ag cfg
+	local keys vals
+	local DATA=$(extractData "$1" "$2")
+	readarray -t keys < <(echo "$DATA" | cut -d '=' -f 1)
+	readarray -t vals < <(echo "$DATA" | cut -d '=' -f 2-)
+	for i in "${!keys[@]}" ; do
+		cfg[$(trim "${keys[$i]}")]=$(trim $(echo -e "${vals[$i]}"))
+	done
+}
+
+##################################################################
+# Save the data in the global variable (associative array) called cfg.
+# See read_cfg.
+# Usage:
+#	save_cfg "___DATA_1_MARKER___"
+#	save_cfg "___DATA_1_MARKER___" "___DATA_2_MARKER___"
+function save_cfg() {
+	local cfg_data=$(
+		for i in "${!cfg[@]}" ; do
+			echo "$i=${cfg[$i]}"
+		done
+	)
+	replaceData "$cfg_data" "$1" "$2"
+}
+
+##################################################################
+# Error handling in bash
+# Usage: 
+#	BASH_ERROR_LEVEL=IGNORE
+#	set -E	# This is needed to have the same trap in sub-shells and shell function
+#	set -u	# This is to trap unset parameters/variables as errors
+#	trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
+function onBashErrorHandler() {
+	case "${BASH_ERROR_LEVEL}" in
+		0 | IGNORE | NONE)
+			;;
+		1 | WARN)
+			echo "Warning in ${1}:${2}. Exit code is ${3} running ${4}"
+			;;
+		2 | EXIT | *)
+			echo "Error in ${1}:${2}. Exit code is ${3} running ${4}"
+			echo "Aborting..."
+			exit 255
+			;;
+	esac
+}
+
+##################################################################
 # Init
 ##################################################################
 
+set -Eu
+BASH_ERROR_LEVEL=EXIT
+trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
+declare -r TRUE=0
+declare -r FALSE=1
 log_stdout
 
-false
-
+SCRIPT_HOME=$(realpath "$0")
+SCRIPT_HOME=$(dirname "$SCRIPT_HOME")

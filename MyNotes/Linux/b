@@ -1,57 +1,34 @@
 #!/bin/bash
 
-function findToken() {
-	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
-}
+source my_utils.sh
 
-function extractData() {
-	local end=${2:+$(($2-$1-1))}
-	tail -n +$(($1+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
-}
-
-function make_cfg() {
-	for i in "${!cfg[@]}" ; do
-		echo "$i=${cfg[$i]}"
-	done
-}
-
-function generate_script_for_save() {
-	SCRIPT_TOKEN=$(findToken '___SCRIPT___')
-	head -n $SCRIPT_TOKEN "$0"
-	make_cfg
-}
-
-function save() {
-	local script=$(save)
-	echo "$script" > "$0"
-}
-
-function trim() {
-	echo "$@" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
-}
-
-function read_cfg() {
-	unset cfg
-	declare -Ag cfg
-	local keys vals
-	local SCRIPT_TOKEN=$(findToken '___SCRIPT___')
-	local DATA=$(extractData SCRIPT_TOKEN)
-	readarray -t keys < <(echo "$DATA" | cut -d '=' -f 1)
-	readarray -t vals < <(echo "$DATA" | cut -d '=' -f 2-)
-	for i in "${!keys[@]}" ; do
-		cfg[$(trim "${keys[$i]}")]=$(trim $(echo -e "${vals[$i]}"))
-	done
-}
-
-read_cfg
-make_cfg
+#read_cfg '___SCRIPT___' '___END___'
+#cfg[qqq]="asd qwe"
+#save_cfg '___SCRIPT___' '___END___'
 
 #generate_script_for_save
-
 #DATA=$(make_cfg)
 #echo "$DATA"
 
 
+declare -A c
+# To make new escape codes use: printf "%q\n" "$(tput setaf 1)"
+# Use "man tput" and "man terminfo" to get parameters for tput
+c[black]=$'\E[30m'
+c[red]=$'\E[31m'
+c[green]=$'\E[32m'
+c[yellow]=$'\E[33m'
+c[blue]=$'\E[34m'
+c[magenta]=$'\E[35m'
+c[cyan]=$'\E[36m'
+c[white]=$'\E[37m'
+c[reset]=$'\E(B\E[m'
+
+#echo "This is ${c[red]}important${c[white]} text."
+
+COL1=$(tput setaf 5)$(tput setab 3)
+COL2=$(tput sgr0)
+echo "This is ${COL1}important${COL2} text."
 
 exit
 
@@ -59,3 +36,5 @@ ___SCRIPT___
  asd = Some \t data "${vals[@]}"
    qwe = Some = data  
 
+___END___
+eeee
