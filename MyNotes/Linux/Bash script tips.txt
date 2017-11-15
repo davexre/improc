@@ -17,6 +17,7 @@ $XDG_RUNTIME_DIR	-> Points to a folder mounted in the RAM and accessible only by
 $-					-> Currently set flags in bash, see set --help
 $DISPLAY
 $LINES				-> Number of lines in current terminal
+$EUID				-> Effective user id. If running as root EUID is 0. Same as $(id -u)
 
 Saving/restoring bash flags
 ===========================

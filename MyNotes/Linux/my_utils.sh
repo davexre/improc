@@ -44,23 +44,23 @@ function log_severity() {
 }
 
 function log() {
-	log_severity "" "$*"
+	log_severity "      " "$*"
 }
 
 function log_debug() {
-	log_severity " DEBUG" "$*"
+	log_severity "${COLOR[cyan]} DEBUG${COLOR[reset]}" "$*"
 }
 
 function log_warn() {
-	log_severity " WARN " "$*"
+	log_severity "${COLOR[yellow]} WARN ${COLOR[reset]}" "$*"
 }
 
 function log_info() {
-	log_severity " INFO " "$*"
+	log_severity "${COLOR[blue]} INFO ${COLOR[reset]}" "$*"
 }
 
 function log_error() {
-	log_severity " ERROR" "$*"
+	log_severity "${COLOR[red]} ERROR${COLOR[reset]}" "$*"
 }
 
 ##################################################################
@@ -75,7 +75,7 @@ function trim2() {
 }
 
 function trim() {
-	echo "$@" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+	echo -n "$@" | sed -ze 's/^[[:space:]]*//g; s/[[:space:]]*$//g'
 }
 
 ##################################################################
@@ -93,19 +93,17 @@ function default_string() {
 ##################################################################
 
 function execQuiet() {
-	[[ "$1" != "" ]] && "$@" >& /dev/null
-}
-
-function makeError() {
-	false
+	local exitCode=0
+	([[ "$1" != "" ]] && "$@" >& /dev/null) || exitCode=$?
+	#return $exitCode
 }
 
 ##################################################################
-# Purpose: Return true if script is executed by the root user
-# Arguments: none
-# Return: True or False
+# Purpose: Returns exit code 0 if script is executed by the root user
+# Return: exit code 0 -> root, 1->not root
+# Usage: is_root && echo root || echo not root
 function is_root() {
-	[ $(id -u) -eq 0 ] && return $TRUE || return $FALSE
+	[[ $(id -u) -eq 0 ]] && return 1 || return 0
 }
 
 ##################################################################
@@ -199,12 +197,13 @@ function replaceData() {
 function read_cfg() {
 	unset cfg
 	declare -Ag cfg
-	local keys vals
+	local keys vals v
 	local DATA=$(extractData "$1" "$2")
 	readarray -t keys < <(echo "$DATA" | cut -d '=' -f 1)
 	readarray -t vals < <(echo "$DATA" | cut -d '=' -f 2-)
 	for i in "${!keys[@]}" ; do
-		cfg[$(trim "${keys[$i]}")]=$(trim $(echo -e "${vals[$i]}"))
+		v=$(echo -e "${vals[$i]}")
+		cfg[$(trim "${keys[$i]}")]=$(trim "$v")
 	done
 }
 
@@ -217,7 +216,10 @@ function read_cfg() {
 function save_cfg() {
 	local cfg_data=$(
 		for i in "${!cfg[@]}" ; do
-			echo "$i=${cfg[$i]}"
+			#local v=$(echo -n "${cfg[$i]}" | sed -rze 's/(\r)|(\n)|(\r\n)|(\n\r)/\\n/g')
+			#local v=$(printf '%q' "${cfg[$i]}" | sed -re 's/^\$?'"'(.*)'"'$/\1/; s/\\([][$\ ])/\1/')
+			local v=$(printf '%q' "${cfg[$i]}" | sed -re 's/^\$?'"'(.*)'"'$/\1/; s/\\([][$\'"'"' ])/\1/')
+			echo "$i = $v"
 		done
 	)
 	replaceData "$cfg_data" "$1" "$2"
@@ -246,14 +248,73 @@ function onBashErrorHandler() {
 }
 
 ##################################################################
+# Set bash option (shopt) and return it's previous value.
+# Usage: 
+#	local myBak=$(setBashOption nocasematch 1)
+#	setBashOption nocasematch $myBak
+function setBashOption() {
+	local val bak='1'
+	shopt -q $1 || bak='0'
+	case $2 in 
+		1 | Y | y | yes | YES | T | TRUE | t | true | -s)
+			val='-s'
+			;;
+		*)
+			val='-u'
+			;;
+	esac
+	shopt $val $1
+	echo $bak
+}
+
+##################################################################
+# Enable/disable colors
+# Usage: 1-> enable colors 0->disable
+#	colors 1 
+function colors() {
+	declare -Ag COLOR
+	# To make new escape codes use: printf "%q\n" "$(tput setaf 1)"
+	# Use "man tput" and "man terminfo" to get parameters for tput
+	COLOR[black]=$'\E[30m'
+	COLOR[red]=$'\E[31m'
+	COLOR[green]=$'\E[32m'
+	COLOR[yellow]=$'\E[33m'
+	COLOR[blue]=$'\E[34m'
+	COLOR[magenta]=$'\E[35m'
+	COLOR[cyan]=$'\E[36m'
+	COLOR[white]=$'\E[37m'
+	COLOR[reset]=$'\E(B\E[m'
+	
+	COLOR[0]="${COLOR[reset]}"
+	COLOR[1]="${COLOR[red]}"
+	COLOR[2]="${COLOR[green]}"
+	COLOR[3]="${COLOR[yellow]}"
+	COLOR[4]="${COLOR[blue]}"
+	COLOR[5]="${COLOR[magenta]}"
+	COLOR[6]="${COLOR[cyan]}"
+	COLOR[7]="${COLOR[white]}"
+	COLOR[8]="${COLOR[black]}"
+
+	case $1 in 
+		1 | Y | y | yes | YES | T | TRUE | t | true | -s)
+			;;
+		*)
+			for i in "${!COLOR[@]}" ; do
+				COLOR["$i"]=''
+			done
+			;;
+	esac
+}
+
+##################################################################
 # Init
 ##################################################################
 
-set -Eu
+set -E
 BASH_ERROR_LEVEL=EXIT
 trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
-declare -r TRUE=0
-declare -r FALSE=1
+
+colors 1
 log_stdout
 
 SCRIPT_HOME=$(realpath "$0")

@@ -11,24 +11,17 @@ source my_utils.sh
 #echo "$DATA"
 
 
-declare -A c
-# To make new escape codes use: printf "%q\n" "$(tput setaf 1)"
-# Use "man tput" and "man terminfo" to get parameters for tput
-c[black]=$'\E[30m'
-c[red]=$'\E[31m'
-c[green]=$'\E[32m'
-c[yellow]=$'\E[33m'
-c[blue]=$'\E[34m'
-c[magenta]=$'\E[35m'
-c[cyan]=$'\E[36m'
-c[white]=$'\E[37m'
-c[reset]=$'\E(B\E[m'
+#log_warn This is a message
+#log_debug This is a message
+#log_info This is a message
+#log_error This is a message
+#log This is a message
 
-#echo "This is ${c[red]}important${c[white]} text."
+#execQuiet aaals -la
+is_root && echo root || echo not root
 
-COL1=$(tput setaf 5)$(tput setab 3)
-COL2=$(tput sgr0)
-echo "This is ${COL1}important${COL2} text."
+
+#echo $EUID
 
 exit
 
