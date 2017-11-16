@@ -160,6 +160,28 @@ public class SymmetricMatrix {
 		m[((atX * (atX + 1)) >> 1) + atY] = aValue;
 	}
 
+	public double itemAdd(int atX, int atY, double aValue) {
+		if (atX < atY) {
+			int tmp = atX;
+			atX = atY;
+			atY = tmp;
+		}
+		if (atY < 0 || atY >= sizeM)
+			throw new IndexOutOfBoundsException();
+		return m[((atX * (atX + 1)) >> 1) + atY] += aValue;
+	}
+
+	public double itemMul(int atX, int atY, double aValue) {
+		if (atX < atY) {
+			int tmp = atX;
+			atX = atY;
+			atY = tmp;
+		}
+		if (atY < 0 || atY >= sizeM)
+			throw new IndexOutOfBoundsException();
+		return m[((atX * (atX + 1)) >> 1) + atY] *= aValue;
+	}
+
 	/**
 	 * Returns the size of the SymmetricMatrix as a vector
 	 * 
@@ -204,6 +226,14 @@ public class SymmetricMatrix {
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
 		m[aIndex] = aValue;
+	}
+
+	public double vectorItemAdd(int aIndex, double aValue) {
+		return m[aIndex] += aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
+	}
+
+	public double vectorItemMul(int aIndex, double aValue) {
+		return m[aIndex] *= aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
 	/**
@@ -677,26 +707,27 @@ public class SymmetricMatrix {
 				A = getItem(i, i);
 			}
 
+			A = 1.0 / A;
 			for (int j = 0; j < sizeM; j++)
 				if (i != j) {
-					double B = getItem(j, i) / A;
+					double B = getItem(j, i) * A;
 					for (int k = j; k < sizeM; k++)
 						if (k != i) {
 							if (k < i)
-								setItem(j, k, getItem(j, k) + B * getItem(i, k));
+								itemAdd(j, k,  B * getItem(i, k));
 							else
-								setItem(j, k, getItem(j, k) - B * getItem(i, k));
+								itemAdd(j, k, -B * getItem(i, k));
 						}
 				}
 
 			for (int j = 0; j < sizeM; j++)
 				if (i != j) {
 					if (i > j)
-						setItem(i, j, -getItem(i, j) / A);
+						itemMul(i, j, -A);
 					else
-						setItem(i, j, getItem(i, j) / A);
+						itemMul(i, j,  A);
 				}
-			setItem(i, i, 1 / A);
+			setItem(i, i, A);
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {

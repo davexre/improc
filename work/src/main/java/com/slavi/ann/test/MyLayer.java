@@ -161,10 +161,10 @@ public class MyLayer {
 			r = scale * error.getVectorItem(j) * r * (1 - r);
 			for (int i = getSizeInput() -1; i >= 0; i--) {
 				double dw = r * input.getVectorItem(i) * learningRate;
-				tmpW.setItem(i, j, tmpW.getItem(i, j) + Math.abs(dw));
-				sumDW.setItem(i, j, sumDW.getItem(i, j) + dw);
-				inputError.setVectorItem(i, inputError.getVectorItem(i) + r * weight.getItem(i, j));
-				weight.setItem(i, j, weight.getItem(i, j) - dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+				tmpW.itemAdd(i, j, Math.abs(dw));
+				sumDW.itemAdd(i, j, dw);
+				inputError.vectorItemAdd(i, r * weight.getItem(i, j));
+				weight.itemAdd(i, j, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 			}
 		}
 		maxInputError.mMaxAbs(inputError, maxInputError);

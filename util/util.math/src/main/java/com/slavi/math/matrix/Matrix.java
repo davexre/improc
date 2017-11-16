@@ -234,6 +234,20 @@ public class Matrix {
 		m[atX + atY * sizeX] = aValue;
 	}
 
+	public double itemAdd(int atX, int atY, double aValue) {
+		if (atX < 0 || atX >= sizeX ||
+				atY < 0 || atY >= sizeY)
+				throw new IndexOutOfBoundsException();
+		return m[atX + atY * sizeX] += aValue;
+	}
+
+	public double itemMul(int atX, int atY, double aValue) {
+		if (atX < 0 || atX >= sizeX ||
+				atY < 0 || atY >= sizeY)
+				throw new IndexOutOfBoundsException();
+		return m[atX + atY * sizeX] *= aValue;
+	}
+
 	/**
 	 * Returns the size of the matrix as a vector.
 	 * @see Matrix#getVectorItem(int)
@@ -268,6 +282,14 @@ public class Matrix {
 	 */
 	public void setVectorItem(int aIndex, double aValue) {
 		m[aIndex] = aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
+	}
+
+	public double vectorItemAdd(int aIndex, double aValue) {
+		return m[aIndex] += aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
+	}
+
+	public double vectorItemMul(int aIndex, double aValue) {
+		return m[aIndex] *= aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
 	/**
@@ -338,7 +360,7 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.setItem(i, j, getItem(i, j) + second.getItem(i, j));
+				dest.itemAdd(i, j, second.getItem(i, j));
 	}
 
 	/**
@@ -448,7 +470,7 @@ public class Matrix {
 	public void rMul(double aValue) {
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				setItem(i, j, getItem(i, j) * aValue);
+				itemMul(i, j, aValue);
 	}
 
 	/**
@@ -860,7 +882,7 @@ public class Matrix {
 	 */
 	public void mulX(int atX, double D) {
 		for (int j = sizeY - 1; j >= 0; j--)
-			setItem(atX, j, getItem(atX, j) * D);
+			itemMul(atX, j, D);
 	}
 
 	/**
@@ -868,7 +890,7 @@ public class Matrix {
 	 */
 	public void mulY(int atY, double D) {
 		for (int i = sizeX - 1; i >= 0; i--)
-			setItem(i, atY, getItem(i, atY) * D);
+			itemMul(i, atY, D);
 	}
 
 	/**
@@ -879,7 +901,7 @@ public class Matrix {
 	 */
 	public void sumX(int atX1, int atX2) {
 		for (int j = sizeY - 1; j >= 0; j--)
-			setItem(atX1, j, getItem(atX1, j) + getItem(atX2, j));
+			itemAdd(atX1, j, getItem(atX2, j));
 	}
 
 	/**
@@ -890,7 +912,7 @@ public class Matrix {
 	 */
 	public void sumY(int atY1, int atY2) {
 		for (int i = sizeX - 1; i >= 0; i--)
-			setItem(i, atY1, getItem(i, atY1) + getItem(i, atY2));
+			itemAdd(i, atY1, getItem(i, atY2));
 	}
 
 	/**
@@ -963,29 +985,30 @@ public class Matrix {
 				A = getItem(i, i);
 			}
 
+			A = 1.0 / A;
 			for (int j = 0; j < sizeX; j++)
 				if (i != j) {
-					double B = getItem(j, i) / A;
+					double B = getItem(j, i) * A;
 					for (int k = 0; k < sizeX; k++)
 						if (k != i) {
 							if ((k < i) && (j < i))
-								setItem(j, k, getItem(j, k) + B * getItem(i, k));
+								itemAdd(j, k,  B * getItem(i, k));
 							else
-								setItem(j, k, getItem(j, k) - B * getItem(i, k));
+								itemAdd(j, k, -B * getItem(i, k));
 						}
 				}
 
 			for (int j = 0; j < sizeX; j++)
 				if (i != j) {
 					if (i > j) {
-						setItem(i, j, -getItem(i, j) / A);
-						setItem(j, i, -getItem(j, i) / A);
+						itemMul(i, j, -A);
+						itemMul(j, i, -A);
 					} else {
-						setItem(i, j, getItem(i, j) / A);
-						setItem(j, i, getItem(j, i) / A);
+						itemMul(i, j,  A);
+						itemMul(j, i,  A);
 					}
 				}
-			setItem(i, i, 1 / A);
+			setItem(i, i, A);
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {
@@ -1149,7 +1172,7 @@ public class Matrix {
 			tau.setItem(atIndex, 0, tmp_tau);
 			double scale = 1.0 / (alpha - beta);
 			for (int i = getSizeX() - 1; i > atIndex; i--)
-				setItem(i, atIndex, scale * getItem(i, atIndex));
+				itemMul(i, atIndex, scale);
 			// End DLARFG
 
 			// DGELQ2:109 Apply H(i) to A(i+1:m,i:n) from the right
@@ -1182,7 +1205,7 @@ public class Matrix {
 				q.svdDLARF_Y(atIndex, tmp_tau);
 
 				for (int i = q.getSizeX() - 1; i > atIndex; i--)
-					q.setItem(i, atIndex, q.getItem(i, atIndex) * (-tmp_tau));
+					q.itemMul(i, atIndex, -tmp_tau);
 				q.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				for (int i = atIndex - 1; i >= 0; i--)
 					q.setItem(i, atIndex, 0.0);
@@ -1233,7 +1256,7 @@ public class Matrix {
 			tau.setItem(atIndex, 0, tmp_tau);
 			double scale = 1.0 / (alpha - beta);
 			for (int j = getSizeY() - 1; j > atIndex; j--)
-				setItem(atIndex, j, scale * getItem(atIndex, j));
+				itemMul(atIndex, j, scale);
 			// End DLARFG
 
 			// DGEQR2:109 Apply H(i) to A(i:m,i+1:n) from the left
@@ -1265,7 +1288,7 @@ public class Matrix {
 				q.svdDLARF_X(atIndex, tmp_tau);
 
 				for (int j = q.getSizeY() - 1; j > atIndex; j--)
-					q.setItem(atIndex, j, q.getItem(atIndex, j) * (-tmp_tau));
+					q.itemMul(atIndex, j, -tmp_tau);
 				q.setItem(atIndex, atIndex, 1.0 - tmp_tau);
 				for (int j = atIndex - 1; j >= 0; j--)
 					q.setItem(atIndex, j, 0.0);
@@ -1288,7 +1311,7 @@ public class Matrix {
 			for (int j = getSizeY() - 1; j >= atX; j--)
 				sum += getItem(i, j) * getItem(atX, j);
 			for (int j = getSizeY() - 1; j >= atX; j--)
-				setItem(i, j, getItem(i, j) - tau * sum * getItem(atX, j));
+				itemAdd(i, j, -tau * sum * getItem(atX, j));
 		}
 	}
 
@@ -1306,7 +1329,7 @@ public class Matrix {
 			for (int i = getSizeX() - 1; i >= atY; i--)
 				sum += getItem(i, j) * getItem(i, atY);
 			for (int i = getSizeX() - 1; i >= atY; i--)
-				setItem(i, j, getItem(i, j) - tau * sum * getItem(i, atY));
+				itemAdd(i, j, -tau * sum * getItem(i, atY));
 		}
 	}
 

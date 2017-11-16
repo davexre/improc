@@ -166,7 +166,7 @@ public class LeastSquaresAdjust {
 		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
 			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)
 				for (int k = numCoordinates - 1; k >= 0; k--)
-					unknown.setItem(k, i, unknown.getItem(k, i) + nm.getItem(i, j) * apl.getItem(k, j));
+					unknown.itemAdd(k, i, nm.getItem(i, j) * apl.getItem(k, j));
 	}
 
 	public void addMeasurement(Matrix m, double weight, double L, int coordinate) {
@@ -183,10 +183,10 @@ public class LeastSquaresAdjust {
 
 		for (int i = 0; i < numCoefsPerCoordinate; i++) {
 			double tmp = weight * m.getItem(i, 0);
-			apl.setItem(coordinate, i, apl.getItem(coordinate, i) + tmp * L);
+			apl.itemAdd(coordinate, i, tmp * L);
 			if (coordinate == 0)
 				for (int j = i; j < numCoefsPerCoordinate; j++)
-					nm.setItem(i, j, nm.getItem(i, j) + tmp * m.getItem(j, 0));
+					nm.itemAdd(i, j, tmp * m.getItem(j, 0));
 		}
 	}
 

@@ -92,20 +92,20 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 			double weight = getWeight(item);
 			sumWeight += weight;
 			for (int i = inputSize - 1; i >= 0; i--)
-				sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) + transformer.getSourceCoord(source, i) * weight);
+				sourceOrigin.itemAdd(i, 0, transformer.getSourceCoord(source, i) * weight);
 			for (int i = outputSize - 1; i >= 0; i--)
-				targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) + transformer.getTargetCoord(dest, i) * weight);
+				targetOrigin.itemAdd(i, 0, transformer.getTargetCoord(dest, i) * weight);
 			isFirst = false;
 		}
 		
 		double t;
 		for (int i = inputSize - 1; i >= 0; i--) {
-			sourceOrigin.setItem(i, 0, sourceOrigin.getItem(i, 0) / sumWeight);
+			sourceOrigin.itemMul(i, 0, 1.0 / sumWeight);
 			t = sourceMax.getItem(i, 0) - sourceMin.getItem(i, 0);
 			sourceScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
 		}
 		for (int i = outputSize - 1; i >= 0; i--) {
-			targetOrigin.setItem(i, 0, targetOrigin.getItem(i, 0) / sumWeight);
+			targetOrigin.itemMul(i, 0, 1.0 / sumWeight);
 			t = targetMax.getItem(i, 0) - targetMin.getItem(i, 0);
 			targetScale.setItem(i, 0, t == 0.0 ? 1.0 : t);
 		}
@@ -164,7 +164,7 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 		for (int i = outputSize - 1; i >= 0; i--) {
 			double t = targetScale.getItem(i, 0);
 			for (int j = tr.numPoints - 1; j >= 0; j--) {
-				u.setItem(i, j, u.getItem(i, j) * t);
+				u.itemMul(i, j, t);
 			}
 		}
 		
@@ -174,12 +174,12 @@ public abstract class PolynomialTransformLearner<InputType, OutputType> extends 
 				t *= Math.pow(sourceScale.getItem(i, 0), tr.polynomPowers.getItem(i, j));
 			}
 			for (int i = outputSize - 1; i >= 0; i--) {
-				u.setItem(i, j, u.getItem(i, j) / t);
+				u.itemMul(i, j, 1.0 / t);
 			}
 		}
 
 		for (int i = outputSize - 1; i >= 0; i--) {
-			u.setItem(i, 0, u.getItem(i, 0) + targetOrigin.getItem(i, 0));
+			u.itemAdd(i, 0, targetOrigin.getItem(i, 0));
 		}
 		
 		u.copyTo(tr.polynomCoefs);

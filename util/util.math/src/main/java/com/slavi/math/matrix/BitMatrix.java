@@ -116,6 +116,23 @@ public class BitMatrix {
 		}
 	}
 	
+	public boolean itemNot(int atX, int atY) {
+		if ((atX < 0) || (atX > sizeX) || 
+			(atY < 0) || (atY > sizeY)) {
+			throw new IllegalArgumentException("Invalid argument");
+		}
+		int index = atY * sizeX + atX;
+		int indexM = index / 8;
+		byte mask = (byte) (1 << (index % 8));
+		if ((m[indexM] & mask) == 0) {
+			m[indexM] |= mask;
+			return true;
+		} else {
+			m[indexM] &= ~mask;
+			return false;
+		}
+	}
+	
 	public boolean getItem(int atX, int atY) {
 		if ((atX < 0) || (atX > sizeX) || 
 			(atY < 0) || (atY > sizeY)) {

@@ -34,7 +34,7 @@ public class DNister5PointMatch {
 		u.transpose(a);
 		u.mMul(a, b);
 		for (int i = b.getSizeX() - 1; i >= 0; i--)
-			b.setItem(i, i, b.getItem(i, i) - 1.0);
+			b.itemAdd(i, i, -1.0);
 		b.rMul(precision);
 		if (b.maxAbs() > 1.0)
 			System.out.println("INVALID RESULT FROM SVD!!!!!!");
@@ -182,7 +182,7 @@ public class DNister5PointMatch {
 			D.setItem(i, DY, 0.0);
 		for (int iR = 0; iR < RS; iR++) {
 			for (int iL = 0; iL < LS; iL++) {
-				D.setItem(iR + iL, DY, D.getItem(iR + iL, DY) +
+				D.itemAdd(iR + iL, DY, 
 					R.getItem(RX + iR, RY) * L.getItem(LX + iL, LY));
 			}
 		}
@@ -325,7 +325,7 @@ public class DNister5PointMatch {
 		
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 3; j++)
-				EEt[j][j].setItem(i, 0, EEt[j][j].getItem(i, 0) - traceEEt.getItem(i, 0));  
+				EEt[j][j].itemAdd(i, 0, -traceEEt.getItem(i, 0));  
 		}
 		
 		// 2.4 essential matrix constraint LE = 0
@@ -414,18 +414,18 @@ public class DNister5PointMatch {
 			// normalize current row
 			if (theValue != 0.0)
 				for (int i = 0; i < 20; i++)
-					A.setItem(i, aRow, A.getItem(i, aRow) / theValue);
+					A.itemMul(i, aRow, 1.0 / theValue);
 			// nullify rest of column
 			for (int j = aRow + 1; j < 10; j++) {
 				tmp = A.getItem(aRow, j);
 				for (int i = 0; i < 20; i++)
-					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, aRow) * tmp);
+					A.itemAdd(i, j, -A.getItem(i, aRow) * tmp);
 			}
 			// diagonalize row 5-9
 			for (int j = 4; j < aRow; j++) {
 				tmp = A.getItem(aRow, j);
 				for (int i = 0; i < 20; i++)
-					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, aRow) * tmp);
+					A.itemAdd(i, j, -A.getItem(i, aRow) * tmp);
 			}
 		}
 		// test for rank deficiency (e.g., pure translation)
@@ -442,7 +442,7 @@ public class DNister5PointMatch {
 			for (int j = 4; j < 9; j++) {
 				tmp = A.getItem(9, j);
 				for (int i = 0; i < 20; i++)
-					A.setItem(i, j, A.getItem(i, j) - A.getItem(i, 9) * tmp);
+					A.itemAdd(i, j, -A.getItem(i, 9) * tmp);
 			}
 		}
 		
