@@ -3,7 +3,7 @@ package com.test.image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 import javax.imageio.ImageIO;
@@ -12,7 +12,7 @@ import com.slavi.math.adjust.Statistics;
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Const;
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.file.FileUtil;
 import com.slavi.util.file.FindFileIterator;
 
@@ -86,7 +86,7 @@ public class ImageAdjust {
 		System.out.println(statL);
 	}
 	
-	public static abstract class ProcessImage implements Callable<Void> {
+	public static abstract class ProcessImage implements Runnable {
 		BufferedImage bi;
 		String fouName;
 		
@@ -97,22 +97,25 @@ public class ImageAdjust {
 
 		public abstract void transform(double srcDRGB[], double destDRGB[]);
 
-		public Void call() throws Exception {
-			double srcDRGB[] = new double[3];
-			double destDRGB[] = new double[3];
-
-			System.out.println("Generating " + fouName);
-			BufferedImage bo = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
-			for (int j = 0; j < bi.getHeight(); j++)
-				for (int i = 0; i < bi.getWidth(); i++) {
-					int color = bi.getRGB(i, j);
-					ColorConversion.RGB.fromRGB(color, srcDRGB);
-					transform(srcDRGB, destDRGB);
-					color = ColorConversion.RGB.toRGB(destDRGB);
-					bo.setRGB(i, j, color);
-				}
-			ImageIO.write(bo, "png", new File(fouName));
-			return null;
+		public void run() {
+			try {
+				double srcDRGB[] = new double[3];
+				double destDRGB[] = new double[3];
+	
+				System.out.println("Generating " + fouName);
+				BufferedImage bo = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
+				for (int j = 0; j < bi.getHeight(); j++)
+					for (int i = 0; i < bi.getWidth(); i++) {
+						int color = bi.getRGB(i, j);
+						ColorConversion.RGB.fromRGB(color, srcDRGB);
+						transform(srcDRGB, destDRGB);
+						color = ColorConversion.RGB.toRGB(destDRGB);
+						bo.setRGB(i, j, color);
+					}
+				ImageIO.write(bo, "png", new File(fouName));
+			} catch (Exception e) {
+				throw new CompletionException(e);
+			}
 		}
 	}
 	
@@ -121,7 +124,7 @@ public class ImageAdjust {
 		String fouBaseName = new File(fouDir + "/" + fin.getName()).getAbsolutePath();
 		BufferedImage bi = ImageIO.read(fin);
 		makeStats(bi);
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		TaskSet taskSet = new TaskSet(exec);
 		taskSet.add(new ProcessImage(bi, fouBaseName, "_a_original") {
 			public void transform(double[] srcDRGB, double[] destDRGB) {
 				destDRGB[0] = srcDRGB[0];
@@ -254,8 +257,7 @@ public class ImageAdjust {
 		}
 		});*/
 	
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 	}
 	
 	public static void main(String[] args) throws Exception {

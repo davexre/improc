@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,7 +24,7 @@ import com.slavi.improc.myadjust.render.WeightMergeRender;
 import com.slavi.math.MathUtil;
 import com.slavi.util.ColorConversion;
 import com.slavi.util.Marker;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.swt.SwtUtil;
 
 public class GeneratePanoramas implements Callable<Void> {
@@ -539,27 +540,27 @@ public class GeneratePanoramas implements Callable<Void> {
 			outImageColor2 = new SafeImage(outputImageSizeX, outputImageSizeY);
 			outImageMask = new SafeImage(outputImageSizeX, outputImageSizeY);
 			imageData = new HashMap<KeyPointList, SafeImage>();
-			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+			TaskSet taskSet = new TaskSet(exec);
 			for (int index = 0; index < images.size(); index++) {
 				final KeyPointList image = images.get(index);
-				taskSet.add(new Callable<Void>() {
-					public Void call() throws Exception {
+				taskSet.add(() -> {
+					try {
 						SafeImage im = new SafeImage(new FileInputStream(image.imageFileStamp.getFile()));
 						im.populateStatistics();
 						synchronized (imageData) {
 							imageData.put(image, im);
 						}
-						return null;
+					} catch (Exception e) {
+						throw new CompletionException(e);
 					}
 				});
 			}
-			taskSet.addFinished();
-			taskSet.get();
+			taskSet.run().get();
 			
 			Runtime runtime = Runtime.getRuntime();
 			int numberOfProcessors = runtime.availableProcessors();
 			
-			taskSet = new TaskSetExecutor(exec);
+			taskSet = new TaskSet(exec);
 			rowsProcessed = new AtomicInteger(0);
 			for (int i = 0; i < numberOfProcessors; i++) {
 				if (useImageMaxWeight) {
@@ -569,8 +570,7 @@ public class GeneratePanoramas implements Callable<Void> {
 					taskSet.add(new WeightMergeRender(this));
 				}
 			}
-			taskSet.addFinished();
-			taskSet.get();
+			taskSet.run().get();
 			
 			pinPointPairs(outImageMask);
 			labelImageNames(outImageMask);

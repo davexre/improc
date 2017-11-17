@@ -11,7 +11,7 @@ import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 
-public class PDLoweDetector2 implements Callable<Void> {
+public class PDLoweDetector2 implements Runnable {
 
 	public static final int defaultScaleSpaceLevels = 3;
 
@@ -735,9 +735,8 @@ public class PDLoweDetector2 implements Callable<Void> {
 		}*/
 	}
 	
-	public Void call() throws Exception {
+	public void run() {
 		DetectFeaturesInSingleLevel();
-		return null;
 	}
 
 	public String toString() {

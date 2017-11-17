@@ -3,21 +3,17 @@ package example.slavi.concurrent;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 
 public class TaskSetExecutorExample {
 	public static void main(String[] args) throws Exception {
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor(2);
 
 		System.out.println("Creating tasks");
-		TaskSetExecutor ts = new TaskSetExecutor(exec) {
-			public void onTaskFinished(Object task, Object result) throws Exception {
+		TaskSet ts = new TaskSet(exec) {
+			public void onTaskFinished(Object task) throws Exception {
 				ExampleTask t = (ExampleTask) task;
 				System.out.println("OnTaskFinish for Task " + t.taskName);
-			}
-			
-			public void onFinally() throws Exception {
-				System.out.println("OnFinally");
 			}
 		};
 		for (int i = 0; i < 10; i++) {
@@ -26,9 +22,8 @@ public class TaskSetExecutorExample {
 			ts.add(task);
 			System.out.println("Submitted task " + i);
 		}
-		ts.addFinished();
 		System.out.println("Waiting for tasks to finish");
-		ts.get();
+		ts.run().get();
 		System.out.println("Parallel job finished");
 
 		exec.shutdown();

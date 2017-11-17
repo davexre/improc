@@ -3,6 +3,7 @@ package com.slavi.improc.ui;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPoint;
@@ -11,7 +12,7 @@ import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
 import com.slavi.improc.KeyPointTreeImageSpace;
 import com.slavi.improc.myadjust.KeyPointHelmertTransformer;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.tree.NearestNeighbours;
 
 public class GenerateImageSpaceKeyPointTree implements Callable<ArrayList<KeyPointPairList>> {
@@ -25,32 +26,31 @@ public class GenerateImageSpaceKeyPointTree implements Callable<ArrayList<KeyPoi
 		this.kppl = kppl;
 	}
 
-	private class GenerateImageSpaceTree implements Callable<Void> {
+	private class GenerateImageSpaceTree implements Runnable {
 		KeyPointList image;
 
 		public GenerateImageSpaceTree(KeyPointList image) {
 			this.image = image;
 		}
 
-		public Void call() throws Exception {
+		public void run() {
 			image.imageSpaceTree = new KeyPointTreeImageSpace();
 			for (KeyPoint item : image.items) {
 				if (Thread.currentThread().isInterrupted())
-					throw new InterruptedException();
+					throw new CompletionException(new InterruptedException());
 				image.imageSpaceTree.add(item);
 			}
-			return null;
 		}
 	}
 
-	private class GenerateNewKeyPointPairs implements Callable<Void> {
+	private class GenerateNewKeyPointPairs implements Runnable {
 		KeyPointPairList pairList;
 
 		public GenerateNewKeyPointPairs(KeyPointPairList pairList) {
 			this.pairList = pairList;
 		}
 
-		public Void call() throws Exception {
+		public void run() {
 			pairList.items.clear();
 			KeyPoint tmpKP = new KeyPoint(pairList.target, 0, 0);
 			KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
@@ -58,7 +58,7 @@ public class GenerateImageSpaceKeyPointTree implements Callable<ArrayList<KeyPoi
 
 			for (KeyPoint kp : pairList.source.items) {
 				if (Thread.currentThread().isInterrupted())
-					throw new InterruptedException();
+					throw new CompletionException(new InterruptedException());
 				tr.transform(kp, tmpKP);
 /*				NearestNeighbours<KeyPoint> nearest = pairList.target.imageSpaceTree.getNearestNeighbours(tmpKP, 1);
 				KeyPoint target = nearest.size() > 0 ? nearest.getItem(0) : null;
@@ -86,7 +86,6 @@ public class GenerateImageSpaceKeyPointTree implements Callable<ArrayList<KeyPoi
 					pairList.items.add(pair);
 				}
 			}
-			return null;
 		}
 	}
 
@@ -98,20 +97,18 @@ public class GenerateImageSpaceKeyPointTree implements Callable<ArrayList<KeyPoi
 		for (KeyPointPairList pairList : kppl) {
 			targets.add(pairList.target);
 		}
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		TaskSet taskSet = new TaskSet(exec);
 		for (KeyPointList image : targets) {
 			taskSet.add(new GenerateImageSpaceTree(image));
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 
 		// Rebuild key point pairs
-		taskSet = new TaskSetExecutor(exec);
+		taskSet = new TaskSet(exec);
 		for (KeyPointPairList pairList : result) {
 			taskSet.add(new GenerateNewKeyPointPairs(pairList));
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 
 		return null;
 	}

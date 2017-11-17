@@ -23,7 +23,7 @@ import com.slavi.improc.parallel.ExecutionProfile;
 import com.slavi.improc.parallel.PDLoweDetector;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.improc.parallel.PDLoweDetector2;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.file.AbsoluteToRelativePathMaker;
 import com.slavi.util.file.FileStamp;
 import com.slavi.util.file.FileUtil;
@@ -92,7 +92,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		};
 		
 		int scale = 1;
-		TaskSetExecutor ts = new TaskSetExecutor(exec);
+		TaskSet ts = new TaskSet(exec);
 		try {
 			while (img.maxX() > 32) {
 				DWindowedImage source = img;
@@ -147,9 +147,8 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 				scale *= 2;
 			}
 		} finally {
-			ts.addFinished();
+			ts.run().get();
 		}
-		ts.get();
 		return result;
 	}
 	

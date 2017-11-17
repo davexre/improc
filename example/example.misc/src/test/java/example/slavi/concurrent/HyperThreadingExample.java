@@ -5,21 +5,20 @@ import java.util.concurrent.Executors;
 
 import com.slavi.util.Marker;
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 
 
 public class HyperThreadingExample {
 	static long doIt(int numThreads) throws Exception {
 		ExecutorService exec = Executors.newFixedThreadPool(numThreads);
-		TaskSetExecutor ts = new TaskSetExecutor(exec);
+		TaskSet ts = new TaskSet(exec);
 		System.out.println("Creating tasks");
 		Marker.mark();
 		for (int i = 0; i < numThreads; i++) {
 			ts.add(new ExampleTask(Integer.toString(i)));
 		}
-		ts.addFinished();
 		System.out.println("Waiting for tasks to finish");
-		ts.get();
+		ts.run().get();
 		System.out.println("Parallel job finished");
 		Marker.State stamp = Marker.release();
 		

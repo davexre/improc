@@ -121,7 +121,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 		return result;
 	}
 	
-	private class ProcessOne implements Callable<Void> {
+	private class ProcessOne implements Runnable {
 		ArrayList<KeyPointPairList> chain;
 		
 		public ProcessOne(ArrayList<KeyPointPairList> chain) {
@@ -213,7 +213,7 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			}
 		}
 		
-		public Void call() {
+		public void run() {
 			copyBadStatus(chain);
 			panoTransformer.initialize(chain);
 			int iteration = 0;
@@ -245,7 +245,6 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			synchronized(kppl) {
 				kppl.addAll(panoTransformer.ignoredPairLists);
 			}
-			return null; 
 		}
 	}
 	
@@ -274,16 +273,15 @@ public class CalculatePanoramaParams implements Callable<ArrayList<ArrayList<Key
 			System.out.println("*********** ATTEMPT " + curAttempt + " ****************");
 			if (Thread.interrupted())
 				throw new InterruptedException();
-//			TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+//			TaskSet taskSet = new TaskSet(exec);
 			while (true) {
 				ArrayList<KeyPointPairList> chain = getImageChain(kppl);
 				if (chain.size() == 0)
 					break;
 //				taskSet.add(new ProcessOne(chain));
-				new ProcessOne(chain).call();
+				new ProcessOne(chain).run();
 			}
-//			taskSet.addFinished();
-//			taskSet.get();
+//			taskSet.run().get();
 		}
 		return panos;
 	}	

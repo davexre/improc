@@ -2,6 +2,7 @@ package com.slavi.improc.myadjust;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -10,7 +11,7 @@ import com.slavi.improc.KeyPointPairList;
 import com.slavi.math.AbstractConvexHullArea;
 import com.slavi.math.MathUtil;
 import com.slavi.math.transform.TransformLearnerResult;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.swt.SwtUtil;
 
 public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPairList>> {
@@ -26,7 +27,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		this.kppl = kppl;
 	}
 
-	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws Exception {
+	public static boolean validateKeyPointPairList(KeyPointPairList pairList) throws InterruptedException {
 		for (KeyPointPair pair : pairList.items) {
 //			double dist = Math.sqrt(pair.distanceToNearest);
 			double dist = pair.distanceToNearest;
@@ -89,7 +90,7 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 	AtomicInteger processedPairsList = new AtomicInteger(0);
 
-	private class ValidateOne extends AbstractConvexHullArea implements Callable<Void> {
+	private class ValidateOne extends AbstractConvexHullArea implements Runnable {
 		KeyPointPairList pairList;
 		int curPoint;
 		boolean calcSourceArea;
@@ -117,43 +118,46 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 			return ratio > 0.05;
 		}
 
-		public Void call() throws Exception {
-			if (validateKeyPointPairList(pairList)) {
-//				&& checkAreaRatio(true) && checkAreaRatio(false))
-				checkAreaRatio(true);
-				checkAreaRatio(false);
-				calcSourceArea = true;
-//				double sourceConvexHullArea = Math.abs(getConvexHullArea());
-//				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
-//				double sourceRatio = sourceConvexHullArea / sourceImageArea;
-
-				calcSourceArea = false;
-//				double targetConvexHullArea = Math.abs(getConvexHullArea());
-//				double targetImageArea = pairList.target.imageSizeX * pairList.target.imageSizeY;
-//				double targetRatio = targetConvexHullArea / targetImageArea;
-
-//				if (sourceRatio <= 0.05 || targetRatio <= 0.05) {
-/*					System.out.println("RATIO " +
-						pairList.source.imageFileStamp.getFile().getName() + "\t" +
-						pairList.target.imageFileStamp.getFile().getName() + "\t" +
-						MathUtil.d2(sourceConvexHullArea) + "\t" +
-						MathUtil.d2(sourceImageArea) + "\t" +
-						MathUtil.d2(sourceRatio) + "\t|" +
-						MathUtil.d2(targetConvexHullArea) + "\t" +
-						MathUtil.d2(targetImageArea) + "\t" +
-						MathUtil.d2(targetRatio) + "\t"
-						);*/
-//				} else {
-					synchronized (result) {
-						result.add(pairList);
-					}
-//				}
+		public void run() {
+			try {
+				if (validateKeyPointPairList(pairList)) {
+	//				&& checkAreaRatio(true) && checkAreaRatio(false))
+					checkAreaRatio(true);
+					checkAreaRatio(false);
+					calcSourceArea = true;
+	//				double sourceConvexHullArea = Math.abs(getConvexHullArea());
+	//				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
+	//				double sourceRatio = sourceConvexHullArea / sourceImageArea;
+	
+					calcSourceArea = false;
+	//				double targetConvexHullArea = Math.abs(getConvexHullArea());
+	//				double targetImageArea = pairList.target.imageSizeX * pairList.target.imageSizeY;
+	//				double targetRatio = targetConvexHullArea / targetImageArea;
+	
+	//				if (sourceRatio <= 0.05 || targetRatio <= 0.05) {
+	/*					System.out.println("RATIO " +
+							pairList.source.imageFileStamp.getFile().getName() + "\t" +
+							pairList.target.imageFileStamp.getFile().getName() + "\t" +
+							MathUtil.d2(sourceConvexHullArea) + "\t" +
+							MathUtil.d2(sourceImageArea) + "\t" +
+							MathUtil.d2(sourceRatio) + "\t|" +
+							MathUtil.d2(targetConvexHullArea) + "\t" +
+							MathUtil.d2(targetImageArea) + "\t" +
+							MathUtil.d2(targetRatio) + "\t"
+							);*/
+	//				} else {
+						synchronized (result) {
+							result.add(pairList);
+						}
+	//				}
+				}
+			} catch (Exception e) {
+				throw new CompletionException(e);
 			}
 
 			int curCount = processedPairsList.incrementAndGet();
 			String status = "Processing " + Integer.toString(curCount) + "/" + Integer.toString(kppl.size());
 			SwtUtil.activeWaitDialogSetStatus(status, curCount);
-			return null;
 		}
 
 		public void resetPointIterator() {
@@ -186,12 +190,11 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
 		//////////////////////////////////
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		TaskSet taskSet = new TaskSet(exec);
 		for (KeyPointPairList pairList : kppl) {
 			taskSet.add(new ValidateOne(pairList));
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 /*
 		System.out.println("---------------");
 
@@ -204,12 +207,11 @@ public class ValidateKeyPointPairList implements Callable<ArrayList<KeyPointPair
 		kppl.clear();
 		kppl.addAll(result);
 		result.clear();
-		taskSet = new TaskSetExecutor(exec);
+		taskSet = new TaskSet(exec);
 		for (KeyPointPairList pairList : kppl) {
 			taskSet.add(new ValidateOne(pairList));
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 */
 /*
 		// Generate image discrepancies

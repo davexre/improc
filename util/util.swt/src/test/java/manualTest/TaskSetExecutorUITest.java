@@ -2,12 +2,13 @@ package manualTest;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.slavi.util.Util;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.swt.SwtUtil;
 
 public class TaskSetExecutorUITest {
@@ -21,20 +22,16 @@ public class TaskSetExecutorUITest {
 		}
 
 		public Object call() throws Exception {
-			TaskSetExecutor ts = new TaskSetExecutor(exec) {
+			TaskSet ts = new TaskSet(exec) {
 				public void onError(Object task, Throwable e) throws Exception {
 					ExampleTask t = (ExampleTask) task;
 					System.out.println("onERROR in task " + t.taskName + " -> " + Util.exceptionToString(e));
 				}
 				
-				public void onTaskFinished(Object task, Object result) throws Exception {
+				public void onTaskFinished(Object task) throws Exception {
 					SwtUtil.activeWaitDialogSetStatus("Done " + 
 							Integer.toString(getFinishedTasksCount()) + "/" + Integer.toString(getTasksCount()), 
 							getFinishedTasksCount());
-				}
-				
-				public void onFinally() throws Exception {
-					System.out.println("TaskSet is done.");
 				}
 			};
 			System.out.println("Creating tasks");
@@ -44,9 +41,13 @@ public class TaskSetExecutorUITest {
 				ts.add(task);
 				System.out.println("Submitted task " + i);
 			}
-			ts.addFinished();
+			CompletableFuture f = ts.run();
+			f.thenRun(() -> {
+				System.out.println("TaskSet is done.");
+			});
+			
 			System.out.println("Waiting for tasks to finish");
-			ts.get();
+			ts.run().get();
 			System.out.println("Parallel job finished");
 			return null;
 		}

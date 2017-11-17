@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +13,7 @@ import com.slavi.improc.KeyPointBigTree;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.swt.SwtUtil;
 import com.slavi.util.tree.NearestNeighbours;
 
@@ -39,7 +40,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 		}
 	}
 
-	class ProcessOneImage implements Callable<Void> {
+	class ProcessOneImage implements Runnable {
 
 		KeyPointList image;
 
@@ -47,7 +48,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			this.image = image;
 		}
 
-		public Void call() throws Exception {
+		public void run() {
 //			int searchSteps = (int) (Math.max(130.0, (Math.log(tree.getSize()) / Math.log (1000.0)) * 130.0));
 			int searchSteps = tree.getTreeDepth() / 2;
 			String strImageId = Integer.toString(image.imageId);
@@ -55,7 +56,7 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			int totalPairCount = 0;
 			for (KeyPoint kp : image.items) {
 				if (Thread.interrupted())
-					throw new InterruptedException();
+					throw new CompletionException(new InterruptedException());
 
 //				NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursMyBBF(kp, 2, KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps);
 				NearestNeighbours<KeyPoint> nnlst = tree.getNearestNeighboursBBF(kp, 2, searchSteps);
@@ -107,7 +108,6 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 			SwtUtil.activeWaitDialogSetStatus("Processing " +
 					Integer.toString(count) + "/" + Integer.toString(tree.keyPointLists.size()), count);
 			System.out.println(image.imageFileStamp.getFile().getAbsolutePath() + " (" + totalPairCount + ")");
-			return null;
 		}
 	}
 
@@ -119,13 +119,12 @@ public class GenerateKeyPointPairsFromBigTree implements Callable<ArrayList<KeyP
 	}
 
 	public ArrayList<KeyPointPairList> call() throws Exception {
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		TaskSet taskSet = new TaskSet(exec);
 		for (int i = 0; i < tree.keyPointLists.size(); i++) {
 			KeyPointList k = tree.keyPointLists.get(i);
 			taskSet.add(new ProcessOneImage(k));
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 		ArrayList<KeyPointPairList> result = new ArrayList<KeyPointPairList>();
 		for (KeyPointPairList k : keyPointPairLists.values()) {
 			result.add(k);

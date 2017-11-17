@@ -2,13 +2,14 @@ package com.slavi.improc.ui;
 
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 
 import com.slavi.improc.KeyPoint;
 import com.slavi.improc.KeyPointList;
 import com.slavi.improc.KeyPointPair;
 import com.slavi.improc.KeyPointPairList;
-import com.slavi.util.concurrent.TaskSetExecutor;
+import com.slavi.util.concurrent.TaskSet;
 import com.slavi.util.swt.SwtUtil;
 import com.slavi.util.tree.NearestNeighbours;
 
@@ -27,7 +28,7 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 		this.kpl = kpl;
 	}
 
-	class MakePairs implements Callable<Void> {
+	class MakePairs implements Runnable {
 
 		KeyPointList source;
 		
@@ -44,7 +45,7 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 		}
 		
 		public static final double maxDistanceToTarget = 110;
-		public Void call() throws Exception {
+		public void run() {
 			KeyPointPairList kppl = new KeyPointPairList();
 			kppl.source = source;
 			kppl.target = target;
@@ -52,7 +53,7 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 			int searchSteps = target.tree.getTreeDepth() / 2;
 			for (KeyPoint kp : source.items) {
 				if (Thread.interrupted())
-					throw new InterruptedException();
+					throw new CompletionException(new InterruptedException());
 				NearestNeighbours<KeyPoint> nnlst = target.tree.getNearestNeighboursBBF(kp, 2, searchSteps);
 //				NearestNeighbours<KeyPoint> nnlst = target.tree.getNearestNeighboursMyBBF(kp, 2, 
 //						KeyPointBigTree.maxAbsoluteDiscrepancyPerCoordinate, searchSteps,
@@ -66,12 +67,11 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 				result.add(kppl);
 			}
 			SwtUtil.activeWaitDialogProgress(1); 
-			return null;
 		}
 	}
 		
 	public ArrayList<KeyPointPairList> call() throws Exception {
-		TaskSetExecutor taskSet = new TaskSetExecutor(exec);
+		TaskSet taskSet = new TaskSet(exec);
 		for (int i = 0; i < kpl.size(); i++) {
 			KeyPointList imageI = kpl.get(i);
 			for (int j = i + 1; j < kpl.size(); j++) {
@@ -79,8 +79,7 @@ public class GenerateKeyPointPairs implements Callable<ArrayList<KeyPointPairLis
 				taskSet.add(new MakePairs(imageI, imageJ));
 			}
 		}
-		taskSet.addFinished();
-		taskSet.get();
+		taskSet.run().get();
 		
 		for (KeyPointList i : kpl) {
 			i.tree = null;
