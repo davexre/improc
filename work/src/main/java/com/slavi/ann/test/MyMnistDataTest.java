@@ -35,10 +35,11 @@ public class MyMnistDataTest {
 		List<MnistPattern> pats = MnistData.readMnistSet(false);
 		Marker.release();
 
-		MyNet nnet = new MyNet(MyLayer.class,
+		int outsize = 10;
+		MyNet nnet = MyNet.makeNet(MyLayer.class,
 				insize,
 				//700, 600, 500, 400, 300, 200, 100,
-				50, 10);
+				50, outsize);
 		nnet.eraseMemory();
 
 		int maxPattern = pats.size();
@@ -46,9 +47,9 @@ public class MyMnistDataTest {
 
 		Marker.mark("Total");
 		Marker.mark("Train");
-		Matrix input = new Matrix(nnet.getSizeInput(), 1);
-		Matrix target = new Matrix(nnet.getSizeOutput(), 1);
-		Matrix error = new Matrix(nnet.getSizeOutput(), 1);
+		Matrix input = new Matrix(insize, 1);
+		Matrix target = new Matrix(outsize, 1);
+		Matrix error = new Matrix(outsize, 1);
 
 		for (int epoch = 0; epoch < 1; epoch++) {
 			nnet.resetEpoch();
@@ -78,7 +79,7 @@ public class MyMnistDataTest {
 		//nnet.layers.get(nnet.layers.size() - 1).sumDW.printM("last sumDW");
 		nnet.applyTraining();
 
-		Matrix max = new Matrix(nnet.getSizeOutput(), 1);
+		Matrix max = new Matrix(outsize, 1);
 		max.make0();
 
 		Statistics st = new Statistics();
@@ -125,7 +126,7 @@ public class MyMnistDataTest {
 		Marker.release();
 
 		for (int index = 0; index < nnet.layers.size(); index++) {
-			MyLayer l = nnet.layers.get(index);
+			MyLayer l = (MyLayer) nnet.layers.get(index);
 			System.out.println("\nWeight " + index);
 			System.out.println(l.weight.calcItemStatistics());
 			l.maxInputError.printM("Max input Error");
@@ -133,72 +134,8 @@ public class MyMnistDataTest {
 		}
 	}
 
-	void printM(Matrix m, String desc) {
-		//System.out.println(m.toMatlabString(desc));
-		m.printM(desc);
-	}
-	
-	void doIt2() throws Exception {
-		int sizeInput = 15;
-		int sizeOutput = 4;
-		//MyLayer l = new MyLayer(sizeInput, sizeOutput, 1);
-		MyNet l = new MyNet(MyLayer.class, sizeInput, 10, sizeOutput);
-		Matrix input = new Matrix(sizeInput, 1);
-		Matrix error = new Matrix(sizeOutput, 1);
-		Matrix target = new Matrix(sizeOutput, 1);
-
-		l.eraseMemory();
-		for (int epoch = 0; epoch < 200; epoch++) {
-			System.out.println("---------------------\nEPOCH "  + epoch);
-			MatrixStatistics ms = new MatrixStatistics();
-			for (int index = 0;
-					index < sizeInput;
-					index++) {
-				boolean print = index == 0;
-				if (print)
-					for (int i = 0; i < l.layers.size(); i++) {
-						MyLayer ll = l.layers.get(i);
-						printM(ll.inputError, "IER " + i);
-						printM(ll.output, "OUT " + i);
-						printM(ll.weight, "W");
-					}
-
-				if (print)
-					System.out.println("At index " + index);
-				for (int i = 0; i < input.getVectorSize(); i++) {
-					input.setVectorItem(i, index == i ? 0.95 : 0.05);
-				}
-				for (int i = 0; i < target.getVectorSize(); i++)
-					target.setVectorItem(i, ((index + 1) & (1 << i)) == 0 ? 0.05 : 0.95);
-				Matrix output = l.feedForward(input);
-				if (print) {
-					printM(input, "Input");
-					printM(target, "Target");
-					printM(output, "Output");
-				}
-				output.mSub(target, error);
-				if (print)
-					printM(error, "E1");
-				//Matrix inputError =
-				
-				error.termAbs(output);
-				ms.addValue(output);
-				l.backPropagate(error);
-				//printM(inputError, "IE");
-				output = l.feedForward(input);
-				output.mSub(target, error);
-				if (print)
-					printM(error, "E2");
-			}
-			//System.out.println(l.weight.toMatlabString("W"));
-			ms.stop();
-			System.out.println(ms.toString());
-		}
-
-	}
-
 	public static void main(String[] args) throws Exception {
-		new MyMnistDataTest().doIt2();
-//		System.out.println("Done.");
+		new MyMnistDataTest().doIt();
+		System.out.println("Done.");
 	}
 }

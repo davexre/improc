@@ -360,7 +360,7 @@ public class Matrix {
 		dest.resize(sizeX, sizeY);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
-				dest.itemAdd(i, j, second.getItem(i, j));
+				dest.setItem(i, j, getItem(i, j) + second.getItem(i, j));
 	}
 
 	/**

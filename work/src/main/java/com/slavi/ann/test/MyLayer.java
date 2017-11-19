@@ -5,31 +5,23 @@ import java.util.Random;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 
-public class MyLayer {
+public class MyLayer implements Layer {
 	Matrix input;
 	Matrix inputError;
 	Matrix output;
 	Matrix weight;
+	Matrix dW;
 
-	Matrix maxInputError;
-	Matrix tmpOutput;
-	Matrix tmpW;
-	Matrix sumDW;
-	int countDW;
+	int dCount;
 	double scale;
 	double learningRate;
 
 	public MyLayer(int sizeInput, int sizeOutput, double learningRate) {
 		input = null;
 		inputError = new Matrix(sizeInput, 1);
-		maxInputError = new Matrix(sizeInput, 1);
-
 		output = new Matrix(sizeOutput, 1);
-		tmpOutput = new Matrix(sizeOutput, 1);
-
 		weight = new Matrix(sizeInput, sizeOutput);
-		tmpW = new Matrix(sizeInput, sizeOutput);
-		sumDW = new Matrix(sizeInput, sizeOutput);
+		dW = new Matrix(sizeInput, sizeOutput);
 
 		scale = 1; //5.0 / sizeInput;
 		this.learningRate = learningRate;
@@ -114,21 +106,16 @@ public class MyLayer {
 		//weight.makeR(0.5);
 		//weight.make0();
 		eraseWeights_2();
+		dW.make0();
 		inputError.make0();
-		maxInputError.make0();
 		output.make0();
-		tmpOutput.make0();
-		tmpW.make0();
-		sumDW.make0();
 	}
 
 	public void resetEpoch() {
-		inputError.make0();
-		maxInputError.make0();
-		output.make0();
-		tmpOutput.make0();
-		tmpW.make0();
-		sumDW.make0();
+//		inputError.make0();
+//		output.make0();
+		dW.make0();
+		dCount = 0;
 	}
 
 	/**
@@ -146,7 +133,6 @@ public class MyLayer {
 			r = 1.0 / (1.0 + Math.exp(-r * scale));
 			output.setVectorItem(j, r);
 		}
-		tmpOutput.mMaxAbs(output, tmpOutput);
 		return output;
 	}
 
@@ -161,15 +147,12 @@ public class MyLayer {
 			r = scale * error.getVectorItem(j) * r * (1 - r);
 			for (int i = getSizeInput() -1; i >= 0; i--) {
 				double dw = r * input.getVectorItem(i) * learningRate;
-				tmpW.itemAdd(i, j, Math.abs(dw));
-				sumDW.itemAdd(i, j, dw);
 				inputError.vectorItemAdd(i, r * weight.getItem(i, j));
-				weight.itemAdd(i, j, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+				dW.itemAdd(i, j, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 			}
 		}
-		maxInputError.mMaxAbs(inputError, maxInputError);
 		input = null;
-		countDW++;
+		dCount++;
 		return inputError;
 	}
 
@@ -182,12 +165,11 @@ public class MyLayer {
 	}
 
 	public void applyTraining() {
-		if (countDW == 0)
+		if (dCount == 0)
 			return;
-		sumDW.rMul(1.0 / countDW);
-		//weight.mSum(sumDW, weight);
-		tmpW.make0();
-		sumDW.make0();
-		countDW = 0;
+//		dW.rMul(1.0 / dCount);
+		dW.mSum(weight, weight);
+		dCount = 0;
+		resetEpoch();
 	}
 }
