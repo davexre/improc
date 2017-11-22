@@ -14,7 +14,7 @@ public class TestTaskSetParallelize {
 	void doIt() throws Exception {
 		ExecutorService exec = Executors.newCachedThreadPool();
 		System.out.println("Creating parallel task");
-		CompletableFuture f = TaskSet.parallelize(exec, 2, new IntIterator(30), (id) -> {
+		CompletableFuture f = TaskSet.parallel(exec, 2, new IntIterator(30), (id) -> {
 			try {
 				System.out.println("Task " + id + ": started");
 				if (id == 4) {
