@@ -62,7 +62,7 @@ public class TaskSet {
 					task.run();
 					boolean lastOne;
 					synchronized (tasks) {
-						lastOne = (0 == remaining--) && addingFinished;
+						lastOne = (0 == --remaining) && addingFinished;
 					}
 					onTaskFinished(task);
 					if (lastOne) {
@@ -129,7 +129,7 @@ public class TaskSet {
 		return this;
 	}
 
-	public static <T> CompletableFuture<Void> parallelize(ExecutorService exec, int numberOfThreads, Iterator<T> iterator, Consumer<T> task) throws Exception {
+	public static <T> CompletableFuture<Void> parallel(ExecutorService exec, int numberOfThreads, Iterator<T> iterator, Consumer<T> task) throws Exception {
 		if (numberOfThreads <= 0)
 			numberOfThreads = Runtime.getRuntime().availableProcessors();
 		TaskSet taskSet = new TaskSet(exec);
@@ -151,7 +151,7 @@ public class TaskSet {
 		return taskSet.run();
 	}
 
-	public static <T> CompletableFuture<Void> parallelize(ExecutorService exec, Iterator<T> iterator, Consumer<T> task) throws Exception {
-		return parallelize(exec, 0, iterator, task);
+	public static <T> CompletableFuture<Void> parallel(ExecutorService exec, Iterator<T> iterator, Consumer<T> task) throws Exception {
+		return parallel(exec, 0, iterator, task);
 	}
 }
