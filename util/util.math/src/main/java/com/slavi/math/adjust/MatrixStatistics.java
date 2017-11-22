@@ -1,7 +1,5 @@
-package com.slavi.ann.test;
+package com.slavi.math.adjust;
 
-import com.slavi.math.adjust.Laplas;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MatrixStatistics {

@@ -1,4 +1,4 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.v1;
 
 import com.slavi.math.matrix.Matrix;
 

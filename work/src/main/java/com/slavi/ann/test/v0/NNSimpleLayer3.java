@@ -1,4 +1,4 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.v0;
 
 import com.slavi.ann.ANN;
 import com.slavi.ann.NNLayerBase;

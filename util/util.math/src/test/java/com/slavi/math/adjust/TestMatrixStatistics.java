@@ -1,7 +1,8 @@
-package com.slavi.ann.test;
+package com.slavi.math.adjust;
 
 import java.util.Random;
 
+import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 

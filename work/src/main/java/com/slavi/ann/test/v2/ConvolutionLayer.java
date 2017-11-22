@@ -1,6 +1,6 @@
 package com.slavi.ann.test.v2;
 
-import com.slavi.ann.test.MatrixStatistics;
+import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 

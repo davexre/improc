@@ -1,9 +1,10 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.v0;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.slavi.ann.NNet;
+import com.slavi.ann.test.MnistData;
 import com.slavi.ann.test.MnistData.MnistPattern;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;

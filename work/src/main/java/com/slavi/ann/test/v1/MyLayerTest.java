@@ -1,5 +1,6 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.v1;
 
+import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MyLayerTest {
