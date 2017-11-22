@@ -129,8 +129,8 @@ public class MyMnistDataTest {
 			MyLayer l = (MyLayer) nnet.layers.get(index);
 			System.out.println("\nWeight " + index);
 			System.out.println(l.weight.calcItemStatistics());
-			l.maxInputError.printM("Max input Error");
-			l.tmpOutput.printM("tmpOutput");
+			//l.maxInputError.printM("Max input Error");
+			//l.tmpOutput.printM("tmpOutput");
 		}
 	}
 
