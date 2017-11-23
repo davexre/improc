@@ -2,14 +2,18 @@ package com.slavi.ann.test.v2;
 
 import com.slavi.math.matrix.Matrix;
 
-public class SubsamplingLayer extends Layer {
+public class SubsamplingAvgLayer extends Layer {
 
 	protected int sizeX;
 	protected int sizeY;
+	protected int strideX;
+	protected int strideY;
 	
-	public SubsamplingLayer(int sizeX, int sizeY) {
+	public SubsamplingAvgLayer(int sizeX, int sizeY, int strideX, int strideY) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
+		this.strideX = strideX;
+		this.strideY = strideY;
 	}
 	
 	@Override
@@ -26,8 +30,8 @@ public class SubsamplingLayer extends Layer {
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
 			output.resize(
-					(int) (0.5 + (double) input.getSizeX() / sizeX), 
-					(int) (0.5 + (double) input.getSizeY() / sizeY));
+					(int) (Math.ceil((double) input.getSizeX() / strideX)), 
+					(int) (Math.ceil((double) input.getSizeY() / strideY)));
 			output.make0();
 			for (int i = input.getSizeX() - 1; i >= 0; i++) {
 				int io = i / sizeX;
