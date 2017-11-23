@@ -1,15 +1,13 @@
 package com.slavi.ann.test.v2;
 
-import com.slavi.math.adjust.MatrixStatistics;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
-public class ConvolutionLayer extends Layer {
+public class ConvolutionSameSizeLayer extends Layer {
 
 	protected Matrix kernel;
 	protected double learningRate;
 
-	public ConvolutionLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
+	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
 	}
@@ -22,8 +20,6 @@ public class ConvolutionLayer extends Layer {
 	@Override
 	public void applyWorkspace(Workspace workspace) {
 		LayerWorkspace ws = (LayerWorkspace) workspace;
-		ws.ms.stop();
-		System.out.println(ws.ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
 		ws.dKernel.mSum(kernel, kernel);
 		ws.resetEpoch();
 	}
@@ -33,14 +29,11 @@ public class ConvolutionLayer extends Layer {
 		protected Matrix inputError;
 		protected Matrix output;
 		protected Matrix dKernel;
-		protected Matrix dKernel1;
-		protected MatrixStatistics ms = new MatrixStatistics();
 
 		protected LayerWorkspace() {
 			int kernelSizeX = kernel.getSizeX();
 			int kernelSizeY = kernel.getSizeY();
 			dKernel = new Matrix(kernelSizeX, kernelSizeY);
-			dKernel1 = new Matrix(kernelSizeX, kernelSizeY);
 			output = new Matrix();
 			input = null;
 			inputError = new Matrix();
@@ -49,13 +42,22 @@ public class ConvolutionLayer extends Layer {
 		@Override
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
-			output.resize(input.getSizeX() - kernel.getSizeX() + 1, input.getSizeY() - kernel.getSizeY() + 1);
+			output.resize(input.getSizeX(), input.getSizeY());
+			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
+			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
+
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeY() - 1; ox >= 0; ox--) {
 					double r = 0.0;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+						int iy = oy + ky - padY;
+						if (iy < 0 || iy >= input.getSizeY())
+							continue;
 						for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
-							r += input.getItem(ox + kx, oy + ky) * kernel.getItem(kx, ky);
+							int ix = ox + kx - padX;
+							if (ix < 0 || ix >= input.getSizeX())
+								continue;
+							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
 					r = 1.0 / (1.0 + Math.exp(-r));
@@ -73,28 +75,30 @@ public class ConvolutionLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
+			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
+			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			dKernel1.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeY() - 1; ox >= 0; ox--) {
 					double r = output.getItem(ox, oy);
 					r = error.getItem(ox, oy) * r * (1 - r);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+						int iy = oy + ky - padY;
+						if (iy < 0 || iy >= input.getSizeY())
+							continue;
 						for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
-							double dw = r * input.getItem(ox + kx, oy + ky) * learningRate;
-							inputError.itemAdd(ox + kx, oy + ky, r * kernel.getItem(kx, ky));
-							dKernel1.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+							int ix = ox + kx - padX;
+							if (ix < 0 || ix >= input.getSizeX())
+								continue;
+							double dw = r * input.getItem(ix, iy) * learningRate;
+							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
+							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 						}
 					}
 
 				}
 			}
-			dKernel.mSum(dKernel1, dKernel);
-//			dKernel1.termAbs(dKernel1);
-			Matrix m = new Matrix();
-			error.termAbs(m);
-			ms.addValue(m);
 			input = null;
 			return inputError;
 		}
@@ -102,7 +106,6 @@ public class ConvolutionLayer extends Layer {
 		@Override
 		protected void resetEpoch() {
 			dKernel.make0();
-			ms.start();
 		}
 	}
 }

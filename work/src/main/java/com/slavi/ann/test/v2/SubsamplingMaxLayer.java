@@ -2,12 +2,12 @@ package com.slavi.ann.test.v2;
 
 import com.slavi.math.matrix.Matrix;
 
-public class SubsamplingAvgLayer extends Layer {
+public class SubsamplingMaxLayer extends Layer {
 
 	protected int sizeX;
 	protected int sizeY;
 	
-	public SubsamplingAvgLayer(int sizeX, int sizeY) {
+	public SubsamplingMaxLayer(int sizeX, int sizeY) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 	}
@@ -31,15 +31,16 @@ public class SubsamplingAvgLayer extends Layer {
 			output.resize(
 					(int) (Math.ceil((double) input.getSizeX() / sizeX)), 
 					(int) (Math.ceil((double) input.getSizeY() / sizeY)));
-			output.make0();
+			output.makeR(Double.MIN_VALUE);
 			for (int i = input.getSizeX() - 1; i >= 0; i++) {
 				int io = (i + padX) / sizeX;
 				for (int j = input.getSizeY() - 1; j >= 0; j++) {
 					int jo = (j + padY) / sizeY;
-					output.itemAdd(io, jo, input.getItem(i, j));
+					double v = input.getItem(i, j);
+					if (output.getItem(io, jo) < v)
+						output.setItem(io, jo, v);
 				}
 			}
-			output.rMul(sizeX * sizeY);
 			return output;
 		}
 
@@ -56,12 +57,13 @@ public class SubsamplingAvgLayer extends Layer {
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 
-			double scale = 1.0 / (sizeX * sizeY);
 			for (int i = input.getSizeX() - 1; i >= 0; i++) {
 				int io = (i + padX) / sizeX;
 				for (int j = input.getSizeY() - 1; j >= 0; j++) {
 					int jo = (j + padY) / sizeY;
-					inputError.setItem(i, j, scale * input.getItem(i, j) * error.getItem(io, jo));
+					double v = input.getItem(i, j);
+					if (output.getItem(io, jo) == v)
+						inputError.setItem(i, j, error.getItem(io, jo));
 				}
 			}
 			input = null;

@@ -8,6 +8,9 @@ public abstract class Layer {
 
 	public abstract Workspace createWorkspace();
 	
+	/**
+	 * After calling this method the caller will invoke the resetEpoch method of each Workspace.
+	 */
 	public void applyWorkspaces(List<Workspace> workspaces) {
 		for (Workspace workspace : workspaces) {
 			applyWorkspace(workspace);
@@ -36,12 +39,20 @@ public abstract class Layer {
 
 	public abstract class Workspace {
 		/**
-		 * inputPattern = new Matirx(layer.sizeInput, 1);
+		 * input may be stored internally for use later in backProppagate. It should treated readonly.
+		 * The result may be always the "same instance". It should treated readonly.
 		 */
 		public abstract Matrix feedForward(Matrix input);
 		
+		/**
+		 * error may be the result of the "upper" backPropagate. It should treated readonly.
+		 * The result may be always the "same instance". It should treated readonly.
+		 */
 		public abstract Matrix backPropagate(Matrix error);
 
+		/**
+		 * Clears internal counters "after" applyWorkspace.
+		 */
 		protected abstract void resetEpoch();
 	}
 }
