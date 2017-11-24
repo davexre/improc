@@ -4,12 +4,13 @@ import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionSameSizeLayer extends Layer {
 
-	protected Matrix kernel;
-	protected double learningRate;
+	public Matrix kernel;
+	public double learningRate;
 
 	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
+		fillKernelMatrix(kernel, 0.3);
 	}
 	
 	@Override
@@ -24,11 +25,11 @@ public class ConvolutionSameSizeLayer extends Layer {
 		ws.resetEpoch();
 	}
 
-	protected class LayerWorkspace extends Workspace {
-		protected Matrix input;
-		protected Matrix inputError;
-		protected Matrix output;
-		protected Matrix dKernel;
+	public class LayerWorkspace extends Workspace {
+		public Matrix input;
+		public Matrix inputError;
+		public Matrix output;
+		public Matrix dKernel;
 
 		protected LayerWorkspace() {
 			int kernelSizeX = kernel.getSizeX();
@@ -43,11 +44,11 @@ public class ConvolutionSameSizeLayer extends Layer {
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
 			output.resize(input.getSizeX(), input.getSizeY());
-			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
-			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
+			int padX = kernel.getSizeX() / 2;
+			int padY = kernel.getSizeY() / 2;
 
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
-				for (int ox = output.getSizeY() - 1; ox >= 0; ox--) {
+				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = 0.0;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy + ky - padY;
@@ -75,12 +76,12 @@ public class ConvolutionSameSizeLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
-			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
-			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
+			int padX = kernel.getSizeX() / 2;
+			int padY = kernel.getSizeY() / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
-				for (int ox = output.getSizeY() - 1; ox >= 0; ox--) {
+				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = output.getItem(ox, oy);
 					r = error.getItem(ox, oy) * r * (1 - r);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {

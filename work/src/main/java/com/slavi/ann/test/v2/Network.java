@@ -1,16 +1,35 @@
 package com.slavi.ann.test.v2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.slavi.math.matrix.Matrix;
 
-public class Network extends Layer {
+public class Network extends Layer implements Iterable<Layer>{
 
 	protected List<Layer> layers;
 	
 	public Network(List<Layer> layers) {
-		this.layers = layers;
+		this.layers = Collections.unmodifiableList(layers);
+	}
+
+	public Network(Layer ... layers) {
+		this.layers = Collections.unmodifiableList(Arrays.asList(layers));
+	}
+	
+	public int size() {
+		return layers.size();
+	}
+	
+	public Layer get(int index) {
+		return layers.get(index);
+	}
+	
+	public Iterator<Layer> iterator() {
+		return layers.iterator();
 	}
 	
 	@Override
@@ -19,14 +38,24 @@ public class Network extends Layer {
 	}
 
 	@Override
-	public void applyWorkspace(Workspace workspace) {
-		NetWorkSpace ws = (NetWorkSpace) workspace;
-		for (Workspace i : ws.workspaces)
-			i.resetEpoch();
+	public void applyWorkspaces(List<Workspace> workspaces) {
+		List<Workspace> tmp = new ArrayList<>(workspaces.size());
+		for (int l = 0; l < layers.size(); l++) {
+			for (Workspace i : workspaces) {
+				NetWorkSpace ws = (NetWorkSpace) i;
+				tmp.add(ws.workspaces.get(l));
+			}
+			layers.get(l).applyWorkspaces(tmp);
+			tmp.clear();
+		}
+		for (Workspace i : workspaces) {
+			NetWorkSpace ws = (NetWorkSpace) i;
+			ws.resetEpoch();
+		}
 	}
 	
-	protected class NetWorkSpace extends Workspace {
-		protected List<Workspace> workspaces;
+	public class NetWorkSpace extends Workspace {
+		public List<Workspace> workspaces;
 		
 		protected NetWorkSpace() {
 			workspaces = new ArrayList<>(layers.size());
@@ -53,8 +82,6 @@ public class Network extends Layer {
 
 		@Override
 		protected void resetEpoch() {
-			for (Workspace workspace : workspaces)
-				workspace.resetEpoch();
 		}
 	}
 }

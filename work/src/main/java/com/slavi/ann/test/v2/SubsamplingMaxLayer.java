@@ -4,8 +4,8 @@ import com.slavi.math.matrix.Matrix;
 
 public class SubsamplingMaxLayer extends Layer {
 
-	protected int sizeX;
-	protected int sizeY;
+	public int sizeX;
+	public int sizeY;
 	
 	public SubsamplingMaxLayer(int sizeX, int sizeY) {
 		this.sizeX = sizeX;
@@ -17,10 +17,10 @@ public class SubsamplingMaxLayer extends Layer {
 		return new LayerWorkspace();
 	}
 
-	protected class LayerWorkspace extends Workspace {
-		protected Matrix input = null;
-		protected Matrix output = new Matrix();
-		protected Matrix inputError = new Matrix();
+	public class LayerWorkspace extends Workspace {
+		public Matrix input = null;
+		public Matrix output = new Matrix();
+		public Matrix inputError = new Matrix();
 
 		@Override
 		public Matrix feedForward(Matrix input) {

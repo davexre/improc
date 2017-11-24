@@ -3,14 +3,12 @@ package com.slavi.ann.test.v2;
 import com.slavi.math.matrix.Matrix;
 
 public class FullyConnectedLayer extends Layer {
-	Matrix weight;
-	double learningRate;
-	double scale;
+	public Matrix weight;
+	public double learningRate;
 
 	public FullyConnectedLayer(int sizeInput, int sizeOutput, double learningRate) {
 		this.learningRate = learningRate;
 		weight = new Matrix(sizeInput, sizeOutput);
-		scale = 1.0;
 		fillWeight(weight, 0.3);
 	}
 	
@@ -26,12 +24,12 @@ public class FullyConnectedLayer extends Layer {
 		ws.resetEpoch();
 	}
 
-	protected class LayerWorkspace extends Workspace {
-		protected Matrix input;
-		protected Matrix inputError;
-		protected Matrix output;
-		protected Matrix dW;
-		protected int dCount;
+	public class LayerWorkspace extends Workspace {
+		public Matrix input;
+		public Matrix inputError;
+		public Matrix output;
+		public Matrix dW;
+		public int dCount;
 
 		protected LayerWorkspace() {
 			input = null;
@@ -53,7 +51,7 @@ public class FullyConnectedLayer extends Layer {
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					r += input.getVectorItem(i) * weight.getItem(i, j);
 				}
-				r = 1.0 / (1.0 + Math.exp(-r * scale));
+				r = 1.0 / (1.0 + Math.exp(-r));
 				output.setVectorItem(j, r);
 			}
 			return output;
@@ -68,7 +66,7 @@ public class FullyConnectedLayer extends Layer {
 			inputError.make0();
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = output.getVectorItem(j);
-				r = scale * error.getVectorItem(j) * r * (1 - r);
+				r = error.getVectorItem(j) * r * (1 - r);
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
