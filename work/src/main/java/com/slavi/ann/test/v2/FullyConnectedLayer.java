@@ -1,15 +1,22 @@
 package com.slavi.ann.test.v2;
 
+import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.math.matrix.Matrix;
 
 public class FullyConnectedLayer extends Layer {
 	public Matrix weight;
 	public double learningRate;
+	public double scale;
+	public double bias;
 
 	public FullyConnectedLayer(int sizeInput, int sizeOutput, double learningRate) {
 		this.learningRate = learningRate;
 		weight = new Matrix(sizeInput, sizeOutput);
-		fillWeight(weight, 0.3);
+		BellCurveDistribution.fillWeight(weight, 0.3);
+//		bias = 0.5;
+		scale = 1;
+//		scale = 5.0 / sizeOutput;
+//		weight.rMul(scale);
 	}
 	
 	@Override
@@ -29,6 +36,7 @@ public class FullyConnectedLayer extends Layer {
 		public Matrix inputError;
 		public Matrix output;
 		public Matrix dW;
+		public Matrix dW0;
 		public int dCount;
 
 		protected LayerWorkspace() {
@@ -38,6 +46,7 @@ public class FullyConnectedLayer extends Layer {
 			inputError = new Matrix(sizeInput, 1);
 			output = new Matrix(sizeOutput, 1);
 			dW = new Matrix(sizeInput, sizeOutput);
+			dW0 = new Matrix(sizeInput, sizeOutput);
 			dCount = 0;
 		}
 
@@ -51,7 +60,7 @@ public class FullyConnectedLayer extends Layer {
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					r += input.getVectorItem(i) * weight.getItem(i, j);
 				}
-				r = 1.0 / (1.0 + Math.exp(-r));
+				r = 1.0 / (1.0 + Math.exp(bias - r * scale));
 				output.setVectorItem(j, r);
 			}
 			return output;
@@ -63,17 +72,20 @@ public class FullyConnectedLayer extends Layer {
 				throw new Error("Invalid state");
 			if (error.getVectorSize() != weight.getSizeY())
 				throw new Error("Invalid argument");
+			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
+			dW0.make0();
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = output.getVectorItem(j);
-				r = error.getVectorItem(j) * r * (1 - r);
+				r =  scale * error.getVectorItem(j) * r * (1 - r);
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
+					dW0.itemAdd(i, j, -dw);
 				}
 			}
-			input = null;
+//			input = null;
 			dCount++;
 			return inputError;
 		}
@@ -82,6 +94,14 @@ public class FullyConnectedLayer extends Layer {
 		protected void resetEpoch() {
 			dW.make0();
 			dCount = 0;
+		}
+
+		public String toString() {
+			return new StringBuilder()
+					.append("weight\n").append(weight)
+					.append("dWeight\n").append(dW)
+					.append("output\n").append(output)
+					.toString();
 		}
 	}
 }

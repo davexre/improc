@@ -19,7 +19,8 @@ public class Dummy {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new Dummy().doIt();
+//		new Dummy().doIt();
+		System.out.println(Math.ceil(-5.0/4.0));
 		System.out.println("Done.");
 	}
 }

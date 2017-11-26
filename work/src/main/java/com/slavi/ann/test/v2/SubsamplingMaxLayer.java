@@ -25,20 +25,19 @@ public class SubsamplingMaxLayer extends Layer {
 		@Override
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
-			// Auto-center
+			int sizeOX = (int) Math.ceil(((double) input.getSizeX() / sizeX));
+			int sizeOY = (int) Math.ceil(((double) input.getSizeY() / sizeY));
 			int padX = (input.getSizeX() % sizeX) / 2;
 			int padY = (input.getSizeY() % sizeY) / 2;
-			output.resize(
-					(int) (Math.ceil((double) input.getSizeX() / sizeX)), 
-					(int) (Math.ceil((double) input.getSizeY() / sizeY)));
+			output.resize(sizeOX, sizeOY);
 			output.makeR(Double.MIN_VALUE);
-			for (int i = input.getSizeX() - 1; i >= 0; i++) {
-				int io = (i + padX) / sizeX;
-				for (int j = input.getSizeY() - 1; j >= 0; j++) {
-					int jo = (j + padY) / sizeY;
-					double v = input.getItem(i, j);
-					if (output.getItem(io, jo) < v)
-						output.setItem(io, jo, v);
+			for (int ix = input.getSizeX() - 1; ix >= 0; ix--) {
+				int ox = (ix - padX) / sizeX;
+				for (int iy = input.getSizeY() - 1; iy >= 0; iy--) {
+					int oy = (iy - padY) / sizeY;
+					double v = input.getItem(ix, iy);
+					if (output.getItem(ox, oy) < v)
+						output.setItem(ox, oy, v);
 				}
 			}
 			return output;
@@ -57,13 +56,13 @@ public class SubsamplingMaxLayer extends Layer {
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 
-			for (int i = input.getSizeX() - 1; i >= 0; i++) {
-				int io = (i + padX) / sizeX;
-				for (int j = input.getSizeY() - 1; j >= 0; j++) {
-					int jo = (j + padY) / sizeY;
-					double v = input.getItem(i, j);
-					if (output.getItem(io, jo) == v)
-						inputError.setItem(i, j, error.getItem(io, jo));
+			for (int ix = input.getSizeX() - 1; ix >= 0; ix--) {
+				int ox = (ix - padX) / sizeX;
+				for (int iy = input.getSizeY() - 1; iy >= 0; iy--) {
+					int oy = (iy - padY) / sizeY;
+					double v = input.getItem(ix, iy);
+					if (output.getItem(ox, oy) == v)
+						inputError.setItem(ix, iy, error.getItem(ox, oy));
 				}
 			}
 			input = null;

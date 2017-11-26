@@ -2,8 +2,9 @@ package com.slavi.ann.test.v2.test;
 
 import java.util.ArrayList;
 
-import com.slavi.ann.test.v2.ConvolutionLayer;
 import com.slavi.ann.test.v2.ConvolutionSameSizeLayer;
+import com.slavi.ann.test.v2.ConvolutionWithStrideLayer;
+import com.slavi.ann.test.v2.FullyConnectedLayer;
 import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.Network.NetWorkSpace;
@@ -15,12 +16,24 @@ public class ConvolutionLayerTest {
 
 	void doIt() throws Exception {
 		Network net = new Network(
-				new ConvolutionSameSizeLayer(2, 2, 1)
-				,new ConvolutionLayer(2, 2, 1)
+//				new ConvolutionSameSizeLayer(4, 4, 1),
+//				new ConvolutionSameSizeLayer(4, 4, 1),
+//				new ConvolutionLayer(2, 2, 1)
+//				new ConvolutionWithStrideLayer(2, 2, 2, 2, 1),
+//				new SubsamplingAvgLayer(1, 1),
+//				new SubsamplingMaxLayer(1, 1),
+				new FullyConnectedLayer(16, 4, 1)
+
+//				new FullyConnectedLayer(16, 16, 1),
+//				new FullyConnectedLayer(16, 16, 1),
+//				new FullyConnectedLayer(16, 16, 1),
+//				new FullyConnectedLayer(16, 4, 1)
+//				new FullyConnectedLayer(12, 8, 1),
+//				new FullyConnectedLayer(10, 4, 1)
 				);
 		
 		Matrix input = new Matrix(4, 4);
-		Matrix target = new Matrix(2, 2);
+		Matrix target = new Matrix(4, 1);
 
 		int sizeInput = input.getVectorSize();
 		MatrixStatistics ms = new MatrixStatistics();
@@ -33,7 +46,8 @@ public class ConvolutionLayerTest {
 			System.out.println("---------------------\nEPOCH "  + epoch);
 			ms.start();
 			for (int index = 0; index < sizeInput; index++) {
-				boolean print = index == 1; // || epoch == 19;
+				boolean print = index == 5 || epoch==-10 || epoch==-99; // || epoch == 19;
+				print = false;
 				if (print) System.out.println("Index = " + index);
 
 				for (int i = 0; i < input.getVectorSize(); i++)
@@ -53,12 +67,11 @@ public class ConvolutionLayerTest {
 					error.printM("error");
 /*
 					for (int i = 0; i < net.size(); i++) {
-						ConvolutionLayer.LayerWorkspace w = (ConvolutionLayer.LayerWorkspace) ws.workspaces.get(i);
-						ConvolutionLayer ll = (ConvolutionLayer) net.get(i);
-						w.inputError.printM("IER " + i);
-						w.output.printM("OUT " + i);
-						ll.kernel.printM("Kernel " + i);
-					}*/
+ */
+					{
+						int i = 0;
+						System.out.println(ws.workspaces.get(i));
+					}
 					System.out.println();
 				}
 				error.termAbs(tmpErr);
@@ -67,6 +80,10 @@ public class ConvolutionLayerTest {
 			net.applyWorkspaces(wslist);
 			ms.stop();
 			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+			if (ms.getAbsMaxX().max() < 0.2) {
+				System.out.println("Threshold reached at epoch " + epoch);
+				break;
+			}
 		}
 	}
 

@@ -6,11 +6,18 @@ public class ConvolutionSameSizeLayer extends Layer {
 
 	public Matrix kernel;
 	public double learningRate;
+	public double scale;
+	public double bias;
 
 	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
+		scale = 15.0 / kernel.getVectorSize();
+//		bias = 5;
+//		scale = 1; // ???
 		fillKernelMatrix(kernel, 0.3);
+		kernel.rMul(scale);
+		scale = 1;
 	}
 	
 	@Override
@@ -44,8 +51,8 @@ public class ConvolutionSameSizeLayer extends Layer {
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
 			output.resize(input.getSizeX(), input.getSizeY());
-			int padX = kernel.getSizeX() / 2;
-			int padY = kernel.getSizeY() / 2;
+			int padX = (kernel.getSizeX() - 1) / 2;
+			int padY = (kernel.getSizeY() - 1) / 2;
 
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
@@ -61,7 +68,7 @@ public class ConvolutionSameSizeLayer extends Layer {
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
-					r = 1.0 / (1.0 + Math.exp(-r));
+					r = 1.0 / (1.0 + Math.exp(bias - r * scale));
 					output.setItem(ox, oy, r);
 				}
 			}
@@ -76,14 +83,14 @@ public class ConvolutionSameSizeLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
-			int padX = kernel.getSizeX() / 2;
-			int padY = kernel.getSizeY() / 2;
+			int padX = (kernel.getSizeX() - 1) / 2;
+			int padY = (kernel.getSizeY() - 1) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = output.getItem(ox, oy);
-					r = error.getItem(ox, oy) * r * (1 - r);
+					r = scale * error.getItem(ox, oy) * r * (1 - r);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -107,6 +114,14 @@ public class ConvolutionSameSizeLayer extends Layer {
 		@Override
 		protected void resetEpoch() {
 			dKernel.make0();
+		}
+		
+		public String toString() {
+			return new StringBuilder()
+					.append("Kernel\n").append(kernel)
+					.append("dKernel\n").append(dKernel)
+					.append("output\n").append(output)
+					.toString();
 		}
 	}
 }

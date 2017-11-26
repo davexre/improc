@@ -4,19 +4,25 @@ import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
-public class ConvolutionLayer extends Layer {
+public class ConvolutionWithStrideLayer extends Layer {
 	public Matrix kernel;
 	public double learningRate;
+	public int strideX;
+	public int strideY;
 	public double scale;
 	public double bias;
 	
-	public ConvolutionLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
+	public ConvolutionWithStrideLayer(int kernelSizeX, int kernelSizeY, int strideX, int strideY, double learningRate) {
 		this.learningRate = learningRate;
+		this.strideX = strideX;
+		this.strideY = strideY;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		scale = 10.0 / kernel.getVectorSize();
-		bias = 5;
+		scale = 15.0 / kernel.getVectorSize();
+//		bias = 5;
 //		scale = 1; // ???
 		fillKernelMatrix(kernel, 0.3);
+		kernel.rMul(scale);
+		scale = 1;
 	}
 	
 	@Override
@@ -27,9 +33,6 @@ public class ConvolutionLayer extends Layer {
 	@Override
 	public void applyWorkspace(Workspace workspace) {
 		LayerWorkspace ws = (LayerWorkspace) workspace;
-		ws.ms.stop();
-		System.out.println("INTERNAL STATS (error)");
-		System.out.println(ws.ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
 		ws.dKernel.mSum(kernel, kernel);
 		ws.resetEpoch();
 	}
@@ -58,21 +61,21 @@ public class ConvolutionLayer extends Layer {
 		@Override
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
-			int sizeOX = (int) Math.ceil(((double) input.getSizeX() / kernel.getSizeX()));
-			int sizeOY = (int) Math.ceil(((double) input.getSizeY() / kernel.getSizeY()));
-			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
-			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
+			int sizeOX = (int) Math.ceil(((double) input.getSizeX() / strideX));
+			int sizeOY = (int) Math.ceil(((double) input.getSizeY() / strideY));
+			int padX = (kernel.getSizeX() - strideX) / 2;
+			int padY = (kernel.getSizeY() - strideY) / 2;
 			output.resize(sizeOX, sizeOY);
 			output0.resize(sizeOX, sizeOY);
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = 0.0;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
-						int iy = oy * kernel.getSizeY() + ky - padY;
+						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
 							continue;
 						for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
-							int ix = ox * kernel.getSizeX() + kx - padX;
+							int ix = ox * strideY + kx - padX;
 							if (ix < 0 || ix >= input.getSizeX())
 								continue;
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
@@ -94,8 +97,8 @@ public class ConvolutionLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
-			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
-			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
+			int padX = (kernel.getSizeX() - strideX) / 2;
+			int padY = (kernel.getSizeY() - strideY) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			dKernel1.make0();
@@ -104,11 +107,11 @@ public class ConvolutionLayer extends Layer {
 					double r = output.getItem(ox, oy);
 					r = scale * error.getItem(ox, oy) * r * (1 - r);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
-						int iy = oy * kernel.getSizeY() + ky - padY;
+						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
 							continue;
 						for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
-							int ix = ox * kernel.getSizeX() + kx - padX;
+							int ix = ox * strideY + kx - padX;
 							if (ix < 0 || ix >= input.getSizeX())
 								continue;
 							double dw = r * input.getItem(ix, iy) * learningRate;
@@ -136,7 +139,9 @@ public class ConvolutionLayer extends Layer {
 		}
 		
 		public String toString() {
+			ms.stop();
 			return new StringBuilder()
+					.append("INTERNAL STATS (error)\n").append(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax))
 					.append("Kernel\n").append(kernel)
 					.append("dKernel\n").append(dKernel)
 					.append("dKernel1\n").append(dKernel1)

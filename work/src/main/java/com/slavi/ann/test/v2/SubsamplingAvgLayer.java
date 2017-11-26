@@ -25,18 +25,17 @@ public class SubsamplingAvgLayer extends Layer {
 		@Override
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
-			// Auto-center
+			int sizeOX = (int) Math.ceil(((double) input.getSizeX() / sizeX));
+			int sizeOY = (int) Math.ceil(((double) input.getSizeY() / sizeY));
 			int padX = (input.getSizeX() % sizeX) / 2;
 			int padY = (input.getSizeY() % sizeY) / 2;
-			output.resize(
-					(int) (Math.ceil((double) input.getSizeX() / sizeX)), 
-					(int) (Math.ceil((double) input.getSizeY() / sizeY)));
+			output.resize(sizeOX, sizeOY);
 			output.make0();
-			for (int i = input.getSizeX() - 1; i >= 0; i++) {
-				int io = (i + padX) / sizeX;
-				for (int j = input.getSizeY() - 1; j >= 0; j++) {
-					int jo = (j + padY) / sizeY;
-					output.itemAdd(io, jo, input.getItem(i, j));
+			for (int ix = input.getSizeX() - 1; ix >= 0; ix--) {
+				int ox = (ix - padX) / sizeX;
+				for (int iy = input.getSizeY() - 1; iy >= 0; iy--) {
+					int oy = (iy - padY) / sizeY;
+					output.itemAdd(ox, oy, input.getItem(ix, iy));
 				}
 			}
 			output.rMul(sizeX * sizeY);
@@ -57,11 +56,11 @@ public class SubsamplingAvgLayer extends Layer {
 			inputError.make0();
 
 			double scale = 1.0 / (sizeX * sizeY);
-			for (int i = input.getSizeX() - 1; i >= 0; i++) {
-				int io = (i + padX) / sizeX;
-				for (int j = input.getSizeY() - 1; j >= 0; j++) {
-					int jo = (j + padY) / sizeY;
-					inputError.setItem(i, j, scale * input.getItem(i, j) * error.getItem(io, jo));
+			for (int ix = input.getSizeX() - 1; ix >= 0; ix--) {
+				int ox = (ix - padX) / sizeX;
+				for (int iy = input.getSizeY() - 1; iy >= 0; iy--) {
+					int oy = (iy - padY) / sizeY;
+					inputError.setItem(ix, iy, scale * input.getItem(ix, iy) * error.getItem(ox, oy));
 				}
 			}
 			input = null;

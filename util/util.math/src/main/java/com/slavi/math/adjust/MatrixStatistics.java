@@ -171,7 +171,7 @@ public class MatrixStatistics {
 			double sv1 = sumValues1.getVectorItem(i);
 			double sv2 = sumValues2.getVectorItem(i);
 			stdDev.setVectorItem(i, Math.sqrt(
-					(itemsCount * sv2 - sv1 * sv1) /
+					Math.abs(itemsCount * sv2 - sv1 * sv1) /
 					(itemsCount * (itemsCount - 1))));
 		}
 	}
