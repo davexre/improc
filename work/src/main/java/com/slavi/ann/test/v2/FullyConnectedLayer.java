@@ -15,7 +15,7 @@ public class FullyConnectedLayer extends Layer {
 		BellCurveDistribution.fillWeight(weight, 0.3);
 //		bias = 0.5;
 		scale = 1;
-//		scale = 5.0 / sizeOutput;
+		scale = 5.0 / sizeOutput;
 //		weight.rMul(scale);
 	}
 	
@@ -35,6 +35,7 @@ public class FullyConnectedLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
+		public Matrix output0;
 		public Matrix dW;
 		public Matrix dW0;
 		public int dCount;
@@ -45,6 +46,7 @@ public class FullyConnectedLayer extends Layer {
 			int sizeOutput = weight.getSizeY();
 			inputError = new Matrix(sizeInput, 1);
 			output = new Matrix(sizeOutput, 1);
+			output0 = new Matrix(sizeOutput, 1);
 			dW = new Matrix(sizeInput, sizeOutput);
 			dW0 = new Matrix(sizeInput, sizeOutput);
 			dCount = 0;
@@ -60,6 +62,7 @@ public class FullyConnectedLayer extends Layer {
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					r += input.getVectorItem(i) * weight.getItem(i, j);
 				}
+				output0.setVectorItem(j, bias - r * scale);
 				r = 1.0 / (1.0 + Math.exp(bias - r * scale));
 				output.setVectorItem(j, r);
 			}

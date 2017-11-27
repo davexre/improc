@@ -43,8 +43,8 @@ public class MyMnistDataTest {
 				new ConvolutionWithStrideLayer(5, 5, 2, 2, 1),
 				new FullyConnectedLayer(49, 10, 1)
 	*/			
-				new FullyConnectedLayer(insize, 20, 1),
-				new FullyConnectedLayer(20, 10, 1)
+				new FullyConnectedLayer(insize, 50, 1),
+				new FullyConnectedLayer(50, 10, 1)
 //				new FullyConnectedLayer(insize, 10, 1)
 /*				new FullyConnectedLayer(784, 700, 1),
 				new FullyConnectedLayer(700, 500, 1),
@@ -65,12 +65,14 @@ public class MyMnistDataTest {
 		Matrix tmpErr = new Matrix();
 
 		MatrixStatistics ms = new MatrixStatistics();
+		MatrixStatistics msErr = new MatrixStatistics();
 		NetWorkSpace ws = net.createWorkspace();
 		ArrayList<Workspace> wslist = new ArrayList<>();
 		wslist.add(ws);
-		for (int epoch = 0; epoch < 3; epoch++) {
+		for (int epoch = 0; epoch < 100; epoch++) {
 			System.out.println("--------------------- EPOCH "  + epoch);
 			ms.start();
+			msErr.start();
 			for (int index = 0;
 					index < maxPatternTrain; //pats.size()
 					index++) {
@@ -81,20 +83,27 @@ public class MyMnistDataTest {
 				output.mSub(target, error);
 				Matrix inputError = ws.backPropagate(error);
 
-				FullyConnectedLayer.LayerWorkspace tmpws = (FullyConnectedLayer.LayerWorkspace) ws.workspaces.get(1);
-				FullyConnectedLayer tmpl = (FullyConnectedLayer) net.get(1);
+				FullyConnectedLayer.LayerWorkspace tmpws = (FullyConnectedLayer.LayerWorkspace) ws.workspaces.get(0);
+				FullyConnectedLayer tmpl = (FullyConnectedLayer) net.get(0);
 				
 				error.termAbs(tmpErr);
+				msErr.addValue(tmpErr);
 				if (index == 5) {
-					System.out.println(tmpws.input.toMatlabString("x"));
-					System.out.println(tmpl.weight.toMatlabString("w"));
+					System.out.println(tmpws.output0.toMatlabString("x0"));
+					System.out.println(tmpws.output.maxAbs());
+//					System.out.println(tmpl.weight.toMatlabString("w"));
 				}
-				ms.addValue(tmpErr);
+				ms.addValue(tmpws.output0);
 			}
+			FullyConnectedLayer tmpl = (FullyConnectedLayer) net.get(0);
+			System.out.println("sumW: " + MathUtil.d4(tmpl.weight.sumAbs() ));
 			net.applyWorkspaces(wslist);
 			ms.stop();
+			msErr.stop();
 			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
-			FullyConnectedLayer tmpl = (FullyConnectedLayer) net.get(1);
+			System.out.println("sumW: " + MathUtil.d4(tmpl.weight.sumAbs()) + "/" + MathUtil.d4(tmpl.weight.sumAll()));
+			System.out.println("max abs ms : " + MathUtil.d4(ms.getAbsMaxX().max()));
+			System.out.println("max abs err: " + MathUtil.d4(msErr.getAbsMaxX().max()));
 //			System.out.println(tmpl.weight.toMatlabString("w"));
 			
 /*
