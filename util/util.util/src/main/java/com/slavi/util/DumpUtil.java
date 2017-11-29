@@ -41,7 +41,10 @@ public class DumpUtil {
 	 * names and values on the system console.
 	 * @param object		the object to be displayed
 	 * @see #showObject(Object, boolean, boolean)
+	 * @deprecated Use maven org.apache.commons:commons-lang3 org.apache.commons.lang3.builder.ReflectionToStringBuilder
+	 * Example: ReflectionToStringBuilder.toString(object)
 	 */
+	@Deprecated
 	public static void showObject(Object object) {
 		showObject(object, false, false);
 	}
@@ -53,7 +56,10 @@ public class DumpUtil {
 	 * @param showHidden	if false the hidden (private) fields and 
 	 * 						methods will not be displayed.
 	 * @param showMethods	if false the method names will not be displayed.
+	 * @deprecated Use maven org.apache.commons:commons-lang3 org.apache.commons.lang3.builder.ReflectionToStringBuilder
+	 * Example: ReflectionToStringBuilder.toString(object)
 	 */
+	@Deprecated
 	public static void showObject(Object object, boolean showHidden, boolean showMethods) {
 		if (object == null) {
 			System.out.println("Show object: Object is null.");

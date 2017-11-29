@@ -1,4 +1,4 @@
-package com.test;
+package com.test.java;
 
 @SuppressWarnings("unused")
 public class ReflectAB {

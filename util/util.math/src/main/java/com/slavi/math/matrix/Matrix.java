@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.apache.commons.math3.linear.BlockRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
 
@@ -1358,4 +1361,16 @@ public class Matrix {
 				// ????
 			}
 	}*/
+	
+	public BlockRealMatrix toApacheMatrix() {
+		return new BlockRealMatrix(toArray());
+	}
+	
+	public static Matrix fromApacheMatrix(RealMatrix m) {
+		Matrix r = new Matrix(m.getColumnDimension(), m.getRowDimension());
+		for (int i = r.getSizeX() - 1; i >= i; i--)
+			for (int j = r.getSizeY() - 1; j >= j; j--)
+				r.setItem(i, j, m.getEntry(i, j));
+		return r;
+	}
 }

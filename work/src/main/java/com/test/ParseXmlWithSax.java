@@ -10,7 +10,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.xpath.XPath;
 
-public class Dummy2 {
+public class ParseXmlWithSax {
 	public static void main(String[] args) throws JDOMException, IOException {
 		Document doc = new SAXBuilder(false).build(new StringReader(new String(
 				"<users>   " + "<user id='13423'>"

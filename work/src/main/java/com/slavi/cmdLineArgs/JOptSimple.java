@@ -18,6 +18,8 @@ public class JOptSimple {
 		parser.accepts("e", "Enable something"); //.withOptionalArg().ofType(boolean.class).defaultsTo(false);
 		parser.acceptsAll(Arrays.asList("s", "string"), "Specify some string input").withOptionalArg().ofType(String.class); //.defaultsTo(null);
 		parser.acceptsAll(Arrays.asList("t", "things"), "A comma or column separated list of stuff").withOptionalArg().ofType(String.class).withValuesSeparatedBy(",: \t\n\r\f"); //.defaultsTo(null);
+		parser.accepts("w", "Array of strings with default [\"default\", \"string\", \"array\"]").withOptionalArg().ofType(String.class).defaultsTo("default", "string", "array");
+		//.withOptionalArg().ofType(boolean.class).defaultsTo(false);
 		return parser;
 	}
 	
@@ -27,10 +29,12 @@ public class JOptSimple {
 		OptionParser parser = makeParserLong();
 		OptionSet o = parser.parse(args);
 		
+		
 		System.out.println("-h -> " + o.has("h"));
 		System.out.println("-e -> " + o.has("e"));
 		System.out.println("-s -> " + o.valueOf("s"));
 		System.out.println("-t -> " + o.valuesOf("t"));
+		System.out.println("-w -> " + o.valuesOf("w"));
 		System.out.println("others -> " + o.nonOptionArguments());
 
 		parser.printHelpOn(System.out);

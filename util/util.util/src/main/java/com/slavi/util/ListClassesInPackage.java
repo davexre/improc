@@ -11,6 +11,15 @@ import java.util.StringTokenizer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+/**
+ * Use maven org.reflections:reflections instead.
+ * Example:
+ *	Reflections reflections = new Reflections("com.slavi", new ResourcesScanner());
+ *	Set<String> r = reflections.getResources(Pattern.compile(".*\\.txt", Pattern.CASE_INSENSITIVE));
+ *	for (String i : r)
+ *		System.out.println(i);
+ */
+@Deprecated
 public class ListClassesInPackage {
 
 	private static void listClassFiles(int pathItemAbsolutePathLength, File dir, boolean recurseSubPackages, ArrayList<String>result) {

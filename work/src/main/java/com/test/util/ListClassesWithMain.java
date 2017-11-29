@@ -3,11 +3,16 @@ package com.test.util;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 import com.slavi.util.ListClassesInPackage;
 
 public class ListClassesWithMain {
-	public static void main1(String[] args) {
+	public static void main(String[] args) {
 		List<String> classNames = ListClassesInPackage.getClassNamesInPackage("com.slavi", true);
 		Class<?>[] mainArgs = new Class[] { args.getClass() };
 		for (String className : classNames) {
@@ -25,7 +30,12 @@ public class ListClassesWithMain {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main1(String[] args) {
+		Reflections reflections = new Reflections("com.slavi", new ResourcesScanner());
+		Set<String> r = reflections.getResources(Pattern.compile(".*\\.txt", Pattern.CASE_INSENSITIVE));
+		for (String i : r)
+			System.out.println(i);
+/*
 		File dir = new File("D:/Users/S/LJS/Wink/");
 		File files[] = dir.listFiles();
 		for (File f : files) {
@@ -36,6 +46,6 @@ public class ListClassesWithMain {
 					System.out.println(i);
 				}
 			}
-		}
+		}*/
 	}
 }
