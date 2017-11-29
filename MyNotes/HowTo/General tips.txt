@@ -1,0 +1,6 @@
+Firefox
+=======
+* Custom settings about:config
+dom.webnotifications.enabled false -> disable site notifications
+
+
