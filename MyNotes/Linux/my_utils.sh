@@ -2,6 +2,7 @@
 ##################################################################
 # This file should be sourced from uther scripts:
 #	source my_utils.sh
+##################################################################
 
 ##################################################################
 ### LOGGING
@@ -36,34 +37,82 @@ function log_clear() {
 		touch "$LOG_FILE"
 	fi
 }
+
+#-----------------------------------------------------------------
+# Log with severity level in first parameter. 
+# Severity levels: (see decode_log_level)
+#   DEBUG/D/0, INFO/I/1, WARNING/WARN/W/2, ERROR/ERR/E/3, ALL/A/empty
 function log_severity() {
-	local severity="$1"
+	local level=$(decode_log_level "$1")
+	local tmp=$(decode_log_level ${LOG_LEVEL})
+	if [[ $level -lt $tmp && $tmp -lt 4 ]]; then
+		return
+	fi
+	
 	shift
+	case $level in
+		0)
+			tmp="${COLOR[cyan]}DEBUG${COLOR[reset]}"
+			;;
+		1)
+			tmp="${COLOR[blue]}INFO ${COLOR[reset]}"
+			;;
+		2)
+			tmp="${COLOR[yellow]}WARN ${COLOR[reset]}"
+			;;
+		3)
+			tmp="${COLOR[red]}ERROR${COLOR[reset]}"
+			;;
+		*)
+			tmp="     "
+			;;
+	esac
+	
 	local timestamp=$(date +"$LOG_DATE")
-	echo "${timestamp}${severity} $*" >> "$LOG_FILE"
+	echo "${timestamp} ${tmp} $*" >> "$LOG_FILE"
+}
+
+function decode_log_level() {
+	case "$1" in
+		0 | DEBUG | debug | D | d)
+			echo 0;
+			;;
+		1 | INFO | info | I | i)
+			echo 1;
+			;;
+		2 | WARNING | warning | WARN | warn | W | w)
+			echo 2
+			;;
+		3 | ERROR | error | ERR | err | E | e)
+			echo 3
+			;;
+		4 | ALL | all | A | a | *)
+			echo 4;
+			;;
+	esac
 }
 
 function log() {
-	log_severity "      " "$*"
+	log_severity "" "$*"
 }
 
 function log_debug() {
-	log_severity "${COLOR[cyan]} DEBUG${COLOR[reset]}" "$*"
+	log_severity "DEBUG" "$*"
 }
 
 function log_warn() {
-	log_severity "${COLOR[yellow]} WARN ${COLOR[reset]}" "$*"
+	log_severity "WARN" "$*"
 }
 
 function log_info() {
-	log_severity "${COLOR[blue]} INFO ${COLOR[reset]}" "$*"
+	log_severity "INFO" "$*"
 }
 
 function log_error() {
-	log_severity "${COLOR[red]} ERROR${COLOR[reset]}" "$*"
+	log_severity "ERROR" "$*"
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # STRING Processing
 function trim2() {
 	local f_bak=$-
@@ -78,7 +127,7 @@ function trim() {
 	echo -n "$@" | sed -ze 's/^[[:space:]]*//g; s/[[:space:]]*$//g'
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Usage: local myVar=$(default_string "$2" "$1" "$@" "Some default value")
 function default_string() {
 	while [ $# -gt 0 ]; do
@@ -98,7 +147,7 @@ function execQuiet() {
 	#return $exitCode
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Purpose: Returns exit code 0 if script is executed by the root user
 # Return: exit code 0 -> root, 1->not root
 # Usage: is_root && echo root || echo not root
@@ -106,7 +155,7 @@ function is_root() {
 	[[ $(id -u) -eq 0 ]] && return 1 || return 0
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Copy current user ssh key to a host
 # $1=username@host $2=password
 function copy_ssh_id() {
@@ -132,7 +181,7 @@ EOF
 ### Bash file processing/configuration at the end of scrip
 ##################################################################
 
-##################################################################
+#-----------------------------------------------------------------
 # Searches the $0 file for marker $1 and returns the line number.
 # Usage: local myTokenAtLine=$(findToken "___SOME_MARKER___")
 # The script should contain the token ___SOME_MARKER___ somewhere 
@@ -142,19 +191,40 @@ function findToken() {
 	grep -anm 1 "^${1}\$" "$0" | cut -d ':' -f 1
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Extracts a data segment in $0.
 # Usage: 
 #	local myData=$(extractData "___DATA_1_MARKER___")
 #	local myData=$(extractData "___DATA_1_MARKER___" "___DATA_2_MARKER___")
+# The shorter version:
+# function extractData() {
+# 	local begin=$(findToken "$1")
+# 	local end=${2:+$(findToken "$2")}
+# 	end=${end:+$(($end-$begin-1))}
+# 	(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$') || true
+# }
 function extractData() {
+	if [[ -z "$1" ]]; then
+		return
+	fi
 	local begin=$(findToken "$1")
-	local end=${2:+$(findToken "$2")}
-	end=${end:+$(($end-$begin-1))}
-	tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
+	if [[ -z $begin ]]; then
+		return
+	fi
+	local end="${2}"
+	if [[ -z $end ]]; then
+		tail -n +$(($begin+1)) "$0" | grep -v '^\s*\(#.*\)\?$'
+	else
+		end=$(findToken "$end")
+		if [[ -z $end ]]; then
+			return
+		fi
+		end=${end:+$(($end-$begin-1))}
+		(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$') || true
+	fi
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Extracts a data segment in $0.
 # Usage: 
 #	local myDataLoc1=$(findToken "___DATA_1_MARKER___")
@@ -163,11 +233,14 @@ function extractData() {
 #	local myData=$(extractDataLines $myDataLoc1 $myDataLoc2)
 function extractDataLines() {
 	local begin="$1"
+	if [[ -z $begin ]]; then
+		return
+	fi
 	local end=${2:+$(($2-$begin-1))}
-	tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$'
+	(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$') || true
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Modifies the current script by replacing a data segment. See extractData
 # Usage:
 #	myData=$(echo -e "my multi-\nline data")
@@ -176,16 +249,24 @@ function extractDataLines() {
 function replaceData() {
 	local script=$(
 		local begin=$(findToken "$2")
+		local end=$(findToken "$3")
+		if [[ (-z "$begin") || (! -z "$3" && -z "$end") ]]; then
+			return
+		fi
 		head -n $begin "$0"
 		echo "$1"
 		if [[ -n $3 ]]; then
-			tail -n +$(findToken "$3") "$0"
+			tail -n "+$end" "$0"
 		fi
 	)
+	if [[ -z "$script" ]]; then
+		log_error "Error saving data to script"
+		return 1
+	fi
 	echo "$script" > "$0"
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Property files-like configuration located in a data segment of 
 # the script. The configuration is read in a global variable called
 # cfg. The variable is associative array. Individual properties 
@@ -201,13 +282,15 @@ function read_cfg() {
 	local DATA=$(extractData "$1" "$2")
 	readarray -t keys < <(echo "$DATA" | cut -d '=' -f 1)
 	readarray -t vals < <(echo "$DATA" | cut -d '=' -f 2-)
-	for i in "${!keys[@]}" ; do
-		v=$(echo -e "${vals[$i]}")
-		cfg[$(trim "${keys[$i]}")]=$(trim "$v")
-	done
+	if [[ ! -z "${keys[@]}" ]]; then
+		for i in "${!keys[@]}" ; do
+			v=$(echo -e "${vals[$i]}")
+			cfg[$(trim "${keys[$i]}")]=$(trim "$v")
+		done
+	fi
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Save the data in the global variable (associative array) called cfg.
 # See read_cfg.
 # Usage:
@@ -225,7 +308,7 @@ function save_cfg() {
 	replaceData "$cfg_data" "$1" "$2"
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Error handling in bash
 # Usage: 
 #	BASH_ERROR_LEVEL=IGNORE
@@ -247,7 +330,7 @@ function onBashErrorHandler() {
 	esac
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Set bash option (shopt) and return it's previous value.
 # Usage: 
 #	local myBak=$(setBashOption nocasematch 1)
@@ -267,7 +350,7 @@ function setBashOption() {
 	echo $bak
 }
 
-##################################################################
+#-----------------------------------------------------------------
 # Enable/disable colors
 # Usage: 1-> enable colors 0->disable
 #	colors 1 
@@ -307,14 +390,15 @@ function colors() {
 }
 
 ##################################################################
-# Init
+### Init
 ##################################################################
 
 set -E
 BASH_ERROR_LEVEL=EXIT
 trap 'onBashErrorHandler "${BASH_SOURCE}" "${LINENO}" "$?" "${BASH_COMMAND}"' ERR
 
-colors 1
+colors YES
+LOG_LEVEL=ALL;
 log_stdout
 
 SCRIPT_HOME=$(realpath "$0")

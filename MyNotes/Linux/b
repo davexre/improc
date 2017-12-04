@@ -10,15 +10,19 @@ source my_utils.sh
 #DATA=$(make_cfg)
 #echo "$DATA"
 
-
-#log_warn This is a message
-#log_debug This is a message
-#log_info This is a message
-#log_error This is a message
-#log This is a message
-
 #execQuiet aaals -la
-is_root && echo root || echo not root
+#is_root && echo root || echo not root
+
+start="___SCRIPT___"
+end="___END___"
+
+#extractData $start $end
+
+read_cfg $start $end
+cfg[qqq]=QQQ
+echo "${cfg[@]}"
+save_cfg $start $end
+
 
 
 #echo $EUID
@@ -28,6 +32,7 @@ exit
 ___SCRIPT___
  asd = Some \t data "${vals[@]}"
    qwe = Some = data  
+az=az
 
 ___END___
-eeee
+eeee=aaa
