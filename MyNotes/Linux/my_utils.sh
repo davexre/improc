@@ -22,6 +22,8 @@ function log_file() {
 		fn="${fn}.log"
 	fi
 	fn=$(realpath -mq "$fn")
+	local dir=$(dirname "$fn")
+	mkdir -p "$dir"
 	LOG_FILE="$fn"
 }
 
@@ -32,8 +34,7 @@ function log_stdout() {
 function log_clear() {
 	local tmp=$(dirname "$LOG_FILE")
 	if [[ "$tmp" != "/dev" ]]; then
-		rm -f "$LOG_FILE"
-		touch "$LOG_FILE"
+		echo -n > "$LOG_FILE"
 	fi
 }
 function log_severity() {
