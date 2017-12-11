@@ -112,6 +112,15 @@ function getScriptExitStatement() {
 $(getScriptExitStatement 2)
 echo Will never execute
 
+A function always writes to stderr
+==================================
+function err() {
+	echo "Error"
+} >&2
+asd=$(err)
+echo "-----------"
+echo "$asd"
+
 Custom bash command line completion
 ===================================
 The following script MUST be "source"d into ~/.bashrc

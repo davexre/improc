@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -34,6 +35,15 @@ public abstract class TestDbSpeedBase {
 		return "select min(id), max(id) from t";
 	}
 	
+	String makeRandomAsciiString(int numberOfChars) {
+		StringBuilder sb = new StringBuilder(numberOfChars);
+		Random r = new Random(); // Tried using SecureRandom as Sonar suggests, but it is way too slow.
+		for (int i = 0; i < numberOfChars; i++) {
+			sb.append((char) (r.nextInt(127 - 33) + 33));
+		}
+		return sb.toString();
+	}
+	
 	void createDataRows(Connection conn, AtomicInteger countDown, boolean useAutoCommit) throws SQLException {
 		conn.setAutoCommit(useAutoCommit);
 		PreparedStatement ps = conn.prepareStatement(getSqlForCreateDataRows());
@@ -41,7 +51,7 @@ public abstract class TestDbSpeedBase {
 		int count = 0;
 		while (id >= 0) {
 			count++;
-			ps.setString(1, "Data index " + id);
+			ps.setString(1, "Data index " + id + " " + makeRandomAsciiString(1900));
 			ps.execute();
 			if (!useAutoCommit && count % 10000 == 0) {
 				conn.commit();
