@@ -51,8 +51,9 @@ public class ConvolutionSameSizeLayer extends Layer {
 		public Matrix feedForward(Matrix input) {
 			this.input = input;
 			output.resize(input.getSizeX(), input.getSizeY());
-			int padX = (kernel.getSizeX() - 1) / 2;
-			int padY = (kernel.getSizeY() - 1) / 2;
+			// See https://octave.sourceforge.io/octave/function/conv2.html
+			int padX = kernel.getSizeX() / 2;
+			int padY = kernel.getSizeY() / 2;
 
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
@@ -83,8 +84,8 @@ public class ConvolutionSameSizeLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
-			int padX = (kernel.getSizeX() - 1) / 2;
-			int padY = (kernel.getSizeY() - 1) / 2;
+			int padX = kernel.getSizeX() / 2;
+			int padY = kernel.getSizeY() / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
@@ -104,7 +105,6 @@ public class ConvolutionSameSizeLayer extends Layer {
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 						}
 					}
-
 				}
 			}
 			input = null;
