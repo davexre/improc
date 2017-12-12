@@ -80,6 +80,10 @@ public class Util {
 			size /= 1024.0;
 		}
 		if (Math.abs(size) >= 800.0) {
+			dim = "P";
+			size /= 1024.0;
+		}
+		if (Math.abs(size) >= 800.0) {
 			dim = "E";
 			size /= 1024.0;
 		}

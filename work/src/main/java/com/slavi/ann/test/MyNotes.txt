@@ -1,3 +1,7 @@
 Interesting to read
 ===================
+CNN:
+	https://grzegorzgwardys.wordpress.com/2016/04/22/8/
+	http://www.jefkine.com/general/2016/09/05/backpropagation-in-convolutional-neural-networks/
+	
 https://en.wikipedia.org/wiki/Basis_function

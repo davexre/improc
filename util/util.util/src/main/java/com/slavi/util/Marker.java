@@ -106,13 +106,12 @@ public class Marker {
 	public synchronized static void mark(String markName) {
 		State marker = new State();
 		marker.id = markName;
-		marker.start = System.currentTimeMillis();
 		MemoryUsage memoryUsage = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
 		marker.memoryUsedStart = memoryUsage.getUsed();
 		marker.garbageCounterMark = garbageCounter.get();
-
-		marks.push(marker);
 		System.out.println("Set block marker \"" + markName + "\", memory used " + Util.getFormatBytes(marker.memoryUsedStart));
+		marker.start = System.currentTimeMillis();
+		marks.push(marker);
 	}
 
 	public synchronized static State release() {
