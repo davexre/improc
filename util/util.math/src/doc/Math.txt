@@ -17,6 +17,10 @@ cos(90-a)= sin(a)
 
 Derivatives
 ===========
+
+log b = log_a(b)
+   a
+
 (sinX)'			= cosX
 (cosX)'			= -sinX
 (tanX)'			= 1 + tanX^2 = 1 / (cosX)^2
@@ -25,11 +29,27 @@ Derivatives
 (arctanX)'		= 1 / (1 + X^2)
 (sqrt(X))'		= 1 / (2 * sqrt(X))
 (X^r)'			= r * X^(r-1)
+(a^f(X))'		= (ln a)(a^f)*f'
+(log_a (f(X)))'	= (1/((ln a)*f)) * f'
+(ln(X))'		= 1/X
 (e^X)'			= e^X
 (e^(-X))'		= -e^(-X)
 (f(X) * g(X))'	= (f'*g + f*g')
 (f(X) / g(X))'	= (f'*g - f*g') / g^2
 df(X)/dX		= (df(U(X))/dU(X)) * (dU(X)/dX)
+
+Sigmoid function derivation
+===========================
+https://math.stackexchange.com/questions/78575/derivative-of-sigmoid-function-sigma-x-frac11e-x
+s(x) = 1 / (1+e^(-x))
+ds/dx = ?
+
+Let
+f(x) = 1/s = 1+e^(-x)
+df/dx = d(1/s)/dx = -(1/(s^2))*ds/dx
+df/dx = d(1+e^(-x))/dx = -e^(-x) = 1-f = 1-1/s = (s-1)/s
+-(1/(s^2))*ds/dx = (s-1)/s
+ds/dx = s(1-s)
 
 Normal distribution
 ===================
