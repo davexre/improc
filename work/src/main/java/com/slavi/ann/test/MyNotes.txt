@@ -5,3 +5,48 @@ CNN:
 	http://www.jefkine.com/general/2016/09/05/backpropagation-in-convolutional-neural-networks/
 	
 https://en.wikipedia.org/wiki/Basis_function
+
+Functions & derivatives
+=======================
+
+*** Sigmoid
+s(x) = 1 / (1+e^(-x))
+ds/dx = s(1-s)
+
+*** Applying layer weights
+o - output
+x - input
+w[x,o] - weight between input x and output o
+
+o(x) = sum( x*w[x,o] )
+do/dx = w[x,o]
+do/dw = x
+
+*** Training error
+e - error
+v - last layer output
+t - target value
+
+e(v) = sum( (t-v)^2 ) / 2
+de/dv = v-t
+
+*** Layer & sigmoid
+x - input
+w[x,o] - weight between input x and output o
+o - layer weight sum of inputs
+v - layer output (that can be used as input for the next layer or if last layer compared to a target)
+
+o(x) = sum( x*w[x,o] )
+v(x) = s(o(x)) = 1 / (1+e^(-o(x)))
+dv/dx = (dv/do)*(do/dx) = (ds/do)*(do/dx) = s * (1-s) * w[x,o]
+dv/dw = (dv/do)*(do/dw) = (ds/do)*(do/dw) = s * (1-s) * x
+
+*** Convolution layer
+o - output
+x - input
+k[a,b] - kernel weights. The kernel has size a by b
+
+o(x) = conv2d( x, k )
+do/dx = ?
+do/dw = ?
+
