@@ -1,0 +1,34 @@
+WEB Resources
+============
+http://perldoc.perl.org/
+https://www.tutorialspoint.com/perl/index.htm
+
+Sample script for processing a complex input file and output a CSV
+==================================================================
+#!/usr/bin/perl
+# Usage: this_file.pl < file_to_convert
+#
+@k=qw/host comp_ratio read_count/;
+foreach $i (@k) {
+	print "$i\t"
+}
+print "\n";
+%d=();
+while (<STDIN>) {
+	$_ =~ s/^\s+|\s+$//g;	# Trim all input lines
+	if ($_ =~ /----------------/) {
+		# New section begins
+		foreach $i (@k) {
+			print "$d{$i}\t"
+		}
+		print "\n";
+		%d=();
+	} elsif ($_ =~ /^==== /) {
+		# Data about the host
+		$d{host} = (split(" "))[1];
+	} elsif ($_ =~ /Table Compression Ratio:/) {
+		$d{comp_ratio} = (split(" "))[3];
+	} elsif ($_ =~ /Read Count:/) {
+		$d{read_count} = (split(" "))[2];
+	}
+}

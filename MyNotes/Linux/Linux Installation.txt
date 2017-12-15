@@ -103,6 +103,7 @@ octave                      \
 openssh-server              \
 p7zip                       \
 pavucontrol                 \
+perl-doc                    \
 pinentry-curses             \
 pdfshufler                  \
 ppa-purge                   \

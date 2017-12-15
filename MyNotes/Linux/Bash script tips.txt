@@ -1,5 +1,5 @@
-WEB Rsources
-===========
+WEB Resources
+=============
 * Bash manual: 
 http://www.gnu.org/software/bash/manual/bashref.html
 
