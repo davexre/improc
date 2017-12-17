@@ -42,11 +42,14 @@ dv/dx = (dv/do)*(do/dx) = (ds/do)*(do/dx) = s * (1-s) * w[x,o]
 dv/dw = (dv/do)*(do/dw) = (ds/do)*(do/dw) = s * (1-s) * x
 
 *** Convolution layer
+v - layer after activation function is applied
 o - output
 x - input
 k[a,b] - kernel weights. The kernel has size a by b
 
+v(x) = s(o(x))
 o(x) = conv2d( x, k )
+o[i,j](x) = sum_a(sum_b( k[a,b] * x[i+a,k+b] ))
 do/dx = ?
 do/dw = ?
 

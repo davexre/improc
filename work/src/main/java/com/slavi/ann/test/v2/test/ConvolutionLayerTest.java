@@ -16,7 +16,7 @@ public class ConvolutionLayerTest {
 
 	void doIt() throws Exception {
 		Network net = new Network(
-//				new ConvolutionSameSizeLayer(4, 4, 1),
+				new ConvolutionSameSizeLayer(4, 4, 1),
 //				new ConvolutionSameSizeLayer(4, 4, 1),
 //				new ConvolutionLayer(2, 2, 1)
 //				new ConvolutionWithStrideLayer(2, 2, 2, 2, 1),

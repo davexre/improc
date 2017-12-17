@@ -14,6 +14,8 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.slavi.math.MathUtil;
+import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class MnistData {
@@ -34,19 +36,33 @@ public class MnistData {
 		public byte label;
 		public byte image[];
 
+		public static final int columns = 28;
+		public static final int rows = 28;
+		public static final int size = columns * rows; // 784
+		
 		public BufferedImage toBufferedImage() {
-			int numberOfCols = 28;
-			int numberOfRows = 28;
 
-			BufferedImage img = new BufferedImage(numberOfCols, numberOfRows, BufferedImage.TYPE_USHORT_GRAY);
-			for (int r = 0; r < numberOfRows; r++) {
-				for (int c = 0; c < numberOfCols; c++) {
-					int col = ((int) image[r * numberOfCols + c]) & 0xff;
+			BufferedImage img = new BufferedImage(columns, rows, BufferedImage.TYPE_USHORT_GRAY);
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < columns; c++) {
+					int col = ((int) image[r * columns + c]) & 0xff;
 					col = col << 16 | col << 8 | col;
 					img.setRGB(c, r, col);
 				}
 			}
 			return img;
+		}
+		
+		public void toInputMatrix(Matrix dest) {
+			dest.resize(28, 28);
+			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
+				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, 0.05, 0.95));
+		}
+		
+		public void toOutputMatrix(Matrix dest) {
+			dest.resize(10, 1);
+			for (int i = 0; i < 10; i++)
+				dest.setVectorItem(i, label == i ? 0.95 : 0.05);
 		}
 	}
 
