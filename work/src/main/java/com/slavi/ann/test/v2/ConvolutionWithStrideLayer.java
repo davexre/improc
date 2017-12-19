@@ -25,6 +25,12 @@ public class ConvolutionWithStrideLayer extends Layer {
 		scale = 1;
 	}
 	
+	public int[] getOutputSize(int inputSize[]) {
+		int sizeOX = (int) Math.ceil(((double) inputSize[0] / strideX));
+		int sizeOY = (int) Math.ceil(((double) inputSize[1] / strideY));
+		return new int[] { sizeOX, sizeOY };
+	}
+
 	@Override
 	public LayerWorkspace createWorkspace() {
 		return new LayerWorkspace();

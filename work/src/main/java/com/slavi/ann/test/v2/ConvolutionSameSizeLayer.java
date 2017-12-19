@@ -20,6 +20,10 @@ public class ConvolutionSameSizeLayer extends Layer {
 		scale = 1;
 	}
 	
+	public int[] getOutputSize(int inputSize[]) {
+		return new int[] { inputSize[0], inputSize[1] };
+	}
+
 	@Override
 	public LayerWorkspace createWorkspace() {
 		return new LayerWorkspace();

@@ -18,6 +18,12 @@ public class FullyConnectedLayer extends Layer {
 		scale = 5.0 / sizeOutput;
 //		weight.rMul(scale);
 	}
+
+	public int[] getOutputSize(int inputSize[]) {
+		if (inputSize[0] * inputSize[1]  != weight.getSizeX())
+			throw new Error("Invalid argument");
+		return new int[] { weight.getSizeY(), 1 };
+	}
 	
 	@Override
 	public LayerWorkspace createWorkspace() {

@@ -7,6 +7,8 @@ import com.slavi.math.matrix.Matrix;
 
 public abstract class Layer {
 
+	public abstract int[] getOutputSize(int inputSize[]);
+	
 	public abstract Workspace createWorkspace();
 	
 	public void applyWorkspaces(List<Workspace> workspaces) {

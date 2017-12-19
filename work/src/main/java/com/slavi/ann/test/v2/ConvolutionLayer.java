@@ -19,6 +19,12 @@ public class ConvolutionLayer extends Layer {
 		fillKernelMatrix(kernel, 0.3);
 	}
 	
+	public int[] getOutputSize(int inputSize[]) {
+		int sizeOX = (int) Math.ceil(((double) inputSize[0] / kernel.getSizeX()));
+		int sizeOY = (int) Math.ceil(((double) inputSize[1] / kernel.getSizeY()));
+		return new int[] { sizeOX, sizeOY };
+	}
+	
 	@Override
 	public LayerWorkspace createWorkspace() {
 		return new LayerWorkspace();

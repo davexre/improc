@@ -5,15 +5,13 @@ import java.util.List;
 
 import com.slavi.ann.test.MnistData;
 import com.slavi.ann.test.MnistData.MnistPattern;
-import com.slavi.ann.test.v2.ConvolutionSameSizeLayer;
-import com.slavi.ann.test.v2.ConvolutionWithStrideLayer;
 import com.slavi.ann.test.v2.FullyConnectedLayer;
 import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.Network.NetWorkSpace;
+import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
@@ -26,7 +24,14 @@ public class MyMnistDataTest {
 		Marker.release();
 
 		int outsize = 10;
-		Network net = new Network(
+		Network net = new NetworkBuilder(28, 28)
+//				.addConvolutionLayer(5)
+//				.addConvolutionLayer(5)
+				.addFullyConnectedLayer(30)
+				.addFullyConnectedLayer(10)
+				.build();
+				
+//				new Network(
 //				new ConvolutionWithStrideLayer(4, 4, 1, 1, 1),
 /*				new ConvolutionWithStrideLayer(9, 9, 2, 2, 1),
 				new ConvolutionWithStrideLayer(5, 5, 2, 2, 1),
@@ -34,12 +39,12 @@ public class MyMnistDataTest {
 	*/			
 //				new FullyConnectedLayer(insize, 50, 1),
 //				new FullyConnectedLayer(50, 10, 1)
-				new FullyConnectedLayer(insize, 10, 1)
+//				new FullyConnectedLayer(insize, 10, 1)
 /*				new FullyConnectedLayer(784, 700, 1),
 				new FullyConnectedLayer(700, 500, 1),
 				new FullyConnectedLayer(500, 100, 1),
 				new FullyConnectedLayer(100, 10, 1)*/
-				);
+//				);
 
 		int maxPattern = pats.size();
 		int startPattern = 0;

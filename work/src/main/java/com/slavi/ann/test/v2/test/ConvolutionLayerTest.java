@@ -2,12 +2,10 @@ package com.slavi.ann.test.v2.test;
 
 import java.util.ArrayList;
 
-import com.slavi.ann.test.v2.ConvolutionSameSizeLayer;
-import com.slavi.ann.test.v2.ConvolutionWithStrideLayer;
-import com.slavi.ann.test.v2.FullyConnectedLayer;
 import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.Network.NetWorkSpace;
+import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -15,7 +13,11 @@ import com.slavi.math.matrix.Matrix;
 public class ConvolutionLayerTest {
 
 	void doIt() throws Exception {
-		Network net = new Network(
+		Network net = new NetworkBuilder(16, 1)
+				.addConvolutionSameSizeLayer(4)
+				.addFullyConnectedLayer(4)
+				.build();
+/*		Network net = new Network(
 				new ConvolutionSameSizeLayer(4, 4, 1),
 //				new ConvolutionSameSizeLayer(4, 4, 1),
 //				new ConvolutionLayer(2, 2, 1)
@@ -31,7 +33,7 @@ public class ConvolutionLayerTest {
 //				new FullyConnectedLayer(12, 8, 1),
 //				new FullyConnectedLayer(10, 4, 1)
 				);
-		
+*/		
 		Matrix input = new Matrix(4, 4);
 		Matrix target = new Matrix(4, 1);
 

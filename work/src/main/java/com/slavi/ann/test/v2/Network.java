@@ -19,19 +19,26 @@ public class Network extends Layer implements Iterable<Layer>{
 	public Network(Layer ... layers) {
 		this.layers = Collections.unmodifiableList(Arrays.asList(layers));
 	}
-	
+
 	public int size() {
 		return layers.size();
 	}
-	
+
 	public Layer get(int index) {
 		return layers.get(index);
 	}
-	
+
 	public Iterator<Layer> iterator() {
 		return layers.iterator();
 	}
-	
+
+	public int[] getOutputSize(int inputSize[]) {
+		for (Layer l : layers) {
+			inputSize = l.getOutputSize(inputSize);
+		}
+		return inputSize;
+	}
+
 	@Override
 	public NetWorkSpace createWorkspace() {
 		return new NetWorkSpace();
