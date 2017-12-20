@@ -2,6 +2,7 @@ package com.slavi.ann.test.v2.test;
 
 import java.util.ArrayList;
 
+import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.Network.NetWorkSpace;
@@ -12,12 +13,34 @@ import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionLayerTest {
 
+	public static class BinaryDigitsPattern implements DatapointPair {
+		int number;
+		
+		public int[] getInputSize() {
+			return new int[] { 4, 4 };
+		}
+
+		public int[] getOutputSize() {
+			return new int[] { 4, 1 };
+		}
+
+		public void toInputMatrix(Matrix dest) {
+			for (int i = 0; i < dest.getVectorSize(); i++)
+				dest.setVectorItem(i, number == i ? 0.95 : 0.05);
+		}
+
+		public void toOutputMatrix(Matrix dest) {
+			for (int i = 0; i < dest.getVectorSize(); i++)
+				dest.setVectorItem(i, (number & (1 << i)) == 0 ? 0.05 : 0.95);
+		}
+	}
+	
 	void doIt() throws Exception {
 		Network net = new NetworkBuilder(4, 4)
 //				.addConvolutionLayer(3)
 //				.addConvolutionSameSizeLayer(3)
 //				.addSubsamplingAvgLayer(2)
-				.addFullyConnectedLayer(4)
+//				.addFullyConnectedLayer(4)
 				.addFullyConnectedLayer(4)
 				.build();
 /*		Network net = new Network(
