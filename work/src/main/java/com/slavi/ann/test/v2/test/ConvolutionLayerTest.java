@@ -13,8 +13,11 @@ import com.slavi.math.matrix.Matrix;
 public class ConvolutionLayerTest {
 
 	void doIt() throws Exception {
-		Network net = new NetworkBuilder(16, 1)
-				.addConvolutionSameSizeLayer(4)
+		Network net = new NetworkBuilder(4, 4)
+//				.addConvolutionLayer(3)
+//				.addConvolutionSameSizeLayer(3)
+//				.addSubsamplingAvgLayer(2)
+				.addFullyConnectedLayer(4)
 				.addFullyConnectedLayer(4)
 				.build();
 /*		Network net = new Network(
@@ -58,7 +61,9 @@ public class ConvolutionLayerTest {
 					target.setVectorItem(i, (index & (1 << i)) == 0 ? 0.05 : 0.95);
 
 				Matrix output = ws.feedForward(input);
-				output.mSub(target, error);
+				error.resize(output.getSizeX(), output.getSizeY());
+				for (int i = 0; i < target.getVectorSize(); i++)
+					error.setVectorItem(i, output.getVectorItem(i) - target.getVectorItem(i));
 				Matrix inputError = ws.backPropagate(error);
 
 				if (print) {

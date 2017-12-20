@@ -35,6 +35,7 @@ audacious                   \
 avr-libc                    \
 avrdude                     \
 binutils-avr                \
+bmon                        \
 build-essential             \
 bum                         \
 calibre                     \
@@ -83,6 +84,8 @@ htop                        \
 iftop                       \
 imagemagick                 \
 inkscape                    \
+iperf                       \
+iptraf                      \
 jedit                       \
 kde-baseapps-bin            \
 kdenlive                    \
@@ -96,6 +99,7 @@ mplayer2                    \
 ncdu                        \
 nemo                        \
 nemo-fileroller             \
+nethogs                     \
 nmon                        \
 npm                         \
 ocrmypdf                    \

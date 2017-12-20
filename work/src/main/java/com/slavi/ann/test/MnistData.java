@@ -31,7 +31,7 @@ public class MnistData {
 	String testFileLabels = "t10k-labels-idx1-ubyte.gz";
 	String mnistFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
 
-	public static class MnistPattern {
+	public static class MnistPattern implements DatapointPair {
 		public int patternNumber;
 		public byte label;
 		public byte image[];
@@ -51,6 +51,14 @@ public class MnistData {
 				}
 			}
 			return img;
+		}
+		
+		public int[] getInputSize() {
+			return new int[] { columns, rows };
+		}
+		
+		public int[] getOutputSize() {
+			return new int[] { 10, 1 };
 		}
 		
 		public void toInputMatrix(Matrix dest) {

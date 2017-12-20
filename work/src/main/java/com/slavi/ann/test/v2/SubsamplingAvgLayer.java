@@ -44,7 +44,7 @@ public class SubsamplingAvgLayer extends Layer {
 					output.itemAdd(ox, oy, input.getItem(ix, iy));
 				}
 			}
-			output.rMul(sizeX * sizeY);
+			output.rMul(1.0 / sizeX * sizeY);
 			return output;
 		}
 
@@ -66,7 +66,7 @@ public class SubsamplingAvgLayer extends Layer {
 				int ox = (ix - padX) / sizeX;
 				for (int iy = input.getSizeY() - 1; iy >= 0; iy--) {
 					int oy = (iy - padY) / sizeY;
-					inputError.setItem(ix, iy, scale * input.getItem(ix, iy) * error.getItem(ox, oy));
+					inputError.setItem(ix, iy, scale * error.getItem(ox, oy));
 				}
 			}
 			input = null;
