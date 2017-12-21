@@ -53,14 +53,6 @@ public class MnistData {
 			return img;
 		}
 		
-		public int[] getInputSize() {
-			return new int[] { columns, rows };
-		}
-		
-		public int[] getOutputSize() {
-			return new int[] { 10, 1 };
-		}
-		
 		public void toInputMatrix(Matrix dest) {
 			dest.resize(28, 28);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)

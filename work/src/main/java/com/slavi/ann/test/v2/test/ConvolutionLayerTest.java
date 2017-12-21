@@ -3,39 +3,37 @@ package com.slavi.ann.test.v2.test;
 import java.util.ArrayList;
 
 import com.slavi.ann.test.DatapointPair;
-import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
-import com.slavi.ann.test.v2.Network.NetWorkSpace;
 import com.slavi.ann.test.v2.NetworkBuilder;
-import com.slavi.math.adjust.MatrixStatistics;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionLayerTest {
 
 	public static class BinaryDigitsPattern implements DatapointPair {
-		int number;
+		final int number;
 		
-		public int[] getInputSize() {
-			return new int[] { 4, 4 };
+		public BinaryDigitsPattern(int number) {
+			this.number = number;
 		}
-
-		public int[] getOutputSize() {
-			return new int[] { 4, 1 };
-		}
-
+		
 		public void toInputMatrix(Matrix dest) {
+			dest.resize(4, 4);
 			for (int i = 0; i < dest.getVectorSize(); i++)
 				dest.setVectorItem(i, number == i ? 0.95 : 0.05);
 		}
 
 		public void toOutputMatrix(Matrix dest) {
+			dest.resize(4, 1);
 			for (int i = 0; i < dest.getVectorSize(); i++)
 				dest.setVectorItem(i, (number & (1 << i)) == 0 ? 0.05 : 0.95);
 		}
 	}
 	
 	void doIt() throws Exception {
+		ArrayList<BinaryDigitsPattern> trainset = new ArrayList<>();
+		for (int i = 0; i < 16; i++)
+			trainset.add(new BinaryDigitsPattern(i));
+		
 		Network net = new NetworkBuilder(4, 4)
 //				.addConvolutionLayer(3)
 //				.addConvolutionSameSizeLayer(3)
@@ -60,61 +58,7 @@ public class ConvolutionLayerTest {
 //				new FullyConnectedLayer(10, 4, 1)
 				);
 */		
-		Matrix input = new Matrix(4, 4);
-		Matrix target = new Matrix(4, 1);
-
-		int sizeInput = input.getVectorSize();
-		MatrixStatistics ms = new MatrixStatistics();
-		Matrix error = new Matrix();
-		Matrix tmpErr = new Matrix();
-		NetWorkSpace ws = net.createWorkspace();
-		ArrayList<Workspace> wslist = new ArrayList<>();
-		wslist.add(ws);
-		for (int epoch = 0; epoch < 100; epoch++) {
-			System.out.println("---------------------\nEPOCH "  + epoch);
-			ms.start();
-			for (int index = 0; index < sizeInput; index++) {
-				boolean print = index == 5 || epoch==-10 || epoch==-99; // || epoch == 19;
-				print = false;
-				if (print) System.out.println("Index = " + index);
-
-				for (int i = 0; i < input.getVectorSize(); i++)
-					input.setVectorItem(i, index == i ? 0.95 : 0.05);
-				for (int i = 0; i < target.getVectorSize(); i++)
-					target.setVectorItem(i, (index & (1 << i)) == 0 ? 0.05 : 0.95);
-
-				Matrix output = ws.feedForward(input);
-				error.resize(output.getSizeX(), output.getSizeY());
-				for (int i = 0; i < target.getVectorSize(); i++)
-					error.setVectorItem(i, output.getVectorItem(i) - target.getVectorItem(i));
-				Matrix inputError = ws.backPropagate(error);
-
-				if (print) {
-					input.printM("input");
-					inputError.printM("inputError");
-					target.printM("target");
-					output.printM("output");
-					error.printM("error");
-/*
-					for (int i = 0; i < net.size(); i++) {
- */
-					{
-						int i = 0;
-						System.out.println(ws.workspaces.get(i));
-					}
-					System.out.println();
-				}
-				error.termAbs(tmpErr);
-				ms.addValue(tmpErr);
-			}
-			net.applyWorkspaces(wslist);
-			ms.stop();
-			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
-			if (ms.getAbsMaxX().max() < 0.2) {
-				System.out.println("Threshold reached at epoch " + epoch);
-				break;
-			}
-		}
+		Trainer.train(net, trainset, 100);
 	}
 
 	public static void main(String[] args) throws Exception {

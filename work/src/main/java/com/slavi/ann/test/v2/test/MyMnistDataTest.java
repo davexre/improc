@@ -5,13 +5,13 @@ import java.util.List;
 
 import com.slavi.ann.test.MnistData;
 import com.slavi.ann.test.MnistData.MnistPattern;
-import com.slavi.ann.test.v2.FullyConnectedLayer;
 import com.slavi.ann.test.v2.Layer.Workspace;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.Network.NetWorkSpace;
 import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
@@ -22,12 +22,15 @@ public class MyMnistDataTest {
 		Marker.mark("Read");
 		List<MnistPattern> pats = MnistData.readMnistSet(false);
 		Marker.release();
-
+		ArrayList<MnistPattern> trainset = new ArrayList<>();
+		for (int i = 0; i < 20; i++)
+			trainset.add(pats.get(i));
+		
 		int outsize = 10;
 		Network net = new NetworkBuilder(28, 28)
 //				.addConvolutionLayer(5)
 //				.addConvolutionLayer(5)
-				.addFullyConnectedLayer(30)
+				.addFullyConnectedLayer(300)
 				.addFullyConnectedLayer(10)
 				.build();
 				
@@ -45,11 +48,8 @@ public class MyMnistDataTest {
 				new FullyConnectedLayer(500, 100, 1),
 				new FullyConnectedLayer(100, 10, 1)*/
 //				);
-
-		int maxPattern = pats.size();
-		int startPattern = 0;
-		int maxPatternTrain = 10; //maxPattern / 2;
-
+		Trainer.train(net, trainset, 1000);
+/*
 		Marker.mark("Total");
 		Marker.mark("Train");
 		Matrix input = new Matrix(28, 28);
@@ -67,10 +67,8 @@ public class MyMnistDataTest {
 			System.out.println("--------------------- EPOCH "  + epoch);
 //			ms.start();
 			msErr.start();
-			for (int index = 0;
-					index < maxPatternTrain; //pats.size()
-					index++) {
-				MnistPattern pat = pats.get(startPattern + index);
+			for (int index = 0; index < trainset.size(); index++) {
+				MnistPattern pat = trainset.get(index);
 				pat.toInputMatrix(input);
 				pat.toOutputMatrix(target);
 				Matrix output = ws.feedForward(input);
@@ -95,24 +93,18 @@ public class MyMnistDataTest {
 //			ms.stop();
 			msErr.stop();
 //			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+			System.out.println(msErr.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
 //			System.out.println("sumW: " + MathUtil.d4(tmpl.weight.sumAbs()) + "/" + MathUtil.d4(tmpl.weight.sumAll()));
 //			System.out.println("max abs ms : " + MathUtil.d4(ms.getAbsMaxX().max()));
 			System.out.println("max abs err: " + MathUtil.d4(msErr.getAbsMaxX().max()));
 //			System.out.println(tmpl.weight.toMatlabString("w"));
 			
-/*
-			FullyConnectedLayer.LayerWorkspace tmpws = (FullyConnectedLayer.LayerWorkspace) ws.workspaces.get(0);
-			System.out.println("LAYER 0");
-			System.out.println(tmpws);
-			tmpws = (FullyConnectedLayer.LayerWorkspace) ws.workspaces.get(1);
-			System.out.println("LAYER 1");
-			System.out.println(tmpws);*/
-/*			if (ms.getAbsMaxX().max() < 0.2) {
+			if (msErr.getAbsMaxX().max() < 0.2) {
 				System.out.println("Threshold reached at epoch " + epoch);
 				break;
-			}*/
+			}
 		}
-//		Marker.release();
+//		Marker.release();*/
 	}
 
 	public static void main(String[] args) throws Exception {
