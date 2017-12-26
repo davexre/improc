@@ -9,10 +9,10 @@ public abstract class Layer {
 
 	public abstract int[] getOutputSize(int inputSize[]);
 	
-	public abstract Workspace createWorkspace();
+	public abstract LayerWorkspace createWorkspace();
 	
-	public void applyWorkspaces(List<Workspace> workspaces) {
-		for (Workspace workspace : workspaces) {
+	public void applyWorkspaces(List<LayerWorkspace> workspaces) {
+		for (LayerWorkspace workspace : workspaces) {
 			applyWorkspace(workspace);
 			workspace.resetEpoch();
 		}
@@ -21,7 +21,7 @@ public abstract class Layer {
 	/**
 	 * After calling this method the caller will invoke the resetEpoch method of each Workspace.
 	 */
-	protected void applyWorkspace(Workspace workspaces) {};
+	protected void applyWorkspace(LayerWorkspace workspaces) {};
 
 	public static double sqrt2pi = Math.sqrt(2.0 * Math.PI);
 	
@@ -64,7 +64,7 @@ public abstract class Layer {
 				k.setItem(i, j, (tmpX[i] + tmpY[j]) * 0.5);
 	}
 	
-	public abstract class Workspace {
+	public abstract class LayerWorkspace {
 		/**
 		 * input may be stored internally for use later in backProppagate. It should treated readonly.
 		 * The result may be always the "same instance". It should treated readonly.
@@ -80,6 +80,6 @@ public abstract class Layer {
 		/**
 		 * Clears internal counters "after" applyWorkspace.
 		 */
-		protected abstract void resetEpoch();
+		protected void resetEpoch() {};
 	}
 }

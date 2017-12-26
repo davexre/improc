@@ -1,7 +1,6 @@
-package com.slavi.ann.test.v2;
+package com.slavi.ann.test.v2.connection;
 
-import com.slavi.math.adjust.MatrixStatistics;
-import com.slavi.math.adjust.Statistics;
+import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionWithStrideLayer extends Layer {
@@ -32,34 +31,29 @@ public class ConvolutionWithStrideLayer extends Layer {
 	}
 
 	@Override
-	public LayerWorkspace createWorkspace() {
-		return new LayerWorkspace();
+	public LayerWorkspace2 createWorkspace() {
+		return new LayerWorkspace2();
 	}
 
 	@Override
-	public void applyWorkspace(Workspace workspace) {
-		LayerWorkspace ws = (LayerWorkspace) workspace;
+	public void applyWorkspace(LayerWorkspace workspace) {
+		LayerWorkspace2 ws = (LayerWorkspace2) workspace;
 		ws.dKernel.mSum(kernel, kernel);
 		ws.resetEpoch();
 	}
 
-	public class LayerWorkspace extends Workspace {
+	public class LayerWorkspace2 extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		public Matrix output0;
 		
 		public Matrix dKernel;
-		public Matrix dKernel1;
-		public MatrixStatistics ms = new MatrixStatistics();
 
-		protected LayerWorkspace() {
+		protected LayerWorkspace2() {
 			int kernelSizeX = kernel.getSizeX();
 			int kernelSizeY = kernel.getSizeY();
 			dKernel = new Matrix(kernelSizeX, kernelSizeY);
-			dKernel1 = new Matrix(kernelSizeX, kernelSizeY);
 			output = new Matrix();
-			output0 = new Matrix();
 			input = null;
 			inputError = new Matrix();
 		}
@@ -72,7 +66,6 @@ public class ConvolutionWithStrideLayer extends Layer {
 			int padX = (kernel.getSizeX() - strideX) / 2;
 			int padY = (kernel.getSizeY() - strideY) / 2;
 			output.resize(sizeOX, sizeOY);
-			output0.resize(sizeOX, sizeOY);
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = 0.0;
@@ -87,9 +80,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
-					output0.setItem(ox, oy, bias - r * scale);
-					r = 1.0 / (1.0 + Math.exp(bias - r * scale));
-					output.setItem(ox, oy, r);
+					output.setItem(ox, oy, r * scale - bias);
 				}
 			}
 			return output;
@@ -107,11 +98,9 @@ public class ConvolutionWithStrideLayer extends Layer {
 			int padY = (kernel.getSizeY() - strideY) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			dKernel1.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
-					double r = output.getItem(ox, oy);
-					r = scale * error.getItem(ox, oy) * r * (1 - r);
+					double r = scale * error.getItem(ox, oy);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -122,36 +111,24 @@ public class ConvolutionWithStrideLayer extends Layer {
 								continue;
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
-							dKernel1.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 						}
 					}
 
 				}
 			}
-//			dKernel1.rMul(1.0 / output.getVectorSize());
-			dKernel.mSum(dKernel1, dKernel);
-//			dKernel1.termAbs(dKernel1);
-			Matrix m = new Matrix();
-			error.termAbs(m);
-			ms.addValue(m);
-			input = null;
 			return inputError;
 		}
 
 		@Override
 		protected void resetEpoch() {
 			dKernel.make0();
-			ms.start();
 		}
 		
 		public String toString() {
-			ms.stop();
 			return new StringBuilder()
-					.append("INTERNAL STATS (error)\n").append(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax))
 					.append("Kernel\n").append(kernel)
 					.append("dKernel\n").append(dKernel)
-					.append("dKernel1\n").append(dKernel1)
-					.append("output0\n").append(output0)
 					.append("output\n").append(output)
 					.toString();
 		}

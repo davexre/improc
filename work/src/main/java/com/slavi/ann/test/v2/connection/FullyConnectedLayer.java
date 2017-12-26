@@ -1,6 +1,8 @@
-package com.slavi.ann.test.v2;
+package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.BellCurveDistribution;
+import com.slavi.ann.test.v2.Layer;
+import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.math.matrix.Matrix;
 
 public class FullyConnectedLayer extends Layer {
@@ -26,35 +28,31 @@ public class FullyConnectedLayer extends Layer {
 	}
 	
 	@Override
-	public LayerWorkspace createWorkspace() {
-		return new LayerWorkspace();
+	public LayerWorkspace2 createWorkspace() {
+		return new LayerWorkspace2();
 	}
 
 	@Override
-	public void applyWorkspace(Workspace workspace) {
-		LayerWorkspace ws = (LayerWorkspace) workspace;
+	public void applyWorkspace(LayerWorkspace workspace) {
+		LayerWorkspace2 ws = (LayerWorkspace2) workspace;
 		ws.dW.mSum(weight, weight);
 		ws.resetEpoch();
 	}
 
-	public class LayerWorkspace extends Workspace {
+	public class LayerWorkspace2 extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		public Matrix output0;
 		public Matrix dW;
-		public Matrix dW0;
 		public int dCount;
 
-		protected LayerWorkspace() {
+		protected LayerWorkspace2() {
 			input = null;
 			int sizeInput = weight.getSizeX();
 			int sizeOutput = weight.getSizeY();
 			inputError = new Matrix(sizeInput, 1);
 			output = new Matrix(sizeOutput, 1);
-			output0 = new Matrix(sizeOutput, 1);
 			dW = new Matrix(sizeInput, sizeOutput);
-			dW0 = new Matrix(sizeInput, sizeOutput);
 			dCount = 0;
 		}
 
@@ -68,9 +66,7 @@ public class FullyConnectedLayer extends Layer {
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					r += input.getVectorItem(i) * weight.getItem(i, j);
 				}
-				output0.setVectorItem(j, bias - r * scale);
-				r = 1.0 / (1.0 + Math.exp(bias - r * scale));
-				output.setVectorItem(j, r);
+				output.setVectorItem(j, r * scale - bias);
 			}
 			return output;
 		}
@@ -83,18 +79,16 @@ public class FullyConnectedLayer extends Layer {
 				throw new Error("Invalid argument");
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			dW0.make0();
+			
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
-				double r = output.getVectorItem(j);
-				r =  scale * error.getVectorItem(j) * r * (1 - r);
+				double r = scale * error.getVectorItem(j);
+				
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
-					dW0.itemAdd(i, j, -dw);
 				}
 			}
-//			input = null;
 			dCount++;
 			return inputError;
 		}

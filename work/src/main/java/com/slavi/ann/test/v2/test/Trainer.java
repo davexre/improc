@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
-import com.slavi.ann.test.v2.Layer.Workspace;
+import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
@@ -33,8 +33,9 @@ public class Trainer {
 		Matrix error = new Matrix();
 		Matrix absError = new Matrix();
 		MatrixStatistics ms = new MatrixStatistics();
-		Workspace ws = l.createWorkspace();
-		ArrayList<Workspace> wslist = new ArrayList<>();
+		MatrixStatistics ms2 = new MatrixStatistics();
+		LayerWorkspace ws = l.createWorkspace();
+		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
 		Matrix lastAvgE = new Matrix();
 		double lastAvgError = 0;
@@ -43,6 +44,7 @@ public class Trainer {
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
 			System.out.println("--------------------- EPOCH "  + epoch);
 			ms.start();
+			ms2.start();
 			int index = 0;
 			errors.clear();
 			for (DatapointPair pair : trainset) {
@@ -62,13 +64,18 @@ public class Trainer {
 				ms.addValue(absError);
 				errors.add(new DatapointTrainResult(index, absError.sumAll() / absError.getVectorSize()));
 				Matrix inputError = ws.backPropagate(error);
+				inputError.termAbs(inputError);
+				ms2.addValue(inputError);
 				if (print) {
 					System.out.println("E(5):" + error.toString());
 				}
 				index++;
 			}
 			ms.stop();
-			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+			ms2.stop();
+//			System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+//			System.out.println(ms2.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+			System.out.println("MaxAbs=" + MathUtil.d20(ms2.getAbsMaxX().maxAbs()));
 			Matrix avg = ms.getAvgValue();
 			double avgError = avg.sumAll() / avg.getVectorSize();
 			double dE = lastAvgError - avgError;
@@ -79,10 +86,22 @@ public class Trainer {
 				System.out.println("dAvgE=" + lastAvgE);
 			}
 			
-			Collections.sort(errors);
+/*			Collections.sort(errors);
 			for (int i = 0; i < 5 && i < errors.size(); i++) {
 				DatapointTrainResult e = errors.get(i);
 				System.out.println("INDEX " + e.index + " ERROR:" + e.error);
+			}*/
+			double maxStdInputErr = ms2.getStdDeviation().max();
+			System.out.println("maxStdInputErr: " + MathUtil.d4(maxStdInputErr));
+			System.out.println("maxErr:         " + MathUtil.d4(maxE));
+			System.out.println("avgError:       " + MathUtil.d4(avgError));
+			System.out.println("avg Max Error:  " + MathUtil.d4(avg.max()));
+			System.out.println("std Max Error:  " + MathUtil.d4(ms.getStdDeviation().max()));
+			System.out.println("dAvgE:          " + MathUtil.d4(dE));
+			
+			if (maxStdInputErr < 0.0001) {
+				System.out.println("Input error std dev threshold reached at epoch " + epoch + " maxE=" + maxE + " dAvgE=" + dE);
+				break;
 			}
 			if (maxE < 0.2) { // || (dE > 0 && dE < 0.001)) {
 				System.out.println("Threshold reached at epoch " + epoch + " maxE=" + maxE + " dAvgE=" + dE);

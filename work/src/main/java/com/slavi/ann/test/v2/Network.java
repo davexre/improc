@@ -45,24 +45,24 @@ public class Network extends Layer implements Iterable<Layer>{
 	}
 
 	@Override
-	public void applyWorkspaces(List<Workspace> workspaces) {
-		List<Workspace> tmp = new ArrayList<>(workspaces.size());
+	public void applyWorkspaces(List<LayerWorkspace> workspaces) {
+		List<LayerWorkspace> tmp = new ArrayList<>(workspaces.size());
 		for (int l = 0; l < layers.size(); l++) {
-			for (Workspace i : workspaces) {
+			for (LayerWorkspace i : workspaces) {
 				NetWorkSpace ws = (NetWorkSpace) i;
 				tmp.add(ws.workspaces.get(l));
 			}
 			layers.get(l).applyWorkspaces(tmp);
 			tmp.clear();
 		}
-		for (Workspace i : workspaces) {
+		for (LayerWorkspace i : workspaces) {
 			NetWorkSpace ws = (NetWorkSpace) i;
 			ws.resetEpoch();
 		}
 	}
 	
-	public class NetWorkSpace extends Workspace {
-		public List<Workspace> workspaces;
+	public class NetWorkSpace extends LayerWorkspace {
+		public List<LayerWorkspace> workspaces;
 		
 		protected NetWorkSpace() {
 			workspaces = new ArrayList<>(layers.size());
@@ -72,7 +72,7 @@ public class Network extends Layer implements Iterable<Layer>{
 
 		@Override
 		public Matrix feedForward(Matrix input) {
-			for (Workspace workspace : workspaces) {
+			for (LayerWorkspace workspace : workspaces) {
 				input = workspace.feedForward(input);
 			}
 			return input;
@@ -81,7 +81,7 @@ public class Network extends Layer implements Iterable<Layer>{
 		@Override
 		public Matrix backPropagate(Matrix error) {
 			for (int i = workspaces.size() - 1; i >= 0; i--) {
-				Workspace workspace = workspaces.get(i);
+				LayerWorkspace workspace = workspaces.get(i);
 				error = workspace.backPropagate(error);
 			}
 			return error;

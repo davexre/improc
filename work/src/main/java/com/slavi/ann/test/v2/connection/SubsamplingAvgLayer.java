@@ -1,5 +1,6 @@
-package com.slavi.ann.test.v2;
+package com.slavi.ann.test.v2.connection;
 
+import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
 
 public class SubsamplingAvgLayer extends Layer {
@@ -19,11 +20,11 @@ public class SubsamplingAvgLayer extends Layer {
 	}
 	
 	@Override
-	public LayerWorkspace createWorkspace() {
-		return new LayerWorkspace();
+	public Workspace createWorkspace() {
+		return new Workspace();
 	}
 
-	public class LayerWorkspace extends Workspace {
+	public class Workspace extends LayerWorkspace {
 		public Matrix input = null;
 		public Matrix output = new Matrix();
 		public Matrix inputError = new Matrix();
@@ -71,10 +72,6 @@ public class SubsamplingAvgLayer extends Layer {
 			}
 			input = null;
 			return inputError;
-		}
-
-		@Override
-		protected void resetEpoch() {
 		}
 	}
 }

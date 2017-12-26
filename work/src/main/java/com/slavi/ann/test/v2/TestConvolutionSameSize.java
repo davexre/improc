@@ -1,6 +1,6 @@
 package com.slavi.ann.test.v2;
 
-import com.slavi.ann.test.v2.ConvolutionSameSizeLayer.LayerWorkspace;
+import com.slavi.ann.test.v2.connection.ConvolutionSameSizeLayer;
 import com.slavi.math.matrix.Matrix;
 
 public class TestConvolutionSameSize {
@@ -10,7 +10,7 @@ public class TestConvolutionSameSize {
 		l.scale = 1;
 		l.kernel.makeR(0);
 		l.kernel.setItem(1, 1, 1);
-		LayerWorkspace w = l.createWorkspace();
+		ConvolutionSameSizeLayer.Workspace w = l.createWorkspace();
 		Matrix m = new Matrix(3, 3);
 		m.setItem(0, 0, 1);
 		m.setItem(1, 0, 2);
