@@ -3,6 +3,7 @@ package com.slavi.ann.test.v2;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.ann.test.v2.activation.ConstScaleAndBiasLayer;
 import com.slavi.ann.test.v2.activation.ReLULayer;
 import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
@@ -53,6 +54,15 @@ public class NetworkBuilder {
 
 	public NetworkBuilder addFullyConnectedLayer(int outputSize) {
 		return addLayer(new FullyConnectedLayer(lastSize[0] * lastSize[1], outputSize, 1));
+	}
+
+	public NetworkBuilder addConstScaleAndBiasLayer() {
+		int outputSize = lastSize[0] * lastSize[1];
+		return addLayer(new ConstScaleAndBiasLayer(5.0 / outputSize, 0));
+	}
+
+	public NetworkBuilder addConstScaleAndBiasLayer(double scale, double bias) {
+		return addLayer(new ConstScaleAndBiasLayer(scale, bias));
 	}
 
 	public NetworkBuilder addSigmoidLayer() {

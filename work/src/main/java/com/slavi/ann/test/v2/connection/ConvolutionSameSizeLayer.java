@@ -7,18 +7,11 @@ public class ConvolutionSameSizeLayer extends Layer {
 
 	public Matrix kernel;
 	public double learningRate;
-	public double scale;
-	public double bias;
 
 	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		scale = 15.0 / kernel.getVectorSize();
-//		bias = 5;
-//		scale = 1; // ???
 		fillKernelMatrix(kernel, 0.3);
-		kernel.rMul(scale);
-		scale = 1;
 	}
 	
 	public int[] getOutputSize(int inputSize[]) {
@@ -74,7 +67,7 @@ public class ConvolutionSameSizeLayer extends Layer {
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
-					output.setItem(ox, oy, r * scale - bias);
+					output.setItem(ox, oy, r);
 				}
 			}
 			return output;
@@ -94,7 +87,7 @@ public class ConvolutionSameSizeLayer extends Layer {
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
-					double r = scale * error.getItem(ox, oy);
+					double r = error.getItem(ox, oy);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -110,7 +103,6 @@ public class ConvolutionSameSizeLayer extends Layer {
 					}
 				}
 			}
-			input = null;
 			return inputError;
 		}
 

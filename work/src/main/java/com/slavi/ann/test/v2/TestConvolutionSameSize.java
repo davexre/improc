@@ -7,7 +7,6 @@ public class TestConvolutionSameSize {
 
 	void doIt() throws Exception {
 		ConvolutionSameSizeLayer l = new ConvolutionSameSizeLayer(2, 2, 1);
-		l.scale = 1;
 		l.kernel.makeR(0);
 		l.kernel.setItem(1, 1, 1);
 		ConvolutionSameSizeLayer.Workspace w = l.createWorkspace();

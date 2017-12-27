@@ -8,20 +8,13 @@ public class ConvolutionWithStrideLayer extends Layer {
 	public double learningRate;
 	public int strideX;
 	public int strideY;
-	public double scale;
-	public double bias;
 	
 	public ConvolutionWithStrideLayer(int kernelSizeX, int kernelSizeY, int strideX, int strideY, double learningRate) {
 		this.learningRate = learningRate;
 		this.strideX = strideX;
 		this.strideY = strideY;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		scale = 15.0 / kernel.getVectorSize();
-//		bias = 5;
-//		scale = 1; // ???
 		fillKernelMatrix(kernel, 0.3);
-		kernel.rMul(scale);
-		scale = 1;
 	}
 	
 	public int[] getOutputSize(int inputSize[]) {
@@ -31,25 +24,25 @@ public class ConvolutionWithStrideLayer extends Layer {
 	}
 
 	@Override
-	public LayerWorkspace2 createWorkspace() {
-		return new LayerWorkspace2();
+	public Workspace createWorkspace() {
+		return new Workspace();
 	}
 
 	@Override
 	public void applyWorkspace(LayerWorkspace workspace) {
-		LayerWorkspace2 ws = (LayerWorkspace2) workspace;
+		Workspace ws = (Workspace) workspace;
 		ws.dKernel.mSum(kernel, kernel);
 		ws.resetEpoch();
 	}
 
-	public class LayerWorkspace2 extends LayerWorkspace {
+	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
 		
 		public Matrix dKernel;
 
-		protected LayerWorkspace2() {
+		protected Workspace() {
 			int kernelSizeX = kernel.getSizeX();
 			int kernelSizeY = kernel.getSizeY();
 			dKernel = new Matrix(kernelSizeX, kernelSizeY);
@@ -80,7 +73,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
-					output.setItem(ox, oy, r * scale - bias);
+					output.setItem(ox, oy, r);
 				}
 			}
 			return output;
@@ -100,7 +93,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
-					double r = scale * error.getItem(ox, oy);
+					double r = error.getItem(ox, oy);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())

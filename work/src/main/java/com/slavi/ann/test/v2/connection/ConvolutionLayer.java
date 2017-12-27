@@ -1,21 +1,15 @@
 package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.v2.Layer;
-import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionLayer extends Layer {
 	public Matrix kernel;
 	public double learningRate;
-	public double scale;
-	public double bias;
 	
 	public ConvolutionLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		scale = 10.0 / kernel.getVectorSize();
-		bias = 5;
-//		scale = 1; // ???
 		fillKernelMatrix(kernel, 0.3);
 	}
 	
@@ -26,34 +20,26 @@ public class ConvolutionLayer extends Layer {
 	}
 	
 	@Override
-	public LayerWorkspace2 createWorkspace() {
-		return new LayerWorkspace2();
+	public Workspace createWorkspace() {
+		return new Workspace();
 	}
 
 	@Override
 	public void applyWorkspace(LayerWorkspace workspace) {
-		LayerWorkspace2 ws = (LayerWorkspace2) workspace;
-		ws.ms.stop();
-//		System.out.println("INTERNAL STATS (error)");
-//		System.out.println(ws.ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+		Workspace ws = (Workspace) workspace;
 		ws.dKernel.mSum(kernel, kernel);
-		ws.resetEpoch();
 	}
 
-	public class LayerWorkspace2 extends LayerWorkspace {
+	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		
 		public Matrix dKernel;
-		public Matrix dKernel1;
-		public MatrixStatistics ms = new MatrixStatistics();
 
-		protected LayerWorkspace2() {
+		protected Workspace() {
 			int kernelSizeX = kernel.getSizeX();
 			int kernelSizeY = kernel.getSizeY();
 			dKernel = new Matrix(kernelSizeX, kernelSizeY);
-			dKernel1 = new Matrix(kernelSizeX, kernelSizeY);
 			output = new Matrix();
 			input = null;
 			inputError = new Matrix();
@@ -81,7 +67,7 @@ public class ConvolutionLayer extends Layer {
 							r += input.getItem(ix, iy) * kernel.getItem(kx, ky);
 						}
 					}
-					output.setItem(ox, oy, r * scale - bias);
+					output.setItem(ox, oy, r);
 				}
 			}
 			return output;
@@ -99,10 +85,9 @@ public class ConvolutionLayer extends Layer {
 			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			dKernel1.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
-					double r = scale * error.getItem(ox, oy);
+					double r = error.getItem(ox, oy);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * kernel.getSizeY() + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -113,33 +98,24 @@ public class ConvolutionLayer extends Layer {
 								continue;
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
-							dKernel1.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 						}
 					}
 
 				}
 			}
-//			dKernel1.rMul(1.0 / output.getVectorSize());
-			dKernel.mSum(dKernel1, dKernel);
-//			dKernel1.termAbs(dKernel1);
-			Matrix m = new Matrix();
-			error.termAbs(m);
-			ms.addValue(m);
-			input = null;
 			return inputError;
 		}
 
 		@Override
 		protected void resetEpoch() {
 			dKernel.make0();
-			ms.start();
 		}
 		
 		public String toString() {
 			return new StringBuilder()
 					.append("Kernel\n").append(kernel)
 					.append("dKernel\n").append(dKernel)
-					.append("dKernel1\n").append(dKernel1)
 					.append("output\n").append(output)
 					.toString();
 		}
