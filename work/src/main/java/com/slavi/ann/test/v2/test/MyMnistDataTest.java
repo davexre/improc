@@ -34,7 +34,8 @@ public class MyMnistDataTest {
 				.addFullyConnectedLayer(10)
 				.addConstScaleAndBiasLayer()
 				.addSigmoidLayer()
-				.addLayer(new DebugLayer("fully connected", 0, DebugLayer.defaultStyle))
+//				.addLayer(new DebugLayer("fully connected", DebugLayer.defaultStyle))
+
 
 				.build();
 

@@ -1,7 +1,6 @@
 package com.slavi.ann.test.v2.test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
@@ -38,7 +37,6 @@ public class Trainer {
 		LayerWorkspace ws = l.createWorkspace();
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
-		Matrix lastAvgE = new Matrix();
 		double lastAvgError = 0;
 
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
@@ -49,6 +47,7 @@ public class Trainer {
 			st.start();
 			int index = 0;
 			errors.clear();
+			int patternsLearend = 0;
 			for (DatapointPair pair : trainset) {
 				boolean print = (index == 5);
 				print = false;
@@ -63,6 +62,8 @@ public class Trainer {
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
 				}
+				if (absError.max() < 0.15)
+					patternsLearend++;
 				stAbsError.addValue(absError);
 				errors.add(new DatapointTrainResult(index, absError.sumAll() / absError.getVectorSize()));
 				st.addValue(error.maxAbs());
@@ -77,22 +78,16 @@ public class Trainer {
 			stAbsError.stop();
 			stInputError.stop();
 			st.stop();
-			System.out.println("MS - AbsError");
-			System.out.println(stAbsError.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+//			System.out.println("MS - AbsError");
+//			System.out.println(stAbsError.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
 //			System.out.println(stInputError.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
-			System.out.println("MaxAbs=" + MathUtil.d4(stInputError.getAbsMaxX().maxAbs()));
-			System.out.println("Max(Error) stats\n" + st.toString(Statistics.CStatStdDev | Statistics.CStatMinMax| Statistics.CStatAbs));
+			System.out.println("MaxAbsInputErr=" + MathUtil.d4(stInputError.getAbsMaxX().maxAbs()));
+//			System.out.println("Max(Error) stats\n" + st.toString(Statistics.CStatStdDev | Statistics.CStatMinMax| Statistics.CStatAbs));
 			Matrix avg = stAbsError.getAvgValue();
-			double avgError = avg.sumAll() / avg.getVectorSize();
-			double dE = lastAvgError - avgError;
+			double avgError = avg.sumAll(); // / avg.getVectorSize();
+			double learnProgress = lastAvgError - avgError;
 			lastAvgError = avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
-			double dE2 = 0;
-			if (epoch > 0) {
-				lastAvgE.mSub(avg, lastAvgE);
-				dE2 = lastAvgE.maxAbs();
-				System.out.println("dAvgE=" + lastAvgE);
-			}
 			
 /*			Collections.sort(errors);
 			for (int i = 0; i < 5 && i < errors.size(); i++) {
@@ -100,26 +95,32 @@ public class Trainer {
 				System.out.println("INDEX " + e.index + " ERROR:" + e.error);
 			}*/
 			double maxStdInputErr = stInputError.getStdDeviation().max();
-			System.out.println("maxStdInputErr: " + MathUtil.d4(maxStdInputErr));
-			System.out.println("maxErr:         " + MathUtil.d4(maxErr));
-			System.out.println("avgAvgError:    " + MathUtil.d4(avgError));
-			System.out.println("avg Max Error:  " + MathUtil.d4(avg.max()));
-			System.out.println("std Max Error:  " + MathUtil.d4(stAbsError.getStdDeviation().max()));
-			System.out.println("dAvgE:          " + MathUtil.d4(dE * 100));
-			System.out.println("dAvgE2:         " + MathUtil.d4(dE2 * 100));
+			double patternsLearendPercent = (double) patternsLearend / index;
+			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
+			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
+			System.out.println("avgAvgError:      " + MathUtil.d4(avgError));
+			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
+			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
+			System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
+			System.out.println("lastAvgError:     " + MathUtil.d4(lastAvgError * 100));
+			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
+			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
 			
-			if (maxStdInputErr < 0.0001) {
-				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxE=" + MathUtil.d4(maxErr) + " dAvgE=" + MathUtil.d4(dE));
+//			if (maxStdInputErr < 0.0001) {
+//				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
 //				break;
-			}
-			if (maxErr < 0.2) { // || (dE > 0 && dE < 0.001)) {
-				System.out.println("Threshold 'maxE' reached at epoch " + epoch + " maxE=" + MathUtil.d4(maxErr) + " dAvgE=" + MathUtil.d4(dE));
+//			}
+			if (patternsLearendPercent > 0.8 && maxErr < 0.3) {
+				System.out.println("Threshold 'patternsLearendPercent' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
 				break;
 			}
-			if (epoch > 0 && dE < 0) {
+			if (maxErr < 0.2) { // || (dE > 0 && dE < 0.001)) {
+				System.out.println("Threshold 'maxE' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
+				break;
+			}
+			if (epoch > 0 && learnProgress < 0) {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
-			stAbsError.getAvgValue().copyTo(lastAvgE);
 			l.applyWorkspaces(wslist);
 		}
 	}

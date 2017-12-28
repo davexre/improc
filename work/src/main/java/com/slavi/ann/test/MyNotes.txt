@@ -53,3 +53,21 @@ o[i,j](x) = sum_a(sum_b( k[a,b] * x[i+a,k+b] ))
 do/dx = ?
 do/dw = ?
 
+*** Trainer and train thresholds
+Oi - Output neuron i, 0 <= Oi <= 1
+Oi(k) - Output neuron i for pattern k
+Ti - Target for output neuron i
+Ti(k) - Target for output neuron i for train pair k
+K - Number of train pairs - max(k)
+
+Ei = abs(Ti - Oi)
+MaxErr = max(Ei(k)) # for all i,k
+AvgErr = sum(Ei(k)) / K
+LearnProgress = AvgErr[previous epoch] - AvgErr[current epoch]
+MaxPatternError(k) = max(Ei(k))
+PatternsLearned = sum( MaxPatternError(k) < 0.15 ? 1 : 0 ) / K
+
+Stop training when
+MaxError < 0.2
+LearnProgress < 0.0002
+PatternsLearned > 0.80 and MaxError < 0.3
