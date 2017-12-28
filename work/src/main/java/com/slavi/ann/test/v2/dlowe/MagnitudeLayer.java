@@ -53,6 +53,9 @@ f = sqrt(A^2 + B^2)
 T = A^2 + B^2
 df/dT = 1 / (2 * f)
 
+dT/dA = 2*A
+dT/dB = 2*B
+
 A = X(right, oy) - X(left, oy)
 B = X(ox, bottom) - X(ox, top)
 
@@ -60,9 +63,6 @@ dA/dX(right, oy) = 1
 dA/dX(left, oy) = -1
 dB/dX(ox, bottom) = 1
 dB/dX(ox, top) = -1
-
-dT/dA = 2*A
-dT/dB = 2*B
 */
 		@Override
 		public Matrix backPropagate(Matrix error) {
@@ -81,11 +81,15 @@ dT/dB = 2*B
 				int right;
 				for (int ox = right = output.getSizeX() - 1; ox >= 0; ox--) {
 					int left = ox == 0 ? 0 : ox - 1;
+					double A = input.getItem(right, oy) - input.getItem(left, oy);
+					double B = input.getItem(ox, bottom) - input.getItem(ox, top);
 					double dfdT = error.getItem(ox, oy) * output.getItem(ox, oy);
-					inputError.itemAdd(right, oy, dfdT);
-					inputError.itemAdd(left, oy, -dfdT);
-					inputError.itemAdd(ox, bottom, dfdT);
-					inputError.itemAdd(ox, top, -dfdT);
+					double dfdA = dfdT * 2.0 * A;
+					double dfdB = dfdT * 2.0 * B;
+					inputError.itemAdd(right, oy, dfdA);
+					inputError.itemAdd(left, oy, -dfdA);
+					inputError.itemAdd(ox, bottom, dfdB);
+					inputError.itemAdd(ox, top, -dfdB);
 					right = ox;
 				}
 				bottom = oy;

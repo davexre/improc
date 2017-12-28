@@ -50,11 +50,14 @@ public class DirectionLayer extends Layer {
 		}
 
 /*
-X - input
-f = atan2(A, B) = atan(A/B)
-T=A/B
-df/dT = 1 / (1 + T^2)
+(atan2(X,Y))'	=> d(atan2)/dX = -Y/(X^2 + Y^2);  d(atan2)/dY = X/(X^2 + Y^2)
+https://en.wikipedia.org/wiki/Atan2#Derivative
 
+f = atan2(A, B) = atan(A/B)
+df/dA = -B/(A*A+B*B)
+df/dB = A/(A*A+B*B)
+
+X - input
 A = X(ox, bottom) - X(ox, top)
 B = X(right, oy) - X(left, oy)
 
@@ -62,11 +65,6 @@ dA/dX(ox, bottom) = 1
 dA/dX(ox, top) = -1
 dB/dX(right, oy) = 1
 dB/dX(left, oy) = -1
-
-dT/dA = 1/B
-dT/dB = -A/B^2
-
-dT/dX = (B * dA/dX - A * dB/dX) / B^2
 */
 		@Override
 		public Matrix backPropagate(Matrix error) {
@@ -87,13 +85,11 @@ dT/dX = (B * dA/dX - A * dB/dX) / B^2
 					int left = ox == 0 ? 0 : ox - 1;
 					double A = input.getItem(ox, bottom) - input.getItem(ox, top);
 					double B = input.getItem(right, oy) - input.getItem(left, oy);
-					double f = output.getItem(ox, oy);
-					double dfdT = error.getItem(ox, oy) / (1 + f*f);
-					
-					if (B == 0)
-						; // TODO:
-					double dfdA = dfdT / B;
-					double dfdB = -A * dfdA / B;
+					double r = A * A + B * B;
+					if (r < 0.000001)
+						continue;
+					double dfdA = - error.getItem(ox, oy) * B / r;
+					double dfdB = error.getItem(ox, oy) * A / r;
 
 					inputError.itemAdd(ox, bottom, dfdA);
 					inputError.itemAdd(ox, top, -dfdA);
