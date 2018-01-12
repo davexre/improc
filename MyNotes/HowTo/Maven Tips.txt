@@ -5,6 +5,10 @@ http://mojo.codehaus.org/versions-maven-plugin/display-dependency-updates-mojo.h
 mvn versions:display-dependency-updates
 mvn versions:display-plugin-updates
 
+========= Run a class from maven project =========
+* Run java with main method (run with dependancies)
+mvn exec:java -Dexec.mainClass=.... -Dexec.args="arg1 arg2 arg3"
+
 ========= Remove the project dependencies from the local repository, and optionally re-resolve them =========
 mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
 
