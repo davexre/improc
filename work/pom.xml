@@ -15,6 +15,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.hierynomus</groupId>
+			<artifactId>sshj</artifactId>
+			<version>0.23.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
 		</dependency>

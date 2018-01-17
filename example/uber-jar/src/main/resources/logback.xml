@@ -1,0 +1,39 @@
+<configuration>
+<!-- 
+	<appender name="my.appender.file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>log/mylog.log</file>
+		<encoder>
+			<pattern>%date{dd.MM.yyyy HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>target/mylog_%i.log</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>4</maxIndex>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>5MB</maxFileSize>
+		</triggeringPolicy>
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="uk.org.lidalia.sysoutslf4j.context" level="none" additivity="false" />
+
+	<logger name="com.slavi.example.logging.Log4J" level="info" />
+ -->
+
+	<appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+		<target>System.err</target>
+	</appender>
+
+	<root level="error">
+		<appender-ref ref="STDERR" />
+	</root>
+</configuration>

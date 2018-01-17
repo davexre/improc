@@ -11,6 +11,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>uber-jar</module>
 		<module>javacc</module>
 		<module>spring.boot</module>
 		<module>example.logging</module>
