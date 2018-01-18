@@ -123,6 +123,7 @@ sshfs                       \
 subversion                  \
 synaptic                    \
 synfigstudio                \
+sysstat                     \
 sysv-rc-conf                \
 sqlite3                     \
 tesseract-ocr               \
