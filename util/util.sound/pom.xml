@@ -11,12 +11,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<artifactId>util.sound</artifactId>
 
 	<dependencies>
-<!--
-		<dependency>
-			<groupId>com.googlecode.soundlibs</groupId>
-			<artifactId>soundlibs</artifactId>
-		</dependency>
--->
 		<dependency>
 			<groupId>com.googlecode.soundlibs</groupId>
 			<artifactId>vorbisspi</artifactId>

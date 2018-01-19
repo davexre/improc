@@ -13,7 +13,6 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -24,6 +23,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.jsoup.Jsoup;
@@ -68,26 +68,28 @@ public class TestApacheHttpClient {
 		if (url.startsWith("file://")) {
 			jsoupDoc = Jsoup.parse(new URL(url).openStream(), null, "");
 		} else {
+			PoolingHttpClientConnectionManager httpClientConnectionManager = new PoolingHttpClientConnectionManager();
 			BasicCookieStore cookieStore = new BasicCookieStore();
 			HttpHost target = new HttpHost("localhost", 8080, "http");
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(
+			CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+			credentialsProvider.setCredentials(
 					new AuthScope(target.getHostName(), target.getPort()),
 					new UsernamePasswordCredentials("asd", "dsa"));
 			try (CloseableHttpClient httpclient = HttpClients.custom()
 					.setDefaultCookieStore(cookieStore)
-					.setDefaultCredentialsProvider(credsProvider)
+					.setDefaultCredentialsProvider(credentialsProvider)
+					.setConnectionManager(httpClientConnectionManager)
 					.build();
 				) {
 				
 				AuthCache authCache = new BasicAuthCache();
 				BasicScheme basicAuth = new BasicScheme();
 				authCache.put(target, basicAuth);
-				HttpContext ctx = new BasicHttpContext();
-				HttpClientContext clictx = HttpClientContext.adapt(ctx);
+				HttpClientContext ctx = HttpClientContext.create(); // new BasicHttpContext();
+				//HttpClientContext clictx = HttpClientContext.adapt(ctx);
 
 				HttpGet httpget = new HttpGet(new URI(url));
-				CloseableHttpResponse response1 = httpclient.execute(httpget);
+				CloseableHttpResponse response1 = httpclient.execute(httpget, ctx);
 				System.out.println("Status line: " + response1.getStatusLine());
 				HttpEntity entity = response1.getEntity();
 				
