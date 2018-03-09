@@ -2,5 +2,6 @@ Firefox
 =======
 * Custom settings about:config
 dom.webnotifications.enabled false -> disable site notifications
+dom.max_script_run_time -> JavaScript timeout. Default 10, set to 60
 
 

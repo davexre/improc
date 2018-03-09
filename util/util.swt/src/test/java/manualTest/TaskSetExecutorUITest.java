@@ -47,7 +47,12 @@ public class TaskSetExecutorUITest {
 			});
 			
 			System.out.println("Waiting for tasks to finish");
-			ts.run().get();
+			try {
+				f.get();
+			} catch (Throwable t) {
+				t.printStackTrace();
+				f.cancel(true);
+			}
 			System.out.println("Parallel job finished");
 			return null;
 		}
