@@ -86,10 +86,13 @@ imagemagick                 \
 inkscape                    \
 iperf                       \
 iptraf                      \
+iotop                       \
 jedit                       \
+kate                        \
 kde-baseapps-bin            \
 kdenlive                    \
 lame                        \
+libav-tools                 \
 librecad                    \
 libreoffice                 \
 mc                          \
