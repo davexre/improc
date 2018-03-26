@@ -14,7 +14,7 @@ SHORT_DATE="%H:%M:%S"
 LOG_DATE="$SHORT_DATE"
 
 function log_file() {
-	local fn=$(realpath -q "$1")
+	local fn=$(readlink -fm "$1")
 	fn=$(default_string "$fn" "$0.log")
 	local basefn=$(basename "$fn")
 	local noext=${basefn%.*}
@@ -22,7 +22,7 @@ function log_file() {
 	if [[ "$basefn" == "$noext" ]]; then
 		fn="${fn}.log"
 	fi
-	fn=$(realpath -mq "$fn")
+	fn=$(readlink -fm "$fn")
 	local dir=$(dirname "$fn")
 	mkdir -p "$dir"
 	LOG_FILE="$fn"
@@ -402,5 +402,4 @@ colors YES
 LOG_LEVEL=ALL;
 log_stdout
 
-SCRIPT_HOME=$(realpath "$0")
-SCRIPT_HOME=$(dirname "$SCRIPT_HOME")
+SCRIPT_HOME=$(dirname "$(readlink -f "$0")")

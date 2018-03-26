@@ -86,5 +86,10 @@ Some interesting tools
 biosdecode			read info from BIOS
 dmidecode			read info from BIOS
 
+Usefull command chains
+======================
+* List all file extensions in subfolders and count number of files
+find . -type f | sed -nE 's/.*\.(\w+)$/\1/p' | sort | uniq -c | sort -nr | less
 
-
+* Show disk usage by subfolders
+du -bd 1|sort -n

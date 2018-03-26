@@ -1,3 +1,25 @@
+========= Maven Configuration =========
+* Maven Central mirrors
+http://repo.maven.apache.org/maven2/.meta/repository-metadata.xml
+
+* Oracle Maven Repository
+https://docs.oracle.com/middleware/1213/core/MAVEN/config_maven_repo.htm
+
+* Maven master password
+http://maven.apache.org/guides/mini/guide-encryption.html
+mvn --encrypt-master-password
+put the output in ~/.m2/settings-security.xml
+--- BEGIN settings-security.xml ---
+<settingsSecurity>
+<!--
+  <relocation>/Volumes/mySecureUsb/secure/settings-security.xml</relocation>
+-->
+  <master>{jSMOWnoPFgsHVpMvz5VrIt5kRbzGpI8u+9EF1iFQyJQ=}</master>
+</settingsSecurity>
+--- END settings-security.xml ---
+mvn --encrypt-password
+
+
 =========
 Check for artifact updates (newer versions of a library)
 http://www.mojohaus.org/versions-maven-plugin/

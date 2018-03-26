@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DatabaseIO;
@@ -107,7 +108,7 @@ public class Derby {
 		}
 	}
 	
-	public static void main2(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 //		EmbeddedDriver driver = new EmbeddedDriver(); //Class.forName(driver).newInstance();
 
 		dbToXmlDemo();
@@ -121,13 +122,17 @@ public class Derby {
 		for (Emp e : emps) {
 			System.out.println(e.id + "\t" + e.name + "\t" + e.position);
 		}
+		List res = qr.query("select * from emp", new ColumnListHandler<>(2));
+		for (Object i : res)
+			System.out.println(i);
+//		System.out.println(res);
 		
 		// DriverManager.getConnection("jdbc:derby:memory:MyDbTest;shutdown=true");
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		System.out.println("Done.");
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main2(String[] args) throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:derby:memory:MyDbTest;create=true");
 		System.out.println(conn.getClass());
 	}

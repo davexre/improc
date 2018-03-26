@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="true" context="java" deleted="false" description="" enabled="true" name="maindo">public void doIt(String[] args) throws Exception {
+	${cursor}
+}
+
+public static void main(String[] args) throws Exception {
+	new ${enclosing_type}().doIt(args);
+	System.out.println("Done.");
+}</template></templates>

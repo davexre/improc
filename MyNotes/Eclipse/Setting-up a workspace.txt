@@ -40,14 +40,14 @@ Setting-up a workspace
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
 	* P4Eclipse + Perforce Folder Diff Support
-	* ?? LiClipseText
+	* LiClipseText
 	* ?? Eclipse Class Decompiler
 	* ?? ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
 	* ?? Tern Eclipse IDE (JavaScript analyzer)
 	* ?? Subversive (SVN version control)
 	* ?? Toad Extension for Eclipse
-	* Bash Editor
-	* JSON Editor
+	* ?? Bash Editor
+	* ?? JSON Editor
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
 	Settings

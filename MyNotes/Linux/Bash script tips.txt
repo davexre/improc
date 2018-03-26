@@ -93,12 +93,9 @@ Variables
 	the arguments are broken up properly if there are spaces in them.
 
 * script home
-	SCRIPT_HOME=$(dirname $(readlink -f "${0}"))
+	SCRIPT_HOME=$(dirname "$(readlink -fm "$0")")
 	or
-	SCRIPT_HOME=$(dirname "$(realpath -m "${0}")")
-	or better
-	SCRIPT_HOME=$(realpath -m "${0}")
-	SCRIPT_HOME=$(dirname "${SCRIPT_HOME}");
+	SCRIPT_HOME=$(dirname "$(realpath -m "$0")")
 
 Check whether the script is executed or is sourced
 ==================================================

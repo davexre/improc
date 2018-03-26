@@ -171,9 +171,9 @@ public class ResultSetToString {
 
 	final HashMap<Integer, DBFieldFormat> formatter = new HashMap<Integer, ResultSetToString.DBFieldFormat>();
 
-	private void addType(int typeCode, String typeName, Class fmt) throws InstantiationException,
+	private void addType(int typeCode, String typeName, Class<? extends DBFieldFormat> fmt) throws InstantiationException,
 			IllegalAccessException {
-		DBFieldFormat instance = (DBFieldFormat) fmt.newInstance();
+		DBFieldFormat instance = fmt.newInstance();
 		instance.typeCode = typeCode;
 		instance.typeName = typeName;
 		formatter.put(typeCode, instance);
