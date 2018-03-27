@@ -1,10 +1,14 @@
+Git config
+==========
+git config --global http.sslVerify=false
+git config --global http.proxy socks5://localhost:12345
+
 Reset/restore a subdirectory
 ============================
 cd <git_repository_root>
 git checkout HEAD -- <sub_directory_to_hard_reset>
 
 git config --global push.default simple
-
 
 Revert a single file to a specific changelist
 =============================================

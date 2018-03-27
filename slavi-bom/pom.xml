@@ -118,6 +118,11 @@
 			</dependency>
 			<dependency>
 				<groupId>com.slavi</groupId>
+				<artifactId>util.oracle</artifactId>
+				<version>${com.slavi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.slavi</groupId>
 				<artifactId>improc</artifactId>
 				<version>${com.slavi.version}</version>
 			</dependency>

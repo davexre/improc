@@ -15,6 +15,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.sonatype.plexus</groupId>
+			<artifactId>plexus-cipher</artifactId>
+			<version>1.7</version>
+		</dependency>
+		<dependency>
 			<groupId>com.hierynomus</groupId>
 			<artifactId>sshj</artifactId>
 			<version>0.23.0</version>
@@ -359,6 +364,10 @@
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.dbutil</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>util.oracle</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
