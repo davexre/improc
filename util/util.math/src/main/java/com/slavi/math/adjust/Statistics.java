@@ -258,6 +258,18 @@ public class Statistics {
 		return M1;
 	}
 
+	/*
+	 * a=[x]/N
+	 * 
+	 * s^2=([(x-a)^2])/(N-1)=
+	 * ([xx - 2ax + aa])/(N-1)=
+	 * ([xx - 2x[x]/N + [x][x]/NN])/(N-1)=
+	 * ([xx] - [2x[x]/N] + [[x][x]/NN])/(N-1)=
+	 * ([xx] - 2[x][x]/N + N[x][x]/NN)/(N-1)=
+	 * ([xx] - 2[x][x]/N + [x][x]/N)/(N-1)=
+	 * ([xx] - [x][x]/N)/(N-1)=
+	 * (N[xx] - [x][x])/(N(N-1))
+	 */
 	public double getStdDeviation() {
 		//return Math.sqrt(D2 / (getItemsCount() - 1));
 		return Math.sqrt(

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.slavi.ann.test.v2.activation.ConstScaleAndBiasLayer;
+import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.activation.ReLULayer;
 import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
@@ -16,9 +17,11 @@ import com.slavi.ann.test.v2.connection.SubsamplingMaxLayer;
 public class NetworkBuilder {
 	List<Layer> layers = new ArrayList<>();
 
+	int inputSize[];
 	int lastSize[];
 
 	public NetworkBuilder(int inputSizeX, int inputSizeY) {
+		inputSize = new int[] { inputSizeX, inputSizeY };
 		lastSize = new int[] { inputSizeX, inputSizeY };
 	}
 
@@ -26,6 +29,20 @@ public class NetworkBuilder {
 		lastSize = l.getOutputSize(lastSize);
 		layers.add(l);
 		return this;
+	}
+
+	public String describe() {
+		StringBuilder r = new StringBuilder();
+		int size[] = new int[] { inputSize[0], inputSize[1] };
+		for (int i = 0; i < layers.size(); i++) {
+			Layer l = layers.get(i);
+			r.append(i).append(": ")
+				.append(size[0]).append(':').append(size[1]).append(' ')
+				.append(l.getClass().getSimpleName())
+				.append('\n');
+			size = l.getOutputSize(size);
+		}
+		return r.toString();
 	}
 
 	public int[] getCurrentOutputSize() {
@@ -63,6 +80,18 @@ public class NetworkBuilder {
 
 	public NetworkBuilder addConstScaleAndBiasLayer(double scale, double bias) {
 		return addLayer(new ConstScaleAndBiasLayer(scale, bias));
+	}
+
+	public NetworkBuilder addDebugLayer(String name) {
+		return addLayer(new DebugLayer(name));
+	}
+
+	public NetworkBuilder addDebugLayer(String name, int style) {
+		return addLayer(new DebugLayer(name, style));
+	}
+
+	public NetworkBuilder addDebugLayer(String name, int inputStyle, int errorStyle) {
+		return addLayer(new DebugLayer(name, inputStyle, errorStyle));
 	}
 
 	public NetworkBuilder addSigmoidLayer() {

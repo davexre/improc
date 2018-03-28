@@ -64,9 +64,9 @@ public class Trainer {
 				}
 				if (absError.max() < 0.15)
 					patternsLearend++;
+				st.addValue(absError.max());
 				stAbsError.addValue(absError);
 				errors.add(new DatapointTrainResult(index, absError.sumAll() / absError.getVectorSize()));
-				st.addValue(error.maxAbs());
 				Matrix inputError = ws.backPropagate(error);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
@@ -86,7 +86,6 @@ public class Trainer {
 			Matrix avg = stAbsError.getAvgValue();
 			double avgError = avg.sumAll(); // / avg.getVectorSize();
 			double learnProgress = lastAvgError - avgError;
-			lastAvgError = avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
 			
 /*			Collections.sort(errors);
@@ -98,13 +97,16 @@ public class Trainer {
 			double patternsLearendPercent = (double) patternsLearend / index;
 			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
 			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
-			System.out.println("avgAvgError:      " + MathUtil.d4(avgError));
+			System.out.println("avgMaxError:      " + MathUtil.d4(st.getAvgValue()));
+			System.out.println("stdMaxError:      " + MathUtil.d4(st.getStdDeviation()));
+			System.out.println("sumAvgError:      " + MathUtil.d4(avgError));
 			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
 			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
 			System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
-			System.out.println("lastAvgError:     " + MathUtil.d4(lastAvgError * 100));
+			System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
+			lastAvgError = avgError;
 			
 //			if (maxStdInputErr < 0.0001) {
 //				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));

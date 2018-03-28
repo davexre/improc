@@ -20,17 +20,20 @@ import com.slavi.util.Marker;
 
 public class MnistData {
 
-	Logger log = LoggerFactory.getLogger(getClass());
+	static final Logger log = LoggerFactory.getLogger(MnistData.class);
 
-	String mnistUrl = "http://yann.lecun.com/exdb/mnist/";
-	String mnistDir = "data/mnist";
+	static final String mnistUrl = "http://yann.lecun.com/exdb/mnist/";
+	static final String mnistDir = "data/mnist";
 
-	String trainingFiles = "train-images-idx3-ubyte.gz";
-	String trainingFileLabels = "train-labels-idx1-ubyte.gz";
-	String testFiles = "t10k-images-idx3-ubyte.gz";
-	String testFileLabels = "t10k-labels-idx1-ubyte.gz";
-	String mnistFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
+	static final String trainingFiles = "train-images-idx3-ubyte.gz";
+	static final String trainingFileLabels = "train-labels-idx1-ubyte.gz";
+	static final String testFiles = "t10k-images-idx3-ubyte.gz";
+	static final String testFileLabels = "t10k-labels-idx1-ubyte.gz";
+	static final String mnistFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
 
+	static final double valueLow = 0.05;
+	static final double valueHigh = 0.95;
+	
 	public static class MnistPattern implements DatapointPair {
 		public int patternNumber;
 		public byte label;
@@ -56,35 +59,35 @@ public class MnistData {
 		public void toInputMatrix(Matrix dest) {
 			dest.resize(28, 28);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
-				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, 0.05, 0.95));
+				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, valueLow, valueHigh));
 		}
 		
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(10, 1);
 			for (int i = 0; i < 10; i++)
-				dest.setVectorItem(i, label == i ? 0.95 : 0.05);
+				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
 		}
 	}
 
-	public void downloadMnistFiles() throws Exception {
-		File mnistDir = new File(this.mnistDir);
-		mnistDir.mkdirs();
-		URL mnistUrl = new URL(this.mnistUrl);
+	public static void downloadMnistFiles() throws Exception {
+		File dir = new File(mnistDir);
+		dir.mkdirs();
+		URL url = new URL(mnistUrl);
 		for (String f : mnistFiles) {
-			File targetFile = new File(mnistDir, f);
+			File targetFile = new File(dir, f);
 			if (!targetFile.isFile()) {
 				log.info("Downloading file {}", targetFile);
-				FileUtils.copyURLToFile(new URL(mnistUrl, f), targetFile);
+				FileUtils.copyURLToFile(new URL(url, f), targetFile);
 			}
 		}
 	}
 
-	public List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
+	public static List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
 		downloadMnistFiles();
 
-		File mnistDir = new File(this.mnistDir);
-		File labelsFile = new File(mnistDir, labelsFileName);
-		File imagesFile = new File(mnistDir, imagesFileName);
+		File dir = new File(mnistDir);
+		File labelsFile = new File(dir, labelsFileName);
+		File imagesFile = new File(dir, imagesFileName);
 		try (
 			DataInputStream labelsIs = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(labelsFile))));
 			DataInputStream imagesIs = new DataInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(imagesFile))));
@@ -123,11 +126,10 @@ public class MnistData {
 	}
 
 	public static List<MnistPattern> readMnistSet(boolean useTrainDataSet) throws Exception {
-		MnistData md = new MnistData();
 		if (useTrainDataSet)
-			return md.readMnistSet(md.trainingFileLabels, md.trainingFiles);
+			return readMnistSet(trainingFileLabels, trainingFiles);
 		else
-			return md.readMnistSet(md.testFileLabels, md.testFiles);
+			return readMnistSet(testFileLabels, testFiles);
 	}
 
 	public static void main(String[] args) throws Exception {

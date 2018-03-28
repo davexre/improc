@@ -8,6 +8,7 @@ import com.slavi.math.matrix.Matrix;
 public class DebugLayer extends Layer {
 	
 	public static int defaultStyle = Statistics.CStatStdDev | Statistics.CStatMinMax | Statistics.CStatAbs;
+	public static int off = 0;
 	
 	String name;
 	int inputStyle;

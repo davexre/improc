@@ -8,6 +8,7 @@ import com.slavi.ann.test.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.ann.test.v2.activation.DebugLayer;
+import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.util.Marker;
 
 public class MyMnistDataTest {
@@ -22,8 +23,9 @@ public class MyMnistDataTest {
 		for (int i = 0; i < 30; i++)
 			trainset.add(pats.get(i));
 		
-		Network net = new NetworkBuilder(28, 28)
+		NetworkBuilder nb = new NetworkBuilder(28, 28)
 				.addConvolutionLayer(5)
+//				.addDebugLayer("After convolution", DebugLayer.defaultStyle, DebugLayer.off)
 				.addConstScaleAndBiasLayer(10.0 / 25, -5)
 				.addSigmoidLayer()
 //				.addReLULayer()
@@ -32,13 +34,14 @@ public class MyMnistDataTest {
 //				.addFullyConnectedLayer(30).addSigmoidLayer()
 
 				.addFullyConnectedLayer(10)
-				.addConstScaleAndBiasLayer()
+//				.addConstScaleAndBiasLayer()
 				.addSigmoidLayer()
+
 //				.addLayer(new DebugLayer("fully connected", DebugLayer.defaultStyle))
-
-
-				.build();
-
+				;
+		System.out.println(nb.describe());
+		Network net = nb.build();
+		System.out.println(((ConvolutionLayer) net.get(0)).kernel.normalize());
 		Trainer.train(net, trainset, 1000);
 	}
 
