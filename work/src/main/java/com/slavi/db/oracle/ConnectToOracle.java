@@ -9,6 +9,8 @@ import java.util.Properties;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
+import com.slavi.dbutil.ResultSetToStringHandler;
+
 import oracle.jdbc.pool.OracleDataSource;
 
 
@@ -35,6 +37,9 @@ public class ConnectToOracle {
 		QueryRunner qr = new QueryRunner(ods);
 		Object o = qr.query("select sysdate from dual", new ScalarHandler());
 		System.out.println(o);
+		ResultSetToStringHandler rss = new ResultSetToStringHandler();
+		System.out.println(qr.query("select * from user_tables", rss));
+		
 		ods.close();
 	}
 

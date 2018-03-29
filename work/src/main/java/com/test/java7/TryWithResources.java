@@ -15,13 +15,21 @@ public class TryWithResources {
 			this.throwExceptionOnClose = throwExceptionOnClose;
 		}
 		
-		@Override
 		public void close() throws IOException {
 			System.out.println("Closing " + name);
 			if (throwExceptionOnClose)
 				throw new IOException("Exception closing " + name);
 		}
 		
+		public String toString() {
+			return "MyResource " + name + (throwExceptionOnClose ? " throws exception on close " : " not throwing");
+		}
+	}
+
+	void test(MyResource r) throws Exception {
+		try (MyResource rr = r) {
+			System.out.println("test " + r);
+		}
 	}
 	
 	void doIt() throws Exception {
@@ -29,6 +37,7 @@ public class TryWithResources {
 			MyResource r1 = new MyResource("R1", false);
 			MyResource r2 = new MyResource("R2", true);
 			MyResource r3 = new MyResource("R3", true)) {
+			test(new MyResource("RR", true));
 			System.out.println(r1.toString());
 			System.out.println(r2.toString());
 			if (16 == 0b1_0000_0000)
