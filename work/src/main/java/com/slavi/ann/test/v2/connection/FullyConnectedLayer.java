@@ -36,6 +36,7 @@ public class FullyConnectedLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
+		public Matrix outputError;
 		public Matrix dW;
 
 		protected Workspace() {
@@ -44,6 +45,7 @@ public class FullyConnectedLayer extends Layer {
 			int sizeOutput = weight.getSizeY();
 			inputError = new Matrix(sizeInput, 1);
 			output = new Matrix(sizeOutput, 1);
+			outputError = new Matrix(sizeOutput, 1);
 			dW = new Matrix(sizeInput, sizeOutput);
 		}
 
@@ -68,6 +70,7 @@ public class FullyConnectedLayer extends Layer {
 				throw new Error("Invalid state");
 			if (error.getVectorSize() != weight.getSizeY())
 				throw new Error("Invalid argument");
+			outputError.mMaxAbs(error, outputError);
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			
@@ -85,6 +88,7 @@ public class FullyConnectedLayer extends Layer {
 		@Override
 		protected void resetEpoch() {
 			dW.make0();
+			outputError.make0();
 		}
 
 		public String toString() {

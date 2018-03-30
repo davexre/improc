@@ -65,6 +65,9 @@ public abstract class Layer {
 	}
 	
 	public abstract class LayerWorkspace {
+		public Layer getLayer() {
+			return Layer.this;
+		}
 		/**
 		 * input may be stored internally for use later in backProppagate. It should treated readonly.
 		 * The result may be always the "same instance". It should treated readonly.

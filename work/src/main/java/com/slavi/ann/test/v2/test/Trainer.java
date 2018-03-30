@@ -1,10 +1,16 @@
 package com.slavi.ann.test.v2.test;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
+import com.slavi.ann.test.v2.Utils;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
@@ -26,7 +32,7 @@ public class Trainer {
 		}
 	}
 	
-	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) {
+	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
 		Matrix error = new Matrix();
@@ -107,7 +113,7 @@ public class Trainer {
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
 			lastAvgError = avgError;
-			
+
 //			if (maxStdInputErr < 0.0001) {
 //				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
 //				break;
@@ -125,6 +131,10 @@ public class Trainer {
 			}
 			l.applyWorkspaces(wslist);
 		}
+
+		int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
+		BufferedImage bi = Utils.draw(ws, tmpInputSize);
+		ImageIO.write(bi, "png", new File("tmp.png"));
 	}
 	
 }
