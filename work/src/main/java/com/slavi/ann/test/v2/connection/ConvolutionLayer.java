@@ -34,6 +34,7 @@ public class ConvolutionLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
+		public Matrix outputError;
 		public Matrix dKernel;
 
 		protected Workspace() {
@@ -41,6 +42,7 @@ public class ConvolutionLayer extends Layer {
 			int kernelSizeY = kernel.getSizeY();
 			dKernel = new Matrix(kernelSizeX, kernelSizeY);
 			output = new Matrix();
+			outputError = new Matrix();
 			input = null;
 			inputError = new Matrix();
 		}
@@ -53,6 +55,7 @@ public class ConvolutionLayer extends Layer {
 			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
 			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
 			output.resize(sizeOX, sizeOY);
+			outputError.resize(sizeOX, sizeOY);
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = 0.0;
@@ -81,6 +84,7 @@ public class ConvolutionLayer extends Layer {
 				(output.getSizeY() != error.getSizeY()))
 				throw new Error("Invalid argument");
 
+			outputError.mMaxAbs(error, outputError);
 			int padX = (input.getSizeX() % kernel.getSizeX()) / 2;
 			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
@@ -110,6 +114,7 @@ public class ConvolutionLayer extends Layer {
 		@Override
 		protected void resetEpoch() {
 			dKernel.make0();
+			outputError.make0();
 		}
 		
 		public String toString() {

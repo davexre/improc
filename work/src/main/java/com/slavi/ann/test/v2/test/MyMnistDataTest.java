@@ -3,36 +3,39 @@ package com.slavi.ann.test.v2.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.MnistData;
-import com.slavi.ann.test.MnistData.MnistPattern;
+import com.slavi.ann.test.TwoSpiralsData;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
+import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class MyMnistDataTest {
-	int insize = MnistPattern.size; // => 784
-
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<MnistPattern> pats = MnistData.readMnistSet(false);
-		Marker.release();
-
-		ArrayList<MnistPattern> trainset = new ArrayList<>();
+		/*List<? extends DatapointPair> pats = MnistData.readMnistSet(false);
+		List<DatapointPair> trainset = new ArrayList<>();
 		for (int i = 0; i < 30; i++)
-			trainset.add(pats.get(i));
+			trainset.add(pats.get(i));*/
+		List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
+		Marker.release();
 		
-		NetworkBuilder nb = new NetworkBuilder(28, 28)
+		DatapointPair pair0 = trainset.get(0);
+		Matrix m = new Matrix();
+		pair0.toInputMatrix(m);
+		NetworkBuilder nb = new NetworkBuilder(m.getSizeX(), m.getSizeY())
 //				.addConstScaleAndBiasLayer(2, -1)
-				.addConvolutionLayer(9)
+//				.addConvolutionLayer(5)
 //				.addDebugLayer("After convolution", DebugLayer.defaultStyle, DebugLayer.off)
-				.addConstScaleAndBiasLayer(10.0 / 25, -5)
-				.addSigmoidLayer()
+//				.addConstScaleAndBiasLayer(10.0 / 25, -5)
+//				.addSigmoidLayer()
 //				.addReLULayer()
 
-//				.addFullyConnectedLayer(50).addSigmoidLayer()
+				.addFullyConnectedLayer(8).addSigmoidLayer()
 //				.addFullyConnectedLayer(30).addSigmoidLayer()
 
-				.addFullyConnectedLayer(10)
+				.addFullyConnectedLayer(8)
 //				.addConstScaleAndBiasLayer()
 				.addSigmoidLayer()
 

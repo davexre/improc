@@ -7,6 +7,8 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FileUtils;
+
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
@@ -31,6 +33,35 @@ public class Trainer {
 			return Double.compare(o.error, error); // Descending order
 		}
 	}
+
+	public static Matrix calcScales(Layer l, Iterable<? extends DatapointPair> trainset) throws IOException {
+		Matrix input = new Matrix();
+		Matrix target = new Matrix();
+		double imin = Double.MAX_VALUE;
+		double imax = Double.MIN_VALUE;
+		double tmin = Double.MAX_VALUE;
+		double tmax = Double.MIN_VALUE;
+		for (DatapointPair pair : trainset) {
+			pair.toInputMatrix(input);
+			pair.toOutputMatrix(target);
+			for (int i = input.getVectorSize() - 1; i >= 0; i--) {
+				double v = input.getVectorItem(i);
+				if (v < imin) imin = v;
+				if (v > imax) imax = v;
+			}
+			for (int i = target.getVectorSize() - 1; i >= 0; i--) {
+				double v = target.getVectorItem(i);
+				if (v < tmin) tmin = v;
+				if (v > tmax) tmax = v;
+			}
+		}
+		Matrix r = new Matrix(2, 2);
+		r.setItem(0, 0, imin);
+		r.setItem(1, 0, imax);
+		r.setItem(0, 1, tmin);
+		r.setItem(1, 1, tmax);
+		return r;
+	}
 	
 	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Matrix input = new Matrix();
@@ -44,6 +75,9 @@ public class Trainer {
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
 		double lastAvgError = 0;
+		File outDir = new File("./target/tmp");
+		FileUtils.deleteQuietly(outDir);
+		outDir.mkdirs();
 
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
@@ -130,11 +164,11 @@ public class Trainer {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
 			l.applyWorkspaces(wslist);
-		}
 
-		int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
-		BufferedImage bi = Utils.draw(ws, tmpInputSize);
-		ImageIO.write(bi, "png", new File("tmp.png"));
+			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
+			BufferedImage bi = Utils.draw(ws, tmpInputSize);
+			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));
+		}
 	}
 	
 }

@@ -2,6 +2,7 @@ package com.test.swing;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -10,11 +11,11 @@ import javax.swing.UIManager;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.ColorConversion;
-import com.slavi.util.ColorConversion.RGB;
 import com.slavi.util.swing.SwingUtil;
 
 public class DummyUi {
 
+	
 	public static class SwingMatrix extends JComponent {
 		Object lock = new Object();
 		Matrix m = new Matrix();
