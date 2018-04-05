@@ -1,6 +1,14 @@
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 
+=========================== Explain plan ===========================
+ALTER SESSION SET EVENTS='10053 trace name context forever, level 1';
+...your statement here...
+ALTER SESSION SET EVENTS '10053 trace name context off';
+
+ALTER SESSION SET sql_trace=TRUE;
+
+
 =========================== Copy table statistics ===========================
 exec dbms_stats.create_stat_table ( ownname => user , stattab => 'prod_stats' ) ;
 exec dbms_stats.export_schema_stats ( ownname => user , stattab => 'prod_stats') ;
@@ -300,6 +308,28 @@ INSERT INTO t (id, text) VALUES (2, 'word4, word5, word6');
 INSERT INTO t (id, text) VALUES (3, 'word7, word8, word9');
 INSERT INTO t (id, text) VALUES (4, 'word10, word11, word12, word13');
 COMMIT;
+
+-- INSTR + CONNECT BY + LATERAL + SUBSTR (Oracle 12c +)
+with t as (
+select 1 id, ',word1,, word2, word3,' text from dual union all
+select 2, 'word4, word5, word6' from dual union all
+select 3, 'word7, word8, word9' from dual union all
+select 4, 'word10, word11, word12, word13' from dual)
+
+SELECT t.id, lines.lvl, 
+	trim(substr(t.text, 
+		lines.start_pos, 
+		decode(lines.end_pos, 0, length(t.text), lines.end_pos - lines.start_pos))) text
+FROM t,
+	LATERAL(
+		SELECT 
+			LEVEL lvl,
+			decode(level, 1, 1, instr(t.text, ',', 1, level - 1) + 1) start_pos,
+			instr(t.text, ',', 1, level) end_pos
+		FROM dual
+			CONNECT BY instr(t.text, ',', 1, LEVEL - 1) > 0
+	) lines
+ORDER BY id, lines.lvl;
 
 -- INSTR in CONNECT BY clause
 SELECT t.id, trim(regexp_substr(t.text, '[^,]+', 1, lines.column_value)) text
