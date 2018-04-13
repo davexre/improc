@@ -64,13 +64,15 @@
 		<jaxen.version>1.1.4</jaxen.version>
 		<joda-time.version>2.9.9</joda-time.version>
 		<org.reflections.version>0.9.11</org.reflections.version>
-
+		<javax.mail.version>1.6.1</javax.mail.version>
+		<apache.velocity.version>2.0</apache.velocity.version>
+		
 		<!--
 		The version of the jackson library can not be in the range [2.7.0-2.7.4] (all versions tested) because
 		of a bug - breaks functionality in spring abstract controlers with methods having a parameter
 		annotated with @RequestBody
 		-->
-		<com.fasterxml.jackson.version>2.6.6</com.fasterxml.jackson.version>
+		<com.fasterxml.jackson.version>2.9.5</com.fasterxml.jackson.version>
 	</properties>
 
 	<dependencyManagement>
@@ -659,7 +661,21 @@
 				<artifactId>reflections</artifactId>
 				<version>${org.reflections.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>javax.mail-api</artifactId>
+				<version>${javax.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>javax.mail</artifactId>
+				<version>${javax.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.velocity</groupId>
+				<artifactId>velocity-engine-core</artifactId>
+				<version>${apache.velocity.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

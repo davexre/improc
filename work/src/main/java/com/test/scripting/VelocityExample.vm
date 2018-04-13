@@ -1,0 +1,13 @@
+Username is $username.
+
+#set($width = 28)
+#set($hrow = $strutl.leftPad("", $width * 3 + 4, "-"))
+#macro(fmt $text)$strutl.left($strutl.leftPad($text, $width), $width)#end
+
+#foreach( $row in $rows )
+$hrow
+|#fmt($row["Col1"])|#fmt($row["Col2"])|#fmt($row["Col3"])|
+#end
+#if(!$rows.isEmpty)
+$hrow
+#end

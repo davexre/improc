@@ -2,12 +2,16 @@ package com.slavi.jackson;
 
 import java.lang.reflect.Field;
 
+import javax.xml.bind.annotation.XmlAttribute;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slavi.ann.test.Utils;
 import com.slavi.util.StringPrintStream;
 
 public class TestInheritanceInJackson {
 
 	public static class BaseObject {
+		@XmlAttribute
 		public String title = "Base title";
 
 		public String getTitle() {
@@ -25,6 +29,7 @@ public class TestInheritanceInJackson {
 	}
 	
 	public static class ExtObject extends BaseObject {
+		@XmlAttribute
 		public String title = "Ext title";
 		
 		public String getTitle() {
@@ -37,7 +42,7 @@ public class TestInheritanceInJackson {
 	}
 	
 	void doIt() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = Utils.xmlMapper(); // new ObjectMapper();
 		
 		BaseObject o = new ExtObject();
 		o.print();
@@ -46,7 +51,7 @@ public class TestInheritanceInJackson {
 		for (Field f : clazz.getFields()) {
 			System.out.println(f.getDeclaringClass().getName() + "." + f.getName() + " = " + f.get(o));
 		}
-		
+		System.out.println("------------");
 		
 		StringPrintStream out = new StringPrintStream();
 		mapper.writeValue(out, o);
