@@ -293,6 +293,11 @@ order by table_name, constraint_name, orderby
 	end loop;
 end;
 
+=========================== Make a comma separated list ===========================
+select rtrim(xmlagg(XMLELEMENT(E,a.lvl,',').extract('//text()') order by a.lvl).getclobval(), ',') csv
+from
+	(select level lvl from dual connect by level < 10) a; 
+
 =========================== Split a column by comma ===========================
 https://lalitkumarb.wordpress.com/2015/03/04/split-comma-delimited-strings-in-a-table-in-oracle/
 CREATE TABLE t(id NUMBER generated always AS identity, text VARCHAR2(4000));
@@ -481,3 +486,19 @@ with
 t1 as (select sql_text, replace_constants_in_sql(sql_text) sql_text_wo_constants from (select to_char(dbms_lob.substr(sql_fulltext, 4000)) sql_text from v$sqlarea)),
 t2 as (select row_number() over (order by count(*) desc) rank, count(*) occurances, sql_text_wo_constants from t1 group by sql_text_wo_constants)
 select t2.occurances, t1.sql_text from t1 join t2 on t1.sql_text_wo_constants = t2.sql_text_wo_constants where t2.rank<10 order by t2.rank, t2.occurances, t1.sql_text;
+
+=========================== User tables data to XML ===========================
+select 
+	xmlelement(evalname(t.table_name), 
+		xmlattributes(
+			t.num_rows as "ROWS"
+		),
+		(select xmlagg(
+			xmlelement(evalname(c.column_name), xmlattributes(
+				c.data_type as "TYPE",
+				c.data_length as "LENGTH",
+				c.nullable as "NULLABLE")))
+		from user_tab_columns c
+		where t.table_name = c.table_name)
+	) tbls
+from user_tables t;
