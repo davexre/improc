@@ -127,7 +127,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 						Math.ceil((double)srcExtent.height / (double)suggestedProfile.destWindowSizeY));
 				
 				Rectangle rect = new Rectangle(dx, dy);
-				rect = PDLoweDetector.getNeededSourceExtent(rect, PDLoweDetector.defaultScaleSpaceLevels);
+				rect = PDLoweDetector2.getNeededSourceExtent(rect, PDLoweDetector2.defaultScaleSpaceLevels);
 				
 				for (int sminx = 0; sminx < srcExtent.width; sminx += dx) {
 					for (int sminy = 0; sminy < srcExtent.height; sminy += dy) {
@@ -139,7 +139,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 							throw new RuntimeException("empty");
 						}
 						DImageWrapper srcW = new DImageWrapper(source, srcR);
-						PDLoweDetector2 task = new PDLoweDetector2(result, srcW, destR, scale, PDLoweDetector.defaultScaleSpaceLevels);
+						PDLoweDetector2 task = new PDLoweDetector2(result, srcW, destR, scale, PDLoweDetector2.defaultScaleSpaceLevels);
 						task.hook = hook;
 						ts.add(task);
 					}

@@ -277,10 +277,12 @@ public class MatrixStatistics {
 
 	public String toString(int style) {
 		StringBuilder r = new StringBuilder();
-		r.append("Count: ").append(getItemsCount()).append("\n");
-		r.append("B    : ").append(getB()).append("\n");
-		r.append("Average\n").append(getAvgValue());
+		if ((style & Statistics.CStatAvg) != 0) {
+			r.append("Count: ").append(getItemsCount()).append("\n");
+			r.append("Average\n").append(getAvgValue());
+		}
 		if ((style & Statistics.CStatStdDev) != 0) {
+			r.append("B    : ").append(getB()).append("\n");
 			r.append("Std deviation\n").append(getStdDeviation());
 		}
 		if ((style & Statistics.CStatJ) != 0) {

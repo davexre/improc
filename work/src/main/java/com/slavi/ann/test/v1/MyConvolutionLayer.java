@@ -86,7 +86,7 @@ public class MyConvolutionLayer implements Layer {
 
 	public void applyTraining() {
 		ms.stop();
-		System.out.println(ms.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
+		System.out.println(ms.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatMinMax));
 		dKernel.mSum(kernel, kernel);
 		resetEpoch();
 	}
