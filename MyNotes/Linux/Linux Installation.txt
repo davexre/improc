@@ -115,6 +115,9 @@ pinentry-curses             \
 pdfshufler                  \
 ppa-purge                   \
 python-pip                  \
+python-qgis                 \
+qgis                        \
+qgis-plugin-grass           \
 rar                         \
 remmina                     \
 seahorse                    \
