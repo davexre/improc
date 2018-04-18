@@ -14,6 +14,11 @@ public abstract class Layer {
 	public void applyWorkspaces(List<LayerWorkspace> workspaces) {
 		for (LayerWorkspace workspace : workspaces) {
 			applyWorkspace(workspace);
+		}
+	}
+
+	public void resetEpoch(List<LayerWorkspace> workspaces) {
+		for (LayerWorkspace workspace : workspaces) {
 			workspace.resetEpoch();
 		}
 	}

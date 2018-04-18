@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
+import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.MathUtil;
@@ -13,6 +14,16 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.util.ColorConversion;
 
 public class Utils {
+	public static int fixColorLight(int baseColor, double light) {
+		double hsl[] = new double[3];
+		double drgb[] = new double[3];
+		ColorConversion.RGB.fromRGB(baseColor, drgb);
+		ColorConversion.HSL.fromDRGB(drgb, hsl);
+		hsl[2] = light;
+		ColorConversion.HSL.toDRGB(hsl, drgb);
+		return ColorConversion.RGB.toRGB(drgb);
+	}
+	
 	public static BufferedImage toImage(int baseColor, double minVal, double maxVal, Matrix m, BufferedImage dest) {
 		double hsl[] = new double[3];
 		double drgb[] = new double[3];
@@ -31,11 +42,6 @@ public class Utils {
 				ColorConversion.HSL.toDRGB(hsl, drgb);
 				result.setRGB(i, j, ColorConversion.RGB.toRGB(drgb));
 			}
-/*		for (int i = 0; i < m.getSizeX(); i++) {
-			int c = 0xff0000;
-			result.setRGB(i, 0, c);
-			result.setRGB(i, m.getSizeY() - 1, c);
-		}*/
 		return result;
 	}
 
@@ -126,6 +132,38 @@ public class Utils {
 		}
 	}
 
+	static class DrawDebugLayer extends DrawLayer {
+		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
+			DebugLayer ll = (DebugLayer) ws.getLayer();
+			DebugLayer.Workspace wws = (DebugLayer.Workspace) ws;
+
+			Matrix m = wws.stInput.getMaxX();
+			int width = m.getSizeX();
+			imgSize[1] += m.getSizeY() + spaceBetweenLayers;
+
+			width += spaceBetweenLayers + m.getSizeX();
+			setWidth(imgSize, width);
+			
+			return ll.getOutputSize(inputSize);
+		}
+
+		public int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]) {
+			DebugLayer ll = (DebugLayer) ws.getLayer();
+			DebugLayer.Workspace wws = (DebugLayer.Workspace) ws;
+
+			Matrix m = wws.stInput.getMaxX();
+			BufferedImage bi = toImage(inputBaseColor, Math.min(0, m.min()), Math.max(1, m.max()), m, null);
+			g.drawImage(bi, 0, 0, null);
+
+			m = wws.stError.getMaxX();
+			bi = toImage(errorBaseColor, Math.min(0, m.min()), Math.max(0.01, m.max()), m, null);
+			g.drawImage(bi, m.getSizeX() + spaceBetweenLayers, 0, null);
+			g.translate(0, m.getSizeY() + spaceBetweenLayers);
+
+			return ll.getOutputSize(inputSize);
+		}
+	}
+
 	static class DrawNetwork extends DrawLayer {
 		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
 			Network.NetWorkSpace wws = (Network.NetWorkSpace) ws;
@@ -165,13 +203,14 @@ public class Utils {
 	}
 	
 	static final int spaceBetweenLayers = 10;
-	static int inputBaseColor = 0x00B9FB;
-	static int errorBaseColor = 0xCB4154;
+	static int inputBaseColor = fixColorLight(0x00B9FB, 0.2);
+	static int errorBaseColor = fixColorLight(0xCB4154, 0.2);
 	static HashMap<Class<? extends Layer>, DrawLayer> drawMap = new HashMap<>();
 	
 	static {
 		drawMap.put(ConvolutionLayer.class, new DrawConvolutionLayer());
 		drawMap.put(FullyConnectedLayer.class, new DrawFullyConnectedLayer());
+		drawMap.put(DebugLayer.class, new DrawDebugLayer());
 		drawMap.put(Network.class, new DrawNetwork());
 	}
 	

@@ -164,10 +164,10 @@ public class Trainer {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
 			l.applyWorkspaces(wslist);
-
 			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));
+			l.resetEpoch(wslist);
 		}
 	}
 	

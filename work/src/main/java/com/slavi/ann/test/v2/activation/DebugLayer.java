@@ -44,15 +44,13 @@ public class DebugLayer extends Layer {
 		
 		@Override
 		public Matrix feedForward(Matrix input) {
-			if (inputStyle != 0 || errorStyle != 0)
-				stInput.addValue(input);
+			stInput.addValue(input);
 			return input;
 		}
 
 		@Override
 		public Matrix backPropagate(Matrix error) {
-			if (inputStyle != 0 || errorStyle != 0)
-				stError.addValue(error);
+			stError.addValue(error);
 			return error;
 		}
 
