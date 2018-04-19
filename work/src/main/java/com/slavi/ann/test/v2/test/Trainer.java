@@ -63,6 +63,12 @@ public class Trainer {
 		return r;
 	}
 	
+	public static double assertValue(double d) {
+		if (Double.isInfinite(d) || Double.isNaN(d))
+			throw new RuntimeException("Invalid value");
+		return d;
+	}
+	
 	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
@@ -164,9 +170,9 @@ public class Trainer {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
 			l.applyWorkspaces(wslist);
-			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
+/*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
-			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));
+			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
 			l.resetEpoch(wslist);
 		}
 	}

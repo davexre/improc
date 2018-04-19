@@ -67,6 +67,10 @@ public class MnistData {
 			for (int i = 0; i < 10; i++)
 				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
 		}
+		
+		public String toString() {
+			return "Label: " + label + ", pattern number: " + patternNumber;
+		}
 	}
 
 	public static void downloadMnistFiles() throws Exception {

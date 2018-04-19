@@ -5,19 +5,47 @@ import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.MnistData;
+import com.slavi.ann.test.MnistData.MnistPattern;
 import com.slavi.ann.test.TwoSpiralsData;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
+import com.slavi.ann.test.v2.activation.DebugLayer;
+import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class MyMnistDataTest {
 	void doIt() throws Exception {
+		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false); //.subList(0, 30);
+		MatrixStatistics stIn = new MatrixStatistics();
+		MatrixStatistics stOut = new MatrixStatistics();
+		stIn.start();
+		stOut.start();
+		Matrix input = new Matrix();
+		Matrix output = new Matrix();
+		
+		for (DatapointPair pair : trainset) {
+			MnistPattern mp = (MnistPattern) pair;
+			if (mp.label == 8)
+				System.out.println(mp.patternNumber);
+			//System.out.println(pair);
+			pair.toInputMatrix(input);
+			pair.toOutputMatrix(output);
+			stIn.addValue(input);
+			stOut.addValue(output);
+		}
+		
+		stIn.stop();
+		stOut.stop();
+		
+//		System.out.println(stIn.toString());
+//		System.out.println("------------");
+//		System.out.println(stOut.toString());
+	}
+	
+	void doIt2() throws Exception {
 		Marker.mark("Read");
-		List<? extends DatapointPair> pats = MnistData.readMnistSet(false);
-		List<DatapointPair> trainset = new ArrayList<>();
-		for (int i = 0; i < 30; i++)
-			trainset.add(pats.get(i));
+		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 30); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
 		Marker.release();
 		
@@ -27,10 +55,15 @@ public class MyMnistDataTest {
 		pair0.toInputMatrix(input0);
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
-				.addConvolutionLayer(5).addSigmoidLayer()
+				// MNIST data
+				.addConvolutionLayer(5)
+				.addConstScaleAndBiasLayer(10.0 / 25, -5)
+				.addSigmoidLayer()
+				.addFullyConnectedLayer(10).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
+				.addDebugLayer("last", DebugLayer.off)
 
-/*				
+/*
 //				.addConstScaleAndBiasLayer(2, -1)
 				.addConvolutionLayer(5)
 //				.addDebugLayer("After convolution", DebugLayer.defaultStyle, DebugLayer.off)
@@ -41,16 +74,16 @@ public class MyMnistDataTest {
 				.addFullyConnectedLayer(30).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 */
-				
-/*				// TwoSpiralsData
-				.addFullyConnectedLayer(8).addSigmoidLayer()
+/*
+				// TwoSpiralsData
+				.addFullyConnectedLayer(4).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
-				.addDebugLayer("last")*/
+				.addDebugLayer("last", DebugLayer.off)*/
 				;
 		System.out.println(nb.describe());
 		Network net = nb.build();
 //		System.out.println(((ConvolutionLayer) net.get(0)).kernel.normalize());
-		Trainer.train(net, trainset, 100);
+		Trainer.train(net, trainset, 1000);
 	}
 
 	public static void main(String[] args) throws Exception {

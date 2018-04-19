@@ -55,12 +55,8 @@ public class Network extends Layer implements Iterable<Layer>{
 			layers.get(l).applyWorkspaces(tmp);
 			tmp.clear();
 		}
-		for (LayerWorkspace i : workspaces) {
-			NetWorkSpace ws = (NetWorkSpace) i;
-			ws.resetEpoch();
-		}
 	}
-	
+
 	public class NetWorkSpace extends LayerWorkspace {
 		public List<LayerWorkspace> workspaces;
 		
@@ -89,6 +85,8 @@ public class Network extends Layer implements Iterable<Layer>{
 
 		@Override
 		protected void resetEpoch() {
+			for (LayerWorkspace workspace : workspaces)
+				workspace.resetEpoch();
 		}
 	}
 }

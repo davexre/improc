@@ -28,6 +28,10 @@ public class TwoSpiralsData {
 			dest.setItem(0, 0, type == 0 ? 1 : 0);
 			dest.setItem(1, 0, type == 1 ? 1 : 0);
 		}
+		
+		public String toString() {
+			return "Angle: " + angle + ", type: " + type;
+		}
 	}
 	
 	public static List<TwoSpiralsDataPoint> dataSet(int numberOfItems) {
