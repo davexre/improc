@@ -1,6 +1,18 @@
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 
+=========================== Bitwise operations ===========================
+http://www.oracledba.co.uk/tips/bitwise_ops.htm
+create or replace function bitor( x in number, y in number ) return number  as
+begin
+	return x + y - bitand(x,y);
+end;
+
+create or replace function bitxor( x in number, y in number ) return number  as
+begin
+	return bitor(x,y) - bitand(x,y);
+end;
+
 =========================== Explain plan ===========================
 ALTER SESSION SET EVENTS='10053 trace name context forever, level 1';
 ...your statement here...

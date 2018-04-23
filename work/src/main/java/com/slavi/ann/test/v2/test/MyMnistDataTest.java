@@ -15,7 +15,7 @@ import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class MyMnistDataTest {
-	void doIt() throws Exception {
+	void doIt2() throws Exception {
 		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false); //.subList(0, 30);
 		MatrixStatistics stIn = new MatrixStatistics();
 		MatrixStatistics stOut = new MatrixStatistics();
@@ -43,7 +43,7 @@ public class MyMnistDataTest {
 //		System.out.println(stOut.toString());
 	}
 	
-	void doIt2() throws Exception {
+	void doIt() throws Exception {
 		Marker.mark("Read");
 		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 30); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);

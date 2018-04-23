@@ -5,31 +5,23 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
-
-import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class MnistData {
-
-	static final Logger log = LoggerFactory.getLogger(MnistData.class);
-
-	static final String mnistUrl = "http://yann.lecun.com/exdb/mnist/";
-	static final String mnistDir = "data/mnist";
+	static final String dataUrl = "http://yann.lecun.com/exdb/mnist/";
+	static final String dataTargetDir = "data/mnist";
 
 	static final String trainingFiles = "train-images-idx3-ubyte.gz";
 	static final String trainingFileLabels = "train-labels-idx1-ubyte.gz";
 	static final String testFiles = "t10k-images-idx3-ubyte.gz";
 	static final String testFileLabels = "t10k-labels-idx1-ubyte.gz";
-	static final String mnistFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
+	static final String dataFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
 
 	static final double valueLow = 0.05;
 	static final double valueHigh = 0.95;
@@ -73,23 +65,10 @@ public class MnistData {
 		}
 	}
 
-	public static void downloadMnistFiles() throws Exception {
-		File dir = new File(mnistDir);
-		dir.mkdirs();
-		URL url = new URL(mnistUrl);
-		for (String f : mnistFiles) {
-			File targetFile = new File(dir, f);
-			if (!targetFile.isFile()) {
-				log.info("Downloading file {}", targetFile);
-				FileUtils.copyURLToFile(new URL(url, f), targetFile);
-			}
-		}
-	}
-
 	public static List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
-		downloadMnistFiles();
+		Utils.downloadDataFiles(dataTargetDir, dataUrl, dataFiles);
 
-		File dir = new File(mnistDir);
+		File dir = new File(dataTargetDir);
 		File labelsFile = new File(dir, labelsFileName);
 		File imagesFile = new File(dir, imagesFileName);
 		try (

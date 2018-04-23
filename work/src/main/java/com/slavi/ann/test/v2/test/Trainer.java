@@ -130,7 +130,7 @@ public class Trainer {
 			System.out.println("MaxAbsInputErr=" + MathUtil.d4(stInputError.getAbsMaxX().maxAbs()));
 //			System.out.println("Max(Error) stats\n" + st.toString(Statistics.CStatStdDev | Statistics.CStatMinMax| Statistics.CStatAbs));
 			Matrix avg = stAbsError.getAvgValue();
-			double avgError = avg.sumAll(); // / avg.getVectorSize();
+			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
 			double learnProgress = lastAvgError - avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
 			
