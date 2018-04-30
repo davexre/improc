@@ -102,6 +102,8 @@ public class MatrixStatistics {
 				AbsMaxX.setVectorItem(i, v);
 			}
 		} else {
+			if (m.getVectorSize() != sumValues1.getVectorSize())
+				throw new IllegalArgumentException("Can not calc statistics on matrices of different size");
 			for (int i = m.getVectorSize() - 1; i >= 0; i--) {
 				double value = m.getVectorItem(i);
 				double absValue = Math.abs(value);
