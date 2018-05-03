@@ -9,13 +9,14 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.slavi.ann.test.MnistData.MnistPattern;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
 public class IrisData {
 	static final String dataUrl = "http://download.tensorflow.org/data/";
-	static final String dataFiles[] = { "iris_training.csv" };
+	static final String dataFiles[] = { "iris_training.csv", "iris_test.csv" };
 	static final String dataTargetDir = "data/iris";
 
 	static final double valueLow = 0.05;
@@ -43,11 +44,11 @@ public class IrisData {
 		}
 	}
 
-	public static List<IrisPattern> readDataSet() throws Exception {
+	public static List<IrisPattern> readDataSet(boolean useTrainDataSet) throws Exception {
 		Utils.downloadDataFiles(dataTargetDir, dataUrl, dataFiles);
 		
 		try (
-			Reader fin = new FileReader(new File(dataTargetDir, dataFiles[0]));
+			Reader fin = new FileReader(new File(dataTargetDir, dataFiles[useTrainDataSet ? 0 : 1]));
 			LineNumberReader r = new LineNumberReader(fin);
 		) {
 			try {
@@ -82,7 +83,7 @@ public class IrisData {
 
 	public static void main(String[] args) throws Exception {
 		Marker.mark("Read");
-		List<IrisPattern> pats = readDataSet();
+		List<IrisPattern> pats = readDataSet(true);
 		Marker.release();
 
 		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(dataDir, "test.png"));
