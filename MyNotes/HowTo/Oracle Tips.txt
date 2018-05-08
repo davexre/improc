@@ -431,6 +431,8 @@ ORDER BY ID, mod_str, element_no;
 
 
 =========================== Find most used and unused DB indexes ===========================
+http://www.dba-oracle.com/oracle_tips_unused_indexes.htm
+
 ----- List the indexes
 select a.executions_total, a.elapsed_time_total, i.*
 from dba_indexes i
@@ -463,6 +465,28 @@ from (
 	group by p.object_owner, p.object_name, t.sql_id) a
 join WRH$_SQLTEXT t on a.sql_id = t.sql_id
 order by executions_total desc;
+
+----- Find duplicated indexes
+with
+cols as (
+	select index_name, count(*) cols
+	from user_ind_columns
+	group by index_name
+),
+dup as (
+	select i1.index_name name1, i2.index_name name2, count(*) cnt
+	from user_ind_columns i1
+	join user_ind_columns i2 on i1.table_name = i2.table_name and i1.column_name = i2.column_name and i1.index_name != i2.index_name
+	group by i1.index_name, i2.index_name
+)
+select dup.*, c1.cols cols1, c2.cols cols2
+from dup
+join cols c1 on dup.name1 = c1.index_name
+join cols c2 on dup.name2 = c2.index_name
+where
+	(c1.cols < c2.cols or (c1.cols = c2.cols and c1.index_name < c2.index_name))
+	and dup.cnt = c1.cols	-- comment this line to return possible duplication, uncomment to get a list of "full match"
+order by cnt desc, dup.name1, dup.name2;
 
 =========================== Find SQL statements using literals ===========================
 Article URL: https://connormcdonald.wordpress.com/2016/05/30/sql-statements-using-literals/
