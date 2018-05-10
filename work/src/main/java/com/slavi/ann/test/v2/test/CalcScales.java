@@ -3,7 +3,7 @@ package com.slavi.ann.test.v2.test;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
-import com.slavi.ann.test.MnistData;
+import com.slavi.ann.test.dataset.MnistData;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.ann.test.v2.activation.ScaleAndBiasLayer;
 import com.slavi.math.adjust.MatrixStatistics;

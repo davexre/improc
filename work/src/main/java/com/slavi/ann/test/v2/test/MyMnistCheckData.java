@@ -2,8 +2,8 @@ package com.slavi.ann.test.v2.test;
 
 import java.util.List;
 
-import com.slavi.ann.test.MnistData;
-import com.slavi.ann.test.MnistData.MnistPattern;
+import com.slavi.ann.test.dataset.MnistData;
+import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.connection.ConvolutionSameSizeLayer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;

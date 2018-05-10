@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
-import com.slavi.ann.test.MnistData;
-import com.slavi.ann.test.MnistData.MnistPattern;
-import com.slavi.ann.test.TwoSpiralsData;
+import com.slavi.ann.test.dataset.MnistData;
+import com.slavi.ann.test.dataset.TwoSpiralsData;
+import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.ann.test.v2.activation.DebugLayer;

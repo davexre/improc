@@ -1,4 +1,4 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.dataset;
 
 import java.io.File;
 import java.io.FileReader;
@@ -9,7 +9,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.slavi.ann.test.MnistData.MnistPattern;
+import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.Utils;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;

@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.slavi.ann.NNet;
-import com.slavi.ann.test.MnistData;
-import com.slavi.ann.test.MnistData.MnistPattern;
+import com.slavi.ann.test.dataset.MnistData;
+import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
 

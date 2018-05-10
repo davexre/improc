@@ -1,4 +1,4 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.dataset;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.Utils;
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
@@ -36,7 +38,6 @@ public class MnistData {
 		public static final int size = columns * rows; // 784
 		
 		public BufferedImage toBufferedImage() {
-
 			BufferedImage img = new BufferedImage(columns, rows, BufferedImage.TYPE_USHORT_GRAY);
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < columns; c++) {
@@ -120,7 +121,7 @@ public class MnistData {
 		List<MnistPattern> pats = readMnistSet(false);
 		Marker.release();
 
-		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(mnistDir, "test.png"));
+		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(dataTargetDir, "test.png"));
 		System.out.println(pats.size());
 		System.out.println("Done.");
 	}

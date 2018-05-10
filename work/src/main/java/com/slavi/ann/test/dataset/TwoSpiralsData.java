@@ -1,8 +1,9 @@
-package com.slavi.ann.test;
+package com.slavi.ann.test.dataset;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.slavi.ann.test.DatapointPair;
 import com.slavi.math.matrix.Matrix;
 
 public class TwoSpiralsData {
