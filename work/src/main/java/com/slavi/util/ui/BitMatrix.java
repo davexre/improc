@@ -2,15 +2,18 @@ package com.slavi.util.ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.MatrixUtil;
 
 public class BitMatrix extends JComponent {
-  private static final long serialVersionUID = 3643680302268014549L;
+	private static final long serialVersionUID = 3643680302268014549L;
 
 	protected Matrix matrix = null;
+	BufferedImage img;
 	protected double checkedValue = 1;
 	protected double unCheckedValue = 0;
 	protected boolean usingGradientColors = true;
@@ -58,49 +61,14 @@ public class BitMatrix extends JComponent {
 		g.drawLine(0, 0, toX, toY);
 		g.drawLine(0, toY, toX, 0);
 	}
-  
+
 	public void paint(Graphics g) {
 		if (matrix == null) {
-			drawX(g);
-			return;
-    	}
-		double mmin = matrix.min();
-		double mmax = matrix.max();
-		double middle = (mmin + mmax) / 2;
-		double delta = mmax - mmin;
-		if (delta == 0) {
-			drawX(g);
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, getWidth(), getHeight());
 			return;
 		}
-		
-		double dX = (double)(this.getWidth()) / (double)(matrix.getSizeX());    
-		double dY = (double)(this.getHeight()) / (double)(matrix.getSizeY());
-		
-		int fc = this.getForeground().getRGB();
-		int bc = this.getBackground().getRGB();
-    
-		for (int i = matrix.getSizeX() - 1; i >= 0; i--) {
-			for (int j = matrix.getSizeY() - 1; j >= 0; j--) {  
-				if (usingGradientColors) {
-					double t = (matrix.getItem(i, j) - mmin) / delta;
-					int c = 
-			            (((((bc    )& 0xff) + ((int)((((fc-bc)    )& 0xff)*t))&0xff))      ) |
-			            (((((bc>> 8)& 0xff) + ((int)((((fc-bc)>> 8)& 0xff)*t))&0xff)) <<  8) |
-			            (((((bc>>16)& 0xff) + ((int)((((fc-bc)>>16)& 0xff)*t))&0xff)) << 16);
-					g.setColor(new Color(c));
-					g.fillRect(
-						(int)(i * dX), 
-						(int)(j * dY), 
-						(int)((i + 1) * dX) - (int)(i * dX), 
-						(int)((j + 1) * dY) - (int)(j * dY));
-				} else if (matrix.getItem(i, j) > middle) {
-					g.fillRect(
-						(int)(i * dX), 
-						(int)(j * dY), 
-						(int)((i + 1) * dX) - (int)(i * dX), 
-						(int)((j + 1) * dY) - (int)(j * dY));
-				}
-        	}
-		}
+		img = MatrixUtil.toImage(matrix, unCheckedValue, checkedValue, 0, img);
+		g.drawImage(img, 0, 0, getWidth(), getHeight(), null);
 	}
 }

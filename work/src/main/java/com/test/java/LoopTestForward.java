@@ -1,7 +1,6 @@
 package com.test.java;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import com.slavi.util.Marker;
@@ -33,7 +32,7 @@ public class LoopTestForward {
 			String temp = lList.get(k);
 		}
 		Marker.release();
-		
+
 		long lForwardEndTime = System.currentTimeMillis(); // new Date().getTime();
 		System.out.println("End: " + lForwardEndTime);
 		long lForwardDifference = lForwardEndTime - lForwardStartTime;

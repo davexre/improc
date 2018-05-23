@@ -1,11 +1,9 @@
 package com.slavi.ann.test.v2.test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.dataset.MnistData;
-import com.slavi.ann.test.dataset.TwoSpiralsData;
 import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
@@ -23,7 +21,7 @@ public class MyMnistDataTest {
 		stOut.start();
 		Matrix input = new Matrix();
 		Matrix output = new Matrix();
-		
+
 		for (DatapointPair pair : trainset) {
 			MnistPattern mp = (MnistPattern) pair;
 			if (mp.label == 8)
@@ -34,21 +32,21 @@ public class MyMnistDataTest {
 			stIn.addValue(input);
 			stOut.addValue(output);
 		}
-		
+
 		stIn.stop();
 		stOut.stop();
-		
+
 //		System.out.println(stIn.toString());
 //		System.out.println("------------");
 //		System.out.println(stOut.toString());
 	}
-	
+
 	void doIt() throws Exception {
 		Marker.mark("Read");
 		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 30); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
 		Marker.release();
-		
+
 		DatapointPair pair0 = trainset.get(0);
 		Matrix input0 = new Matrix();
 		Matrix output0 = new Matrix();

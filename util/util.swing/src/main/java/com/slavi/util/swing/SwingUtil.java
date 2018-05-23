@@ -7,13 +7,20 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import com.slavi.util.swing.TaskProgress.TaskState;
 
 /**
  * This class contains utility functions for creating user interface using the
@@ -27,7 +34,7 @@ public class SwingUtil {
 	public static String getDirectory() {
 		return getDirectory(null);
 	}
-	
+
 	/**
 	 * Opens the standard SWING directory chooser dialog.
 	 * <p>
@@ -45,7 +52,7 @@ public class SwingUtil {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Opens the standard SWING file chooser dialog.
 	 * @see #getFileName(Component)
@@ -53,7 +60,7 @@ public class SwingUtil {
 	public static String getFileName() {
 		return getFileName(null);
 	}
-	
+
 	/**
 	 * Opens the standard SWING file chooser dialog.
 	 * <p>
@@ -91,7 +98,7 @@ public class SwingUtil {
 	 * maximum preferred width/height of the components in that cell, except for
 	 * the cells in row <code>springRow</code> and column <code>springCol</code>
 	 * wich are made "elastic" to in order the grid to fit the parent window.
-	 * 
+	 *
 	 * @param parent
 	 *            the parent container which elements need to be put in a grid
 	 * @param columns
@@ -126,7 +133,7 @@ public class SwingUtil {
 		String c2name;
 		Spring c2spring;
 		ArrayList<Spring> sizes;
-		
+
 		// WIDTH
 		pad = Spring.constant(xPad);
 		c2 = parent;
@@ -134,7 +141,7 @@ public class SwingUtil {
 		c2spring = Spring.constant(insetX);
 		Spring totalSizeX = c2spring;
 		sizes = new ArrayList<Spring>();
-		
+
 		for (int col = 0; col < columns; col++) {
 			Spring width = Spring.constant(0);
 			for (int i = col; i < components.length; i += columns) {
@@ -182,14 +189,14 @@ public class SwingUtil {
 			c2name = SpringLayout.WEST;
 			c2spring = pad;
 		}
-		
+
 		// HEIGHT
 		pad = Spring.constant(yPad);
 		c2 = parent;
 		c2name = SpringLayout.NORTH;
 		c2spring = Spring.constant(insetY);
 		Spring totalSizeY = c2spring;
-		
+
 		sizes = new ArrayList<Spring>();
 		for (int row = 0; row <= maxRow; row++) {
 			int startI = row * columns;
@@ -205,7 +212,7 @@ public class SwingUtil {
 			totalSizeY = Spring.sum(totalSizeY, height);
 			c2spring = pad;
 		}
-		
+
 		c2spring = Spring.constant(insetY);
 		for (int row = 0; row <= maxRow; row++) {
 			int startI = row * columns;
@@ -253,7 +260,7 @@ public class SwingUtil {
 	 * <code>parent</code> in a grid. Each component is as big as the maximum
 	 * preferred width and height of the components. The parent is made just big
 	 * enough to fit them all.
-	 * 
+	 *
 	 * @param rows
 	 *            number of rows
 	 * @param cols
@@ -351,7 +358,7 @@ public class SwingUtil {
 	 * the maximum preferred width of the components in that column; height is
 	 * similarly determined for each row. The parent is made just big enough to
 	 * fit them all.
-	 * 
+	 *
 	 * @param rows
 	 *            number of rows
 	 * @param cols
@@ -416,7 +423,7 @@ public class SwingUtil {
 		c.setBorder(BorderFactory.createLineBorder(Color.black));
 		return c;
 	}
-	
+
 	public static <C extends Container> C setEnabled(C container, boolean isEnabled) {
 		if (container != null) {
 			container.setEnabled(isEnabled);
@@ -428,7 +435,7 @@ public class SwingUtil {
 		}
 		return container;
 	}
-	
+
 	public static <C extends Component> C center(C c) {
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension size = c.getSize();
@@ -436,5 +443,112 @@ public class SwingUtil {
 		int y = Math.max(0, (dim.height - size.height) / 2);
 		c.setLocation(x, y);
 		return c;
+	}
+
+	private static JDialog waitDialog;
+	private static TaskProgress waitDialogTaskProgress;
+	private static final Object waitDialogSynch = new Object();
+
+	public static void activeWaitDialogAbortTask() {
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				waitDialog.dispose();
+		}
+	}
+
+	public static void activeWaitDialogSetStatus(final String status, final int taskCompleted) {
+		synchronized (waitDialogSynch) {
+			if (waitDialogTaskProgress != null) {
+				waitDialogTaskProgress.setStatus(status);
+				waitDialogTaskProgress.setProgress(taskCompleted);
+			}
+		}
+	}
+
+	public static void activeWaitDialogProgress(int taskCompleted) {
+		synchronized (waitDialogSynch) {
+			if (waitDialogTaskProgress != null) {
+				waitDialogTaskProgress.setProgress(taskCompleted);
+			}
+		}
+	}
+
+	private static class CallableWrapper<V> implements Runnable {
+		final Callable<V> callable;
+		V result;
+		Throwable exception;
+
+		public CallableWrapper(Callable<V> callable) {
+			this.callable = callable;
+		}
+
+		public void run() {
+			try {
+				result = callable.call();
+			} catch (Exception e) {
+				exception = e;
+			}
+		}
+	}
+
+	public static <V> V openWaitDialog(final String title, final Callable<V> callable, final int maxProgressValue) throws Throwable {
+		CallableWrapper<V> w = new CallableWrapper<>(callable);
+		if (openWaitDialog(title, w, maxProgressValue)) {
+			if (w.exception != null)
+				throw w.exception;
+			else
+				return w.result;
+		} else {
+			throw new InterruptedException("Aborted");
+		}
+	}
+
+	public static boolean openWaitDialog(final String title, final Runnable runnable, final int maxProgressValue) {
+		if (runnable == null)
+			return false;
+		JDialog dialog;
+		synchronized (waitDialogSynch) {
+			if (waitDialog != null)
+				return false;
+			dialog = waitDialog = new JDialog();
+		}
+
+		waitDialogTaskProgress = new TaskProgress(new Runnable() {
+			public void run() {
+				try {
+					runnable.run();
+				} finally {
+					activeWaitDialogAbortTask();
+				}
+			}
+		});
+		waitDialogTaskProgress.setTitle(title);
+		waitDialogTaskProgress.setProgressMax(maxProgressValue);
+		dialog.add(waitDialogTaskProgress);
+
+		dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		dialog.setMinimumSize(new Dimension(300, -1));
+		dialog.pack();
+		SwingUtil.center(dialog);
+		waitDialogTaskProgress.startTask();
+		dialog.setModal(true);
+		dialog.setVisible(true);
+		TaskState r = waitDialogTaskProgress.getTaskState();
+		waitDialogTaskProgress.abortTask();
+		dialog.dispose();
+
+		waitDialogTaskProgress = null;
+		dialog = null;
+
+		return r == TaskState.FINISHED;
+	}
+
+	@SuppressWarnings("restriction")
+	public static void swingInit() {
+		try {
+			UIManager.setLookAndFeel(new com.sun.java.swing.plaf.gtk.GTKLookAndFeel());
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 	}
 }

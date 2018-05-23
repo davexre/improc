@@ -8,6 +8,7 @@ import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
+import com.slavi.util.MatrixUtil;
 /*
 
 To check this: https://github.com/deepmind/sonnet
@@ -129,7 +130,7 @@ public class MyMnistDataTest {
 		for (int index = 0; index < nnet.layers.size(); index++) {
 			MyLayer l = (MyLayer) nnet.layers.get(index);
 			System.out.println("\nWeight " + index);
-			System.out.println(l.weight.calcItemStatistics());
+			System.out.println(MatrixUtil.calcStatistics(l.weight));
 			//l.maxInputError.printM("Max input Error");
 			//l.tmpOutput.printM("tmpOutput");
 		}

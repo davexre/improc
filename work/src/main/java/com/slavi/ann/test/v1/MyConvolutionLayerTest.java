@@ -1,7 +1,5 @@
 package com.slavi.ann.test.v1;
 
-import java.util.Random;
-
 import com.slavi.math.matrix.Matrix;
 
 public class MyConvolutionLayerTest {
@@ -14,12 +12,12 @@ public class MyConvolutionLayerTest {
 		Matrix error = new Matrix();
 		output.mSub(target, error);
 		error.printM("error");
-		
+
 		Matrix inputError = l.backPropagate(error);
 		inputError.printM("inputError");
-		
+
 	}
-	
+
 	void doIt() throws Exception {
 		MyNet net = new MyNet();
 		MyConvolutionLayer l1 = new MyConvolutionLayer(3, 3, 1);
@@ -37,10 +35,10 @@ public class MyConvolutionLayerTest {
 		l2.kernel.makeR(0.3);
 		l2.kernel.setItem(1, 1, 1);
 		net.layers.add(l2);
-		
+
 		Matrix input = new Matrix(4, 4);
 		int sizeInput = input.getVectorSize();
-		
+
 		Matrix error = new Matrix(1, 1);
 		Matrix target = new Matrix(1, 1);
 
@@ -73,20 +71,20 @@ public class MyConvolutionLayerTest {
 				if (print) error.printM("error");
 				if (print) System.out.println();
 			}
-			
+
 			//l1.kernel.printM("kernel 1");
 			// l2.kernel.printM("kernel 2");
 			net.applyTraining();
 		}
-/*		
-		
+/*
+
 		Random rnd = new Random();
 		for (int i = 0; i < input.getVectorSize(); i++)
 			input.setVectorItem(i, rnd.nextDouble());
 //		input.makeR(0.7);
 		Matrix target = new Matrix(1, 1);
 		target.makeR(0.95);
-		
+
 		for (int i = 0; i < 50; i ++) {
 			System.out.println("=================\nEpoch " + i);
 			learn(l, input, target);

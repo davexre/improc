@@ -24,8 +24,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
@@ -38,20 +36,20 @@ import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 public class TestApacheHttpClient {
 
 	void doIt1() throws Exception {
-		SSHClient ssh = new SSHClient();
-		ssh.addHostKeyVerifier(new PromiscuousVerifier());
-		ssh.connect("localhost");
-		ssh.authPublickey(System.getProperty("user.name"));
-		SFTPClient sftp = ssh.newSFTPClient();
-		List<RemoteResourceInfo> ls = sftp.ls(".");
-		sftp.close();
-		
-		ssh.disconnect();
-		for (RemoteResourceInfo i : ls)
-			System.out.println(i);
-		
+		try (SSHClient ssh = new SSHClient()) {
+			ssh.addHostKeyVerifier(new PromiscuousVerifier());
+			ssh.connect("localhost");
+			ssh.authPublickey(System.getProperty("user.name"));
+			SFTPClient sftp = ssh.newSFTPClient();
+			List<RemoteResourceInfo> ls = sftp.ls(".");
+			sftp.close();
+
+			ssh.disconnect();
+			for (RemoteResourceInfo i : ls)
+				System.out.println(i);
+		}
 	}
-	
+
 	void doIt3() throws Exception {
 		Document jsoupDoc;
 		jsoupDoc = Jsoup.parse(getClass().getResourceAsStream("TestApacheHttpClient.xml"), null, "", Parser.xmlParser());
@@ -59,12 +57,12 @@ public class TestApacheHttpClient {
 		System.out.println("--------------");
 		System.out.println(jsoupDoc.select("configuration badtag"));
 	}
-	
+
 	void doIt() throws Exception {
 		String url = "https://www.google.com";
 		url = "http://localhost:8080/manager/html";
 		Document jsoupDoc;
-		
+
 		if (url.startsWith("file://")) {
 			jsoupDoc = Jsoup.parse(new URL(url).openStream(), null, "");
 		} else {
@@ -81,7 +79,7 @@ public class TestApacheHttpClient {
 					.setConnectionManager(httpClientConnectionManager)
 					.build();
 				) {
-				
+
 				AuthCache authCache = new BasicAuthCache();
 				BasicScheme basicAuth = new BasicScheme();
 				authCache.put(target, basicAuth);
@@ -92,15 +90,15 @@ public class TestApacheHttpClient {
 				CloseableHttpResponse response1 = httpclient.execute(httpget, ctx);
 				System.out.println("Status line: " + response1.getStatusLine());
 				HttpEntity entity = response1.getEntity();
-				
+
 				ContentType contentType = ContentType.get(entity);
 				Charset charset = contentType == null ? null : contentType.getCharset();
 				String charsetName = charset == null ? null : charset.name();
-	
+
 				InputStream is = entity.getContent();
 				jsoupDoc = Jsoup.parse(is, charsetName, url);
 				IOUtils.closeQuietly(is);
-				
+
 				//EntityUtils.consume(entity);
 				//IOUtils.copy(entity.getContent(), System.out);
 	/*			System.out.println("Initial set of cookies:");

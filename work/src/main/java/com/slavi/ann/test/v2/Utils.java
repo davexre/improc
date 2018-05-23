@@ -9,9 +9,9 @@ import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
-import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.ColorConversion;
+import com.slavi.util.MatrixUtil;
 
 public class Utils {
 	public static int fixColorLight(int baseColor, double light) {
@@ -24,27 +24,6 @@ public class Utils {
 		return ColorConversion.RGB.toRGB(drgb);
 	}
 	
-	public static BufferedImage toImage(int baseColor, double minVal, double maxVal, Matrix m, BufferedImage dest) {
-		double hsl[] = new double[3];
-		double drgb[] = new double[3];
-		ColorConversion.RGB.fromRGB(baseColor, drgb);
-		ColorConversion.HSL.fromDRGB(drgb, hsl);
-		double maxL = hsl[2];
-		BufferedImage result = dest;
-		if (result == null || 
-			result.getWidth() != m.getSizeX() || 
-			result.getHeight() != m.getSizeY() || 
-			result.getType() != BufferedImage.TYPE_INT_RGB)
-			result = new BufferedImage(m.getSizeX(), m.getSizeY(), BufferedImage.TYPE_INT_RGB);
-		for (int i = 0; i < m.getSizeX(); i++)
-			for (int j = 0; j < m.getSizeY(); j++) {
-				hsl[2] = MathUtil.mapValue(m.getItem(i, j), minVal, maxVal, 1, maxL);
-				ColorConversion.HSL.toDRGB(hsl, drgb);
-				result.setRGB(i, j, ColorConversion.RGB.toRGB(drgb));
-			}
-		return result;
-	}
-
 	static abstract class DrawLayer {
 		public void setWidth(int imgSize[], int width) {
 			imgSize[0] = Math.max(imgSize[0], width);
@@ -75,13 +54,13 @@ public class Utils {
 			ConvolutionLayer.Workspace wws = (ConvolutionLayer.Workspace) ws;
 
 			Matrix m = ll.kernel;
-			BufferedImage bi = toImage(inputBaseColor, 0, Math.max(1, m.max()), m, null);
+			BufferedImage bi = MatrixUtil.toImage(m, 0, Math.max(1, m.max()), inputBaseColor, null);
 			g.drawImage(bi, 0, 0, null);
 			g.translate(0, m.getSizeY() + spaceBetweenLayers);
 			
 			m = new Matrix();
 			wws.outputError.termAbs(m);
-			bi = toImage(errorBaseColor, 0, 1, m, null);
+			bi = MatrixUtil.toImage(m, 0, 1, errorBaseColor, null);
 			g.drawImage(bi, 0, 0, null);
 			g.translate(0, m.getSizeY());
 
@@ -114,17 +93,17 @@ public class Utils {
 			FullyConnectedLayer.Workspace wws = (FullyConnectedLayer.Workspace) ws;
 
 			Matrix m = ll.weight;
-			BufferedImage bi = toImage(inputBaseColor, Math.min(0, m.min()), Math.max(1, m.max()), m, null);
+			BufferedImage bi = MatrixUtil.toImage(m, Math.min(0, m.min()), Math.max(1, m.max()), inputBaseColor, null);
 			g.drawImage(bi, 0, 0, null);
 
 			m = wws.dW.makeCopy();
-			bi = toImage(errorBaseColor, Math.min(0, m.min()), Math.max(0.01, m.max()), m, null);
+			bi = MatrixUtil.toImage(m, Math.min(0, m.min()), Math.max(0.01, m.max()), errorBaseColor, null);
 			g.drawImage(bi, ll.weight.getSizeX() + spaceBetweenLayers, 0, null);
 			g.translate(0, m.getSizeY() + spaceBetweenLayers);
 			
 			m = new Matrix();
 			wws.outputError.termAbs(m);
-			bi = toImage(errorBaseColor, 0, 1, m, null);
+			bi = MatrixUtil.toImage(m, 0, 1, errorBaseColor, null);
 			g.drawImage(bi, 0, 0, null);
 			g.translate(0, m.getSizeY());
 
@@ -152,11 +131,11 @@ public class Utils {
 			DebugLayer.Workspace wws = (DebugLayer.Workspace) ws;
 
 			Matrix m = wws.stInput.getMaxX();
-			BufferedImage bi = toImage(inputBaseColor, Math.min(0, m.min()), Math.max(1, m.max()), m, null);
+			BufferedImage bi = MatrixUtil.toImage(m, Math.min(0, m.min()), Math.max(1, m.max()), inputBaseColor, null);
 			g.drawImage(bi, 0, 0, null);
 
 			m = wws.stError.getMaxX();
-			bi = toImage(errorBaseColor, Math.min(0, m.min()), Math.max(0.01, m.max()), m, null);
+			bi = MatrixUtil.toImage(m, Math.min(0, m.min()), Math.max(0.01, m.max()), errorBaseColor, null);
 			g.drawImage(bi, m.getSizeX() + spaceBetweenLayers, 0, null);
 			g.translate(0, m.getSizeY() + spaceBetweenLayers);
 

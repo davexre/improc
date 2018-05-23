@@ -1,18 +1,14 @@
 package com.slavi.ann.test.v2.test;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
-import com.slavi.ann.test.v2.Utils;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
@@ -23,7 +19,7 @@ public class Trainer {
 	static class DatapointTrainResult implements Comparable<DatapointTrainResult> {
 		int index;
 		double error;
-		
+
 		public DatapointTrainResult(int index, double error) {
 			this.index = index;
 			this.error = error;
@@ -62,13 +58,13 @@ public class Trainer {
 		r.setItem(1, 1, tmax);
 		return r;
 	}
-	
+
 	public static double assertValue(double d) {
 		if (Double.isInfinite(d) || Double.isNaN(d))
 			throw new RuntimeException("Invalid value");
 		return d;
 	}
-	
+
 	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
@@ -133,7 +129,7 @@ public class Trainer {
 			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
 			double learnProgress = lastAvgError - avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
-			
+
 /*			Collections.sort(errors);
 			for (int i = 0; i < 5 && i < errors.size(); i++) {
 				DatapointTrainResult e = errors.get(i);
@@ -176,5 +172,4 @@ public class Trainer {
 			l.resetEpoch(wslist);
 		}
 	}
-	
 }

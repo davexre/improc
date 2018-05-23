@@ -1,7 +1,6 @@
 package com.slavi.improc.parallel;
 
 import java.awt.Rectangle;
-import java.util.concurrent.Callable;
 
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
@@ -18,15 +17,15 @@ public class PDLoweDetector2 implements Runnable {
 	public Hook hook = null;
 
 	final KeyPointList keyPointList;
-	
+
 	DWindowedImage src;
-	
+
 	int scale;
 
 	int scaleSpaceLevels;
 
 	Rectangle dloweExtent;
-	
+
 	public PDLoweDetector2(KeyPointList keyPointList, DWindowedImage src, Rectangle dloweExtent, int scale, int scaleSpaceLevels) {
 		this.keyPointList = keyPointList;
 		this.src = src;
@@ -34,11 +33,11 @@ public class PDLoweDetector2 implements Runnable {
 		this.scaleSpaceLevels = scaleSpaceLevels;
 		this.dloweExtent = dloweExtent;
 	}
-	
+
 	public static double getNextSigma(double sigma, int scaleSpaceLevels) {
 		return sigma * Math.pow(2.0, 1.0 / scaleSpaceLevels); // -> This is the original formula!!!
 	}
-	
+
 	public static Rectangle getNeededSourceExtent(Rectangle dest) {
 		return getNeededSourceExtent(dest, defaultScaleSpaceLevels);
 	}
@@ -60,7 +59,7 @@ public class PDLoweDetector2 implements Runnable {
 	public static Rectangle getEffectiveTargetExtent(Rectangle source) {
 		return getEffectiveTargetExtent(source, defaultScaleSpaceLevels);
 	}
-	
+
 	public static Rectangle getEffectiveTargetExtent(Rectangle source, int scaleSpaceLevels) {
 		double sigma = initialSigma;
 		double sigmas[] = new double[scaleSpaceLevels + 2];
@@ -74,7 +73,7 @@ public class PDLoweDetector2 implements Runnable {
 		}
 		return tmp;
 	}
-	
+
 	void computeDOG(DWindowedImage blured1, DWindowedImage blured2, DWindowedImage destDOG) {
 		int minX = destDOG.minX();
 		int maxX = destDOG.maxX();
@@ -120,11 +119,11 @@ public class PDLoweDetector2 implements Runnable {
 	 * plane. A high value will allow for peaks to be used that are more far
 	 * away from the plane used for localization, while a low value will sort
 	 * out more peaks, that drifted too far away.
-	 * 
+	 *
 	 * Be very careful with this value, as a too large value will lead to a high
 	 * number of keypoints in hard to localize areas such as in photos of the
 	 * sky.
-	 * 
+	 *
 	 * Good values seem to lie between 0.30 and 0.6.
 	 */
 	public static final double scaleAdjustThresh = 0.50;
@@ -174,16 +173,16 @@ public class PDLoweDetector2 implements Runnable {
 		}
 		return isMinimum || isMaximum;
 	}
-	
+
 	private boolean isTooEdgeLike(DWindowedImage aDOG, int atX, int atY) {
 		double D_xx, D_yy, D_xy;
 		// Calculate the Hessian H elements [ D_xx, D_xy ; D_xy , D_yy ]
-		D_xx = aDOG.getPixel(atX + 1, atY) + aDOG.getPixel(atX - 1, atY) - 
+		D_xx = aDOG.getPixel(atX + 1, atY) + aDOG.getPixel(atX - 1, atY) -
 			2.0 * aDOG.getPixel(atX, atY);
-		D_yy = aDOG.getPixel(atX, atY + 1) + aDOG.getPixel(atX, atY - 1) - 
+		D_yy = aDOG.getPixel(atX, atY + 1) + aDOG.getPixel(atX, atY - 1) -
 			2.0 * aDOG.getPixel(atX, atY);
 		D_xy = 0.25 * (
-			(aDOG.getPixel(atX + 1, atY + 1) - aDOG.getPixel(atX + 1, atY - 1)) - 
+			(aDOG.getPixel(atX + 1, atY + 1) - aDOG.getPixel(atX + 1, atY - 1)) -
 			(aDOG.getPixel(atX - 1, atY + 1) - aDOG.getPixel(atX - 1, atY - 1)));
 
 		// page 13 in Lowe's paper
@@ -198,16 +197,16 @@ public class PDLoweDetector2 implements Runnable {
 		// (DetH * r1sq))
 		return (TrHsq / DetH) >= (r1sq / maximumEdgeRatio);
 	}
-	
+
 	protected boolean localizeIsWeak(DWindowedImage[] DOGs, int x, int y,
 			KeyPoint sp) {
 		DWindowedImage below = DOGs[0];
 		DWindowedImage current = DOGs[1];
 		DWindowedImage above = DOGs[2];
-		int minX = current.minX(); 
-		int maxX = current.maxX(); 
-		int minY = current.minY(); 
-		int maxY = current.maxY(); 
+		int minX = current.minX();
+		int maxX = current.maxX();
+		int minY = current.minY();
+		int maxY = current.maxY();
 
 		SymmetricMatrix h = new SymmetricMatrix(3);
 		Matrix adj = new Matrix(1, 3);
@@ -217,34 +216,34 @@ public class PDLoweDetector2 implements Runnable {
 		while (adjustments-- > 0) {
 			// When the localization hits some problem, i.e. while moving the
 			// point a border is reached, then skip this point.
-			if ((x <= minX) || (x >= maxX) || 
+			if ((x <= minX) || (x >= maxX) ||
 				(y <= minY) || (y >= maxY))
 				return true;
 
-			h.setItem(0, 0, below.getPixel(x, y) - 
+			h.setItem(0, 0, below.getPixel(x, y) -
 				2 * current.getPixel(x, y) + above.getPixel(x, y));
-			h.setItem(1, 1, current.getPixel(x, y - 1) - 
+			h.setItem(1, 1, current.getPixel(x, y - 1) -
 				2 * current.getPixel(x, y) + current.getPixel(x, y + 1));
-			h.setItem(2, 2, current.getPixel(x - 1, y) - 
+			h.setItem(2, 2, current.getPixel(x - 1, y) -
 				2 * current.getPixel(x, y) + current.getPixel(x + 1, y));
 
 			h.setItem(0, 1, 0.25 * (
-				(above.getPixel(x, y + 1) - above.getPixel(x, y - 1)) - 
+				(above.getPixel(x, y + 1) - above.getPixel(x, y - 1)) -
 				(below.getPixel(x, y + 1) - below.getPixel(x, y - 1))));
 			h.setItem(0, 2, 0.25 * (
-				(above.getPixel(x + 1, y) - above.getPixel(x - 1, y)) - 
+				(above.getPixel(x + 1, y) - above.getPixel(x - 1, y)) -
 				(below.getPixel(x + 1, y) - below.getPixel(x - 1, y))));
 			h.setItem(1, 2, 0.25 * (
-				(current.getPixel(x + 1, y + 1) - current.getPixel(x - 1, y + 1)) - 
+				(current.getPixel(x + 1, y + 1) - current.getPixel(x - 1, y + 1)) -
 				(current.getPixel(x + 1, y - 1) - current.getPixel(x - 1, y - 1))));
 
 			// Solve linear
 			if (!h.inverse())
 				return true;
 
-			b.setItem(0, 0, -0.5 * 
+			b.setItem(0, 0, -0.5 *
 				(above.getPixel(x, y) - below.getPixel(x, y)));
-			b.setItem(0, 1, -0.5 * 
+			b.setItem(0, 1, -0.5 *
 				(current.getPixel(x, y + 1) - current.getPixel(x, y - 1)));
 			b.setItem(0, 2, -0.5 *
 				(current.getPixel(x + 1, y) - current.getPixel(x - 1, y)));
@@ -255,7 +254,7 @@ public class PDLoweDetector2 implements Runnable {
 			double adjX = adj.getItem(0, 2);
 			if ((Math.abs(adjX) <= 0.5) && (Math.abs(adjY) <= 0.5)) {
 				// Now we approximated the exact sub-pixel peak position.
-				if (Math.abs(adjS) > scaleAdjustThresh) 
+				if (Math.abs(adjS) > scaleAdjustThresh)
 					return true;
 				// Additional local pixel information is now available,
 				// threshhold the D(^x)
@@ -280,26 +279,26 @@ public class PDLoweDetector2 implements Runnable {
 		}
 		return true;
 	}
-	
+
 	public void createDescriptor(KeyPoint sp, DWindowedImage magnitude, DWindowedImage direction) {
 		double[][][] featureVector = new double[KeyPoint.descriptorSize][KeyPoint.descriptorSize][KeyPoint.numDirections];
-		int minX = magnitude.minX(); 
-		int maxX = magnitude.maxX(); 
-		int minY = magnitude.minY(); 
-		int maxY = magnitude.maxY(); 
+		int minX = magnitude.minX();
+		int maxX = magnitude.maxX();
+		int minY = magnitude.minY();
+		int maxY = magnitude.maxY();
 
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0 ; k < KeyPoint.numDirections; k++)
 					featureVector[i][j][k] = 0;
-		
+
 		double considerScaleFactor = 2.0 * sp.kpScale;
 		double dDim05 = KeyPoint.descriptorSize / 2.0;
 		int radius = (int) (((KeyPoint.descriptorSize + 1.0) / 2) *
 			Math.sqrt(2.0) * considerScaleFactor + 0.5);
 		double sigma2Sq = 2.0 * dDim05 * dDim05;
 		double angle = -sp.degree;
-		
+
 		for (int y = -radius ; y < radius ; ++y) {
 			for (int x = -radius ; x < radius ; ++x) {
 				// Rotate and scale
@@ -310,7 +309,7 @@ public class PDLoweDetector2 implements Runnable {
 
 				yR /= considerScaleFactor;
 				xR /= considerScaleFactor;
-		
+
 				// Now consider all (xR, yR) that are anchored within
 				// (- descDim/2 - 0.5 ; -descDim/2 - 0.5) to
 				//    (descDim/2 + 0.5 ; descDim/2 + 0.5),
@@ -324,7 +323,7 @@ public class PDLoweDetector2 implements Runnable {
 				if (currentX < minX || currentX > maxX ||
 					currentY < minY || currentY > maxY)
 					continue;
-				
+
 				// Weight the magnitude relative to the center of the
 				// whole FV. We do not need a normalizing factor now, as
 				// we normalize the whole FV later anyway (see below).
@@ -349,10 +348,10 @@ public class PDLoweDetector2 implements Runnable {
 				double[] xWeight = new double[2];
 				double[] yWeight = new double[2];
 				double[] dirWeight = new double[2];
-				
-				for (int i = 0; i<2; i++) 
+
+				for (int i = 0; i<2; i++)
 					dirWeight[i] = yWeight[i] = xWeight[i] = dirIdx[i] = yIdx[i] = xIdx[i] = 0;
-				
+
 				if (xR >= 0) {
 					xIdx[0] = (int) xR;
 					xWeight[0] = (1.0 - (xR - xIdx[0]));
@@ -370,7 +369,7 @@ public class PDLoweDetector2 implements Runnable {
 					yIdx[1] = (int) (yR + 1.0);
 					yWeight[1] = yR - yIdx[1] + 1.0;
 				}
-				
+
 				// Rotate the gradient direction by the keypoint
 				// orientation, then normalize to [-pi ; pi] range.
 				double dir = direction.getPixel(currentX, currentY) - sp.degree;
@@ -393,19 +392,19 @@ public class PDLoweDetector2 implements Runnable {
 					for (int ix = 0 ; ix < 2 ; ix++) {
 						for (int id = 0 ; id < 2 ; id++) {
 							double value = featureVector[xIdx[ix]][yIdx[iy]][dirIdx[id]] +
-								xWeight[ix] * yWeight[iy] * dirWeight[id] * magW; 
+								xWeight[ix] * yWeight[iy] * dirWeight[id] * magW;
 							featureVector[xIdx[ix]][yIdx[iy]][dirIdx[id]] = value;
 						}
 					}
 				}
 			}
 		}
-		
+
 		// Normalize and hicap the feature vector, as recommended on page
 		// 16 in Lowe03.
 		// Straight normalization
 		double norm = 0.0;
-		
+
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0 ; k < KeyPoint.numDirections; k++) {
@@ -416,7 +415,7 @@ public class PDLoweDetector2 implements Runnable {
 		norm = Math.sqrt(norm);
 		if (norm == 0.0)
 			throw (new IllegalArgumentException("CapAndNormalizeFV cannot normalize with norm = 0.0"));
-		
+
 		for (int i = 0 ; i < KeyPoint.descriptorSize; i++)
 			for (int j = 0 ; j < KeyPoint.descriptorSize; j++)
 				for (int k = 0 ; k < KeyPoint.numDirections; k++)
@@ -449,7 +448,7 @@ public class PDLoweDetector2 implements Runnable {
 		sp.setDoubleY(sp.getDoubleY() * sp.imgScale);
 		sp.kpScale *= sp.imgScale;
 	}
-	
+
 	private void GenerateKeypointSingle(double sigma, DWindowedImage magnitude,
 			DWindowedImage direction, KeyPoint sp, int scaleSpaceLevels) {
 		// The relative estimated keypoint scale. The actual absolute keypoint
@@ -587,7 +586,7 @@ public class PDLoweDetector2 implements Runnable {
 
 				sp.kpScale = kpScale;
 				sp.degree = degree;
-				
+
 				KeyPoint sp2 = new KeyPoint(keyPointList, sp.getDoubleX(), sp.getDoubleY());
 				sp2.adjS = sp.adjS;
 				sp2.degree = sp.degree;
@@ -596,14 +595,14 @@ public class PDLoweDetector2 implements Runnable {
 				sp2.kpScale = sp.kpScale;
 				sp2.dogLevel = sp.dogLevel;
 				sp2.imgScale = sp.imgScale;
-				
+
 				createDescriptor(sp2, magnitude, direction);
 				if (hook != null)
 					hook.keyPointCreated(sp2);
 			}
 		}
 	}
-	
+
 	private void DetectFeaturesInSingleDOG(DWindowedImage[] DOGs, DWindowedImage magnitude, DWindowedImage direction, int aLevel, int scale, int scaleSpaceLevels, double sigma) {
 		// Now we have three valid Difference Of Gaus images
 		// Border pixels are skipped
@@ -622,7 +621,7 @@ public class PDLoweDetector2 implements Runnable {
 					continue; // current pixel in DOGs[1] is not a local
 								// extrema
 				isLocalExtremaCount++;
-				
+
 				// We have a peak.
 				if (isTooEdgeLike(DOGs[1], i, j))
 					continue;
@@ -648,7 +647,7 @@ public class PDLoweDetector2 implements Runnable {
 	int isLocalExtremaCount;
 	int isTooEdgeLikeCount;
 	int localizeIsWeakCount;
-	
+
 	void DetectFeaturesInSingleLevel() {
 		double sigma = initialSigma;
 		Rectangle srcExtent = src.getExtent();
@@ -661,7 +660,7 @@ public class PDLoweDetector2 implements Runnable {
 
 		Rectangle dogExtent = new Rectangle(dloweExtent.x - 1, dloweExtent.y - 1, dloweExtent.width + 2, dloweExtent.height + 2);
 		dogExtent = dogExtent.intersection(srcExtent);
-		
+
 		PDImageMapBuffer[] DOGs = new PDImageMapBuffer[3];
 		for (int i = DOGs.length - 1; i >= 0; i--)
 			DOGs[i] = new PDImageMapBuffer(dogExtent);
@@ -693,7 +692,7 @@ public class PDLoweDetector2 implements Runnable {
 
 			PComputeMagnitude.computeMagnitude(blurred0, magnitude);
 			PComputeDirection.computeDirection(blurred0, direction);
-			
+
 			// Compute next DOG
 			PFastGaussianFilter.applyFilter(blurred1, blurred2, sigma);
 			computeDOG(blurred1, blurred2, DOGs[2]);
@@ -706,17 +705,17 @@ public class PDLoweDetector2 implements Runnable {
 			// detect
 			DetectFeaturesInSingleDOG(DOGs, magnitude, direction, aLevel, scale, scaleSpaceLevels, sigma);
 		}
-		
+
 /*		int minX = dloweExtent.x;
 		int minY = dloweExtent.y;
 		int maxX = dloweExtent.x + dloweExtent.width - 1;
 		int maxY = dloweExtent.y + dloweExtent.height - 1;
-		
+
 		if ((minX & 0x01) != 0)
 			minX++;
 		if ((minY & 0x01) != 0)
 			minY++;
-		
+
 		for (int j = minY; j <= maxY; j += 2) {
 			for (int i = minX; i <= maxX; i += 2) {
 				try {
@@ -734,7 +733,7 @@ public class PDLoweDetector2 implements Runnable {
 			}
 		}*/
 	}
-	
+
 	public void run() {
 		DetectFeaturesInSingleLevel();
 	}

@@ -1,6 +1,5 @@
 package com.test.util;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +28,7 @@ public class ListClassesWithMain {
 			}
 		}
 	}
-	
+
 	public static void main1(String[] args) {
 		Reflections reflections = new Reflections("com.slavi", new ResourcesScanner());
 		Set<String> r = reflections.getResources(Pattern.compile(".*\\.txt", Pattern.CASE_INSENSITIVE));

@@ -455,10 +455,10 @@ public class SwtUtil {
 		}
 	}
 
-	public static void activeWaitDialogProgress(int amount) {
+	public static void activeWaitDialogProgress(int taskCompleted) {
 		synchronized (waitDialogSynch) {
 			if (waitDialog != null)
-				waitDialog.progress(amount);
+				waitDialog.progress(taskCompleted);
 		}
 	}
 

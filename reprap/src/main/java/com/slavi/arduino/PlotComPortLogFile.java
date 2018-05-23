@@ -37,18 +37,18 @@ import com.slavi.util.swt.SwtUtil;
 public class PlotComPortLogFile {
 
 	static boolean labelFrequency = true;
-	
+
 	static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	
+
 	Shell shell;
-	
+
 	Chart chart;
-	
+
 	public void createWidgets() {
         shell = new Shell();
         shell.setLayout(new FillLayout(SWT.HORIZONTAL));
         Composite parent = shell;
-        
+
         chart = new InteractiveChart(parent, SWT.NONE) {
             public void save(String filename, int format) {
                 Point size = getSize();
@@ -69,7 +69,7 @@ public class PlotComPortLogFile {
         chart.getTitle().setVisible(false);
 		chart.getAxisSet().getXAxes()[0].getTitle().setText(labelFrequency ? "frequency (Hz)" : "hour");
 	}
-	
+
 	public void open() throws Exception {
         SwtUtil.centerShell(shell);
         shell.open();
@@ -81,7 +81,7 @@ public class PlotComPortLogFile {
         }
         shell.dispose();
 	}
-	
+
 	public static class MeasurementData {
 		Date time = null;
 		public int frequency = 0;
@@ -95,7 +95,7 @@ public class PlotComPortLogFile {
 		public int maxPressure = 0;
 		public double maxCurrent = 0;
 	}
-	
+
 	static ArrayList<MeasurementData> readData(BufferedReader fin) throws Exception {
 		ArrayList<MeasurementData> r = new ArrayList<MeasurementData>();
 		double curFreq = -1;
@@ -104,7 +104,7 @@ public class PlotComPortLogFile {
 			String line = Util.trimNZ(fin.readLine());
 			if ("".equals(line) || line.startsWith("*"))
 				continue;
-			StringTokenizer st = new StringTokenizer(line, "\t"); 
+			StringTokenizer st = new StringTokenizer(line, "\t");
 			if (st.countTokens() < 11)
 				continue;
 			Date time = df.parse(st.nextToken());
@@ -118,7 +118,7 @@ public class PlotComPortLogFile {
 			double current = Double.parseDouble(st.nextToken());
 			int maxPressure = Integer.parseInt(st.nextToken());
 			double maxCurrent = Double.parseDouble(st.nextToken());
-			
+
 			if (curFreq != frequency) {
 				if (curFreq > 0) {
 					r.add(d);
@@ -148,7 +148,7 @@ public class PlotComPortLogFile {
 		});
 		return r;
 	}
-	
+
 	private ILineSeries makeSeries(String label, int color, boolean createNewYSeries) {
 		Color systemColor = Display.getDefault().getSystemColor(color);
 		ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, label);
@@ -164,7 +164,7 @@ public class PlotComPortLogFile {
 			yAxis = chart.getAxisSet().getYAxis(axisId);
 			yAxis.setPosition(Position.Secondary);
 		}
-        
+
 		yAxis.getTitle().setText(label);
 		yAxis.getTick().setForeground(systemColor);
 		yAxis.getTitle().setForeground(systemColor);
@@ -173,7 +173,7 @@ public class PlotComPortLogFile {
         }
         return lineSeries;
 	}
-	
+
 	int colors[] = {
 			SWT.COLOR_BLUE,
 			SWT.COLOR_RED,
@@ -181,12 +181,11 @@ public class PlotComPortLogFile {
 			SWT.COLOR_MAGENTA
 	};
 	int curColor = 0;
-	
+
 	int getNextColor() {
 		return colors[(curColor++) % colors.length];
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	private void readFile(File fin) throws Exception {
 		String finName = fin.getName();
 		InputStream inStream = new FileInputStream(fin);
@@ -197,7 +196,7 @@ public class PlotComPortLogFile {
 		mindate.setHours(0);
 		mindate.setMinutes(0);
 		mindate.setSeconds(0);
-		
+
 		double dataX[] = new double[data.size()];
 		double dataY[] = new double[data.size()];
 //		double dataY2[] = new double[data.size()];
@@ -219,7 +218,7 @@ public class PlotComPortLogFile {
 		lineSeries = makeSeries("current (A) " + finName, col, false);
 		lineSeries.setXSeries(dataX);
 		lineSeries.setYSeries(dataY);
-/*		
+/*
 		lineSeries = makeSeries("pressure (rel)" + finName, getNextColor(), true);
 		lineSeries.setXSeries(dataX);
 		lineSeries.setYSeries(dataY2);*/
@@ -232,11 +231,11 @@ public class PlotComPortLogFile {
 //		readFile(new File(getClass().getResource("comport/comport_output_04.txt").toURI()));
 //		readFile(new File(System.getProperty("user.home") + "/comport_output_12.txt"));
 		readFile(new File(System.getProperty("user.home") + "/comport_output_11.txt"));
-		
+
         chart.getAxisSet().adjustRange();
 		open();
 	}
-		
+
 	public static void main(String[] args) throws Exception {
 		new PlotComPortLogFile().doIt();
 		System.out.println("Done.");

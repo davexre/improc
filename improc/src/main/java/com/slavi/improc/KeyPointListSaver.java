@@ -20,7 +20,6 @@ import com.slavi.image.DImageWrapper;
 import com.slavi.image.DWindowedImage;
 import com.slavi.image.PDImageMapBuffer;
 import com.slavi.improc.parallel.ExecutionProfile;
-import com.slavi.improc.parallel.PDLoweDetector;
 import com.slavi.improc.parallel.PDLoweDetector.Hook;
 import com.slavi.improc.parallel.PDLoweDetector2;
 import com.slavi.util.concurrent.TaskSet;
@@ -46,16 +45,16 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 
 	public static class ListenerImpl implements Hook {
 		public KeyPointList scalePointList;
-		
+
 		public ListenerImpl(KeyPointList spl) {
 			this.scalePointList = spl;
 		}
-		
+
 		public synchronized void keyPointCreated(KeyPoint scalePoint) {
 			scalePointList.items.add(scalePoint);
-		}		
+		}
 	}
-	
+
 	public static void updateKeyPointFileIfNecessary(
 			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
@@ -63,7 +62,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			File image) throws Exception {
 		doUpdateKeyPointFileIfNecessary(exec, rootImagesDir, rootKeyPointFileDir, image);
 	}
-	
+
 	public static File getFile(AbsoluteToRelativePathMaker rootImagesDir,
 			AbsoluteToRelativePathMaker rootKeyPointFileDir,
 			File image) {
@@ -71,7 +70,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			rootKeyPointFileDir.getFullPath(
 				rootImagesDir.getRelativePath(image)), ".spf.z"));
 	}
-	
+
 	public static KeyPointList buildKeyPointFileMultiThreaded(ExecutorService exec, File image) throws Exception {
 		final KeyPointList result = new KeyPointList();
 		BufferedImage bi = ImageIO.read(image);
@@ -88,9 +87,9 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		Hook hook = new Hook() {
 			public synchronized void keyPointCreated(KeyPoint scalePoint) {
 				result.items.add(scalePoint);
-			}		
+			}
 		};
-		
+
 		int scale = 1;
 		TaskSet ts = new TaskSet(exec);
 		try {
@@ -109,26 +108,26 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 					for (int j = nextLevelBlurredImageExt.height - 1; j >= 0; j--) {
 						int atY = j << 1;
 						double col = (
-							source.getPixel(atX, atY) + 
-							source.getPixel(atX, atY + 1) + 
-							source.getPixel(atX + 1, atY + 1) + 
+							source.getPixel(atX, atY) +
+							source.getPixel(atX, atY + 1) +
+							source.getPixel(atX + 1, atY + 1) +
 							source.getPixel(atX + 1, atY)) / 4.0;
 						img.setPixel(i, j, col);
 					}
 				}
-				
+
 	//			nextLevelBlurredImage = new ImageWriteTracker(nextLevelBlurredImage, false, true);
-	
+
 				ExecutionProfile suggestedProfile = ExecutionProfile.suggestExecutionProfile(srcExtent);
-	
-				int dx = (int)Math.ceil((double)srcExtent.width / 
+
+				int dx = (int)Math.ceil((double)srcExtent.width /
 						Math.ceil((double)srcExtent.width / (double)suggestedProfile.destWindowSizeX));
-				int dy = (int)Math.ceil((double)srcExtent.height / 
+				int dy = (int)Math.ceil((double)srcExtent.height /
 						Math.ceil((double)srcExtent.height / (double)suggestedProfile.destWindowSizeY));
-				
+
 				Rectangle rect = new Rectangle(dx, dy);
 				rect = PDLoweDetector2.getNeededSourceExtent(rect, PDLoweDetector2.defaultScaleSpaceLevels);
-				
+
 				for (int sminx = 0; sminx < srcExtent.width; sminx += dx) {
 					for (int sminy = 0; sminy < srcExtent.height; sminy += dy) {
 						Rectangle srcR = new Rectangle(sminx + rect.x, sminy + rect.y, rect.width, rect.height);
@@ -151,7 +150,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		}
 		return result;
 	}
-	
+
 	private static KeyPointList doUpdateKeyPointFileIfNecessary(
 			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,
@@ -184,7 +183,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 			}
 			zis.close();
 		}
-		
+
 		KeyPointList result = buildKeyPointFileMultiThreaded(exec, image);
 
 		String relativeImageName = rootImagesDir.getRelativePath(image);
@@ -204,7 +203,7 @@ public class KeyPointListSaver extends TXTKDTree<KeyPoint> {
 		zos.close();
 		return result;
 	}
-	
+
 	public static KeyPointList readKeyPointFile(
 			ExecutorService exec,
 			AbsoluteToRelativePathMaker rootImagesDir,

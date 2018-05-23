@@ -28,9 +28,9 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 public class ProcessManager extends Composite {
-	
+
 	Table table;
-	
+
 	TableColumn columnTID;
 	TableColumn columnName;
 	TableColumn columnCPU;
@@ -39,13 +39,13 @@ public class ProcessManager extends Composite {
 	TableColumn columnIsDaemon;
 	TableColumn columnIsInterrupted;
 	TableColumn columnIsSuspended;
-	
+
 	private static final Runnable refreshTask;
-	
+
 	private static int refreshRateMillis;
-	
+
 	private static final ThreadMXBean threadMXBean;
-	
+
 	private static final int numberOfProcessors;
 
 	private static final ThreadGroup rootThreadGroup;
@@ -53,7 +53,7 @@ public class ProcessManager extends Composite {
 	private static final HashMap<Long, ThreadData> threadData;
 
 	private static final ArrayList<ProcessManager> refreshListeners;
-	
+
 	private static long lastRefreshNanoTime;
 
 	static {
@@ -79,7 +79,7 @@ public class ProcessManager extends Composite {
 			}
 		};
 	}
-	
+
 	private static class ThreadData {
 		public long id = -1;
 		public long lastCpuTime = 0;
@@ -91,7 +91,7 @@ public class ProcessManager extends Composite {
 		public boolean isInterrupted = false;
 		public boolean isSuspended = false;
 	}
-	
+
 	private static class RefreshTimerTask extends TimerTask {
 		public void run() {
 			synchronized (refreshListeners) {
@@ -107,7 +107,7 @@ public class ProcessManager extends Composite {
 			}
 		}
 	}
-	
+
 	public ProcessManager(Composite parent, int style) {
 		super(parent, style);
 		createWidgets();
@@ -119,7 +119,7 @@ public class ProcessManager extends Composite {
 		}
 		refreshAllListeners();
 	}
-	
+
 	private void createWidgets() {
 		final ProcessManager that = this;
 		setLayout(new GridLayout());
@@ -130,13 +130,13 @@ public class ProcessManager extends Composite {
 				}
 			}
 		});
-		
+
 		ToolBar toolbar = new ToolBar(this, SWT.HORIZONTAL | SWT.FLAT | SWT.WRAP);
 		toolbar.setLayout(new RowLayout(SWT.HORIZONTAL));
 		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+
 		ToolItem btn;
-		
+
 		btn = new ToolItem(toolbar, SWT.PUSH);
 		btn.setText("&+");
 		btn.setToolTipText("Increase thread priority");
@@ -152,7 +152,7 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		});
-		
+
 		btn = new ToolItem(toolbar, SWT.PUSH);
 		btn.setText("&-");
 		btn.setToolTipText("Decrease thread priority");
@@ -168,7 +168,7 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		});
-		
+
 		btn = new ToolItem(toolbar, SWT.PUSH);
 		btn.setText("&Interrupt");
 		btn.setToolTipText("Interrupt");
@@ -181,12 +181,11 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		});
-		
+
 		btn = new ToolItem(toolbar, SWT.PUSH);
 		btn.setText("Sto&p");
 		btn.setToolTipText("Stop");
 		btn.addSelectionListener(new SelectionAdapter() {
-			@SuppressWarnings("deprecation")
 			public void widgetSelected(SelectionEvent event) {
 				Thread thread = getSelectedThread();
 				if (thread == null)
@@ -195,12 +194,11 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		});
-		
+
 		btn = new ToolItem(toolbar, SWT.PUSH);
 		btn.setText("&Suspend/Resume");
 		btn.setToolTipText("Suspend/Resume");
 		btn.addSelectionListener(new SelectionAdapter() {
-			@SuppressWarnings("deprecation")
 			public void widgetSelected(SelectionEvent event) {
 				Thread thread = getSelectedThread();
 				if (thread == null)
@@ -214,7 +212,7 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		});
-		
+
 		table = new Table(this, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setSortDirection(SWT.DOWN);
@@ -233,7 +231,7 @@ public class ProcessManager extends Composite {
 				refreshAllListeners();
 			}
 		};
-		
+
 		TableColumn col;
 		col = columnTID = new TableColumn(table, SWT.NONE);
 		col.setText("TID");
@@ -244,49 +242,49 @@ public class ProcessManager extends Composite {
 		col.pack();
 		increaseColumnWidth = col.getWidth() - increaseColumnWidth;
 //		col.setWidth(col.getWidth() + increaseColumnWidth);
-		
+
 		col = columnName = new TableColumn(table, SWT.NONE);
 		col.setText("Thread name");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth() + increaseColumnWidth);
-		
+
 		col = columnCPU = new TableColumn(table, SWT.NONE);
 		col.setText("CPU");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth() + increaseColumnWidth);
-		
+
 		col = columnState = new TableColumn(table, SWT.NONE);
 		col.setText("State");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth() + increaseColumnWidth);
-		
+
 		col = columnPriority = new TableColumn(table, SWT.NONE);
 		col.setText("Priority");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth());
-		
+
 		col = columnIsDaemon = new TableColumn(table, SWT.NONE);
 		col.setText("Daemon");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth());
-		
+
 		col = columnIsInterrupted = new TableColumn(table, SWT.NONE);
 		col.setText("Interrupted");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth());
-		
+
 		col = columnIsSuspended = new TableColumn(table, SWT.NONE);
 		col.setText("Suspended");
 		col.addSelectionListener(columnListener);
 		col.pack();
 		col.setWidth(col.getWidth());
-		
+
 		table.setFocus();
 		table.setSortColumn(columnTID);
 		table.setSortDirection(SWT.UP);
@@ -300,7 +298,7 @@ public class ProcessManager extends Composite {
 				ThreadData tmp = o1;
 				o1 = o2;
 				o2 = tmp;
-			}			
+			}
 			int result = 0;
 
 			if (sortCol == columnCPU) {
@@ -318,18 +316,18 @@ public class ProcessManager extends Composite {
 			} else if (sortCol == columnIsSuspended) {
 				result = o1.isSuspended == o2.isSuspended ? 0 : o1.isSuspended ? 1 : -1;
 			} // if (sortCol == columnTID)
-			
+
 			if (result == 0)
 				result = o1.id == o2.id ? 0 : o1.id < o2.id ? -1 : 1;
 			return result;
 		}
 	};
-	
+
 	private long getSelectedTID() {
 		TableItem selected[] = table.getSelection();
-		return selected.length <= 0 ? -1 : ((ThreadData) selected[0].getData()).id;  
+		return selected.length <= 0 ? -1 : ((ThreadData) selected[0].getData()).id;
 	}
-	
+
 	private Thread getSelectedThread() {
 		long tid = getSelectedTID();
 		if (tid == -1)
@@ -344,7 +342,7 @@ public class ProcessManager extends Composite {
 		}
 		return null;
 	}
-	
+
 	private static void refreshAllListeners() {
 		synchronized (refreshListeners) {
 			ThreadData data[] = getThreadData();
@@ -358,7 +356,7 @@ public class ProcessManager extends Composite {
 			}
 		}
 	}
-	
+
 	private static ThreadData[] getThreadData() {
 		long[] tids = threadMXBean.getAllThreadIds();
 		Arrays.sort(tids);
@@ -368,12 +366,12 @@ public class ProcessManager extends Composite {
 			if (Arrays.binarySearch(tids, tid) < 0)
 				tdata.remove();
 		}
-		
+
 		long curNanoTime = System.nanoTime();
 		long div = (numberOfProcessors * (curNanoTime - lastRefreshNanoTime)) / 100;
 		if (div == 0)
 			div = 1;
-		
+
 		for (long tid : tids) {
 			long cpuTime = threadMXBean.getThreadCpuTime(tid);
 			ThreadData d = threadData.get(tid);
@@ -392,7 +390,7 @@ public class ProcessManager extends Composite {
 			ThreadInfo info = threadMXBean.getThreadInfo(tid, 0);
 			if (info != null) {
 				d.isSuspended = info.isSuspended();
-			}			
+			}
 		}
 
 		int activeCount = rootThreadGroup.activeCount();
@@ -410,18 +408,18 @@ public class ProcessManager extends Composite {
 			data.isDaemon = thread.isDaemon();
 			data.isInterrupted = thread.isInterrupted();
 		}
-		
+
 		lastRefreshNanoTime = curNanoTime;
 		ThreadData data[] = threadData.values().toArray(new ThreadData[0]);
 		return data;
 	}
-	
+
 	private void updateTable(ThreadData data[]) {
-		long selectedTid = getSelectedTID();  
+		long selectedTid = getSelectedTID();
 		Arrays.sort(data, columnSort);
 		table.setItemCount(data.length);
 		TableItem items[] = table.getItems();
-			
+
 		int sel = -1;
 		for (int i = 0; i < data.length; i++) {
 			ThreadData d = data[i];
@@ -441,11 +439,11 @@ public class ProcessManager extends Composite {
 		}
 		table.setSelection(sel);
 	}
-	
+
 	public static int getRefreshRateMillis() {
 		return refreshRateMillis;
 	}
-	
+
 	public static void setRefreshRateMillis(int newRefreshRateMillis) {
 		refreshRateMillis = newRefreshRateMillis;
 	}
