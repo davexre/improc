@@ -6,9 +6,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 
-import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.ColorConversion;
 import com.slavi.util.MatrixUtil;
 
 public class BitMatrix extends JComponent {

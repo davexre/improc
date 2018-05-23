@@ -52,7 +52,7 @@ public class NetworkBuilder {
 	public NetworkBuilder addConvolutionLayer(int kernelSize) {
 		return addLayer(new ConvolutionLayer(kernelSize, kernelSize, 1));
 	}
-	
+
 	public NetworkBuilder addConvolutionSameSizeLayer(int kernelSize) {
 		return addLayer(new ConvolutionSameSizeLayer(kernelSize, kernelSize, 1));
 	}
@@ -100,6 +100,10 @@ public class NetworkBuilder {
 
 	public NetworkBuilder addReLULayer() {
 		return addLayer(new ReLULayer());
+	}
+
+	public Layer getLastLayer() {
+		return layers.size() > 0 ? layers.get(layers.size() - 1) : null;
 	}
 
 	public Network build() {
