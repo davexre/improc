@@ -151,8 +151,10 @@ public class MathUtil {
 	 * Returns the specified angle in the range [0..pi)
 	 */
 	public static double fixAnglePI(double angle) {
-		angle %= Math.PI;
-		return (angle < 0) ? Math.PI + angle : angle;
+		angle  = MathUtil.fixAngle2PI(angle);
+		return (angle > Math.PI) ? MathUtil.C2PI - angle : angle;
+/*		angle %= Math.PI;
+		return (angle < 0) ? Math.PI + angle : angle;*/
 //		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
 	}
 

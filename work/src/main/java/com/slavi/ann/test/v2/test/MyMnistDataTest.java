@@ -9,6 +9,7 @@ import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
 import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.math.adjust.MatrixStatistics;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
 
@@ -55,7 +56,8 @@ public class MyMnistDataTest {
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
 				// MNIST data
 				.addConvolutionLayer(5)
-				.addConstScaleAndBiasLayer(10.0 / 25, -5)
+				.addConstScaleAndBiasLayer(100.0 / 25, -5)
+				.addDebugLayer("WTF", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				.addSigmoidLayer()
 				.addFullyConnectedLayer(10).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()

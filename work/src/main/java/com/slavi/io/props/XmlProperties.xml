@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>My comment</comment>
+<entry key="MyProp6"><![CDATA[
+	Value
+>]]	<	6]]></entry>
+<entry key="MyProp5">Value 5</entry>
+<entry key="MyProp4">Value 4</entry>
+<entry key="MyProp3">Value 3</entry>
+<entry key="MyProp2">Value 2</entry>
+<entry key="MyProp1">Value 1</entry>
+<entry key="MyProp0">Value 0</entry>
+<entry key="MyProp9">Value 9</entry>
+<entry key="MyProp8">Value 8</entry>
+<entry key="MyProp7">Value 7</entry>
+</properties>

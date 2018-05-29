@@ -2,15 +2,19 @@ package com.slavi.ann.test.v2;
 
 import java.util.List;
 
+import org.apache.commons.math3.linear.MatrixUtils;
+
 import com.slavi.ann.test.BellCurveDistribution;
+import com.slavi.improc.parallel.PGaussianFilter;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.MatrixUtil;
 
 public abstract class Layer {
 
 	public abstract int[] getOutputSize(int inputSize[]);
-	
+
 	public abstract LayerWorkspace createWorkspace();
-	
+
 	public void applyWorkspaces(List<LayerWorkspace> workspaces) {
 		for (LayerWorkspace workspace : workspaces) {
 			applyWorkspace(workspace);
@@ -29,7 +33,7 @@ public abstract class Layer {
 	protected void applyWorkspace(LayerWorkspace workspaces) {};
 
 	public static double sqrt2pi = Math.sqrt(2.0 * Math.PI);
-	
+
 	public static void fillWeight(Matrix w, double stdDev) {
 		double scale = 1.0 / (2 * stdDev * stdDev); // * w.getSizeX());
 		double scale2 = 1.0 / (stdDev * sqrt2pi);
@@ -59,16 +63,34 @@ public abstract class Layer {
 		}
 	}
 
-	public static void fillKernelMatrix(Matrix k, double stdDev) {
+	public static void fillKernelMatrix(Matrix k, double sigma) {
+		double scaleOutput = 10;
 		double[] tmpX = new double[k.getSizeX()];
 		double[] tmpY = new double[k.getSizeY()];
-		BellCurveDistribution.fillArray(tmpX, 0.3, (tmpX.length - 1) / 2);
-		BellCurveDistribution.fillArray(tmpY, 0.3, (tmpY.length - 1) / 2);
+		if (false) {
+			BellCurveDistribution.fillArray(tmpX, 0.3, (tmpX.length - 1) / 2);
+			BellCurveDistribution.fillArray(tmpY, 0.3, (tmpY.length - 1) / 2);
+		} else {
+			PGaussianFilter.fillArray(tmpX, sigma);
+			PGaussianFilter.fillArray(tmpY, sigma);
+		}
+
 		for (int i = k.getSizeX() - 1; i >= 0; i--)
 			for (int j = k.getSizeY() - 1; j >= 0; j--)
 				k.setItem(i, j, (tmpX[i] + tmpY[j]) * 0.5);
+		if (true) {
+			double scale = k.sumAll();
+			if (scale != 0.0)
+				scale = scaleOutput / scale;
+			k.rMul(scale);
+		}
+//		k.normalize();
+
+		System.out.println("K ==========");
+		System.out.println(MatrixUtil.calcStatistics(k));
+		System.out.println("[K] = " + k.sumAll());
 	}
-	
+
 	public abstract class LayerWorkspace {
 		public Layer getLayer() {
 			return Layer.this;
@@ -78,7 +100,7 @@ public abstract class Layer {
 		 * The result may be always the "same instance". It should treated readonly.
 		 */
 		public abstract Matrix feedForward(Matrix input);
-		
+
 		/**
 		 * error may be the result of the "upper" backPropagate. It should treated readonly.
 		 * The result may be always the "same instance". It should treated readonly.

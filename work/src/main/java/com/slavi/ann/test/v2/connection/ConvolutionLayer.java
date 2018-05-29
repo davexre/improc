@@ -2,23 +2,26 @@ package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.MatrixUtil;
 
 public class ConvolutionLayer extends Layer {
+	public static final double kernelSigma = 1.5;
+
 	public Matrix kernel;
 	public double learningRate;
-	
+
 	public ConvolutionLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		fillKernelMatrix(kernel, 0.3);
+		fillKernelMatrix(kernel, kernelSigma);
 	}
-	
+
 	public int[] getOutputSize(int inputSize[]) {
 		int sizeOX = (int) Math.ceil(((double) inputSize[0] / kernel.getSizeX()));
 		int sizeOY = (int) Math.ceil(((double) inputSize[1] / kernel.getSizeY()));
 		return new int[] { sizeOX, sizeOY };
 	}
-	
+
 	@Override
 	public Workspace createWorkspace() {
 		return new Workspace();
@@ -115,8 +118,12 @@ public class ConvolutionLayer extends Layer {
 		protected void resetEpoch() {
 			dKernel.make0();
 			outputError.make0();
+
+			System.out.println("K ==========");
+			System.out.println(MatrixUtil.calcStatistics(kernel));
+			System.out.println("[K] = " + kernel.sumAll());
 		}
-		
+
 		public String toString() {
 			return new StringBuilder()
 					.append("Kernel\n").append(kernel)

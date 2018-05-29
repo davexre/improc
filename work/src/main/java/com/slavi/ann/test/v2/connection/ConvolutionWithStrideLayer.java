@@ -8,15 +8,15 @@ public class ConvolutionWithStrideLayer extends Layer {
 	public double learningRate;
 	public int strideX;
 	public int strideY;
-	
+
 	public ConvolutionWithStrideLayer(int kernelSizeX, int kernelSizeY, int strideX, int strideY, double learningRate) {
 		this.learningRate = learningRate;
 		this.strideX = strideX;
 		this.strideY = strideY;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		fillKernelMatrix(kernel, 0.3);
+		fillKernelMatrix(kernel, ConvolutionLayer.kernelSigma);
 	}
-	
+
 	public int[] getOutputSize(int inputSize[]) {
 		int sizeOX = (int) Math.ceil(((double) inputSize[0] / strideX));
 		int sizeOY = (int) Math.ceil(((double) inputSize[1] / strideY));
@@ -39,7 +39,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		
+
 		public Matrix dKernel;
 
 		protected Workspace() {
@@ -117,7 +117,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 		protected void resetEpoch() {
 			dKernel.make0();
 		}
-		
+
 		public String toString() {
 			return new StringBuilder()
 					.append("Kernel\n").append(kernel)

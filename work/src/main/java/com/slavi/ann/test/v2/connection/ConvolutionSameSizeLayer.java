@@ -11,9 +11,9 @@ public class ConvolutionSameSizeLayer extends Layer {
 	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);
-		fillKernelMatrix(kernel, 0.3);
+		fillKernelMatrix(kernel, ConvolutionLayer.kernelSigma);
 	}
-	
+
 	public int[] getOutputSize(int inputSize[]) {
 		return new int[] { inputSize[0], inputSize[1] };
 	}
@@ -110,7 +110,7 @@ public class ConvolutionSameSizeLayer extends Layer {
 		protected void resetEpoch() {
 			dKernel.make0();
 		}
-		
+
 		public String toString() {
 			return new StringBuilder()
 					.append("Kernel\n").append(kernel)
