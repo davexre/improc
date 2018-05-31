@@ -7,16 +7,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.comparator.CompositeFileComparator;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import org.apache.commons.io.comparator.SizeFileComparator;
+import org.apache.commons.lang3.StringUtils;
 
 public class FileUtil {
 	public static boolean areFilesIdentical(File file1, File file2, boolean compareFileContent) throws IOException {
@@ -90,14 +96,14 @@ public class FileUtil {
 		OutputStream os;
 		boolean logErrors;
 		boolean closeStreams;
-		
+
 		public RedirectStream(InputStream is, OutputStream os, boolean closeStreams, boolean logErrors) {
 			this.is = is;
 			this.os = os;
 			this.logErrors = logErrors;
 			this.closeStreams = closeStreams;
 		}
-		
+
 		public void run() {
 			try {
 				byte buf[] = new byte[256];
@@ -131,19 +137,19 @@ public class FileUtil {
 		//thread.setDaemon(true);
 		thread.start();
 	}
-	
+
 	public static CompositeFileComparator getFileComparator() {
 		return new CompositeFileComparator(
 				new LastModifiedFileComparator(),
 				new SizeFileComparator());
 	}
-	
+
 	public static void copyFileIfDifferent(File fromFile, File toFile) throws IOException {
 		if (toFile.isDirectory())
 			toFile = new File(toFile, fromFile.getName());
-		if (fromFile.exists() && 
-			toFile.exists() && 
-			fromFile.lastModified() == toFile.lastModified() && 
+		if (fromFile.exists() &&
+			toFile.exists() &&
+			fromFile.lastModified() == toFile.lastModified() &&
 			fromFile.length() == toFile.length()) {
 			return;
 		}
@@ -162,7 +168,7 @@ public class FileUtil {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Replaces the extension of fileName with the newExtension.
 	 * <p>
@@ -182,9 +188,9 @@ public class FileUtil {
 		int lastIndex = fileName.lastIndexOf('.');
 		if ((lastPath > lastIndex) || (lastIndex < 0))
 			return fileName + newExtension;
-		return fileName.substring(0, lastIndex) + newExtension; 
+		return fileName.substring(0, lastIndex) + newExtension;
 	}
-	
+
 	public static void unzipToFolder(String zip, String destinationFolder) throws IOException {
 		FileInputStream fin = new FileInputStream(zip);
 		try {
@@ -267,7 +273,7 @@ public class FileUtil {
 			}
 		}
 	}
-		  
+
 	/**
 	 * Replaces a set of files in a zip file in one zip copy operation.
 	 * If zipfin = null then a new zip file is generated in zipfou.
@@ -316,5 +322,129 @@ public class FileUtil {
 				zin.close();
 			zou.close();
 		}
+	}
+
+	/**
+	 * The code bellow is borrowed from WedSphinx
+	 * http://www.cs.cmu.edu/~rcm/websphinx
+	 * and slightly modified
+	 *
+	 * Gets a wildcard pattern and returns a Regexp equivalent.
+	 *
+	 * Wildcards are similar to sh-style file globbing.
+	 * A wildcard pattern is implicitly anchored, meaning that it must match the entire string.
+	 * The wildcard operators are:
+	 * <pre>
+	 *    ? matches one arbitrary character
+	 *    * matches zero or more arbitrary characters
+	 *    [xyz] matches characters x or y or z
+	 *    {foo,bar,baz}   matches expressions foo or bar or baz
+	 *    ()  grouping to extract fields
+	 *    \ escape one of these special characters
+	 * </pre>
+	 * Escape codes (like \n and \t) and Perl5 character classes (like \w and \s) may also be used.
+	 */
+	public static String toRegexpStr(String wildcard) {
+		String s = wildcard;
+
+		int inAlternative = 0;
+		int inSet = 0;
+		boolean inEscape = false;
+
+		StringBuilder output = new StringBuilder();
+
+		int len = s.length();
+		for (int i = 0; i < len; ++i) {
+			char c = s.charAt(i);
+			if (inEscape) {
+				output.append(c);
+				inEscape = false;
+			} else {
+				switch (c) {
+				case '\\':
+					output.append(c);
+					inEscape = true;
+					break;
+				case '?':
+					output.append('.');
+					break;
+				case '*':
+					output.append(".*");
+					break;
+				case '[':
+					output.append(c);
+					++inSet;
+					break;
+				case ']':
+					// FIX: handle [] case properly
+					output.append(c);
+					--inSet;
+					break;
+				case '{':
+					output.append("(?:");
+					++inAlternative;
+					break;
+				case ',':
+					if (inAlternative > 0)
+						output.append("|");
+					else
+						output.append(c);
+					break;
+				case '}':
+					output.append(")");
+					--inAlternative;
+					break;
+				case '^':
+					if (inSet > 0) {
+						output.append(c);
+					} else {
+						output.append('\\');
+						output.append(c);
+					}
+					break;
+				case '$':
+				case '.':
+				case '|':
+				case '+':
+					output.append('\\');
+					output.append(c);
+					break;
+				default:
+					output.append(c);
+					break;
+				}
+			}
+		}
+		if (inEscape)
+			output.append('\\');
+
+		return output.toString();
+	}
+
+	public static void rollFile(String fileName) throws IOException {
+		rollFile(fileName, null, 2);
+	}
+
+	public static void rollFile(String fileName, int maxIndex) throws IOException {
+		rollFile(fileName, null, maxIndex);
+	}
+
+	public static void rollFile(String fileName, String fileNamePattern, int maxIndex) throws IOException {
+		fileNamePattern = StringUtils.defaultIfEmpty(StringUtils.trimToEmpty(fileNamePattern), fileName);
+		if (!fileNamePattern.contains("%i")) {
+			fileNamePattern = FilenameUtils.removeExtension(fileNamePattern) + " %i." + FilenameUtils.getExtension(fileNamePattern);
+		}
+
+		Path file = Paths.get(fileName);
+		if (!Files.isRegularFile(file))
+			return;
+		Path dest = Paths.get(fileNamePattern.replaceAll("%i", Integer.toString(maxIndex)));
+		for (int i = maxIndex - 1; i >= 1; i--) {
+			Path src = Paths.get(fileNamePattern.replaceAll("%i", Integer.toString(i)));
+			if (Files.isRegularFile(src))
+				Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
+			dest = src;
+		}
+		Files.move(file, dest, StandardCopyOption.REPLACE_EXISTING);
 	}
 }

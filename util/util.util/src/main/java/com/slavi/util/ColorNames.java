@@ -82,9 +82,9 @@ public class ColorNames {
 		double dist = Double.MAX_VALUE;
 		for (ColorNameData i : colors) {
 			double d =
-					Math.pow(MathUtil.fixAnglePI(i.h - tmp[0]) + 0.001, 2.5) +
-					Math.pow(Math.abs(i.s - tmp[1]) + 0.001, 2) +
-					Math.pow(Math.abs(i.l - tmp[2]) + 0.001, 1.5);
+					MathUtil.fixAnglePI(i.h - tmp[0]) / 2 +
+					Math.abs(i.s - tmp[1]) +
+					Math.abs(i.l - tmp[2]);
 			if (d < dist) {
 				dist = d;
 				r = i;

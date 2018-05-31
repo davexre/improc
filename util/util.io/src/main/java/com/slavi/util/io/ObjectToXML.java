@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 
 import sun.reflect.ReflectionFactory;
@@ -22,19 +23,19 @@ import sun.reflect.ReflectionFactory;
 public class ObjectToXML {
 	private static class CompareByIndex implements Comparator<Element> {
 		public int compare(Element o1, Element o2) {
-			int i1 = Integer.parseInt(com.slavi.util.Util.trimNZ(o1.getAttributeValue("index")));
-			int i2 = Integer.parseInt(com.slavi.util.Util.trimNZ(o2.getAttributeValue("index")));
+			int i1 = Integer.parseInt(StringUtils.trimToEmpty(o1.getAttributeValue("index")));
+			int i2 = Integer.parseInt(StringUtils.trimToEmpty(o2.getAttributeValue("index")));
 			return Integer.compare(i1, i2);
 		}
 	}
-	
+
 	public static class Read implements ObjectRead {
 		public ArrayList readObjectIds = new ArrayList();
 
 		List<Element> itemElements;
 
 		boolean setToNullMissingProperties;
-		
+
 		public boolean ignoreTransientProperties = false;
 		public boolean ignoreSyntheticProperties = false;
 
@@ -47,7 +48,7 @@ public class ObjectToXML {
 			Collections.sort(itemElements, new CompareByIndex());
 			this.setToNullMissingProperties = setToNullMissingProperties;
 		}
-		
+
 		public void loadPropertiesToObject(Element element, Object object) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, InstantiationException, SecurityException, NoSuchMethodException, InvocationTargetException {
 			if (object == null) {
 				return;
@@ -76,7 +77,7 @@ public class ObjectToXML {
 						continue;
 					Class fieldType = field.getType();
 					field.setAccessible(true);
-					
+
 					String fieldName = field.getName();
 					Element fieldElement = element;
 					if (fieldName.startsWith("this$")) {
@@ -90,12 +91,12 @@ public class ObjectToXML {
 
 					String classStr = "";
 					if (fieldElement != null) {
-						classStr = com.slavi.util.Util.trimNZ(fieldElement.getAttributeValue("class"));
+						classStr = StringUtils.trimToEmpty(fieldElement.getAttributeValue("class"));
 					}
 					if (classStr == "")
 						classStr = Utils.computeClassTag(fieldType);
 					Object value = xmlToObject(fieldElement, classStr);
-					
+
 					if (value == null) {
 						if (fieldType.isPrimitive() || (!setToNullMissingProperties))
 							continue;
@@ -106,20 +107,20 @@ public class ObjectToXML {
 				element = element.getChild("parent");
 			}
 		}
-		
+
 		public Object xmlToObject(Element element) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 			if (element == null)
 				return null;
-			String objectClassName = com.slavi.util.Util.trimNZ(element.getAttributeValue("class"));
+			String objectClassName = StringUtils.trimToEmpty(element.getAttributeValue("class"));
 			if (objectClassName == "")
 				return null;
 			return xmlToObject(element, objectClassName);
 		}
-		
+
 		public Object xmlToObject(Element element, String objectClassName) throws ClassNotFoundException, InstantiationException, IllegalAccessException, SecurityException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
 			if (element == null)
 				return null;
-			objectClassName = com.slavi.util.Util.trimNZ(objectClassName);
+			objectClassName = StringUtils.trimToEmpty(objectClassName);
 			if (objectClassName == "")
 				return null;
 			if (objectClassName.startsWith("$ref$")) {
@@ -132,7 +133,7 @@ public class ObjectToXML {
 				// array
 				Class arrayType = objectClass.getComponentType();
 				String arrayItemType = objectClassName.substring(1, objectClassName.length() - 1);
-				String arraySizeStr = com.slavi.util.Util.trimNZ(element.getAttributeValue("size"));
+				String arraySizeStr = StringUtils.trimToEmpty(element.getAttributeValue("size"));
 				if (arraySizeStr == null)
 					return null;
 				int arraySize = Integer.parseInt(arraySizeStr);
@@ -147,8 +148,8 @@ public class ObjectToXML {
 
 				for (int i = 0; i < itemElements.size(); i++) {
 					Element itemElement = itemElements.get(i);
-					int index = Integer.parseInt(com.slavi.util.Util.trimNZ(itemElement.getAttributeValue("index")));
-					
+					int index = Integer.parseInt(StringUtils.trimToEmpty(itemElement.getAttributeValue("index")));
+
 					Object item;
 					if (arrayItemsNeedClassTag)
 						item = xmlToObject(itemElement);
@@ -160,10 +161,10 @@ public class ObjectToXML {
 					}
 					Array.set(array, index, item);
 				}
-				
+
 				return array;
 			}
-			
+
 			String sval = element.getText();
 			if ((objectClass == boolean.class) ||
 				(objectClass == Boolean.class)) {
@@ -216,7 +217,7 @@ public class ObjectToXML {
 			Constructor objDef = Object.class.getDeclaredConstructor();
 			Constructor intConstr = rf.newConstructorForSerialization(objectClass, objDef);
 			Object object = intConstr.newInstance();
-			
+
 			readObjectIds.add(object);
 			loadPropertiesToObject(element, object);
 			return object;
@@ -228,30 +229,30 @@ public class ObjectToXML {
 		public Object read() throws Exception {
 			readCounter++;
 			Element el = itemElements.get(itemCounter);
-			int i = Integer.parseInt(com.slavi.util.Util.trimNZ(el.getAttributeValue("index")));
+			int i = Integer.parseInt(StringUtils.trimToEmpty(el.getAttributeValue("index")));
 			if (i != readCounter)
 				return null;
 			itemCounter++;
 			return xmlToObject(el);
 		}
 	}
-	
+
 	public static class Write implements ObjectWrite {
 		public Map<Object, Integer> writeObjectIds = new HashMap<Object, Integer>();
-		
+
 		Element root;
-		
+
 		public boolean ignoreTransientProperties = false;
 		public boolean ignoreSyntheticProperties = false;
-		
+
 		public Write(Element root) {
 			this.root = root;
 		}
-		
+
 		public void objectToXML(Element element, Object object) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 			objectToXML(element, object, true);
 		}
-		
+
 		public void objectToXML(Element element, Object object, boolean needsClassTag) throws IntrospectionException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 			if (object == null)
 				return;

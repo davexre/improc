@@ -10,16 +10,17 @@ import java.util.Collections;
 import javax.imageio.ImageIO;
 
 import com.slavi.math.MathUtil;
+import com.slavi.util.file.FileUtil;
 
 public class ColorNamesTest {
 	public static double colorDist(ColorNameData i, double tmp[]) {
 		return
-			Math.pow(MathUtil.fixAnglePI(i.h - tmp[0]) + 0.001, 2.5) +
-			Math.pow(Math.abs(i.s - tmp[1]) + 0.001, 2) +
-			Math.pow(Math.abs(i.l - tmp[2]) + 0.001, 1.5);
+				MathUtil.fixAnglePI(i.h - tmp[0]) / 2 +
+				Math.abs(i.s - tmp[1]) +
+				Math.abs(i.l - tmp[2]);
 	}
 
-	static int numColors = 10;
+	static int numColors = 20;
 	static int colHeight = 20;
 
 	public static void drawColor(Graphics2D g, int row, int color, String name) {
@@ -32,11 +33,16 @@ public class ColorNamesTest {
 	void doIt() throws Exception {
 		ColorNames cn = new ColorNames();
 		cn.loadDefault();
-
+/*
 		double tmp[] = { 6.23, 0.8, 0.5 };
 		double tmp2[] = tmp.clone();
 		ColorConversion.HSL.toDRGB(tmp, tmp2);
 		int color = ColorConversion.RGB.toRGB(tmp2);
+*/
+		int color = 0xFFEBCD;
+		double tmp[] = new double[3];
+		ColorConversion.RGB.fromRGB(color, tmp);
+		ColorConversion.HSL.fromDRGB(tmp, tmp);
 
 		ArrayList<ColorNameData> bak = new ArrayList<>(cn.colors);
 		Collections.sort(bak, (a, b) -> {
@@ -59,7 +65,10 @@ public class ColorNamesTest {
 			ColorNameData c = bak.get(i - 1);
 			drawColor(g, i, c.color, c.name);
 		}
-		File fou = new File("tmp.png");
+
+		String fouName = "target/tmp.png";
+		FileUtil.rollFile(fouName);
+		File fou = new File(fouName);
 		ImageIO.write(bi, "png", fou);
 		System.out.println(fou.getAbsolutePath());
 	}
@@ -93,8 +102,8 @@ public class ColorNamesTest {
 
 	public static void main(String[] args) throws Exception {
 		new ColorNamesTest().doIt();
-		System.out.println(String.format("%.20f", Math.pow(MathUtil.fixAnglePI(6.03-6.23) + 0.001, 2) * Math.pow(0.001, 2) * Math.pow(0.001, 1)));
-		System.out.println(String.format("%.20f", Math.pow(MathUtil.fixAnglePI(   0-6.23) + 0.001, 2) * Math.pow(0.001, 2) * Math.pow(0.011, 1)));
+//		System.out.println(String.format("%.20f", Math.pow(MathUtil.fixAnglePI(6.03-6.23) + 0.001, 2) * Math.pow(0.001, 2) * Math.pow(0.001, 1)));
+//		System.out.println(String.format("%.20f", Math.pow(MathUtil.fixAnglePI(   0-6.23) + 0.001, 2) * Math.pow(0.001, 2) * Math.pow(0.011, 1)));
 		System.out.println("Done.");
 	}
 }

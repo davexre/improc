@@ -95,6 +95,8 @@ lame                        \
 libav-tools                 \
 librecad                    \
 libreoffice                 \
+links                       \
+lynx                        \
 mc                          \
 meld                        \
 melt                        \
@@ -145,6 +147,7 @@ unzip                       \
 virtualbox-qt               \
 vlc                         \
 vlc-plugin-fluidsynth       \
+w3m                         \
 wammu                       \
 whois                       \
 xbacklight                  \

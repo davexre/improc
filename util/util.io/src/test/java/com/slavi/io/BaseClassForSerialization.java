@@ -11,7 +11,7 @@ import com.slavi.util.Util;
 
 public class BaseClassForSerialization implements Serializable {
 	private static final AtomicInteger counter = new AtomicInteger();
-	
+
 	public static interface Dumpable extends Serializable {
 		public void dump(String prefix);
 	}
@@ -22,24 +22,24 @@ public class BaseClassForSerialization implements Serializable {
 
 	public static class Class1 implements Dumpable {
 		public String stringProperty;
-		
+
 		public Class1() {
 			stringProperty = "Class1 " + Integer.toString(counter.getAndIncrement());
 			System.out.println("new Class1() " + stringProperty);
 		}
-		
+
 		public void dump(String prefix) {
 			System.out.println(prefix + "Class1.dump() " + stringProperty);
 		}
-		
+
 		public class Class1Inner implements NestedDumpable {
 			public int intProperty;
-			
+
 			public Class1Inner() {
 				intProperty = counter.getAndIncrement();
 				System.out.println("new Class1Inner() " + intProperty);
 			}
-			
+
 			public void nestedDump(String prefix) {
 				System.out.println(prefix + "Class1Inner.nestedDump() " + intProperty);
 				dump(prefix + "Class1Inner.");
@@ -53,20 +53,20 @@ public class BaseClassForSerialization implements Serializable {
 				stringProperty = "Class1StaticInner " + Integer.toString(counter.getAndIncrement());
 				System.out.println("new Class1StaticInner() " + stringProperty);
 			}
-			
+
 			public void dump(String prefix) {
 				System.out.println(prefix + "Class1StaticInner.dump() " + stringProperty);
 			}
 		}
-		
+
 		public class Class1InnerClassExtended extends Class1Inner {
 			private int privateInt;
-			
+
 			public Class1InnerClassExtended() {
 				privateInt = counter.getAndIncrement();
 				System.out.println("new Class1InnerClassExtended() " + privateInt);
 			}
-			
+
 			public void nestedDump(String prefix) {
 				System.out.println(prefix + "Class1InnerClassExtended.nestedDump() " + privateInt);
 				dump(prefix + "Class1InnerClassExtended.");
@@ -74,12 +74,12 @@ public class BaseClassForSerialization implements Serializable {
 
 			public class Class1InnerClassExtendedInner implements Dumpable {
 				protected int protectedInt;
-				
+
 				public Class1InnerClassExtendedInner() {
 					protectedInt = counter.getAndIncrement();
 					System.out.println("new Class1InnerClassExtendedInner() " + protectedInt);
 				}
-				
+
 				public void dump(String prefix) {
 					System.out.println(prefix + "Class1InnerClassExtendedInner.dump() " + protectedInt);
 					nestedDump(prefix + "Class1Inner.");
@@ -87,16 +87,16 @@ public class BaseClassForSerialization implements Serializable {
 			}
 		}
 	}
-	
+
 	public static class StaticClassExtendsNonStaticInner extends Class1.Class1Inner {
 		public final int finalInt;
-		
+
 		public StaticClassExtendsNonStaticInner(Class1 class1) {
 			class1.super();
 			finalInt = counter.getAndIncrement();
 			System.out.println("new StaticClassExtendsNonStaticInner() " + finalInt);
 		}
-		
+
 		public void nestedDump(String prefix) {
 			System.out.println(prefix + "StaticClassExtendsNonStaticInner.nestedDump() " + finalInt);
 			super.nestedDump(prefix + "StaticClassExtendsNonStaticInner.");
@@ -105,37 +105,37 @@ public class BaseClassForSerialization implements Serializable {
 
 	public class Class2 implements Dumpable {
 		public String stringProperty = "Class2 DEFAULT VALUE";
-		
+
 		public Class2() {
 			stringProperty = "Class2 " + Integer.toString(counter.getAndIncrement());
 			System.out.println("new Class2() " + stringProperty);
 		}
-		
+
 		public void dump(String prefix) {
 			System.out.println(prefix + "Class2.dump() " + stringProperty);
 		}
 
 		public class Class2InnerExtendsNonStatic extends Class1.Class1Inner {
 			private final int finalInt;
-			
+
 			public Class2InnerExtendsNonStatic(Class1 class1) {
 				class1.super();
 				finalInt = counter.getAndIncrement();
 				System.out.println("new Class2InnerExtendsNonStatic() " + finalInt);
 			}
-			
+
 			public void nestedDump(String prefix) {
 				System.out.println(prefix + "Class2InnerExtendsNonStatic.nestedDump() " + finalInt);
 				super.nestedDump(prefix + "Class2InnerExtendsNonStatic.");
 			}
 		}
 	}
-	
-	static final Class1 staticClass1 = new Class1(); 
-	
+
+	static final Class1 staticClass1 = new Class1();
+
 	public static class StaticClassExtendsNonStaticWithConstructorHack extends Class1.Class1Inner {
 		public final String finalStringProperty;
-		
+
 		public StaticClassExtendsNonStaticWithConstructorHack(String value) {
 			staticClass1.super();
 			finalStringProperty = value;
@@ -188,11 +188,11 @@ public class BaseClassForSerialization implements Serializable {
 		r.add(class2InnerExtendsNonStatic);
 		return r;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	static void dumpObjectSyntheticFields(String prefix, Object o) throws Exception {
 		Class c = o.getClass();
 		while (c != null) {
@@ -208,27 +208,27 @@ public class BaseClassForSerialization implements Serializable {
 			c = c.getSuperclass();
 		}
 	}
-	
+
 	static Serializable dumpObjectClassData(Serializable o) throws Exception {
 		o = Util.deepCopy(o);
 		Class c = o.getClass();
 		System.out.println("=======");
 		System.out.println("CLASS " + c);
 		System.out.println("isStatic " + Modifier.isStatic(c.getModifiers()));
-		
+
 		System.out.println("ENCLOSING " + c.getEnclosingClass());
 		System.out.println("DECLARING " + c.getDeclaringClass());
 		System.out.println("SUPER     " + c.getSuperclass());
 //		System.out.println("ENC ctr " + c.getEnclosingConstructor());
-		
+
 		for (Class i : c.getClasses()) {
 			System.out.println("classes " + i);
 		}
-		
+
 		for (Class i : c.getDeclaredClasses()) {
 			System.out.println("declared class " + i);
 		}
-		
+
 		dumpObjectSyntheticFields("this", o);
 
 		Class tmpc = c;
@@ -240,14 +240,14 @@ public class BaseClassForSerialization implements Serializable {
 			pref += "this.";
 			tmpc = tmpc.getSuperclass();
 		}
-		
+
 //		System.out.println(c.isMemberClass());
 //		System.out.println(c.isLocalClass());
 //		System.out.println(c.isAnonymousClass());
-		
+
 		return o;
 	}
-	
+
 	public static void dumpObjects(ArrayList<Serializable> objects) {
 		for (int i = 0; i < objects.size(); i++) {
 			Serializable o = objects.get(i);
@@ -259,13 +259,13 @@ public class BaseClassForSerialization implements Serializable {
 			if (o instanceof NestedDumpable)
 				((NestedDumpable) o).nestedDump("NestedDumpable " + Integer.toString(i) + ".");
 			if ((o != null) &&
-				(!(o instanceof Dumpable)) && 
+				(!(o instanceof Dumpable)) &&
 				(!(o instanceof NestedDumpable))) {
 				System.out.println("??? BUG " + o.getClass());
 			}
 		}
 	}
-	
+
 	void doIt() throws Exception {
 		staticClass1.stringProperty = "final StaticClass1 string property value";
 		ArrayList<Serializable> objects = getTestObjects();
@@ -278,7 +278,7 @@ public class BaseClassForSerialization implements Serializable {
 		staticClass1.stringProperty = "final StaticClass1 VALUE MODIFIED";
 		dumpObjects(objects2);
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		new BaseClassForSerialization().doIt();
 //		ReflectionFactory rf = ReflectionFactory.getReflectionFactory();

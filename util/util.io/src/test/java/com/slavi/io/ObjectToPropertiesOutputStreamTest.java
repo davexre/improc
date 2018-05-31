@@ -16,13 +16,13 @@ import com.slavi.util.io.ObjectToPropertiesOutputStream;
 public class ObjectToPropertiesOutputStreamTest {
 	static Object doTest(String prefix, Object o) throws Exception {
 		Properties properties = new Properties();
-		
+
 		ObjectToPropertiesOutputStream oos = new ObjectToPropertiesOutputStream(properties, prefix);
 		oos.writeObject(o);
 		oos.close();
 		String s1 = PropertyUtil.propertiesToString(properties);
 		System.out.println(s1);
-		
+
 		ObjectToPropertiesInputStream ois = new ObjectToPropertiesInputStream(properties, prefix, true);
 		o = ois.readObject();
 		ois.close();
@@ -37,13 +37,13 @@ public class ObjectToPropertiesOutputStreamTest {
 //		System.out.println(s1);
 		return o;
 	}
-	
+
 	public String dummyProperty = "Dummy string property";
-	
+
 	public class MyBeanNested extends MyBean {
 		Object objects[] = new Object[5];
 		private String strs[][] = new String[3][5];
-		
+
 		public MyBeanNested() {
 			for (int i = 0; i < strs.length; i++) {
 				Object ob[] = strs[i];
@@ -64,7 +64,7 @@ public class ObjectToPropertiesOutputStreamTest {
 		new ObjectToProperties.Write(properties, prefix).write(myBean);
 		String s1 = PropertyUtil.propertiesToString(properties);
 		Assert.assertEquals("Expected empty string", s1, "");
-		
+
 		myBean = new MyBeanNested();
 		doTest(prefix, myBean);
 
@@ -79,15 +79,15 @@ public class ObjectToPropertiesOutputStreamTest {
 		myBean.objects[0] = "123qwe";
 		myBean.objects[1] = myBean.getMyData();
 		myBean.setMyEnum(null);
-		
+
 		doTest(prefix, myBean);
-		
+
 		myBean = new MyBeanNested();
 		myBean.initialize();
 		myBean.setMyDataArray(null);
 		doTest(prefix, myBean);
 	}
-	
+
 	public void doHardTest() throws Exception {
 		String prefix = "";
 
@@ -107,43 +107,43 @@ public class ObjectToPropertiesOutputStreamTest {
 		System.out.println("-------------------------------------");
 		BaseClassForSerialization.dumpObjects((ArrayList) o);
 	}
-	
+
 	public void partialHardTest() throws Exception {
 		System.out.println("*** Creating test classes");
 		BaseClassForSerialization baseClass = new BaseClassForSerialization();
 		BaseClassForSerialization.Class1 class1 = new BaseClassForSerialization.Class1();
 		BaseClassForSerialization.Class2 class2 = baseClass.new Class2();
-		BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic 
+		BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic
 			c = class2.new Class2InnerExtendsNonStatic(class1);
-		
+
 		System.out.println();
 		System.out.println("*** Making copy");
-		BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic c2 = 
+		BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic c2 =
 			(BaseClassForSerialization.Class2.Class2InnerExtendsNonStatic) doTest("", c);
 
 		System.out.println();
 		System.out.println("*** Invoking dump");
 		c2.nestedDump("");
 	}
-	
+
 	public static class BaseClass implements Serializable {
 		public String str = "baseClass";
 	}
-	
+
 	public static class ExtendingClass extends BaseClass {
 		public String str = "extendingClass";
 	}
-	
+
 	public void simplifiedHardTest() throws Exception {
 		ExtendingClass ec1 = new ExtendingClass();
 		BaseClass bc1 = ec1;
-		
+
 		System.out.println("EC.str " + ec1.str);
 		System.out.println("BC.str " + bc1.str);
-		
+
 		ExtendingClass ec2 = (ExtendingClass) doTest("", ec1);
 		BaseClass bc2 = ec2;
-		
+
 		System.out.println("EC.str " + ec2.str);
 		System.out.println("BC.str " + bc2.str);
 	}
@@ -153,7 +153,7 @@ public class ObjectToPropertiesOutputStreamTest {
 		TypeVariable vars[] = c.getTypeParameters();
 		System.out.println(Arrays.toString(vars.getClass().getTypeParameters()));
 	}
-	
+
 	public void typedArrayTest() throws Exception {
 		ArrayList<String> str = new ArrayList<String>();
 		str.add("asdqwe");
@@ -166,16 +166,16 @@ public class ObjectToPropertiesOutputStreamTest {
 		System.out.println(str);
 		dumpgen(str);
 	}
-	
+
 	public void serializeClass() throws Exception {
 		Class ec1 = ExtendingClass.class;
 		System.out.println("EC.str " + ec1);
-		
+
 		Class ec2 = (Class) doTest("", ec1);
 		System.out.println("EC.str " + ec2);
 		Assert.assertTrue("", ec1 == ec2);
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		System.out.println("ObjectToPropertiesOutputStreamTest");
 		new ObjectToPropertiesOutputStreamTest().serializeClass();

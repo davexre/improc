@@ -27,7 +27,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * This class contains utility static methods for general purpose.  
+ * This class contains utility static methods for general purpose.
  */
 public class Util {
 	/**
@@ -87,7 +87,7 @@ public class Util {
 			dim = "E";
 			size /= 1024.0;
 		}
-		if (Math.floor(size) == size) 
+		if (Math.floor(size) == size)
 			return String.format(Locale.US, "%d %s", new Object[] { new Integer((int)size), dim } );
 		return String.format(Locale.US, "%.1f %s", new Object[] { new Double(size), dim } );
 	}
@@ -156,115 +156,18 @@ public class Util {
 		}
 	}
 
-    public static long parseFormattedBytes(String s) {
-        s = s.toUpperCase().trim();
-        long scale = 1;
-        for (int i = UnitName.byteSizeUnits.size() - 1; i >= 0; i--) {
-            UnitName un = UnitName.byteSizeUnits.get(i);
-            if (s.endsWith(un.name)) {
-                scale = un.scale;
-                s = s.substring(0, s.length() - un.name.length()).trim();
-                break;
-            }
-        }
-        return (long) (Double.parseDouble(s) * scale);
-    }
-	
-	/**
-	 * The code bellow is borrowed from WedSphinx
-	 * http://www.cs.cmu.edu/~rcm/websphinx
-	 * and slightly modified 
-	 * 
-	 * Gets a wildcard pattern and returns a Regexp equivalent.  
-	 * 
-	 * Wildcards are similar to sh-style file globbing.
-	 * A wildcard pattern is implicitly anchored, meaning that it must match the entire string.
-	 * The wildcard operators are:
-	 * <pre>
-	 *    ? matches one arbitrary character
-	 *    * matches zero or more arbitrary characters
-	 *    [xyz] matches characters x or y or z
-	 *    {foo,bar,baz}   matches expressions foo or bar or baz
-	 *    ()  grouping to extract fields
-	 *    \ escape one of these special characters
-	 * </pre>
-	 * Escape codes (like \n and \t) and Perl5 character classes (like \w and \s) may also be used.
-	 */
-	public static String toRegexpStr(String wildcard) {
-		String s = wildcard;
-
-		int inAlternative = 0;
-		int inSet = 0;
-		boolean inEscape = false;
-
-		StringBuilder output = new StringBuilder();
-
-		int len = s.length();
-		for (int i = 0; i < len; ++i) {
-			char c = s.charAt(i);
-			if (inEscape) {
-				output.append(c);
-				inEscape = false;
-			} else {
-				switch (c) {
-				case '\\':
-					output.append(c);
-					inEscape = true;
-					break;
-				case '?':
-					output.append('.');
-					break;
-				case '*':
-					output.append(".*");
-					break;
-				case '[':
-					output.append(c);
-					++inSet;
-					break;
-				case ']':
-					// FIX: handle [] case properly
-					output.append(c);
-					--inSet;
-					break;
-				case '{':
-					output.append("(?:");
-					++inAlternative;
-					break;
-				case ',':
-					if (inAlternative > 0)
-						output.append("|");
-					else
-						output.append(c);
-					break;
-				case '}':
-					output.append(")");
-					--inAlternative;
-					break;
-				case '^':
-					if (inSet > 0) {
-						output.append(c);
-					} else {
-						output.append('\\');
-						output.append(c);
-					}
-					break;
-				case '$':
-				case '.':
-				case '|':
-				case '+':
-					output.append('\\');
-					output.append(c);
-					break;
-				default:
-					output.append(c);
-					break;
-				}
+	public static long parseFormattedBytes(String s) {
+		s = s.toUpperCase().trim();
+		long scale = 1;
+		for (int i = UnitName.byteSizeUnits.size() - 1; i >= 0; i--) {
+			UnitName un = UnitName.byteSizeUnits.get(i);
+			if (s.endsWith(un.name)) {
+				scale = un.scale;
+				s = s.substring(0, s.length() - un.name.length()).trim();
+				break;
 			}
 		}
-		if (inEscape)
-			output.append('\\');
-
-		return output.toString();
+		return (long) (Double.parseDouble(s) * scale);
 	}
 
 	/**
@@ -278,9 +181,9 @@ public class Util {
 	 * [port] is the proxy port. default is 80<br>
 	 * [username] is the proxy username. if empty - no user required for proxy<br>
 	 * [password] is the proxy password. if empty - no password required for proxy<br>
-	 * [no proxy address list] hosts which should be connected too directly and 
-	 * 		not through the proxy server. The value can be a list of hosts, each 
-	 * 		seperated by a |, and in addition a wildcard character (*) can be 
+	 * [no proxy address list] hosts which should be connected too directly and
+	 * 		not through the proxy server. The value can be a list of hosts, each
+	 * 		seperated by a |, and in addition a wildcard character (*) can be
 	 * 		used for matching. For example: "*.foo.com|localhost"<br>
 	 * <code>
 	 * Examples:
@@ -300,23 +203,23 @@ public class Util {
 		String user = 3 < count ? settings[3] : "";
 		String pass = 4 < count ? settings[4] : "";
 		String noProxyList = 5 < count ? settings[5] : "";
-		
+
 		Properties props = System.getProperties();
-		
+
 		props.remove("http.proxyHost");
 		props.remove("http.proxyPort");
 		props.remove("http.proxyUser");
 		props.remove("http.proxyPassword");
 		props.remove("http.http.nonProxyHosts");
-		
+
 		props.remove("https.proxyHost");
 		props.remove("https.proxyPort");
 		props.remove("https.http.nonProxyHosts");
-		
+
 		props.remove("ftp.proxyHost");
 		props.remove("ftp.proxyPort");
 		props.remove("ftp.nonProxyHosts");
-		
+
 		props.remove("socksProxyHost");
 		props.remove("socksProxyPort");
 		props.remove("java.net.socks.username");
@@ -359,7 +262,7 @@ public class Util {
 			}
 		}
 	}
-	
+
 	private static class BlockingQueuePut implements RejectedExecutionHandler {
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 			try {
@@ -372,7 +275,7 @@ public class Util {
 
 	private static class WorkerThreadFactory implements ThreadFactory {
 		static final AtomicInteger threadCounter = new AtomicInteger(0);
-		
+
 		public Thread newThread(Runnable r) {
 			Thread thread = new Thread(r);
 			thread.setName("Worker thread " + threadCounter.incrementAndGet());
@@ -383,7 +286,7 @@ public class Util {
 
 	/**
 	 * Creates a Blocking thread pool with fixed size.
-	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 * @see java.util.concurrent.Executors.newFixedThreadPool
 	 */
 	public static ExecutorService newBlockingThreadPoolExecutor() {
 		Runtime runtime = Runtime.getRuntime();
@@ -396,10 +299,10 @@ public class Util {
                                       new WorkerThreadFactory(),
                                       new BlockingQueuePut());
 	}
-	
+
 	/**
 	 * Creates a Blocking thread pool with fixed size.
-	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 * @see java.util.concurrent.Executors.newFixedThreadPool
 	 */
 	public static ExecutorService newBlockingThreadPoolExecutor(int nThreads) {
 		return new ThreadPoolExecutor(nThreads, nThreads,
@@ -408,10 +311,10 @@ public class Util {
                                       new WorkerThreadFactory(),
                                       new BlockingQueuePut());
 	}
-	
+
 	/**
 	 * Creates a Blocking thread pool with fixed size.
-	 * @see java.util.concurrent.Executors.newFixedThreadPool 
+	 * @see java.util.concurrent.Executors.newFixedThreadPool
 	 */
 	public static ExecutorService newBlockingThreadPoolExecutor(int nThreads, ThreadFactory threadFactory) {
 		return new ThreadPoolExecutor(nThreads, nThreads,
@@ -422,21 +325,21 @@ public class Util {
 	}
 
 	/**
-	 * Trims the specified string or returns an empty string if value is null. 
+	 * Trims the specified string or returns an empty string if value is null.
 	 */
 	public static String trimNZ(String value) {
 		return value == null ? "" : value.trim();
 	}
-	
+
 	/**
 	 * This returns a new string with all surrounding whitespace removed and
 	 * internal whitespace normalized to a single space. If only whitespace
 	 * exists, the empty string is returned.
 	 * <p>Per XML 1.0 Production 3 whitespace includes: #x20, #x9, #xD, #xA</p>
-	 * 
+	 *
 	 * @param str string to be normalized.
 	 * @return normalized string or empty string
-	 * 
+	 *
 	 * @see org.jdom.Text#normalizeString
 	 */
 	public static String normalizeString(String str) {
@@ -463,7 +366,7 @@ public class Util {
 		}
 		return new String(n, 0, pos);
 	}
-	
+
 	public static String arrayToString(double array[]) {
 		if (array == null)
 			return "";
@@ -471,10 +374,10 @@ public class Util {
 		for (double i : array) {
 			sb.append(i);
 			sb.append('\t');
-		}		
+		}
 		return sb.toString();
 	}
-	
+
 	public static String arrayToString(int array[]) {
 		if (array == null)
 			return "";
@@ -482,10 +385,10 @@ public class Util {
 		for (int i : array) {
 			sb.append(i);
 			sb.append('\t');
-		}		
+		}
 		return sb.toString();
 	}
-	
+
 	public static double[] stringToDoubleArray(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		int size = st.countTokens();
@@ -497,7 +400,7 @@ public class Util {
 		}
 		return result;
 	}
-	
+
 	public static int[] stringToIntArray(String str) {
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		int size = st.countTokens();
@@ -518,7 +421,7 @@ public class Util {
 		out.close();
 		return result.toString();
 	}
-	
+
 	/**
 	 * Treat an {@link Enumeration} as an {@link Iterable} so it can be used in an enhanced for-loop.
 	 * Bear in mind that the enumeration is "consumed" by the loop and so should be used only once.
@@ -539,7 +442,7 @@ public class Util {
 	 * @throws NullPointerException if the enumeration is null
 	 * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6349852">Java bug #6349852</a>
 	 * @since org.openide.util 7.5
-	 * 
+	 *
 	 * Code borrowed from http://www.java2s.com/Code/Java/Collections-Data-Structure/TreatanEnumerationasanIterable.htm
 	 */
 	public static <E> Iterable<E> iterable(final Enumeration<E> enumeration) {
@@ -582,26 +485,26 @@ public class Util {
 		// return the new object
 		return (SerializableObject) ois.readObject();
 	}
-	
+
 	public static <T> int indexOf(T[] objects, T object) {
 		if (objects == null)
 			return -1;
 		for (int i = 0; i < objects.length; i++) {
-			if ((objects[i] != null && objects[i].equals(object)) || 
+			if ((objects[i] != null && objects[i].equals(object)) ||
 				(object == null && objects[i] == null))
 				return i;
 		}
 		return -1;
 	}
-	
+
 	public static String objectToString(Object o) {
-		return ReflectionToStringBuilder.toString(o, ToStringStyle.SHORT_PREFIX_STYLE);	
+		return ReflectionToStringBuilder.toString(o, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
-	
+
 	public static <T> T nvl(T value, T defaultValue) {
 		return value == null ? defaultValue : value;
 	}
-	
+
 	public static <T> T nvl2(Object value, T valueIfNotNull, T valueIfNull) {
 		return value == null ? valueIfNull : valueIfNotNull;
 	}
