@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_HOME=$(dirname "$(readlink -fm "$0")")
-source "$SCRIPT_HOME/my_utils.sh"
+source "$SCRIPT_HOME/my_tools/my_utils.sh"
 
 #read_cfg '___SCRIPT___' '___END___'
 #cfg[qqq]="asd qwe"
@@ -14,17 +14,39 @@ source "$SCRIPT_HOME/my_utils.sh"
 #execQuiet aaals -la
 #is_root && echo root || echo not root
 
-start="___SCRIPT___"
-end="___END___"
+function readScriptSection() {
+	start="___SCRIPT___"
+	end="___END___"
+	
+	#extractData $start $end
+	
+	read_cfg $start $end
+	cfg[qqq]=QQQ
+	echo "${cfg[@]}"
+	save_cfg $start $end
+}
 
-#extractData $start $end
+function func1() {
+	echo Func 1
+	func2
+}
+	
+function func2() {
+	echo Func 2
+	func3
+}
 
-read_cfg $start $end
-cfg[qqq]=QQQ
-echo "${cfg[@]}"
-save_cfg $start $end
+function func3() {
+	echo Func 3
+	func4
+}
 
+function func4() {
+	echo Func 4
+	ggetStack
+}
 
+func1
 
 #echo $EUID
 

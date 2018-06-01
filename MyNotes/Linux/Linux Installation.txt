@@ -155,7 +155,6 @@ xpdf                        \
 zenity                      \
 zip
 
-
 Change the border width of windows in Gnome
 ===========================================
 http://ubuntuforums.org/showthread.php?t=439329
@@ -234,13 +233,22 @@ Usefull settings for .profile
 # make default less search case not-sesitive
 export LESS='-I -R'
 
-export NPM_HOME=$HOME/bin/npm-global
-export JAVA_HOME=$HOME/bin/java
-export M2_HOME=$HOME/bin/apache-maven-3.2.3
-export ANT_HOME=$HOME/bin/apache-ant-1.7.1
-export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$ANT_HOME/bin:$NPM_HOME/bin:$PATH
+export ORACLE_HOME=/opt/oracle/instantclient_12_2
+export TNS_ADMIN="$HOME/bin/oracle/network/admin"
+
+export IMPROC_HOME="~/.S/git/improc"
+export NPM_HOME="$HOME/bin/npm-global"
+export JAVA_HOME="$HOME/bin/java"
+export MVN_HOME="$HOME/bin/apache-maven-3.2.3"
+export ANT_HOME="$HOME/bin/apache-ant-1.7.1"
+export ANT_OPTS="-Xms256m -Xmx256m"
+export PATH="$HOME/bin:$JAVA_HOME/bin:$ANT_HOME/bin:$MVN_HOME/bin:$NPM_HOME/bin:$ORACLE_HOME:$IMPROC_HOME/MyNotes/Linux/my_tools:$PATH"
+
+export PATH=$JAVA_HOME/bin:$MVN_HOME/bin:$ANT_HOME/bin:$NPM_HOME/bin:$IMPROC_HOME/MyNotes/Linux/my_tools:$PATH
 ##### gpg-agent https://www.gnupg.org/documentation/manuals/gnupg/Invoking-GPG_002dAGENT.html
 export GPG_TTY=$(tty)
+export LYNX_CFG="$IMPROC_HOME/MyNotes/Linux/lynx.cfg"
+alias la='ls -la'
 
 Enable arrow keys in vi
 =======================

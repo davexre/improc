@@ -310,6 +310,18 @@ function save_cfg() {
 }
 
 #-----------------------------------------------------------------
+# Returns the bash call stack
+# Usage: 
+#	getStack [number_of_items_to_skip_default_1]
+function getStack() {
+	local start
+	start=${1:-1}
+	for ((i=$start; $i<${#FUNCNAME[@]}; i++)) ; do
+		echo ${BASH_SOURCE[$i]}:${BASH_LINENO[$i]}:${FUNCNAME[$i]}
+	done
+}
+
+#-----------------------------------------------------------------
 # Error handling in bash
 # Usage: 
 #	BASH_ERROR_LEVEL=IGNORE
@@ -325,6 +337,7 @@ function onBashErrorHandler() {
 			;;
 		2 | EXIT | *)
 			echo "Error in ${1}:${2}. Exit code is ${3} running ${4}"
+			getStack 2
 			echo "Aborting..."
 			exit 255
 			;;
