@@ -33,8 +33,7 @@ function log_stdout() {
 }
 
 function log_clear() {
-	local tmp=$(dirname "$LOG_FILE")
-	if [[ "$tmp" != "/dev" ]]; then
+	if [[ -f "$LOG_FILE" ]]; then
 		echo -n > "$LOG_FILE"
 	fi
 }
@@ -179,7 +178,7 @@ EOF
 }
 
 ##################################################################
-### Bash file processing/configuration at the end of scrip
+### Bash file processing/configuration at the end of script
 ##################################################################
 
 #-----------------------------------------------------------------
