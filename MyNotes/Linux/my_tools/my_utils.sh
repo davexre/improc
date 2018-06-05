@@ -425,4 +425,4 @@ colors YES
 LOG_LEVEL=ALL;
 log_stdout
 
-SCRIPT_HOME=$(dirname "$(readlink -f "$0")")
+SCRIPT_HOME=$(dirname "$(readlink -f "${BASH_SOURCE[ ${#BASH_SOURCE[@]}-1 ]}")")
