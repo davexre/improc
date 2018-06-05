@@ -30,6 +30,14 @@ public class ConvolutionSameSizeLayer extends Layer {
 		ws.resetEpoch();
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append(String.format("learning rate: %.4f\n", learningRate))
+				.append("kernel\n").append(kernel)
+				.toString();
+	}
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;

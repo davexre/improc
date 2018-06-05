@@ -1,5 +1,41 @@
 #!/bin/bash
 
+source my_utils.sh
+
+
+
+export a=aaa
+#b="bbb\n$a\nccc"
+b=$(extractData "===A" "===B")
+: '
+readarray -t lines <<< "$b"
+for i in "${!lines[@]}" ; do
+	line="${lines[$i]}"
+	echo $(eval echo \"$line\")
+done
+'
+
+c=$(eval echo \""$b"\")
+c=$(substituteVariables "$b")
+echo "$c"
+
+
+exit
+
+#c=$(eval echo -e \"$(echo -e "$b")\")
+b=$(printf '%b' "$b")
+c=$(eval echo -e \"${b}\")
+echo -e "$c"
+
+exit
+
+===A
+bbb
+>> $a <<
+ccc
+===B
+
+
 SCRIPT_HOME=$(dirname "$(readlink -fm "$0")")
 source "$SCRIPT_HOME/my_tools/my_utils.sh"
 
@@ -22,9 +58,11 @@ function readScriptSection() {
 	
 	read_cfg $start $end
 	cfg[qqq]=QQQ
-	echo "${cfg[@]}"
-	save_cfg $start $end
+	a="${cfg[asd]}"
+	echo "$(($a))"
+	#save_cfg $start $end
 }
+readScriptSection
 
 function func1() {
 	echo Func 1
@@ -46,7 +84,7 @@ function func4() {
 	ggetStack
 }
 
-func1
+#func1
 
 #echo $EUID
 

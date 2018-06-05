@@ -9,18 +9,18 @@ public class FastGaussianLayer extends Layer {
 	double sigma;
 	int maskRadius;
 	double mask[];
-	
+
 	public FastGaussianLayer() {
 		this(PGaussianFilter.defaultSigma, PGaussianFilter.getMaskRadius(PGaussianFilter.defaultSigma));
 	}
-	
+
 	public FastGaussianLayer(double sigma, int maskRadius) {
 		this.sigma = sigma;
 		this.maskRadius = maskRadius;
 		this.mask = new double[(maskRadius << 1) - 1];
 		PGaussianFilter.fillArray(mask, sigma);
 	}
-	
+
 	public int[] getOutputSize(int inputSize[]) {
 		return inputSize;
 	}
@@ -28,6 +28,11 @@ public class FastGaussianLayer extends Layer {
 	@Override
 	public Workspace createWorkspace() {
 		return new Workspace();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("R: %d, sigma: %.4f\n", maskRadius, sigma);
 	}
 
 	public class Workspace extends LayerWorkspace {
@@ -70,7 +75,7 @@ public class FastGaussianLayer extends Layer {
 					output.setItem(destI, j, sum);
 				}
 			}
-			
+
 			for (int destJ = input.getSizeY() - 1; destJ >= 0; destJ--) {
 				// fill in the buffer
 				int bufIndex = 0;
@@ -132,8 +137,8 @@ public class FastGaussianLayer extends Layer {
 					inputError.setItem(destI, j, sum);
 				}
 			}
-			
-			
+
+
 			int bottom;
 			for (int oy = bottom = output.getSizeY() - 1; oy >= 0; oy--) {
 				int top = oy == 0 ? 0 : oy - 1;
@@ -159,7 +164,7 @@ public class FastGaussianLayer extends Layer {
 			return inputError;
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		double buf[] = new double[5];
 		PGaussianFilter.fillArray(buf, PGaussianFilter.defaultSigma);
@@ -168,5 +173,5 @@ public class FastGaussianLayer extends Layer {
 			sum += buf[i];
 		System.out.println(sum);
 	}
-	
+
 }

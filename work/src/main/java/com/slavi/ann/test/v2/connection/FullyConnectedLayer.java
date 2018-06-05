@@ -19,7 +19,7 @@ public class FullyConnectedLayer extends Layer {
 			throw new Error("Invalid argument");
 		return new int[] { weight.getSizeY(), 1 };
 	}
-	
+
 	@Override
 	public Workspace createWorkspace() {
 		return new Workspace();
@@ -30,6 +30,14 @@ public class FullyConnectedLayer extends Layer {
 		Workspace ws = (Workspace) workspace;
 		ws.dW.mSum(weight, weight);
 		ws.resetEpoch();
+	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append(String.format("learning rate: %.4f\n", learningRate))
+				.append("weight\n").append(weight)
+				.toString();
 	}
 
 	public class Workspace extends LayerWorkspace {
@@ -73,7 +81,7 @@ public class FullyConnectedLayer extends Layer {
 			outputError.mMaxAbs(error, outputError);
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			
+
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = error.getVectorItem(j);
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {

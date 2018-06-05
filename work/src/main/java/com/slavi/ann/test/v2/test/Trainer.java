@@ -96,6 +96,8 @@ public class Trainer {
 				pair.toInputMatrix(input);
 				pair.toOutputMatrix(target);
 				Matrix output = ws.feedForward(input);
+				if (target.getVectorSize() != output.getVectorSize())
+					throw new Error("Dimensions mismatch");
 				error.resize(output.getSizeX(), output.getSizeY());
 				absError.resize(output.getSizeX(), output.getSizeY());
 				for (int i = target.getVectorSize() - 1; i >= 0; i--) {

@@ -7,7 +7,7 @@ public class ScaleAndBiasLayer extends Layer {
 
 	Matrix scale;
 	Matrix bias;
-	
+
 	public ScaleAndBiasLayer(Matrix scale, Matrix bias) {
 		this.scale = scale;
 		this.bias = bias;
@@ -22,7 +22,15 @@ public class ScaleAndBiasLayer extends Layer {
 	public LayerWorkspace createWorkspace() {
 		return new Workspace();
 	}
-	
+
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append("scale\n").append(scale)
+				.append("bias\n").append(bias)
+				.toString();
+	}
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix inputError = new Matrix();
 		public Matrix output = new Matrix();

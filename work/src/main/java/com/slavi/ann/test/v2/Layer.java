@@ -27,6 +27,11 @@ public abstract class Layer {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "";
+	}
+
 	/**
 	 * After calling this method the caller will invoke the resetEpoch method of each Workspace.
 	 */
@@ -67,17 +72,17 @@ public abstract class Layer {
 		double scaleOutput = 10;
 		double[] tmpX = new double[k.getSizeX()];
 		double[] tmpY = new double[k.getSizeY()];
-		if (false) {
+		if (true) {
 			BellCurveDistribution.fillArray(tmpX, 0.3, (tmpX.length - 1) / 2);
 			BellCurveDistribution.fillArray(tmpY, 0.3, (tmpY.length - 1) / 2);
 		} else {
 			PGaussianFilter.fillArray(tmpX, sigma);
 			PGaussianFilter.fillArray(tmpY, sigma);
 		}
-
 		for (int i = k.getSizeX() - 1; i >= 0; i--)
 			for (int j = k.getSizeY() - 1; j >= 0; j--)
 				k.setItem(i, j, (tmpX[i] + tmpY[j]) * 0.5);
+		/*
 		if (true) {
 			double scale = k.sumAll();
 			if (scale != 0.0)
@@ -85,7 +90,8 @@ public abstract class Layer {
 			k.rMul(scale);
 		}
 //		k.normalize();
-
+*/
+		k.rMul(50.0 / k.sumAll());
 		System.out.println("K ==========");
 		System.out.println(MatrixUtil.calcStatistics(k));
 		System.out.println("[K] = " + k.sumAll());

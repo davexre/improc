@@ -7,7 +7,7 @@ public class ConstScaleAndBiasLayer extends Layer {
 
 	double scale;
 	double bias;
-	
+
 	public ConstScaleAndBiasLayer(double scale, double bias) {
 		this.scale = scale;
 		this.bias = bias;
@@ -22,7 +22,12 @@ public class ConstScaleAndBiasLayer extends Layer {
 	public LayerWorkspace createWorkspace() {
 		return new Workspace();
 	}
-	
+
+	@Override
+	public String toString() {
+		return String.format("scale: %.4f, bias: %.4f", scale, bias);
+	}
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix inputError = new Matrix();
 		public Matrix output = new Matrix();

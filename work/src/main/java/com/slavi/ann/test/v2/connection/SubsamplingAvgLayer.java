@@ -7,21 +7,26 @@ public class SubsamplingAvgLayer extends Layer {
 
 	public int sizeX;
 	public int sizeY;
-	
+
 	public SubsamplingAvgLayer(int sizeX, int sizeY) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 	}
-	
+
 	public int[] getOutputSize(int inputSize[]) {
 		int sizeOX = (int) Math.ceil(((double) inputSize[0] / sizeX));
 		int sizeOY = (int) Math.ceil(((double) inputSize[1] / sizeY));
 		return new int[] { sizeOX, sizeOY };
 	}
-	
+
 	@Override
 	public Workspace createWorkspace() {
 		return new Workspace();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("size (X): %d, (Y): %d", sizeX, sizeY);
 	}
 
 	public class Workspace extends LayerWorkspace {

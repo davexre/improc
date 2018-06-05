@@ -11,7 +11,7 @@ import com.slavi.math.matrix.Matrix;
 public class Network extends Layer implements Iterable<Layer>{
 
 	protected List<Layer> layers;
-	
+
 	public Network(List<Layer> layers) {
 		this.layers = Collections.unmodifiableList(layers);
 	}
@@ -57,9 +57,18 @@ public class Network extends Layer implements Iterable<Layer>{
 		}
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder r = new StringBuilder();
+		for (Layer l : layers) {
+			r.append("Layer (").append(l.getClass()).append("): ").append(l);
+		}
+		return r.toString().trim();
+	}
+
 	public class NetWorkSpace extends LayerWorkspace {
 		public List<LayerWorkspace> workspaces;
-		
+
 		protected NetWorkSpace() {
 			workspaces = new ArrayList<>(layers.size());
 			for (Layer layer : layers)

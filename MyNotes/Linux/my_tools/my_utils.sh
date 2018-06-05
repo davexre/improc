@@ -310,6 +310,16 @@ function save_cfg() {
 }
 
 #-----------------------------------------------------------------
+# Substitutes all variables in $1.
+# Usage:
+#	string='some string'
+#	str=$'some\nmultiline $string that\nshould be substituted'
+#	result=$(substituteVariables "$str")
+function substituteVariables() {
+	eval echo \""$1"\"
+}
+
+#-----------------------------------------------------------------
 # Returns the bash call stack
 # Usage: 
 #	getStack [number_of_items_to_skip_default_1]

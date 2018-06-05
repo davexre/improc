@@ -33,6 +33,14 @@ public class ConvolutionLayer extends Layer {
 		ws.dKernel.mSum(kernel, kernel);
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append(String.format("learning rate: %.4f\n", learningRate))
+				.append("kernel\n").append(kernel)
+				.toString();
+	}
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
@@ -124,6 +132,7 @@ public class ConvolutionLayer extends Layer {
 			System.out.println("[K] = " + kernel.sumAll());
 		}
 
+		@Override
 		public String toString() {
 			return new StringBuilder()
 					.append("Kernel\n").append(kernel)

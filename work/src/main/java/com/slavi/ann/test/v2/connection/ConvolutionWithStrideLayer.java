@@ -35,6 +35,14 @@ public class ConvolutionWithStrideLayer extends Layer {
 		ws.resetEpoch();
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder()
+				.append(String.format("learning rate: %.4f, stride (X): %d, (Y): %d\n", learningRate, strideX, strideY))
+				.append("kernel\n").append(kernel)
+				.toString();
+	}
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError;
