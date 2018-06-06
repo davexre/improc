@@ -185,9 +185,6 @@ public class Matrix {
 		if ((newSizeX < 0) || (newSizeY < 0)) {
 			throw new Error("Invalid matrix size");
 		}
-		if ((newSizeX == sizeX) && (newSizeY == sizeY) && (m != null)) {
-			return;
-		}
 		sizeX = newSizeX;
 		sizeY = newSizeY;
 		int newSize = newSizeX * newSizeY;
@@ -516,7 +513,7 @@ public class Matrix {
 			double tmp = Math.abs(getVectorItem(i));
 			if (D < tmp)
 				D = tmp;
-			
+
 		}
 		return D;
 	}

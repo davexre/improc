@@ -10,10 +10,10 @@ public class TwoSpiralsData {
 	public static class TwoSpiralsDataPoint implements DatapointPair {
 		static final double A = 1;
 		static final double B = 1;
-		
+
 		double angle;
 		int type;
-		
+
 		public void toInputMatrix(Matrix dest) {
 			double t = angle + type * Math.PI;
 			double r = A + B * t;
@@ -29,12 +29,16 @@ public class TwoSpiralsData {
 			dest.setItem(0, 0, type == 0 ? 1 : 0);
 			dest.setItem(1, 0, type == 1 ? 1 : 0);
 		}
-		
+
 		public String toString() {
 			return "Angle: " + angle + ", type: " + type;
 		}
+
+		public String getName() {
+			return toString();
+		}
 	}
-	
+
 	public static List<TwoSpiralsDataPoint> dataSet(int numberOfItems) {
 		ArrayList<TwoSpiralsDataPoint> r = new ArrayList<>();
 		double deltaAngle = 2.0 * Math.PI * numberOfItems;

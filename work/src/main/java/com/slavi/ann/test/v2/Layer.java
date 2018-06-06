@@ -91,7 +91,7 @@ public abstract class Layer {
 		}
 //		k.normalize();
 */
-		k.rMul(50.0 / k.sumAll());
+//		k.rMul(50.0 / k.sumAll());
 		System.out.println("K ==========");
 		System.out.println(MatrixUtil.calcStatistics(k));
 		System.out.println("[K] = " + k.sumAll());

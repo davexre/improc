@@ -44,7 +44,7 @@ public class MyMnistDataTest {
 
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 30); // Number 8 is missing until index 61,84, 110
+		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(60, 90); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
 		Marker.release();
 
@@ -55,15 +55,16 @@ public class MyMnistDataTest {
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
 				// MNIST data
+				.addConstScaleAndBiasLayer(2, -1)
 				.addConvolutionLayer(5)
-				.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
+				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				.addConstScaleAndBiasLayer(10.0 / 25, -5)
-				.addDebugLayer("A2", Statistics.CStatMinMax, Statistics.CStatMinMax)
+				//.addDebugLayer("A2", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				//.addDebugLayer("WTF", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				.addSigmoidLayer()
-				.addFullyConnectedLayer(10).addSigmoidLayer()
+				//.addFullyConnectedLayer(10).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
-				.addDebugLayer("last", DebugLayer.off)
+				//.addDebugLayer("last", DebugLayer.off)
 
 /*
 //				.addConstScaleAndBiasLayer(2, -1)
@@ -84,10 +85,9 @@ public class MyMnistDataTest {
 				;
 		System.out.println(nb.describe());
 		Network net = nb.build();
-//		System.out.println(((ConvolutionLayer) net.get(0)).kernel.normalize());
-		System.out.println(net.get(0));
+		System.out.println(net.get(1));
 		Trainer.train(net, trainset, 1000);
-		System.out.println(net.get(0));
+		System.out.println(net.get(1));
 	}
 
 	public static void main(String[] args) throws Exception {

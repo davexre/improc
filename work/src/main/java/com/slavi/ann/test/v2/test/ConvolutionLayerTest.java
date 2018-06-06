@@ -11,11 +11,11 @@ public class ConvolutionLayerTest {
 
 	public static class BinaryDigitsPattern implements DatapointPair {
 		final int number;
-		
+
 		public BinaryDigitsPattern(int number) {
 			this.number = number;
 		}
-		
+
 		public void toInputMatrix(Matrix dest) {
 			dest.resize(4, 4);
 			for (int i = 0; i < dest.getVectorSize(); i++)
@@ -27,13 +27,17 @@ public class ConvolutionLayerTest {
 			for (int i = 0; i < dest.getVectorSize(); i++)
 				dest.setVectorItem(i, (number & (1 << i)) == 0 ? 0.05 : 0.95);
 		}
+
+		public String getName() {
+			return Integer.toString(number);
+		}
 	}
-	
+
 	void doIt() throws Exception {
 		ArrayList<BinaryDigitsPattern> trainset = new ArrayList<>();
 		for (int i = 0; i < 16; i++)
 			trainset.add(new BinaryDigitsPattern(i));
-		
+
 		Network net = new NetworkBuilder(4, 4)
 //				.addConvolutionLayer(3)
 //				.addConvolutionSameSizeLayer(3)
@@ -57,7 +61,7 @@ public class ConvolutionLayerTest {
 //				new FullyConnectedLayer(12, 8, 1),
 //				new FullyConnectedLayer(10, 4, 1)
 				);
-*/		
+*/
 		Trainer.train(net, trainset, 100);
 	}
 

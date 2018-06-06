@@ -55,7 +55,7 @@ public class Cifar100 {
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < columns; c++) {
 					int offset = r * columns + c;
-					int col = 
+					int col =
 						(((int) pixels[offset]) & 0xff) << 16 |
 						(((int) pixels[offset + size]) & 0xff) << 8 |
 						(((int) pixels[offset + size + size]) & 0xff);
@@ -71,16 +71,20 @@ public class Cifar100 {
 				for (int j = dest.getSizeY() - 1; j >= 0; j--)
 					dest.setItem(i, j, MathUtil.mapValue(pixels[j * columns + i] & 0xff, 0, 255, 0, 1));
 		}
-		
+
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(labelsFine.size(), 1);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
 				dest.setVectorItem(i, labelFine == i ? valueHigh : valueLow);
 		}
-		
+
 		public String toString() {
-			return String.format("Label fine: %s, coarse: %s, batch: %s, pattern number: %s (%s/%s)" , 
+			return String.format("Label fine: %s, coarse: %s, batch: %s, pattern number: %s (%s/%s)" ,
 					labelFine, labelCoarse, batch, patternNumber, labelsFine.get(labelFine), labelsFine.get(labelFine));
+		}
+
+		public String getName() {
+			return Integer.toString(patternNumber);
 		}
 	}
 
@@ -102,7 +106,7 @@ public class Cifar100 {
 			result.add(p);
 		}
 	}
-	
+
 	public static List<Cifar100Pattern> readDataSet() throws Exception {
 		Utils.downloadDataFiles(dataTargetDir, dataUrl, dataFiles);
 		try (

@@ -33,21 +33,25 @@ public class IrisData {
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
 				dest.setVectorItem(i, MathUtil.mapValue(features[i], 0, 10, 0, 1));
 		}
-		
+
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(3, 1);
 			for (int i = 0; i < 3; i++)
 				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
 		}
-		
+
 		public String toString() {
 			return "Label: " + label + ", pattern number: " + patternNumber;
+		}
+
+		public String getName() {
+			return Integer.toString(patternNumber);
 		}
 	}
 
 	public static List<IrisPattern> readDataSet(boolean useTrainDataSet) throws Exception {
 		Utils.downloadDataFiles(dataTargetDir, dataUrl, dataFiles);
-		
+
 		try (
 			Reader fin = new FileReader(new File(dataTargetDir, dataFiles[useTrainDataSet ? 0 : 1]));
 			LineNumberReader r = new LineNumberReader(fin);
@@ -60,7 +64,7 @@ public class IrisData {
 				for (int i = 2; i < s.length; i++) {
 					names.add(StringUtils.trimToEmpty(s[i]));
 				}
-				
+
 				ArrayList<IrisPattern> result = new ArrayList<>();
 				for (int p = 0; p < numPatterns; p++) {
 					s = r.readLine().split(",");

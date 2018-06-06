@@ -3,6 +3,7 @@ package com.slavi.ann.test.v2.test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 
@@ -18,10 +19,12 @@ public class Trainer {
 
 	static class DatapointTrainResult implements Comparable<DatapointTrainResult> {
 		int index;
+		DatapointPair pair;
 		double error;
 
-		public DatapointTrainResult(int index, double error) {
+		public DatapointTrainResult(int index, DatapointPair pair, double error) {
 			this.index = index;
+			this.pair = pair;
 			this.error = error;
 		}
 
@@ -110,7 +113,8 @@ public class Trainer {
 					patternsLearend++;
 				st.addValue(absError.max());
 				stAbsError.addValue(absError);
-				errors.add(new DatapointTrainResult(index, absError.sumAll() / absError.getVectorSize()));
+				//errors.add(new DatapointTrainResult(index, pair, absError.sumAll() / absError.getVectorSize()));
+				errors.add(new DatapointTrainResult(index, pair, absError.max()));
 				Matrix inputError = ws.backPropagate(error);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
@@ -132,15 +136,17 @@ public class Trainer {
 			double learnProgress = lastAvgError - avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
 
-/*			Collections.sort(errors);
+			Collections.sort(errors);
+
 			for (int i = 0; i < 5 && i < errors.size(); i++) {
 				DatapointTrainResult e = errors.get(i);
-				System.out.println("INDEX " + e.index + " ERROR:" + e.error);
-			}*/
+				System.out.println("INDEX " + e.index + " ERROR:" + e.error + ", " + e.pair.getName());
+			}
 			double maxStdInputErr = stInputError.getStdDeviation().max();
 			double patternsLearendPercent = (double) patternsLearend / index;
 			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
 			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
+			System.out.println("maxErrPair:       " + errors.get(0).pair.getName());
 			System.out.println("avgMaxError:      " + MathUtil.d4(st.getAvgValue()));
 			System.out.println("stdMaxError:      " + MathUtil.d4(st.getStdDeviation()));
 			System.out.println("sumAvgError:      " + MathUtil.d4(avgError));

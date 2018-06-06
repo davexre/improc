@@ -27,7 +27,7 @@ public class MnistData {
 
 	static final double valueLow = 0.05;
 	static final double valueHigh = 0.95;
-	
+
 	public static class MnistPattern implements DatapointPair {
 		public int patternNumber;
 		public byte label;
@@ -36,7 +36,7 @@ public class MnistData {
 		public static final int columns = 28;
 		public static final int rows = 28;
 		public static final int size = columns * rows; // 784
-		
+
 		public BufferedImage toBufferedImage() {
 			BufferedImage img = new BufferedImage(columns, rows, BufferedImage.TYPE_USHORT_GRAY);
 			for (int r = 0; r < rows; r++) {
@@ -48,21 +48,25 @@ public class MnistData {
 			}
 			return img;
 		}
-		
+
 		public void toInputMatrix(Matrix dest) {
 			dest.resize(28, 28);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
 				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, valueLow, valueHigh));
 		}
-		
+
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(10, 1);
 			for (int i = 0; i < 10; i++)
 				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
 		}
-		
+
 		public String toString() {
 			return "Label: " + label + ", pattern number: " + patternNumber;
+		}
+
+		public String getName() {
+			return Integer.toString(label);
 		}
 	}
 
