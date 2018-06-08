@@ -19,30 +19,31 @@ public class Statistics {
 	// побитово И (OR).
 
 	public static final int CStatOff		= 0x0000;
-	public static final int CStatAvg		= 0x0001;
+	public static final int CStatCount		= 0x0001;
+	public static final int CStatAvg		= 0x0002;
 	// Доверителен интервал [J start, J end]
-	public static final int CStatJ			= 0x0002;
+	public static final int CStatJ			= 0x0004;
 	// Асиметрия и ексцес
-	public static final int CStatAE			= 0x0004;
+	public static final int CStatAE			= 0x0008;
 	// Стойностите MinX и MaxX	// Брой на "добрите", с които е изчислявано.
 
-	public static final int CStatMinMax		= 0x0008;
+	public static final int CStatMinMax		= 0x0010;
 	// Стойностите Min(Abs(X)) и Max(Abs(X))
-	public static final int CStatAbs		= 0x0010;
+	public static final int CStatAbs		= 0x0020;
 	// Стойността MaxX - MinX
-	public static final int CStatDelta		= 0x0020;
+	public static final int CStatDelta		= 0x0040;
 	// Таблица със начален (M) и централен (D) моменти
-	public static final int CStatMD			= 0x0040;
+	public static final int CStatMD			= 0x0080;
 	// Стандартно отклонение
-	public static final int CStatStdDev		= 0x0080;
+	public static final int CStatStdDev		= 0x0100;
 	// Съобщение 'There is(are) bad values'
 	public static final int CStatErrors		= 0x1000;
 
-	public static final int CStatAll		= CStatAvg | CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatStdDev | CStatErrors;
+	public static final int CStatAll		= CStatCount | CStatAvg | CStatJ | CStatAE | CStatMinMax | CStatAbs | CStatDelta | CStatMD | CStatStdDev | CStatErrors;
 
-	public static final int CStatShort		= CStatAvg | CStatJ | CStatMinMax | CStatStdDev | CStatErrors;
+	public static final int CStatShort		= CStatCount | CStatAvg | CStatJ | CStatMinMax | CStatStdDev | CStatErrors;
 
-	public static final int CStatDetail		= CStatAvg | CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatStdDev | CStatErrors;
+	public static final int CStatDetail		= CStatCount | CStatAvg | CStatJ | CStatMinMax | CStatAbs | CStatDelta | CStatStdDev | CStatErrors;
 
 	public static final int CStatDefault	= CStatShort;
 
@@ -262,7 +263,7 @@ public class Statistics {
 
 	/*
 	 * a=[x]/N
-	 * 
+	 *
 	 * s^2=([(x-a)^2])/(N-1)=
 	 * ([xx - 2ax + aa])/(N-1)=
 	 * ([xx - 2x[x]/N + [x][x]/NN])/(N-1)=
@@ -292,8 +293,10 @@ public class Statistics {
 
 	public String toString(int style) {
 		try (Formatter f = new Formatter()) {
-			if ((style & CStatAvg) != 0) {
+			if ((style & CStatCount) != 0) {
 				f.format(nameFormatInt, "Count", getItemsCount());
+			}
+			if ((style & CStatAvg) != 0) {
 				f.format(nameFormatDec, "Average", getAvgValue());
 			}
 			if ((style & CStatStdDev) != 0) {
@@ -335,8 +338,10 @@ public class Statistics {
 
 	public static String toString2Header(int style) {
 		StringBuilder b = new StringBuilder();
+		if ((style & CStatCount) != 0)
+			b.append("Count");
 		if ((style & CStatAvg) != 0)
-			b.append("Count\tAverage");
+			b.append("\tAverage");
 		if ((style & CStatStdDev) != 0)
 			b.append("\tB\tStd deviation");
 		if ((style & CStatJ) != 0)
@@ -357,7 +362,7 @@ public class Statistics {
 		}
 		if ((style & CStatErrors) != 0)
 			b.append("\tResult");
-		return b.toString();
+		return b.toString().trim();
 	}
 
 	public static String toString2Header() {
@@ -367,8 +372,9 @@ public class Statistics {
 	public String toString2(int style) {
 		StringBuilder b = new StringBuilder();
 		if ((style & CStatAvg) != 0)
-			b.append(Double.toString(this.getItemsCount()))
-			.append("\t").append(Double.toString(this.getAvgValue()));
+			b.append(Double.toString(this.getItemsCount()));
+		if ((style & CStatAvg) != 0)
+			b.append("\t").append(Double.toString(this.getAvgValue()));
 		if ((style & CStatStdDev) != 0)
 			b.append("\t").append(Double.toString(this.B))
 			.append("\t").append(Double.toString(this.getStdDeviation()));
@@ -396,7 +402,7 @@ public class Statistics {
 			b.append("\tFAILED");
 		else
 			b.append("\tok");
-		return b.toString();
+		return b.toString().trim();
 	}
 
 	public String toString2() {

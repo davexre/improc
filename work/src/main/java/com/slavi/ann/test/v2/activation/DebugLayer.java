@@ -7,7 +7,7 @@ import com.slavi.math.matrix.Matrix;
 
 public class DebugLayer extends Layer {
 
-	public static int defaultStyle = Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatMinMax | Statistics.CStatAbs;
+	public static int defaultStyle = Statistics.CStatCount | Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatMinMax | Statistics.CStatAbs;
 	public static int off = 0;
 
 	String name;
@@ -18,6 +18,7 @@ public class DebugLayer extends Layer {
 		StringBuilder r = new StringBuilder();
 		if (style == Statistics.CStatAll) return "ALL";
 
+		if ((style & Statistics.CStatCount ) != 0) r.append("Count ");
 		if ((style & Statistics.CStatAvg   ) != 0) r.append("Avg ");
 		if ((style & Statistics.CStatJ     ) != 0) r.append("J ");
 		if ((style & Statistics.CStatAE    ) != 0) r.append("AE ");

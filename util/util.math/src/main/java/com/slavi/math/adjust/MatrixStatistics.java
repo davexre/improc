@@ -128,7 +128,7 @@ public class MatrixStatistics {
 			sumValues4.vectorItemAdd(i, tmp *= value);
 		}
 	}
-	
+
 	public void start() {
 		resetCalculations();
 	}
@@ -163,7 +163,7 @@ public class MatrixStatistics {
 			// Пресмятане на Асиметрия и Ексцес.
 			A.setVectorItem(i, d3 == 0 ? 0 : d3 / Math.sqrt(Math.abs(d3)));
 			E.setVectorItem(i, d4 == 0 ? 0 : (d4 / Math.sqrt(Math.abs(d4))) - 3.0);
-			
+
 			// стр.54,285
 			// Определяне на Доверителния интервал.
 			double r = Laplas.get_T_from_Laplas(B) * Math.sqrt(Math.abs(d2));
@@ -279,8 +279,10 @@ public class MatrixStatistics {
 
 	public String toString(int style) {
 		StringBuilder r = new StringBuilder();
-		if ((style & Statistics.CStatAvg) != 0) {
+		if ((style & Statistics.CStatCount) != 0) {
 			r.append("Count: ").append(getItemsCount()).append("\n");
+		}
+		if ((style & Statistics.CStatAvg) != 0) {
 			r.append("Average\n").append(getAvgValue());
 		}
 		if ((style & Statistics.CStatStdDev) != 0) {

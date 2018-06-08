@@ -34,6 +34,76 @@
 					<artifactId>xmlparserv2</artifactId>
 					<version>12.2.0.1</version>
 				</dependency>
+
+				<!-- 
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ucp</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>orai18n</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>simplefan</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ons</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				 -->
+
+				<!-- osdt_core,osdt_cert and oraclepki are needed for accessing Oracle wallets -->
+				<!-- 
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>osdt_core</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>osdt_cert</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>oraclepki</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				 -->
+
+				<!-- Same as the ones without _g but with tracing enabled
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ojdbc8dms</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ojdbc8_g</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ojdbc8dms_g</artifactId>
+					<version>12.2.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				 -->
 			</dependencies>
 
 			<repositories>

@@ -80,9 +80,9 @@ public class Trainer {
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
 		double lastAvgError = 0;
-		File outDir = new File("./target/tmp");
+/*		File outDir = new File("./target/tmp");
 		FileUtils.deleteQuietly(outDir);
-		outDir.mkdirs();
+		outDir.mkdirs();*/
 
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {

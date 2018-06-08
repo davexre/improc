@@ -129,7 +129,7 @@ public class ConvolutionLayer extends Layer {
 
 			System.out.println("K ==========");
 			System.out.println(MatrixUtil.calcStatistics(kernel));
-			System.out.println("[K] = " + kernel.sumAll());
+			System.out.println("[K] = " + kernel.sumAll() + ", [|K|] = " + kernel.sumAbs());
 		}
 
 		@Override
