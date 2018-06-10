@@ -19,6 +19,8 @@ put the output in ~/.m2/settings-security.xml
 --- END settings-security.xml ---
 mvn --encrypt-password
 
+========= Auto completion in Bash for Maven commands =========
+https://github.com/juven/maven-bash-completion
 
 =========
 Check for artifact updates (newer versions of a library)

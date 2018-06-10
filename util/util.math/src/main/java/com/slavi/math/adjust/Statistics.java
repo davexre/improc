@@ -275,17 +275,17 @@ public class Statistics {
 	 */
 	public double getStdDeviation() {
 		//return Math.sqrt(D2 / (getItemsCount() - 1));
-		return Math.sqrt(
+		return getItemsCount() <= 1 ? 0 : Math.sqrt(
 				(getItemsCount() * sumValues2 - sumValues1 * sumValues1) /
 				(getItemsCount() * (getItemsCount() - 1)));
 	}
 
 	public boolean hasBadValues() {
-		return (MinX < J_Start) || (MaxX > J_End);
+		return !((J_Start <= MinX) && (MaxX <= J_End)); // Using ! handles NaN values.
 	}
 
 	public boolean isBad(double value) {
-		return (value < J_Start) || (value > J_End);
+		return !((J_Start <= value) && (value <= J_End)); // Using ! handles NaN values.
 	}
 
 	private static final String nameFormatDec = "%-18s = %.4f\n";

@@ -1,5 +1,8 @@
 package com.slavi.math.adjust;
 
+import java.io.IOException;
+import java.util.Formatter;
+
 import com.slavi.math.matrix.Matrix;
 
 public class MatrixStatistics {
@@ -172,7 +175,7 @@ public class MatrixStatistics {
 
 			double sv1 = sumValues1.getVectorItem(i);
 			double sv2 = sumValues2.getVectorItem(i);
-			stdDev.setVectorItem(i, Math.sqrt(
+			stdDev.setVectorItem(i, itemsCount <= 1 ? 0 : Math.sqrt(
 					Math.abs(itemsCount * sv2 - sv1 * sv1) /
 					(itemsCount * (itemsCount - 1))));
 		}
@@ -258,9 +261,11 @@ public class MatrixStatistics {
 
 	public boolean hasBadValues() {
 		for (int i = sumValues1.getVectorSize() - 1; i >= 0; i--) {
-			if ((MinX.getVectorItem(i) < J_Start.getVectorItem(i)) ||
-				(MaxX.getVectorItem(i) > J_End.getVectorItem(i)))
-				return true;
+			if (!(
+				(J_Start.getVectorItem(i) <= MinX.getVectorItem(i)) &&
+				(MaxX.getVectorItem(i) <= J_End.getVectorItem(i))
+				))
+				return true; // Using ! handles NaN values.
 		}
 		return false;
 	}
@@ -270,9 +275,12 @@ public class MatrixStatistics {
 			m.getSizeY() != sumValues1.getSizeY())
 			throw new Error("Bad matrix size");
 		for (int i = sumValues1.getVectorSize() - 1; i >= 0; i--) {
-			if ((m.getVectorItem(i) < J_Start.getVectorItem(i)) ||
-				(m.getVectorItem(i) > J_End.getVectorItem(i)))
-				return true;
+			double d = m.getVectorItem(i);
+			if (!(
+				(J_Start.getVectorItem(i) <= d) &&
+				(d <= J_End.getVectorItem(i))
+				))
+				return true; // Using ! handles NaN values.
 		}
 		return false;
 	}
@@ -321,6 +329,71 @@ public class MatrixStatistics {
 		if (((style & Statistics.CStatErrors) != 0) && hasBadValues())
 			r.append("*** There is/are BAD value(s) ***\n");
 		return r.toString().trim();
+	}
+
+	private static String nameFormat = "%-18s";
+	private static String numberFormat = " %8.4f";
+	private static void statStatToStringInternal(String name, Formatter f, Statistics stat) throws IOException {
+		f.format(nameFormat, name);
+		f.format(numberFormat, stat.getMinX());
+		f.format(numberFormat, stat.getMaxX());
+		f.format(numberFormat, stat.getAvgValue());
+		f.format(numberFormat, stat.getStdDeviation());
+		f.format(numberFormat, stat.getJ_Start());
+		f.format(numberFormat, stat.getJ_End());
+		f.out().append("\n");
+	}
+
+	public String statStatToString(int style) {
+		try {
+			Statistics stat = new Statistics();
+			Formatter f = new Formatter();
+			f.format("%18s %8s %8s %8s %8s %8s %8s\n", "stat->", "Min", "Max", "Avg", "Std Dev", "J Start", "J End");
+			if ((style & Statistics.CStatAvg) != 0) {
+				statStatToStringInternal("Average", f, getAvgValue().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatStdDev) != 0) {
+				statStatToStringInternal("Std deviation", f, getStdDeviation().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatJ) != 0) {
+				statStatToStringInternal("J start", f, getJ_Start().calcStatistics(stat));
+				statStatToStringInternal("J end", f, getJ_End().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatAE) != 0) {
+				statStatToStringInternal("A", f, getA().calcStatistics(stat));
+				statStatToStringInternal("E", f, getE().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatMinMax) != 0) {
+				statStatToStringInternal("min", f, getMinX().calcStatistics(stat));
+				statStatToStringInternal("max", f, getMaxX().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatAbs) != 0) {
+				statStatToStringInternal("min(abs(X))", f, getAbsMinX().calcStatistics(stat));
+				statStatToStringInternal("max(abs(X))", f, getAbsMaxX().calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatDelta) != 0) {
+				Matrix d = new Matrix();
+				getMaxX().mSub(getMinX(), d);
+				statStatToStringInternal("max-min", f, d.calcStatistics(stat));
+			}
+			if ((style & Statistics.CStatMD) != 0) {
+				for (int i = 2; i <= 4; i++) {
+					statStatToStringInternal("M[" + i + "]", f, getM(i).calcStatistics(stat));
+				}
+				for (int i = 2; i <= 4; i++) {
+					statStatToStringInternal("D[" + i + "]", f, getD(i).calcStatistics(stat));
+				}
+			}
+			if ((style & Statistics.CStatCount) != 0) {
+				f.format(nameFormat, "Count").format(" %8d", getItemsCount()).out().append("\n");
+			}
+			if (((style & Statistics.CStatErrors) != 0) && hasBadValues())
+				f.out().append("*** There is/are BAD value(s) ***\n");
+			return f.toString();
+		} catch (Exception e) {
+			// Should not happen
+			return e.toString();
+		}
 	}
 
 	public String toString() {

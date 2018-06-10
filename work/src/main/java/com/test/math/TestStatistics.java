@@ -61,11 +61,13 @@ public class TestStatistics {
 			items.add(item);
 		}
 		fin.close();
+		MyData tmpitem = new MyData(Double.NaN, 1.0);
+		items.add(tmpitem);
 
 		Statistics stat = new Statistics();
 		stat.setB(0.9);
 //		for (int i = 0; i < 5; i++)
-			if (!calculateOne(items, stat))
+			if (!calculateOne(items, stat));
 //				break;
 		System.out.println(stat.toString());
 		System.out.println("------------");
@@ -73,5 +75,6 @@ public class TestStatistics {
 		for (MyData item : items) {
 			System.out.println(item.toString());
 		}
+		System.out.println(stat.isBad(Double.NaN));
 	}
 }

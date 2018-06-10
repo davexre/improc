@@ -99,11 +99,13 @@ public class DebugLayer extends Layer {
 				System.out.println(">>> Debug " + name);
 			if (inputStyle != 0) {
 				System.out.println("Input Stats");
-				System.out.println(stInput.toString(inputStyle));
+				//System.out.println(stInput.toString(inputStyle));
+				System.out.println(stInput.statStatToString(inputStyle));
 			}
 			if (errorStyle != 0) {
 				System.out.println("Error Stats");
-				System.out.println(stError.toString(errorStyle));
+				//System.out.println(stError.toString(errorStyle));
+				System.out.println(stError.statStatToString(errorStyle));
 			}
 
 			if (hasBadValuesInInput) System.out.println("HAS BAD VALUES IN INPUT");

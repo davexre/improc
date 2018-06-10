@@ -34,6 +34,8 @@ public class TestMatrixStatistics {
 		System.out.println(ms.sumValues2);
 		System.out.println(ms.toString(Statistics.CStatAll));
 		System.out.println(s.toString(Statistics.CStatAll));
+		System.out.println("-------------");
+		System.out.println(ms.statStatToString(Statistics.CStatAll));
 	}
 
 	public static void main(String[] args) throws Exception {

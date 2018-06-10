@@ -55,11 +55,11 @@ public class MyMnistDataTest {
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
 				// MNIST data
-				//.addConstScaleAndBiasLayer(2, -1)
+				.addConstScaleAndBiasLayer(2, -1)
 				.addConvolutionLayer(5)
 				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
-				.addConstScaleAndBiasLayer(10.0 / 25, -5)
-				//.addDebugLayer("A2", Statistics.CStatMinMax, Statistics.CStatMinMax)
+				//.addConstScaleAndBiasLayer(10.0 / 25, -5)
+				.addDebugLayer("A2", Statistics.CStatDetail, Statistics.CStatDetail)
 				//.addDebugLayer("WTF", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				.addSigmoidLayer()
 				//.addFullyConnectedLayer(10).addSigmoidLayer()

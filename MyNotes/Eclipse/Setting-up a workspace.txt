@@ -41,6 +41,7 @@ Setting-up a workspace
 	* Eclipse plugin for LESS
 	* P4Eclipse + Perforce Folder Diff Support
 	* LiClipseText
+	* PyDev
 	* ?? Eclipse Class Decompiler
 	* ?? ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
 	* ?? Tern Eclipse IDE (JavaScript analyzer)
