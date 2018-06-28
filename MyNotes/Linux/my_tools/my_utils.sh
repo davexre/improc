@@ -203,6 +203,39 @@ function findToken() {
 # 	end=${end:+$(($end-$begin-1))}
 # 	(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$') || true
 # }
+function extractData0() {
+	if [[ -z "$1" ]]; then
+		return
+	fi
+	local begin=$(findToken "$1")
+	if [[ -z $begin ]]; then
+		return
+	fi
+	local end="${2}"
+	if [[ -z $end ]]; then
+		tail -n +$(($begin+1)) "$0"
+	else
+		end=$(findToken "$end")
+		if [[ -z $end ]]; then
+			return
+		fi
+		end=${end:+$(($end-$begin-1))}
+		(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"}) || true
+	fi
+}
+
+#-----------------------------------------------------------------
+# Extracts a data segment in $0. Removes any empty lines or line beginning with #.
+# Usage: 
+#	local myData=$(extractData "___DATA_1_MARKER___")
+#	local myData=$(extractData "___DATA_1_MARKER___" "___DATA_2_MARKER___")
+# The shorter version:
+# function extractData() {
+# 	local begin=$(findToken "$1")
+# 	local end=${2:+$(findToken "$2")}
+# 	end=${end:+$(($end-$begin-1))}
+# 	(tail -n +$(($begin+1)) "$0" | head -n ${end:-"-0"} | grep -v '^\s*\(#.*\)\?$') || true
+# }
 function extractData() {
 	if [[ -z "$1" ]]; then
 		return
@@ -309,13 +342,15 @@ function save_cfg() {
 }
 
 #-----------------------------------------------------------------
-# Substitutes all variables in $1.
+# Evaluates all variables in $1.
 # Usage:
-#	string='some string'
-#	str=$'some\nmultiline $string that\nshould be substituted'
-#	result=$(substituteVariables "$str")
-function substituteVariables() {
-	eval echo \""$1"\"
+#	my_variable='some string'
+#	str=$'some\nmultiline ${my_variable} that\nshould be evaluated'
+#	result=$(evalVariables "$str")
+# WARNING: If the string contains executable statement it will be executed!
+#	ex: my_var=$(evalVariables "just created $(mkdir -p ~/temp/a) a folder")
+function evalVariables() {
+	eval echo -E "\"$(sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' <<< "$1")\""
 }
 
 #-----------------------------------------------------------------

@@ -64,3 +64,20 @@ Preferences
 		** Text -> Default encoding -> UTF-8
 		** Text/Java Properties Files -> Default encoding -> UTF-8
 	* General/Workspace -> Text file encoding -> Default -> UTF-8
+
+Fixing some issues
+==================
+* Eclipse JPA Project Change Event Handler (waiting)
+https://stackoverflow.com/questions/19649847/eclipse-jpa-project-change-event-handler-waiting
+	cd <ECLIPSE_HOME>
+	rm features/org.eclipse.jpt.*
+	reconfigure your content-assist
+
+* Cannot change version of project facet Dynamic Web Module to 3.0
+https://stackoverflow.com/questions/18122336/cannot-change-version-of-project-facet-dynamic-web-module-to-3-0
+	* Update web.xml, update project
+	or
+	* Change in file
+		<WORKSPACE_DIR>/.settings/org.eclipse.wst.common.project.facet.core.xml
+		edit the line <installed facet="jst.web" version="2.5"/> and update project
+

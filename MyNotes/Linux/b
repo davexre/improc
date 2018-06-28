@@ -16,7 +16,7 @@ done
 '
 
 c=$(eval echo \""$b"\")
-c=$(substituteVariables "$b")
+c=$(evalVariables "$b")
 echo "$c"
 
 
@@ -56,10 +56,15 @@ function readScriptSection() {
 	
 	#extractData $start $end
 	
+	vals[zzz]="ZZZ"
+	echo "${vals[@]}"
 	read_cfg $start $end
 	cfg[qqq]=QQQ
 	a="${cfg[asd]}"
-	echo "$(($a))"
+	echo -e "$a"
+	#echo "$(($a))"
+	a=$(evalVariables "$a")
+	echo "$a"
 	#save_cfg $start $end
 }
 readScriptSection
@@ -91,8 +96,8 @@ function func4() {
 exit
 
 ___SCRIPT___
- asd = Some \t data "${vals[@]}"
-   qwe = Some = data  
+ asd = Some \t da"ta "${vals[@]}" "$(pwd)" \n qqqqq
+   qwe = Some = data
 az=az
 
 ___END___

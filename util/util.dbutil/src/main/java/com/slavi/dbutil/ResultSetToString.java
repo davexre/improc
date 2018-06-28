@@ -166,15 +166,15 @@ public class ResultSetToString {
 		}
 	}
 
-	final HashMap<Integer, DBFieldFormat> formatter = new HashMap<Integer, ResultSetToString.DBFieldFormat>();
+	static final HashMap<Integer, DBFieldFormat> formatter = new HashMap<Integer, DBFieldFormat>();
 
-	private void addType(int typeCode, String typeName, DBFieldFormat instance) {
+	private static void addType(int typeCode, String typeName, DBFieldFormat instance) {
 		instance.typeCode = typeCode;
 		instance.typeName = typeName;
 		formatter.put(typeCode, instance);
 	}
-	
-	public ResultSetToString() {
+
+	static {
 		addType(Types.BIT, "BIT", new DBFieldBoolean());
 		addType(Types.BOOLEAN, "BOOLEAN", new DBFieldBoolean());
 		addType(Types.BIGINT, "BIGINT", new DBFieldInt());
@@ -217,7 +217,7 @@ public class ResultSetToString {
 		addType(Types.DATALINK, "DATALINK", new DBFieldObject());
 	}
 
-	String getFieldValueString(ResultSet rs, ResultSetMetaData md, int column, int maxStringLength)
+	static String getFieldValueString(ResultSet rs, ResultSetMetaData md, int column, int maxStringLength)
 			throws SQLException {
 		DBFieldFormat fmt = formatter.get(md.getColumnType(column));
 		if (fmt == null)
@@ -225,25 +225,25 @@ public class ResultSetToString {
 		return fmt.valueToString(rs, column, maxStringLength);
 	}
 
-	int getPreferedColumnWidth(ResultSetMetaData md, int column) throws SQLException {
+	static int getPreferedColumnWidth(ResultSetMetaData md, int column) throws SQLException {
 		DBFieldFormat fmt = formatter.get(md.getColumnType(column));
 		if (fmt == null)
 			fmt = formatter.get(Types.OTHER);
 		return fmt.getPreferedColumnWidth(md, column);
 	}
 
-	String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
+	static String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
 		DBFieldFormat fmt = formatter.get(md.getColumnType(column));
 		if (fmt == null)
 			fmt = formatter.get(Types.OTHER);
 		return fmt.getFieldTypeString(md, column);
 	}
 
-	public String resultSetToString(ResultSet rs) throws SQLException {
+	public static String resultSetToString(ResultSet rs) throws SQLException {
 		return resultSetToString(rs, 0, 10, true, 40);
 	}
-	
-	public String resultSetToString(ResultSet rs, int recordsToSkip, int recordsToShow, boolean showHeader,
+
+	public static String resultSetToString(ResultSet rs, int recordsToSkip, int recordsToShow, boolean showHeader,
 			int maxColumnWidth) throws SQLException {
 		try (ResultSet dummyRsToClose = rs) {
 			while (recordsToSkip > 0) {
@@ -254,7 +254,7 @@ public class ResultSetToString {
 			StringBuilder r = new StringBuilder();
 			ResultSetMetaData md = rs.getMetaData();
 			int columns = md.getColumnCount();
-	
+
 			int columnWidths[] = new int[columns];
 			String columnFormats[] = new String[columns];
 			StringBuilder delim = new StringBuilder();
@@ -267,17 +267,17 @@ public class ResultSetToString {
 					columnWidth = Math.max(columnWidth, preferedWidth);
 				}
 				columnWidth = Math.min(columnWidth, maxColumnWidth);
-	
+
 				columnWidths[c] = columnWidth;
 				columnFormats[c] = "|%" + columnWidth + "." + columnWidth + "s";
-	
+
 				delim.append("+");
 				for (int i = 0; i < columnWidth; i++) {
 					delim.append("-");
 				}
 			}
 			delim.append("+\n");
-	
+
 			r.append(delim);
 			if (showHeader) {
 				for (int c = 0; c < columns; c++) {
@@ -285,7 +285,7 @@ public class ResultSetToString {
 				}
 				r.append("|");
 				r.append("\n");
-	
+
 				for (int c = 0; c < columns; c++) {
 					r.append(String.format(Locale.US, columnFormats[c], getFieldTypeString(md, c + 1)));
 				}
@@ -293,7 +293,7 @@ public class ResultSetToString {
 				r.append("\n");
 				r.append(delim);
 			}
-	
+
 			while (recordsToShow > 0) {
 				if (!rs.next())
 					break;

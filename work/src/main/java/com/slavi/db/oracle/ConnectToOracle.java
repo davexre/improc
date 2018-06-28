@@ -4,23 +4,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.slavi.dbutil.ResultSetToStringHandler;
+import com.slavi.dbutil.StringRowProcessor;
 
 import oracle.jdbc.pool.OracleDataSource;
-
+import oracle.sql.ARRAY;
+import oracle.sql.ArrayDescriptor;
 
 public class ConnectToOracle {
 
@@ -28,13 +25,31 @@ public class ConnectToOracle {
 	String connectStr;
 	String username;
 	String password;
-	
+
 	public ConnectToOracle() throws IOException {
 		prop = new Properties();
 		prop.load(new InputStreamReader(getClass().getResourceAsStream(getClass().getSimpleName() + ".properties")));
 		connectStr = prop.getProperty("connectStr");
 		username = prop.getProperty("username");
 		password = prop.getProperty("password");
+	}
+
+	public void exampleUsingOracleArrays(String[] args) throws Exception {
+		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
+		try (Connection conn = DriverManager.getConnection(connectStr, username, password)) {
+			QueryRunner qr = new QueryRunner();
+			ArrayList<String> lst = new ArrayList<>();
+			lst.add("NUMBER");
+			lst.add("VARCHAR2");
+
+			// select * from ALL_COLL_TYPES where owner = 'SYS' order by coll_type, type_name;
+			//ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.ODCIVARCHAR2LIST", conn);
+			ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.DBMS_DEBUG_VC2COLL", conn);
+			ARRAY ar = new ARRAY(ard, conn, lst.toArray());
+			String sql = "select count(*) from user_tab_columns where data_type not in (select * from table(?))";
+			Object val = qr.query(conn, sql, new ScalarHandler(), ar);
+			System.out.println(val);
+		};
 	}
 
 	public static class MyXml {
@@ -47,44 +62,13 @@ public class ConnectToOracle {
 		public void setXml(String xml) {
 			this.xml = xml;
 		}
-		
+
 		public String toString() {
 			return xml;
 		}
 	}
-	
-	public static class StringRowProcessor extends BasicRowProcessor {
-		public Object[] toArray(ResultSet rs) throws SQLException {
-			ResultSetMetaData meta = rs.getMetaData();
-			int cols = meta.getColumnCount();
-			Object[] result = new Object[cols];
 
-			for (int i = 0; i < cols; i++) {
-				result[i] = rs.getString(i + 1);
-			}
-
-			return result;
-		}
-
-		@Override
-		public Map<String, Object> toMap(ResultSet rs) throws SQLException {
-			Map<String, Object> result = new HashMap();
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int cols = rsmd.getColumnCount();
-
-			for (int i = 1; i <= cols; i++) {
-				String columnName = rsmd.getColumnLabel(i);
-				if (null == columnName || 0 == columnName.length()) {
-					columnName = rsmd.getColumnName(i);
-				}
-				result.put(columnName.toLowerCase(), rs.getString(i));
-			}
-
-			return result;
-		}
-	}
-
-	public void doIt(String[] args) throws Exception {
+	public void doIt3(String[] args) throws Exception {
 		OracleDataSource ods = new OracleDataSource();
 		ods.setURL(connectStr);
 		ods.setUser(username);
@@ -115,7 +99,7 @@ public class ConnectToOracle {
 
 		ods.close();
 	}
-	
+
 	public void doIt2(String[] args) throws Exception {
 		OracleDataSource ods = new OracleDataSource();
 		ods.setURL(connectStr);
@@ -126,7 +110,7 @@ public class ConnectToOracle {
 		System.out.println(o);
 		ResultSetToStringHandler rss = new ResultSetToStringHandler();
 		System.out.println(qr.query("select * from user_tables", rss));
-		
+
 		ods.close();
 	}
 
@@ -140,7 +124,7 @@ public class ConnectToOracle {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new ConnectToOracle().doIt(args);
+		new ConnectToOracle().doIt2(args);
 		System.out.println("Done.");
 	}
 }

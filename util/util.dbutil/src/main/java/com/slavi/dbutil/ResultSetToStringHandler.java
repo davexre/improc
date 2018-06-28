@@ -7,14 +7,13 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 public class ResultSetToStringHandler implements ResultSetHandler<String> {
 
-	ResultSetToString rss = new ResultSetToString();
 	int recordsToSkip = 0;
 	int recordsToShow = 10;
 	boolean showHeader = true;
 	int maxColumnWidth = 40;
 
 	public String handle(ResultSet rs) throws SQLException {
-		return rss.resultSetToString(rs);
+		return ResultSetToString.resultSetToString(rs);
 	}
 
 	public int getRecordsToSkip() {
