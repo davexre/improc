@@ -18,7 +18,7 @@ public class ResultSetToString {
 		public String typeName;
 
 		public String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
-			return typeName + "(" + md.getPrecision(column) + ")";
+			return typeName;
 		}
 
 		public int getPreferedColumnWidth(ResultSetMetaData md, int column) throws SQLException {
@@ -29,9 +29,26 @@ public class ResultSetToString {
 	}
 
 	static class DBFieldString extends DBFieldFormat {
+		public String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
+			return typeName + "(" + md.getPrecision(column) + ")";
+		}
+
 		public String valueToString(ResultSet rs, int column, int maxStringLength) throws SQLException {
 			String r = rs.getString(column);
 			return r == null ? "NULL" : toAlphaNumericString(r);
+		}
+	}
+
+	static class DBFieldNumeric extends DBFieldFormat {
+		public String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
+			return typeName + "(" +
+					md.getPrecision(column) +
+					(md.getScale(column) < 1 ? "" : "," + md.getScale(column)) +
+					")";
+		}
+
+		public String valueToString(ResultSet rs, int column, int maxStringLength) throws SQLException {
+			return Double.toString(rs.getDouble(column));
 		}
 	}
 
@@ -166,7 +183,7 @@ public class ResultSetToString {
 		}
 	}
 
-	static final HashMap<Integer, DBFieldFormat> formatter = new HashMap<Integer, DBFieldFormat>();
+	public static final HashMap<Integer, DBFieldFormat> formatter = new HashMap<Integer, DBFieldFormat>();
 
 	private static void addType(int typeCode, String typeName, DBFieldFormat instance) {
 		instance.typeCode = typeCode;
@@ -198,7 +215,7 @@ public class ResultSetToString {
 
 		addType(Types.DECIMAL, "DECIMAL", new DBFieldInt());
 		addType(Types.DOUBLE, "DOUBLE", new DBFieldDouble());
-		addType(Types.NUMERIC, "NUMERIC", new DBFieldDouble());
+		addType(Types.NUMERIC, "NUMERIC", new DBFieldNumeric());
 		addType(Types.REAL, "REAL", new DBFieldDouble());
 		addType(Types.FLOAT, "FLOAT", new DBFieldDouble());
 
@@ -232,7 +249,7 @@ public class ResultSetToString {
 		return fmt.getPreferedColumnWidth(md, column);
 	}
 
-	static String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
+	public static String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
 		DBFieldFormat fmt = formatter.get(md.getColumnType(column));
 		if (fmt == null)
 			fmt = formatter.get(Types.OTHER);
@@ -363,6 +380,21 @@ public class ResultSetToString {
 			r.append(' ');
 		r.append('|');
 		r.append(hex);
+		return r.toString();
+	}
+
+	public static String resultSet2ddl(ResultSet rs, String destTableName) throws Exception {
+		ResultSetMetaData meta = rs.getMetaData();
+
+		StringBuilder r = new StringBuilder();
+		r.append("create table ").append(destTableName).append("(");
+		String prefix = "\n";
+		for (int i = 1; i <= meta.getColumnCount(); i++) {
+			r.append(prefix).append("    ").append(meta.getColumnName(i)).append(" ")
+				.append(ResultSetToString.getFieldTypeString(meta, i));
+			prefix = ",\n";
+		}
+		r.append("\n)");
 		return r.toString();
 	}
 }

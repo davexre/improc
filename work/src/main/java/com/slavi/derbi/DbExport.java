@@ -45,7 +45,7 @@ public class DbExport {
 			databaseIO.write(database, writer);
 			writer.flush();
 			zos.closeEntry();
-			
+
 			DatabaseDataIO databaseDataIO = new DatabaseDataIO();
 			zipEntry = new ZipEntry(modelName + "_data.xml");
 			zos.putNextEntry(zipEntry);
@@ -62,19 +62,19 @@ public class DbExport {
 			zos.close();
 		}
 	}
-	
+
 	public static void importArchive(DataSource ds, ZipFile zipFile, String modelName) throws Exception {
 		String dataFileName = modelName + "_ddl.xml";
 		ZipEntry zipEntry = zipFile.getEntry(dataFileName);
 		if (zipEntry == null)
 			throw new FileNotFoundException(dataFileName);
-		
+
 		Platform platform = PlatformFactory.createNewPlatformInstance(ds);
 		InputStreamReader reader = new InputStreamReader(zipFile.getInputStream(zipEntry));
 		Database database = new DatabaseIO().read(reader);
 		reader.close();
 		platform.alterTables(database, false);
-		
+
 		dataFileName = modelName + "_data.xml";
 		zipEntry = zipFile.getEntry(dataFileName);
 		if (zipEntry == null)
@@ -82,17 +82,17 @@ public class DbExport {
 		DatabaseDataIO dataIO = new DatabaseDataIO();
 		dataIO.writeDataToDatabase(platform, database, new InputStream[] { zipFile.getInputStream(zipEntry) } );
 	}
-	
+
 	void ddlUtilsImport() throws Exception {
 		// Import
 		EmbeddedDataSource40 ds = new EmbeddedDataSource40();
 		ds.setDatabaseName("memory:myTestDB;create=true");
-		
+
 		Platform platform = PlatformFactory.createNewPlatformInstance(ds);
 		Database db = new DatabaseIO().read(new InputStreamReader(new ByteArrayInputStream(exportDDL.getBytes())));
 //		platform.createTables(db, false, false);
 		platform.alterTables(db, false);
-		
+
 		Connection conn = ds.getConnection();
 		QueryRunner qr = new QueryRunner(ds);
 		qr.update("insert into Channel(name, pollinterval, type) values (?,?,?)", "Some channel name", "2d", 1);
@@ -102,24 +102,24 @@ public class DbExport {
 
 		DatabaseDataIO dataIO = new DatabaseDataIO();
 		dataIO.writeDataToDatabase(platform, db, new InputStream[] { new ByteArrayInputStream(exportDML.getBytes()) } );
-		
+
 		r = qr.query("select * from Channel", new MapListHandler());
 		System.out.println(r);
-		
+
 		conn.close();
 	}
-	
+
 	String exportDDL;
 	String exportDML;
-	
+
 	void ddlUtilsExport() throws Exception {
 		Platform  platform = PlatformFactory.createNewPlatformInstance(ds);
 		Connection conn = ds.getConnection();
 		Database db = platform.readModelFromDatabase(conn, "MyDbTest");
 		DatabaseIO dbio = new DatabaseIO();
-		
+
 		StringPrintStream out;
-		
+
 		out = new StringPrintStream();
 		Writer wr = new OutputStreamWriter(out, "UTF-8");
 		dbio.write(db, wr);
@@ -130,17 +130,17 @@ public class DbExport {
 		DatabaseDataIO dataIO = new DatabaseDataIO();
 		dataIO.writeDataToXML(platform, db, out, "utf-8");
 		exportDML = out.toString();
-		
+
 		conn.close();
 	}
-	
+
 	EmbeddedDataSource40 ds;
 	void doIt() throws Exception {
 		ds = new EmbeddedDataSource40();
 		ds.setDatabaseName("../Database/webscrap;create=true");
 
-		Context ctx = new InitialContext();
-		ctx.bind("webscrap", ds);
+		/*Context ctx = new InitialContext();
+		ctx.bind("webscrap", ds);*/
 		try {
 			ddlUtilsExport();
 			System.out.println(exportDDL);
@@ -149,7 +149,7 @@ public class DbExport {
 		} finally {
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		new DbExport().doIt();
 		System.out.println("Done.");

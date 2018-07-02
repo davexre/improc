@@ -23,6 +23,7 @@
 			<url url="http://download.java.net/media/java3d/examples/1.5.2/j3d-examples-1_5_2-src.zip" />
 			<url url="http://download.java.net/media/java3d/builds/release/1.5.2/joalmixer-1_5_2.zip" />
 -->
+			<url url="http://apache.cbox.biz/db/ddlutils/ddlutils-1.0/source/DdlUtils-1.0-src.zip" />
 		</get>
 		
 		<antcall target="unzip_j3d_jre">
@@ -105,6 +106,15 @@
 			<arg line="-DgroupId=java3d -DartifactId=vecmath -Dpackaging=sources" />
 		</exec>
 
+		<unzip src="${download}/DdlUtils-1.0-src.zip" dest="${unzip}/DdlUtils-1.0-src" />
+		<exec executable="mvn" dir="${unzip}/DdlUtils-1.0-src" failonerror="true">
+			<arg line="source:jar" />
+		</exec>
+		<exec executable="mvn" dir="${unzip}/DdlUtils-1.0-src" failonerror="true">
+			<arg line="install:install-file" />
+			<arg line="-Dfile=target/ddlutils-1.0-sources.jar -Dversion=1.0" />
+			<arg line="-DgroupId=org.apache.ddlutils -DartifactId=ddlutils -Dpackaging=jar -Dclassifier=sources" />
+		</exec>
 	</target>
 	
 	<target name="unzip_j3d_jre">
