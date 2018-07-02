@@ -12,6 +12,8 @@ import org.apache.commons.dbutils.ResultSetHandler;
 
 public class ResultSetToObjectMap implements ResultSetHandler<List<Map<String, Object>>> {
 
+	public static final ResultSetToObjectMap instance = new ResultSetToObjectMap();
+
 	public List<Map<String, Object>> handle(ResultSet rs) throws SQLException {
 		List<Map<String, Object>> r = new ArrayList<Map<String, Object>>();
 		ResultSetMetaData meta = rs.getMetaData();
