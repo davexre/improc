@@ -50,11 +50,11 @@ public class ReadMetaData {
 		try (Connection conn = getConn()) {
 			ScriptRunner sr = new ScriptRunner(conn, true, true);
 			sr.setLogWriter(null);
-			sr.runScript(new InputStreamReader(Derby.class.getResourceAsStream("Derby_sql.txt")));
+			sr.runScript(new InputStreamReader(Derby.class.getResourceAsStream("Derby_HR_schema.sql.txt")));
 
 			QueryRunner qr = new QueryRunner();
 			ResultSetToStringHandler rss = new ResultSetToStringHandler();
-			System.out.println(qr.query(conn, "select * from emp", rss));
+			System.out.println(qr.query(conn, "select * from departments", rss));
 
 //			List<Map<String, Object>> l = qr.query(conn, "select * from emp", handler);
 //			System.out.println(toJsonStr(l));

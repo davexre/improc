@@ -72,7 +72,7 @@ public class ScriptRunner {
 
 	/**
 	 * Setter for logWriter property
-	 * 
+	 *
 	 * @param logWriter
 	 *            - the new value of the logWriter property
 	 */
@@ -82,7 +82,7 @@ public class ScriptRunner {
 
 	/**
 	 * Setter for errorLogWriter property
-	 * 
+	 *
 	 * @param errorLogWriter
 	 *            - the new value of the errorLogWriter property
 	 */
@@ -92,7 +92,7 @@ public class ScriptRunner {
 
 	/**
 	 * Runs an SQL script (read in using the Reader parameter)
-	 * 
+	 *
 	 * @param reader
 	 *            - the source of the script
 	 */
@@ -119,7 +119,7 @@ public class ScriptRunner {
 	/**
 	 * Runs an SQL script (read in using the Reader parameter) using the
 	 * connection passed in
-	 * 
+	 *
 	 * @param conn
 	 *            - the connection to use for the script
 	 * @param reader
@@ -132,14 +132,20 @@ public class ScriptRunner {
 	private void runScript(Connection conn, Reader reader) throws IOException,
 			SQLException {
 		StringBuffer command = null;
+		int lastLine = 1;
 		try {
 			LineNumberReader lineReader = new LineNumberReader(reader);
 			String line = null;
 			while ((line = lineReader.readLine()) != null) {
 				if (command == null) {
 					command = new StringBuffer();
+					lastLine = lineReader.getLineNumber();
 				}
+
 				String trimmedLine = line.trim();
+				if (command.length() == 0)
+					lastLine = lineReader.getLineNumber();
+
 				if (trimmedLine.startsWith("--")) {
 					println(trimmedLine);
 				} else if (trimmedLine.length() < 1
@@ -185,6 +191,7 @@ public class ScriptRunner {
 							printlnError(e);
 						}
 					}
+					lastLine = lineReader.getLineNumber();
 
 					if (autoCommit && !conn.getAutoCommit()) {
 						conn.commit();
@@ -238,7 +245,7 @@ public class ScriptRunner {
 			}
 		} catch (SQLException e) {
 			e.fillInStackTrace();
-			printlnError("Error executing: " + command);
+			printlnError("Error on line " + lastLine + " executing: " + command);
 			printlnError(e);
 			throw e;
 		} catch (IOException e) {

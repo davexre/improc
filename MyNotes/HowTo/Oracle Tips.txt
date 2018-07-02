@@ -4,12 +4,14 @@
 =========================== TITLE ===========================
 
 =========================== Install Oracle instant client (Oracle HOME without database) ===========================
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-basic-linux.x64-12.2.0.1.0.zip?AuthParam=1522834092_9b9227f8b40f38d27971420a44717be4
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-sqlplus-linux.x64-12.2.0.1.0.zip?AuthParam=1522834741_b05efcdec110aac7dcebf731b3438127
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-tools-linux.x64-12.2.0.1.0.zip?AuthParam=1522834760_019f259efa5e6d490db3522933665c95
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-odbc-linux.x64-12.2.0.1.0-2.zip?AuthParam=1522834781_77f75999a76b4e0283760f1ce5db7907
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-sdk-linux.x64-12.2.0.1.0.zip?AuthParam=1522834789_1a458143382cc43516e71cbcc94900bf
-http://download.oracle.com/otn/linux/instantclient/122010/instantclient-jdbc-linux.x64-12.2.0.1.0.zip?AuthParam=1522834810_e2ddad4f594582e4ed0dc2257a67131e
+http://www.oracle.com/technetwork/database/database-technologies/instant-client/downloads/index.html
+
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-basic-linux.x64-12.2.0.1.0.zip
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-sqlplus-linux.x64-12.2.0.1.0.zip
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-tools-linux.x64-12.2.0.1.0.zip
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-odbc-linux.x64-12.2.0.1.0-2.zip
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-sdk-linux.x64-12.2.0.1.0.zip
+http://download.oracle.com/otn/linux/instantclient/122010/instantclient-jdbc-linux.x64-12.2.0.1.0.zip
 
 =========================== Bitwise operations ===========================
 http://www.oracledba.co.uk/tips/bitwise_ops.htm
