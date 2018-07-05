@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
@@ -21,12 +22,13 @@ import oracle.sql.ArrayDescriptor;
 
 public class ConnectToOracle {
 
-	Properties prop;
-	String connectStr;
-	String username;
-	String password;
+	public Properties prop;
+	public String connectStr;
+	public String username;
+	public String password;
 
-	public ConnectToOracle() throws IOException {
+	public ConnectToOracle() throws IOException, SQLException {
+		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 		prop = new Properties();
 		prop.load(new InputStreamReader(getClass().getResourceAsStream(getClass().getSimpleName() + ".properties")));
 		connectStr = prop.getProperty("connectStr");
@@ -34,9 +36,12 @@ public class ConnectToOracle {
 		password = prop.getProperty("password");
 	}
 
+	public Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(connectStr, username, password);
+	}
+
 	public void exampleUsingOracleArrays(String[] args) throws Exception {
-		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
-		try (Connection conn = DriverManager.getConnection(connectStr, username, password)) {
+		try (Connection conn = getConnection()) {
 			QueryRunner qr = new QueryRunner();
 			ArrayList<String> lst = new ArrayList<>();
 			lst.add("NUMBER");
@@ -115,8 +120,7 @@ public class ConnectToOracle {
 	}
 
 	public void doIt1(String[] args) throws Exception {
-		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
-		try (Connection conn = DriverManager.getConnection(connectStr, username, password)) {
+		try (Connection conn = getConnection()) {
 			QueryRunner qr = new QueryRunner();
 			Object o = qr.query(conn, "select sysdate from dual", new ScalarHandler());
 			System.out.println(o);

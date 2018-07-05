@@ -254,7 +254,6 @@ public class ScriptRunner {
 			printlnError(e);
 			throw e;
 		} finally {
-			conn.rollback();
 			flush();
 		}
 	}
