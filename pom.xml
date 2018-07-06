@@ -58,6 +58,7 @@
 		<module>zaSasho</module>
 		<module>example</module>
 		<module>work</module>
+		<module>tools</module>
 	</modules>
 
 	<repositories>

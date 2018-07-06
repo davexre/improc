@@ -2,44 +2,38 @@ package com.slavi.derbi;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.MapListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.slavi.ann.test.Utils;
 import com.slavi.db.oracle.ConnectToOracle;
 import com.slavi.dbutil.DbUtil;
-import com.slavi.dbutil.ResultSetToString;
 import com.slavi.dbutil.ResultSetToStringHandler;
 import com.slavi.dbutil.ScriptRunner;
-import com.slavi.util.Marker;
-import com.slavi.util.StringPrintStream;
 
 public class ReadMetaData {
-/*
-	EmbeddedDataSource40 ds;
-	ReadMetaData() {
-		ds = new EmbeddedDataSource40();
-		ds.setDatabaseName("memory:MyDbTest");
-		ds.setCreateDatabase("create");
-	}
-*/
 	Connection getMyConn() throws SQLException {
 		return DriverManager.getConnection("jdbc:sqlite:target/MyDbTest.sqlite");
 		//return DriverManager.getConnection("jdbc:sqlite::memory:");
@@ -65,13 +59,6 @@ public class ReadMetaData {
 		} finally {
 			DbUtils.closeQuietly(rs);
 		}
-	}
-
-	ObjectMapper mapper = Utils.jsonMapper();
-	String toJsonStr(Object o) throws JsonGenerationException, JsonMappingException, IOException {
-		StringPrintStream out = new StringPrintStream();
-		mapper.writeValue(out, o);
-		return out.toString();
 	}
 
 	String resultSet2dml(ResultSet rs, String destTableName) throws Exception {
@@ -112,44 +99,73 @@ public class ReadMetaData {
 		}
 	}
 
-	void copyDatabaseMetadata(Connection sourceConnToOracle, Connection targetConnToSQLite, String tableNameSuffix) throws SQLException {
-		int commitEveryNumRows = 10000;
-		targetConnToSQLite.setAutoCommit(false);
+	static void copyDatabaseMetadata(Connection sourceConnToOracle, Connection sqlite, String tableNameSuffix) throws SQLException {
+		try (Statement st = sqlite.createStatement()) {
+			st.execute("drop table if exists " + "TABLES" + tableNameSuffix);
+			st.execute("drop table if exists " + "TAB_COLUMNS" + tableNameSuffix);
+			st.execute("drop table if exists " + "INDEXES" + tableNameSuffix);
+			st.execute("drop table if exists " + "IND_COLUMNS" + tableNameSuffix);
+			st.execute("drop table if exists " + "CONSTRAINTS" + tableNameSuffix);
+			st.execute("drop table if exists " + "CONS_COLUMNS" + tableNameSuffix);
+			st.execute("drop table if exists " + "VIEWS" + tableNameSuffix);
+			st.execute("drop table if exists " + "MVIEWS" + tableNameSuffix);
+			st.execute("drop table if exists " + "TRIGGERS" + tableNameSuffix);
+			st.execute("drop table if exists " + "SOURCE" + tableNameSuffix);
+		}
 
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "TABLES" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "TAB_COLUMNS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "INDEXES" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "IND_COLUMNS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "CONSTRAINTS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "CONS_COLUMNS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "VIEWS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "MVIEWS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "TRIGGERS" + tableNameSuffix);
-		executeSqlQuietly(targetConnToSQLite, "drop table " + "SOURCE" + tableNameSuffix);
-
-		Statement st = sourceConnToOracle.createStatement();
-		DbUtil.copyResultSet(st.executeQuery("select table_name, temporary, secondary, nested, compression, default_collation, external from user_tables"), targetConnToSQLite, "TABLES" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select table_name, column_name, data_type, data_length, data_precision, data_scale, nullable, column_id, collation from user_tab_columns"), targetConnToSQLite, "TAB_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select index_name, index_type, table_owner, table_name, table_type, uniqueness, compression, temporary, generated, secondary from user_indexes"), targetConnToSQLite, "INDEXES" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select index_name, table_name, column_name, column_position, descend from user_ind_columns"), targetConnToSQLite, "IND_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, constraint_type, table_name, search_condition, r_owner, r_constraint_name, delete_rule, status from user_constraints"), targetConnToSQLite, "CONSTRAINTS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, table_name, column_name, position from user_cons_columns"), targetConnToSQLite, "CONS_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select view_name, text_length, text_vc from user_views"), targetConnToSQLite, "VIEWS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select owner, mview_name, container_name, query, query_len, updatable, update_log, refresh_mode, refresh_method, default_collation from user_mviews"), targetConnToSQLite, "MVIEWS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select trigger_name, trigger_type, triggering_event, table_owner, base_object_type, table_name, column_name, when_clause, status, trigger_body, crossedition, before_statement, before_row, after_row, after_statement, instead_of_row, fire_once from user_triggers"), targetConnToSQLite, "TRIGGERS" + tableNameSuffix, commitEveryNumRows);
-		DbUtil.copyResultSet(st.executeQuery("select name, type, line, text from user_source"), targetConnToSQLite, "SOURCE" + tableNameSuffix, commitEveryNumRows);
-		targetConnToSQLite.commit();
-		st.close();
+		try (Statement st = sourceConnToOracle.createStatement()) {
+			int commitEveryNumRows = 10000;
+			DbUtil.copyResultSet(st.executeQuery("select table_name, temporary, secondary, nested, compression, default_collation, external from user_tables"), sqlite, "TABLES" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select table_name, column_name, data_type, data_length, data_precision, data_scale, nullable, column_id, collation from user_tab_columns"), sqlite, "TAB_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select index_name, index_type, table_owner, table_name, table_type, uniqueness, compression, temporary, generated, secondary from user_indexes"), sqlite, "INDEXES" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select index_name, table_name, column_name, column_position, descend from user_ind_columns"), sqlite, "IND_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, constraint_type, table_name, search_condition, r_owner, r_constraint_name, delete_rule, status from user_constraints"), sqlite, "CONSTRAINTS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, table_name, column_name, position from user_cons_columns"), sqlite, "CONS_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select view_name, text_length, text_vc from user_views"), sqlite, "VIEWS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select owner, mview_name, container_name, query, query_len, updatable, update_log, refresh_mode, refresh_method, default_collation from user_mviews"), sqlite, "MVIEWS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select trigger_name, trigger_type, triggering_event, table_owner, base_object_type, table_name, column_name, when_clause, status, trigger_body, crossedition, before_statement, before_row, after_row, after_statement, instead_of_row, fire_once from user_triggers"), sqlite, "TRIGGERS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.copyResultSet(st.executeQuery("select name, type, line, text from user_source"), sqlite, "SOURCE" + tableNameSuffix, commitEveryNumRows);
+		}
 	}
 
-	void doIt() throws Exception {
+	static boolean compare(Connection sqlite, StringBuilder report) throws Exception {
+		ScriptRunner sr = new ScriptRunner(sqlite, true, true);
+		sr.setLogWriter(null);
+		sr.runScript(new InputStreamReader(Derby.class.getResourceAsStream("ReadMetaData.compare.sql.txt")));
+
+		List<AbstractMap.SimpleEntry<String, List<String>>> r = new ArrayList<>();
+		String msg = null;
+		List<String> lst = null;
+		Statement st = sqlite.createStatement();
+		ResultSet rs = st.executeQuery("select m.message, c.obj_name from compare c join compare_msg m on m.err_code = c.err_code order by 1,2");
+		boolean hasErrors = false;
+		while (rs.next()) {
+			String tmp = StringUtils.trimToEmpty(rs.getString(1));
+			if (!tmp.equals(msg)) {
+				msg = tmp;
+				lst = new ArrayList<>();
+				r.add(new AbstractMap.SimpleEntry(msg, lst));
+			}
+			lst.add(StringUtils.trimToEmpty(rs.getString(2)));
+			hasErrors = true;
+		}
+
+		StringWriter content = new StringWriter();
+		Velocity.init();
+		VelocityContext velocityContext = new VelocityContext();
+		velocityContext.put("errors", r);
+		velocityContext.put("su", StringUtils.class);
+		Velocity.evaluate(velocityContext, content, "", new InputStreamReader(ReadMetaData.class.getResourceAsStream("ReadMetaData.vm")));
+		report.append(content.toString());
+		return hasErrors;
+	}
+
+	void doIt1() throws Exception {
 		try (
 				Connection sourceConnToOracle = getConn();
 				Connection targetConnToSQLite = getMyConn();
 			) {
-			Marker.mark("Copy result set");
 			copyDatabaseMetadata(sourceConnToOracle, targetConnToSQLite, "2");
-			Marker.release();
 		}
 	}
 
@@ -195,8 +211,81 @@ public class ReadMetaData {
 		}
 	}
 
+	static int main0(String[] args) throws Exception {
+		Options options = new Options();
+		options.addOption("h", "help", true, "Display this help");
+		options.addOption("f", "file", true, "File to store database metadata");
+		options.addOption("s", "src-url", true, "Connect string to source database");
+		options.addOption("su", "src-user", true, "User name for source database");
+		options.addOption("sp", "src-pass", true, "Password for source database");
+		options.addOption("t", "target-url", true, "Connect string to target database");
+		options.addOption("tu", "target-user", true, "User name for target database");
+		options.addOption("tp", "target-pass", true, "Password for target database");
+		options.addOption("c", "compare", false, "Compare database metadata");
+		CommandLineParser clp = new DefaultParser();
+		CommandLine cl = clp.parse(options, args, false);
+
+		boolean showHelp = true;
+		if (!(cl.hasOption("h") || !cl.getArgList().isEmpty() || args == null || args.length == 0)) {
+			try {
+				String fname = cl.getOptionValue("f", "dbcompare.sqlite");
+				Connection sqlite = DriverManager.getConnection("jdbc:sqlite:" + fname);
+				sqlite.setAutoCommit(false);
+
+				if (cl.hasOption("s")) {
+					String url = "jdbc:oracle:thin:@" + cl.getOptionValue("s");
+					Connection conn = null;
+					if (cl.hasOption("su")) {
+						conn = DriverManager.getConnection(url, cl.getOptionValue("su"), cl.getOptionValue("sp"));
+					} else {
+						conn = DriverManager.getConnection(url);
+					}
+					copyDatabaseMetadata(conn, sqlite, "1");
+					showHelp = false;
+				}
+
+				if (cl.hasOption("t")) {
+					String url = "jdbc:oracle:thin:@" + cl.getOptionValue("t");
+					Connection conn = null;
+					if (cl.hasOption("tu")) {
+						conn = DriverManager.getConnection(url, cl.getOptionValue("tu"), cl.getOptionValue("tp"));
+					} else {
+						conn = DriverManager.getConnection(url);
+					}
+					copyDatabaseMetadata(conn, sqlite, "2");
+					showHelp = false;
+				}
+
+				if (cl.hasOption("c")) {
+					StringBuilder report = new StringBuilder();
+					boolean hasErrors = compare(sqlite, report);
+					System.out.println(report);
+					if (hasErrors)
+						return 1;
+					showHelp = false;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return 254;
+			}
+		}
+
+		if (showHelp) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("dbcompare", "", options, IOUtils.toString(ReadMetaData.class.getResourceAsStream("ReadMetaData.help-footer.txt"), "UTF8"));
+			return 255;
+		}
+		return 0;
+	}
+
 	public static void main(String[] args) throws Exception {
-		new ReadMetaData().doIt();
-		System.out.println("Done.");
+		System.exit(main0(new String[] {
+			"-f", "target/MyDbTest.sqlite",
+			"-s", "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
+			"-su", "spetrov",
+			"-sp", "spetrov",
+			//"-c",
+			"asd?"
+		}));
 	}
 }

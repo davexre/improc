@@ -33,7 +33,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.regex.Matcher;
@@ -186,7 +185,6 @@ public class ScriptRunner {
 						try {
 							statement.execute(command.toString());
 						} catch (SQLException e) {
-							e.fillInStackTrace();
 							printlnError("Error executing: " + command);
 							printlnError(e);
 						}
@@ -197,22 +195,10 @@ public class ScriptRunner {
 						conn.commit();
 					}
 
-					ResultSet rs = statement.getResultSet();
-					if (hasResults && rs != null) {
-						ResultSetMetaData md = rs.getMetaData();
-						int cols = md.getColumnCount();
-						for (int i = 0; i < cols; i++) {
-							String name = md.getColumnLabel(i);
-							print(name + "\t");
-						}
-						println("");
-						while (rs.next()) {
-							for (int i = 0; i < cols; i++) {
-								String value = rs.getString(i);
-								print(value + "\t");
-							}
-							println("");
-						}
+					if (hasResults) {
+						ResultSet rs = statement.getResultSet();
+						if (rs != null)
+							print(ResultSetToString.resultSetToString(rs, 0, Integer.MAX_VALUE, true, 200));
 					}
 
 					command = null;
@@ -244,12 +230,10 @@ public class ScriptRunner {
 				conn.commit();
 			}
 		} catch (SQLException e) {
-			e.fillInStackTrace();
 			printlnError("Error on line " + lastLine + " executing: " + command);
 			printlnError(e);
 			throw e;
 		} catch (IOException e) {
-			e.fillInStackTrace();
 			printlnError("Error executing: " + command);
 			printlnError(e);
 			throw e;
@@ -264,7 +248,7 @@ public class ScriptRunner {
 
 	private void print(Object o) {
 		if (logWriter != null) {
-			System.out.print(o);
+			logWriter.print(o);
 		}
 	}
 

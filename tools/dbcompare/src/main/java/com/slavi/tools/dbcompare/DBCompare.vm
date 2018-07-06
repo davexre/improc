@@ -1,0 +1,8 @@
+#foreach($err in $errors)
+$err.key
+$su.repeat('-', $err.key.length())
+#foreach($i in $err.value)
+$i
+#end
+
+#end
