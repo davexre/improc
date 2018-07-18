@@ -38,6 +38,8 @@ import java.sql.Statement;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.text.StrSubstitutor;
+
 /**
  * Tool to run database scripts
  */
@@ -132,6 +134,7 @@ public class ScriptRunner {
 			SQLException {
 		StringBuffer command = null;
 		int lastLine = 1;
+		StrSubstitutor ss = new StrSubstitutor();
 		try {
 			LineNumberReader lineReader = new LineNumberReader(reader);
 			String line = null;

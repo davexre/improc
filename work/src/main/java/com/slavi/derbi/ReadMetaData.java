@@ -115,16 +115,16 @@ public class ReadMetaData {
 
 		try (Statement st = sourceConnToOracle.createStatement()) {
 			int commitEveryNumRows = 10000;
-			DbUtil.copyResultSet(st.executeQuery("select table_name, temporary, secondary, nested, compression, default_collation, external from user_tables"), sqlite, "TABLES" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select table_name, column_name, data_type, data_length, data_precision, data_scale, nullable, column_id, collation from user_tab_columns"), sqlite, "TAB_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select index_name, index_type, table_owner, table_name, table_type, uniqueness, compression, temporary, generated, secondary from user_indexes"), sqlite, "INDEXES" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select index_name, table_name, column_name, column_position, descend from user_ind_columns"), sqlite, "IND_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, constraint_type, table_name, search_condition, r_owner, r_constraint_name, delete_rule, status from user_constraints"), sqlite, "CONSTRAINTS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select owner, constraint_name, table_name, column_name, position from user_cons_columns"), sqlite, "CONS_COLUMNS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select view_name, text_length, text_vc from user_views"), sqlite, "VIEWS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select owner, mview_name, container_name, query, query_len, updatable, update_log, refresh_mode, refresh_method, default_collation from user_mviews"), sqlite, "MVIEWS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select trigger_name, trigger_type, triggering_event, table_owner, base_object_type, table_name, column_name, when_clause, status, trigger_body, crossedition, before_statement, before_row, after_row, after_statement, instead_of_row, fire_once from user_triggers"), sqlite, "TRIGGERS" + tableNameSuffix, commitEveryNumRows);
-			DbUtil.copyResultSet(st.executeQuery("select name, type, line, text from user_source"), sqlite, "SOURCE" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select table_name, temporary, secondary, nested, compression, default_collation, external from user_tables"), sqlite, "TABLES" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select table_name, column_name, data_type, data_length, data_precision, data_scale, nullable, column_id, collation from user_tab_columns"), sqlite, "TAB_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select index_name, index_type, table_owner, table_name, table_type, uniqueness, compression, temporary, generated, secondary from user_indexes"), sqlite, "INDEXES" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select index_name, table_name, column_name, column_position, descend from user_ind_columns"), sqlite, "IND_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select owner, constraint_name, constraint_type, table_name, search_condition, r_owner, r_constraint_name, delete_rule, status from user_constraints"), sqlite, "CONSTRAINTS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select owner, constraint_name, table_name, column_name, position from user_cons_columns"), sqlite, "CONS_COLUMNS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select view_name, text_length, text_vc from user_views"), sqlite, "VIEWS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select owner, mview_name, container_name, query, query_len, updatable, update_log, refresh_mode, refresh_method, default_collation from user_mviews"), sqlite, "MVIEWS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select trigger_name, trigger_type, triggering_event, table_owner, base_object_type, table_name, column_name, when_clause, status, trigger_body, crossedition, before_statement, before_row, after_row, after_statement, instead_of_row, fire_once from user_triggers"), sqlite, "TRIGGERS" + tableNameSuffix, commitEveryNumRows);
+			DbUtil.createResultSetSnapshot(st.executeQuery("select name, type, line, text from user_source"), sqlite, "SOURCE" + tableNameSuffix, commitEveryNumRows);
 		}
 	}
 
@@ -187,9 +187,9 @@ public class ReadMetaData {
 			DatabaseMetaData dbmeta = conn.getMetaData();
 			//PreparedStatement ps = conn.prepareStatement("select * from departments");
 			//ResultSet rs = ps.executeQuery();
-			DbUtil.copyResultSet(dbmeta.getTables(null, null, null, null), myconn, "tables1", 0);
-			DbUtil.copyResultSet(dbmeta.getColumns(null, null, null, null), myconn, "columns1", 0);
-			DbUtil.copyResultSet(dbmeta.getIndexInfo(null, null, "employee", false, false), myconn, "indexinfo1", 0);
+			DbUtil.createResultSetSnapshot(dbmeta.getTables(null, null, null, null), myconn, "tables1", 0);
+			DbUtil.createResultSetSnapshot(dbmeta.getColumns(null, null, null, null), myconn, "columns1", 0);
+			DbUtil.createResultSetSnapshot(dbmeta.getIndexInfo(null, null, "employee", false, false), myconn, "indexinfo1", 0);
 
 			System.out.println(qr.query(myconn, "select * from indexinfo1", rss));
 

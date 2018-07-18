@@ -13,7 +13,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -400,11 +402,19 @@ Types.TIMESTAMP_WITH_TIMEZONE
 	}
 
 	public static String resultSet2ddl(ResultSetMetaData meta, String destTableName) throws SQLException {
+		Set<String> columns = new HashSet<>();
 		StringBuilder r = new StringBuilder();
 		r.append("create table \"").append(destTableName).append("\" (");
 		String prefix = "\n";
 		for (int i = 1; i <= meta.getColumnCount(); i++) {
-			r.append(prefix).append("    \"").append(meta.getColumnName(i)).append("\" ")
+			String column = meta.getColumnName(i);
+			int columnCount = 1;
+			while (columns.contains(column)) {
+				column = meta.getColumnName(i) + columnCount;
+				columnCount++;
+			}
+			columns.add(column);
+			r.append(prefix).append("    \"").append(column).append("\" ")
 				.append(getFieldTypeString(meta, i));
 			prefix = ",\n";
 		}
@@ -412,34 +422,31 @@ Types.TIMESTAMP_WITH_TIMEZONE
 		return r.toString();
 	}
 
-	public static void copyResultSet(ResultSet rs, Connection targetConn, String targetTable, int commitEveryNumRows) throws SQLException {
-		String sql;
+	public static void copyResultSet(ResultSet rs, Connection targetConn, String targetTable, int commitEveryNumRows, boolean useColumnNames) throws SQLException {
 		Logger log = LoggerFactory.getLogger(DbUtil.class);
-
 		ResultSetMetaData md = rs.getMetaData();
-		try (Statement st = targetConn.createStatement()) {
-			sql = DbUtil.resultSet2ddl(md, targetTable);
-			log.debug(sql);
-			st.execute(sql);
-		}
 
 		int numColumns = md.getColumnCount();
 		StringBuilder sb = new StringBuilder();
-		sb.append("insert into \"").append(targetTable).append("\" (");
-		String prefix = "";
-		for (int i = 1; i <= numColumns; i++) {
-			sb.append(prefix).append("\"").append(md.getColumnName(i)).append("\"");
-			prefix = ",";
+		sb.append("insert into \"").append(targetTable).append("\"");
+		if (useColumnNames) {
+			sb.append(" (");
+			String prefix = "";
+			for (int i = 1; i <= numColumns; i++) {
+				sb.append(prefix).append("\"").append(md.getColumnName(i)).append("\"");
+				prefix = ",";
+			}
+			sb.append(")");
 		}
-		sb.append(") values (");
-		prefix = "";
+		sb.append(" values (");
+		String prefix = "";
 		for (int i = 1; i <= numColumns; i++) {
 			sb.append(prefix).append("?");
 			prefix = ",";
 		}
 		sb.append(")");
 
-		sql = sb.toString();
+		String sql = sb.toString();
 		log.debug(sql);
 		PreparedStatement ps = targetConn.prepareStatement(sql);
 		int numRows = 0;
@@ -459,5 +466,21 @@ Types.TIMESTAMP_WITH_TIMEZONE
 			log.info("Total of {} rows inserted into {}", numRows, targetTable);
 		}
 		rs.close();
+	}
+
+	public static void createResultSetTable(ResultSet rs, Connection targetConn, String targetTable) throws SQLException {
+		Logger log = LoggerFactory.getLogger(DbUtil.class);
+
+		ResultSetMetaData md = rs.getMetaData();
+		try (Statement st = targetConn.createStatement()) {
+			String sql = DbUtil.resultSet2ddl(md, targetTable);
+			log.debug(sql);
+			st.execute(sql);
+		}
+	}
+
+	public static void createResultSetSnapshot(ResultSet rs, Connection targetConn, String targetTable, int commitEveryNumRows) throws SQLException {
+		createResultSetTable(rs, targetConn, targetTable);
+		copyResultSet(rs, targetConn, targetTable, commitEveryNumRows, false);
 	}
 }

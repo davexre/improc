@@ -9,6 +9,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class Main {
 	static int main0(String[] args) throws Exception {
@@ -22,8 +23,12 @@ public class Main {
 		options.addOption("tu", "target-user", true, "User name for target database");
 		options.addOption("tp", "target-pass", true, "Password for target database");
 		options.addOption("c", "compare", false, "Compare database metadata");
+		options.addOption("jdbc", "", false, "Compare using metadata from JDBC driver");
+		options.addOption("jdbcschema", "", true, "Schema for which to import metdata");
 		CommandLineParser clp = new DefaultParser();
 		CommandLine cl = clp.parse(options, args, false);
+
+		String schema = StringUtils.trimToNull(cl.getOptionValue("jdbcschema", null));
 
 		boolean showHelp = true;
 		if (!(cl.hasOption("h") || !cl.getArgList().isEmpty() || args == null || args.length == 0)) {
@@ -40,7 +45,10 @@ public class Main {
 					} else {
 						conn = DriverManager.getConnection(url);
 					}
-					DBCompare.copyDatabaseMetadata(conn, sqlite, "1");
+					if (cl.hasOption("jdbc"))
+						JdbcCompare.copyDatabaseMetadata(conn, sqlite, "1", schema);
+					else
+						DBCompare.copyDatabaseMetadata(conn, sqlite, "1");
 					showHelp = false;
 				}
 
@@ -52,13 +60,20 @@ public class Main {
 					} else {
 						conn = DriverManager.getConnection(url);
 					}
-					DBCompare.copyDatabaseMetadata(conn, sqlite, "2");
+					if (cl.hasOption("jdbc"))
+						JdbcCompare.copyDatabaseMetadata(conn, sqlite, "2", schema);
+					else
+						DBCompare.copyDatabaseMetadata(conn, sqlite, "2");
 					showHelp = false;
 				}
 
 				if (cl.hasOption("c")) {
 					StringBuilder report = new StringBuilder();
-					boolean hasErrors = DBCompare.compare(sqlite, report);
+					boolean hasErrors;
+					if (cl.hasOption("jdbc"))
+						hasErrors = JdbcCompare.compare(sqlite, report);
+					else
+						hasErrors = DBCompare.compare(sqlite, report);
 					System.out.println(report);
 					if (hasErrors)
 						return 1;

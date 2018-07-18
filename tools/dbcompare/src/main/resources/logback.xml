@@ -23,6 +23,7 @@
 		</encoder>
 	</appender>
 
+	<logger level="debug" name="com.slavi" />
 	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
 <!--
 	<logger name="my.logger.file" level="all" additivity="false">
