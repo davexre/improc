@@ -1,9 +1,26 @@
-create package asd
+asd;
+
+/* this is 
+multi line
+// comment
+asd
+*/
+
+create	package asd
 declare
 begin
-	select 'asd
+/*	select 'asd
 	''
 	qwe' a from
-	"dual";
+	"dual"; */
 end;
 /
+
+create table --sdqwe /*
+asda;
+/
+
+asd;
+
+qwe;
+

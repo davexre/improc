@@ -13,15 +13,16 @@ public class MySqlParser extends MySqlParserHelper {
 }
 PARSER_END(MySqlParser)
 
-SKIP: {
+//SKIP: {
 //	" " |
 //	"\t" |
 //	"\r" |
 //	"\n" |
-	<"--"(~["\r","\n"])*> |
-	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+//	<"--"(~["\r","\n"])*> |
+//	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 //	<"/*" ((?!"*/").)* "*/">
-}
+//}
+
 
 TOKEN: {
 	<DECLARE: "declare"> |
@@ -34,7 +35,9 @@ TOKEN: {
 	<PROCEDURE: "procedure"> |
 	<FUNCTION: "function"> |
 	<TYPE: "type"> |
-	<SPACE: [" ","\n","\r"]>
+	<SPACE: ([" ","\t","\n","\r"])+> |
+	<LINE_COMMENT: "--"(~["\r","\n"])*> | 
+	<MULTILINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
 
 TOKEN: {
@@ -42,7 +45,17 @@ TOKEN: {
 	<S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" > |
 	<SEMICOLUMN: ";"> |
 	<SLASH: "/"> |
-	<AWORD: (~["'", "\"", " ", "\n", "\r"])*>
+	<AWORD: (~["'", "\"", " ", "\t", "\n", "\r", ";", "/"])+>
+}
+
+void space():
+{}
+{
+	(
+		<SPACE>					|
+		<LINE_COMMENT>			|
+		<MULTILINE_COMMENT>
+	)							{ addComment(token); }
 }
 
 void parse():
@@ -50,26 +63,29 @@ void parse():
 }
 {
 	(
-		<SPACE>					{ doAdd(token.image); } |
+		space() |
 		(
-			<DECLARE>			{ add2(token.image); } |
-			<BEGIN>				{ add2(token.image); } |
+			<DECLARE>			{ add2(token); } |
+			<BEGIN>				{ add2(token); } |
 			(
-				<CREATE>		{ add2(token.image); }
+				<CREATE>		{ doAdd(token); }
+				space()
 				(
-					<SPACE>		{ doAdd(token.image); }
-					<OR>		{ add2(token.image); }
-					<SPACE>		{ doAdd(token.image); }
-					<REPLACE>	{ add2(token.image); }
+					<OR>		{ doAdd(token); }
+					space()
+					<REPLACE>	{ doAdd(token); }
+					space()
 				)?
-				<SPACE>			{ doAdd(token.image); }
 				(
-					<TRIGGER> |
-					<PACKAGE> |
-					<PROCEDURE> |
-					<FUNCTION> |
-					<TYPE>
-				)				{ add2(token.image); }
+					(
+						<TRIGGER> |
+						<PACKAGE> |
+						<PROCEDURE> |
+						<FUNCTION> |
+						<TYPE>
+					)				{ add2(token); } |
+					<AWORD>			{ add(token); }
+				)
 			)
 		) |
 		(
@@ -78,7 +94,7 @@ void parse():
 			<AWORD> |
 			<SEMICOLUMN> |
 			<SLASH>
-		) { add(token.image); }
+		)						{ add(token); }
 	)*
 	<EOF>
 }
