@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,6 +56,7 @@ public class ScriptRunner {
 	private boolean fullLineDelimiter = false;
 	private static final String DELIMITER_LINE_REGEX = "(?i)DELIMITER.+";
 	private static final String DELIMITER_LINE_SPLIT_REGEX = "(?i)DELIMITER";
+	private Map<String, String> substVariables;
 
 	/**
 	 * Default constructor
@@ -91,6 +93,10 @@ public class ScriptRunner {
 		this.errorLogWriter = errorLogWriter;
 	}
 
+	public void setSubstVariables(Map<String, String> substVariables) {
+		this.substVariables = substVariables;
+	}
+
 	/**
 	 * Runs an SQL script (read in using the Reader parameter)
 	 *
@@ -113,7 +119,7 @@ public class ScriptRunner {
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException("Error running script.  Cause: " + e, e);
+			throw new RuntimeException("Error running script. Cause: " + e, e);
 		}
 	}
 
@@ -134,7 +140,7 @@ public class ScriptRunner {
 			SQLException {
 		StringBuffer command = null;
 		int lastLine = 1;
-		StrSubstitutor ss = new StrSubstitutor();
+		StrSubstitutor ss = new StrSubstitutor(substVariables);
 		try {
 			LineNumberReader lineReader = new LineNumberReader(reader);
 			String line = null;
@@ -186,7 +192,8 @@ public class ScriptRunner {
 						hasResults = statement.execute(command.toString());
 					} else {
 						try {
-							statement.execute(command.toString());
+							String cmd = ss.replace(command);
+							statement.execute(cmd);
 						} catch (SQLException e) {
 							printlnError("Error executing: " + command);
 							printlnError(e);

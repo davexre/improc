@@ -1,0 +1,84 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(MySqlParser)
+
+package com.slavi.parser;
+
+import org.apache.commons.lang3.StringEscapeUtils;
+
+public class MySqlParser extends MySqlParserHelper {
+}
+PARSER_END(MySqlParser)
+
+SKIP: {
+//	" " |
+//	"\t" |
+//	"\r" |
+//	"\n" |
+	<"--"(~["\r","\n"])*> |
+	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+//	<"/*" ((?!"*/").)* "*/">
+}
+
+TOKEN: {
+	<DECLARE: "declare"> |
+	<BEGIN: "begin"> |
+	<CREATE: "create"> |
+	<OR: "or"> |
+	<REPLACE: "replace"> |
+	<TRIGGER: "trigger"> |
+	<PACKAGE: "package"> |
+	<PROCEDURE: "procedure"> |
+	<FUNCTION: "function"> |
+	<TYPE: "type"> |
+	<SPACE: [" ","\n","\r"]>
+}
+
+TOKEN: {
+	<S_CHAR_LITERAL: "'" (~["'"] | ("''") )* "'"> |
+	<S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" > |
+	<SEMICOLUMN: ";"> |
+	<SLASH: "/"> |
+	<AWORD: (~["'", "\"", " ", "\n", "\r"])*>
+}
+
+void parse():
+{
+}
+{
+	(
+		<SPACE>					{ doAdd(token.image); } |
+		(
+			<DECLARE>			{ add2(token.image); } |
+			<BEGIN>				{ add2(token.image); } |
+			(
+				<CREATE>		{ add2(token.image); }
+				(
+					<SPACE>		{ doAdd(token.image); }
+					<OR>		{ add2(token.image); }
+					<SPACE>		{ doAdd(token.image); }
+					<REPLACE>	{ add2(token.image); }
+				)?
+				<SPACE>			{ doAdd(token.image); }
+				(
+					<TRIGGER> |
+					<PACKAGE> |
+					<PROCEDURE> |
+					<FUNCTION> |
+					<TYPE>
+				)				{ add2(token.image); }
+			)
+		) |
+		(
+			<S_CHAR_LITERAL> |
+			<S_QUOTED_IDENTIFIER> |
+			<AWORD> |
+			<SEMICOLUMN> |
+			<SLASH>
+		) { add(token.image); }
+	)*
+	<EOF>
+}

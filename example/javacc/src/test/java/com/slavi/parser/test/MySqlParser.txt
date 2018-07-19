@@ -1,0 +1,9 @@
+create package asd
+declare
+begin
+	select 'asd
+	''
+	qwe' a from
+	"dual";
+end;
+/
