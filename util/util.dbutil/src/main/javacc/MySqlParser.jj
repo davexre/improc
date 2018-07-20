@@ -1,0 +1,153 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(MySqlParser)
+
+package com.slavi.dbutil.parser;
+
+public class MySqlParser {
+	StringBuilder cmd = new StringBuilder();
+	int line;
+	boolean isSlashNeeded = false;
+	boolean slashBlocked = false;
+	public boolean removeComments = false;
+
+	void add() {
+		if (cmd.length() == 0)
+			line = token.beginLine;
+		cmd.append(token.image);
+	}
+
+	void addSpace() {
+		if (cmd.length() > 0) {
+			cmd.append(token.image);
+		}
+	}
+
+	void addComment() {
+		if (cmd.length() > 0) {
+			cmd.append(removeComments ? token.image.replaceAll("[^\n\r]", "") : token.image);
+		}
+	}
+
+	void needsSlash() {
+		if (!slashBlocked)
+			isSlashNeeded = true;
+		add();
+	}
+
+	void noSlash() {
+		slashBlocked = true;
+		add();
+	}
+
+	void cmdEnd() {
+		String strtr = token.image.trim();
+		if ("/".equals(strtr) ||
+			((!isSlashNeeded) && ";".equals(token.image))) {
+			execCmd();
+		} else {
+			add();
+		}
+	}
+
+	void execCmd() {
+		if (cmd.length() > 0) {
+			runCmd(line, cmd.toString());
+		}
+		cmd.setLength(0);
+		isSlashNeeded = false;
+		slashBlocked = false;
+		line = 0;
+	}
+	
+	public void runCmd(int line, String cmd) {
+	}
+}
+PARSER_END(MySqlParser)
+
+//SKIP: {
+//	" " |
+//	"\t" |
+//	"\r" |
+//	"\n" |
+//	<"--"(~["\r","\n"])*> |
+//	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+//	<"/*" ((?!"*/").)* "*/">
+//}
+
+
+TOKEN: {
+	<DECLARE: "DECLARE"> |
+	<BEGIN: "BEGIN"> |
+	<CREATE: "CREATE"> |
+	<OR: "OR"> |
+	<REPLACE: "REPLACE"> |
+	<TRIGGER: "TRIGGER"> |
+	<PACKAGE: "PACKAGE"> |
+	<PROCEDURE: "PROCEDURE"> |
+	<FUNCTION: "FUNCTION"> |
+	<TYPE: "TYPE"> |
+	
+	<LINE_COMMENT: "--"(~["\r","\n"])*> |
+	<MULTILINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/"> |
+	
+	<S_CHAR_LITERAL: "'" (~["'"] | ("''") )* "'"> |
+	<S_QUOTED_IDENTIFIER: "\"" (~["\n","\r","\""])* "\"" > |
+
+	<SEMICOLUMN: ";"> |
+	<SLASH: ["\n", "\r"] ([" ", "\t"])* "/" ([" ", "\t"])* ["\n", "\r"]> |
+	<SPACE: ([" ","\t","\n","\r"])+> |
+	
+	<WORD: (~["'", "\"", " ", "\t", "\n", "\r", ";"])+>
+}
+
+void space():
+{}
+{
+	(
+		<SPACE>						{ addSpace(); } |
+		<LINE_COMMENT>				{ addComment(); } |
+		<MULTILINE_COMMENT>			{ addComment(); }
+	)+
+}
+
+void parse():
+{
+}
+{
+	(
+		(
+			<CREATE>				{ add(); }
+			space()
+			(
+				<OR>				{ add(); }
+				space()
+				(
+					<REPLACE>		{ add(); } |
+					<WORD>			{ noSlash(); }
+				)
+				space()
+			)?
+			(
+				<PACKAGE>			{ needsSlash(); } |
+				<PROCEDURE>			{ needsSlash(); } |
+				<FUNCTION>			{ needsSlash(); } |
+				<TYPE>				{ needsSlash(); } |
+				<TRIGGER>			{ needsSlash(); } |
+				<WORD>				{ noSlash(); }
+			)
+		) |
+		<DECLARE>					{ needsSlash(); } |
+		<BEGIN>						{ needsSlash(); } |
+		<S_CHAR_LITERAL>			{ noSlash(); } |
+		<S_QUOTED_IDENTIFIER>		{ noSlash(); } |
+		<WORD>						{ noSlash(); } |
+		<SLASH>						{ cmdEnd(); } |
+		<SEMICOLUMN>				{ cmdEnd(); } |
+		space()
+	)*
+	<EOF>							{ execCmd(); }
+}

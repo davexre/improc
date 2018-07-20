@@ -23,38 +23,38 @@ import org.apache.ddlutils.model.Database;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40;
 import org.apache.derby.jdbc.EmbeddedDataSource40;
 
-import com.slavi.dbutil.ScriptRunner;
+import com.slavi.dbutil.ScriptRunner2;
 import com.slavi.util.StringPrintStream;
 
 public class Derby {
 
-	public static void dbToXmlDemo() throws SQLException, IOException {
+	public static void dbToXmlDemo() throws Exception {
 		EmbeddedConnectionPoolDataSource40 dd = new EmbeddedConnectionPoolDataSource40();
 		dd.setDatabaseName("");
 		EmbeddedDataSource40 ds = new EmbeddedDataSource40();
 		ds.setDatabaseName("memory:MyDbTest");
 		ds.setCreateDatabase("create");
-		
+
 		Connection conn = ds.getConnection();
-		
-		ScriptRunner sr = new ScriptRunner(conn, true, true);
-		sr.setLogWriter(null);
+
+		ScriptRunner2 sr = new ScriptRunner2(conn);
+		//sr.setLogWriter(null);
 		sr.runScript(new InputStreamReader(Derby.class.getResourceAsStream("Derby_sql.txt")));
 
 		Platform  platform = PlatformFactory.createNewPlatformInstance(ds);
 		Database db = platform.readModelFromDatabase(conn, "MyDbTest");
-		
+
 		DatabaseIO dbio = new DatabaseIO();
 		StringPrintStream out = new StringPrintStream();
 		Writer wr = new OutputStreamWriter(out);
-		
+
 		dbio.write(db, wr);
 		wr.flush();
 		System.out.println(out.toString());
 		out.close();
 		conn.close();
 	}
-	
+
 	public static String driver = "org.apache.derby.jdbc.EmbeddedDriver";
 
 	public void demoHowToObtainAutoId() throws Exception {
@@ -77,7 +77,7 @@ public class Derby {
 		}
 		conn.close();
 	}
-	
+
 	public static class Emp implements Serializable {
 		int id;
 		String name;
@@ -107,7 +107,7 @@ public class Derby {
 			this.position = position;
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 //		EmbeddedDriver driver = new EmbeddedDriver(); //Class.forName(driver).newInstance();
 
@@ -126,12 +126,12 @@ public class Derby {
 		for (Object i : res)
 			System.out.println(i);
 //		System.out.println(res);
-		
+
 		// DriverManager.getConnection("jdbc:derby:memory:MyDbTest;shutdown=true");
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		System.out.println("Done.");
 	}
-	
+
 	public static void main2(String[] args) throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:derby:memory:MyDbTest;create=true");
 		System.out.println(conn.getClass());

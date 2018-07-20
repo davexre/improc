@@ -15,7 +15,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import com.slavi.dbutil.DbUtil;
-import com.slavi.dbutil.ScriptRunner;
+import com.slavi.dbutil.ScriptRunner2;
 
 public class DBCompare {
 	static void copyDatabaseMetadata(Connection sourceConnToOracle, Connection sqlite, String tableNameSuffix) throws SQLException {
@@ -48,8 +48,8 @@ public class DBCompare {
 	}
 
 	static boolean compare(Connection sqlite, StringBuilder report) throws Exception {
-		ScriptRunner sr = new ScriptRunner(sqlite, true, true);
-		sr.setLogWriter(null);
+		ScriptRunner2 sr = new ScriptRunner2(sqlite);
+		//sr.setLogWriter(null);
 		sr.runScript(new InputStreamReader(Main.class.getResourceAsStream("DBCompare.sql")));
 
 		List<AbstractMap.SimpleEntry<String, List<String>>> r = new ArrayList<>();

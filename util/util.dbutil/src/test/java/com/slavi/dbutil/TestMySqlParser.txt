@@ -6,7 +6,12 @@ multi line
 asd
 */
 
-create	package asd
+create	or -- some comment /* asd 
+		replace -- asdqwe
+/**
+/
+*/	package
+		asd
 declare
 begin
 /*	select 'asd
@@ -20,7 +25,7 @@ create table --sdqwe /*
 asda;
 /
 
+select 6 / 2 from dual;
+
+create or replace procedure asd;
 asd;
-
-qwe;
-
