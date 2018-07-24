@@ -35,41 +35,46 @@ public class JdbcCompare {
 		Logger log = LoggerFactory.getLogger(JdbcCompare.class);
 
 		try (Statement st = sqlite.createStatement()) {
-			st.execute("drop table if exists " + "TABLE_TYPES" + tableNameSuffix);
-			st.execute("drop table if exists " + "TYPES" + tableNameSuffix);
-			st.execute("drop table if exists " + "CATALOGS" + tableNameSuffix);
-			st.execute("drop table if exists " + "SCHEMAS" + tableNameSuffix);
 			st.execute("drop table if exists " + "TABLES" + tableNameSuffix);
 			st.execute("drop table if exists " + "USER_TYPES" + tableNameSuffix);
-			//st.execute("drop table if exists " + "SUPER_TABLES" + tableNameSuffix);
-			//st.execute("drop table if exists " + "SUPER_TYPES" + tableNameSuffix);
-			//st.execute("drop table if exists " + "ATTRIBUTES" + tableNameSuffix);
-			st.execute("drop table if exists " + "CLIENT_INFO" + tableNameSuffix);
 			st.execute("drop table if exists " + "TAB_COLUMNS" + tableNameSuffix);
 			st.execute("drop table if exists " + "INDEXES" + tableNameSuffix);
 			st.execute("drop table if exists " + "PRIMARY_KEYS" + tableNameSuffix);
 			st.execute("drop table if exists " + "IMPORTED_KEYS" + tableNameSuffix);
+
+			st.execute("drop table if exists " + "PROCEDURES" + tableNameSuffix);
+			st.execute("drop table if exists " + "PROC_COLUMNS" + tableNameSuffix);
+			st.execute("drop table if exists " + "FUNCTIONS" + tableNameSuffix);
+			st.execute("drop table if exists " + "FUNC_COLUMNS" + tableNameSuffix);
+/*
+			st.execute("drop table if exists " + "TABLE_TYPES" + tableNameSuffix);
+			st.execute("drop table if exists " + "TYPES" + tableNameSuffix);
+			st.execute("drop table if exists " + "CATALOGS" + tableNameSuffix);
+			st.execute("drop table if exists " + "SCHEMAS" + tableNameSuffix);
+			st.execute("drop table if exists " + "SUPER_TABLES" + tableNameSuffix);
+			st.execute("drop table if exists " + "SUPER_TYPES" + tableNameSuffix);
+			st.execute("drop table if exists " + "ATTRIBUTES" + tableNameSuffix);
+			st.execute("drop table if exists " + "CLIENT_INFO" + tableNameSuffix);
+
 			st.execute("drop table if exists " + "VERSION_COLS" + tableNameSuffix);
 			st.execute("drop table if exists " + "BEST_ROW_ID" + tableNameSuffix);
 			st.execute("drop table if exists " + "TABLE_PRIVS" + tableNameSuffix);
 			st.execute("drop table if exists " + "COLUMN_PRIVS" + tableNameSuffix);
 			st.execute("drop table if exists " + "PSEUDO_COLUMNS" + tableNameSuffix);
-			st.execute("drop table if exists " + "PROCEDURES" + tableNameSuffix);
-			st.execute("drop table if exists " + "PROC_COLUMNS" + tableNameSuffix);
-			st.execute("drop table if exists " + "FUNCTIONS" + tableNameSuffix);
-			st.execute("drop table if exists " + "FUNC_COLUMNS" + tableNameSuffix);
-
+*/
 			DatabaseMetaData mdata = sourceConnToOracle.getMetaData();
+			copyRS(mdata.getTables(null, schemaToImport, null, null), sqlite, "TABLES" + tableNameSuffix, true);
+			copyRS(mdata.getUDTs(null, schemaToImport, null, null), sqlite, "USER_TYPES" + tableNameSuffix, true);
+/*
 			copyRS(mdata.getTableTypes(), sqlite, "TABLE_TYPES" + tableNameSuffix, true);
 			copyRS(mdata.getTypeInfo(), sqlite, "TYPES" + tableNameSuffix, true);
 			copyRS(mdata.getCatalogs(), sqlite, "CATALOGS" + tableNameSuffix, true);
 			copyRS(mdata.getSchemas(null, schemaToImport), sqlite, "SCHEMAS" + tableNameSuffix, true);
-			copyRS(mdata.getTables(null, schemaToImport, null, null), sqlite, "TABLES" + tableNameSuffix, true);
-			copyRS(mdata.getUDTs(null, schemaToImport, null, null), sqlite, "USER_TYPES" + tableNameSuffix, true);
-			//copyRS(mdata.getSuperTables(null, null, null), sqlite, "SUPER_TABLES" + tableNameSuffix, true);
-			//copyRS(mdata.getSuperTypes(null, null, null), sqlite, "SUPER_TYPES" + tableNameSuffix, true);
-			//copyRS(mdata.getAttributes(null, null, null, null), sqlite, "ATTRIBUTES" + tableNameSuffix, true);
+			copyRS(mdata.getSuperTables(null, null, null), sqlite, "SUPER_TABLES" + tableNameSuffix, true);
+			copyRS(mdata.getSuperTypes(null, null, null), sqlite, "SUPER_TYPES" + tableNameSuffix, true);
+			copyRS(mdata.getAttributes(null, null, null, null), sqlite, "ATTRIBUTES" + tableNameSuffix, true);
 			copyRS(mdata.getClientInfoProperties(), sqlite, "CLIENT_INFO" + tableNameSuffix, true);
+*/
 
 			ResultSet rs = st.executeQuery("select * from TABLES" + tableNameSuffix + " where table_type in ('TABLE','GLOBAL TEMPORARY','LOCAL TEMPORARY','VIEW')");
 			boolean first = true;
@@ -86,16 +91,20 @@ public class JdbcCompare {
 				copyRS(mdata.getPrimaryKeys(catalog, schema, table), sqlite, "PRIMARY_KEYS" + tableNameSuffix, first);
 				log.debug("Copy Imported keys info for table {}", table);
 				copyRS(mdata.getImportedKeys(catalog, schema, table), sqlite, "IMPORTED_KEYS" + tableNameSuffix, first);
+/*
 				log.debug("Copy Version columns info for table {}", table);
 				copyRS(mdata.getVersionColumns(catalog, schema, table), sqlite, "VERSION_COLS" + tableNameSuffix, first);
 				log.debug("Copy Best row identifier info for table {}", table);
 				copyRS(mdata.getBestRowIdentifier(catalog, schema, table, 0, false), sqlite, "BEST_ROW_ID" + tableNameSuffix, first);
 				log.debug("Copy Table privileges info for table {}", table);
 				copyRS(mdata.getTablePrivileges(catalog, schema, table), sqlite, "TABLE_PRIVS" + tableNameSuffix, first);
+				log.debug("Copy Column privileges info for table {}", table);
 				copyRS(mdata.getColumnPrivileges(catalog, schema, table, null), sqlite, "COLUMN_PRIVS" + tableNameSuffix, first);
+				log.debug("Copy Pseudo columns info for table {}", table);
 				copyRS(mdata.getPseudoColumns(catalog, schema, table, null), sqlite, "PSEUDO_COLUMNS" + tableNameSuffix, first);
-
-				// TODO: copyRS(mdata.getCrossReference(), sqlite, "CROSS_REF" + tableNameSuffix, first);
+				//log.debug("Copy Cross reference info for table {}", table);
+				//copyRS(mdata.getCrossReference(...), sqlite, "CROSS_REF" + tableNameSuffix, first); // same as ImportedKeys
+*/
 				first = false;
 			}
 			rs.close();
@@ -163,23 +172,25 @@ public class JdbcCompare {
 
 	public static void main(String[] args) throws Exception {
 		args = new String[] {
+		"-f", "target/jdbc.sqlite",
 		"-jdbc",
-		"-jdbcschema", "MMITEV",
-/*
+		"-jdbcschema", "SPETROV",
 		"-f", "target/MyDbTest.sqlite",
 		"-s", "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
 		"-su", "spetrov",
 		"-sp", "spetrov",
-*/
+
+/*
+		"-jdbcschema", "MMITEV",
 		"-t", "(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
 		"-tu", "mmitev",
 		"-tp", "mmitev",
-
+*/
 		//"-c",
 		//"asd?"
 		};
 		Marker.mark();
-		System.exit(Main.main0(args));
+		Main.main0(args);
 		Marker.release();
 		System.out.println("Done.");
 	}
