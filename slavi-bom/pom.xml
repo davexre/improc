@@ -52,6 +52,7 @@
 		<h2database.version>1.4.196</h2database.version>
 		<commons-dbutils.version>1.7</commons-dbutils.version>
 		<apache.ddlutils.version>1.0</apache.ddlutils.version>
+		<oracle.version>12.2.0.1</oracle.version>
 		<googlecode.soundlibs.version>1.4</googlecode.soundlibs.version>
 		<googlecode.soundlibs.vorbisspi.version>1.0.3.3</googlecode.soundlibs.vorbisspi.version>
 		<googlecode.soundlibs.jorbis.version>0.0.17.4</googlecode.soundlibs.jorbis.version>
@@ -118,11 +119,6 @@
 			<dependency>
 				<groupId>com.slavi</groupId>
 				<artifactId>util.swt</artifactId>
-				<version>${com.slavi.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.slavi</groupId>
-				<artifactId>util.oracle</artifactId>
 				<version>${com.slavi.version}</version>
 			</dependency>
 			<dependency>
@@ -576,6 +572,86 @@
 						<groupId>saxpath</groupId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+
+			<!-- Oracle 
+			See: https://blogs.oracle.com/dev2dev/get-oracle-jdbc-drivers-and-ucp-from-oracle-maven-repository-without-ides#settings -->
+			<dependency>
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ojdbc8</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			
+			<dependency>
+				<!-- needed to work with XML columns -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>xdb6</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<!-- needed to work with XML columns -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>xmlparserv2</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ucp</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>orai18n</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>simplefan</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ons</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+
+			<dependency>
+				<!-- osdt_core,osdt_cert and oraclepki are needed for accessing Oracle wallets -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>osdt_core</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<!-- osdt_core,osdt_cert and oraclepki are needed for accessing Oracle wallets -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>osdt_cert</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<!-- osdt_core,osdt_cert and oraclepki are needed for accessing Oracle wallets -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>oraclepki</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+
+			<dependency>
+				<!-- Same as the ones without _g but with tracing enabled -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ojdbc8dms</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Same as the ones without _g but with tracing enabled -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ojdbc8_g</artifactId>
+				<version>${oracle.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Same as the ones without _g but with tracing enabled -->
+				<groupId>com.oracle.jdbc</groupId>
+				<artifactId>ojdbc8dms_g</artifactId>
+				<version>${oracle.version}</version>
 			</dependency>
 
 			<!-- Sound -->

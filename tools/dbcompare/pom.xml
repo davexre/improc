@@ -47,8 +47,8 @@
 			<artifactId>sqlite-jdbc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.slavi</groupId>
-			<artifactId>util.oracle</artifactId>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
 		</dependency>
 	</dependencies>
 	

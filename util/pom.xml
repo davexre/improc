@@ -20,6 +20,5 @@
 		<module>util.io</module>
 		<module>util.swing</module>
 		<module>util.swt</module>
-		<module>util.oracle</module>
 	</modules>
 </project>

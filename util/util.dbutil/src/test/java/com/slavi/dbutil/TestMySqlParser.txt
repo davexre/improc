@@ -18,6 +18,13 @@ begin
 	''
 	qwe' a from
 	"dual"; */
+	
+	select 'asd /* this is
+not a multiline 
+comment */
+-- neither is this single line comment
+'
+	from dual;
 end;
 /
 
