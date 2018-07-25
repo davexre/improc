@@ -480,6 +480,10 @@ Types.TIMESTAMP_WITH_TIMEZONE
 	}
 
 	public static void createResultSetSnapshot(ResultSet rs, Connection targetConn, String targetTable, int commitEveryNumRows) throws SQLException {
+		try (Statement st = targetConn.createStatement()) {
+			st.executeQuery("drop table " + targetTable);
+		} catch (SQLException ignore) {
+		};
 		createResultSetTable(rs, targetConn, targetTable);
 		copyResultSet(rs, targetConn, targetTable, commitEveryNumRows, false);
 	}

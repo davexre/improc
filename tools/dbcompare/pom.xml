@@ -4,6 +4,11 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
+	<!-- 
+		In order to include all jdbcs in the target jar use:
+		mvn package -Dalljdbc
+	 -->
+
 	<parent>
 		<groupId>com.slavi</groupId>
 		<artifactId>tools</artifactId>
@@ -32,10 +37,6 @@
 		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.log</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.slavi</groupId>
-			<artifactId>util.util</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.slavi</groupId>
@@ -75,4 +76,61 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>mysql</id>
+			<activation><property><name>alljdbc</name></property></activation>
+			<dependencies>
+				<dependency>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+		
+		<profile>
+			<id>derby</id>
+			<activation><property><name>alljdbc</name></property></activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.derby</groupId>
+					<artifactId>derby</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<profile>
+			<id>hsqldb</id>
+			<activation><property><name>alljdbc</name></property></activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.hsqldb</groupId>
+					<artifactId>hsqldb</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<profile>
+			<id>h2</id>
+			<activation><property><name>alljdbc</name></property></activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+
+		<profile>
+			<id>mssql</id>
+			<activation><property><name>alljdbc</name></property></activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.microsoft.sqlserver</groupId>
+					<artifactId>mssql-jdbc</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>

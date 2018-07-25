@@ -9,6 +9,10 @@ create table compare_msg(
 	err_code number(2) primary key,
 	message varchar(160));
 
+create table compare(
+	err_code number(2) references compare_msg,
+	obj_name varchar(130));
+
 insert into compare_msg values( 1, 'Table found in sourceDB does not exist in targetDB');
 insert into compare_msg values( 2, 'Table found in targetDB does not exist in sourceDB');
 insert into compare_msg values( 5, 'Table column in sourceDB does not exist in or match (type, length, precision, nullable) to a column in targetDB');
@@ -23,10 +27,6 @@ insert into compare_msg values(15, 'Stored procedure in sourceDB could not be ma
 insert into compare_msg values(16, 'Stored procedure in targetDB could not be matched to a procedure in sourceDB');
 insert into compare_msg values(17, 'Stored function in sourceDB could not be matched to a function in targetDB');
 insert into compare_msg values(18, 'Stored function in targetDB could not be matched to a function in sourceDB');
-
-create table compare(
-	err_code number(2) references compare_msg,
-	obj_name varchar(130));
 
 --------- Compare tables ---------
 insert into compare(err_code, obj_name)
@@ -110,7 +110,7 @@ group by L.table_name || '.' || ifnull(L.pk_name, '');
 --------- Compare primary keys ---------
 
 insert into compare(err_code, obj_name)
-select 9, L.table_name || '.' || ifnull(L.fk_name, '')
+select 9, L.fktable_name || '.' || ifnull(L.fk_name, '')
 from imported_keys1 L
 left join imported_keys2 R on 
 	L.pktable_name = R.pktable_name and 
@@ -120,12 +120,12 @@ left join imported_keys2 R on
 	L.key_seq = R.key_seq and 
 	ifnull(L.update_rule, '') = ifnull(R.update_rule, '') and
 	ifnull(L.delete_rule, -1) = ifnull(R.delete_rule, -1)
-left join compare c on c.obj_name = L.table_name and c.err_code in (1,2)
-where R.table_name is null and c.err_code is null
-group by L.table_name || '.' || ifnull(L.fk_name, '');
+left join compare c on c.obj_name = L.fktable_name and c.err_code in (1,2)
+where R.fktable_name is null and c.err_code is null
+group by L.fktable_name || '.' || ifnull(L.fk_name, '');
 
 insert into compare(err_code, obj_name)
-select 10, L.table_name || '.' || ifnull(L.fk_name, '')
+select 10, L.fktable_name || '.' || ifnull(L.fk_name, '')
 from imported_keys2 L
 left join imported_keys1 R on 
 	L.pktable_name = R.pktable_name and 
@@ -135,9 +135,9 @@ left join imported_keys1 R on
 	L.key_seq = R.key_seq and 
 	ifnull(L.update_rule, '') = ifnull(R.update_rule, '') and
 	ifnull(L.delete_rule, -1) = ifnull(R.delete_rule, -1)
-left join compare c on c.obj_name = L.table_name and c.err_code in (1,2)
-where R.table_name is null and c.err_code is null
-group by L.table_name || '.' || ifnull(L.fk_name, '');
+left join compare c on c.obj_name = L.fktable_name and c.err_code in (1,2)
+where R.fktable_name is null and c.err_code is null
+group by L.fktable_name || '.' || ifnull(L.fk_name, '');
 
 --------- Compare indexes ---------
 
@@ -186,7 +186,7 @@ left join (
 	ifnull(L.procedure_cat, '') = ifnull(R.procedure_cat, '') and
 	L.procedure_name = R.procedure_name and 
 	L.procedure_type = R.procedure_type and
-	L.column_name = R.column_name and 
+	ifnull(L.column_name, '') = ifnull(R.column_name, '') and 
 	L.column_type = R.column_type and
 	L.data_type = R.data_type and
 	L.ordinal_position = R.ordinal_position
@@ -208,7 +208,7 @@ left join (
 	ifnull(L.procedure_cat, '') = ifnull(R.procedure_cat, '') and
 	L.procedure_name = R.procedure_name and 
 	L.procedure_type = R.procedure_type and
-	L.column_name = R.column_name and 
+	ifnull(L.column_name, '') = ifnull(R.column_name, '') and 
 	L.column_type = R.column_type and
 	L.data_type = R.data_type and
 	L.ordinal_position = R.ordinal_position
@@ -232,7 +232,7 @@ left join (
 	ifnull(L.function_cat, '') = ifnull(R.function_cat, '') and
 	L.function_name = R.function_name and 
 	L.function_type = R.function_type and
-	L.column_name = R.column_name and 
+	ifnull(L.column_name, '') = ifnull(R.column_name, '') and 
 	L.column_type = R.column_type and
 	L.data_type = R.data_type and
 	L.ordinal_position = R.ordinal_position
@@ -254,7 +254,7 @@ left join (
 	ifnull(L.function_cat, '') = ifnull(R.function_cat, '') and
 	L.function_name = R.function_name and 
 	L.function_type = R.function_type and
-	L.column_name = R.column_name and 
+	ifnull(L.column_name, '') = ifnull(R.column_name, '') and 
 	L.column_type = R.column_type and
 	L.data_type = R.data_type and
 	L.ordinal_position = R.ordinal_position

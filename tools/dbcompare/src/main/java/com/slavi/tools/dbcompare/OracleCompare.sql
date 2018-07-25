@@ -9,6 +9,10 @@ create table compare_msg(
 	err_code number(2) primary key,
 	message varchar(160));
 
+create table compare(
+	err_code number(2) references compare_msg,
+	obj_name varchar(130));
+
 insert into compare_msg values( 1, 'Table found in sourceDB does not exist in targetDB');
 insert into compare_msg values( 2, 'Table found in targetDB does not exist in sourceDB');
 insert into compare_msg values( 3, 'Table properties (temporary, secondary, nested, compression, external) do not match');
@@ -29,10 +33,6 @@ insert into compare_msg values(21, 'Trigger found in sourceDB does not exist in 
 insert into compare_msg values(22, 'Trigger found in targetDB does not exist in sourceDB');
 insert into compare_msg values(23, 'The source code of (procedure, function, package, trigger) found in sourceDB does not exist in or match (sql) to one in targetDB');
 insert into compare_msg values(24, 'The source code of (procedure, function, package, trigger) found in targetDB does not exist in sourceDB');
-
-create table compare(
-	err_code number(2) references compare_msg,
-	obj_name varchar(130));
 
 --------- Compare tables ---------
 

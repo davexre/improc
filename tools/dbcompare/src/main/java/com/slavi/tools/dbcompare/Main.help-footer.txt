@@ -1,6 +1,35 @@
+Usage: dbcompare <command> <options>
+
+Commands:
+  get                        Get metadata for a database and store it in a file
+  compare                    Compares the metadata from two databases and produces a report.
+  -h,--help                  Display this help
+
+Error levels:
+  0                          Ok, metadata is created or comparison found no mismatch.
+  1                          Comparison found mismateches. Report is sent to stdout.
+  2                          Comparison not possible. The mode of the source and target database do not match.
+  254                        Invalid command line parameters. Help is displayed.
+  255                        An error has occurred. See stderr for details.
+
+Available options for command get:
+  -f,--file <file>           File to store database metadata. Default is dbcompare.sqlite.
+  -mode <jdbc|oracle>        Compare using metadata from JDBC driver. Use jdbc or oracle. Default is jdbc.
+  -jdbcschema <schema>       Schema for which to import metdata.
+  -url <db connect url>      Connect string to database. See examples.
+  -p,--password <pass>       Password to connect to database.
+  -u,--user <username>       Username to connect to database.
+
+Available options for command compare:
+  -f,--file <file>           File to store comparison data. Default is :memory:, i.e. empty/none.
+  -sdb,--sourcedb <file>     File containing source db metadata.
+  -tdb,--targetdb <file>     File containing target db metadata.
+
 Examples:
-  dbcompare -f data.sqlite -su 'scott' -sp 'tiger' -s 'localhost:1521:XE'
+  dbcompare get -f data.sqlite -mode oracle -u 'scott' -p 'tiger' -url 'localhost:1521:XE'
 
-  dbcompare -f data.sqlite -tu 'scott' -tp 'tiger' -t '(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=XE)))'
+  dbcompare get -f data.sqlite -mode oracle -u 'scott' -p 'tiger' -url '(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=XE)))'
 
-  dbcompare -f data.sqlite -c
+  dbcompare get -f data.sqlite -mode jdbc -url 'jdbc:sqlite:./my_sqllite_db.sqlite'
+
+  dbcompare compare -sdb source.sqlite -tdb target.sqlite

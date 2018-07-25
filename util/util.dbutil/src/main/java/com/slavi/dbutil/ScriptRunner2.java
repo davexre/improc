@@ -20,8 +20,8 @@ public class ScriptRunner2 {
 	private Map<String, String> substVariables = null;
 
 	private static class ScriptError extends RuntimeException {
-		public ScriptError(Throwable cause) {
-			super(cause);
+		public ScriptError(String message, Throwable cause) {
+			super(message, cause);
 		}
 	}
 
@@ -48,8 +48,9 @@ public class ScriptRunner2 {
 			}
 		} catch (SQLException e) {
 			if (stopOnError) {
-				throw new ScriptError(e);
+				throw new ScriptError("Error running sql command on line " + line, e);
 			} else {
+				System.err.println("Error running sql command on line " + line);
 				e.printStackTrace();
 			}
 		}
@@ -68,8 +69,6 @@ public class ScriptRunner2 {
 			};
 			parser.removeComments = removeComments;
 			parser.parse();
-		} catch (ScriptError e) {
-			throw (Exception) e.getCause();
 		} finally {
 			DbUtils.closeQuietly(statement);
 			statement = null;
