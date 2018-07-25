@@ -34,13 +34,13 @@ Setting-up a workspace
 		* ?? Rich Ajax Platform (RAP) Tools
 		* Web Page Editor
 	Install from "Eclipse Market Place"
-	* AVR Eclipse Plugin
-	* Eclipse JST Server Adapters (Apache Tomcat, JOnAS, J2EE)
 	* Quick Bookmarks Plugin
+	* LiClipseText
+	* Eclipse JST Server Adapters (Apache Tomcat, JOnAS, J2EE)
+	* AVR Eclipse Plugin
 	* Optimizer for Eclipse
 	* Eclipse plugin for LESS
 	* P4Eclipse + Perforce Folder Diff Support
-	* LiClipseText
 	* PyDev
 	* ?? Eclipse Class Decompiler
 	* ?? ResourceBundle editor (Update site https://raw.githubusercontent.com/essiembre/eclipse-rbe/master/eclipse-rbe-update-site/site.xml)
