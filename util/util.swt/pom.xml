@@ -10,7 +10,6 @@
 	</parent>
 	<artifactId>util.swt</artifactId>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>com.slavi</groupId>
