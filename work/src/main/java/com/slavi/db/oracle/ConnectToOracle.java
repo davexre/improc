@@ -1,14 +1,20 @@
 package com.slavi.db.oracle;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
@@ -127,8 +133,21 @@ public class ConnectToOracle {
 		}
 	}
 
+	public void doIt4(String[] args) throws Exception {
+		try (Connection conn = getConnection()) {
+			Statement st = conn.createStatement();
+			ResultSet rs = st.executeQuery("select * from AA_TMP_CHANGE_FIRST_NAME");
+
+			PrintWriter out = new PrintWriter(new File("target/csv.csv"));
+			CSVFormat.EXCEL.withHeader(rs).print(out).printRecords(rs);
+			out.close();
+			rs.close();
+			st.close();
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
-		new ConnectToOracle().doIt2(args);
+		new ConnectToOracle().doIt4(args);
 		System.out.println("Done.");
 	}
 }

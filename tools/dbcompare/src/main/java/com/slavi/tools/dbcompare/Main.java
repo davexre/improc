@@ -19,6 +19,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.io.IOUtils;
@@ -110,17 +111,23 @@ public class Main {
 		options.addOption("sdb", "sourcedb", true, "File containing source db metadata");
 		options.addOption("tdb", "targetdb", true, "File containing target db metadata");
 		CommandLineParser clp = new DefaultParser();
-		CommandLine cl = clp.parse(options, args, false);
-
-		String cmd = cl.getArgList().size() == 1 ? cl.getArgList().get(0) : "";
-		String schema = StringUtils.trimToNull(cl.getOptionValue("jdbcschema", null));
-
 		boolean showHelp = true;
-		if (("get".equals(cmd) || "compare".equals(cmd)) &&
+		CommandLine cl = null;
+		String cmd = null;
+		try {
+			cl = clp.parse(options, args, false);
+			cmd = cl.getArgList().size() == 1 ? cl.getArgList().get(0) : "";
+		} catch (ParseException e) {
+			// ignore
+		}
+
+		if (cl != null &&
+			("get".equals(cmd) || "compare".equals(cmd)) &&
 			(!cl.hasOption("h"))
 		) {
 			switch (cmd) {
 			case "get":
+				String schema = StringUtils.trimToNull(cl.getOptionValue("jdbcschema", null));
 				String mode = cl.getOptionValue("mode", "jdbc");
 				if (cl.hasOption("url") &&
 					("oracle".equals(mode) || "jdbc".equals(mode))
@@ -203,7 +210,7 @@ public class Main {
 		if (showHelp) {
 			//HelpFormatter formatter = new HelpFormatter();
 			//formatter.printHelp("dbcompare", "", options, IOUtils.toString(Main.class.getResourceAsStream("Main.help-footer.txt"), "UTF8"));
-			System.out.println(IOUtils.toString(Main.class.getResourceAsStream("Main.help-footer.txt"), "UTF8"));
+			System.out.println(IOUtils.toString(Main.class.getResourceAsStream("Main.help.txt"), "UTF8"));
 			return 254;
 		}
 		return 0;

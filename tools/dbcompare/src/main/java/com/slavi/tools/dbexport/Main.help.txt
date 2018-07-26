@@ -1,0 +1,35 @@
+Usage: dbexport <options>
+
+Options:
+  -h,--help                  Display this help.
+
+  -sql <select sql>          SQL to use export data.
+  -sf,--sqlFile <file>       Read sql commands from file.
+  -t,--tables <tables>       List of tables to export. Separator can be space, comma, semi column or column.
+
+  -c,createScript            Generate a create table script.
+  -f,--file <file>           Pattern to use for output file names. Use %t (table name), %n (sql number), %d (date stamp).
+  -mode <mode>               Output format mode. Default is excel.
+
+  -url <db connect url>      Connect string to database. See examples.
+  -p,--password <pass>       Password to connect to database.
+  -u,--user <username>       Username to connect to database.
+
+Available modes:
+  sql                        Generate insert statements.
+  mysql, unload, unload_csv, rfc4180, excel
+                             Gererate CSV file. More info https://commons.apache.org/proper/commons-csv/archives/1.5/apidocs/org/apache/commons/csv/CSVFormat.html
+
+Error levels:
+  0                          Ok, metadata is created or comparison found no mismatch.
+  254                        Invalid command line parameters. Help is displayed.
+  255                        An error has occurred. See stderr for details.
+
+Examples:
+  dbexport get -f data.sqlite -mode oracle -u 'scott' -p 'tiger' -url 'localhost:1521:XE'
+
+  dbexport get -f data.sqlite -mode oracle -u 'scott' -p 'tiger' -url '(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=XE)))'
+
+  dbexport get -f data.sqlite -mode jdbc -url 'jdbc:sqlite:./my_sqllite_db.sqlite'
+
+  dbexport compare -sdb source.sqlite -tdb target.sqlite

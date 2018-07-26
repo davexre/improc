@@ -19,7 +19,7 @@ public class ScriptRunner2 {
 	private boolean removeComments = false;
 	private Map<String, String> substVariables = null;
 
-	private static class ScriptError extends RuntimeException {
+	public static class ScriptError extends RuntimeException {
 		public ScriptError(String message, Throwable cause) {
 			super(message, cause);
 		}
@@ -29,15 +29,16 @@ public class ScriptRunner2 {
 		this.connection = connection;
 	}
 
-	Statement statement;
-	int countSqls = 0;
+	protected Statement statement;
+	protected int countSqls = 0;
 	public void runCmd(int line, String cmd) {
 		try {
 			boolean hasResultSet = statement.execute(cmd);
 			if (hasResultSet) {
-				ResultSet rs = statement.getResultSet();
-				if (rs != null)
-					System.out.println(ResultSetToString.resultSetToString(rs, 0, Integer.MAX_VALUE, true, 200));
+				try (ResultSet rs = statement.getResultSet()) {
+					if (rs != null)
+						System.out.println(ResultSetToString.resultSetToString(rs, 0, Integer.MAX_VALUE, true, 200));
+				}
 			} else {
 				if (!connection.getAutoCommit() &&
 					commitEveryNumSqls > 0 &&
