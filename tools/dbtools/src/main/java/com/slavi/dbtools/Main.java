@@ -1,4 +1,4 @@
-package com.slavi.tools;
+package com.slavi.dbtools;
 
 import java.util.ArrayList;
 import java.util.List;

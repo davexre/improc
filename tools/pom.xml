@@ -12,6 +12,6 @@
 	<packaging>pom</packaging>
 	
 	<modules>
-		<module>dbcompare</module>
+		<module>dbtools</module>
 	</modules>
 </project>

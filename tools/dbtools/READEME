@@ -1,0 +1,16 @@
+Compiling:
+==========
+
+If using the default maven settings, i.e.
+
+	mvn clean package
+
+the target/dbtools.jar will contain drivers for Oracle and SQLite only.
+
+In case other drivers are needed use respectively
+
+	mvn clean package -P mysql,mssql,derby,hsqldb,h2
+
+In order to include all jdbcs in the target jar use:
+
+	mvn package -Dalljdbc
