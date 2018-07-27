@@ -71,7 +71,7 @@
 							<outputFile>${project.build.directory}/dbcompare.jar</outputFile>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.slavi.tools.dbcompare.Main</mainClass>
+									<mainClass>com.slavi.tools.Main</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

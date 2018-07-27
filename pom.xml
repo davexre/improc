@@ -70,12 +70,13 @@
 		 -->
 		<repository>
 			<id>1.maven.apache.org</id>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
 			<snapshots>
-				<enabled>true</enabled>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
 			</snapshots>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
 			<url>https://repo.maven.apache.org/maven2</url>
 			<layout>default</layout>
 		</repository>
@@ -85,7 +86,11 @@
 			<url>http://maven-eclipse.github.io/maven</url>
 			<snapshots>
 				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
 			</snapshots>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
 		</repository>
 		
 		<repository>
@@ -104,14 +109,13 @@
 			<id>maven.oracle.com</id>
 			<name>Oracle Maven Reporistory</name>
 			<url>https://maven.oracle.com</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
 			<snapshots>
 				<enabled>false</enabled>
 				<updatePolicy>never</updatePolicy>
 			</snapshots>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
 			<layout>default</layout>
 		</repository>
 	</repositories>
@@ -128,25 +132,25 @@
 		<pluginRepository>
 			<id>1.maven.apache.org</id>
 			<url>https://repo.maven.apache.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
 			<releases>
 				<updatePolicy>never</updatePolicy>
 			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
 		</pluginRepository>
 
 		<pluginRepository>
 			<id>maven.oracle.com</id>
 			<url>https://maven.oracle.com</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>never</updatePolicy>
-			</releases>
 			<snapshots>
 				<enabled>false</enabled>
 				<updatePolicy>never</updatePolicy>
 			</snapshots>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
 			<layout>default</layout>
 		</pluginRepository>
 	</pluginRepositories>

@@ -3,5 +3,5 @@ Usage:
   dbtools <command> -h
 
 Commands:
-  dccompare         Extract database metadata to file and compare databases using these files.
+  dbcompare         Extract database metadata to file and compare databases using these files.
   dbexport          Export a sql(s) or table(s) to CSV or SQL format.
