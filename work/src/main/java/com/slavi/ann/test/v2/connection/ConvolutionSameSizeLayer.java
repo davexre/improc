@@ -14,8 +14,10 @@ public class ConvolutionSameSizeLayer extends Layer {
 		fillKernelMatrix(kernel, ConvolutionLayer.kernelSigma);
 	}
 
-	public int[] getOutputSize(int inputSize[]) {
-		return new int[] { inputSize[0], inputSize[1] };
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return new LayerParameters(
+				inputLayerParameters.outputSize,
+				kernel.getVectorSize());
 	}
 
 	@Override

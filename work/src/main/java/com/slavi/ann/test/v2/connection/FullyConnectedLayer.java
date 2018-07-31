@@ -16,10 +16,12 @@ public class FullyConnectedLayer extends Layer {
 		BellCurveDistribution.fillWeight(weight, 0.3);
 	}
 
-	public int[] getOutputSize(int inputSize[]) {
-		if (inputSize[0] * inputSize[1]  != weight.getSizeX())
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		if (inputLayerParameters.outputSize[0] * inputLayerParameters.outputSize[1] != weight.getSizeX())
 			throw new Error("Invalid argument");
-		return new int[] { weight.getSizeY(), 1 };
+		return new LayerParameters(
+				new int[] { weight.getSizeY(), 1 },
+				weight.getVectorSize());
 	}
 
 	@Override

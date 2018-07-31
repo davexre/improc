@@ -20,15 +20,15 @@ ds/dx = s(1-s)
 */
 public class SigmoidLayer extends Layer {
 	@Override
-	public int[] getOutputSize(int[] inputSize) {
-		return inputSize;
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override
 	public LayerWorkspace createWorkspace() {
 		return new Workspace();
 	}
-	
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError = new Matrix();

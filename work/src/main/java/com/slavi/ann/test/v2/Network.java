@@ -32,11 +32,12 @@ public class Network extends Layer implements Iterable<Layer>{
 		return layers.iterator();
 	}
 
-	public int[] getOutputSize(int inputSize[]) {
+	@Override
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
 		for (Layer l : layers) {
-			inputSize = l.getOutputSize(inputSize);
+			inputLayerParameters = l.getLayerParams(inputLayerParameters);
 		}
-		return inputSize;
+		return inputLayerParameters;
 	}
 
 	@Override

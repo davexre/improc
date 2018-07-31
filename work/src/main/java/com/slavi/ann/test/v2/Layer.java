@@ -2,8 +2,6 @@ package com.slavi.ann.test.v2;
 
 import java.util.List;
 
-import org.apache.commons.math3.linear.MatrixUtils;
-
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.improc.parallel.PGaussianFilter;
 import com.slavi.math.matrix.Matrix;
@@ -11,7 +9,17 @@ import com.slavi.util.MatrixUtil;
 
 public abstract class Layer {
 
-	public abstract int[] getOutputSize(int inputSize[]);
+	public static class LayerParameters {
+		public int outputSize[];
+		public int numAdjustableParams;
+
+		public LayerParameters(int outputSize[], int numAdjustableParams) {
+			this.outputSize = outputSize;
+			this.numAdjustableParams = numAdjustableParams;
+		}
+	}
+
+	public abstract LayerParameters getLayerParams(LayerParameters inputLayerParams);
 
 	public abstract LayerWorkspace createWorkspace();
 
@@ -112,6 +120,10 @@ public abstract class Layer {
 		 * The result may be always the "same instance". It should treated readonly.
 		 */
 		public abstract Matrix backPropagate(Matrix error);
+
+		public void calcLsaParams(Matrix coefs, int startingIndex, Matrix error) {
+			throw new Error();
+		}
 
 		/**
 		 * Clears internal counters "after" applyWorkspace.

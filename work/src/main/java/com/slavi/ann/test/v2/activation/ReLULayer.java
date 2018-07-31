@@ -18,15 +18,15 @@ ds/dx -> logistic function -> https://en.wikipedia.org/wiki/Logistic_function
 */
 public class ReLULayer extends Layer {
 	@Override
-	public int[] getOutputSize(int[] inputSize) {
-		return inputSize;
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override
 	public LayerWorkspace createWorkspace() {
 		return new Workspace();
 	}
-	
+
 	public class Workspace extends LayerWorkspace {
 		public Matrix input;
 		public Matrix inputError = new Matrix();

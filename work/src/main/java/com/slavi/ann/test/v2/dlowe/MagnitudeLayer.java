@@ -5,8 +5,9 @@ import com.slavi.math.matrix.Matrix;
 
 public class MagnitudeLayer extends Layer {
 
-	public int[] getOutputSize(int inputSize[]) {
-		return inputSize;
+	@Override
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override

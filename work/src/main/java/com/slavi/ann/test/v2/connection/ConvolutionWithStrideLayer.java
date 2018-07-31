@@ -17,10 +17,12 @@ public class ConvolutionWithStrideLayer extends Layer {
 		fillKernelMatrix(kernel, ConvolutionLayer.kernelSigma);
 	}
 
-	public int[] getOutputSize(int inputSize[]) {
-		int sizeOX = (int) Math.ceil(((double) inputSize[0] / strideX));
-		int sizeOY = (int) Math.ceil(((double) inputSize[1] / strideY));
-		return new int[] { sizeOX, sizeOY };
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		int sizeOX = (int) Math.ceil(((double) inputLayerParameters.outputSize[0] / strideX));
+		int sizeOY = (int) Math.ceil(((double) inputLayerParameters.outputSize[1] / strideY));
+		return new LayerParameters(
+				new int[] { sizeOX, sizeOY },
+				kernel.getVectorSize());
 	}
 
 	@Override

@@ -21,8 +21,9 @@ public class FastGaussianLayer extends Layer {
 		PGaussianFilter.fillArray(mask, sigma);
 	}
 
-	public int[] getOutputSize(int inputSize[]) {
-		return inputSize;
+	@Override
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override

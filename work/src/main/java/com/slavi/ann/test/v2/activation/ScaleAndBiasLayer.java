@@ -14,8 +14,8 @@ public class ScaleAndBiasLayer extends Layer {
 	}
 
 	@Override
-	public int[] getOutputSize(int[] inputSize) {
-		return inputSize;
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override

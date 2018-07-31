@@ -5,8 +5,9 @@ import com.slavi.math.matrix.Matrix;
 
 public class DirectionLayer extends Layer {
 
-	public int[] getOutputSize(int inputSize[]) {
-		return inputSize;
+	@Override
+	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+		return inputLayerParameters;
 	}
 
 	@Override
@@ -39,7 +40,7 @@ public class DirectionLayer extends Layer {
 					// Direction is computed as d = atan2( dX, dY )
 					// The returned value of atan2 is from -pi to +pi.
 					double f = Math.atan2(
-						input.getItem(ox, bottom) - input.getItem(ox, top), 
+						input.getItem(ox, bottom) - input.getItem(ox, top),
 						input.getItem(right, oy) - input.getItem(left, oy));
 					output.setItem(ox, oy, f);
 					right = ox;
