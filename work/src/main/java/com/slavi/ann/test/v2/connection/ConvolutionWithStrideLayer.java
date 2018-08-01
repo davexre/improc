@@ -17,13 +17,17 @@ public class ConvolutionWithStrideLayer extends Layer {
 		fillKernelMatrix(kernel, ConvolutionLayer.kernelSigma);
 	}
 
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		int sizeOX = (int) Math.ceil(((double) inputLayerParameters.outputSize[0] / strideX));
-		int sizeOY = (int) Math.ceil(((double) inputLayerParameters.outputSize[1] / strideY));
-		return new LayerParameters(
-				new int[] { sizeOX, sizeOY },
-				kernel.getVectorSize());
+	@Override
+	public int[] getOutputSize(int inputSize[]) {
+		int sizeOX = (int) Math.ceil(((double) inputSize[0] / strideX));
+		int sizeOY = (int) Math.ceil(((double) inputSize[1] / strideY));
+		return new int[] { sizeOX, sizeOY };
 	}
+
+	@Override
+	public int getNumAdjustableParams() {
+		return kernel.getVectorSize();
+	};
 
 	@Override
 	public Workspace createWorkspace() {
@@ -90,7 +94,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (input == null)
 				throw new Error("Invalid state");
 			if ((output.getSizeX() != error.getSizeX()) ||
@@ -101,9 +105,13 @@ public class ConvolutionWithStrideLayer extends Layer {
 			int padY = (kernel.getSizeY() - strideY) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
+			for (int i = kernel.getVectorSize() - 1; i >= 0; i--)
+				coefs.setItem(startingIndex + i, 0, 0);
+
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = error.getItem(ox, oy);
+					int coefIndex = startingIndex;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -115,6 +123,7 @@ public class ConvolutionWithStrideLayer extends Layer {
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
+							coefs.itemAdd(coefIndex++, 0, -dw);
 						}
 					}
 

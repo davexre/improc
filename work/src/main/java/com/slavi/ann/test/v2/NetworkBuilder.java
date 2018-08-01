@@ -3,7 +3,6 @@ package com.slavi.ann.test.v2;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.slavi.ann.test.v2.Layer.LayerParameters;
 import com.slavi.ann.test.v2.activation.ConstScaleAndBiasLayer;
 import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.activation.ReLULayer;
@@ -19,40 +18,35 @@ public class NetworkBuilder {
 	List<Layer> layers = new ArrayList<>();
 
 	int inputSize[];
-	LayerParameters lastParams;
+	int lastSize[];
 
 	public NetworkBuilder(int inputSizeX, int inputSizeY) {
 		inputSize = new int[] { inputSizeX, inputSizeY };
-		lastParams = new LayerParameters(
-				new int[] { inputSizeX, inputSizeY },
-				0);
+		lastSize = new int[] { inputSizeX, inputSizeY };
 	}
 
 	public NetworkBuilder addLayer(Layer l) {
-		lastParams = l.getLayerParams(lastParams);
+		lastSize = l.getOutputSize(lastSize);
 		layers.add(l);
 		return this;
 	}
 
 	public String describe() {
 		StringBuilder r = new StringBuilder();
-		LayerParameters tmpParams = new LayerParameters(
-				new int[] { inputSize[0], inputSize[1] },
-				0);
+		int size[] = new int[] { inputSize[0], inputSize[1] };
 		for (int i = 0; i < layers.size(); i++) {
 			Layer l = layers.get(i);
 			r.append(i).append(": ")
-				.append(tmpParams.outputSize[0]).append(':')
-				.append(tmpParams.outputSize[1]).append(' ')
+				.append(size[0]).append(':').append(size[1]).append(' ')
 				.append(l.getClass().getSimpleName())
 				.append('\n');
-			tmpParams = l.getLayerParams(tmpParams);
+			size = l.getOutputSize(size);
 		}
 		return r.toString();
 	}
 
-	public LayerParameters getLayerParameters() {
-		return lastParams;
+	public int[] getCurrentOutputSize() {
+		return lastSize;
 	}
 
 	public NetworkBuilder addConvolutionLayer(int kernelSize) {
@@ -76,11 +70,11 @@ public class NetworkBuilder {
 	}
 
 	public NetworkBuilder addFullyConnectedLayer(int outputSize) {
-		return addLayer(new FullyConnectedLayer(lastParams.outputSize[0] * lastParams.outputSize[1], outputSize, 1));
+		return addLayer(new FullyConnectedLayer(lastSize[0] * lastSize[1], outputSize, 1));
 	}
 
 	public NetworkBuilder addConstScaleAndBiasLayer() {
-		int outputSize = lastParams.outputSize[0] * lastParams.outputSize[1];
+		int outputSize = lastSize[0] * lastSize[1];
 		return addLayer(new ConstScaleAndBiasLayer(5.0 / outputSize, 0));
 	}
 

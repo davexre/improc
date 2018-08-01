@@ -5,7 +5,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
-import com.slavi.ann.test.v2.Layer.LayerParameters;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
@@ -30,12 +29,12 @@ public class Utils {
 			imgSize[0] = Math.max(imgSize[0], width);
 		}
 
-		public abstract LayerParameters calcSize(LayerWorkspace ws, LayerParameters inputLayerParameters, int imgSize[]);
-		public abstract LayerParameters draw(Graphics2D g, LayerWorkspace ws, LayerParameters inputLayerParameters);
+		public abstract int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]);
+		public abstract int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]);
 	}
 
 	static class DrawConvolutionLayer extends DrawLayer {
-		public LayerParameters calcSize(LayerWorkspace ws, LayerParameters inputLayerParameters, int imgSize[]) {
+		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
 			ConvolutionLayer ll = (ConvolutionLayer) ws.getLayer();
 			ConvolutionLayer.Workspace wws = (ConvolutionLayer.Workspace) ws;
 
@@ -47,10 +46,10 @@ public class Utils {
 			imgSize[1] += m.getSizeY();
 			setWidth(imgSize, m.getSizeX());
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 
-		public LayerParameters draw(Graphics2D g, LayerWorkspace ws, LayerParameters inputLayerParameters) {
+		public int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]) {
 			ConvolutionLayer ll = (ConvolutionLayer) ws.getLayer();
 			ConvolutionLayer.Workspace wws = (ConvolutionLayer.Workspace) ws;
 
@@ -65,12 +64,12 @@ public class Utils {
 			g.drawImage(bi, 0, 0, null);
 			g.translate(0, m.getSizeY());
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 	}
 
 	static class DrawFullyConnectedLayer extends DrawLayer {
-		public LayerParameters calcSize(LayerWorkspace ws, LayerParameters inputLayerParameters, int imgSize[]) {
+		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
 			FullyConnectedLayer ll = (FullyConnectedLayer) ws.getLayer();
 			FullyConnectedLayer.Workspace wws = (FullyConnectedLayer.Workspace) ws;
 
@@ -86,10 +85,10 @@ public class Utils {
 			imgSize[1] += m.getSizeY();
 			setWidth(imgSize, m.getSizeX());
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 
-		public LayerParameters draw(Graphics2D g, LayerWorkspace ws, LayerParameters inputLayerParameters) {
+		public int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]) {
 			FullyConnectedLayer ll = (FullyConnectedLayer) ws.getLayer();
 			FullyConnectedLayer.Workspace wws = (FullyConnectedLayer.Workspace) ws;
 
@@ -108,12 +107,12 @@ public class Utils {
 			g.drawImage(bi, 0, 0, null);
 			g.translate(0, m.getSizeY());
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 	}
 
 	static class DrawDebugLayer extends DrawLayer {
-		public LayerParameters calcSize(LayerWorkspace ws, LayerParameters inputLayerParameters, int imgSize[]) {
+		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
 			DebugLayer ll = (DebugLayer) ws.getLayer();
 			DebugLayer.Workspace wws = (DebugLayer.Workspace) ws;
 
@@ -124,10 +123,10 @@ public class Utils {
 			width += spaceBetweenLayers + m.getSizeX();
 			setWidth(imgSize, width);
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 
-		public LayerParameters draw(Graphics2D g, LayerWorkspace ws, LayerParameters inputLayerParameters) {
+		public int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]) {
 			DebugLayer ll = (DebugLayer) ws.getLayer();
 			DebugLayer.Workspace wws = (DebugLayer.Workspace) ws;
 
@@ -140,12 +139,12 @@ public class Utils {
 			g.drawImage(bi, m.getSizeX() + spaceBetweenLayers, 0, null);
 			g.translate(0, m.getSizeY() + spaceBetweenLayers);
 
-			return ll.getLayerParams(inputLayerParameters);
+			return ll.getOutputSize(inputSize);
 		}
 	}
 
 	static class DrawNetwork extends DrawLayer {
-		public LayerParameters calcSize(LayerWorkspace ws, LayerParameters inputLayerParameters, int imgSize[]) {
+		public int[] calcSize(LayerWorkspace ws, int inputSize[], int imgSize[]) {
 			Network.NetWorkSpace wws = (Network.NetWorkSpace) ws;
 			int vspace = 0;
 			for (int i = 0; i < wws.workspaces.size(); i++) {
@@ -153,17 +152,17 @@ public class Utils {
 				DrawLayer dl = drawMap.get(ws2.getLayer().getClass());
 				if (dl != null) {
 					imgSize[1] += vspace;
-					inputLayerParameters = dl.calcSize(ws2, inputLayerParameters, imgSize);
+					inputSize = dl.calcSize(ws2, inputSize, imgSize);
 					vspace = spaceBetweenLayers;
 				} else {
-					inputLayerParameters = ws2.getLayer().getLayerParams(inputLayerParameters);
+					inputSize = ws2.getLayer().getOutputSize(inputSize);
 					vspace = 0;
 				}
 			}
-			return inputLayerParameters;
+			return inputSize;
 		}
 
-		public LayerParameters draw(Graphics2D g, LayerWorkspace ws, LayerParameters inputLayerParameters) {
+		public int[] draw(Graphics2D g, LayerWorkspace ws, int inputSize[]) {
 			Network.NetWorkSpace wws = (Network.NetWorkSpace) ws;
 			int vspace = 0;
 			for (int i = 0; i < wws.workspaces.size(); i++) {
@@ -171,14 +170,14 @@ public class Utils {
 				DrawLayer dl = drawMap.get(ws2.getLayer().getClass());
 				if (dl != null) {
 					g.translate(0, vspace);
-					inputLayerParameters = dl.draw(g, ws2, inputLayerParameters);
+					inputSize = dl.draw(g, ws2, inputSize);
 					vspace = spaceBetweenLayers;
 				} else {
-					inputLayerParameters = ws2.getLayer().getLayerParams(inputLayerParameters);
+					inputSize = ws2.getLayer().getOutputSize(inputSize);
 					vspace = 0;
 				}
 			}
-			return inputLayerParameters;
+			return inputSize;
 		}
 	}
 
@@ -197,13 +196,12 @@ public class Utils {
 	public static BufferedImage draw(LayerWorkspace ws, int inputSize[]) {
 		DrawLayer dl = drawMap.get(ws.getLayer().getClass());
 		int imgSize[] = new int[2];
-		LayerParameters inputLayerParameters = new LayerParameters(inputSize, 0);
-		dl.calcSize(ws, inputLayerParameters, imgSize);
+		dl.calcSize(ws, inputSize, imgSize);
 		BufferedImage bi = new BufferedImage(imgSize[0], imgSize[1], BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = bi.createGraphics();
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
-		dl.draw(g, ws, inputLayerParameters);
+		dl.draw(g, ws, inputSize);
 		return bi;
 	}
 }

@@ -33,12 +33,20 @@ public class Network extends Layer implements Iterable<Layer>{
 	}
 
 	@Override
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
+	public int[] getOutputSize(int inputSize[]) {
 		for (Layer l : layers) {
-			inputLayerParameters = l.getLayerParams(inputLayerParameters);
+			inputSize = l.getOutputSize(inputSize);
 		}
-		return inputLayerParameters;
+		return inputSize;
 	}
+
+	public int getNumAdjustableParams() {
+		int r = 0;
+		for (Layer l : layers) {
+			r += l.getNumAdjustableParams();
+		}
+		return r;
+	};
 
 	@Override
 	public NetWorkSpace createWorkspace() {
@@ -85,10 +93,11 @@ public class Network extends Layer implements Iterable<Layer>{
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			for (int i = workspaces.size() - 1; i >= 0; i--) {
 				LayerWorkspace workspace = workspaces.get(i);
-				error = workspace.backPropagate(error);
+				error = workspace.backPropagate(coefs, startingIndex, error);
+				startingIndex += workspace.getLayer().getNumAdjustableParams();
 			}
 			return error;
 		}

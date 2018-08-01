@@ -44,7 +44,7 @@ public class MyMnistDataTest {
 
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(60, 90); // Number 8 is missing until index 61,84, 110
+		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 490); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
 		Marker.release();
 

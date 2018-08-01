@@ -11,6 +11,7 @@ import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -76,6 +77,8 @@ public class Trainer {
 		MatrixStatistics stAbsError = new MatrixStatistics();
 		MatrixStatistics stInputError = new MatrixStatistics();
 		Statistics st = new Statistics();
+		int numAdjustableParams = l.getNumAdjustableParams();
+		Matrix coefs = new Matrix(numAdjustableParams, 1);
 		LayerWorkspace ws = l.createWorkspace();
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
@@ -84,6 +87,7 @@ public class Trainer {
 		FileUtils.deleteQuietly(outDir);
 		outDir.mkdirs();*/
 
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
 			System.out.println("--------------------- EPOCH "  + epoch);
@@ -103,19 +107,24 @@ public class Trainer {
 					throw new Error("Dimensions mismatch");
 				error.resize(output.getSizeX(), output.getSizeY());
 				absError.resize(output.getSizeX(), output.getSizeY());
+				double L = 0;
 				for (int i = target.getVectorSize() - 1; i >= 0; i--) {
 					double e = output.getVectorItem(i) - target.getVectorItem(i);
+					L += e;
 					error.setVectorItem(i, e);
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
 				}
+
 				if (absError.max() < 0.15)
 					patternsLearend++;
 				st.addValue(absError.max());
 				stAbsError.addValue(absError);
 				//errors.add(new DatapointTrainResult(index, pair, absError.sumAll() / absError.getVectorSize()));
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));
-				Matrix inputError = ws.backPropagate(error);
+				coefs.make0();
+				Matrix inputError = ws.backPropagate(coefs, 0, error);
+				lsa.addMeasurement(coefs, 1, L, 0);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
 				if (print) {
@@ -123,6 +132,8 @@ public class Trainer {
 				}
 				index++;
 			}
+			if (!lsa.calculate())
+				throw new Error("LSA failed");
 			stAbsError.stop();
 			stInputError.stop();
 			st.stop();
@@ -173,7 +184,7 @@ public class Trainer {
 			if (epoch > 0 && learnProgress < 0) {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
-			l.applyWorkspaces(wslist);
+			//l.applyWorkspaces(wslist);
 /*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/

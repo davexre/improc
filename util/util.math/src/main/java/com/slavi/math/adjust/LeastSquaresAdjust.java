@@ -11,7 +11,7 @@ public class LeastSquaresAdjust {
 	private Logger log = LoggerFactory.getLogger(getClass());
 
 	private Logger log_measurements = LoggerFactory.getLogger(getClass().getName() + ".measurements");
-	
+
 	private int numCoefsPerCoordinate;
 
 	private int numCoordinates;
@@ -108,7 +108,7 @@ public class LeastSquaresAdjust {
 
 	public boolean calculate() {
 		if (!canCalculate()) {
-			log.error("Can not calculate. Not enough data.");
+			log.error("Can not calculate. Not enough data. Minimum " + getRequiredMeasurements() + " measurements required.");
 			return false;
 		}
 		if (log.isInfoEnabled()) {
@@ -116,7 +116,7 @@ public class LeastSquaresAdjust {
 			if (sumP == 0.0)
 				sumP = 1E-100;
 			log.info("Measurements: " + measurementCount +
-					", [P]: " + MathUtil.d4(getSumP()) + 
+					", [P]: " + MathUtil.d4(getSumP()) +
 					", Sqrt([PLL]/[P]): " + MathUtil.d4(getMedianSquareError())
 			);
 		}
@@ -137,10 +137,10 @@ public class LeastSquaresAdjust {
 			log.error("Inverse of normal matrix non-reliable.");
 		}
 		if (log.isTraceEnabled() || (deviation > precision)) {
-			log.info("Normal matrix\n" + nmCopy.makeSquareMatrix().toString());
-			log.info("Inverted Normal Matrix\n" + nm.toString());
-			log.info("NM * (NM')\n" + tmp.toString());
-			log.info("APL\n" + apl.toString());
+			log.info("Normal matrix\n" + nmCopy.makeSquareMatrix().toMatlabString("NM"));
+//			log.info("Inverted Normal Matrix\n" + nm.toString());
+//			log.info("NM * (NM')\n" + tmp.toString());
+//			log.info("APL\n" + apl.toString());
 		}
 		if (deviation > precision) {
 			return false;
@@ -151,7 +151,7 @@ public class LeastSquaresAdjust {
 		}
 		return true;
 	}
-	
+
 	public boolean calculateNoNm_Validation() {
 		if (!canCalculate())
 			return false;
@@ -160,7 +160,7 @@ public class LeastSquaresAdjust {
 		calculateUnknowns();
 		return true;
 	}
-	
+
 	private void calculateUnknowns() {
 		unknown.make0();
 		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)

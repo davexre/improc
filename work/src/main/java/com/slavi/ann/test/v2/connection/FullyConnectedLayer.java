@@ -16,13 +16,17 @@ public class FullyConnectedLayer extends Layer {
 		BellCurveDistribution.fillWeight(weight, 0.3);
 	}
 
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		if (inputLayerParameters.outputSize[0] * inputLayerParameters.outputSize[1] != weight.getSizeX())
+	@Override
+	public int[] getOutputSize(int inputSize[]) {
+		if (inputSize[0] * inputSize[1]  != weight.getSizeX())
 			throw new Error("Invalid argument");
-		return new LayerParameters(
-				new int[] { weight.getSizeY(), 1 },
-				weight.getVectorSize());
+		return new int[] { weight.getSizeY(), 1 };
 	}
+
+	@Override
+	public int getNumAdjustableParams() {
+		return weight.getVectorSize();
+	};
 
 	@Override
 	public Workspace createWorkspace() {
@@ -82,7 +86,7 @@ public class FullyConnectedLayer extends Layer {
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (input == null)
 				throw new Error("Invalid state");
 			if (error.getVectorSize() != weight.getSizeY())
@@ -90,13 +94,17 @@ public class FullyConnectedLayer extends Layer {
 			outputError.mMaxAbs(error, outputError);
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
+			for (int i = weight.getVectorSize() - 1; i >= 0; i--)
+				coefs.setItem(startingIndex + i, 0, 0);
 
+			int coefIndex = startingIndex;
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = error.getVectorItem(j);
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
+					coefs.itemAdd(coefIndex++, 0, -dw);
 					tmp.setItem(i, j, -dw);
 				}
 			}

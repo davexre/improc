@@ -18,8 +18,8 @@ ds/dx -> logistic function -> https://en.wikipedia.org/wiki/Logistic_function
 */
 public class ReLULayer extends Layer {
 	@Override
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		return inputLayerParameters;
+	public int[] getOutputSize(int[] inputSize) {
+		return inputSize;
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class ReLULayer extends Layer {
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (input == null)
 				throw new Error("Invalid state");
 			if (error.getVectorSize() != input.getVectorSize())

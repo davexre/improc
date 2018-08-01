@@ -207,14 +207,18 @@ public class Matrix {
 		return sizeY;
 	}
 
+	private void assertValidIndex(int atX, int atY) {
+		if (atX < 0 || atX >= sizeX ||
+			atY < 0 || atY >= sizeY)
+			throw new IndexOutOfBoundsException("Indexes (" + atX + "," + atY + ") not in range (" + sizeX + "," + sizeY + ")");
+	}
+
 	/**
 	 * Returns the value of the matrix atX column and atY row. The top-left
 	 * element is atX=0, atY=0.
 	 */
 	public double getItem(int atX, int atY) {
-		if (atX < 0 || atX >= sizeX ||
-			atY < 0 || atY >= sizeY)
-			throw new IndexOutOfBoundsException();
+		assertValidIndex(atX, atY);
 		return m[atX + atY * sizeX];
 	}
 
@@ -223,23 +227,17 @@ public class Matrix {
 	 * is atX=0, atY=0.
 	 */
 	public void setItem(int atX, int atY, double aValue) {
-		if (atX < 0 || atX >= sizeX ||
-				atY < 0 || atY >= sizeY)
-				throw new IndexOutOfBoundsException();
+		assertValidIndex(atX, atY);
 		m[atX + atY * sizeX] = aValue;
 	}
 
 	public double itemAdd(int atX, int atY, double aValue) {
-		if (atX < 0 || atX >= sizeX ||
-				atY < 0 || atY >= sizeY)
-				throw new IndexOutOfBoundsException();
+		assertValidIndex(atX, atY);
 		return m[atX + atY * sizeX] += aValue;
 	}
 
 	public double itemMul(int atX, int atY, double aValue) {
-		if (atX < 0 || atX >= sizeX ||
-				atY < 0 || atY >= sizeY)
-				throw new IndexOutOfBoundsException();
+		assertValidIndex(atX, atY);
 		return m[atX + atY * sizeX] *= aValue;
 	}
 
@@ -1082,7 +1080,7 @@ public class Matrix {
 	public Statistics calcStatistics() {
 		return calcStatistics(null);
 	}
-	
+
 	public Statistics calcStatistics(Statistics dest) {
 		if (dest == null)
 			dest = new Statistics();
@@ -1092,7 +1090,7 @@ public class Matrix {
 		dest.stop();
 		return dest;
 	}
-	
+
 	public void printM(String title) {
 		System.out.println(title);
 //		System.out.print(toString());

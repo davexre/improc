@@ -21,13 +21,21 @@
 		</encoder>
 	</appender>
 
+	<appender name="STDOUT_MSG_ONLY" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
 
 <!-- 	<logger name="my.logger.file" level="all" additivity="false">
 		<appender-ref ref="my.appender.file" />
 	</logger> -->
 
-	<logger level="debug" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" />
+	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+		<appender-ref ref="STDOUT_MSG_ONLY" />
+	</logger>
 	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
 
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />

@@ -13,12 +13,11 @@ public class SubsamplingAvgLayer extends Layer {
 		this.sizeY = sizeY;
 	}
 
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		int sizeOX = (int) Math.ceil(((double) inputLayerParameters.outputSize[0] / sizeX));
-		int sizeOY = (int) Math.ceil(((double) inputLayerParameters.outputSize[1] / sizeY));
-		return new LayerParameters(
-				new int[] { sizeOX, sizeOY },
-				0);
+	@Override
+	public int[] getOutputSize(int inputSize[]) {
+		int sizeOX = (int) Math.ceil(((double) inputSize[0] / sizeX));
+		int sizeOY = (int) Math.ceil(((double) inputSize[1] / sizeY));
+		return new int[] { sizeOX, sizeOY };
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class SubsamplingAvgLayer extends Layer {
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (input == null)
 				throw new Error("Invalid state");
 			if ((output.getSizeX() != error.getSizeX()) ||

@@ -54,8 +54,8 @@ public class DebugLayer extends Layer {
 	}
 
 	@Override
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		return inputLayerParameters;
+	public int[] getOutputSize(int[] inputSize) {
+		return inputSize;
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class DebugLayer extends Layer {
 		}
 
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (hasBadValues(error))
 				hasBadValuesInError = true;
 			stError.addValue(error);

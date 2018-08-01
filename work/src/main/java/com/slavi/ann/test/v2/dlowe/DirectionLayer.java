@@ -6,8 +6,8 @@ import com.slavi.math.matrix.Matrix;
 public class DirectionLayer extends Layer {
 
 	@Override
-	public LayerParameters getLayerParams(LayerParameters inputLayerParameters) {
-		return inputLayerParameters;
+	public int[] getOutputSize(int inputSize[]) {
+		return inputSize;
 	}
 
 	@Override
@@ -68,7 +68,7 @@ dB/dX(right, oy) = 1
 dB/dX(left, oy) = -1
 */
 		@Override
-		public Matrix backPropagate(Matrix error) {
+		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
 			if (input == null)
 				throw new Error("Invalid state");
 			if ((input.getSizeX() != error.getSizeX()) ||

@@ -9,17 +9,11 @@ import com.slavi.util.MatrixUtil;
 
 public abstract class Layer {
 
-	public static class LayerParameters {
-		public int outputSize[];
-		public int numAdjustableParams;
+	public abstract int[] getOutputSize(int inputSize[]);
 
-		public LayerParameters(int outputSize[], int numAdjustableParams) {
-			this.outputSize = outputSize;
-			this.numAdjustableParams = numAdjustableParams;
-		}
-	}
-
-	public abstract LayerParameters getLayerParams(LayerParameters inputLayerParams);
+	public int getNumAdjustableParams() {
+		return 0;
+	};
 
 	public abstract LayerWorkspace createWorkspace();
 
@@ -119,11 +113,7 @@ public abstract class Layer {
 		 * error may be the result of the "upper" backPropagate. It should treated readonly.
 		 * The result may be always the "same instance". It should treated readonly.
 		 */
-		public abstract Matrix backPropagate(Matrix error);
-
-		public void calcLsaParams(Matrix coefs, int startingIndex, Matrix error) {
-			throw new Error();
-		}
+		public abstract Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error);
 
 		/**
 		 * Clears internal counters "after" applyWorkspace.
