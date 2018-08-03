@@ -57,6 +57,17 @@ Setting-up a workspace
 * SQuireL http://squirrel-sql.sourceforge.net/
 * Apache Tomcat
 
+Disable DALI/JPT
+================
+Fixes the messages: "JPA Project Change Event Handler (waiting)"
+https://stackoverflow.com/questions/19649847/eclipse-jpa-project-change-event-handler-waiting
+
+cd <ECLIPSE_HOME>
+mkdir disabled
+mkdir disabled/features disabled/plugins
+mv plugins/org.eclipse.jpt.* disabled/plugins
+mv features/org.eclipse.jpt.* disabled/features
+
 Preferences
 ===========
 * File encodings: Window/Preferences

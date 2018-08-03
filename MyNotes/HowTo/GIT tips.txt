@@ -3,6 +3,43 @@ Git config
 git config --global http.sslVerify=false
 git config --global http.proxy socks5://localhost:12345
 
+Set Meld as git diff and git mergetool
+======================================
+https://stackoverflow.com/questions/34119866/setting-up-and-using-meld-as-your-git-difftool-and-mergetool
+* Add the following to your .gitconfig file.
+[diff]
+    tool = meld
+[difftool]
+    prompt = false
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
+[merge]
+    tool = meld
+[mergetool "meld"]
+    # Choose one of these 2 lines (not both!) explained below.
+    cmd = meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"
+    cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
+
+* OR use these commands:
+git config --global diff.tool meld
+git config --global difftool.meld.cmd 'meld "$LOCAL" "$REMOTE"'
+git config --global difftool.prompt false
+
+git config --global merge.tool meld
+git config --global mergetool.meld.cmd 'meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"'
+#git config --global mergetool.meld.cmd 'meld "$LOCAL" "$MERGED" "$REMOTE" --output "$MERGED"'
+git config --global mergetool.prompt false
+
+* Usage:
+git difftool <COMMIT_HASH> file_name
+git difftool <BRANCH_NAME> file_name
+git difftool <COMMIT_HASH_1> <COMMIT_HASH_2> file_name
+
+git checkout master
+git merge branch_name
+git mergetool
+
+
 Reset/restore a subdirectory
 ============================
 cd <git_repository_root>
@@ -35,7 +72,6 @@ echo -e "\nsource ~/.git-completion.bash" >> ~/.bashrc
 * In tcsh
 curl -o ~/.git-completion.tcsh https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.tcsh
 echo -e "\nsource ~/.git-completion.tcsh" >> ~/.cshrc
-
 
 Git squash/merge last two commits
 =================================

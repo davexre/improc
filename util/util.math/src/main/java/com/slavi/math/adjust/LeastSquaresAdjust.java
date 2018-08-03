@@ -117,7 +117,7 @@ public class LeastSquaresAdjust {
 				sumP = 1E-100;
 			log.info("Measurements: " + measurementCount +
 					", [P]: " + MathUtil.d4(getSumP()) +
-					", Sqrt([PLL]/[P]): " + MathUtil.d4(getMedianSquareError())
+					", Sqrt([PLL]/[P]): " + MathUtil.d4(getRootMeanSquareError())
 			);
 		}
 		SymmetricMatrix nmCopy = nm.makeCopy();
@@ -201,7 +201,7 @@ public class LeastSquaresAdjust {
 	/**
 	 * Ср.кв.гр.на измерване с тежест единица sqrt([PLL]/[P])
 	 */
-	public double getMedianSquareError() {
+	public double getRootMeanSquareError() {
 		if (sumP == 0.0)
 			return Double.POSITIVE_INFINITY;
 		return Math.sqrt(sumPLL / sumP);
@@ -243,7 +243,7 @@ public class LeastSquaresAdjust {
 		b.append("sumPLL                = " + Double.toString(sumPLL) + "\n");
 		b.append("sumP                  = " + Double.toString(sumP) + "\n");
 		b.append("sumLL                 = " + Double.toString(sumLL) + "\n");
-		b.append("medianSquareError     = " + Double.toString(getMedianSquareError()) + "\n");
+		b.append("medianSquareError     = " + Double.toString(getRootMeanSquareError()) + "\n");
 		b.append("Normal matrix\n");
 		b.append(nm.toString());
 		b.append("APL\n");
