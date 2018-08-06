@@ -33,6 +33,14 @@ insert into compare_msg values(21, 'Trigger found in sourceDB does not exist in 
 insert into compare_msg values(22, 'Trigger found in targetDB does not exist in sourceDB');
 insert into compare_msg values(23, 'The source code of (procedure, function, package, trigger) found in sourceDB does not exist in or match (sql) to one in targetDB');
 insert into compare_msg values(24, 'The source code of (procedure, function, package, trigger) found in targetDB does not exist in sourceDB');
+insert into compare_msg values(25, 'User type in sourceDB could not be matched to a user type in targetDB (name, # of attributes, # of methods)');
+insert into compare_msg values(26, 'User type in targetDB could not be matched to a user type in sourceDB (name, # of attributes, # of methods)');
+insert into compare_msg values(27, 'Attribute of user type in sourceDB could not be matched to an attribute of user type in targetDB (name, type, order, length, precision, scale)');
+insert into compare_msg values(28, 'Attribute of user type in targetDB could not be matched to an attribute of user type in sourceDB (name, type, order, length, precision, scale)');
+insert into compare_msg values(29, 'Source code for user type in sourceDB differs from source code of user type in targetDB');
+insert into compare_msg values(30, 'Source code for user type in targetDB differs from source code of user type in sourceDB');
+insert into compare_msg values(31, 'Method of user type in sourceDB could not be matched to a method of user type in targetDB (name, # of parameters, order, results)');
+insert into compare_msg values(32, 'Method of user type in targetDB could not be matched to a method of user type in sourceDB (name, # of parameters, order, results)');
 
 --------- Compare tables ---------
 
@@ -393,3 +401,137 @@ left join source1 R on
 	L.type = R.type
 where R.name is null
 group by L.name;
+
+--------- Compare user types ---------
+
+insert into compare(err_code, obj_name)
+select 25, L.type_name
+from types1 L
+left join types2 R on 
+	L.type_name = R.type_name and 
+	L.typecode = R.typecode and 
+	L.attributes = R.attributes and 
+	L.methods = R.methods and 
+	L.predefined = R.predefined and 
+	L.incomplete = R.incomplete and 
+	L.final = R.final
+where R.type_name is null;
+
+insert into compare(err_code, obj_name)
+select 26, L.type_name
+from types2 L
+left join types1 R on 
+	L.type_name = R.type_name and 
+	L.typecode = R.typecode and 
+	L.attributes = R.attributes and 
+	L.methods = R.methods and 
+	L.predefined = R.predefined and 
+	L.incomplete = R.incomplete and 
+	L.final = R.final
+left join compare c on c.obj_name = L.type_name and c.err_code = 25
+where R.type_name is null and c.err_code is null;
+
+--------- Compare attributes of user types ---------
+
+insert into compare(err_code, obj_name)
+select 27, L.type_name || '.' || L.attr_name
+from type_attrs1 L
+left join type_attrs2 R on 
+	L.type_name = R.type_name and 
+	L.attr_name = R.attr_name and 
+	ifnull(L.attr_type_mod, '<NULL>') = ifnull(R.attr_type_mod, '<NULL>') and
+	L.attr_type_name = R.attr_type_name and 
+	ifnull(L.length, '<NULL>') = ifnull(R.length, '<NULL>') and
+	ifnull(L.precision, '<NULL>') = ifnull(R.precision, '<NULL>') and
+	ifnull(L.scale, '<NULL>') = ifnull(R.scale, '<NULL>') and
+	ifnull(L.character_set_name, '<NULL>') = ifnull(R.character_set_name, '<NULL>') and
+	L.attr_no = R.attr_no and 
+	L.inherited = R.inherited
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26)
+where R.type_name is null and c.err_code is null;
+
+insert into compare(err_code, obj_name)
+select 28, L.type_name || '.' || L.attr_name
+from type_attrs2 L
+left join type_attrs1 R on 
+	L.type_name = R.type_name and 
+	L.attr_name = R.attr_name and 
+	ifnull(L.attr_type_mod, '<NULL>') = ifnull(R.attr_type_mod, '<NULL>') and
+	L.attr_type_name = R.attr_type_name and 
+	ifnull(L.length, '<NULL>') = ifnull(R.length, '<NULL>') and
+	ifnull(L.precision, '<NULL>') = ifnull(R.precision, '<NULL>') and
+	ifnull(L.scale, '<NULL>') = ifnull(R.scale, '<NULL>') and
+	ifnull(L.character_set_name, '<NULL>') = ifnull(R.character_set_name, '<NULL>') and
+	L.attr_no = R.attr_no and 
+	L.inherited = R.inherited
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26)
+left join compare c2 on c2.obj_name = L.type_name || '.' || L.attr_name and c.err_code = 27
+where R.type_name is null and c.err_code is null and c2.err_code is null;
+
+--------- Compare source code of user types ---------
+
+insert into compare(err_code, obj_name)
+select 29, L.type_name
+from type_versions1 L
+left join type_versions2 R on 
+	L.type_name = R.type_name and 
+	L."version#" = R."version#" and 
+	L.typecode = R.typecode and 
+	L.status = R.status and 
+	L.line = R.line and 
+	L.text = R.text and 
+	L.hashcode = R.hashcode
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26)
+where R.type_name is null and c.err_code is null
+group by L.type_name;
+
+insert into compare(err_code, obj_name)
+select 30, L.type_name
+from type_versions2 L
+left join type_versions1 R on 
+	L.type_name = R.type_name and 
+	L."version#" = R."version#" and 
+	L.typecode = R.typecode and 
+	L.status = R.status and 
+	L.line = R.line and 
+	L.text = R.text and 
+	L.hashcode = R.hashcode
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26, 29)
+where R.type_name is null and c.err_code is null
+group by L.type_name;
+
+--------- Compare methods of user types ---------
+
+insert into compare(err_code, obj_name)
+select 31, L.type_name || '.' || L.method_name
+from type_methods1 L
+left join type_methods2 R on 
+	L.type_name = R.type_name and 
+	L.method_name = R.method_name and 
+	L.method_no = R.method_no and 
+	L.method_type = R.method_type and 
+	L.parameters = R.parameters and 
+	L.results = R.results and 
+	L.final = R.final and 
+	L.instantiable = R.instantiable and 
+	L.inherited = R.inherited
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26)
+where R.type_name is null and c.err_code is null;
+
+insert into compare(err_code, obj_name)
+select 32, L.type_name || '.' || L.method_name
+from type_methods2 L
+left join type_methods1 R on 
+	L.type_name = R.type_name and 
+	L.method_name = R.method_name and 
+	L.method_no = R.method_no and 
+	L.method_type = R.method_type and 
+	L.parameters = R.parameters and 
+	L.results = R.results and 
+	L.final = R.final and 
+	L.instantiable = R.instantiable and 
+	L.inherited = R.inherited
+left join compare c on c.obj_name = L.type_name and c.err_code in (25, 26)
+left join compare c2 on c2.obj_name = L.type_name || '.' || L.method_name and c.err_code = 31
+where R.type_name is null and c.err_code is null and c2.err_code is null;
+

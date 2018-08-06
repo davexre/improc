@@ -76,7 +76,7 @@ public class Main {
 		String msg = null;
 		List<String> lst = null;
 		Statement st = sqlite.createStatement();
-		ResultSet rs = st.executeQuery("select m.message, c.obj_name from compare c join compare_msg m on m.err_code = c.err_code order by 1,2");
+		ResultSet rs = st.executeQuery("select m.message, c.obj_name from compare c join compare_msg m on m.err_code = c.err_code order by c.err_code, c.obj_name");
 		boolean hasErrors = false;
 		while (rs.next()) {
 			String tmp = StringUtils.trimToEmpty(rs.getString(1));
