@@ -86,7 +86,7 @@ public class MyMnistDataTest {
 		System.out.println(nb.describe());
 		Network net = nb.build();
 		System.out.println(net.get(1));
-		Trainer.train(net, trainset, 1000);
+		Trainer.train(net, trainset, 2);
 		System.out.println(net.get(1));
 	}
 

@@ -1,5 +1,7 @@
 package com.slavi.ann.test.v2.connection;
 
+import org.apache.commons.math3.linear.RealVector;
+
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.MatrixUtil;
@@ -21,6 +23,25 @@ public class ConvolutionLayer extends Layer {
 		int sizeOX = (int) Math.ceil(((double) inputSize[0] / kernel.getSizeX()));
 		int sizeOY = (int) Math.ceil(((double) inputSize[1] / kernel.getSizeY()));
 		return new int[] { sizeOX, sizeOY };
+	}
+
+	@Override
+	public void extractParams(RealVector delta, int coefIndex) {
+		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
+			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
+				delta.setEntry(coefIndex++, kernel.getItem(i, j));
+			}
+		}
+	}
+
+	@Override
+	public void applyDeltaToParams(RealVector delta, int coefIndex) {
+		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
+			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
+				double r = delta.getEntry(coefIndex++);
+				kernel.itemAdd(i, j, r);
+			}
+		}
 	}
 
 	@Override

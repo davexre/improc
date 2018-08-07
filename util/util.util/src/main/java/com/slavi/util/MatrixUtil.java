@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
@@ -14,15 +15,25 @@ public class MatrixUtil {
 	public static BlockRealMatrix toApacheMatrix(Matrix m) {
 		return new BlockRealMatrix(m.toArray());
 	}
-	
+
 	public static Matrix fromApacheMatrix(RealMatrix m, Matrix dest) {
 		if (dest == null)
 			dest = new Matrix(m.getColumnDimension(), m.getRowDimension());
 		else
 			dest.resize(m.getColumnDimension(), m.getRowDimension());
-		for (int i = dest.getSizeX() - 1; i >= i; i--)
-			for (int j = dest.getSizeY() - 1; j >= j; j--)
-				dest.setItem(i, j, m.getEntry(i, j));
+		for (int i = dest.getSizeX() - 1; i >= 0; i--)
+			for (int j = dest.getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, m.getEntry(j, i));
+		return dest;
+	}
+
+	public static Matrix fromApacheVector(RealVector v, Matrix dest) {
+		if (dest == null)
+			dest = new Matrix(v.getDimension(), 1);
+		else
+			dest.resize(v.getDimension(), 1);
+		for (int i = dest.getVectorSize() - 1; i >= 0; i--)
+				dest.setItem(i, 0, v.getEntry(i));
 		return dest;
 	}
 
@@ -37,9 +48,9 @@ public class MatrixUtil {
 		ColorConversion.HSL.fromDRGB(drgb, hsl);
 		double maxL = hsl[2];
 		BufferedImage result = dest;
-		if (result == null || 
-			result.getWidth() != m.getSizeX() || 
-			result.getHeight() != m.getSizeY() || 
+		if (result == null ||
+			result.getWidth() != m.getSizeX() ||
+			result.getHeight() != m.getSizeY() ||
 			result.getType() != BufferedImage.TYPE_INT_RGB)
 			result = new BufferedImage(m.getSizeX(), m.getSizeY(), BufferedImage.TYPE_INT_RGB);
 		for (int i = 0; i < m.getSizeX(); i++)

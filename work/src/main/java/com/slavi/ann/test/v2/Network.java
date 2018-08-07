@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.math3.linear.RealVector;
+
 import com.slavi.math.matrix.Matrix;
 
 public class Network extends Layer implements Iterable<Layer>{
@@ -38,6 +40,22 @@ public class Network extends Layer implements Iterable<Layer>{
 			inputSize = l.getOutputSize(inputSize);
 		}
 		return inputSize;
+	}
+
+	@Override
+	public void extractParams(RealVector delta, int startingIndex) {
+		for (Layer l : layers) {
+			l.extractParams(delta, startingIndex);
+			startingIndex += l.getNumAdjustableParams();
+		}
+	}
+
+	@Override
+	public void applyDeltaToParams(RealVector delta, int startingIndex) {
+		for (Layer l : layers) {
+			l.applyDeltaToParams(delta, startingIndex);
+			startingIndex += l.getNumAdjustableParams();
+		}
 	}
 
 	public int getNumAdjustableParams() {

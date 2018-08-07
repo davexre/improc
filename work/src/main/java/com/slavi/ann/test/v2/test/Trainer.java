@@ -1,11 +1,16 @@
 package com.slavi.ann.test.v2.test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 
 import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Layer;
@@ -15,6 +20,7 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.MatrixUtil;
 
 public class Trainer {
 
@@ -69,7 +75,7 @@ public class Trainer {
 		return d;
 	}
 
-	public static void train(Layer l, Iterable<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
+	public static void train(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
 		Matrix error = new Matrix();
@@ -88,6 +94,9 @@ public class Trainer {
 		outDir.mkdirs();*/
 
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
+		RealMatrix jacobian = new Array2DRowRealMatrix(trainset.size(), numAdjustableParams);
+		RealVector residuals = new ArrayRealVector(trainset.size());
+		RealVector params = new ArrayRealVector(trainset.size());
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
 			System.out.println("--------------------- EPOCH "  + epoch);
@@ -108,9 +117,11 @@ public class Trainer {
 				error.resize(output.getSizeX(), output.getSizeY());
 				absError.resize(output.getSizeX(), output.getSizeY());
 				double L = 0;
+				double R = 0;
 				for (int i = target.getVectorSize() - 1; i >= 0; i--) {
 					double e = output.getVectorItem(i) - target.getVectorItem(i);
 					L += e;
+					R += e*e;
 					error.setVectorItem(i, e);
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
@@ -124,7 +135,10 @@ public class Trainer {
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));
 				coefs.make0();
 				Matrix inputError = ws.backPropagate(coefs, 0, error);
-				lsa.addMeasurement(coefs, 1, L, 0);
+				//lsa.addMeasurement(coefs, 1, L, 0);
+				for (int i = 0; i < numAdjustableParams; i++)
+					jacobian.setEntry(index, i, coefs.getItem(i, 0));
+				residuals.setEntry(index, R);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
 				if (print) {
@@ -132,8 +146,16 @@ public class Trainer {
 				}
 				index++;
 			}
-			if (!lsa.calculate())
-				throw new Error("LSA failed");
+			//System.out.println("\n\nJ=" + MatrixUtils.OCTAVE_FORMAT.format(jacobian));
+			//System.out.println("\n\n" + MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
+			l.extractParams(params, 0);
+			System.out.println(MatrixUtil.fromApacheVector(params, null).toMatlabString("P"));
+			System.out.println(MatrixUtil.fromApacheVector(residuals, null).toMatlabString("R"));
+			RealVector x = new SingularValueDecomposition(jacobian).getSolver().solve(residuals);
+			System.out.println(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
+			/*if (!lsa.calculate())
+				throw new Error("LSA failed");*/
+
 			stAbsError.stop();
 			stInputError.stop();
 			st.stop();
@@ -188,6 +210,7 @@ public class Trainer {
 /*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
+			l.applyDeltaToParams(x, 0);
 			l.resetEpoch(wslist);
 		}
 	}

@@ -1,5 +1,7 @@
 package com.slavi.ann.test.v2.connection;
 
+import org.apache.commons.math3.linear.RealVector;
+
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.adjust.MatrixStatistics;
@@ -21,6 +23,25 @@ public class FullyConnectedLayer extends Layer {
 		if (inputSize[0] * inputSize[1]  != weight.getSizeX())
 			throw new Error("Invalid argument");
 		return new int[] { weight.getSizeY(), 1 };
+	}
+
+	@Override
+	public void extractParams(RealVector delta, int coefIndex) {
+		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
+			for (int i = weight.getSizeX() - 1; i >= 0; i--) {
+				delta.setEntry(coefIndex++, weight.getItem(i, j));
+			}
+		}
+	}
+
+	@Override
+	public void applyDeltaToParams(RealVector delta, int coefIndex) {
+		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
+			for (int i = weight.getSizeX() - 1; i >= 0; i--) {
+				double r = delta.getEntry(coefIndex++);
+				weight.itemAdd(i, j, r);
+			}
+		}
 	}
 
 	@Override

@@ -2,6 +2,8 @@ package com.slavi.ann.test.v2;
 
 import java.util.List;
 
+import org.apache.commons.math3.linear.RealVector;
+
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.improc.parallel.PGaussianFilter;
 import com.slavi.math.matrix.Matrix;
@@ -14,6 +16,9 @@ public abstract class Layer {
 	public int getNumAdjustableParams() {
 		return 0;
 	};
+
+	public void extractParams(RealVector delta, int startingIndex) { }
+	public void applyDeltaToParams(RealVector delta, int startingIndex) { }
 
 	public abstract LayerWorkspace createWorkspace();
 
