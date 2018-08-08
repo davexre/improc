@@ -37,7 +37,7 @@ class InternalScriptRunner extends ScriptRunner2 {
 		if (tables != null && sqlCounter < tables.length) {
 			replaceT = tables[sqlCounter];
 		} else {
-			replaceT = replaceN;
+			replaceT = "table_" + replaceN;
 		}
 
 		String startName = StringUtils.trimToNull(fnpattern.replaceAll("%t", replaceT).replaceAll("%d", replaceD).replaceAll("%n", replaceN));

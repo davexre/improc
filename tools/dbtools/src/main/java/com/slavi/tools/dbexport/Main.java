@@ -17,19 +17,29 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.slavi.tools.dbcompare.JdbcCompare;
+
 public class Main {
 	public static int main0(String[] args) throws Exception {
 		Options options = new Options();
 		options.addOption("h", "help", false, "Display this help");
+
 		options.addOption("sql", null, true, "SQL to use export data");
 		options.addOption("sf", "sqlFile", true, "Read sql commands from file");
 		options.addOption("t", "tables", true, "List of tables to export. Separator can be space, comma, semi column or column");
+
 		options.addOption("c", "createScript", false, "Generate a create table script");
 		options.addOption("f", "file", true, "Pattern to use for output file names. Use %t (table name), %n (sql number), %d (date stamp)");
+		options.addOption("mode", null, true, "Output format mode. Default is excel");
+
 		options.addOption("url", "", true, "Connect string to database");
 		options.addOption("u", "user", true, "User name to connect to database");
 		options.addOption("p", "password", true, "Password to connect to database");
-		options.addOption("mode", null, true, "Output format mode. Default is excel");
+
+		options.addOption("turl", "targetUrl", true, "Connect string to target database");
+		options.addOption("tu", "targetUser", true, "User name to connect to target database");
+		options.addOption("tp", "targetPassword", true, "Password to connect to target database");
+		options.addOption("et", "existingTables", true, "Action to take on existing tables in target database");
 		CommandLineParser clp = new DefaultParser();
 		boolean showHelp = true;
 		CommandLine cl = null;
@@ -53,10 +63,26 @@ public class Main {
 
 			String format = cl.getOptionValue("mode", "excel");
 			String defaultExtension = ".csv";
+			String defaultFileNamePattern = "output" + defaultExtension;
 			ExportResultSet exporter = null;
+			boolean sortRecords = true;
 			switch (format) {
+				case "targetDb":
+					defaultExtension = "";
+					defaultFileNamePattern = "%t";
+					sortRecords = false;
+					Connection targetConn = null;
+					if (cl.hasOption("tu")) {
+						targetConn = DriverManager.getConnection(cl.getOptionValue("turl"), cl.getOptionValue("tu"), cl.getOptionValue("tp"));
+					} else {
+						targetConn = DriverManager.getConnection(cl.getOptionValue("turl"));
+					}
+					exporter = new TargetDbExport(targetConn, cl.getOptionValue("et", "drop"), JdbcCompare.commitEveryNumRows);
+					break;
+
 				case "sql":
 					defaultExtension = ".sql";
+					defaultFileNamePattern = "output" + defaultExtension;
 					exporter = new SQLExport();
 					break;
 
@@ -84,7 +110,7 @@ public class Main {
 
 			InternalScriptRunner sr = new InternalScriptRunner(conn);
 			sr.exporter = exporter;
-			sr.fnpattern = cl.getOptionValue("f", "output" + defaultExtension);
+			sr.fnpattern = cl.getOptionValue("f", defaultFileNamePattern);
 			sr.createTablesScript = cl.hasOption("c");
 
 			Reader fin;
@@ -103,7 +129,10 @@ public class Main {
 					String tt = StringUtils.trimToNull(t);
 					if (tt == null)
 						continue;
-					sb.append("select * from ").append(tt).append(" order by 1;\n");
+					sb.append("select * from ").append(tt);
+					if (sortRecords)
+						sb.append(" order by 1");
+					sb.append(";\n");
 				}
 				fin = new StringReader(sb.toString());
 				sr.tables = tables;

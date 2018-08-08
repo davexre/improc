@@ -22,12 +22,44 @@ public class TestDbExport {
 			"-p", "spetrov"
 		};
 
+	static String[] exportTablesTargetDb = new String[] {
+			"-mode", "targetDb",
+			"-t", "aa_tmp_change_first_name, user_tables",
+			"-url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
+			"-u", "spetrov",
+			"-p", "spetrov",
+			"-turl", "jdbc:sqlite:target/targetDb.sqlite"
+		};
+
+	static String[] exportSqlTargetDb = new String[] {
+			"-mode", "targetDb",
+			"-sql", "select * from user_tab_columns",
+			"-url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
+			"-u", "spetrov",
+			"-p", "spetrov",
+			"-turl", "jdbc:sqlite:target/targetDb.sqlite",
+			"-et", "append"
+		};
+
+	static String[] exportSqlTargetDb2 = new String[] {
+			"-mode", "targetDb",
+			"-sql", "select sysdate, current_date, sys_context('userenv','current_schema') from dual;",
+			"-url", "jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=sofracpci.sofia.ifao.net)(PORT=1677)))(CONNECT_DATA=(SERVICE_NAME=devcytr_srv.sofia.ifao.net)))",
+			"-u", "spetrov",
+			"-p", "spetrov",
+			"-turl", "jdbc:sqlite:target/targetDb.sqlite",
+			"-et", "append"
+		};
+
 	public static void main(String[] args) throws Exception {
 		String[][] all_args = new String[][] {
 			exportTables,
-			exportTablesSql
+			exportTablesSql,
+			exportTablesTargetDb,
+			exportSqlTargetDb,
+			exportSqlTargetDb2,
 		};
-		args = all_args[1];
+		args = all_args[4];
 		Main.main(args);
 	}
 }

@@ -84,6 +84,7 @@ htop                        \
 iftop                       \
 imagemagick                 \
 inkscape                    \
+inotify-tools               \
 iperf                       \
 iptraf                      \
 iotop                       \
@@ -118,6 +119,8 @@ pdfshufler                  \
 ppa-purge                   \
 python-pip                  \
 python-qgis                 \
+python3                     \
+python3-tk                  \
 qgis                        \
 qgis-plugin-grass           \
 rar                         \

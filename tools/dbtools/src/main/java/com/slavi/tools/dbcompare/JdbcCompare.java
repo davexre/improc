@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.slavi.dbutil.DbUtil;
 
 public class JdbcCompare {
-	static final int commitEveryNumRows = 10000;
+	public static final int commitEveryNumRows = 10000;
 
 	static void copyRS(ResultSet rs, Connection targetConn, String targetTable, boolean createTargetTable) throws SQLException {
 		if (createTargetTable) {
