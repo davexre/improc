@@ -16,7 +16,7 @@
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
- 			<pattern>%date{HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n</pattern>
+			<pattern>%date{HH:mm:ss.SSS}|%-5level|%-10logger| %msg%n</pattern>
 		</encoder>
 	</appender>
 
@@ -34,7 +34,7 @@
 
 	<logger name="com.slavi.example.logging.Log4J" level="info" />
 
-	<logger name="dummyLogger" level="info" additivity="false">
+	<logger name="dummyLogger" level="error" additivity="false">
 		<appender-ref ref="STDOUT2" />
 		<appender-ref ref="my.appender.file" />
 	</logger>
