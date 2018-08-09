@@ -127,9 +127,6 @@ public class ConvolutionLayer extends Layer {
 			int padY = (input.getSizeY() % kernel.getSizeY()) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			for (int i = kernel.getVectorSize() - 1; i >= 0; i--)
-				coefs.setItem(startingIndex + i, 0, 0);
-
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = error.getItem(ox, oy);
@@ -150,6 +147,9 @@ public class ConvolutionLayer extends Layer {
 					}
 				}
 			}
+/*			for (int i = kernel.getVectorSize() - 1; i >= 0; i--) {
+				coefs.vectorItemMul(startingIndex + i, 1.0 / output.getVectorSize());
+			}*/
 			return inputError;
 		}
 

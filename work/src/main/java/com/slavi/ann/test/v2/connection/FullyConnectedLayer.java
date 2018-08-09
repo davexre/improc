@@ -115,9 +115,6 @@ public class FullyConnectedLayer extends Layer {
 			outputError.mMaxAbs(error, outputError);
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			for (int i = weight.getVectorSize() - 1; i >= 0; i--)
-				coefs.setItem(startingIndex + i, 0, 0);
-
 			int coefIndex = startingIndex;
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = error.getVectorItem(j);
@@ -125,7 +122,7 @@ public class FullyConnectedLayer extends Layer {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
-					coefs.itemAdd(coefIndex++, 0, -dw);
+					coefs.setItem(coefIndex++, 0, -dw);
 					tmp.setItem(i, j, -dw);
 				}
 			}

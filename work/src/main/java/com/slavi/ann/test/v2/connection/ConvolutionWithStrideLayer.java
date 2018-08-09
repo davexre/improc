@@ -126,9 +126,6 @@ public class ConvolutionWithStrideLayer extends Layer {
 			int padY = (kernel.getSizeY() - strideY) / 2;
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			for (int i = kernel.getVectorSize() - 1; i >= 0; i--)
-				coefs.setItem(startingIndex + i, 0, 0);
-
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = error.getItem(ox, oy);

@@ -14,6 +14,14 @@
 		</triggeringPolicy>
 	</appender> -->
 
+	<appender name="my.appender.log" class="ch.qos.logback.core.FileAppender">
+		<file>target/log.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<!-- <pattern>%date{HH:mm:ss.SSS}|%-5level|%-30.-30logger| %msg%n</pattern> -->
@@ -26,6 +34,10 @@
 			<pattern>%msg%n</pattern>
 		</encoder>
 	</appender>
+
+	<logger level="all" name="LOG" additivity="false">
+		<appender-ref ref="my.appender.log" />
+	</logger>
 
 	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
 

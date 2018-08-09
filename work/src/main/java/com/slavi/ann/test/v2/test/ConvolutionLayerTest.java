@@ -39,7 +39,7 @@ public class ConvolutionLayerTest {
 			trainset.add(new BinaryDigitsPattern(i));
 
 		Network net = new NetworkBuilder(4, 4)
-//				.addConvolutionLayer(3)
+				.addConvolutionLayer(3)
 //				.addConvolutionSameSizeLayer(3)
 //				.addSubsamplingAvgLayer(2)
 //				.addFullyConnectedLayer(4)
@@ -62,7 +62,7 @@ public class ConvolutionLayerTest {
 //				new FullyConnectedLayer(10, 4, 1)
 				);
 */
-		Trainer.train(net, trainset, 100);
+		Trainer.train(net, trainset, 4);
 	}
 
 	public static void main(String[] args) throws Exception {

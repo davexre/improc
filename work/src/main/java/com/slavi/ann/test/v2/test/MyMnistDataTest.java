@@ -55,13 +55,13 @@ public class MyMnistDataTest {
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
 				// MNIST data
-				.addConstScaleAndBiasLayer(2, -1)
-				.addConvolutionLayer(5)
+				//.addConstScaleAndBiasLayer(2, -1)
+				//.addConvolutionLayer(5)
 				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				//.addConstScaleAndBiasLayer(10.0 / 25, -5)
-				.addDebugLayer("A2", Statistics.CStatDetail, Statistics.CStatDetail)
+				//.addDebugLayer("A2", Statistics.CStatDetail, Statistics.CStatDetail)
 				//.addDebugLayer("WTF", Statistics.CStatMinMax, Statistics.CStatMinMax)
-				.addSigmoidLayer()
+				//.addSigmoidLayer()
 				//.addFullyConnectedLayer(10).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				//.addDebugLayer("last", DebugLayer.off)
@@ -86,7 +86,7 @@ public class MyMnistDataTest {
 		System.out.println(nb.describe());
 		Network net = nb.build();
 		System.out.println(net.get(1));
-		Trainer.train(net, trainset, 2);
+		Trainer.train(net, trainset, 4);
 		System.out.println(net.get(1));
 	}
 
