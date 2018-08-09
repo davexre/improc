@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 
-import com.slavi.util.PropertyUtil;
-
 public class TestStrSubstitutor {
 
 	public void doIt(String[] args) throws Exception {
