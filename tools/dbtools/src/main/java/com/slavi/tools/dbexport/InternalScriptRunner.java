@@ -37,7 +37,7 @@ class InternalScriptRunner extends ScriptRunner2 {
 		if (tables != null && sqlCounter < tables.length) {
 			replaceT = tables[sqlCounter];
 		} else {
-			replaceT = "table_" + replaceN;
+			replaceT = "TABLE_" + replaceN;
 		}
 
 		String startName = StringUtils.trimToNull(fnpattern.replaceAll("%t", replaceT).replaceAll("%d", replaceD).replaceAll("%n", replaceN));
@@ -83,7 +83,7 @@ class InternalScriptRunner extends ScriptRunner2 {
 					if (tables != null && sqlCounter < tables.length) {
 						tableName = tables[sqlCounter];
 					} else {
-						tableName = FilenameUtils.getBaseName(fou);
+						tableName = FilenameUtils.getBaseName(fou).toUpperCase();
 					}
 					if (createTablesScript) {
 						ResultSetMetaData meta = rs.getMetaData();

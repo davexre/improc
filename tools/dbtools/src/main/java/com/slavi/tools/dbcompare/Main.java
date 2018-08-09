@@ -1,6 +1,8 @@
 package com.slavi.tools.dbcompare;
 
+import java.io.File;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -106,10 +108,11 @@ public class Main {
 		options.addOption("url", "", true, "Connect string to database");
 		options.addOption("u", "user", true, "User name to connect to database");
 		options.addOption("p", "password", true, "Password to connect to database");
-		options.addOption("mode", "", true, "Compare using metadata from JDBC driver. Use jdbc or oracle. Default is jdbc.");
+		options.addOption("mode", "", true, "Compare using metadata from JDBC driver. Use jdbc or oracle. Default is jdbc");
 		options.addOption("jdbcschema", "", true, "Schema for which to import metdata");
 		options.addOption("sdb", "sourcedb", true, "File containing source db metadata");
 		options.addOption("tdb", "targetdb", true, "File containing target db metadata");
+		options.addOption("r", "reportFile", true, "File to write the comparison report. Default is stdout");
 		CommandLineParser clp = new DefaultParser();
 		boolean showHelp = true;
 		CommandLine cl = null;
@@ -167,6 +170,7 @@ public class Main {
 				break;
 			case "compare":
 				if (cl.hasOption("sdb") && cl.hasOption("tdb")) {
+					PrintStream out = cl.hasOption("r") ? new PrintStream(new File(cl.getOptionValue("r"))) : System.out;
 					Connection sourceConn = DriverManager.getConnection("jdbc:sqlite:" + cl.getOptionValue("sdb"));
 					Connection targetConn = DriverManager.getConnection("jdbc:sqlite:" + cl.getOptionValue("tdb"));
 					String sourceMode = StringUtils.trimToEmpty(getSetting(sourceConn, "mode"));
@@ -191,8 +195,10 @@ public class Main {
 					String compareScript = "oracle".equals(sourceMode) ? "OracleCompare.sql" : "JdbcCompare.sql";
 					StringBuilder report = new StringBuilder();
 					boolean hasErrors = compare(sqlite, report, compareScript);
-					System.out.print(report);
+					out.print(report);
 
+					if (cl.hasOption("r"))
+						out.close();
 					sqlite.commit();
 					sqlite.close();
 

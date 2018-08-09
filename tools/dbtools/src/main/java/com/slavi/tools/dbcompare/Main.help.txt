@@ -24,6 +24,7 @@ Available options for command compare:
   -f,--file <file>           File to store comparison data. Default is :memory:, i.e. empty/none.
   -sdb,--sourcedb <file>     File containing source db metadata.
   -tdb,--targetdb <file>     File containing target db metadata.
+  -r,--reportFile <file>     File to write the comparison report. Default is stdout.
 
 Examples:
   dbcompare get -f data.sqlite -mode oracle -u 'scott' -p 'tiger' -url 'localhost:1521:XE'

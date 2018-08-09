@@ -4,6 +4,16 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 
+<!-- 
+In case other drivers are needed use respectively
+
+	mvn clean package -P mysql,mssql,derby,hsqldb,h2
+
+In order to include all jdbcs in the target jar use:
+
+	mvn package -Dalljdbc
+-->
+
 	<parent>
 		<groupId>com.slavi</groupId>
 		<artifactId>tools</artifactId>

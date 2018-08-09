@@ -6,6 +6,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.dbutils.DbUtils;
+
 import com.slavi.dbutil.DbUtil;
 
 class TargetDbExport implements ExportResultSet {
@@ -20,11 +22,15 @@ class TargetDbExport implements ExportResultSet {
 		this.commitEveryNumRows = commitEveryNumRows;
 	}
 
+	public void close() {
+		DbUtils.closeQuietly(conn);
+	};
+
 	public void export(ResultSet rs, String fouName, String tableName) throws Exception {
 		conn.setAutoCommit(false);
 		Statement tst = conn.createStatement();
 		boolean tableExists = true;
-		try (ResultSet trs = tst.executeQuery("select * from " + tableName + " where 1=0")) {
+		try (ResultSet trs = tst.executeQuery("select * from \"" + tableName + "\" where 1=0")) {
 		} catch (SQLException e) {
 			tableExists = false;
 		};
@@ -32,13 +38,13 @@ class TargetDbExport implements ExportResultSet {
 		boolean useColumnNames = true;
 		if ("truncate".equals(existingTables)) {
 			if (tableExists) {
-				tst.executeUpdate("delete from " + tableName);
+				tst.executeUpdate("delete from \"" + tableName + "\"");
 			}
 		} else if ("append".equals(existingTables)) {
 			// Do nothing
 		} else { // if ("drop".equals(existingTables)) {
 			if (tableExists) {
-				tst.executeUpdate("drop table " + tableName);
+				tst.executeUpdate("drop table \"" + tableName + "\"");
 				tableExists = false;
 			}
 		}

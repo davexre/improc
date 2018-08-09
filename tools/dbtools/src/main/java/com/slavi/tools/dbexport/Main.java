@@ -125,11 +125,17 @@ public class Main {
 			} else if (cl.hasOption("t")) {
 				StringBuilder sb = new StringBuilder();
 				String tables[] = StringUtils.split(cl.getOptionValue("t"), " ,;:");
-				for (String t : tables) {
+				for (int i = 0; i < tables.length; i++) {
+					String t = tables[i];
 					String tt = StringUtils.trimToNull(t);
 					if (tt == null)
 						continue;
-					sb.append("select * from ").append(tt);
+					if (tt.startsWith("\"") && tt.endsWith("\"") && tt.length() > 1) {
+						tt = tt.substring(1, tt.length() - 1);
+					} else {
+						tt = tt.toUpperCase();
+					}
+					sb.append("select * from \"").append(tt).append("\"");
 					if (sortRecords)
 						sb.append(" order by 1");
 					sb.append(";\n");
@@ -144,6 +150,7 @@ public class Main {
 
 			sr.runScript(fin);
 
+			exporter.close();
 			fin.close();
 			conn.close();
 			showHelp = false;
