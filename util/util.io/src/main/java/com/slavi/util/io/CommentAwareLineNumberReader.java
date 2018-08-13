@@ -9,7 +9,7 @@ import java.io.Reader;
  */
 public class CommentAwareLineNumberReader extends Reader implements LineReader {
 	String commentChars = "#";
-	private int lineNumber = 0;
+	private int lineNumber = 1;
 	Reader in;
 
 	public CommentAwareLineNumberReader(Reader in) {
@@ -37,25 +37,26 @@ public class CommentAwareLineNumberReader extends Reader implements LineReader {
 			if (curChar < 0)
 				return null;
 			StringBuilder sb = new StringBuilder();
-			//boolean newLine = this.newLine;
 			while (true) {
 				read();
 				if (curChar < 0)
 					break;
 				if (curChar == '\r' || curChar == '\n') {
-					if (!newLine)
+					if (newLine)
 						break;
 				} else {
 					sb.append((char) curChar);
 				}
 			}
+			if (curChar < 0 && sb.length() == 0)
+				return null;
 			return sb.toString();
 		}
 	}
 
 	int previousChar = 0;
-	int curChar = 0;
-	boolean newLine = true;
+	int curChar = '\n';
+	boolean newLine = false;
 
 	private void read0() throws IOException {
 		if (newLine)
@@ -81,11 +82,13 @@ public class CommentAwareLineNumberReader extends Reader implements LineReader {
 	public int read() throws IOException {
 		synchronized (lock) {
 			read0();
-			while (newLine && commentChars.indexOf(curChar) >= 0) {
+			while ((previousChar == '\r' || previousChar == '\n') && commentChars.indexOf(curChar) >= 0) {
 				while (true) {
 					read0();
-					if (curChar < 0 || newLine)
+					if (curChar < 0 || newLine) {
+						read0();
 						break;
+					}
 				}
 			}
 			return curChar;

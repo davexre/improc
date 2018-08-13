@@ -132,7 +132,7 @@ public class Trainer {
 
 				if (absError.max() < 0.15)
 					patternsLearend++;
-				st.addValue(absError.max());
+				st.addValue(absError.sumAll());
 				stAbsError.addValue(absError);
 				//errors.add(new DatapointTrainResult(index, pair, absError.sumAll() / absError.getVectorSize()));
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));
@@ -185,8 +185,8 @@ public class Trainer {
 			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
 			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
 			System.out.println("maxErrPair:       " + errors.get(0).pair.getName());
-			System.out.println("avgMaxError:      " + MathUtil.d4(st.getAvgValue()));
-			System.out.println("stdMaxError:      " + MathUtil.d4(st.getStdDeviation()));
+			System.out.println("avgSumError:      " + MathUtil.d4(st.getAvgValue()));
+			System.out.println("stdSumError:      " + MathUtil.d4(st.getStdDeviation()));
 			System.out.println("sumAvgError:      " + MathUtil.d4(avgError));
 			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
 			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
