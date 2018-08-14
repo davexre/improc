@@ -102,6 +102,7 @@ public class Trainer {
 		RealVector params = new ArrayRealVector(numAdjustableParams);
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
+			lsa.clear();
 			System.out.println("--------------------- EPOCH "  + epoch);
 			stAbsError.start();
 			stInputError.start();
@@ -138,7 +139,7 @@ public class Trainer {
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));
 				coefs.make0();
 				Matrix inputError = ws.backPropagate(coefs, 0, error);
-				//lsa.addMeasurement(coefs, 1, L, 0);
+				lsa.addMeasurement(coefs, 1, L, 0);
 				for (int i = 0; i < numAdjustableParams; i++)
 					jacobian.setEntry(index, i, coefs.getItem(i, 0));
 				residuals.setEntry(index, R/2);
@@ -158,8 +159,9 @@ public class Trainer {
 			SingularValueDecomposition svd = new SingularValueDecomposition(jacobian);
 			RealVector x = svd.getSolver().solve(residuals);
 			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
-			/*if (!lsa.calculate())
-				throw new Error("LSA failed");*/
+			if (!lsa.calculate())
+				throw new Error("LSA failed");
+			x = MatrixUtil.toApacheVector(lsa.getUnknown());
 
 			stAbsError.stop();
 			stInputError.stop();
@@ -190,8 +192,10 @@ public class Trainer {
 			System.out.println("sumAvgError:      " + MathUtil.d4(avgError));
 			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
 			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
-			System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
-			System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
+			if (epoch > 0) {
+				System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
+				System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
+			}
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
 			lastAvgError = avgError;

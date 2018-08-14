@@ -2,6 +2,7 @@ package com.slavi.util;
 
 import java.awt.image.BufferedImage;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
@@ -11,6 +12,17 @@ import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MatrixUtil {
+
+	public static ArrayRealVector toApacheVector(Matrix m) {
+		if (m.getSizeX() == 1 || m.getSizeY() == 1) {
+			double mm[] = new double[m.getVectorSize()];
+			for (int i = m.getVectorSize() - 1; i >= 0; i--)
+				mm[i] = m.getVectorItem(i);
+			return new ArrayRealVector(mm);
+		} else {
+			throw new Error("Invalid size [" + m.getSizeX() + ", " + m.getSizeY() + "]");
+		}
+	}
 
 	public static BlockRealMatrix toApacheMatrix(Matrix m) {
 		return new BlockRealMatrix(m.toArray());

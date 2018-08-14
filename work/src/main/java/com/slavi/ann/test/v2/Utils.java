@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Random;
 
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.ann.test.v2.activation.DebugLayer;
@@ -203,5 +204,11 @@ public class Utils {
 		g.fillRect(0, 0, bi.getWidth(), bi.getHeight());
 		dl.draw(g, ws, inputSize);
 		return bi;
+	}
+
+	public static void randomMatrix(Matrix dest) {
+		Random random = new Random();
+		for (int i = dest.getVectorSize() - 1; i >= 0; i--)
+			dest.setVectorItem(i, random.nextDouble());
 	}
 }

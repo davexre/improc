@@ -10,6 +10,8 @@ import java.util.StringTokenizer;
 import org.apache.commons.lang3.StringUtils;
 
 import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.v2.Utils;
+import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.io.CommentAwareLineNumberReader;
 import com.slavi.util.io.LineReader;
@@ -62,6 +64,22 @@ public class ConvolutionTestData {
 				p.output = loadMatrix(inSizeX, inSizeY, lr);
 				r.add(p);
 			}
+		}
+		return r;
+	}
+
+	public static List<ConvolutionTestDataPoint> generateDataSet(Matrix kernel, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
+		List<ConvolutionTestDataPoint> r = new ArrayList<>();
+		ConvolutionLayer l = new ConvolutionLayer(kernel.getSizeX(), kernel.getSizeY(), 1);
+		ConvolutionLayer.Workspace w = l.createWorkspace();
+		kernel.copyTo(l.kernel);
+		for (int i = 0; i < numberOfDatapoints; i++) {
+			ConvolutionTestDataPoint p = new ConvolutionTestDataPoint();
+			p.name = Integer.toString(i);
+			p.input = new Matrix(inputSizeX, inputSizeY);
+			Utils.randomMatrix(p.input);
+			p.output = w.feedForward(p.input).makeCopy();
+			r.add(p);
 		}
 		return r;
 	}

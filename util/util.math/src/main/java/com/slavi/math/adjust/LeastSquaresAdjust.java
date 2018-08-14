@@ -137,10 +137,10 @@ public class LeastSquaresAdjust {
 			log.error("Inverse of normal matrix non-reliable.");
 		}
 		if (log.isTraceEnabled() || (deviation > precision)) {
-			log.info("Normal matrix\n" + nmCopy.makeSquareMatrix().toMatlabString("NM"));
-//			log.info("Inverted Normal Matrix\n" + nm.toString());
-//			log.info("NM * (NM')\n" + tmp.toString());
-//			log.info("APL\n" + apl.toString());
+			log.trace("Normal matrix\n" + nmCopy.makeSquareMatrix().toMatlabString("NM"));
+//			log.trace("Inverted Normal Matrix\n" + nm.toString());
+//			log.trace("NM * (NM')\n" + tmp.toString());
+//			log.trace("APL\n" + apl.toString());
 		}
 		if (deviation > precision) {
 			return false;
@@ -174,7 +174,14 @@ public class LeastSquaresAdjust {
 			throw new IllegalArgumentException("Invalid measurement added to Least Square Adjustment.");
 		measurementCount++;
 		if (log_measurements.isDebugEnabled()) {
-			log_measurements.debug(String.format("N:%1$3d, L:%2$10.4f, A:%3$s", measurementCount, L, m.toOneLineString()));
+			//log_measurements.debug(String.format("N:%1$3d, L:%2$10.4f, A:%3$s", measurementCount, L, m.toOneLineString()));
+			log_measurements.debug(String.format("N=[%s %3d]; L=[%s %10.4f]; A=[%s %s];",
+					measurementCount == 1 ? "  " : "N;",
+					measurementCount,
+					measurementCount == 1 ? "  " : "L;",
+					L,
+					measurementCount == 1 ? "  " : "A;",
+					m.toOneLineString()));
 		}
 		double ll = L * L;
 		sumPLL += weight * ll;

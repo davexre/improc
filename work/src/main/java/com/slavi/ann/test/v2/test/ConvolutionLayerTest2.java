@@ -6,18 +6,23 @@ import com.slavi.ann.test.dataset.ConvolutionTestData;
 import com.slavi.ann.test.dataset.ConvolutionTestData.ConvolutionTestDataPoint;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
+import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionLayerTest2 {
 	void doIt() throws Exception {
-		List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.readDataSet(getClass().getResourceAsStream("ConvolutionLayerTest2.txt"));
+		//List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.readDataSet(getClass().getResourceAsStream("ConvolutionLayerTest2.txt"));
+		Matrix kernel = Matrix.fromOneLineString("0.1 0.3 0.35; 0 0.7 0; 0.5 0 0.7");
+		kernel.makeE();
+		List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.generateDataSet(kernel, 4, 4, 200);
+
 		ConvolutionTestDataPoint p0 = trainset.get(0);
 		Matrix m = new Matrix();
 		p0.toInputMatrix(m);
 
 		Network net = new NetworkBuilder(m.getSizeX(), m.getSizeY())
-//				.addConvolutionLayer(3)
-				.addConvolutionSameSizeLayer(3)
+				.addConvolutionLayer(3)
+//				.addConvolutionSameSizeLayer(3)
 //				.addSubsamplingAvgLayer(2)
 //				.addFullyConnectedLayer(4)
 //				.addFullyConnectedLayer(4)
@@ -39,7 +44,11 @@ public class ConvolutionLayerTest2 {
 //				new FullyConnectedLayer(10, 4, 1)
 				);
 */
+		ConvolutionLayer l = (ConvolutionLayer) net.get(0);
+//		l.kernel.makeE();
 		Trainer.train(net, trainset, 10);
+		System.out.println(kernel.toMatlabString("K1"));
+		System.out.println(l.kernel.toMatlabString("K2"));
 	}
 
 	public static void main(String[] args) throws Exception {
