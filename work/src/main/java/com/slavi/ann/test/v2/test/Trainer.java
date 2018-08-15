@@ -144,7 +144,7 @@ public class Trainer {
 				lsa.addMeasurement(coefs, 1, R, 0);
 				for (int i = 0; i < numAdjustableParams; i++)
 					jacobian.setEntry(index, i, coefs.getItem(i, 0));
-				residuals.setEntry(index, R/2);
+				residuals.setEntry(index, R);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
 				if (print) {
@@ -163,7 +163,7 @@ public class Trainer {
 			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
 			if (!lsa.calculate())
 				throw new Error("LSA failed");
-			x = MatrixUtil.toApacheVector(lsa.getUnknown());
+			//x = MatrixUtil.toApacheVector(lsa.getUnknown());
 
 			stAbsError.stop();
 			stInputError.stop();

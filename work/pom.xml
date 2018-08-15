@@ -15,6 +15,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.googlecode.matrix-toolkits-java</groupId>
+			<artifactId>mtj</artifactId>
+			<version>1.0.4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.sonatype.plexus</groupId>
 			<artifactId>plexus-cipher</artifactId>
 			<version>1.7</version>
