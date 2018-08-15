@@ -9,14 +9,14 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.v2.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
+import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.io.CommentAwareLineNumberReader;
 import com.slavi.util.io.LineReader;
 
-public class ConvolutionTestData {
+public class MatrixTestData {
 	public static Matrix loadMatrix(int sizeX, int sizeY, LineReader fin) throws IOException {
 		Matrix r = new Matrix(sizeX, sizeY);
 		for (int j = 0; j < sizeY; j++) {
@@ -27,29 +27,8 @@ public class ConvolutionTestData {
 		return r;
 	}
 
-	public static class ConvolutionTestDataPoint implements DatapointPair {
-		String name;
-		Matrix input;
-		Matrix output;
-
-		@Override
-		public void toInputMatrix(Matrix dest) {
-			input.copyTo(dest);
-		}
-
-		@Override
-		public void toOutputMatrix(Matrix dest) {
-			output.copyTo(dest);
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-	}
-
-	public static List<ConvolutionTestDataPoint> readDataSet(InputStream is) throws IOException {
-		List<ConvolutionTestDataPoint> r = new ArrayList<>();
+	public static List<MatrixDataPointPair> readDataSet(InputStream is) throws IOException {
+		List<MatrixDataPointPair> r = new ArrayList<>();
 		try (LineReader lr = new CommentAwareLineNumberReader(new InputStreamReader(is))) {
 			int inSizeX = Integer.parseInt(lr.readLine());
 			int inSizeY = Integer.parseInt(lr.readLine());
@@ -58,7 +37,7 @@ public class ConvolutionTestData {
 				String name = lr.readLine();
 				if (StringUtils.trimToNull(name) == null)
 					break;
-				ConvolutionTestDataPoint p = new ConvolutionTestDataPoint();
+				MatrixDataPointPair p = new MatrixDataPointPair();
 				p.name = name;
 				p.input = loadMatrix(inSizeX, inSizeY, lr);
 				p.output = loadMatrix(inSizeX, inSizeY, lr);
@@ -68,15 +47,31 @@ public class ConvolutionTestData {
 		return r;
 	}
 
-	public static List<ConvolutionTestDataPoint> generateDataSet(Matrix kernel, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
-		List<ConvolutionTestDataPoint> r = new ArrayList<>();
+	public static List<MatrixDataPointPair> generateConvolutionDataSet(Matrix kernel, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
+		List<MatrixDataPointPair> r = new ArrayList<>();
 		ConvolutionLayer l = new ConvolutionLayer(kernel.getSizeX(), kernel.getSizeY(), 1);
 		ConvolutionLayer.Workspace w = l.createWorkspace();
 		kernel.copyTo(l.kernel);
 		for (int i = 0; i < numberOfDatapoints; i++) {
-			ConvolutionTestDataPoint p = new ConvolutionTestDataPoint();
+			MatrixDataPointPair p = new MatrixDataPointPair();
 			p.name = Integer.toString(i);
 			p.input = new Matrix(inputSizeX, inputSizeY);
+			Utils.randomMatrix(p.input);
+			p.output = w.feedForward(p.input).makeCopy();
+			r.add(p);
+		}
+		return r;
+	}
+
+	public static List<MatrixDataPointPair> generateFullyConnectedDataSet(Matrix weight, int numberOfDatapoints) {
+		List<MatrixDataPointPair> r = new ArrayList<>();
+		FullyConnectedLayer l = new FullyConnectedLayer(weight.getSizeX(), weight.getSizeY(), 1);
+		FullyConnectedLayer.Workspace w = l.createWorkspace();
+		weight.copyTo(l.weight);
+		for (int i = 0; i < numberOfDatapoints; i++) {
+			MatrixDataPointPair p = new MatrixDataPointPair();
+			p.name = Integer.toString(i);
+			p.input = new Matrix(weight.getSizeX(), 1);
 			Utils.randomMatrix(p.input);
 			p.output = w.feedForward(p.input).makeCopy();
 			r.add(p);

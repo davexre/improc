@@ -21,5 +21,11 @@
 			<artifactId>commons-math3</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>util.log</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>

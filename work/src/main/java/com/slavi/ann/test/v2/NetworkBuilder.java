@@ -49,6 +49,10 @@ public class NetworkBuilder {
 		return lastSize;
 	}
 
+	public NetworkBuilder addConvolutionLayer(int kernelSizeX, int kernelSizeY) {
+		return addLayer(new ConvolutionLayer(kernelSizeX, kernelSizeY, 1));
+	}
+
 	public NetworkBuilder addConvolutionLayer(int kernelSize) {
 		return addLayer(new ConvolutionLayer(kernelSize, kernelSize, 1));
 	}

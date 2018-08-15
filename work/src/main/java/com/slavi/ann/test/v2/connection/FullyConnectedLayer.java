@@ -26,19 +26,22 @@ public class FullyConnectedLayer extends Layer {
 	}
 
 	@Override
-	public void extractParams(RealVector delta, int coefIndex) {
+	public void extractParams(RealVector delta, int startingIndex) {
 		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
+			int coefIndex = startingIndex + j * weight.getSizeX();
 			for (int i = weight.getSizeX() - 1; i >= 0; i--) {
-				delta.setEntry(coefIndex++, weight.getItem(i, j));
+				delta.setEntry(coefIndex + i, weight.getItem(i, j));
 			}
 		}
 	}
 
 	@Override
-	public void applyDeltaToParams(RealVector delta, int coefIndex) {
+	public void applyDeltaToParams(RealVector delta, int startingIndex) {
+		System.out.println(weight.toMatlabString("W0"));
 		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
+			int coefIndex = startingIndex + j * weight.getSizeX();
 			for (int i = weight.getSizeX() - 1; i >= 0; i--) {
-				double r = delta.getEntry(coefIndex++);
+				double r = delta.getEntry(coefIndex + i);
 				weight.itemAdd(i, j, r);
 			}
 		}
@@ -115,14 +118,14 @@ public class FullyConnectedLayer extends Layer {
 			outputError.mMaxAbs(error, outputError);
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
-			int coefIndex = startingIndex;
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 				double r = error.getVectorItem(j);
+				int coefIndex = startingIndex + j * weight.getSizeX();
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
 					double dw = r * input.getVectorItem(i) * learningRate;
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
-					coefs.setItem(coefIndex++, 0, -dw);
+					coefs.setItem(coefIndex + i, 0, -dw);
 					tmp.setItem(i, j, -dw);
 				}
 			}

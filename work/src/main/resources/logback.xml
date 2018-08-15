@@ -45,10 +45,10 @@
 		<appender-ref ref="my.appender.file" />
 	</logger> -->
 
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
 		<appender-ref ref="STDOUT_MSG_ONLY" />
 	</logger>
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="debug" name="com.slavi.math.adjust.LeastSquaresAdjust" />
 
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />
 	<logger level="error" name="org.apache.commons.digester" />

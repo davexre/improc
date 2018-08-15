@@ -21,7 +21,6 @@ import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.Marker;
 import com.slavi.util.MatrixUtil;
 
 public class Trainer {
@@ -77,7 +76,10 @@ public class Trainer {
 		return d;
 	}
 
-	public static void train(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
+	public void epochComplete() {
+	}
+
+	public void train(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Logger LOG = LoggerFactory.getLogger("LOG");
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
@@ -139,7 +141,7 @@ public class Trainer {
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));
 				coefs.make0();
 				Matrix inputError = ws.backPropagate(coefs, 0, error);
-				lsa.addMeasurement(coefs, 1, L, 0);
+				lsa.addMeasurement(coefs, 1, R, 0);
 				for (int i = 0; i < numAdjustableParams; i++)
 					jacobian.setEntry(index, i, coefs.getItem(i, 0));
 				residuals.setEntry(index, R/2);
@@ -177,11 +179,11 @@ public class Trainer {
 			double maxErr = stAbsError.getAbsMaxX().max();
 
 			Collections.sort(errors);
-
+/*
 			for (int i = 0; i < 5 && i < errors.size(); i++) {
 				DatapointTrainResult e = errors.get(i);
 				System.out.println("INDEX " + e.index + " ERROR:" + e.error + ", " + e.pair.getName());
-			}
+			}*/
 			double maxStdInputErr = stInputError.getStdDeviation().max();
 			double patternsLearendPercent = (double) patternsLearend / index;
 			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
@@ -220,6 +222,7 @@ public class Trainer {
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
 			l.applyDeltaToParams(x, 0);
+			epochComplete();
 			l.resetEpoch(wslist);
 		}
 	}

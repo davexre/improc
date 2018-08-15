@@ -26,20 +26,22 @@ public class ConvolutionLayer extends Layer {
 	}
 
 	@Override
-	public void extractParams(RealVector delta, int coefIndex) {
-		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
-			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				delta.setEntry(coefIndex++, kernel.getItem(i, j));
+	public void extractParams(RealVector delta, int startingIndex) {
+		for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+			int coefIndex = startingIndex + ky * kernel.getSizeX();
+			for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
+				delta.setEntry(coefIndex + kx, kernel.getItem(kx, ky));
 			}
 		}
 	}
 
 	@Override
-	public void applyDeltaToParams(RealVector delta, int coefIndex) {
-		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
-			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				double r = delta.getEntry(coefIndex++);
-				kernel.itemAdd(i, j, r);
+	public void applyDeltaToParams(RealVector delta, int startingIndex) {
+		for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+			int coefIndex = startingIndex + ky * kernel.getSizeX();
+			for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
+				double r = delta.getEntry(coefIndex + kx);
+				kernel.itemAdd(kx, ky, r);
 			}
 		}
 	}
@@ -142,14 +144,12 @@ public class ConvolutionLayer extends Layer {
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
-							coefs.itemAdd(coefIndex + kx, 0, -dw);
+							int tmp = coefIndex + kx;
+							coefs.itemAdd(tmp, 0, -dw);
 						}
 					}
 				}
 			}
-/*			for (int i = kernel.getVectorSize() - 1; i >= 0; i--) {
-				coefs.vectorItemMul(startingIndex + i, 1.0 / output.getVectorSize());
-			}*/
 			return inputError;
 		}
 

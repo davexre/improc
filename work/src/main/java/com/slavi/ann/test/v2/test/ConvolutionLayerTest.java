@@ -62,7 +62,7 @@ public class ConvolutionLayerTest {
 //				new FullyConnectedLayer(10, 4, 1)
 				);
 */
-		Trainer.train(net, trainset, 4);
+		new Trainer().train(net, trainset, 4);
 	}
 
 	public static void main(String[] args) throws Exception {
