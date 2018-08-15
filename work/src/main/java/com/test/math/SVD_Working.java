@@ -1,5 +1,10 @@
 package com.test.math;
 
+import org.apache.commons.math3.linear.BlockRealMatrix;
+
+import com.slavi.math.matrix.Matrix;
+import com.slavi.util.MatrixUtil;
+
 public class SVD_Working {
 	// SVD in java
 	// translated from NR svdcmp.c, this has worked on several examples,
@@ -9,32 +14,32 @@ public class SVD_Working {
 
 	/***************************************************************************
 	 * results from matlab
-	 * 
+	 *
 	 * M = [1.0, 1.0, 1.0, 1.0, 1.0; 0.0, 0.7578582801241234,
 	 * 0.8705505614977934, 0.9440875104854797, 1.0; 0.0, 0.5743491727526943,
 	 * 0.7578582801241234, 0.8913012274546708, 1.0; 0.0, 0.4352752672614163,
 	 * 0.6597539444834084, 0.841466353313137, 1.0; 0.0, 0.3298769722417042,
 	 * 0.5743491727526943, 0.7944178780622027, 1.0; 0.0, 0.25, 0.5, 0.75, 1.0 ]
-	 * 
+	 *
 	 * [U,D,V] = svd(M); D
-	 * 
+	 *
 	 * D =
-	 * 
+	 *
 	 * 4.0143 0 0 0 0 0 0.9803 0 0 0 0 0 0.3522 0 0 0 0 0 0.0209 0 0 0 0 0
 	 * 0.0004 0 0 0 0 0
 	 *  >> V
-	 * 
+	 *
 	 * V =
-	 * 
+	 *
 	 * 0.1290 -0.8538 0.5019 -0.0503 0.0022 0.3605 -0.3537 -0.6377 0.5576
 	 * -0.1651 0.4543 -0.0929 -0.3332 -0.5544 0.6055 0.5325 0.1348 0.0544
 	 * -0.4113 -0.7254 0.6029 0.3452 0.4769 0.4583 0.2827
-	 * 
+	 *
 	 * ---------------- results from java version: D= [ 4.014 0.980 0.352 0.021
 	 * 0.000 ] V= [ -0.129 0.854 -0.502 0.050 0.002 ] [ -0.360 0.354 0.638
 	 * -0.558 -0.165 ] [ -0.454 0.093 0.333 0.554 0.606 ] [ -0.533 -0.135 -0.054
 	 * 0.411 -0.725 ] [ -0.603 -0.345 -0.477 -0.458 0.283 ]
-	 * 
+	 *
 	 **************************************************************************/
 
 	/**
@@ -285,7 +290,7 @@ public class SVD_Working {
 	public static void printM(String msg, double[]a) {
 		System.out.println(msg);
 		String s = "";
-		for (int i = 0; i < a.length; i++)				
+		for (int i = 0; i < a.length; i++)
 			s += a[i] + "\t";
 		System.out.println(s);
 	}
@@ -300,7 +305,7 @@ public class SVD_Working {
 			System.out.println(s);
 		}
 	}
-	
+
 	// test it
 	public static void main(String[] cmdline) {
 		int nr = 6;
@@ -316,6 +321,9 @@ public class SVD_Working {
 			}
 		}
 		printM("M=", M);
+		BlockRealMatrix aa = new BlockRealMatrix(M);
+		Matrix Sa = MatrixUtil.fromApacheMatrix(aa, null);
+		System.out.println(Sa.toMatlabString("M"));
 
 		double[] w = new double[nc];
 		double[][] V = new double[nc][nc];

@@ -179,6 +179,18 @@ public class Matrix {
 		return r;
 	}
 
+	public static Matrix fromArray(double d[][]) {
+		int sizeX = d.length;
+		int sizeY = sizeX == 0 ? 0 : d[0].length;
+		Matrix r = new Matrix(sizeX, sizeY);
+		for (int i = r.getSizeX() - 1; i >= 0; i--) {
+			for (int j = r.getSizeY() - 1; j >= 0; j--) {
+				r.setItem(i, j, d[i][j]);
+			}
+		}
+		return r;
+	}
+
 	/**
 	 * Resizes the matrix if the new size differs from the current matrix size.
 	 */
