@@ -1,6 +1,10 @@
 package com.slavi.util;
 
 import java.awt.image.BufferedImage;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.BlockRealMatrix;
@@ -12,6 +16,31 @@ import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
 public class MatrixUtil {
+
+	public static Matrix loadOctave(InputStream is) throws IOException {
+		DataInputStream di = new DataInputStream(is);
+		String header = di.readLine();
+		String name = di.readLine();
+		String type = di.readLine();
+		String rows = di.readLine();
+		String columns = di.readLine();
+
+		if (!header.startsWith("# Created by Octave") ||
+			!name.startsWith("# name: ") ||
+			!type.startsWith("# type: matrix") ||
+			!rows.startsWith("# rows: ") ||
+			!rows.startsWith("# columns: ")
+		) {
+			throw new IOException("Invaid format");
+		}
+		int nrows = Integer.parseInt(rows.substring("# rows: ".length()));
+		int ncolumns = Integer.parseInt(columns.substring("# columns: ".length()));
+		Matrix r = new Matrix(ncolumns, nrows);
+		for (int i = 0; i < r.getSizeX(); i++)
+			for (int j = 0; j < r.getSizeY(); j++)
+				r.setItem(j, j, di.readDouble());
+		return r;
+	}
 
 	public static ArrayRealVector toApacheVector(Matrix m) {
 		if (m.getSizeX() == 1 || m.getSizeY() == 1) {

@@ -44,7 +44,7 @@ public class MyMnistDataTest {
 
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 490); // Number 8 is missing until index 61,84, 110
+		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 1000); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
 		Marker.release();
 
@@ -56,12 +56,11 @@ public class MyMnistDataTest {
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
 				// MNIST data
 				//.addConstScaleAndBiasLayer(2, -1)
-				//.addConvolutionLayer(5)
+				.addConvolutionLayer(5).addSigmoidLayer()
 				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				//.addConstScaleAndBiasLayer(10.0 / 25, -5)
 				//.addDebugLayer("A2", Statistics.CStatDetail, Statistics.CStatDetail)
 				//.addDebugLayer("WTF", Statistics.CStatMinMax, Statistics.CStatMinMax)
-				//.addSigmoidLayer()
 				//.addFullyConnectedLayer(10).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				//.addDebugLayer("last", DebugLayer.off)
@@ -86,7 +85,7 @@ public class MyMnistDataTest {
 		System.out.println(nb.describe());
 		Network net = nb.build();
 		System.out.println(net.get(1));
-		new Trainer().train(net, trainset, 4);
+		new Trainer().train(net, trainset, 2);
 		System.out.println(net.get(1));
 	}
 

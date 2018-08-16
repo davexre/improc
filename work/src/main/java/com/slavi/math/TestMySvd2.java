@@ -77,6 +77,13 @@ public class TestMySvd2 {
 		return pinv;
 	}
 
+	public static void printSVD(Matrix a, Matrix u, Matrix s, Matrix vt) {
+		System.out.println(a.toMatlabString("A"));
+		System.out.println(u.toMatlabString("u"));
+		System.out.println(s.toMatlabString("s"));
+		System.out.println(vt.toMatlabString("vt"));
+	}
+
 	public static void checkSVD(Matrix a, Matrix u, Matrix s, Matrix vt) {
 		Matrix tmp1 = new Matrix();
 		Matrix tmp2 = new Matrix();
@@ -98,126 +105,65 @@ public class TestMySvd2 {
 		System.out.println(tmp2.is0(1E-5));
 	}
 
-	public static void mainMy(String[] args) {
-		//Matrix a = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8; 1 2 3");
-		Matrix a = Matrix.fromOneLineString("1 2 3 1; 4 5 6 2; 7 8 8 3");
-		Matrix copyA = a.makeCopy();
-
-		Matrix u = new Matrix();
-		Matrix s = new Matrix();
-		Matrix vt = new Matrix();
-		JLapack jl = new JLapack();
-		jl.mysvd(a, u, vt, s);
-
-		Matrix pinv = pinv(u,s,vt);
-		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);
+	public void svdMy() {
+		new JLapack().mysvd(a, u, vt, s);
 	}
 
-	public static void mainApache(String[] args) {
-		//Matrix a = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8; 1 2 3");
-		Matrix a = Matrix.fromOneLineString("1 2 3 1; 4 5 6 2; 7 8 8 3");
-		Matrix copyA = a.makeCopy();
-		System.out.println(a.toMatlabString("A"));
-
+	public void svdApache() {
 		BlockRealMatrix aa = MatrixUtil.toApacheMatrix(a);
 		SingularValueDecomposition svd = new SingularValueDecomposition(aa);
-		Matrix u = MatrixUtil.fromApacheMatrix(svd.getV(), null);
-		System.out.println(u.toMatlabString("u"));
-		Matrix vt = MatrixUtil.fromApacheMatrix(svd.getUT(), null);
-		System.out.println(vt.toMatlabString("vt"));
-		Matrix s = MatrixUtil.fromApacheMatrix(svd.getS(), null);
-		System.out.println(s.toMatlabString("s"));
-
-		Matrix pinv = pinv(u,s,vt);
-		checkPInv(copyA, pinv);
+		u = MatrixUtil.fromApacheMatrix(svd.getV(), null);
+		vt = MatrixUtil.fromApacheMatrix(svd.getUT(), null);
+		s = MatrixUtil.fromApacheMatrix(svd.getS(), null);
 	}
 
-	public static void mainMy2(String[] args) {
-		Matrix a = Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 8 1");
-		Matrix copyA = a.makeCopy();
-
+	public void svdMy2() {
 		BlockRealMatrix aa = MatrixUtil.toApacheMatrix(a);
 		double au[][] = aa.getData();
 		double aw[] = new double[a.getSizeX()];
 		double av[][] = new double[a.getSizeX()][a.getSizeX()];
 		SVD_Working.svd(au, aw, av);
 
-		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 		for (int i = a.getSizeY() - 1; i >= 0; i--)
 			s.setItem(i, i, aw[i]);
-		Matrix u = new Matrix(a.getSizeY(), a.getSizeY());
 		for (int j = u.getSizeY() - 1; j >= 0; j--)
 			for (int i = u.getSizeX() - 1; i >= 0; i--)
 				u.setItem(i, j, au[i][j]);
-		Matrix vt = new Matrix(a.getSizeX(), a.getSizeX());
 		for (int j = vt.getSizeY() - 1; j >= 0; j--)
 			for (int i = vt.getSizeX() - 1; i >= 0; i--)
 				vt.setItem(i, j, av[i][j]);
-
-		Matrix pinv = pinv(u,s,vt);
-		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);
 	}
 
 	// MTJ - ok
-	public static void mainMTJ(String[] args) throws NotConvergedException {
-		Matrix a = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9");
-		Matrix copyA = a.makeCopy();
-
-		System.out.println(a.toMatlabString("A"));
+	public void svdMTJ() throws NotConvergedException {
 		DenseMatrix aa = new DenseMatrix(a.toArray());
 		SVD svd = new SVD(a.getSizeX(), a.getSizeY());
 		svd.factor(aa);
 
-		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 		double SS[] = svd.getS();
 		for (int i = SS.length - 1; i >= 0; i--)
 			s.setItem(i, i, svd.getS()[i]);
-		System.out.println(s.toMatlabString("s"));
-		Matrix u = new Matrix(a.getSizeY(), a.getSizeY());
 		for (int j = u.getSizeY() - 1; j >= 0; j--)
 			for (int i = u.getSizeX() - 1; i >= 0; i--)
 				u.setItem(i, j, svd.getVt().get(i, j));
-		System.out.println(u.toMatlabString("u"));
 		Matrix vt = new Matrix(a.getSizeX(), a.getSizeX());
 		for (int j = vt.getSizeY() - 1; j >= 0; j--)
 			for (int i = vt.getSizeX() - 1; i >= 0; i--)
 				vt.setItem(i, j, svd.getU().get(i, j));
-		System.out.println(vt.toMatlabString("vt"));
-
-		Matrix pinv = pinv(u,s,vt);
-		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);
 	}
 
 	// Jama - NO
-	public static void mainJama(String[] args) {
-		Matrix a = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
-		Matrix copyA = a.makeCopy();
-
-		System.out.println(a.toMatlabString("A"));
+	public void svdJama() {
 		Jama.Matrix aa = new Jama.Matrix(a.toArray());
 		Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(aa);
 
-		Matrix s = Matrix.fromArray(svd.getS().getArray());
-		System.out.println(s.toMatlabString("s"));
-		Matrix u = Matrix.fromArray(svd.getV().transpose().getArray());
-		System.out.println(u.toMatlabString("u"));
-		Matrix vt = Matrix.fromArray(svd.getU().transpose().getArray());
-		System.out.println(vt.toMatlabString("vt"));
-
-		Matrix pinv = pinv(u,s,vt);
-		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);
+		s = Matrix.fromArray(svd.getS().getArray());
+		u = Matrix.fromArray(svd.getV().transpose().getArray());
+		vt = Matrix.fromArray(svd.getU().transpose().getArray());
 	}
 
 	// EJML
-	public static void main(String[] args) {
-		Matrix a = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
-		Matrix copyA = a.makeCopy();
-
-		System.out.println(a.toMatlabString("A"));
+	public void svdEJML_NONO() {
 		DMatrixRBlock aa = new DMatrixRBlock(a.getSizeX(), a.getSizeY());
 		for (int j = a.getSizeY() - 1; j >= 0; j--)
 			for (int i = a.getSizeX() - 1; i >= 0; i--)
@@ -225,15 +171,44 @@ public class TestMySvd2 {
 		SimpleSVD svd = new SimpleSVD(aa, false);
 /*
 		SimpleBase<SimpleBase<T>> uu = svd.getU();
-		Matrix s = Matrix.fromArray(svd.getS().getArray());
-		System.out.println(s.toMatlabString("s"));
-		Matrix u = Matrix.fromArray(svd.getV().transpose().getArray());
-		System.out.println(u.toMatlabString("u"));
-		Matrix vt = Matrix.fromArray(svd.getU().transpose().getArray());
-		System.out.println(vt.toMatlabString("vt"));
+		s = Matrix.fromArray(svd.getS().getArray());
+		u = Matrix.fromArray(svd.getV().transpose().getArray());
+		vt = Matrix.fromArray(svd.getU().transpose().getArray());
+		*/
+	}
 
-		Matrix pinv = pinv(u,s,vt);
+	Matrix a =
+//			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 8 1");
+//			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 9 1");
+//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8; 1 2 3");
+//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
+//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9; 9 2 3");
+			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9");
+	Matrix copyA = a.makeCopy();
+
+	Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
+	Matrix u = new Matrix(a.getSizeY(), a.getSizeY());
+	Matrix vt = new Matrix(a.getSizeX(), a.getSizeX());
+
+	public void doIt(String[] args) throws Exception {
+		System.out.println(a.toMatlabString("A"));
+
+//		svdMy();
+//		svdMy2();
+		svdApache();
+//		svdJama();
+//		svdMTJ();
+//		svdEJML_NONO();
+
+		Matrix pinv = pinvOld(u,s,vt);
+		printSVD(copyA, u, s, vt);
+		System.out.println();
 		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);*/
+		checkSVD(copyA, u, s, vt);
+	}
+
+	public static void main(String[] args) throws Exception {
+		new TestMySvd2().doIt(args);
+		System.out.println("Done.");
 	}
 }

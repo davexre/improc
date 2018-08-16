@@ -99,9 +99,11 @@ public class Trainer {
 		outDir.mkdirs();*/
 
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
-		RealMatrix jacobian = new Array2DRowRealMatrix(trainset.size(), numAdjustableParams);
-		RealVector residuals = new ArrayRealVector(trainset.size());
+//		RealMatrix jacobian = new Array2DRowRealMatrix(trainset.size(), numAdjustableParams);
+//		RealVector residuals = new ArrayRealVector(trainset.size());
 		RealVector params = new ArrayRealVector(numAdjustableParams);
+		l.extractParams(params, 0);
+		LOG.debug(MatrixUtil.fromApacheVector(params, null).toMatlabString("P"));
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
 			lsa.clear();
@@ -142,9 +144,9 @@ public class Trainer {
 				coefs.make0();
 				Matrix inputError = ws.backPropagate(coefs, 0, error);
 				lsa.addMeasurement(coefs, 1, R, 0);
-				for (int i = 0; i < numAdjustableParams; i++)
-					jacobian.setEntry(index, i, coefs.getItem(i, 0));
-				residuals.setEntry(index, R);
+//				for (int i = 0; i < numAdjustableParams; i++)
+//					jacobian.setEntry(index, i, coefs.getItem(i, 0));
+//				residuals.setEntry(index, R);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
 				if (print) {
@@ -155,15 +157,15 @@ public class Trainer {
 			//System.out.println("\n\nJ=" + MatrixUtils.OCTAVE_FORMAT.format(jacobian));
 			//System.out.println("\n\n" + MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
 			l.extractParams(params, 0);
-			LOG.debug(MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
 			LOG.debug(MatrixUtil.fromApacheVector(params, null).toMatlabString("P"));
-			LOG.debug(MatrixUtil.fromApacheVector(residuals, null).toMatlabString("R"));
-			SingularValueDecomposition svd = new SingularValueDecomposition(jacobian);
-			RealVector x = svd.getSolver().solve(residuals);
-			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
-			if (!lsa.calculate())
+//			LOG.debug(MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
+//			LOG.debug(MatrixUtil.fromApacheVector(residuals, null).toMatlabString("R"));
+//			SingularValueDecomposition svd = new SingularValueDecomposition(jacobian);
+//			RealVector x = svd.getSolver().solve(residuals);
+//			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
+			if (!lsa.calculateSvd())
 				throw new Error("LSA failed");
-			//x = MatrixUtil.toApacheVector(lsa.getUnknown());
+			RealVector x = MatrixUtil.toApacheVector(lsa.getUnknown());
 
 			stAbsError.stop();
 			stInputError.stop();

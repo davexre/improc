@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
@@ -47,11 +48,9 @@ public class MatrixTestData {
 		return r;
 	}
 
-	public static List<MatrixDataPointPair> generateConvolutionDataSet(Matrix kernel, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
+	public static List<MatrixDataPointPair> generateConvolutionDataSet(Layer l, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
 		List<MatrixDataPointPair> r = new ArrayList<>();
-		ConvolutionLayer l = new ConvolutionLayer(kernel.getSizeX(), kernel.getSizeY(), 1);
-		ConvolutionLayer.Workspace w = l.createWorkspace();
-		kernel.copyTo(l.kernel);
+		Layer.LayerWorkspace w = l.createWorkspace();
 		for (int i = 0; i < numberOfDatapoints; i++) {
 			MatrixDataPointPair p = new MatrixDataPointPair();
 			p.name = Integer.toString(i);

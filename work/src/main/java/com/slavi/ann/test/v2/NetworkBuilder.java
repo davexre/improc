@@ -17,7 +17,7 @@ import com.slavi.ann.test.v2.connection.SubsamplingMaxLayer;
 public class NetworkBuilder {
 	List<Layer> layers = new ArrayList<>();
 
-	int inputSize[];
+	public final int inputSize[];
 	int lastSize[];
 
 	public NetworkBuilder(int inputSizeX, int inputSizeY) {
@@ -34,14 +34,19 @@ public class NetworkBuilder {
 	public String describe() {
 		StringBuilder r = new StringBuilder();
 		int size[] = new int[] { inputSize[0], inputSize[1] };
+		int numUnknowns = 0;
 		for (int i = 0; i < layers.size(); i++) {
 			Layer l = layers.get(i);
+			int params = l.getNumAdjustableParams();
 			r.append(i).append(": ")
 				.append(size[0]).append(':').append(size[1]).append(' ')
 				.append(l.getClass().getSimpleName())
+				.append(" (").append(params).append(")")
 				.append('\n');
 			size = l.getOutputSize(size);
+			numUnknowns += params;
 		}
+		r.append("Total params:").append(numUnknowns);
 		return r.toString();
 	}
 

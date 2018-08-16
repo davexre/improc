@@ -37,7 +37,6 @@ public class FullyConnectedLayer extends Layer {
 
 	@Override
 	public void applyDeltaToParams(RealVector delta, int startingIndex) {
-		System.out.println(weight.toMatlabString("W0"));
 		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
 			int coefIndex = startingIndex + j * weight.getSizeX();
 			for (int i = weight.getSizeX() - 1; i >= 0; i--) {
