@@ -1,7 +1,5 @@
 package com.slavi.ann.test.v2.connection;
 
-import org.apache.commons.math3.linear.RealVector;
-
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
 
@@ -27,20 +25,20 @@ public class ConvolutionWithStrideLayer extends Layer {
 	}
 
 	@Override
-	public void extractParams(RealVector delta, int coefIndex) {
+	public void extractParams(Matrix delta, int coefIndex) {
 		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
 			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				delta.setEntry(coefIndex++, kernel.getItem(i, j));
+				delta.setItem(coefIndex++, 0, kernel.getItem(i, j));
 			}
 		}
 	}
 
 	@Override
-	public void applyDeltaToParams(RealVector delta, int coefIndex) {
+	public void loadParams(Matrix delta, int coefIndex) {
 		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
 			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				double r = delta.getEntry(coefIndex++);
-				kernel.itemAdd(i, j, r);
+				double r = delta.getItem(coefIndex++, 0);
+				kernel.setItem(i, j, r);
 			}
 		}
 	}

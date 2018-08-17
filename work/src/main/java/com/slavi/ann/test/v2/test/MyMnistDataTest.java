@@ -1,5 +1,7 @@
 package com.slavi.ann.test.v2.test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
@@ -7,12 +9,25 @@ import com.slavi.ann.test.dataset.MnistData;
 import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
-import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.math.adjust.MatrixStatistics;
-import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Marker;
+import com.slavi.util.MatrixUtil;
 
+/*
+a=A'*A;
+[u,s,v]=svd(a);
+ap=pinv(a);
+dX=(ap*A'*L)';
+max(abs(dX))
+P1=P+dX;
+save octave/A.mat P1
+
+A1=A;
+L1=L;
+
+
+ */
 public class MyMnistDataTest {
 	void doIt2() throws Exception {
 		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false); //.subList(0, 30);
@@ -85,7 +100,9 @@ public class MyMnistDataTest {
 		System.out.println(nb.describe());
 		Network net = nb.build();
 		System.out.println(net.get(1));
-		new Trainer().train(net, trainset, 2);
+		net.loadParams(MatrixUtil.loadOctave(new FileInputStream(new File(System.getProperty("user.home"), "/octave/A.mat"))), 0);
+
+		new Trainer().train(net, trainset, 1);
 		System.out.println(net.get(1));
 	}
 

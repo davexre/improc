@@ -1,10 +1,11 @@
 package com.slavi.util;
 
 import java.awt.image.BufferedImage;
-import java.io.DataInput;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.BlockRealMatrix;
@@ -18,28 +19,32 @@ import com.slavi.math.matrix.Matrix;
 public class MatrixUtil {
 
 	public static Matrix loadOctave(InputStream is) throws IOException {
-		DataInputStream di = new DataInputStream(is);
-		String header = di.readLine();
-		String name = di.readLine();
-		String type = di.readLine();
-		String rows = di.readLine();
-		String columns = di.readLine();
+		try (BufferedReader fin = new BufferedReader(new InputStreamReader(is))) {
+			String header = fin.readLine();
+			String name = fin.readLine();
+			String type = fin.readLine();
+			String rows = fin.readLine();
+			String columns = fin.readLine();
 
-		if (!header.startsWith("# Created by Octave") ||
-			!name.startsWith("# name: ") ||
-			!type.startsWith("# type: matrix") ||
-			!rows.startsWith("# rows: ") ||
-			!rows.startsWith("# columns: ")
-		) {
-			throw new IOException("Invaid format");
+			if (!header.startsWith("# Created by Octave") ||
+				!name.startsWith("# name: ") ||
+				!type.startsWith("# type: matrix") ||
+				!rows.startsWith("# rows: ") ||
+				!columns.startsWith("# columns: ")
+			) {
+				throw new IOException("Invaid format");
+			}
+			int nrows = Integer.parseInt(rows.substring("# rows: ".length()));
+			int ncolumns = Integer.parseInt(columns.substring("# columns: ".length()));
+			Matrix r = new Matrix(ncolumns, nrows);
+			for (int j = 0; j < r.getSizeY(); j++) {
+				StringTokenizer st = new StringTokenizer(fin.readLine());
+				for (int i = 0; i < r.getSizeX(); i++) {
+					r.setItem(i, j, st.hasMoreTokens() ? Double.parseDouble(st.nextToken()) : 0.0);
+				}
+			}
+			return r;
 		}
-		int nrows = Integer.parseInt(rows.substring("# rows: ".length()));
-		int ncolumns = Integer.parseInt(columns.substring("# columns: ".length()));
-		Matrix r = new Matrix(ncolumns, nrows);
-		for (int i = 0; i < r.getSizeX(); i++)
-			for (int j = 0; j < r.getSizeY(); j++)
-				r.setItem(j, j, di.readDouble());
-		return r;
 	}
 
 	public static ArrayRealVector toApacheVector(Matrix m) {

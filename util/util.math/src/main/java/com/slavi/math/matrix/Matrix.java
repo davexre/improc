@@ -225,6 +225,11 @@ public class Matrix {
 			throw new IndexOutOfBoundsException("Indexes (" + atX + "," + atY + ") not in range (" + sizeX + "," + sizeY + ")");
 	}
 
+	private void assertSameSize(Matrix second) {
+		if ((sizeX != second.sizeX) || (sizeY != second.sizeY))
+			throw new Error("Invalid argument. Sizes of this(" + sizeX + "," + sizeY + ") do not match second(" + second.sizeX + "," + second.sizeY + ")");
+	}
+
 	/**
 	 * Returns the value of the matrix atX column and atY row. The top-left
 	 * element is atX=0, atY=0.
@@ -302,7 +307,7 @@ public class Matrix {
 	 */
 	public void loadFromVector(double vector[]) {
 		if (vector.length != getVectorSize())
-			throw new Error("Invalid argument");
+			throw new Error("Invalid argument. VectorSize of this(" + getVectorSize() + ") do not match array size (" + vector.length + ")");
 		for (int i = vector.length - 1; i >= 0 ; i--)
 			setVectorItem(i, vector[i]);
 	}
@@ -312,7 +317,7 @@ public class Matrix {
 	 */
 	public void loadFromVector(int vector[]) {
 		if (vector.length != getVectorSize())
-			throw new Error("Invalid argument");
+			throw new Error("Invalid argument. VectorSize of this(" + getVectorSize() + ") do not match array size (" + vector.length + ")");
 		for (int i = vector.length - 1; i >= 0 ; i--)
 			setVectorItem(i, vector[i]);
 	}
@@ -359,9 +364,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void mSum(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			dest.setVectorItem(i, getVectorItem(i) + second.getVectorItem(i));
@@ -377,9 +380,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void mSub(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			dest.setVectorItem(i, getVectorItem(i) - second.getVectorItem(i));
@@ -391,9 +392,7 @@ public class Matrix {
 	 * </tt>
 	 */
 	public double dotProduct(Matrix second) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		double sum = 0;
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			sum += getVectorItem(i) * second.getVectorItem(i);
@@ -424,9 +423,7 @@ public class Matrix {
 	 * Allows: this == dest
 	 */
 	public void termMul(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			vectorItemMul(i, second.getVectorItem(i));
@@ -442,9 +439,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void termDiv(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			setVectorItem(i, getVectorItem(i) / second.getVectorItem(i));
@@ -631,9 +626,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void mMaxAbs(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--) {
 			double a = Math.abs(getVectorItem(i));
@@ -651,9 +644,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void mMax(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--) {
 			double a = getVectorItem(i);
@@ -671,9 +662,7 @@ public class Matrix {
 	 * Allows: this == second == dest
 	 */
 	public void mMin(Matrix second, Matrix dest) {
-		if ((sizeX != second.sizeX) || (sizeY != second.sizeY)) {
-			throw new Error("Invalid argument");
-		}
+		assertSameSize(second);
 		dest.resize(sizeX, sizeY);
 		for (int i = getVectorSize() - 1; i >= 0; i--) {
 			double a = getVectorItem(i);

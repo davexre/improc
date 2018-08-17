@@ -79,6 +79,8 @@ public class Trainer {
 	public void epochComplete() {
 	}
 
+	Logger log_measurements = LoggerFactory.getLogger(LeastSquaresAdjust.class.getName() + ".measurements");
+
 	public void train(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
 		Logger LOG = LoggerFactory.getLogger("LOG");
 		Matrix input = new Matrix();
@@ -101,9 +103,9 @@ public class Trainer {
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
 //		RealMatrix jacobian = new Array2DRowRealMatrix(trainset.size(), numAdjustableParams);
 //		RealVector residuals = new ArrayRealVector(trainset.size());
-		RealVector params = new ArrayRealVector(numAdjustableParams);
+		Matrix params = new Matrix(numAdjustableParams, 1);
 		l.extractParams(params, 0);
-		LOG.debug(MatrixUtil.fromApacheVector(params, null).toMatlabString("P"));
+		log_measurements.trace(params.toMatlabString("P"));
 		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
 			lsa.clear();
@@ -156,8 +158,7 @@ public class Trainer {
 			}
 			//System.out.println("\n\nJ=" + MatrixUtils.OCTAVE_FORMAT.format(jacobian));
 			//System.out.println("\n\n" + MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
-			l.extractParams(params, 0);
-			LOG.debug(MatrixUtil.fromApacheVector(params, null).toMatlabString("P"));
+			LOG.debug(params.toMatlabString("P"));
 //			LOG.debug(MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
 //			LOG.debug(MatrixUtil.fromApacheVector(residuals, null).toMatlabString("R"));
 //			SingularValueDecomposition svd = new SingularValueDecomposition(jacobian);
@@ -165,7 +166,7 @@ public class Trainer {
 //			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
 			if (!lsa.calculateSvd())
 				throw new Error("LSA failed");
-			RealVector x = MatrixUtil.toApacheVector(lsa.getUnknown());
+			Matrix x = lsa.getUnknown();
 
 			stAbsError.stop();
 			stInputError.stop();
@@ -223,7 +224,10 @@ public class Trainer {
 /*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
-			l.applyDeltaToParams(x, 0);
+
+			for (int i = numAdjustableParams - 1; i >= 0; i--)
+				params.itemAdd(i, 0, x.getItem(0, i));
+			l.loadParams(params, 0);
 			epochComplete();
 			l.resetEpoch(wslist);
 		}
