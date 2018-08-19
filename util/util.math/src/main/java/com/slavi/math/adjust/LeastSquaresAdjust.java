@@ -176,6 +176,20 @@ public class LeastSquaresAdjust {
 	}
 
 	public boolean calculateSvd() {
+		if (log.isInfoEnabled()) {
+			double sumP = getSumP();
+			if (sumP == 0.0)
+				sumP = 1E-100;
+			log.info("Measurements: " + measurementCount +
+					", [P]: " + MathUtil.d4(getSumP()) +
+					", Sqrt([PLL]/[P]): " + MathUtil.d4(getRootMeanSquareError())
+			);
+		}
+		if (log.isTraceEnabled()) {
+			log.trace("Normal matrix\n" + nm.toString());
+			log.trace("APL\n" + apl.toString());
+		}
+
 		Matrix u = new Matrix();
 		Matrix vt = new Matrix();
 		Matrix s = new Matrix();

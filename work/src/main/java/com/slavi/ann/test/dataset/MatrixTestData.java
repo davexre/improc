@@ -8,16 +8,21 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
+import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.io.CommentAwareLineNumberReader;
 import com.slavi.util.io.LineReader;
 
 public class MatrixTestData {
+	static Logger log = LoggerFactory.getLogger(MatrixTestData.class);
+
 	public static Matrix loadMatrix(int sizeX, int sizeY, LineReader fin) throws IOException {
 		Matrix r = new Matrix(sizeX, sizeY);
 		for (int j = 0; j < sizeY; j++) {
@@ -51,14 +56,25 @@ public class MatrixTestData {
 	public static List<MatrixDataPointPair> generateConvolutionDataSet(Layer l, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
 		List<MatrixDataPointPair> r = new ArrayList<>();
 		Layer.LayerWorkspace w = l.createWorkspace();
+		MatrixStatistics msi = new MatrixStatistics();
+		MatrixStatistics mso = new MatrixStatistics();
+		msi.start();
+		mso.start();
 		for (int i = 0; i < numberOfDatapoints; i++) {
 			MatrixDataPointPair p = new MatrixDataPointPair();
 			p.name = Integer.toString(i);
 			p.input = new Matrix(inputSizeX, inputSizeY);
 			Utils.randomMatrix(p.input);
 			p.output = w.feedForward(p.input).makeCopy();
+			msi.addValue(p.input);
+			mso.addValue(p.output);
 			r.add(p);
 		}
+		msi.stop();
+		mso.stop();
+
+		log.trace("Test data statisticts for input\n" + msi.toString());
+		log.trace("Test data statisticts for output\n" + mso.toString());
 		return r;
 	}
 

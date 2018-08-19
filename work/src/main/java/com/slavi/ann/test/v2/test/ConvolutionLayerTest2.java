@@ -61,15 +61,20 @@ public class ConvolutionLayerTest2 {
 		p0.toOutputMatrix(mo);
 
 		{
-			Network net = new NetworkBuilder(mi.getSizeX(), mi.getSizeY())
-					.addConvolutionLayer(3).addSigmoidLayer()
-					.addFullyConnectedLayer(mo.getVectorSize()).addSigmoidLayer()
+			NetworkBuilder nb2 = new NetworkBuilder(mi.getSizeX(), mi.getSizeY());
+			Network net = nb2
+					.addConvolutionLayer(6).addSigmoidLayer()
+					.addFullyConnectedLayer(mo.getVectorSize())
+					.addSigmoidLayer()
+//					.addReLULayer()
 					.build();
-			ConvolutionLayer l = (ConvolutionLayer) net.get(0);
-			l.kernel.makeR(1);
+//			ConvolutionLayer l = (ConvolutionLayer) net.get(0);
+//			l.kernel.makeR(1);
+//			Utils.randomMatrix(l.kernel);
+			System.out.println(nb2.describe());
 			new Trainer().train(net, trainset, 5);
 			System.out.println(kernel.toMatlabString("K1"));
-			System.out.println(l.kernel.toMatlabString("K2"));
+//			System.out.println(l.kernel.toMatlabString("K2"));
 		}
 /*
 		{

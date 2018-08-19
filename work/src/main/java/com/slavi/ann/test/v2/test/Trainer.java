@@ -139,7 +139,7 @@ public class Trainer {
 
 				if (absError.max() < 0.15)
 					patternsLearend++;
-				st.addValue(absError.sumAll());
+				st.addValue(R);
 				stAbsError.addValue(absError);
 				//errors.add(new DatapointTrainResult(index, pair, absError.sumAll() / absError.getVectorSize()));
 				errors.add(new DatapointTrainResult(index, pair, absError.max()));

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.dataset.IrisData;
 import com.slavi.ann.test.dataset.MnistData;
 import com.slavi.ann.test.dataset.MnistData.MnistPattern;
 import com.slavi.ann.test.v2.Network;
@@ -59,8 +60,9 @@ public class MyMnistDataTest {
 
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 1000); // Number 8 is missing until index 61,84, 110
+//		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false).subList(0, 1000); // Number 8 is missing until index 61,84, 110
 		//List<? extends DatapointPair> trainset = TwoSpiralsData.dataSet(100);
+		List<? extends DatapointPair> trainset = IrisData.readDataSet(true);
 		Marker.release();
 
 		DatapointPair pair0 = trainset.get(0);
@@ -69,7 +71,7 @@ public class MyMnistDataTest {
 		pair0.toInputMatrix(input0);
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
-				// MNIST data
+/*				// MNIST data
 				//.addConstScaleAndBiasLayer(2, -1)
 				.addConvolutionLayer(5).addSigmoidLayer()
 				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
@@ -96,13 +98,16 @@ public class MyMnistDataTest {
 				.addFullyConnectedLayer(4).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				.addDebugLayer("last", DebugLayer.off)*/
+				// Iris data
+//				.addFullyConnectedLayer(3).addSigmoidLayer()
+				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				;
 		System.out.println(nb.describe());
 		Network net = nb.build();
 		System.out.println(net.get(1));
-		net.loadParams(MatrixUtil.loadOctave(new FileInputStream(new File(System.getProperty("user.home"), "/octave/A.mat"))), 0);
+//		net.loadParams(MatrixUtil.loadOctave(new FileInputStream(new File(System.getProperty("user.home"), "/octave/A.mat"))), 0);
 
-		new Trainer().train(net, trainset, 1);
+		new Trainer().train(net, trainset, 3);
 		System.out.println(net.get(1));
 	}
 
