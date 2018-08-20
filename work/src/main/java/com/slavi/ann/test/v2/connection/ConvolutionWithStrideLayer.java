@@ -25,20 +25,22 @@ public class ConvolutionWithStrideLayer extends Layer {
 	}
 
 	@Override
-	public void extractParams(Matrix delta, int coefIndex) {
-		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
-			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				delta.setItem(coefIndex++, 0, kernel.getItem(i, j));
+	public void extractParams(Matrix delta, int startingIndex) {
+		for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+			int coefIndex = startingIndex + ky * kernel.getSizeX();
+			for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
+				delta.setItem(coefIndex + kx, 0, kernel.getItem(kx, ky));
 			}
 		}
 	}
 
 	@Override
-	public void loadParams(Matrix delta, int coefIndex) {
-		for (int j = kernel.getSizeY() - 1; j >= 0; j--) {
-			for (int i = kernel.getSizeX() - 1; i >= 0; i--) {
-				double r = delta.getItem(coefIndex++, 0);
-				kernel.setItem(i, j, r);
+	public void loadParams(Matrix delta, int startingIndex) {
+		for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
+			int coefIndex = startingIndex + ky * kernel.getSizeX();
+			for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
+				double r = delta.getItem(coefIndex + kx, 0);
+				kernel.setItem(kx, ky, r);
 			}
 		}
 	}
@@ -127,7 +129,6 @@ public class ConvolutionWithStrideLayer extends Layer {
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
 					double r = error.getItem(ox, oy);
-					int coefIndex = startingIndex;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * strideY + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -136,10 +137,11 @@ public class ConvolutionWithStrideLayer extends Layer {
 							int ix = ox * strideY + kx - padX;
 							if (ix < 0 || ix >= input.getSizeX())
 								continue;
+							int coefIndex = startingIndex + ky * kernel.getSizeX();
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
-							coefs.itemAdd(coefIndex++, 0, -dw);
+							coefs.itemAdd(coefIndex + kx, 0, -dw);
 						}
 					}
 

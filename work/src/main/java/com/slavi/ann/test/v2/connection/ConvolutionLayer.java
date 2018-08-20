@@ -71,7 +71,7 @@ public class ConvolutionLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		public Matrix outputError;
+		public Matrix outputError;	// Used by com.slavi.ann.test.v2.Utils.DrawConvolutionLayer
 		public Matrix dKernel;
 
 		protected Workspace() {
@@ -131,9 +131,9 @@ public class ConvolutionLayer extends Layer {
 					double r = error.getItem(ox, oy);
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * kernel.getSizeY() + ky - padY;
-						int coefIndex = startingIndex + ky * kernel.getSizeX();
 						if (iy < 0 || iy >= input.getSizeY())
 							continue;
+						int coefIndex = startingIndex + ky * kernel.getSizeX();
 						for (int kx = kernel.getSizeX() - 1; kx >= 0; kx--) {
 							int ix = ox * kernel.getSizeX() + kx - padX;
 							if (ix < 0 || ix >= input.getSizeX())
@@ -141,8 +141,7 @@ public class ConvolutionLayer extends Layer {
 							double dw = r * input.getItem(ix, iy) * learningRate;
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
-							int tmp = coefIndex + kx;
-							coefs.itemAdd(tmp, 0, -dw);
+							coefs.itemAdd(coefIndex + kx, 0, -dw);
 						}
 					}
 				}

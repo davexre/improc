@@ -10,7 +10,6 @@ import com.slavi.ann.test.v2.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.MatrixUtil;
 
 public class ConvolutionLayerTest2 {
 	void doIt2() throws Exception {

@@ -2,7 +2,6 @@ package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.ann.test.v2.Layer;
-import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
@@ -73,10 +72,8 @@ public class FullyConnectedLayer extends Layer {
 		public Matrix input;
 		public Matrix inputError;
 		public Matrix output;
-		public Matrix outputError;
+		public Matrix outputError;	// Used by com.slavi.ann.test.v2.Utils.DrawFullyConnectedLayer
 		public Matrix dW;
-		public Matrix tmp;
-		public MatrixStatistics ms;
 
 		protected Workspace() {
 			input = null;
@@ -86,9 +83,6 @@ public class FullyConnectedLayer extends Layer {
 			output = new Matrix(sizeOutput, 1);
 			outputError = new Matrix(sizeOutput, 1);
 			dW = new Matrix(sizeInput, sizeOutput);
-			tmp = new Matrix(sizeInput, sizeOutput);
-			ms = new MatrixStatistics();
-			ms.start();
 		}
 
 		@Override
@@ -116,17 +110,15 @@ public class FullyConnectedLayer extends Layer {
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			inputError.make0();
 			for (int j = weight.getSizeY() - 1; j >= 0; j--) {
-				double r = error.getVectorItem(j);
+				double r = error.getVectorItem(j) * learningRate;
 				int coefIndex = startingIndex + j * weight.getSizeX();
 				for (int i = weight.getSizeX() - 1; i >= 0; i--) {
-					double dw = r * input.getVectorItem(i) * learningRate;
+					double dw = r * input.getVectorItem(i);
 					inputError.vectorItemAdd(i, r * weight.getItem(i, j));
 					dW.itemAdd(i, j, -dw); // the w-dw means descent, while w+dw means ascent (maximize the error)
 					coefs.setItem(coefIndex + i, 0, -dw);
-					tmp.setItem(i, j, -dw);
 				}
 			}
-			ms.addValue(tmp);
 			return inputError;
 		}
 
@@ -143,7 +135,6 @@ public class FullyConnectedLayer extends Layer {
 					.append("output\n").append(output)
 					.append("weight statistics\n").append(weight.calcStatistics().toString(Statistics.CStatDetail))
 					.append("dW statistics\n").append(dW.calcStatistics().toString(Statistics.CStatDetail))
-					.append(ms.statStatToString(Statistics.CStatDetail))
 					.toString();
 		}
 	}
