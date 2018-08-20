@@ -33,9 +33,6 @@ public class Cifar100 {
 	static final String dataFiles[] = { "cifar-100-binary.tar.gz" };
 	static final String dataTargetDir = "data/cifar";
 
-	static final double valueLow = 0.05;
-	static final double valueHigh = 0.95;
-
 	public static class Cifar100Pattern implements DatapointPair {
 		public List<String> labelsFine;
 		public List<String> labelsCoarse;
@@ -75,7 +72,7 @@ public class Cifar100 {
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(labelsFine.size(), 1);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
-				dest.setVectorItem(i, labelFine == i ? valueHigh : valueLow);
+				dest.setVectorItem(i, labelFine == i ? Utils.valueHigh : Utils.valueLow);
 		}
 
 		public String toString() {
@@ -120,8 +117,7 @@ public class Cifar100 {
 			Pattern pattern = Pattern.compile(".*/data_batch_(\\d+).bin");
 			while ((entry = (TarArchiveEntry)tarInputStream.getNextEntry()) != null) {
 				String fname = entry.getName();
-				System.out.println("----------");
-				System.out.println(entry.getName());
+				//System.out.println(entry.getName());
 				if (fname.endsWith("fine_label_names.txt")) {
 					labelsFine.addAll(IOUtils.readLines(tarInputStream));
 				} else if (fname.endsWith("coarse_label_names.txt")) {

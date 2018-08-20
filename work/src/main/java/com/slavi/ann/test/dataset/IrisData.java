@@ -20,9 +20,6 @@ public class IrisData {
 	static final String dataFiles[] = { "iris_training.csv", "iris_test.csv" };
 	static final String dataTargetDir = "data/iris";
 
-	static final double valueLow = 0.05;
-	static final double valueHigh = 0.95;
-
 	public static class IrisPattern implements DatapointPair {
 		public int patternNumber;
 		public byte label;
@@ -37,7 +34,7 @@ public class IrisData {
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(3, 1);
 			for (int i = 0; i < 3; i++)
-				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
+				dest.setVectorItem(i, label == i ? Utils.valueHigh : Utils.valueLow);
 		}
 
 		public String toString() {

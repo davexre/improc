@@ -25,9 +25,6 @@ public class MnistData {
 	static final String testFileLabels = "t10k-labels-idx1-ubyte.gz";
 	static final String dataFiles[] = { trainingFiles, trainingFileLabels, testFiles, testFileLabels };
 
-	static final double valueLow = 0.05;
-	static final double valueHigh = 0.95;
-
 	public static class MnistPattern implements DatapointPair {
 		public int patternNumber;
 		public byte label;
@@ -52,13 +49,13 @@ public class MnistData {
 		public void toInputMatrix(Matrix dest) {
 			dest.resize(28, 28);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
-				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, valueLow, valueHigh));
+				dest.setVectorItem(i, MathUtil.mapValue(((int) image[i]) & 255, 0, 255, Utils.valueLow, Utils.valueHigh));
 		}
 
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(10, 1);
 			for (int i = 0; i < 10; i++)
-				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
+				dest.setVectorItem(i, label == i ? Utils.valueHigh : Utils.valueLow);
 		}
 
 		public String toString() {
@@ -70,7 +67,7 @@ public class MnistData {
 		}
 	}
 
-	public static List<MnistPattern> readMnistSet(String labelsFileName, String imagesFileName) throws Exception {
+	public static List<MnistPattern> readDataSet(String labelsFileName, String imagesFileName) throws Exception {
 		Utils.downloadDataFiles(dataTargetDir, dataUrl, dataFiles);
 
 		File dir = new File(dataTargetDir);
@@ -113,16 +110,16 @@ public class MnistData {
 		}
 	}
 
-	public static List<MnistPattern> readMnistSet(boolean useTrainDataSet) throws Exception {
+	public static List<MnistPattern> readDataSet(boolean useTrainDataSet) throws Exception {
 		if (useTrainDataSet)
-			return readMnistSet(trainingFileLabels, trainingFiles);
+			return readDataSet(trainingFileLabels, trainingFiles);
 		else
-			return readMnistSet(testFileLabels, testFiles);
+			return readDataSet(testFileLabels, testFiles);
 	}
 
 	public static void main(String[] args) throws Exception {
 		Marker.mark("Read");
-		List<MnistPattern> pats = readMnistSet(false);
+		List<MnistPattern> pats = readDataSet(false);
 		Marker.release();
 
 		// ImageIO.write(pats.get(pats.size() - 1).toBufferedImage(), "png", new File(dataTargetDir, "test.png"));

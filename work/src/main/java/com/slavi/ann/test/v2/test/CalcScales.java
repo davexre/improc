@@ -20,7 +20,7 @@ public class CalcScales {
 	static final double valueHigh = 0.95;
 
 	public void doIt(String[] args) throws Exception {
-		List<? extends DatapointPair> trainset = MnistData.readMnistSet(false); //.subList(0, 30);
+		List<? extends DatapointPair> trainset = MnistData.readDataSet(false); //.subList(0, 30);
 		Matrix input = new Matrix();
 		Matrix output = new Matrix();
 

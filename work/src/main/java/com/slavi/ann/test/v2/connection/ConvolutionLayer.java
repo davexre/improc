@@ -2,7 +2,6 @@ package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.MatrixUtil;
 
 public class ConvolutionLayer extends Layer {
 	public static final double kernelSigma = 1.5;
@@ -155,10 +154,6 @@ public class ConvolutionLayer extends Layer {
 		protected void resetEpoch() {
 			dKernel.make0();
 			outputError.make0();
-
-			System.out.println("K ==========");
-			System.out.println(MatrixUtil.calcStatistics(kernel));
-			System.out.println("[K] = " + kernel.sumAll() + ", [|K|] = " + kernel.sumAbs());
 		}
 
 		@Override

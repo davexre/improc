@@ -11,7 +11,7 @@ import com.slavi.math.matrix.Matrix;
 public class MyMnistCheckData {
 
 	void doIt() throws Exception {
-		List<MnistPattern> pats = MnistData.readMnistSet(false);
+		List<MnistPattern> pats = MnistData.readDataSet(false);
 		ConvolutionSameSizeLayer l = new ConvolutionSameSizeLayer(6, 6, 1);
 		ConvolutionSameSizeLayer.LayerWorkspace w = l.createWorkspace();
 		Matrix input = new Matrix();
@@ -28,7 +28,7 @@ public class MyMnistCheckData {
 	}
 	
 	void doIt2() throws Exception {
-		List<MnistPattern> pats = MnistData.readMnistSet(false);
+		List<MnistPattern> pats = MnistData.readDataSet(false);
 		Matrix m = new Matrix(28, 28);
 		Matrix max = new Matrix(28, 28);
 		max.make0();

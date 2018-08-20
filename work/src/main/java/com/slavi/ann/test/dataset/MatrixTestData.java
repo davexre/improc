@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Utils;
-import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.matrix.Matrix;

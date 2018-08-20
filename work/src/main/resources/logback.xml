@@ -50,6 +50,7 @@
 	</logger>
 	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
+	<logger level="debug" name="com.slavi.ann.test" />
 
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />
 	<logger level="error" name="org.apache.commons.digester" />

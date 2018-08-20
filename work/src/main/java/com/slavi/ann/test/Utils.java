@@ -2,6 +2,7 @@ package com.slavi.ann.test;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -14,9 +15,55 @@ import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.slavi.math.adjust.MatrixStatistics;
+import com.slavi.math.adjust.Statistics;
+import com.slavi.math.matrix.Matrix;
 
 public class Utils {
+	public static final double valueLow = 0.05;
+	public static final double valueHigh = 0.95;
+
 	static final Logger log = LoggerFactory.getLogger(Utils.class);
+
+	public static void computeDataStatistics(List<? extends DatapointPair> trainset) {
+		if (!log.isDebugEnabled())
+			return;
+		MatrixStatistics stIn = new MatrixStatistics();
+		MatrixStatistics stOut = new MatrixStatistics();
+		stIn.start();
+		stOut.start();
+		Matrix input = new Matrix();
+		Matrix output = new Matrix();
+
+		for (DatapointPair pair : trainset) {
+			pair.toInputMatrix(input);
+			pair.toOutputMatrix(output);
+			stIn.addValue(input);
+			stOut.addValue(output);
+		}
+
+		stIn.stop();
+		stOut.stop();
+
+		log.debug("Dataset statistics" +
+			"\nInput:\n" + stIn.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatCount //| Statistics.CStatMinMax
+				) +
+			"\nOutput:\n" + stOut.toString(Statistics.CStatAvg | Statistics.CStatStdDev //| Statistics.CStatMinMax
+				));
+	}
+
+	public static double assertValidValue(double d) {
+		if (Double.isInfinite(d) || Double.isNaN(d))
+			throw new RuntimeException("Invalid value");
+		return d;
+	}
+
+	public static Matrix assertValidMatrix(Matrix m) {
+		for (int i = m.getSizeX() - 1; i >= 0; i--)
+			for (int j = m.getSizeY() - 1; j >= 0; j--)
+				assertValidValue(m.getItem(i, j));
+		return m;
+	}
 
 	public static void configureMapper(ObjectMapper m) {
 		AnnotationIntrospector primary = new JacksonAnnotationIntrospector();

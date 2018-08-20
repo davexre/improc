@@ -5,7 +5,6 @@ import java.util.List;
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.improc.parallel.PGaussianFilter;
 import com.slavi.math.matrix.Matrix;
-import com.slavi.util.MatrixUtil;
 
 public abstract class Layer {
 
@@ -96,10 +95,6 @@ public abstract class Layer {
 		}
 //		k.normalize();
 */
-//		k.rMul(50.0 / k.sumAll());
-		System.out.println("K ==========");
-		System.out.println(MatrixUtil.calcStatistics(k));
-		System.out.println("[K] = " + k.sumAll());
 	}
 
 	public abstract class LayerWorkspace {

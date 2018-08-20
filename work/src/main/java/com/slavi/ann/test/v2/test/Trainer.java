@@ -70,12 +70,6 @@ public class Trainer {
 		return r;
 	}
 
-	public static double assertValue(double d) {
-		if (Double.isInfinite(d) || Double.isNaN(d))
-			throw new RuntimeException("Invalid value");
-		return d;
-	}
-
 	public void epochComplete() {
 	}
 
@@ -136,7 +130,7 @@ public class Trainer {
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
 				}
-
+				R *= 0.5;
 				if (absError.max() < 0.15)
 					patternsLearend++;
 				st.addValue(R);
@@ -203,6 +197,8 @@ public class Trainer {
 			}
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
+			System.out.println(params.toMatlabString("params"));
+			System.out.println(x.transpose(null).toMatlabString("dX"));
 			lastAvgError = avgError;
 
 //			if (maxStdInputErr < 0.0001) {
@@ -227,6 +223,124 @@ public class Trainer {
 
 			for (int i = numAdjustableParams - 1; i >= 0; i--)
 				params.itemAdd(i, 0, x.getItem(0, i));
+			l.loadParams(params, 0);
+			epochComplete();
+			l.resetEpoch(wslist);
+		}
+	}
+
+	public void train2(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
+		Logger LOG = LoggerFactory.getLogger("LOG");
+		Matrix input = new Matrix();
+		Matrix target = new Matrix();
+		Matrix error = new Matrix();
+		Matrix absError = new Matrix();
+		MatrixStatistics stAbsError = new MatrixStatistics();
+		MatrixStatistics stInputError = new MatrixStatistics();
+		Statistics st = new Statistics();
+		LayerWorkspace ws = l.createWorkspace();
+		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
+		wslist.add(ws);
+		double lastAvgError = 0;
+
+		int numAdjustableParams = l.getNumAdjustableParams();
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
+		Matrix coefs = new Matrix(numAdjustableParams, 1);
+		Matrix params = new Matrix(numAdjustableParams, 1);
+		l.extractParams(params, 0);
+		log_measurements.trace(params.toMatlabString("P"));
+		for (int epoch = 0; epoch < maxEpochs; epoch++) {
+			System.out.println("--------------------- EPOCH "  + epoch);
+			lsa.clear();
+
+			stAbsError.start();
+			stInputError.start();
+			st.start();
+			int index = 0;
+			int patternsLearend = 0;
+			for (DatapointPair pair : trainset) {
+				pair.toInputMatrix(input);
+				pair.toOutputMatrix(target);
+				Matrix output = ws.feedForward(input);
+				if (target.getVectorSize() != output.getVectorSize())
+					throw new Error("Dimensions mismatch");
+				error.resize(output.getSizeX(), output.getSizeY());
+				absError.resize(output.getSizeX(), output.getSizeY());
+				double R = 0;
+				for (int i = target.getVectorSize() - 1; i >= 0; i--) {
+					double e = output.getVectorItem(i) - target.getVectorItem(i);
+					R += e*e;
+					error.setVectorItem(i, e);
+					e = Math.abs(e);
+					absError.setVectorItem(i, e);
+				}
+				R *= 0.5;
+				if (absError.max() < 0.15)
+					patternsLearend++;
+				st.addValue(R);
+				stAbsError.addValue(absError);
+				coefs.make0();
+				Matrix inputError = ws.backPropagate(coefs, 0, error);
+				lsa.addMeasurement(coefs, 1, R, 0);
+				inputError.termAbs(inputError);
+				stInputError.addValue(inputError);
+				index++;
+			}
+			if (!lsa.calculateSvd())
+				throw new Error("LSA failed");
+			Matrix x = lsa.getUnknown();
+
+			stAbsError.stop();
+			stInputError.stop();
+			st.stop();
+
+			Matrix avg = stAbsError.getAvgValue();
+			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
+			double learnProgress = lastAvgError - avgError;
+			double maxErr = stAbsError.getAbsMaxX().max();
+
+			double maxStdInputErr = stInputError.getStdDeviation().max();
+			double patternsLearendPercent = (double) patternsLearend / index;
+			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
+			System.out.println("maxAbsInputErr:   " + MathUtil.d4(stInputError.getAbsMaxX().maxAbs()));
+			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
+			System.out.println("avg R:            " + MathUtil.d4(st.getAvgValue()));
+			System.out.println("std R:            " + MathUtil.d4(st.getStdDeviation()));
+			System.out.println("avg Avg Error:    " + MathUtil.d4(avgError));
+			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
+			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
+			if (epoch > 0) {
+				System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
+				System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
+			}
+			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
+			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
+			System.out.println(params.toMatlabString("params"));
+			System.out.println(x.transpose(null).toMatlabString("dX"));
+			lastAvgError = avgError;
+
+//			if (maxStdInputErr < 0.0001) {
+//				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
+//				break;
+//			}
+			if (patternsLearendPercent > 0.8 && maxErr < 0.3) {
+				System.out.println("Threshold 'patternsLearendPercent' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
+				break;
+			}
+			if (maxErr < 0.2) { // || (dE > 0 && dE < 0.001)) {
+				System.out.println("Threshold 'maxE' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
+				break;
+			}
+			if (epoch > 0 && learnProgress < 0) {
+				System.out.println("AVERAGE ERROR HAS INCREASED.");
+			}
+			//l.applyWorkspaces(wslist);
+/*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
+			BufferedImage bi = Utils.draw(ws, tmpInputSize);
+			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
+
+			for (int i = numAdjustableParams - 1; i >= 0; i--)
+				params.itemAdd(i, 0, -x.getItem(0, i));
 			l.loadParams(params, 0);
 			epochComplete();
 			l.resetEpoch(wslist);

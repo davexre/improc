@@ -12,7 +12,7 @@ import com.slavi.util.Marker;
 public class MnistDataTest {
 
 	void doIt() throws Exception {
-		List<MnistPattern> pats = MnistData.readMnistSet(false);
+		List<MnistPattern> pats = MnistData.readDataSet(false);
 
 		//ObjectMapper mapper = Utils.jsonMapper();
 		int insize = 28*28;

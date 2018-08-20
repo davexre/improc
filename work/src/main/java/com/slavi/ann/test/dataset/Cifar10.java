@@ -33,9 +33,6 @@ public class Cifar10 {
 	static final String dataFiles[] = { "cifar-10-binary.tar.gz" };
 	static final String dataTargetDir = "data/cifar";
 
-	static final double valueLow = 0.05;
-	static final double valueHigh = 0.95;
-
 	public static class Cifar10Pattern implements DatapointPair {
 		public List<String> labels;
 		public int batch;
@@ -67,13 +64,13 @@ public class Cifar10 {
 			dest.resize(columns, rows);
 			for (int i = dest.getSizeX() - 1; i >= 0; i--)
 				for (int j = dest.getSizeY() - 1; j >= 0; j--)
-					dest.setItem(i, j, MathUtil.mapValue(pixels[j * columns + i] & 0xff, 0, 255, 0, 1));
+					dest.setItem(i, j, MathUtil.mapValue(pixels[j * columns + i] & 0xff, 0, 255, Utils.valueLow, Utils.valueHigh));
 		}
 
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(10, 1);
 			for (int i = dest.getVectorSize() - 1; i >= 0; i--)
-				dest.setVectorItem(i, label == i ? valueHigh : valueLow);
+				dest.setVectorItem(i, label == i ? Utils.valueHigh : Utils.valueLow);
 		}
 
 		public String toString() {
@@ -115,8 +112,7 @@ public class Cifar10 {
 			Pattern pattern = Pattern.compile(".*/data_batch_(\\d+).bin");
 			while ((entry = (TarArchiveEntry)tarInputStream.getNextEntry()) != null) {
 				String fname = entry.getName();
-				System.out.println("----------");
-				System.out.println(entry.getName());
+				//System.out.println(entry.getName());
 				if (fname.endsWith("batches.meta.txt")) {
 					labels.addAll(IOUtils.readLines(tarInputStream));
 				} else if (fname.endsWith("test_batch.bin")) {

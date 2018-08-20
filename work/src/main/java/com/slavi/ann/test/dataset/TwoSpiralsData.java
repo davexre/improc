@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.Utils;
 import com.slavi.math.matrix.Matrix;
 
 public class TwoSpiralsData {
@@ -26,8 +27,8 @@ public class TwoSpiralsData {
 
 		public void toOutputMatrix(Matrix dest) {
 			dest.resize(2, 1);
-			dest.setItem(0, 0, type == 0 ? 1 : 0);
-			dest.setItem(1, 0, type == 1 ? 1 : 0);
+			dest.setItem(0, 0, type == 0 ? Utils.valueHigh : Utils.valueLow);
+			dest.setItem(1, 0, type == 1 ? Utils.valueHigh : Utils.valueLow);
 		}
 
 		public String toString() {

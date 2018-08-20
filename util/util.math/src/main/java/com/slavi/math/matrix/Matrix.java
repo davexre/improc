@@ -676,14 +676,18 @@ public class Matrix {
 	 * incorrect size it will be resized.
 	 * Requires: this != dest
 	 */
-	public void transpose(Matrix dest) {
+	public Matrix transpose(Matrix dest) {
 		if (this == dest) {
 			throw new Error("Invalid argument");
 		}
-		dest.resize(sizeY, sizeX);
+		if (dest == null)
+			dest = new Matrix(sizeY, sizeX);
+		else
+			dest.resize(sizeY, sizeX);
 		for (int i = sizeX - 1; i >= 0; i--)
 			for (int j = sizeY - 1; j >= 0; j--)
 				dest.setItem(j, i, getItem(i, j));
+		return dest;
 	}
 
 	/**

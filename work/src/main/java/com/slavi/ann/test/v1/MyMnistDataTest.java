@@ -34,7 +34,7 @@ public class MyMnistDataTest {
 
 	void doIt() throws Exception {
 		Marker.mark("Read");
-		List<MnistPattern> pats = MnistData.readMnistSet(false);
+		List<MnistPattern> pats = MnistData.readDataSet(false);
 		Marker.release();
 
 		int outsize = 10;

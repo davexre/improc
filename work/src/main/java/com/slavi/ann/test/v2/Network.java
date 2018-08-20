@@ -110,10 +110,11 @@ public class Network extends Layer implements Iterable<Layer>{
 
 		@Override
 		public Matrix backPropagate(Matrix coefs, int startingIndex, Matrix error) {
+			startingIndex += getNumAdjustableParams();
 			for (int i = workspaces.size() - 1; i >= 0; i--) {
 				LayerWorkspace workspace = workspaces.get(i);
+				startingIndex -= workspace.getLayer().getNumAdjustableParams();
 				error = workspace.backPropagate(coefs, startingIndex, error);
-				startingIndex += workspace.getLayer().getNumAdjustableParams();
 			}
 			return error;
 		}

@@ -275,9 +275,10 @@ public class Statistics {
 	 */
 	public double getStdDeviation() {
 		//return Math.sqrt(D2 / (getItemsCount() - 1));
+		double itemsCount = getItemsCount();
 		return getItemsCount() <= 1 ? 0 : Math.sqrt(
-				(getItemsCount() * sumValues2 - sumValues1 * sumValues1) /
-				(getItemsCount() * (getItemsCount() - 1)));
+				(itemsCount * sumValues2 - sumValues1 * sumValues1) /
+				(itemsCount * (itemsCount - 1d)));
 	}
 
 	public boolean hasBadValues() {
@@ -300,10 +301,10 @@ public class Statistics {
 				f.format(nameFormatDec, "Average", getAvgValue());
 			}
 			if ((style & CStatStdDev) != 0) {
-				f.format(nameFormatDec, "B", getB());
 				f.format(nameFormatDec, "Std deviation", getStdDeviation());
 			}
 			if ((style & CStatJ) != 0) {
+				f.format(nameFormatDec, "B", getB());
 				f.format(nameFormatDec, "J start", getJ_Start());
 				f.format(nameFormatDec, "J end", getJ_End());
 			}
