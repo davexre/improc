@@ -76,167 +76,16 @@ public class Trainer {
 	Logger log_measurements = LoggerFactory.getLogger(LeastSquaresAdjust.class.getName() + ".measurements");
 
 	public void train(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
-		Logger LOG = LoggerFactory.getLogger("LOG");
+//		Logger LOG = LoggerFactory.getLogger("LOG");
 		Matrix input = new Matrix();
 		Matrix target = new Matrix();
 		Matrix error = new Matrix();
 		Matrix absError = new Matrix();
 		MatrixStatistics stAbsError = new MatrixStatistics();
 		MatrixStatistics stInputError = new MatrixStatistics();
-		Statistics st = new Statistics();
-		int numAdjustableParams = l.getNumAdjustableParams();
-		Matrix coefs = new Matrix(numAdjustableParams, 1);
-		LayerWorkspace ws = l.createWorkspace();
-		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
-		wslist.add(ws);
-		double lastAvgError = 0;
-/*		File outDir = new File("./target/tmp");
-		FileUtils.deleteQuietly(outDir);
-		outDir.mkdirs();*/
-
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
-//		RealMatrix jacobian = new Array2DRowRealMatrix(trainset.size(), numAdjustableParams);
-//		RealVector residuals = new ArrayRealVector(trainset.size());
-		Matrix params = new Matrix(numAdjustableParams, 1);
-		l.extractParams(params, 0);
-		log_measurements.trace(params.toMatlabString("P"));
-		ArrayList<DatapointTrainResult> errors = new ArrayList<>();
-		for (int epoch = 0; epoch < maxEpochs; epoch++) {
-			lsa.clear();
-			System.out.println("--------------------- EPOCH "  + epoch);
-			stAbsError.start();
-			stInputError.start();
-			st.start();
-			int index = 0;
-			errors.clear();
-			int patternsLearend = 0;
-			for (DatapointPair pair : trainset) {
-				boolean print = (index == 5);
-				print = false;
-				pair.toInputMatrix(input);
-				pair.toOutputMatrix(target);
-				Matrix output = ws.feedForward(input);
-				if (target.getVectorSize() != output.getVectorSize())
-					throw new Error("Dimensions mismatch");
-				error.resize(output.getSizeX(), output.getSizeY());
-				absError.resize(output.getSizeX(), output.getSizeY());
-				double L = 0;
-				double R = 0;
-				for (int i = target.getVectorSize() - 1; i >= 0; i--) {
-					double e = output.getVectorItem(i) - target.getVectorItem(i);
-					L += e;
-					R += e*e;
-					error.setVectorItem(i, e);
-					e = Math.abs(e);
-					absError.setVectorItem(i, e);
-				}
-				R *= 0.5;
-				if (absError.max() < 0.15)
-					patternsLearend++;
-				st.addValue(R);
-				stAbsError.addValue(absError);
-				//errors.add(new DatapointTrainResult(index, pair, absError.sumAll() / absError.getVectorSize()));
-				errors.add(new DatapointTrainResult(index, pair, absError.max()));
-				coefs.make0();
-				Matrix inputError = ws.backPropagate(coefs, 0, error);
-				lsa.addMeasurement(coefs, 1, R, 0);
-//				for (int i = 0; i < numAdjustableParams; i++)
-//					jacobian.setEntry(index, i, coefs.getItem(i, 0));
-//				residuals.setEntry(index, R);
-				inputError.termAbs(inputError);
-				stInputError.addValue(inputError);
-				if (print) {
-					System.out.println("E(5):" + error.toString());
-				}
-				index++;
-			}
-			//System.out.println("\n\nJ=" + MatrixUtils.OCTAVE_FORMAT.format(jacobian));
-			//System.out.println("\n\n" + MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
-			LOG.debug(params.toMatlabString("P"));
-//			LOG.debug(MatrixUtil.fromApacheMatrix(jacobian, null).toMatlabString("J"));
-//			LOG.debug(MatrixUtil.fromApacheVector(residuals, null).toMatlabString("R"));
-//			SingularValueDecomposition svd = new SingularValueDecomposition(jacobian);
-//			RealVector x = svd.getSolver().solve(residuals);
-//			LOG.debug(MatrixUtil.fromApacheVector(x, null).toMatlabString("X"));
-			if (!lsa.calculateSvd())
-				throw new Error("LSA failed");
-			Matrix x = lsa.getUnknown();
-
-			stAbsError.stop();
-			stInputError.stop();
-			st.stop();
-//			System.out.println("MS - AbsError");
-//			System.out.println(stAbsError.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
-//			System.out.println(stInputError.toString(Statistics.CStatStdDev | Statistics.CStatMinMax));
-			System.out.println("MaxAbsInputErr=" + MathUtil.d4(stInputError.getAbsMaxX().maxAbs()));
-//			System.out.println("Max(Error) stats\n" + st.toString(Statistics.CStatStdDev | Statistics.CStatMinMax| Statistics.CStatAbs));
-			Matrix avg = stAbsError.getAvgValue();
-			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
-			double learnProgress = lastAvgError - avgError;
-			double maxErr = stAbsError.getAbsMaxX().max();
-
-			Collections.sort(errors);
-/*
-			for (int i = 0; i < 5 && i < errors.size(); i++) {
-				DatapointTrainResult e = errors.get(i);
-				System.out.println("INDEX " + e.index + " ERROR:" + e.error + ", " + e.pair.getName());
-			}*/
-			double maxStdInputErr = stInputError.getStdDeviation().max();
-			double patternsLearendPercent = (double) patternsLearend / index;
-			System.out.println("maxStdInputErr:   " + MathUtil.d4(maxStdInputErr));
-			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
-			System.out.println("maxErrPair:       " + errors.get(0).pair.getName());
-			System.out.println("avgSumError:      " + MathUtil.d4(st.getAvgValue()));
-			System.out.println("stdSumError:      " + MathUtil.d4(st.getStdDeviation()));
-			System.out.println("sumAvgError:      " + MathUtil.d4(avgError));
-			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
-			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
-			if (epoch > 0) {
-				System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
-				System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
-			}
-			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
-			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
-			System.out.println(params.toMatlabString("params"));
-			System.out.println(x.transpose(null).toMatlabString("dX"));
-			lastAvgError = avgError;
-
-//			if (maxStdInputErr < 0.0001) {
-//				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
-//				break;
-//			}
-			if (patternsLearendPercent > 0.8 && maxErr < 0.3) {
-				System.out.println("Threshold 'patternsLearendPercent' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
-				break;
-			}
-			if (maxErr < 0.2) { // || (dE > 0 && dE < 0.001)) {
-				System.out.println("Threshold 'maxE' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
-				break;
-			}
-			if (epoch > 0 && learnProgress < 0) {
-				System.out.println("AVERAGE ERROR HAS INCREASED.");
-			}
-			//l.applyWorkspaces(wslist);
-/*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
-			BufferedImage bi = Utils.draw(ws, tmpInputSize);
-			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
-
-			for (int i = numAdjustableParams - 1; i >= 0; i--)
-				params.itemAdd(i, 0, x.getItem(0, i));
-			l.loadParams(params, 0);
-			epochComplete();
-			l.resetEpoch(wslist);
-		}
-	}
-
-	public void train2(Layer l, List<? extends DatapointPair> trainset, int maxEpochs) throws IOException {
-		Logger LOG = LoggerFactory.getLogger("LOG");
-		Matrix input = new Matrix();
-		Matrix target = new Matrix();
-		Matrix error = new Matrix();
-		Matrix absError = new Matrix();
-		MatrixStatistics stAbsError = new MatrixStatistics();
-		MatrixStatistics stInputError = new MatrixStatistics();
+		MatrixStatistics stTarget = new MatrixStatistics();
+		MatrixStatistics stOutput = new MatrixStatistics();
+		MatrixStatistics stOutputError = new MatrixStatistics();
 		Statistics st = new Statistics();
 		LayerWorkspace ws = l.createWorkspace();
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
@@ -250,12 +99,15 @@ public class Trainer {
 		l.extractParams(params, 0);
 		log_measurements.trace(params.toMatlabString("P"));
 		for (int epoch = 0; epoch < maxEpochs; epoch++) {
-			System.out.println("--------------------- EPOCH "  + epoch);
+			System.out.println("\n--------------------- EPOCH "  + epoch);
 			lsa.clear();
 
 			stAbsError.start();
 			stInputError.start();
 			st.start();
+			stTarget.start();
+			stOutput.start();
+			stOutputError.start();
 			int index = 0;
 			int patternsLearend = 0;
 			for (DatapointPair pair : trainset) {
@@ -284,6 +136,9 @@ public class Trainer {
 				lsa.addMeasurement(coefs, 1, R, 0);
 				inputError.termAbs(inputError);
 				stInputError.addValue(inputError);
+				stTarget.addValue(target);
+				stOutput.addValue(output);
+				stOutputError.addValue(absError);
 				index++;
 			}
 			if (!lsa.calculateSvd())
@@ -293,6 +148,9 @@ public class Trainer {
 			stAbsError.stop();
 			stInputError.stop();
 			st.stop();
+			stTarget.stop();
+			stOutput.stop();
+			stOutputError.stop();
 
 			Matrix avg = stAbsError.getAvgValue();
 			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
@@ -306,17 +164,22 @@ public class Trainer {
 			System.out.println("maxErr:           " + MathUtil.d4(maxErr));
 			System.out.println("avg R:            " + MathUtil.d4(st.getAvgValue()));
 			System.out.println("std R:            " + MathUtil.d4(st.getStdDeviation()));
-			System.out.println("avg Avg Error:    " + MathUtil.d4(avgError));
+			System.out.println("avg Avg Error**:  " + MathUtil.d4(avgError));
 			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
 			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
 			if (epoch > 0) {
-				System.out.println("LearnProgress:    " + MathUtil.d4(learnProgress * 100));
-				System.out.println("lastSumAvgError:  " + MathUtil.d4(lastAvgError));
+				System.out.println("LearnProgress**:  " + MathUtil.d4(learnProgress * 100));
+				System.out.println("lastAvgAvgError:  " + MathUtil.d4(lastAvgError));
 			}
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
+			System.out.println("params.max.abs:   " + MathUtil.d4(params.maxAbs()));
+			System.out.println("dX.max.abs:       " + MathUtil.d4(x.maxAbs()));
 			System.out.println(params.toMatlabString("params"));
 			System.out.println(x.transpose(null).toMatlabString("dX"));
+			System.out.println("Target stat: " + stTarget.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
+			System.out.println("Output stat: " + stOutput.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
+			System.out.println("Output error stat: " + stOutputError.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
 			lastAvgError = avgError;
 
 //			if (maxStdInputErr < 0.0001) {

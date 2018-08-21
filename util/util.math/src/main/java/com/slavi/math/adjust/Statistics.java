@@ -277,7 +277,7 @@ public class Statistics {
 		//return Math.sqrt(D2 / (getItemsCount() - 1));
 		double itemsCount = getItemsCount();
 		return getItemsCount() <= 1 ? 0 : Math.sqrt(
-				(itemsCount * sumValues2 - sumValues1 * sumValues1) /
+				Math.abs(itemsCount * sumValues2 - sumValues1 * sumValues1) /
 				(itemsCount * (itemsCount - 1d)));
 	}
 

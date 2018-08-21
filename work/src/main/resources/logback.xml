@@ -15,7 +15,8 @@
 	</appender> -->
 
 	<appender name="my.appender.log" class="ch.qos.logback.core.FileAppender">
-		<file>target/log.log</file>
+		<!-- <file>target/log.log</file> -->
+		<file>${user.home}/octave/m.m</file>
 		<append>false</append>
 		<encoder>
 			<pattern>%msg%n</pattern>
@@ -35,20 +36,20 @@
 		</encoder>
 	</appender>
 
-	<logger level="all" name="LOG" additivity="false">
-		<appender-ref ref="my.appender.log" />
-	</logger>
-
 	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
 
 <!-- 	<logger name="my.logger.file" level="all" additivity="false">
 		<appender-ref ref="my.appender.file" />
 	</logger> -->
 
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
-		<appender-ref ref="STDOUT_MSG_ONLY" />
+	<logger level="all" name="LOG" additivity="false">
+		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+		<appender-ref ref="my.appender.log" />
+	</logger>
+	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />
 

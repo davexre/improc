@@ -205,10 +205,4 @@ public class Utils {
 		dl.draw(g, ws, inputSize);
 		return bi;
 	}
-
-	public static void randomMatrix(Matrix dest) {
-		Random random = new Random();
-		for (int i = dest.getVectorSize() - 1; i >= 0; i--)
-			dest.setVectorItem(i, random.nextDouble());
-	}
 }

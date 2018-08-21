@@ -3,6 +3,7 @@ package com.slavi.ann.test;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -63,6 +64,12 @@ public class Utils {
 			for (int j = m.getSizeY() - 1; j >= 0; j--)
 				assertValidValue(m.getItem(i, j));
 		return m;
+	}
+
+	public static void randomMatrix(Matrix dest) {
+		Random random = new Random();
+		for (int i = dest.getVectorSize() - 1; i >= 0; i--)
+			dest.setVectorItem(i, random.nextDouble());
 	}
 
 	public static void configureMapper(ObjectMapper m) {

@@ -294,10 +294,10 @@ public class MatrixStatistics {
 			r.append("Average\n").append(getAvgValue());
 		}
 		if ((style & Statistics.CStatStdDev) != 0) {
-			r.append("B    : ").append(getB()).append("\n");
 			r.append("Std deviation\n").append(getStdDeviation());
 		}
 		if ((style & Statistics.CStatJ) != 0) {
+			r.append("B    : ").append(getB()).append("\n");
 			r.append("J start\n").append(getJ_Start());
 			r.append("J end\n").append(getJ_End());
 		}

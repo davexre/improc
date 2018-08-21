@@ -128,7 +128,7 @@ public class ConvolutionLayer extends Layer {
 			inputError.make0();
 			for (int oy = output.getSizeY() - 1; oy >= 0; oy--) {
 				for (int ox = output.getSizeX() - 1; ox >= 0; ox--) {
-					double r = error.getItem(ox, oy);
+					double r = error.getItem(ox, oy) * learningRate;
 					for (int ky = kernel.getSizeY() - 1; ky >= 0; ky--) {
 						int iy = oy * kernel.getSizeY() + ky - padY;
 						if (iy < 0 || iy >= input.getSizeY())
@@ -138,7 +138,7 @@ public class ConvolutionLayer extends Layer {
 							int ix = ox * kernel.getSizeX() + kx - padX;
 							if (ix < 0 || ix >= input.getSizeX())
 								continue;
-							double dw = r * input.getItem(ix, iy) * learningRate;
+							double dw = r * input.getItem(ix, iy);
 							inputError.itemAdd(ix, iy, r * kernel.getItem(kx, ky));
 							dKernel.itemAdd(kx, ky, -dw); // the w-dw mean descent, while w+dw means ascent (maximize the error)
 							coefs.itemAdd(coefIndex + kx, 0, -dw);

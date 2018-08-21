@@ -6,7 +6,7 @@ import com.slavi.ann.test.dataset.MatrixDataPointPair;
 import com.slavi.ann.test.dataset.MatrixTestData;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
-import com.slavi.ann.test.v2.Utils;
+import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.matrix.Matrix;
@@ -67,13 +67,13 @@ public class ConvolutionLayerTest2 {
 					.addSigmoidLayer()
 //					.addReLULayer()
 					.build();
-//			ConvolutionLayer l = (ConvolutionLayer) net.get(0);
+			ConvolutionLayer l = (ConvolutionLayer) net.get(0);
 //			l.kernel.makeR(1);
 //			Utils.randomMatrix(l.kernel);
 			System.out.println(nb2.describe());
 			new Trainer().train(net, trainset, 5);
 			System.out.println(kernel.toMatlabString("K1"));
-//			System.out.println(l.kernel.toMatlabString("K2"));
+			System.out.println(l.kernel.toMatlabString("K2"));
 		}
 /*
 		{

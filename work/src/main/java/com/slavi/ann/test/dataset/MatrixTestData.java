@@ -12,9 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.slavi.ann.test.v2.Layer;
-import com.slavi.ann.test.v2.Utils;
+import com.slavi.ann.test.DatapointPair;
+import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
+import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.io.CommentAwareLineNumberReader;
 import com.slavi.util.io.LineReader;
@@ -72,8 +75,20 @@ public class MatrixTestData {
 		msi.stop();
 		mso.stop();
 
-		log.trace("Test data statisticts for input\n" + msi.toString());
-		log.trace("Test data statisticts for output\n" + mso.toString());
+		MatrixStatistics mso2 = new MatrixStatistics();
+		mso2.start();
+		for (MatrixDataPointPair p : r) {
+			for (int i = p.output.getVectorSize() - 1; i >= 0; i--) {
+				double v = p.output.getVectorItem(i);
+				v = MathUtil.mapValue(v, mso.getMinX().getVectorItem(i), mso.getMaxX().getVectorItem(i), Utils.valueLow, Utils.valueHigh);
+				p.output.setVectorItem(i, v);
+			}
+			mso2.addValue(p.output);
+		}
+		mso2.stop();
+
+		log.trace("Test data statisticts for input\n" + msi.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatCount));
+		log.trace("Test data statisticts for output\n" + mso2.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatMinMax));
 		return r;
 	}
 
