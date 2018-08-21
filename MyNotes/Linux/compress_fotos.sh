@@ -14,92 +14,94 @@ bakdir=./bak
 mkdir -p "$outdir"
 mkdir -p "$bakdir"
 
+######### Common #########
+
 function showstat1() {
-    if [[ "$fn" == "$p1" ]] ; then
-        echo "$i " $(stat -c '%s' "$i")
-        echo "$fou " $(stat -c '%s' "$fou")
-    fi
+	if [[ "$fn" == "$p1" ]] ; then
+		echo "$i " $(stat -c '%s' "$i")
+		echo "$fou " $(stat -c '%s' "$fou")
+	fi
 }
 
 function showstat2() {
-    echo -e $(stat -c '%s' "$fou") "\t" $(stat -c '%s' "$i") "\t" "$fn" "\t" "$i"
-}
-
-function play() {
-    if [[ "$fn" == "$p1" ]] ; then
-        mplayer "$i" &
-        mplayer "$fou"
-    fi
-}
-
-function getinfo() {
-    fbak="$bakdir/$fn"
-    finfo="${outdir}/${fn}.txt"
-	mediainfo "$fbak" > "$finfo"
-	#echo $fbak
-}
-
-function compress() {
-    if [[ -f "$fou" ]] ; then
-        echo "Exists $fn"
-        return
-    fi
-    echo "Compress $i"
-    mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
-}
-
-function compress2() {
-    if [[ -f "$fou" ]] ; then
-        return
-
-        echo "Exists $fn"
-        size=$(stat -c '%s' "$fou")
-        if [[ $size == 0 ]] ; then
-            echo "size 0 -> $fn"
-            echo "Compress (copy sound) $i"
-#            mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac copy -o "$fou" &>> /dev/null
-            mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -nosound -o "$fou" &>> /dev/null
-        fi
-        return
-    fi
-#    echo "$i"
-    echo "Compress $i"
-    mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
+	echo -e $(stat -c '%s' "$fou") "\t" $(stat -c '%s' "$i") "\t" "$fn" "\t" "$i"
 }
 
 function checksize() {
-    if [[ -f "$fou" ]] ; then
-        size=$(stat -c '%s' "$fou")
-        if [[ $size == 0 ]] ; then
-            echo "size 0 -> $fn"
-        fi
-    fi
+	if [[ -f "$fou" ]] ; then
+		size=$(stat -c '%s' "$fou")
+		if [[ $size == 0 ]] ; then
+			echo "size 0 -> $fn"
+		fi
+	fi
 }
 
-function moveMovie() {
-    fbak="$bakdir/$fn"
-    fdest="$(dirname "$i")/${fn%.*}.avi"
-    if [[ -f "$fou" && -f "$i" && ! -f "$fbak" ]] ; then
-        mv "$i" "$fbak"
-        mv "$fou" "$fdest"
-    fi
+######### Video #########
+
+function videoPlay() {
+	if [[ "$fn" == "$p1" ]] ; then
+		mplayer "$i" &
+		mplayer "$fou"
+	fi
 }
 
-##############################
+function videoGetInfo() {
+	fbak="$bakdir/$fn"
+	finfo="${outdir}/${fn}.txt"
+	mediainfo "$fbak" > "$finfo"
+}
+
+function videoCompress() {
+	if [[ -f "$fou" ]] ; then
+		echo "Exists $fn"
+		return
+	fi
+	echo "Compress $i"
+	mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
+}
+
+function videoCompress2() {
+	if [[ -f "$fou" ]] ; then
+		return
+
+		echo "Exists $fn"
+		size=$(stat -c '%s' "$fou")
+		if [[ $size == 0 ]] ; then
+			echo "size 0 -> $fn"
+			echo "Compress (copy sound) $i"
+#			mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac copy -o "$fou" &>> /dev/null
+			mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -nosound -o "$fou" &>> /dev/null
+		fi
+		return
+	fi
+	echo "Compress $i"
+	mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
+}
+
+function videoMoveMovie() {
+	fbak="$bakdir/$fn"
+	fdest="$(dirname "$i")/${fn%.*}.avi"
+	if [[ -f "$fou" && -f "$i" && ! -f "$fbak" ]] ; then
+		mv "$i" "$fbak"
+		mv "$fou" "$fdest"
+	fi
+}
+
+######### Image #########
 
 function imageCompress() {
-    if [[ -f "$fou" ]] ; then
-        echo "Exists $fn"
-        return
-    fi
-    echo "Compress $i"
+	if [[ -f "$fou" ]] ; then
+		echo "Exists $fn"
+		return
+	fi
+	echo "Compress $i"
 	identify -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\n' src.jpg
-#    mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
+#	mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
 }
 
 function imageGetInfo() {
 #	identify -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\t%d\t%f\n' "$(readlink -f "$i")"
-    stat -c $'%s\t%n' "$i"
+	stat -c $'%s\t%n' "$i"
 }
 
 p1="$1"
@@ -110,32 +112,31 @@ p1="$1"
 #cat allPictures.txt | grep -Ei "(orf|jpg|gif|png|tif)$" | cut -f 2 | \
 find bak/ -type f | \
 while read i ; do
-    fn=$(basename "$i")
-    if [[ -n ${fnames[$fn]} ]] ; then
-        echo "Duplicate ignored $fn"
-        continue
-    fi
-    fou="$outdir/$fn"
+	fn=$(basename "$i")
+	if [[ -n ${fnames[$fn]} ]] ; then
+		echo "Duplicate ignored $fn"
+		continue
+	fi
+	fou="$outdir/$fn"
 
-#    showstat1
-#    showstat2
-#    moveMovie
-#    compress
-    getinfo
-#    checksize
-#    play
+#	showstat1
+#	showstat2
+#	videoMoveMovie
+#	videoCompress
+#	videoGetInfo
+#	checksize
+#	videoPlay
 
-#	imageGetInfo
+	imageGetInfo
 #	imageCompress
 
-    if [[ -f stop ]] ; then
-        echo "Stopping"
-        rm stop
-        break
-    fi
+	if [[ -f stop ]] ; then
+		echo "Stopping"
+		rm stop
+		break
+	fi
 
-    fnames[$fn]="$i"
+	fnames[$fn]="$i"
 done
 
-notify-send "Done" "Done"
-
+notify-send "Done"
