@@ -65,9 +65,9 @@ public class CompareImages {
 				if (d > unmatchedPrercent/MathUtil.C2PI) isSame = false;
 				if (maxHSL[0] < d) {
 					maxHSL[0] = d;
-/*					System.out.println("  " + MathUtil.d4(tmp1[0]) + " " + MathUtil.d4(tmp2[0]) + " d:" + MathUtil.d4(d) +
+					System.out.println("  " + MathUtil.d4(tmp1[0]) + " " + MathUtil.d4(tmp2[0]) + " d:" + MathUtil.d4(d) +
 						" " + ColorConversion.RGB.toString(rgb1) +
-						" -> " + ColorConversion.RGB.toString(rgb2));*/
+						" -> " + ColorConversion.RGB.toString(rgb2));
 				}
 				for (int k = 1; k < 3; k++) {
 					d = Math.abs(tmp1[k] - tmp2[k]);
@@ -96,7 +96,7 @@ public class CompareImages {
 	public static void main(String[] args) throws Exception {
 		args = new String[] {
 			"/home/spetrov/temp/tp/DSC_3808.JPG",
-			"/home/spetrov/temp/tp/a1.jpg",
+			"/home/spetrov/temp/tp/a6.jpg",
 		};
 		new CompareImages().doIt(args);
 		System.out.println("Done.");

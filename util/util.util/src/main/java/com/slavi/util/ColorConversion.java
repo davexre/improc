@@ -22,8 +22,8 @@ public class ColorConversion {
 
 
 	/**
-	 * @param r		Value for RED [0..255] 
-	 * @param g		Value for GREEN [0..255] 
+	 * @param r		Value for RED [0..255]
+	 * @param g		Value for GREEN [0..255]
 	 * @param b		Value for BLUE [0..255]
 	 */
 	public static void clipRGB(double r, double g, double b, double dest[]) {
@@ -42,12 +42,12 @@ public class ColorConversion {
 		dest[1] = clipValue(DG, 0.0, 1.0);
 		dest[2] = clipValue(DB, 0.0, 1.0);
 	}
-	
+
 	public static class RGB {
 		public static String toString(double DRGB[]) {
 			return toString(toRGB(DRGB));
 		}
-		
+
 		public static String toString(int color) {
 			return String.format("0x%06X", color);
 		}
@@ -55,36 +55,36 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double rgb[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], rgb);
 		}
-		
+
 		public static void toDRGB(double rgb[], double DRGB[]) {
 			toDRGB(rgb[0], rgb[1], rgb[2], DRGB);
 		}
-		
+
 		public static void fromDRGB(double DR, double DG, double DB, double rgb[]) {
 			clipDRGB(DR, DG, DB, rgb);
 			rgb[0] *= 255.0;
 			rgb[1] *= 255.0;
 			rgb[2] *= 255.0;
 		}
-		
+
 		public static void toDRGB(double r, double g, double b, double DRGB[]) {
 			clipRGB(r, g, b, DRGB);
 			DRGB[0] /= 255.0;
 			DRGB[1] /= 255.0;
 			DRGB[2] /= 255.0;
 		}
-		
+
 		public static int toRGB(double DRGB[]) {
 			return toRGB(DRGB[0], DRGB[1], DRGB[2]);
 		}
-		
+
 		public static int toRGB(double DR, double DG, double DB) {
 			return (int) (
-				((int) clipValue(Math.round(DR * 255.0), 0.0, 255.0) << 16) | 
-				((int) clipValue(Math.round(DG * 255.0), 0.0, 255.0) << 8) | 
+				((int) clipValue(Math.round(DR * 255.0), 0.0, 255.0) << 16) |
+				((int) clipValue(Math.round(DG * 255.0), 0.0, 255.0) << 8) |
 				((int) clipValue(Math.round(DB * 255.0), 0.0, 255.0)));
 		}
-		
+
 		public static void fromRGB(int rgb, double DRGB[]) {
 			DRGB[0] = ((rgb >> 16) & 255) / 255.0;
 			DRGB[1] = ((rgb >> 8) & 255) / 255.0;
@@ -94,11 +94,11 @@ public class ColorConversion {
 
 	/**
 	 * http://en.wikipedia.org/wiki/HSL_and_HSV
-	 * 
+	 *
 	 * H - Hue [0..2*pi]
 	 * S - Saturation [0..1]
 	 * V - Value [0..1]
-	 * 
+	 *
 	 * DR - Red [0..1]
 	 * DG - Green [0..1]
 	 * DB - Blue [0..1]
@@ -111,11 +111,11 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double hsv[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], hsv);
 		}
-		
+
 		public static void toDRGB(double hsv[], double DRGB[]) {
 			toDRGB(hsv[0], hsv[1], hsv[2], DRGB);
 		}
-		
+
 		/**
 		 * @param hsv	dest[0] = Hue
 		 * 				dest[1] = Saturation
@@ -143,7 +143,7 @@ public class ColorConversion {
 			hsv[1] = chroma / max;
 			hsv[2] = max;
 		}
-		
+
 		public static void toDRGB(double h, double s, double v, double DRGB[]) {
 			h = fixAngle2PI(h);
 			s = clipValue(s, 0.0, 1.0);
@@ -189,11 +189,11 @@ public class ColorConversion {
 
 	/**
 	 * http://en.wikipedia.org/wiki/HSL_and_HSV
-	 * 
+	 *
 	 * H - Hue [0..2*pi]
 	 * S - Saturation [0..1]
 	 * L - Lightness [0..1]
-	 * 
+	 *
 	 * DR - Red [0..1]
 	 * DG - Green [0..1]
 	 * DB - Blue [0..1]
@@ -206,11 +206,11 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double hsl[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], hsl);
 		}
-		
+
 		public static void toDRGB(double hsl[], double DRGB[]) {
 			toDRGB(hsl[0], hsl[1], hsl[2], DRGB);
 		}
-		
+
 		/**
 		 * @param hsl	dest[0] = Hue
 		 * 				dest[1] = Saturation
@@ -242,7 +242,7 @@ public class ColorConversion {
 				hsl[1] = chroma / (2.0 - L2);
 			}
 		}
-		
+
 		public static void toDRGB(double h, double s, double l, double DRGB[]) {
 			h = fixAngle2PI(h);
 			s = clipValue(s, 0.0, 1.0);
@@ -286,15 +286,15 @@ public class ColorConversion {
 			}
 		}
 	}
-	
+
 	/**
 	 * http://bytes.com/topic/java/answers/16180-rgb-cmyk
-	 * 
+	 *
 	 * C - Cyan [0..1]
 	 * M - Magenta [0..1]
 	 * Y - Yellow [0..1]
 	 * K - Key (blacK) [0..1]
-	 * 
+	 *
 	 * DR - Red [0..1]
 	 * DG - Green [0..1]
 	 * DB - Blue [0..1]
@@ -307,11 +307,11 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double cmyk[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], cmyk);
 		}
-		
+
 		public static void toDRGB(double cmyk[], double DRGB[]) {
 			toDRGB(cmyk[0], cmyk[1], cmyk[2], cmyk[3], DRGB);
 		}
-		
+
 		/**
 		 * @param cmyk	dest[0] = Cyan
 		 * 				dest[1] = Magenta
@@ -325,12 +325,12 @@ public class ColorConversion {
 				cmyk[0] = cmyk[1] = cmyk[2] = 0.0;
 			} else {
 				double scale = 1.0 / (1.0 - cmyk[3]);
-				cmyk[0] = scale * (cmyk[0] - cmyk[3]);  
-				cmyk[1] = scale * (cmyk[1] - cmyk[3]);  
-				cmyk[2] = scale * (cmyk[2] - cmyk[3]);  
+				cmyk[0] = scale * (cmyk[0] - cmyk[3]);
+				cmyk[1] = scale * (cmyk[1] - cmyk[3]);
+				cmyk[2] = scale * (cmyk[2] - cmyk[3]);
 			}
 		}
-		
+
 		public static void toDRGB(double c, double m, double y, double k, double DRGB[]) {
 			c = clipValue(1.0 - c, 0.0, 1.0);
 			m = clipValue(1.0 - m, 0.0, 1.0);
@@ -341,7 +341,7 @@ public class ColorConversion {
 			DRGB[2] = k * y;
 		}
 	}
-	
+
 	/**
 	 * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.4151&rep=rep1&type=pdf
 	 * R - Red (1) /green (-1)
@@ -356,11 +356,11 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double rbw[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], rbw);
 		}
-		
+
 		public static void toDRGB(double rbw[], double DRGB[]) {
 			toDRGB(rbw[0], rbw[1], rbw[2], DRGB);
 		}
-		
+
 		/**
 		 * @param rbw	dest[0] = Red
 		 * 				dest[1] = Blue
@@ -371,7 +371,7 @@ public class ColorConversion {
 			double h = 6.0 * rbw[0] / C2PI;
 			double s = rbw[1];
 			double v = rbw[2];
-			
+
 			double a, r, b, w;
 			if (v * (2 - s) > 1) {
 				a = 1.5 - v + v * s;
@@ -383,7 +383,7 @@ public class ColorConversion {
 			double t = Math.sqrt(a*a - 2*v*s);
 			double c = a - t;
 			w = w * (2-a-t);
-			
+
 			if (c == 0) {
 				r = 0;
 				b = 0;
@@ -416,7 +416,7 @@ public class ColorConversion {
 			rbw[1] = b;
 			rbw[2] = w;
 		}
-		
+
 		public static void fromDRGB_NO(double DR, double DG, double DB, double rbw[]) {
 			HSV.fromDRGB(DR, DG, DB, rbw);
 			double h, s, v;
@@ -424,7 +424,7 @@ public class ColorConversion {
 			h = rbw[0] / C2PI;
 			s = rbw[1];
 			v = rbw[2];
-			
+
 			vs = v * s;
 			if (v - .5 > vs / 2) {
 				a = 1.5 + vs - v;
@@ -470,7 +470,7 @@ public class ColorConversion {
 			rbw[1] = b * c / 2.0;
 			rbw[2] = k;
 		}
-		
+
 		public static void toDRGB(double r, double b, double w, double DRGB[]) {
 			r = clipValue(r, -1.0, 1.0);
 			b = clipValue(b, -1.0, 1.0);
@@ -522,15 +522,15 @@ public class ColorConversion {
 	}
 
 	/**
-	 * WARNING: NON IDEMPOTENT! Calling fromDRGB and then toDRGB cat result in different values!
-	 * 
+	 * CIE XYZ.Rec 709 with D65 white point
 	 * http://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#cvtcolor
+	 *
 	 * http://www.poynton.com/notes/colour_and_gamma/ColorFAQ.html#RTFToC18
-	 * 
-	 * X - X [0..1]
-	 * Y - Y [0..1]
-	 * Z - Z [0..1]
-	 * 
+	 *
+	 * X - X [0..0.950456]
+	 * Y - Y [0..1.0]
+	 * Z - Z [0..1.088754] -> may exceed 1. example color = 28671
+	 *
 	 * DR - Red [0..1]
 	 * DG - Green [0..1]
 	 * DB - Blue [0..1]
@@ -543,11 +543,11 @@ public class ColorConversion {
 		public static void fromDRGB(double DRGB[], double xyz[]) {
 			fromDRGB(DRGB[0], DRGB[1], DRGB[2], xyz);
 		}
-		
+
 		public static void toDRGB(double xyz[], double DRGB[]) {
 			toDRGB(xyz[0], xyz[1], xyz[2], DRGB);
 		}
-		
+
 		/**
 		 * @param xyz	dest[0] = X
 		 * 				dest[1] = Y
@@ -555,28 +555,95 @@ public class ColorConversion {
 		 */
 		public static void fromDRGB(double DR, double DG, double DB, double xyz[]) {
 			clipDRGB(DR, DG, DB, xyz);
-			clipDRGB(
+/*			clipDRGB(
 				0.412453 * xyz[0] + 0.357580 * xyz[1] + 0.180423 * xyz[2],
 				0.212671 * xyz[0] + 0.715160 * xyz[1] + 0.072169 * xyz[2],
 				0.019334 * xyz[0] + 0.119193 * xyz[1] + 0.950227 * xyz[2],
 				xyz
-			);
+			);*/
+			DR = 0.412453 * xyz[0] + 0.357580 * xyz[1] + 0.180423 * xyz[2];
+			DG = 0.212671 * xyz[0] + 0.715160 * xyz[1] + 0.072169 * xyz[2];
+			DB = 0.019334 * xyz[0] + 0.119193 * xyz[1] + 0.950227 * xyz[2];
+			xyz[0] = DR;
+			xyz[1] = DG;
+			xyz[2] = DB;
 		}
-		
+
 		public static void toDRGB(double x, double y, double z, double DRGB[]) {
-			clipDRGB(x, y, z, DRGB);
-			/*clipDRGB(
+/*			clipDRGB(x, y, z, DRGB);
+			clipDRGB(
 				3.240479 * DRGB[0] - 1.537150 * DRGB[1] - 0.498535 * DRGB[2],
 				-0.969256* DRGB[0] + 1.875992 * DRGB[1] + 0.041556 * DRGB[2],
 				0.055648 * DRGB[0] - 0.204043 * DRGB[1] + 1.057311 * DRGB[2],
 				DRGB
 			);*/
 			clipDRGB(
-				3.24048134320052660000 * DRGB[0] - 1.53715151627131830000 * DRGB[1] - 0.49853632616888780000 * DRGB[2],
-				-0.96925494999656840000* DRGB[0] + 1.87599000148989070000 * DRGB[1] + 0.04155592655829282000 * DRGB[2],
-				0.05564663913517715000 * DRGB[0] - 0.20404133836651123000 * DRGB[1] + 1.05731106964534430000 * DRGB[2],
+				3.24048134320052660000 * x - 1.53715151627131830000 * y - 0.49853632616888780000 * z,
+				-0.96925494999656840000* x + 1.87599000148989070000 * y + 0.04155592655829282000 * z,
+				0.05564663913517715000 * x - 0.20404133836651123000 * y + 1.05731106964534430000 * z,
 				DRGB
 			);
+		}
+	}
+
+	/**
+	 * CIE L*a*b*
+	 * https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#cvtcolor
+	 *
+	 * L - L [0..1]
+	 * A - A [0..1]
+	 * B - B [0..1]
+	 *
+	 * DR - Red [0..1]
+	 * DG - Green [0..1]
+	 * DB - Blue [0..1]
+	 */
+	public static class LAB {
+		public static String toString(double lab[]) {
+			return String.format("L:%.2f A:%.2f B:%.2f", lab[0], lab[1], lab[2]);
+		}
+
+		public static void fromDRGB(double DRGB[], double lab[]) {
+			fromDRGB(DRGB[0], DRGB[1], DRGB[2], lab);
+		}
+
+		public static void toDRGB(double lab[], double DRGB[]) {
+			toDRGB(lab[0], lab[1], lab[2], DRGB);
+		}
+
+		private static double ft(double t) {
+			if (t > 0.008856)
+				return Math.pow(t, 1.0/3.0);
+			else
+				return 7.787 * t + 16.0/116.0;
+		}
+
+		/**
+		 * @param lab	dest[0] = L
+		 * 				dest[1] = A
+		 * 				dest[2] = B
+		 */
+		public static void fromDRGB(double DR, double DG, double DB, double lab[]) {
+			XYZ.fromDRGB(DR, DG, DB, lab);
+			double l,a,b;
+			if (lab[1] > 0.008856)
+				l = 116.0 * Math.pow(lab[1], 1.0/3.0) - 16.0;
+			else
+				l = 903.3 * lab[1];
+			b = ft(lab[1]);
+			a = 500.0 * (ft(lab[0] / 0.950456) - b);
+			b = 200.0 * (b - ft(lab[2] / 1.088754));
+
+			lab[0] = clipValue(l, 0.0, 100.0);
+			lab[1] = clipValue(a, -127.0, 127.0);
+			lab[2] = clipValue(b, -127.0, 127.0);
+		}
+
+		public static void toDRGB(double l, double a, double b, double DRGB[]) {
+			l = clipValue(l, 0.0, 100.0);
+			a = clipValue(a, -127.0, 127.0) / 500.0;
+			b = clipValue(b, -127.0, 127.0) / 200.0;
+
 		}
 	}
 }

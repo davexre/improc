@@ -95,8 +95,12 @@ function imageCompress() {
 		return
 	fi
 	echo "Compress $i"
-	identify -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\n' src.jpg
-#	mencoder "$i" -ovc x264 -x264encopts preset=slow:profile=main:crf=28 -oac mp3lame -lameopts q=4 -o "$fou" &>> /dev/null
+#	https://www.imagemagick.org/script/escape.php
+#	%b -> size in bytes; %w,%h -> width,height of immage, %m,%C -> compression method, %x,%y -> x,y resolution/density; %Q -> compression quality
+#	identify -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\n' src.jpg
+	convert "$i" -compress JPEG -quality 70 "$fou"
+#	identify -verbose a6.jpg | grep -E "(  Compression:)|(  Quality:)
+#	compare $i $fou compare.jpg
 }
 
 function imageGetInfo() {
