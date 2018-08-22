@@ -2,6 +2,7 @@ package com.slavi.image;
 
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
+import java.util.Arrays;
 
 import javax.imageio.ImageIO;
 
@@ -37,7 +38,10 @@ public class CompareImages {
 		double maxRgbDist = 0;
 		double maxRGB[] = new double[3];
 		double maxHSL[] = new double[3];
+		double maxLAB[] = new double[3];
 		double d;
+		double maxLabDist = 0;
+		double sumD = 0;
 		int unmatchedPixels = 0;
 		for (int ix = 0; ix < i1.getWidth(); ix++) {
 			for (int iy = 0; iy < i1.getHeight(); iy++) {
@@ -46,7 +50,7 @@ public class CompareImages {
 				int c2 = i2.getRGB(ix, iy);
 				ColorConversion.RGB.fromRGB(c1, rgb1);
 				ColorConversion.RGB.fromRGB(c2, rgb2);
-
+/*
 				double dist = 0;
 				for (int k = 0; k < 3; k++) {
 					d = Math.abs(rgb1[k] - rgb2[k]);
@@ -74,6 +78,22 @@ public class CompareImages {
 					if (d > unmatchedPrercent/100.0) isSame = false;
 					if (maxHSL[k] < d)
 						maxHSL[k] = d;
+				}*/
+
+				ColorConversion.LAB.fromDRGB(rgb1, tmp1);
+				ColorConversion.LAB.fromDRGB(rgb2, tmp2);
+				d = Math.sqrt(
+						Math.pow(tmp1[0] - tmp2[0], 2) +
+						Math.pow(tmp1[1] - tmp2[1], 2) +
+						Math.pow(tmp1[2] - tmp2[2], 2)
+					);
+				sumD += d;
+				if (maxLabDist < d) maxLabDist = d;
+				for (int k = 0; k < 3; k++) {
+					d = Math.abs(tmp1[k] - tmp2[k]);
+					//if (d > unmatchedPrercent/100.0) isSame = false;
+					if (maxLAB[k] < d)
+						maxLAB[k] = d;
 				}
 
 				if (!isSame)
@@ -88,16 +108,27 @@ public class CompareImages {
 		System.out.println("Max H dist:      " + MathUtil.d4(maxHSL[0]));
 		System.out.println("Max S dist:      " + MathUtil.d2(maxHSL[1]));
 		System.out.println("Max L dist:      " + MathUtil.d2(maxHSL[2]));
+		System.out.println("Max LAB dist: " + Arrays.toString(maxLAB));
+		System.out.println("Max LAB dist: " + maxLabDist);
+		sumD *= 100.0 / (i1.getWidth() * i1.getHeight());
+		System.out.println("Avg LAB dist: " + sumD);
 		int allPixels = i1.getWidth() * i1.getHeight();
 		System.out.println("Unmatched pixels:" + unmatchedPixels + "/" + allPixels);
 		System.out.println("Unmatched %:     " + MathUtil.d2(100.0 * unmatchedPixels / allPixels));
 	}
 
 	public static void main(String[] args) throws Exception {
-		args = new String[] {
-			"/home/spetrov/temp/tp/DSC_3808.JPG",
-			"/home/spetrov/temp/tp/a6.jpg",
-		};
+		if (true)
+			args = new String[] {
+				"/home/spetrov/temp/tp/DSC_3808.JPG",
+				"/home/spetrov/temp/tp/a6.jpg",
+			};
+		else
+			args = new String[] {
+					"/home/slavian/temp/e/p6.png",
+				"/home/slavian/temp/e/IMG_20180120_105202.jpg",
+				"/home/slavian/temp/e/a9.jpg",
+			};
 		new CompareImages().doIt(args);
 		System.out.println("Done.");
 	}

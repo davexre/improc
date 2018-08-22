@@ -8,6 +8,19 @@ import com.slavi.util.ColorConversion;
 public class TestXYZ {
 
 	public static void main(String[] args) {
+		double drgb[] = new double[3];
+		double value[] = new double[4]; // Because of CMYK
+		double drgb2[] = new double[3];
+
+		int color = 7;
+		ColorConversion.RGB.fromRGB(color, drgb);
+		ColorConversion.LAB.fromDRGB(drgb, value);
+		ColorConversion.LAB.toDRGB(value, drgb2);
+		int color2 = ColorConversion.RGB.toRGB(drgb2);
+		Assert.assertEquals("Color not matched", color, color2);
+	}
+
+	public static void main1(String[] args) {
 		double rgb[] = new double[3];
 		double drgb[] = new double[3];
 		double tmp[] = new double[3];

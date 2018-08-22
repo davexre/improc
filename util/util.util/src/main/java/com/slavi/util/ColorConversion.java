@@ -1,5 +1,7 @@
 package com.slavi.util;
 
+import java.util.Arrays;
+
 public class ColorConversion {
 	public static final double piOver3 = Math.PI / 3.0;
 	public static final double C2PI = Math.PI * 2.0;
@@ -554,27 +556,19 @@ public class ColorConversion {
 		 * 				dest[2] = Z
 		 */
 		public static void fromDRGB(double DR, double DG, double DB, double xyz[]) {
-			clipDRGB(DR, DG, DB, xyz);
-/*			clipDRGB(
-				0.412453 * xyz[0] + 0.357580 * xyz[1] + 0.180423 * xyz[2],
-				0.212671 * xyz[0] + 0.715160 * xyz[1] + 0.072169 * xyz[2],
-				0.019334 * xyz[0] + 0.119193 * xyz[1] + 0.950227 * xyz[2],
-				xyz
-			);*/
-			DR = 0.412453 * xyz[0] + 0.357580 * xyz[1] + 0.180423 * xyz[2];
-			DG = 0.212671 * xyz[0] + 0.715160 * xyz[1] + 0.072169 * xyz[2];
-			DB = 0.019334 * xyz[0] + 0.119193 * xyz[1] + 0.950227 * xyz[2];
-			xyz[0] = DR;
-			xyz[1] = DG;
-			xyz[2] = DB;
+			DR = clipValue(DR, 0.0, 1.0);
+			DG = clipValue(DG, 0.0, 1.0);
+			DB = clipValue(DB, 0.0, 1.0);
+			xyz[0] = 0.412453 * DR + 0.357580 * DG + 0.180423 * DB;
+			xyz[1] = 0.212671 * DR + 0.715160 * DG + 0.072169 * DB;
+			xyz[2] = 0.019334 * DR + 0.119193 * DG + 0.950227 * DB;
 		}
 
 		public static void toDRGB(double x, double y, double z, double DRGB[]) {
-/*			clipDRGB(x, y, z, DRGB);
-			clipDRGB(
-				3.240479 * DRGB[0] - 1.537150 * DRGB[1] - 0.498535 * DRGB[2],
-				-0.969256* DRGB[0] + 1.875992 * DRGB[1] + 0.041556 * DRGB[2],
-				0.055648 * DRGB[0] - 0.204043 * DRGB[1] + 1.057311 * DRGB[2],
+/*			clipDRGB(
+				3.240479 * x - 1.537150 * y - 0.498535 * z,
+				-0.969256* x + 1.875992 * y + 0.041556 * z,
+				0.055648 * x - 0.204043 * y + 1.057311 * z,
 				DRGB
 			);*/
 			clipDRGB(
@@ -639,11 +633,29 @@ public class ColorConversion {
 			lab[2] = clipValue(b, -127.0, 127.0);
 		}
 
+		private static double ft_inverse(double ft) {
+			if (ft <= 7.787 * 0.008856 + 16.0/116.0)
+				return (ft - 16.0/116.0) / 7.787;
+			else
+				return ft * ft * ft;
+		}
+
 		public static void toDRGB(double l, double a, double b, double DRGB[]) {
 			l = clipValue(l, 0.0, 100.0);
-			a = clipValue(a, -127.0, 127.0) / 500.0;
-			b = clipValue(b, -127.0, 127.0) / 200.0;
-
+			double y, fy;
+			if (l <= 903.3 * 0.008856) {
+				y = l / 903.3;
+				fy = 7.787 * y + 16.0/116.0;
+			} else {
+				fy = (l + 16.0) / 116.0;
+				y = fy * fy * fy;
+			}
+			XYZ.toDRGB(
+				ft_inverse(clipValue(a, -127.0, 127.0) / 500.0 + fy) * 0.950456,
+				y,
+				ft_inverse(fy - clipValue(b, -127.0, 127.0) / 200.0) * 1.088754,
+				DRGB
+			);
 		}
 	}
 }
