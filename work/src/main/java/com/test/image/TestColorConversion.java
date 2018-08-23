@@ -17,7 +17,7 @@ public class TestColorConversion {
 	static abstract class Dummy {
 		public abstract double getValue(double DRGB[]);
 	}
-	
+
 	public static void doit(BufferedImage bi, BufferedImage bo, String fouName, Dummy op) throws IOException {
 		System.out.println(fouName);
 		double DRGB[] = new double[3];
@@ -30,16 +30,16 @@ public class TestColorConversion {
 				c = (c << 16) | (c << 8) | c;
 				bo.setRGB(i, j, c);
 			}
-		ImageIO.write(bo, "png", new File(fouName));		
+		ImageIO.write(bo, "png", new File(fouName));
 	}
 
 	public static void processOneImage(String fname, String fouDir) throws IOException {
 		File fin = new File(fname);
 		String baseName = FileUtil.changeFileExtension(fin.getName(), "");
-		
+
 		BufferedImage bi = ImageIO.read(fin);
 		BufferedImage bo = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_RGB);
-		
+
 		FileInputStream fis = new FileInputStream(fin);
 		FileOutputStream fos = new FileOutputStream(fouDir + fin.getName());
 		byte buf[] = new byte[1000];
@@ -52,42 +52,42 @@ public class TestColorConversion {
 
 		doit(bi, bo, fouDir + baseName + " HSL L.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSL.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[2] * 255.0;
 			}
 		});
 
 		doit(bi, bo, fouDir + baseName + " HSL S.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSL.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[1] * 255.0;
 			}
 		});
-		
+
 		doit(bi, bo, fouDir + baseName + " HSL H.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSL.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[0] * 255.0 / MathUtil.C2PI;
 			}
 		});
-		
+
 		doit(bi, bo, fouDir + baseName + " HSV H.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSV.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSV.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[0] * 255.0 / MathUtil.C2PI;
 			}
 		});
-		
+
 		doit(bi, bo, fouDir + baseName + " HSV S.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSV.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSV.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[1] * 255.0;
 			}
 		});
-		
+
 		doit(bi, bo, fouDir + baseName + " HSV V.png", new Dummy() {
 			public double getValue(double[] DRGB) {
-				ColorConversion.HSV.fromDRGB(DRGB, DRGB);
+				ColorConversion.HSV.instance.fromDRGB(DRGB, DRGB);
 				return DRGB[2] * 255.0;
 			}
 		});
@@ -116,7 +116,7 @@ public class TestColorConversion {
 			}
 		});
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		String fouDir = "/home/slavian/S/java/Images/work/1/";
 		processOneImage("/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2/P1100395.jpg", fouDir);

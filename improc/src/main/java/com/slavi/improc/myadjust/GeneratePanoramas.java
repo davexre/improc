@@ -30,26 +30,26 @@ import com.slavi.util.swt.SwtUtil;
 public class GeneratePanoramas implements Callable<Void> {
 
 	static boolean validateTransformerInCalcExtent = true;
-	
+
 	ExecutorService exec;
 	PanoTransformer panoTransformer;
 	ArrayList<ArrayList<KeyPointPairList>> panos;
-	
+
 	ArrayList<KeyPointList> images;
 	ArrayList<KeyPointPairList> pairLists;
 
 	///////
-	
+
 	public AtomicInteger rowsProcessed;
 	public Map<KeyPointList, SafeImage> imageData = new HashMap<KeyPointList, SafeImage>();
 	public SafeImage outImageColor;
 	public SafeImage outImageColor2;
 	public SafeImage outImageMask;
-	
-	/* 
-	 * Parameters for Helmert transformation from PanoTransformer 
+
+	/*
+	 * Parameters for Helmert transformation from PanoTransformer
 	 * coordinate system into output image coordinate system.
-	 */ 
+	 */
 	Point2D.Double panoOrigin = new Point2D.Double();
 	Point2D.Double panoSize = new Point2D.Double();
 	int outputImageSizeX = 2000;
@@ -75,15 +75,15 @@ public class GeneratePanoramas implements Callable<Void> {
 		this.useColorMasks = useColorMasks;
 		this.useImageMaxWeight = useImageMaxWeight;
 	}
-	
+
 	static void minMax(double rx, double ry, Point2D.Double min, Point2D.Double max) {
-		if (rx < min.x) 
+		if (rx < min.x)
 			min.x = rx;
-		if (ry < min.y) 
+		if (ry < min.y)
 			min.y = ry;
-		if (rx > max.x) 
+		if (rx > max.x)
 			max.x = rx;
-		if (ry > max.y) 
+		if (ry > max.y)
 			max.y = ry;
 	}
 
@@ -92,7 +92,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		y = panoSize.y * (y / outputImageSizeY) + panoOrigin.y;
 		panoTransformer.transformBackward(x, y, image, dest);
 	}
-	
+
 	void transformCameraToWorld(double x, double y, KeyPointList image, double dest[]) {
 		panoTransformer.transformForeward(x, y, image, dest);
 		dest[0] = outputImageSizeX * ((dest[0] - panoOrigin.x) / panoSize.x);
@@ -106,7 +106,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		int step = 20;
 		double dest[] = new double[3];
 		double tmp[] = new double[3];
-		
+
 		for (KeyPointList image : images) {
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
@@ -143,9 +143,9 @@ public class GeneratePanoramas implements Callable<Void> {
 		}
 		panoSize.x -= panoOrigin.x;
 		panoSize.y -= panoOrigin.y;
-		
+
 		outputImageSizeY = (int)(outputImageSizeX * (panoSize.y / panoSize.x));
-		
+
 		for (KeyPointList image : images) {
 			image.min.x = outputImageSizeX * ((image.min.x - panoOrigin.x) / panoSize.x);
 			image.min.y = outputImageSizeY * ((image.min.y - panoOrigin.y) / panoSize.y);
@@ -159,7 +159,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		double DRGB[] = new double[3];
 		for (KeyPointList image : images) {
 			double h = image.imageId * MathUtil.C2PI * 2.0 / 13.0;
-			ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
+			ColorConversion.HSV.instance.toDRGB(h, 1.0, 1.0, DRGB);
 			int color = ColorConversion.RGB.toRGB(DRGB);
 			for (int i = 0; i < image.imageSizeX; i++) {
 				transformCameraToWorld(i, 0, image, d);
@@ -167,7 +167,7 @@ public class GeneratePanoramas implements Callable<Void> {
 				transformCameraToWorld(i, image.imageSizeY - 1, image, d);
 				oi.setRGB((int) d[0], (int) d[1], color);
 			}
-			
+
 			for (int j = 0; j < image.imageSizeY; j++) {
 				transformCameraToWorld(0, j, image, d);
 				oi.setRGB((int) d[0], (int) d[1], color);
@@ -175,27 +175,27 @@ public class GeneratePanoramas implements Callable<Void> {
 				oi.setRGB((int) d[0], (int) d[1], color);
 			}
 		}
-		
+
 		for (KeyPointPairList pairList : pairLists) {
 			int colorCross;
 			int colorX;
-			
+
 			if (useImageMaxWeight) {
 				double h = pairList.source.imageId * MathUtil.C2PI * 2.0 / 13.0;
-				ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
+				ColorConversion.HSV.instance.toDRGB(h, 1.0, 1.0, DRGB);
 				colorCross = ColorConversion.RGB.toRGB(DRGB);
 
 				h = pairList.target.imageId * MathUtil.C2PI * 2.0 / 13.0;
-				ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
+				ColorConversion.HSV.instance.toDRGB(h, 1.0, 1.0, DRGB);
 				colorX = ColorConversion.RGB.toRGB(DRGB);
 			} else {
 				colorCross = images.indexOf(pairList.source);;
 				colorCross = colorCross % 3;
 				colorCross = colorCross < 0 ? -1 : 255 << (8 * colorCross);
-				
+
 				colorX = images.indexOf(pairList.target);
 				colorX = colorX % 3;
-				colorX = colorX < 0 ? -1 : 255 << (8 * colorX);			
+				colorX = colorX < 0 ? -1 : 255 << (8 * colorX);
 			}
 
 			for (KeyPointPair pair : pairList.items) {
@@ -211,12 +211,12 @@ public class GeneratePanoramas implements Callable<Void> {
 			}
 		}
 	}
-	
-/*	
+
+/*
 	private void drawWorldMesh(SafeImage img) {
 		int cols[] = {
 			// 0		15			30		45			60		75
-			0xff0000, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 
+			0xff0000, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff,
 			// 90		105			120		135			150		165
 			0x00ff00, 0xffffff, 0xffffff, 0xffffff, 0xffffff, 0xffffff,
 			// 180		195			210		225			240		255
@@ -243,13 +243,13 @@ public class GeneratePanoramas implements Callable<Void> {
 
 	void dumpPointData(String outputFile) throws Exception {
 		PrintStream out = new PrintStream(outputFile);
-		
+
 		out.println("Image generated from the following images:");
 		for (KeyPointList image : images) {
 			out.println(image.imageFileStamp.getFile().getName() + "\t(" + image.items.size() + ")");
 		}
 		out.println("------------");
-		
+
 		for (KeyPointPairList pairList : pairLists) {
 			out.println(
 				pairList.source.imageFileStamp.getFile().getName() + "\t" +
@@ -266,21 +266,21 @@ public class GeneratePanoramas implements Callable<Void> {
 		out.println("outputImageSizeY=" + outputImageSizeY);
 		for (KeyPointList image : images) {
 			out.println(image.imageFileStamp.getFile().getName() +
-					"\tmin.x=" + MathUtil.rad2degStr(image.min.x) + 
-					"\tmin.y=" + MathUtil.rad2degStr(image.min.y) + 
-					"\tmax.x=" + MathUtil.rad2degStr(image.max.x) + 
-					"\tmax.y=" + MathUtil.rad2degStr(image.max.y) + 
-					"\tcameraOriginX=" + MathUtil.d4(image.cameraOriginX) + 
-					"\tcameraOriginY=" + MathUtil.d4(image.cameraOriginY) + 
-					"\tcameraScale=" + MathUtil.d4(image.cameraScale) + 
-					"\timageSizeX=" + image.imageSizeX + 
-					"\timageSizeY=" + image.imageSizeY + 
-					"\trx=" + MathUtil.rad2degStr(image.rx) + 
-					"\try=" + MathUtil.rad2degStr(image.ry) + 
-					"\trz=" + MathUtil.rad2degStr(image.rz) + 
+					"\tmin.x=" + MathUtil.rad2degStr(image.min.x) +
+					"\tmin.y=" + MathUtil.rad2degStr(image.min.y) +
+					"\tmax.x=" + MathUtil.rad2degStr(image.max.x) +
+					"\tmax.y=" + MathUtil.rad2degStr(image.max.y) +
+					"\tcameraOriginX=" + MathUtil.d4(image.cameraOriginX) +
+					"\tcameraOriginY=" + MathUtil.d4(image.cameraOriginY) +
+					"\tcameraScale=" + MathUtil.d4(image.cameraScale) +
+					"\timageSizeX=" + image.imageSizeX +
+					"\timageSizeY=" + image.imageSizeY +
+					"\trx=" + MathUtil.rad2degStr(image.rx) +
+					"\try=" + MathUtil.rad2degStr(image.ry) +
+					"\trz=" + MathUtil.rad2degStr(image.rz) +
 					"\tscaleZ=" + MathUtil.d4(image.scaleZ)
 					);
-			
+
 		}
 		out.println();
 		out.println("------------");
@@ -293,11 +293,11 @@ public class GeneratePanoramas implements Callable<Void> {
 				"Discrepancy\t" +
 				"Distance1\t" +
 				"Distance2\t" +
-				
+
 				"SdogLevel\t" +
 				"SimgScale\t" +
 				"SkpScale\t" +
-				"SadjS\t" + 
+				"SadjS\t" +
 
 				"TdogLevel\t" +
 				"TimgScale\t" +
@@ -313,12 +313,12 @@ public class GeneratePanoramas implements Callable<Void> {
 					MathUtil.d4(pair.discrepancy) + "\t" +
 					MathUtil.d4(pair.distanceToNearest) + "\t" +
 					MathUtil.d4(pair.distanceToNearest2) + "\t" +
-					
+
 					pair.sourceSP.dogLevel + "\t" +
 					pair.sourceSP.imgScale + "\t" +
 					pair.sourceSP.kpScale + "\t" +
 					pair.sourceSP.adjS + "\t" +
-					
+
 					pair.targetSP.dogLevel + "\t" +
 					pair.targetSP.imgScale + "\t" +
 					pair.targetSP.kpScale + "\t" +
@@ -327,8 +327,8 @@ public class GeneratePanoramas implements Callable<Void> {
 		}
 		out.close();
 	}
-*/	
-	
+*/
+
 	private void labelImageNames(SafeImage oi) {
 		double d[] = new double[3];
 		double DRGB[] = new double[3];
@@ -342,7 +342,7 @@ public class GeneratePanoramas implements Callable<Void> {
 		int fontHeight = fm.getAscent() + fontDescent;
 		for (KeyPointList image : images) {
 			double h = image.imageId * MathUtil.C2PI * 2.0 / 13.0;
-			ColorConversion.HSV.toDRGB(h, 1.0, 1.0, DRGB);
+			ColorConversion.HSV.instance.toDRGB(h, 1.0, 1.0, DRGB);
 			int color = ColorConversion.RGB.toRGB(DRGB);
 
 			String str = image.imageFileStamp.getFile().getName();
@@ -358,13 +358,13 @@ public class GeneratePanoramas implements Callable<Void> {
 			gr.fillRect((int) atX, (int) atY, (int) width, (int) height);
 			gr.setColor(new Color(color));
 			gr.drawRect((int) atX, (int) atY, (int) width, (int) height);
-			
+
 			atX = d[0] - rect.getWidth() / 2.0;
 			atY = d[1] + fontHeight / 2.0 - fontDescent - fm.getLeading() - 1;
 			gr.drawString(str, (int) atX, (int) atY);
 		}
 	}
-/*	
+/*
 	double lightCDF[] = new double[KeyPointList.histogramSize];
 	double saturationCDF[] = new double[KeyPointList.histogramSize];
 	void calcHistograms() {
@@ -382,7 +382,7 @@ public class GeneratePanoramas implements Callable<Void> {
 				saturationCDF[i] += image.saturationCDF[i] * imageWeight;
 			}
 		}
-		
+
 		// Compute image light & saturation LUT (Look Up Table)
 		for (KeyPointList image : images) {
 			for (int i = 0; i < image.lightCDF.length; i++) {
@@ -402,18 +402,18 @@ public class GeneratePanoramas implements Callable<Void> {
 			}
 		}
 	}
-*/	
+*/
 	private static final AtomicInteger panoCounter = new AtomicInteger(0);
-/*	
+/*
 	private static class CalcArea extends AbstractConvexHullArea {
 		KeyPointPairList pairList;
 		int curPoint;
 		boolean calcSourceArea;
-		
+
 		public CalcArea(KeyPointPairList pairList) {
 			this.pairList = pairList;
 		}
-		
+
 		public void resetPointIterator() {
 			curPoint = -1;
 		}
@@ -423,24 +423,24 @@ public class GeneratePanoramas implements Callable<Void> {
 				curPoint++;
 				if (curPoint >= pairList.items.size())
 					return false;
-				KeyPointPair pair = pairList.items.get(curPoint); 
+				KeyPointPair pair = pairList.items.get(curPoint);
 				if (!pair.panoBad)
 					return true;
 			}
 		}
 
 		public double getX() {
-			KeyPointPair pair = pairList.items.get(curPoint); 
+			KeyPointPair pair = pairList.items.get(curPoint);
 			return calcSourceArea ? pair.sourceSP.getDoubleX() : pair.targetSP.getDoubleX();
 		}
 
 		public double getY() {
-			KeyPointPair pair = pairList.items.get(curPoint); 
+			KeyPointPair pair = pairList.items.get(curPoint);
 			return calcSourceArea ? pair.sourceSP.getDoubleY() : pair.targetSP.getDoubleY();
 		}
 	}
-*/	
-	
+*/
+
 	public Void call() throws Exception {
 		// Print info for all panoramas found
 		System.out.println("Panoramas found: " + panos.size());
@@ -464,11 +464,11 @@ public class GeneratePanoramas implements Callable<Void> {
 			CalculatePanoramaParams.buildImagesList(pairLists, images);
 			calcExtents();
 //			calcHistograms();
-			
+
 			System.out.println("Output image size in pixels: " + outputImageSizeX + "\t" + outputImageSizeY);
 
 			for (KeyPointList image : images) {
-				System.out.println(image.imageFileStamp.getFile().getName() 
+				System.out.println(image.imageFileStamp.getFile().getName()
 						+ "\tminX=" + (int)(image.min.x)
 						+ "\tminY=" + (int)(image.min.y)
 						+ "\tmaxX=" + (int)(image.max.x)
@@ -486,7 +486,7 @@ public class GeneratePanoramas implements Callable<Void> {
 				KeyPoint tmpKP = new KeyPoint(pairList.target, 0, 0);
 				KeyPointHelmertTransformer tr = new KeyPointHelmertTransformer();
 				tr.setParams(pairList.scale, pairList.angle, pairList.translateX, pairList.translateY);
-				
+
 				for (KeyPointPair pair : pairList.items) {
 					if (pair.panoBad) {
 						if (pair.validatePairBad) {
@@ -497,7 +497,7 @@ public class GeneratePanoramas implements Callable<Void> {
 					} else {
 						tr.transform(pair.sourceSP, tmpKP);
 						double d = Math.hypot(tmpKP.getDoubleX() - pair.targetSP.getDoubleX(), tmpKP.getDoubleY() - pair.targetSP.getDoubleY());
-						if (maxHelmertDiscrepancy < d) 
+						if (maxHelmertDiscrepancy < d)
 							maxHelmertDiscrepancy = d;
 						if (pair.validatePairBad) {
 							helmBadPanoGood++;
@@ -512,12 +512,12 @@ public class GeneratePanoramas implements Callable<Void> {
 				double sourceConvexHullArea = Math.abs(calcArea.getConvexHullArea());
 				double sourceImageArea = pairList.source.imageSizeX * pairList.source.imageSizeY;
 				double sourceRatio = sourceConvexHullArea / sourceImageArea;
-				
+
 				calcArea.calcSourceArea = false;
 				double targetConvexHullArea = Math.abs(calcArea.getConvexHullArea());
 				double targetImageArea = pairList.target.imageSizeX * pairList.target.imageSizeY;
 				double targetRatio = targetConvexHullArea / targetImageArea;
-				
+
 				System.out.println(
 						pairList.source.imageFileStamp.getFile().getName() + "\t" +
 						pairList.target.imageFileStamp.getFile().getName() + "\t" +
@@ -529,10 +529,10 @@ public class GeneratePanoramas implements Callable<Void> {
 						MathUtil.d4(targetRatio) + "\t|" +
 						"pairs=" + pairList.items.size() + "\t" +
 						"maxHelmertDiscrepancy=" + MathUtil.d2(maxHelmertDiscrepancy) + "\t" +
-						"helmBadPanoGood =" + helmBadPanoGood + "\t" + 
-						"helmBadPanoBad  =" + helmBadPanoBad + "\t" + 
-						"helmGoodPanoGood=" + helmGoodPanoGood + "\t" + 
-						"helmGoodPanoBad =" + helmGoodPanoBad 
+						"helmBadPanoGood =" + helmBadPanoGood + "\t" +
+						"helmBadPanoBad  =" + helmBadPanoBad + "\t" +
+						"helmGoodPanoGood=" + helmGoodPanoGood + "\t" +
+						"helmGoodPanoBad =" + helmGoodPanoBad
 				);
 			}
  */
@@ -556,10 +556,10 @@ public class GeneratePanoramas implements Callable<Void> {
 				});
 			}
 			taskSet.run().get();
-			
+
 			Runtime runtime = Runtime.getRuntime();
 			int numberOfProcessors = runtime.availableProcessors();
-			
+
 			taskSet = new TaskSet(exec);
 			rowsProcessed = new AtomicInteger(0);
 			for (int i = 0; i < numberOfProcessors; i++) {
@@ -571,13 +571,13 @@ public class GeneratePanoramas implements Callable<Void> {
 				}
 			}
 			taskSet.run().get();
-			
+
 			pinPointPairs(outImageMask);
 			labelImageNames(outImageMask);
 			outImageColor.save(outputFile + " color.png");
 			outImageColor2.save(outputFile + " color2.png");
 			outImageMask.save(outputFile + " mask.png");
-			
+
 			Marker.release();
 		}
 		return null;

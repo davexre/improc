@@ -52,7 +52,7 @@ public class ColorNames {
 			int color = Integer.decode(k);
 			if (usedColors.add(color)) {
 				ColorConversion.RGB.fromRGB(color, tmp);
-				ColorConversion.HSL.fromDRGB(tmp, tmp);
+				ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
 				colors.add(new ColorNameData((String) i.getValue(), color, tmp));
 			}
 		}
@@ -76,7 +76,7 @@ public class ColorNames {
 			return null;
 		double tmp[] = new double[3];
 		ColorConversion.RGB.fromRGB(color, tmp);
-		ColorConversion.HSL.fromDRGB(tmp, tmp);
+		ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
 
 		ColorNameData r = null;
 		double dist = Double.MAX_VALUE;

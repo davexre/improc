@@ -18,39 +18,39 @@ import com.slavi.util.file.FileStamp;
 
 public class KeyPointList {
 	public static final String fileHeader = "KeyPoint file version 1.28";
-	
+
 	public final ArrayList<KeyPoint> items = new ArrayList<KeyPoint>();
-	
+
 	public KeyPointTree tree;
-	
-	public KeyPointTreeImageSpace imageSpaceTree;	
-	
+
+	public KeyPointTreeImageSpace imageSpaceTree;
+
 	public FileStamp imageFileStamp = null;
-	
+
 	public int imageSizeX;
 
 	public int imageSizeY;
-	
+
 	// Spherical pano adjust
 	public double fov = defaultCameraFieldOfView; // Field of view
 	public double sphereRZ1;
 	public double sphereRY;
 	public double sphereRZ2;
 	public Matrix sphereCamera2real;
-	
+
 	// My adjust
 	public int imageId = -1;
 	public double rx = 0.0, ry = 0.0, rz = 0.0;
 	// Translation in 7 params ZYZ
 	public double tx = 0.0, ty = 0.0, tz = 0.0;
-	// World origin (Focal point of first image) in the coordinate system of the image 
-	public double worldOrigin[] = new double[3]; 
-	
+	// World origin (Focal point of first image) in the coordinate system of the image
+	public double worldOrigin[] = new double[3];
+
 	public Matrix camera2real;
 	public Matrix dMdX, dMdY, dMdZ;
 	public Point2D.Double min, max;
-	
-	public double cameraOriginX, cameraOriginY, cameraScale; 
+
+	public double cameraOriginX, cameraOriginY, cameraScale;
 	public double scaleZ;
 	public int calculatePrimsAtHop;
 
@@ -59,41 +59,41 @@ public class KeyPointList {
 	public double afb; // Affine Forward B
 	public double afc; // Affine Forward C (translateX)
 	public double afd; // Affine Forward D
-	public double afe; // Affine Forward E 
+	public double afe; // Affine Forward E
 	public double aff; // Affine Forward F (translateY)
-	
+
 	public double aba; // Affine Backward A
 	public double abb; // Affine Backward B
 	public double abc; // Affine Backward C (translateX)
 	public double abd; // Affine Backward D
-	public double abe; // Affine Backward E 
+	public double abe; // Affine Backward E
 	public double abf; // Affine Backward F (translateY)
-		
+
 	// Helmert pano adjust
 	public double hfa; // Helmert Forward A
 	public double hfb; // Helmert Forward B
 	public double hfc; // Helmert Forward C
 	public double hfd; // Helmert Forward D
-	
+
 	public double hba; // Helmert Backward A
 	public double hbb; // Helmert Backward B
 	public double hbc; // Helmert Backward C
 	public double hbd; // Helmert Backward D
 	public double hTranslateX;
 	public double hTranslateY;
-	
+
 	public static final double defaultCameraFieldOfView = MathUtil.deg2rad * 40;
-	public static final double defaultCameraFOV_to_ScaleZ = 1.0 / 
+	public static final double defaultCameraFOV_to_ScaleZ = 1.0 /
 			(2.0 * Math.tan(defaultCameraFieldOfView / 2.0));
-	
-	// Image histograms 
+
+	// Image histograms
 	public static final int histogramSize = 256;
 	public int lightHistogram[];
 	public int saturationHistogram[];
 
 	public double lightCDF[];
 	public double saturationCDF[];
-	
+
 	public static KeyPointList fromTextStream(BufferedReader fin, AbsoluteToRelativePathMaker rootImagesDir) throws IOException {
 		KeyPointList r = new KeyPointList();
 		r.imageFileStamp = FileStamp.fromString(fin.readLine(), rootImagesDir);
@@ -104,11 +104,11 @@ public class KeyPointList {
 		r.cameraOriginY = r.imageSizeY / 2.0;
 		r.cameraScale = 1.0 / Math.max(r.imageSizeX, r.imageSizeY);
 		r.scaleZ = defaultCameraFOV_to_ScaleZ;
-		
-		r.lightHistogram = Util.stringToIntArray(fin.readLine()); 
-		r.saturationHistogram = Util.stringToIntArray(fin.readLine()); 
+
+		r.lightHistogram = Util.stringToIntArray(fin.readLine());
+		r.saturationHistogram = Util.stringToIntArray(fin.readLine());
 		r.buildCDFfromHistograms();
-		
+
 		while (fin.ready()) {
 			String str = fin.readLine().trim();
 			if ((str.length() > 0) && (str.charAt(0) != '#')) {
@@ -143,7 +143,7 @@ public class KeyPointList {
 			for (int i = sizeX; i >= 0; i--) {
 				int color = bi.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, DRGB);
-				ColorConversion.HSL.fromDRGB(DRGB, HSL);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, HSL);
 				lightHistogram[(int) (HSL[2] * sizeL)]++;
 				saturationHistogram[(int) (HSL[1] * sizeS)]++;
 			}
@@ -152,12 +152,12 @@ public class KeyPointList {
 	}
 
 	private void buildCDFfromHistograms() {
-		lightCDF = new double[histogramSize]; 
+		lightCDF = new double[histogramSize];
 		saturationCDF = new double[histogramSize];
 		makeCDF(lightHistogram, lightCDF);
 		makeCDF(saturationHistogram, saturationCDF);
 	}
-	
+
 	public static void makeCDF(int histogram[], double dest[]) {
 		int size = histogram.length;
 		if (size != dest.length) {
@@ -173,7 +173,7 @@ public class KeyPointList {
 			dest[i] = c / sum;
 		}
 	}
-	
+
 	public void compareToList(KeyPointList dest) {
 		int matchedCount1 = 0;
 		for (int i = items.size() - 1; i >= 0; i--) {
@@ -206,7 +206,7 @@ public class KeyPointList {
 			if (!matchingFound)
 				System.out.println("Point No " + j + " from 2-nd list has no match in 1-st list");
 		}
-		
+
 		System.out.println("Matched 1-st list against 2-nd list: " + matchedCount1 + "/" + items.size());
 		System.out.println("Matched 2-nd list against 1-st list: " + matchedCount2 + "/" + dest.items.size());
 	}

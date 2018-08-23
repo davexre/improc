@@ -3,8 +3,6 @@ package com.slavi.math;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRBlock;
-import org.ejml.simple.SimpleBase;
-import org.ejml.simple.SimpleMatrix;
 import org.ejml.simple.SimpleSVD;
 
 import com.slavi.math.matrix.JLapack;

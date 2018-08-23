@@ -46,7 +46,7 @@ public class ImageHistogram2 {
 	Chart chartV;
 	Composite imageRect;
 	String fdir = ".";
-		
+
 	private void addChartData(Chart chart, String dataName, int color) {
 		ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet().createSeries(SeriesType.LINE, dataName);
 //		lineSeries.setYSeries(data);
@@ -55,7 +55,7 @@ public class ImageHistogram2 {
 		lineSeries.setSymbolType(PlotSymbolType.NONE);
 //		chart.getAxisSet().adjustRange();
 	}
-	
+
 	private Chart makeChart(Composite parent, String dataName, int color) {
         Chart chart = new Chart(parent, SWT.NONE);
         chart.getTitle().setText(dataName);
@@ -83,14 +83,14 @@ public class ImageHistogram2 {
 		double l[] = new double[256];
 		double s[] = new double[256];
 		double v[] = new double[256];
-		
+
 		double DRGB[] = new double[3];
 		double HSL[] = new double[3];
 //		double HSV[] = new double[3];
 
 		final int sizeX = bi.getWidth() - 1;
 		final int sizeY = bi.getHeight() - 1;
-		
+
 		int ffcount = 0;
 		Marker.mark("calc");
 		for (int j = sizeY; j >= 0; j--) {
@@ -102,14 +102,14 @@ public class ImageHistogram2 {
 				r[(int) Math.round(DRGB[0] * 255.0)]++;
 				g[(int) Math.round(DRGB[1] * 255.0)]++;
 				b[(int) Math.round(DRGB[2] * 255.0)]++;
-				ColorConversion.HSL.fromDRGB(DRGB, HSL);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, HSL);
 				s[(int) Math.round(HSL[1] * 255.0)]++;
 				l[(int) Math.round(HSL[2] * 255.0)]++;
 //				ColorConversion.HSV.fromDRGB(DRGB, HSV);
 //				v[(int) Math.round(HSV[2] * 255.0)]++;
 			}
 		}
-		
+
 		// calc cumul
 		{
 			double cumul[] = s;
@@ -135,7 +135,7 @@ public class ImageHistogram2 {
 				v[i] = c / sum;
 			}
 		}
-		
+
 		Marker.release();
 		System.out.println("FF=" + ffcount);
 		System.out.println("R[255] = " + r[255]);
@@ -145,12 +145,12 @@ public class ImageHistogram2 {
 		System.out.println("S[255] = " + s[255]);
 		System.out.println("V[255] = " + v[255]);
 		System.out.println("Pixels = " + bi.getWidth() * bi.getHeight());
-		
+
 		setChartData(chartR, 0, r);
 		setChartData(chartR, 1, g);
 		setChartData(chartR, 2, b);
 
-		
+
 		setChartData(chartG, 0, g);
 		setChartData(chartB, 0, b);
 		setChartData(chartL, 0, l);
@@ -158,13 +158,13 @@ public class ImageHistogram2 {
 		setChartData(chartS, 0, s);
 		imageRect.redraw();
 	}
-	
+
 	private void setChartData(Chart chart, int seriesIndex, double data[]) {
 		chart.getSeriesSet().getSeries()[seriesIndex].setYSeries(data);
 		chart.getAxisSet().adjustRange();
 		chart.redraw();
 	}
-	
+
 	private void setFiles(String finDir) {
 		fdir = finDir;
 		FindFileIterator ff = FindFileIterator.makeWithWildcard(finDir + "/*.jpg", true, true);
@@ -177,14 +177,14 @@ public class ImageHistogram2 {
 		for (String file : files)
 			fileList.add(file);
 	}
-	
+
 	public void createWidgets() {
         shell = new Shell();
         shell.setLayout(new FillLayout(SWT.HORIZONTAL));
 
         // create a chart
         Composite parent;
-        
+
         parent = new Composite(shell, SWT.NONE);
         parent.setLayout(new FillLayout(SWT.VERTICAL));
 
@@ -194,10 +194,10 @@ public class ImageHistogram2 {
 			public void widgetSelected(SelectionEvent e) {
 				String result = SwtUtil.browseForFolder(shell, "Images root folder", fdir);
 				if (result != null)
-					setFiles(result); 
+					setFiles(result);
 			}
 		});
-        
+
         fileList = new List(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
         fileList.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -213,7 +213,7 @@ public class ImageHistogram2 {
 				}
 			}
         });
-        
+
         imageRect = new Composite(parent, SWT.NONE);
         imageRect.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
@@ -223,19 +223,19 @@ public class ImageHistogram2 {
 				double scale = Math.min((double) e.width / r.width, (double) e.height / r.height);
 				int destW = (int) (r.width * scale);
 				int destH = (int) (r.height * scale);
-				e.gc.drawImage(image, 0, 0, r.width, r.height, 
+				e.gc.drawImage(image, 0, 0, r.width, r.height,
 						(e.width - destW) / 2 , (e.height - destH) / 2 , destW, destH);
 			}
         });
-        
+
         parent = new Composite(shell, SWT.NONE);
         parent.setLayout(new FillLayout(SWT.VERTICAL));
-        
+
         chartR = makeChart(parent, "Red", SWT.COLOR_RED);
         addChartData(chartR, "Green", SWT.COLOR_GREEN);
         addChartData(chartR, "Blue", SWT.COLOR_BLUE);
-        
-        
+
+
         chartG = makeChart(parent, "Green", SWT.COLOR_GREEN);
         chartB = makeChart(parent, "Blue", SWT.COLOR_BLUE);
 
@@ -249,7 +249,7 @@ public class ImageHistogram2 {
         shell.pack();
         shell.setSize(1200, 1000);
 	}
-	
+
 	public void open() throws Exception {
         SwtUtil.centerShell(shell);
         shell.open();
@@ -261,7 +261,7 @@ public class ImageHistogram2 {
         }
         shell.dispose();
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		ImageHistogram2 t = new ImageHistogram2();
 //		String finDir = "D:/Users/S/Java/Images/Image data/Evgeni panorama/1/";
@@ -269,7 +269,7 @@ public class ImageHistogram2 {
 //		String finDir = "/home/slavian/S/java/Images/Image data/20090801 Vodopad Skaklia/Skaklia 2";
 //		String finDir = "/home/slavian/S/temp/1";
 		String finDir = Const.workDir;
-		
+
 		t.createWidgets();
 		t.setFiles(finDir);
 		t.open();

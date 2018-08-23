@@ -42,7 +42,7 @@ public class ColorNamesTest {
 		int color = 0xFFEBCD;
 		double tmp[] = new double[3];
 		ColorConversion.RGB.fromRGB(color, tmp);
-		ColorConversion.HSL.fromDRGB(tmp, tmp);
+		ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
 
 		ArrayList<ColorNameData> bak = new ArrayList<>(cn.colors);
 		Collections.sort(bak, (a, b) -> {
@@ -92,7 +92,7 @@ public class ColorNamesTest {
 		*/
 		double tmp[] = { 6.23, 0.8, 0.5 };
 		double tmp2[] = tmp.clone();
-		ColorConversion.HSL.toDRGB(tmp, tmp2);
+		ColorConversion.HSL.instance.toDRGB(tmp, tmp2);
 		int color = ColorConversion.RGB.toRGB(tmp2);
 
 		System.out.println();

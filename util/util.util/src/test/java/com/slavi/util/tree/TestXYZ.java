@@ -14,8 +14,8 @@ public class TestXYZ {
 
 		int color = 7;
 		ColorConversion.RGB.fromRGB(color, drgb);
-		ColorConversion.LAB.fromDRGB(drgb, value);
-		ColorConversion.LAB.toDRGB(value, drgb2);
+		ColorConversion.LAB.instance.fromDRGB(drgb, value);
+		ColorConversion.LAB.instance.toDRGB(value, drgb2);
 		int color2 = ColorConversion.RGB.toRGB(drgb2);
 		Assert.assertEquals("Color not matched", color, color2);
 	}
@@ -38,10 +38,10 @@ public class TestXYZ {
 					rgb[1] = g;
 					rgb[2] = b;
 
-					ColorConversion.RGB.toDRGB(rgb, drgb);
-					ColorConversion.LAB.fromDRGB(drgb, tmp);
-					ColorConversion.LAB.toDRGB(tmp, drgb2);
-					ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+					ColorConversion.RGB.instance.toDRGB(rgb, drgb);
+					ColorConversion.LAB.instance.fromDRGB(drgb, tmp);
+					ColorConversion.LAB.instance.toDRGB(tmp, drgb2);
+					ColorConversion.RGB.instance.fromDRGB(drgb2, rgb2);
 
 					if (maxTMP[0] < tmp[0]) maxTMP[0] = tmp[0];
 					if (maxTMP[1] < tmp[1]) maxTMP[1] = tmp[1];
@@ -109,13 +109,13 @@ public class TestXYZ {
 
 		int color = 28671;
 		ColorConversion.RGB.fromRGB(color, drgb);
-		ColorConversion.XYZ.fromDRGB(drgb, xyz);
-		ColorConversion.XYZ.toDRGB(xyz, drgb2);
-		ColorConversion.RGB.fromDRGB(drgb2, rgb2);
+		ColorConversion.XYZ.instance.fromDRGB(drgb, xyz);
+		ColorConversion.XYZ.instance.toDRGB(xyz, drgb2);
+		ColorConversion.RGB.instance.fromDRGB(drgb2, rgb2);
 		int color2 = ColorConversion.RGB.toRGB(drgb2);
 
-		System.out.println(ColorConversion.XYZ.toString(xyz));
-		System.out.println(ColorConversion.XYZ.toString(drgb2));
+		System.out.println(ColorConversion.XYZ.instance.toString(xyz));
+		System.out.println(ColorConversion.XYZ.instance.toString(drgb2));
 
 		System.out.println(color);
 		System.out.println(color2);

@@ -4,17 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class ColorConversionTest {
-	@FunctionalInterface
-	private interface IToDRGB {
-		void toDRGB(double value[], double DRGB[]);
-	}
-
-	@FunctionalInterface
-	private interface IFromDRGB {
-		void fromDRGB(double DRGB[], double value[]);
-	}
-
-	private void runTest(IFromDRGB fromDRGB, IToDRGB toDRGB) {
+	private void runTest(ColorConversion cc) {
 		double drgb[] = new double[3];
 		double value[] = new double[4]; // Because of CMYK
 		double drgb2[] = new double[3];
@@ -24,8 +14,8 @@ public class ColorConversionTest {
 				for (int b = 0; b <= 255; b++) {
 					int color = r << 16 | g << 8 | b;
 					ColorConversion.RGB.fromRGB(color, drgb);
-					fromDRGB.fromDRGB(drgb, value);
-					toDRGB.toDRGB(value, drgb2);
+					cc.fromDRGB(drgb, value);
+					cc.toDRGB(value, drgb2);
 					int color2 = ColorConversion.RGB.toRGB(drgb2);
 					Assert.assertEquals("Color not matched", color, color2);
 				}
@@ -35,49 +25,31 @@ public class ColorConversionTest {
 
 	@Test
 	public void testHSV() {
-		runTest(
-			(drgb, value) -> ColorConversion.HSV.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.HSV.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.HSV.instance);
 	}
 
 	@Test
 	public void testHSL() {
-		runTest(
-			(drgb, value) -> ColorConversion.HSL.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.HSL.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.HSL.instance);
 	}
 
 	@Test
 	public void testCMYK() {
-		runTest(
-			(drgb, value) -> ColorConversion.CMYK.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.CMYK.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.CMYK.instance);
 	}
 
 	@Test
 	public void testRBW() {
-		runTest(
-			(drgb, value) -> ColorConversion.RBW.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.RBW.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.RBW.instance);
 	}
 
 	@Test
 	public void testXYZ() {
-		runTest(
-			(drgb, value) -> ColorConversion.XYZ.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.XYZ.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.XYZ.instance);
 	}
 
 	@Test
 	public void testLAB() {
-		runTest(
-			(drgb, value) -> ColorConversion.LAB.fromDRGB(drgb, value),
-			(value, drgb) -> ColorConversion.LAB.toDRGB(value, drgb)
-		);
+		runTest(ColorConversion.LAB.instance);
 	}
 }

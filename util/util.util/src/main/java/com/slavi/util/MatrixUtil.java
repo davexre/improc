@@ -91,7 +91,7 @@ public class MatrixUtil {
 		double hsl[] = new double[3];
 		double drgb[] = new double[3];
 		ColorConversion.RGB.fromRGB(baseColor, drgb);
-		ColorConversion.HSL.fromDRGB(drgb, hsl);
+		ColorConversion.HSL.instance.fromDRGB(drgb, hsl);
 		double maxL = hsl[2];
 		BufferedImage result = dest;
 		if (result == null ||
@@ -102,7 +102,7 @@ public class MatrixUtil {
 		for (int i = 0; i < m.getSizeX(); i++)
 			for (int j = 0; j < m.getSizeY(); j++) {
 				hsl[2] = MathUtil.mapValue(m.getItem(i, j), minVal, maxVal, 1, maxL);
-				ColorConversion.HSL.toDRGB(hsl, drgb);
+				ColorConversion.HSL.instance.toDRGB(hsl, drgb);
 				result.setRGB(i, j, ColorConversion.RGB.toRGB(drgb));
 			}
 		return result;

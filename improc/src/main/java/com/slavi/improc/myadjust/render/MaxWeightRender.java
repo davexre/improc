@@ -27,23 +27,23 @@ public class MaxWeightRender extends AbstractParallelRender {
 				if (Thread.currentThread().isInterrupted())
 					throw new InterruptedException();
 				if (
-					(image.min.x > col) || 
-					(image.min.y > row) || 
-					(image.max.x < col) || 
+					(image.min.x > col) ||
+					(image.min.y > row) ||
+					(image.max.x < col) ||
 					(image.max.y < row))
 					continue;
-				
+
 				parent.transformWorldToCamera(col, row, image, d);
 				if (d[2] < 0)
 					continue;
-				
+
 				SafeImage im = imageData.get(image);
 				int ox = (int)d[0];
 				int oy = (int)d[1];
 				if ((ox < 0) || (ox >= image.imageSizeX) ||
 					(oy < 0) || (oy >= image.imageSizeY))
 					continue;
-				
+
 				int curColor = im.getRGB(ox, oy);
 				if (curColor < 0)
 					continue;
@@ -51,7 +51,7 @@ public class MaxWeightRender extends AbstractParallelRender {
 				double dx = Math.abs(ox - image.cameraOriginX) / image.cameraOriginX;
 				double dy = Math.abs(oy - image.cameraOriginY) / image.cameraOriginY;
 				double weight = 1.5 - MathUtil.hypot(dx, dy);
-				
+
 				// Calculate the color image
 				if (curMaxWeight < weight) {
 					maxWeightImage = image;
@@ -66,22 +66,22 @@ public class MaxWeightRender extends AbstractParallelRender {
 			int color2 = color;
 			if (maxWeightImage != null) {
 				ColorConversion.RGB.fromRGB(color, DRGB);
-				ColorConversion.HSL.fromDRGB(DRGB, HSL);
+				ColorConversion.HSL.instance.fromDRGB(DRGB, HSL);
 				HSL[1] = saturationPercent * HSL[1] + (1.0 - saturationPercent) * maxWeightImage.saturationCDF[(int) Math.round(HSL[1] * 255.0)];
 				HSL[2] = lightPercent * HSL[2] + (1.0 - lightPercent) * maxWeightImage.lightCDF[(int) Math.round(HSL[2] * 255.0)];
-				ColorConversion.HSL.toDRGB(HSL, DRGB);
+				ColorConversion.HSL.instance.toDRGB(HSL, DRGB);
 				color2 = ColorConversion.RGB.toRGB(DRGB);
 			}
 			outImageColor.setRGB(col, row, color);
 			outImageColor2.setRGB(col, row, color2);
-			
+
 			if (maxWeightImage == null) {
 				color = 0;
 			} else {
 				double h = maxWeightImage.imageId * MathUtil.C2PI * 2.0 / 13.0;
 				double v = (DWindowedImageUtils.getGrayColor(color) & 0xff) / 255.0;
 				double s = 1.0;
-				ColorConversion.HSV.toDRGB(h, s, v, DRGB);
+				ColorConversion.HSV.instance.toDRGB(h, s, v, DRGB);
 				color = ColorConversion.RGB.toRGB(DRGB);
 			}
 			outImageMask.setRGB(col, row, color);

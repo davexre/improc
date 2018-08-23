@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.slavi.ann.test.v2.Layer;
-import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.MathUtil;

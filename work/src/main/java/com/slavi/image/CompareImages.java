@@ -80,8 +80,8 @@ public class CompareImages {
 						maxHSL[k] = d;
 				}*/
 
-				ColorConversion.LAB.fromDRGB(rgb1, tmp1);
-				ColorConversion.LAB.fromDRGB(rgb2, tmp2);
+				ColorConversion.LAB.instance.fromDRGB(rgb1, tmp1);
+				ColorConversion.LAB.instance.fromDRGB(rgb2, tmp2);
 				d = Math.sqrt(
 						Math.pow(tmp1[0] - tmp2[0], 2) +
 						Math.pow(tmp1[1] - tmp2[1], 2) +

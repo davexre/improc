@@ -36,7 +36,7 @@ public class HistogramTest {
 			for (int i = 0; i < image.getWidth(); i++) {
 				int color = image.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, tmp);
-				ColorConversion.HSL.fromDRGB(tmp, tmp);
+				ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
 				h.addValue(tmp[valueIndex]);
 			}
 		}
@@ -48,11 +48,11 @@ public class HistogramTest {
 			for (int i = 0; i < image.getWidth(); i++) {
 				int color = image.getRGB(i, j);
 				ColorConversion.RGB.fromRGB(color, tmp);
-				ColorConversion.HSL.fromDRGB(tmp, tmp);
+				ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
 				double d = h.calcHistogramEqualization(tmp[valueIndex]);
 				tmp[valueIndex] = (d - tmp[valueIndex]) * scale + tmp[valueIndex];
 				h2.addValue(d);
-				ColorConversion.HSL.toDRGB(tmp, tmp);
+				ColorConversion.HSL.instance.toDRGB(tmp, tmp);
 				color = ColorConversion.RGB.toRGB(tmp);
 				out.setRGB(i, j, color);
 			}

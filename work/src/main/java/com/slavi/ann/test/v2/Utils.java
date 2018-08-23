@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Random;
 
 import com.slavi.ann.test.v2.Layer.LayerWorkspace;
 import com.slavi.ann.test.v2.activation.DebugLayer;
@@ -19,9 +18,9 @@ public class Utils {
 		double hsl[] = new double[3];
 		double drgb[] = new double[3];
 		ColorConversion.RGB.fromRGB(baseColor, drgb);
-		ColorConversion.HSL.fromDRGB(drgb, hsl);
+		ColorConversion.HSL.instance.fromDRGB(drgb, hsl);
 		hsl[2] = light;
-		ColorConversion.HSL.toDRGB(hsl, drgb);
+		ColorConversion.HSL.instance.toDRGB(hsl, drgb);
 		return ColorConversion.RGB.toRGB(drgb);
 	}
 
