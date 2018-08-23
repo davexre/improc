@@ -120,6 +120,8 @@ public class CompareImages {
 	public static void main(String[] args) throws Exception {
 		if (true)
 			args = new String[] {
+					"/home/spetrov/temp/tp/IMG_20180120_105202.jpg",
+					"/home/spetrov/temp/tp/b6.jpg",
 				"/home/spetrov/temp/tp/DSC_3808.JPG",
 				"/home/spetrov/temp/tp/a6.jpg",
 			};

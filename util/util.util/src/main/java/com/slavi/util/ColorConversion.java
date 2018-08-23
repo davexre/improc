@@ -1,7 +1,5 @@
 package com.slavi.util;
 
-import java.util.Arrays;
-
 public class ColorConversion {
 	public static final double piOver3 = Math.PI / 3.0;
 	public static final double C2PI = Math.PI * 2.0;
