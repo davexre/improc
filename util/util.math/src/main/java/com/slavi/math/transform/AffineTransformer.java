@@ -5,14 +5,13 @@ import java.util.StringTokenizer;
 import com.slavi.math.matrix.Matrix;
 
 /**
- * AffineTransformer performs a 6-parametered affine transform in 
+ * AffineTransformer performs a 6-parametered affine transform in
  * case of a 2-dimensional point space.
- * @author Slavian Petrov
  */
 public abstract class AffineTransformer<InputType, OutputType> extends BaseTransformer<InputType, OutputType> {
 
 	public Matrix affineCoefs;
-	
+
 	public Matrix origin;
 
 	public AffineTransformer() {
@@ -21,11 +20,11 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		this.affineCoefs = new Matrix(inputSize, outputSize);
 		this.origin = new Matrix(outputSize, 1);
 	}
-	
+
 	public int getNumberOfCoefsPerCoordinate() {
 		return getInputSize() + 1;
 	}
-	
+
 	public void transform(InputType source, OutputType dest) {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
@@ -53,7 +52,7 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 	 */
 	public void getMatrix(double[] d) {
 		if (
-			(d.length != 6) || 
+			(d.length != 6) ||
 			(getInputSize() != 2) ||
 			(getOutputSize() != 2))
 			throw new IllegalArgumentException("AffineTransformer.getMatrix requires a double[6] array and AffineTransformer must be 2D");
@@ -64,7 +63,7 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		d[4] = origin.getItem(0, 0);
 		d[5] = origin.getItem(1, 0);
 	}
-	
+
 	/**
 	 * Sets this transformer to the parameters returned by java.awt.geom.AffineTransform.<br/>
 	 * <big><b>This method can be used ONLY if the number of coordinates is 2!</b></big><br/>
@@ -82,7 +81,7 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 	 */
 	public void setMatrix(double[] d) {
 		if (
-			(d.length != 6) || 
+			(d.length != 6) ||
 			(getInputSize() != 2) ||
 			(getOutputSize() != 2))
 			throw new IllegalArgumentException("AffineTransformer.setMatrix requires a double[6] array and AffineTransformer must be 2D");
@@ -93,7 +92,7 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		origin.setItem(0, 0, d[4]);
 		origin.setItem(1, 0, d[5]);
 	}
-	
+
 	public Matrix getMatrix() {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
@@ -108,19 +107,19 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		result.setItem(inputSize, outputSize, 1.0);
 		return result;
 	}
-	
+
 	public void setMatrix(Matrix src) {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
-		if ((src.getSizeX() != inputSize + 1) || (src.getSizeY() != outputSize + 1)) 
+		if ((src.getSizeX() != inputSize + 1) || (src.getSizeY() != outputSize + 1))
 			throw new IllegalArgumentException("Invalid matrix size");
-		for (int i = inputSize - 1; i >= 0; i--) 
+		for (int i = inputSize - 1; i >= 0; i--)
 			for (int j = outputSize - 1; j >= 0; j--)
 				affineCoefs.setItem(i, j, src.getItem(i, j));
 		for (int j = outputSize - 1; j >= 0; j--)
 			origin.setItem(j, 0, src.getItem(inputSize, j));
 	}
-	
+
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append("Origin\n");
@@ -129,7 +128,7 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		b.append(affineCoefs.toString());
 		return b.toString();
 	}
-	
+
 	public String toString2() {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
@@ -145,13 +144,13 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 		}
 		return b.toString();
 	}
-	
+
 	public void fromString2(String str) {
 		int inputSize = getInputSize();
 		int outputSize = getOutputSize();
 		StringTokenizer st = new StringTokenizer(str, "\t");
 		for (int j = 0; j < outputSize; j++) {
-			for (int i = 0; i < inputSize; i++) 
+			for (int i = 0; i < inputSize; i++)
 				affineCoefs.setItem(i, j, Double.parseDouble(st.nextToken()));
 			origin.setItem(j, 0, Double.parseDouble(st.nextToken()));
 		}

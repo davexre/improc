@@ -5,8 +5,16 @@
 		</encoder>
 	</appender>
 
-	<logger level="debug" name="com.slavi.math.adjust.LeastSquaresAdjust" />
-	<logger level="debug" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" />
+	<appender name="STDOUT_MSG_ONLY" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" additivity="false">
+		<appender-ref ref="STDOUT_MSG_ONLY" />
+	</logger>
+	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

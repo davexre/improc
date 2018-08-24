@@ -134,7 +134,7 @@ public class Trainer {
 				stOutputError.addValue(absError);
 				index++;
 			}
-			if (!lsa.calculateSvd())
+			if (!lsa.calculate())
 				throw new Error("LSA failed");
 			Matrix x = lsa.getUnknown();
 

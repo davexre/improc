@@ -29,12 +29,24 @@ public class MathUtil {
 		return String.format(Locale.US, "%1$10d", d);
 	}
 
+	public static String d2(double d) {
+		return String.format(Locale.US, "%1$1.2f", d);
+	}
+
+	public static String d3(double d) {
+		return String.format(Locale.US, "%1$5.3f", d);
+	}
+
 	public static String d4(double d) {
 		return String.format(Locale.US, "%1$10.4f", d);
 	}
 
-	public static String d2(double d) {
-		return String.format(Locale.US, "%1$1.2f", d);
+	public static String d5(double d) {
+		return String.format(Locale.US, "%1$10.5f", d);
+	}
+
+	public static String d6(double d) {
+		return String.format(Locale.US, "%1$10.6f", d);
 	}
 
 	public static String rad2radStr(double angle) {

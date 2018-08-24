@@ -1,7 +1,5 @@
 package com.slavi.math.adjust;
 
-import org.apache.commons.math3.linear.BlockRealMatrix;
-import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,7 +172,7 @@ public class LeastSquaresAdjust {
 			}
 		return dest;
 	}
-
+/*
 	public boolean calculateSvd() {
 		if (log.isInfoEnabled()) {
 			double sumP = getSumP();
@@ -224,7 +222,7 @@ public class LeastSquaresAdjust {
 
 		return true;
 	}
-
+*/
 	public boolean calculateNoNm_Validation() {
 		if (!canCalculate())
 			return false;

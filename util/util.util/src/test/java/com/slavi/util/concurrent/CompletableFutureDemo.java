@@ -16,7 +16,7 @@ public class CompletableFutureDemo {
 			}
 		};
 	}
-	
+
 	Supplier makeTask(final String name) {
 		return makeTask(name, 1000);
 	}
@@ -24,7 +24,7 @@ public class CompletableFutureDemo {
 	Supplier makeTask(final String name, final long delay) {
 		return makeTask(name, delay, false);
 	}
-	
+
 	Supplier makeTask(final String name, final long delay, boolean shouldFail) {
 		return new Callable() {
 			public Object call() {
@@ -46,7 +46,7 @@ public class CompletableFutureDemo {
 		System.out.println("Throwing exception");
 		throw new Exception("Throwing exception");
 	}
-	
+
 	void doIt() throws Exception {
 		CompletableFuture.supplyAsync(() -> {
 			try {
@@ -57,7 +57,7 @@ public class CompletableFutureDemo {
 			return null;
 		}).get();
 	}
-	
+
 	void doIt2() throws Exception {
 		Object result = CompletableFuture
 			.supplyAsync(() -> {
@@ -65,7 +65,7 @@ public class CompletableFutureDemo {
 				return "1";
 			}).thenApply((x) -> {
 				System.out.println("2 got X=" + x);
-				final CompletableFuture r = CompletableFuture.allOf(
+				final CompletableFuture r = CompletableFuture.allOf((CompletableFuture[])
 					IntStream
 						.rangeClosed(1, 10)
 						.mapToObj((i) -> CompletableFuture.supplyAsync(makeTask("Task " + i, 1000, i==3)))
@@ -74,7 +74,7 @@ public class CompletableFutureDemo {
 						//((Throwable) e).printStackTrace();
 						System.out.println("Error. Aborting...");
 						//r.cancel(true);
-						
+
 						return null;
 					});
 				return r;
@@ -83,16 +83,16 @@ public class CompletableFutureDemo {
 				System.out.println("3");
 			})
 			.get();
-			
+
 		System.out.println(result);
 	}
-	
+
 	void doIt1() throws Exception {
 		CompletableFuture
 			.supplyAsync(makeTask("Entry task", 1000))
-			.thenAccept((action) -> 
+			.thenAccept((action) ->
 				CompletableFuture
-					.allOf(
+					.allOf((CompletableFuture[])
 						IntStream
 							.rangeClosed(1, 10)
 							.mapToObj((i) -> CompletableFuture.supplyAsync(makeTask("Task " + i, 1000)))

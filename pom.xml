@@ -21,7 +21,8 @@
 		<dateFormat>yyyy.MM.dd HH:mm:ss Z</dateFormat>
 		<platform.dependencies>true</platform.dependencies>
 
-		<maven.test.skip>true</maven.test.skip>
+		<!-- <maven.test.skip>true</maven.test.skip> This disables the compilation of tests and copying of src/test/resources -->
+		<skipTests>true</skipTests>
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 
 		<maven.require.version>3.3.9</maven.require.version>
@@ -178,6 +179,26 @@
 				</includes>
 			</resource>
 		</resources>
+
+		<testResources>
+			<testResource>
+				<filtering>false</filtering>
+				<directory>src/test/java</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<filtering>true</filtering>
+				<directory>src/test/resources</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+			</testResource>
+		</testResources>
 
 		<plugins>
 			<plugin>
