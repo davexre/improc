@@ -4,44 +4,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.slavi.math.MathUtil;
-import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.math.matrix.SymmetricMatrix;
 
 public class LeastSquaresAdjust {
-	private Logger log = LoggerFactory.getLogger(getClass());
+	protected Logger log = LoggerFactory.getLogger(LeastSquaresAdjust.class);
 
-	private Logger log_measurements = LoggerFactory.getLogger(getClass().getName() + ".measurements");
+	protected Logger log_measurements = LoggerFactory.getLogger(LeastSquaresAdjust.class.getName() + ".measurements");
 
-	private int numCoefsPerCoordinate;
+	protected int numCoefsPerCoordinate;
 
-	private int numCoordinates;
+	protected int numCoordinates;
 
-	private SymmetricMatrix nm;
+	protected SymmetricMatrix nm;
 
-	private Matrix apl;
+	protected Matrix apl;
 
-	private Matrix unknown;
+	protected Matrix unknown;
 
 	/**
 	 * Брой на всички измервания, участващи в изравнението - N
 	 */
-	private int measurementCount;
+	protected int measurementCount;
 
 	/**
 	 * Сума тежест*поправка^2 [PLL]
 	 */
-	private double sumPLL;
+	protected double sumPLL;
 
 	/**
 	 * Сума от тежестите
 	 */
-	private double sumP;
+	protected double sumP;
 
 	/**
 	 * Сума от квадратите на несъвпаденията [LL]
 	 */
-	private double sumLL;
+	protected double sumLL;
 
 	/**
 	 * "Смисълът" на параметрите numCoefsPerCoordinate и numCoordinates е "намаляване" на
@@ -153,6 +152,7 @@ public class LeastSquaresAdjust {
 		return true;
 	}
 
+/*
 	static Matrix pseudoInverseS(Matrix s, Matrix dest) {
 		if (dest == null)
 			dest = new Matrix(s.getSizeY(), s.getSizeX());
@@ -172,7 +172,7 @@ public class LeastSquaresAdjust {
 			}
 		return dest;
 	}
-/*
+
 	public boolean calculateSvd() {
 		if (log.isInfoEnabled()) {
 			double sumP = getSumP();
@@ -232,7 +232,7 @@ public class LeastSquaresAdjust {
 		return true;
 	}
 
-	private void calculateUnknowns() {
+	protected void calculateUnknowns() {
 		unknown.make0();
 		for (int i = numCoefsPerCoordinate - 1; i >= 0; i--)
 			for (int j = numCoefsPerCoordinate - 1; j >= 0; j--)

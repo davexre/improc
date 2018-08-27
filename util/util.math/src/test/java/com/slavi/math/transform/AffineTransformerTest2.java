@@ -55,7 +55,7 @@ public class AffineTransformerTest2 {
 	public void doIt(String[] args) throws Exception {
 		ArrayList<TransformerDataTestImpl> points = generatePoints();
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(6, 1);
-		Matrix coefs = new Matrix(6, 1);
+		Matrix coefs = new Matrix(lsa.getNumPoints(), 1);
 		AffineTransform jTransform = new AffineTransform();
 		jTransform.setToIdentity();
 
@@ -92,13 +92,15 @@ public class AffineTransformerTest2 {
 			coefs.setItem(0, 0, dx * p.getKey().getX());
 			coefs.setItem(2, 0, dx * p.getKey().getY());
 			coefs.setItem(4, 0, dx);
-
-			coefs.setItem(1, 0, dy * p.getKey().getX());
-			coefs.setItem(3, 0, dy * p.getKey().getY());
-			coefs.setItem(5, 0, dy);
-			lsa.addMeasurement(coefs, 1, dx * dy, 0);
-
-/*			double dx1 = dx;
+			lsa.addMeasurement(coefs, 1, dx * dx, 0);
+			if (i % 2 == 0) {
+				coefs.setItem(1, 0, dy * p.getKey().getX());
+				coefs.setItem(3, 0, dy * p.getKey().getY());
+				coefs.setItem(5, 0, dy);
+				lsa.addMeasurement(coefs, 1, dx * dx + dy * dy, 0);
+			}
+/*
+			double dx1 = dx;
 			double dy1 = dy;
 			coefs.make0();
 			coefs.setItem(0, 0, dx1 * p.getKey().getX());
@@ -110,8 +112,8 @@ public class AffineTransformerTest2 {
 			coefs.setItem(1, 0, dy1 * p.getKey().getX());
 			coefs.setItem(3, 0, dy1 * p.getKey().getY());
 			coefs.setItem(5, 0, dy1 * 1);
-			lsa.addMeasurement(coefs, 1, dy1 * dy, 0);*/
-
+			lsa.addMeasurement(coefs, 1, dy1 * dy, 0);
+*/
 /*			coefs.make0();
 			coefs.setItem(0, 0, p.getKey().getX());
 			coefs.setItem(2, 0, p.getKey().getY());
@@ -127,7 +129,7 @@ public class AffineTransformerTest2 {
 		lsa.calculate();
 		Matrix x = lsa.getUnknown();
 		double xx[] = x.getVector();
-		double jj[] = new double[6];
+		double jj[] = new double[xx.length];
 		jTransform.getMatrix(jj);
 		System.out.println("Unknowns " + arrayToString(xx));
 		System.out.println("Before   " + arrayToString(jj));

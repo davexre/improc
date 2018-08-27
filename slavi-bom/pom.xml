@@ -76,6 +76,7 @@
 		annotated with @RequestBody
 		-->
 		<com.fasterxml.jackson.version>2.9.5</com.fasterxml.jackson.version>
+		<lombok.version>1.18.2</lombok.version>
 	</properties>
 
 	<dependencyManagement>
@@ -763,6 +764,11 @@
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
 				<version>${apache.velocity.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
