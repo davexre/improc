@@ -1,38 +1,31 @@
 package com.slavi.math.transform;
 
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.util.Pair;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.LeastSquaresAdjust;
 import com.slavi.math.matrix.Matrix;
 
 public class AffineTransformerTest2 {
 
-	static ArrayList<TransformerDataTestImpl> generatePoints() {
-		AffineTransform jTransform = new AffineTransform();
-		jTransform.setToIdentity();
-		jTransform.rotate(30 * MathUtil.deg2rad);
-		jTransform.scale(2, 1);
-//		jTransform.scale(123.456, 789.123);
-		jTransform.shear(1.234, 2.345);
-		jTransform.translate(100.567, 200.123);
-//		jTransform.translate(10, 1);
-
-		ArrayList<TransformerDataTestImpl> points = new ArrayList<TransformerDataTestImpl>();
-		for (int xcounter = 1; xcounter < 4; xcounter++) {
-			for (int ycounter = 0; ycounter < 4; ycounter++) {
-				Point2D.Double sd = new Point2D.Double(xcounter, ycounter);
-				TransformerDataTestImpl pair = new TransformerDataTestImpl(jTransform, sd);
-				points.add(pair);
+	RotationXYZ r = new RotationXYZ();
+	Matrix initial;
+	ArrayList<Pair<double[], double[]>> generatePoints() {
+		initial = r.makeAngles(10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad);
+		ArrayList<Pair<double[], double[]>> points = new ArrayList<>();
+		for (int ix = 1; ix < 4; ix++) {
+			for (int iy = 0; iy < 4; iy++) {
+				for (int iz = 0; iz < 4; iz++) {
+					double src[] = new double[] { ix, iy, iz };
+					double dest[] = new double[3];
+					r.transformForward(initial, src, dest);
+					points.add(new Pair<>(src, dest));
+				}
 			}
 		}
-		jTransform.getMatrix(m);
-		System.out.println(Arrays.toString(m));
 		return points;
 	}
 	static double m[] = new double[6];
@@ -53,90 +46,95 @@ public class AffineTransformerTest2 {
 	 */
 
 	public void doIt(String[] args) throws Exception {
-		ArrayList<TransformerDataTestImpl> points = generatePoints();
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(6, 1);
+		ArrayList<Pair<double[], double[]>> points = generatePoints();
+		LeastSquaresAdjust lsa = new LeastSquaresAdjust(9, 1);
 		Matrix coefs = new Matrix(lsa.getNumPoints(), 1);
-		AffineTransform jTransform = new AffineTransform();
-		jTransform.setToIdentity();
+		Matrix m = r.makeAngles(0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad, 0 * MathUtil.deg2rad);
 
-		Point2D.Double dest = new Point2D.Double();
+		double dest[] = new double[3];
 		lsa.clear();
 		for (int i = 0; i < points.size(); i++) {
-			TransformerDataTestImpl p  = points.get(i);
+			Pair<double[], double[]> p  = points.get(i);
 			coefs.make0();
-			jTransform.transform(p.getKey(), dest);
-			double dx = dest.getX() - p.getValue().getX();
-			double dy = dest.getY() - p.getValue().getY();
-/*			double L = (dx*dx + dy*dy);
-			coefs.setItem(0, 0, dx * p.getKey().getX());
-			coefs.setItem(1, 0, dy * p.getKey().getX());
-			coefs.setItem(2, 0, dx * p.getKey().getY());
-			coefs.setItem(3, 0, dy * p.getKey().getY());
-			coefs.setItem(4, 0, dx);
-			coefs.setItem(5, 0, dy);
-			lsa.addMeasurement(coefs, 1, L, 0);*/
-
-/*			coefs.make0();
-			coefs.setItem(0, 0, dx * p.getKey().getX());
-			coefs.setItem(2, 0, dx * p.getKey().getY());
-			coefs.setItem(4, 0, dx);
-			lsa.addMeasurement(coefs, 1, dx * 0.5, 0);
+			r.transformForward(m, p.getKey(), dest);
+			double dx = dest[0] - p.getValue()[0];
+			double dy = dest[1] - p.getValue()[1];
+			double dz = dest[2] - p.getValue()[2];
 
 			coefs.make0();
-			coefs.setItem(1, 0, dy * p.getKey().getX());
-			coefs.setItem(3, 0, dy * p.getKey().getY());
-			coefs.setItem(5, 0, dy);
-			lsa.addMeasurement(coefs, 1, dy * 0.5, 0);*/
-
-			coefs.make0();
-			coefs.setItem(0, 0, dx * p.getKey().getX());
-			coefs.setItem(2, 0, dx * p.getKey().getY());
-			coefs.setItem(4, 0, dx);
-			lsa.addMeasurement(coefs, 1, dx * dx, 0);
-			if (i % 2 == 0) {
-				coefs.setItem(1, 0, dy * p.getKey().getX());
-				coefs.setItem(3, 0, dy * p.getKey().getY());
-				coefs.setItem(5, 0, dy);
-				lsa.addMeasurement(coefs, 1, dx * dx + dy * dy, 0);
+			double L = 0;
+//			if (i % 3 == 0)
+			{
+				L += dx * dx;
+				coefs.setItem(0, 0, dx * p.getKey()[0]);
+				coefs.setItem(1, 0, dx * p.getKey()[1]);
+				coefs.setItem(2, 0, dx * p.getKey()[2]);
+//				lsa.addMeasurement(coefs, 1, L, 0);
 			}
-/*
-			double dx1 = dx;
-			double dy1 = dy;
-			coefs.make0();
-			coefs.setItem(0, 0, dx1 * p.getKey().getX());
-			coefs.setItem(2, 0, dx1 * p.getKey().getY());
-			coefs.setItem(4, 0, dx1 * 1);
-			lsa.addMeasurement(coefs, 1, dx1 * dx, 0);
+
+			if (i % 3 != 2)
+			{
+				L += dy * dy;
+				coefs.setItem(3, 0, dy * p.getKey()[0]);
+				coefs.setItem(4, 0, dy * p.getKey()[1]);
+				coefs.setItem(5, 0, dy * p.getKey()[2]);
+//				lsa.addMeasurement(coefs, 1, L, 0);
+			}
+			if (i % 3 == 2)
+			{
+				L += dz * dz;
+				coefs.setItem(6, 0, dz * p.getKey()[0]);
+				coefs.setItem(7, 0, dz * p.getKey()[1]);
+				coefs.setItem(8, 0, dz * p.getKey()[2]);
+			}
+			lsa.addMeasurement(coefs, 1, L, 0);
+
+/*			coefs.make0();
+			coefs.setItem(0, 0, dx * p.getKey()[0]);
+			coefs.setItem(1, 0, dx * p.getKey()[1]);
+			coefs.setItem(2, 0, dx * p.getKey()[2]);
+			lsa.addMeasurement(coefs, 1, dx * dx, 0);
 
 			coefs.make0();
-			coefs.setItem(1, 0, dy1 * p.getKey().getX());
-			coefs.setItem(3, 0, dy1 * p.getKey().getY());
-			coefs.setItem(5, 0, dy1 * 1);
-			lsa.addMeasurement(coefs, 1, dy1 * dy, 0);
-*/
+			coefs.setItem(3, 0, dy * p.getKey()[0]);
+			coefs.setItem(4, 0, dy * p.getKey()[1]);
+			coefs.setItem(5, 0, dy * p.getKey()[2]);
+			lsa.addMeasurement(coefs, 1, dy * dy, 0);
+
+			coefs.make0();
+			coefs.setItem(6, 0, dz * p.getKey()[0]);
+			coefs.setItem(7, 0, dz * p.getKey()[1]);
+			coefs.setItem(8, 0, dz * p.getKey()[2]);
+			lsa.addMeasurement(coefs, 1, dz * dz, 0);*/
+
 /*			coefs.make0();
-			coefs.setItem(0, 0, p.getKey().getX());
-			coefs.setItem(2, 0, p.getKey().getY());
-			coefs.setItem(4, 0, 1);
+			coefs.setItem(0, 0, p.getKey()[0]);
+			coefs.setItem(1, 0, p.getKey()[1]);
+			coefs.setItem(2, 0, p.getKey()[2]);
 			lsa.addMeasurement(coefs, 1, dx, 0);
 
 			coefs.make0();
-			coefs.setItem(1, 0, p.getKey().getX());
-			coefs.setItem(3, 0, p.getKey().getY());
-			coefs.setItem(5, 0, 1);
-			lsa.addMeasurement(coefs, 1, dy, 0);*/
+			coefs.setItem(3, 0, p.getKey()[0]);
+			coefs.setItem(4, 0, p.getKey()[1]);
+			coefs.setItem(5, 0, p.getKey()[2]);
+			lsa.addMeasurement(coefs, 1, dy, 0);
+
+			coefs.make0();
+			coefs.setItem(6, 0, p.getKey()[0]);
+			coefs.setItem(7, 0, p.getKey()[1]);
+			coefs.setItem(8, 0, p.getKey()[2]);
+			lsa.addMeasurement(coefs, 1, dz, 0);*/
 		}
 		lsa.calculate();
 		Matrix x = lsa.getUnknown();
 		double xx[] = x.getVector();
-		double jj[] = new double[xx.length];
-		jTransform.getMatrix(jj);
+		double jj[] = m.getVector();
 		System.out.println("Unknowns " + arrayToString(xx));
 		System.out.println("Before   " + arrayToString(jj));
 		for (int i = 0; i < xx.length; i++)
 			jj[i] -= xx[i];
 		System.out.println("After    " + arrayToString(jj));
-		System.out.println("Original " + arrayToString(m));
+		System.out.println("Original " + arrayToString(initial.getVector()));
 		//jTransform = new AffineTransform(x.getVector());
 	}
 

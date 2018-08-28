@@ -79,7 +79,7 @@ public class MyMnistDataTest {
 		Network net = nb.build();
 //		net.loadParams(MatrixUtil.loadOctave(new FileInputStream(new File(System.getProperty("user.home"), "/octave/A.mat"))), 0);
 
-		new Trainer().train(net, trainset, 1);
+		new Trainer().train(net, trainset, 3);
 		System.out.println(net.get(1));
 	}
 

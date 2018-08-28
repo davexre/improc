@@ -16,7 +16,7 @@ import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
-public class Trainer {
+public class Trainer2 {
 
 	static class DatapointTrainResult implements Comparable<DatapointTrainResult> {
 		int index;
@@ -112,17 +112,14 @@ public class Trainer {
 				error.resize(output.getSizeX(), output.getSizeY());
 				absError.resize(output.getSizeX(), output.getSizeY());
 				double R = 0;
-				int skipIndex = index % error.getVectorSize();
 				for (int i = target.getVectorSize() - 1; i >= 0; i--) {
 					double e = output.getVectorItem(i) - target.getVectorItem(i);
-					if (i != skipIndex) {
-						R += e*e;
-						error.setVectorItem(i, e);
-					}
+					R += e*e;
+					error.setVectorItem(i, e);
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
 				}
-				//R *= 0.5;
+				R *= 0.5;
 				if (absError.max() < 0.15)
 					patternsLearend++;
 				st.addValue(R);
@@ -137,6 +134,9 @@ public class Trainer {
 				stOutputError.addValue(absError);
 				index++;
 			}
+			if (!lsa.calculate())
+				throw new Error("LSA failed");
+			Matrix x = lsa.getUnknown();
 
 			stAbsError.stop();
 			stInputError.stop();
@@ -167,17 +167,12 @@ public class Trainer {
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
 			System.out.println("params.max.abs:   " + MathUtil.d4(params.maxAbs()));
+			System.out.println("dX.max.abs:       " + MathUtil.d4(x.maxAbs()));
+			System.out.println(params.toMatlabString("params"));
+			System.out.println(x.transpose(null).toMatlabString("dX"));
 			System.out.println("Target stat: " + stTarget.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
 			System.out.println("Output stat: " + stOutput.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
 			System.out.println("Output error stat: " + stOutputError.toString(Statistics.CStatAvg | Statistics.CStatStdDev));
-
-			System.out.println(params.toMatlabString("params"));
-			if (!lsa.calculate())
-				throw new Error("LSA failed");
-			Matrix x = lsa.getUnknown();
-
-			System.out.println(x.transpose(null).toMatlabString("dX"));
-			System.out.println("dX.max.abs:       " + MathUtil.d4(x.maxAbs()));
 			lastAvgError = avgError;
 
 //			if (maxStdInputErr < 0.0001) {
