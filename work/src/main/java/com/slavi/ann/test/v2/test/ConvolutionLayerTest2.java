@@ -14,7 +14,8 @@ import com.slavi.math.matrix.Matrix;
 public class ConvolutionLayerTest2 {
 	void doIt2() throws Exception {
 		//List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.readDataSet(getClass().getResourceAsStream("ConvolutionLayerTest2.txt"));
-		Matrix w = Matrix.fromOneLineString("0.1 0.3 0.35 1 0.7 1 0.5 1 0.7");
+		Matrix w = Matrix.fromOneLineString("0.1 0.3 0.35; 1 0.7 1; 0.5 1 0.7");
+		FullyConnectedLayer.normalizeWeights(w);
 //		w.makeE();
 		List<MatrixDataPointPair> trainset = MatrixTestData.generateFullyConnectedDataSet(w, 20);
 
@@ -22,12 +23,12 @@ public class ConvolutionLayerTest2 {
 		Matrix m = new Matrix();
 		p0.toInputMatrix(m);
 
-		Network net = new NetworkBuilder(m.getSizeX(), m.getSizeY())
-				.addFullyConnectedLayer(1)
+		Network net = new NetworkBuilder(m.getSizeX(), 1) //m.getSizeY())
+				.addFullyConnectedLayer(m.getSizeY())
 				.build();
 		FullyConnectedLayer l = (FullyConnectedLayer) net.get(0);
 		w.copyTo(l.weight);
-		l.weight.rMul(1.1);
+		l.weight.rMul(2.1);
 //		l.weight.makeR(1);
 		new Trainer() {
 			public void epochComplete() {
@@ -89,7 +90,7 @@ public class ConvolutionLayerTest2 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new ConvolutionLayerTest2().doIt();
+		new ConvolutionLayerTest2().doIt2();
 		System.out.println("Done.");
 	}
 }

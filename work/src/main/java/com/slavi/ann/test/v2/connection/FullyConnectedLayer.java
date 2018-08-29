@@ -2,6 +2,7 @@ package com.slavi.ann.test.v2.connection;
 
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.ann.test.v2.Layer;
+import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 
@@ -13,6 +14,17 @@ public class FullyConnectedLayer extends Layer {
 		this.learningRate = learningRate;
 		weight = new Matrix(sizeInput, sizeOutput);
 		BellCurveDistribution.fillWeight(weight, 0.3);
+	}
+
+	public static void normalizeWeights(Matrix weight) {
+		for (int j = weight.getSizeY() - 1; j >= 0; j--) {
+			double sum = 0;
+			for (int i = weight.getSizeX() - 1; i >= 0; i--)
+				sum += weight.getItem(i, j);
+			if (Math.abs(sum) > MathUtil.eps)
+				for (int i = weight.getSizeX() - 1; i >= 0; i--)
+					weight.setItem(i, j, weight.getItem(i, j) / sum);
+		}
 	}
 
 	@Override

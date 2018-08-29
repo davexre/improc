@@ -11,8 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.Utils;
+import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
@@ -91,19 +91,23 @@ public class MatrixTestData {
 		return r;
 	}
 
-	public static List<MatrixDataPointPair> generateFullyConnectedDataSet(Matrix weight, int numberOfDatapoints) {
+	public static List<MatrixDataPointPair> generateDataSet(Layer l, int inputSizeX, int inputSizeY, int numberOfDatapoints) {
 		List<MatrixDataPointPair> r = new ArrayList<>();
-		FullyConnectedLayer l = new FullyConnectedLayer(weight.getSizeX(), weight.getSizeY(), 1);
-		FullyConnectedLayer.Workspace w = l.createWorkspace();
-		weight.copyTo(l.weight);
+		Layer.LayerWorkspace w = l.createWorkspace();
 		for (int i = 0; i < numberOfDatapoints; i++) {
 			MatrixDataPointPair p = new MatrixDataPointPair();
 			p.name = Integer.toString(i);
-			p.input = new Matrix(weight.getSizeX(), 1);
+			p.input = new Matrix(inputSizeX, inputSizeY);
 			Utils.randomMatrix(p.input);
 			p.output = w.feedForward(p.input).makeCopy();
 			r.add(p);
 		}
 		return r;
+	}
+
+	public static List<MatrixDataPointPair> generateFullyConnectedDataSet(Matrix weight, int numberOfDatapoints) {
+		FullyConnectedLayer l = new FullyConnectedLayer(weight.getSizeX(), weight.getSizeY(), 1);
+		weight.copyTo(l.weight);
+		return generateDataSet(l, weight.getSizeX(), 1, numberOfDatapoints);
 	}
 }

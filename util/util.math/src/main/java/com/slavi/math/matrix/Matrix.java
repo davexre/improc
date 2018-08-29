@@ -525,6 +525,22 @@ public class Matrix {
 	}
 
 	/**
+	 * Returns the min(abs()) of all elements of the matrix.
+	 */
+	public double minAbs() {
+		int size = getVectorSize();
+		if (size == 0)
+			return 0;
+		double D = getVectorItem(0);
+		for (int i = size - 1; i > 0; i--) {
+			double tmp = Math.abs(getVectorItem(i));
+			if (D < tmp)
+				D = tmp;
+		}
+		return D;
+	}
+
+	/**
 	 * Returns the minimum value of all elements of the matrix.
 	 */
 	public double min() {

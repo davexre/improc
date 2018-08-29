@@ -118,6 +118,8 @@ public class Trainer {
 					if (i != skipIndex) {
 						R += e*e;
 						error.setVectorItem(i, e);
+					} else {
+						error.setVectorItem(i, 0);
 					}
 					e = Math.abs(e);
 					absError.setVectorItem(i, e);
@@ -201,7 +203,7 @@ public class Trainer {
 			ImageIO.write(bi, "png", new File(outDir, String.format("tmp%03d.png", epoch)));*/
 
 			for (int i = numAdjustableParams - 1; i >= 0; i--)
-				params.itemAdd(i, 0, -x.getItem(0, i));
+				params.itemAdd(i, 0, x.getItem(0, i));
 			l.loadParams(params, 0);
 			epochComplete();
 			l.resetEpoch(wslist);
