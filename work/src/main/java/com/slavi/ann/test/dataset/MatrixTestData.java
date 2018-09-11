@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.slavi.ann.test.DatapointPair;
 import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Network;
@@ -54,6 +55,31 @@ public class MatrixTestData {
 			}
 		}
 		return r;
+	}
+
+	public static void checkDataSet(List<? extends DatapointPair> data) {
+		Matrix input = new Matrix();
+		Matrix output = new Matrix();
+		MatrixStatistics msi = new MatrixStatistics();
+		MatrixStatistics mso = new MatrixStatistics();
+		msi.start();
+		mso.start();
+		for (DatapointPair p : data) {
+			p.toInputMatrix(input);
+			p.toOutputMatrix(output);
+			msi.addValue(input);
+			mso.addValue(output);
+		}
+		msi.stop();
+		mso.stop();
+
+		log.trace("Test data statisticts for input\n" + msi.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatCount));
+		log.trace("Test data statisticts for output\n" + mso.toString(Statistics.CStatAvg | Statistics.CStatStdDev | Statistics.CStatMinMax));
+
+		Matrix sd = mso.getStdDeviation();
+		double maxOut = mso.getAbsMaxX().max();
+		System.out.println("Output.AbsMax: " + MathUtil.d4(maxOut));
+		System.out.println("Output.StdDev.Max: " + MathUtil.d4(sd.max()));
 	}
 
 	public static List<MatrixDataPointPair> generateConvolutionDataSet(Layer l, int inputSizeX, int inputSizeY, int numberOfDatapoints) {

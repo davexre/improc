@@ -2,10 +2,13 @@ package com.slavi.ann.test.v2.test;
 
 import java.util.List;
 
+import org.openimaj.math.geometry.transforms.MatrixTransformProvider;
+
 import com.slavi.ann.test.dataset.MatrixDataPointPair;
 import com.slavi.ann.test.dataset.MatrixTestData;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
+import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
@@ -16,9 +19,17 @@ public class ConvolutionLayerTest2 {
 		//List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.readDataSet(getClass().getResourceAsStream("ConvolutionLayerTest2.txt"));
 		Matrix w = Matrix.fromOneLineString("0.1 0.3 0.35; 1 0.7 1; 0.5 1 0.7");
 		FullyConnectedLayer.normalizeWeights(w);
+		FullyConnectedLayer l = new FullyConnectedLayer(w.getSizeX(), w.getSizeY(), 1);
+		w.copyTo(l.weight);
 //		w.makeE();
-		List<MatrixDataPointPair> trainset = MatrixTestData.generateFullyConnectedDataSet(w, 20);
-
+		NetworkBuilder nb = new NetworkBuilder(w.getSizeX(), 1)
+				.addLayer(l)
+				//.addSigmoidLayer()
+				.addReLULayer()
+				;
+		List<MatrixDataPointPair> trainset = MatrixTestData.generateDataSet(nb.build(), w.getSizeX(), 1, 20);
+		MatrixTestData.checkDataSet(trainset);
+/*
 		MatrixDataPointPair p0 = trainset.get(0);
 		Matrix m = new Matrix();
 		p0.toInputMatrix(m);
@@ -37,7 +48,7 @@ public class ConvolutionLayerTest2 {
 				System.out.println(w.toMatlabString("W1"));
 				System.out.println(l.weight.toMatlabString("W2"));
 			}
-		}.train(net, trainset, 20);
+		}.train(net, trainset, 20);*/
 	}
 
 	void doIt() throws Exception {
