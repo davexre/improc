@@ -25,6 +25,8 @@ public class ConvolutionLayerTest2 {
 
 		Network net = new NetworkBuilder(m.getSizeX(), 1) //m.getSizeY())
 				.addFullyConnectedLayer(m.getSizeY())
+				.addConstScaleAndBiasLayer(0.01, 0)
+				.addSigmoidLayer()
 				.build();
 		FullyConnectedLayer l = (FullyConnectedLayer) net.get(0);
 		w.copyTo(l.weight);

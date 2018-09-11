@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.Layer;
+import com.slavi.ann.test.v2.Network;
+import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.MathUtil;
 import com.slavi.math.adjust.MatrixStatistics;
@@ -108,6 +110,7 @@ public class MatrixTestData {
 	public static List<MatrixDataPointPair> generateFullyConnectedDataSet(Matrix weight, int numberOfDatapoints) {
 		FullyConnectedLayer l = new FullyConnectedLayer(weight.getSizeX(), weight.getSizeY(), 1);
 		weight.copyTo(l.weight);
-		return generateDataSet(l, weight.getSizeX(), 1, numberOfDatapoints);
+		Network net = new Network(l, new SigmoidLayer());
+		return generateDataSet(net, weight.getSizeX(), 1, numberOfDatapoints);
 	}
 }
