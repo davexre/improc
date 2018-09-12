@@ -8,6 +8,7 @@ import com.slavi.ann.test.dataset.MatrixDataPointPair;
 import com.slavi.ann.test.dataset.MatrixTestData;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
+import com.slavi.ann.test.v2.activation.BinaryOutputLayer;
 import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
@@ -24,31 +25,37 @@ public class ConvolutionLayerTest2 {
 //		w.makeE();
 		NetworkBuilder nb = new NetworkBuilder(w.getSizeX(), 1)
 				.addLayer(l)
-				//.addSigmoidLayer()
-				.addReLULayer()
+				.addSigmoidLayer()
+				//.addConstScaleAndBiasLayer(4, -2)
+				//.addReLULayer()
+				.addConstScaleAndBiasLayer(1, -0.1)
+				.addLayer(new BinaryOutputLayer())
 				;
 		List<MatrixDataPointPair> trainset = MatrixTestData.generateDataSet(nb.build(), w.getSizeX(), 1, 20);
 		MatrixTestData.checkDataSet(trainset);
-/*
+
 		MatrixDataPointPair p0 = trainset.get(0);
 		Matrix m = new Matrix();
 		p0.toInputMatrix(m);
 
-		Network net = new NetworkBuilder(m.getSizeX(), 1) //m.getSizeY())
-				.addFullyConnectedLayer(m.getSizeY())
-				.addConstScaleAndBiasLayer(0.01, 0)
+		Network net = new NetworkBuilder(w.getSizeX(), 1) //m.getSizeY())
+				.addFullyConnectedLayer(w.getSizeY())
 				.addSigmoidLayer()
+				//.addConstScaleAndBiasLayer(0.01, 0)
+				.addConstScaleAndBiasLayer(1, -0.1)
+				.addLayer(new BinaryOutputLayer())
 				.build();
-		FullyConnectedLayer l = (FullyConnectedLayer) net.get(0);
-		w.copyTo(l.weight);
-		l.weight.rMul(2.1);
-//		l.weight.makeR(1);
+		FullyConnectedLayer l2 = (FullyConnectedLayer) net.get(0);
+//		w.copyTo(l2.weight);
+//		l2.weight.rMul(2.1);
+		l2.weight.makeR(1);
+		com.slavi.ann.test.Utils.randomMatrix(l2.weight);
 		new Trainer() {
 			public void epochComplete() {
 				System.out.println(w.toMatlabString("W1"));
-				System.out.println(l.weight.toMatlabString("W2"));
+				System.out.println(l2.weight.toMatlabString("W2"));
 			}
-		}.train(net, trainset, 20);*/
+		}.train(net, trainset, 5);
 	}
 
 	void doIt() throws Exception {

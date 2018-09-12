@@ -208,5 +208,6 @@ public class Trainer {
 			epochComplete();
 			l.resetEpoch(wslist);
 		}
+		epochComplete();
 	}
 }

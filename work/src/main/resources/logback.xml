@@ -48,7 +48,7 @@
 	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />

@@ -1,3 +1,10 @@
+Octave formulas for LSA debug
+=============================
+N=A'*A;
+max(max(abs(N)))
+max(max(abs(A)))
+
+
 Interesting to read
 ===================
 CNN:
