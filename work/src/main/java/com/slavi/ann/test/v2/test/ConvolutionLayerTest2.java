@@ -23,13 +23,15 @@ public class ConvolutionLayerTest2 {
 		FullyConnectedLayer l = new FullyConnectedLayer(w.getSizeX(), w.getSizeY(), 1);
 		w.copyTo(l.weight);
 //		w.makeE();
+		w.makeR(0.5);
+//		Utils.randomMatrix(w);
 		NetworkBuilder nb = new NetworkBuilder(w.getSizeX(), 1)
 				.addLayer(l)
 				.addSigmoidLayer()
 				//.addConstScaleAndBiasLayer(4, -2)
 				//.addReLULayer()
-				.addConstScaleAndBiasLayer(1, -0.1)
-				.addLayer(new BinaryOutputLayer())
+				//.addConstScaleAndBiasLayer(1, -0.1)
+				//.addLayer(new BinaryOutputLayer())
 				;
 		List<MatrixDataPointPair> trainset = MatrixTestData.generateDataSet(nb.build(), w.getSizeX(), 1, 20);
 		MatrixTestData.checkDataSet(trainset);
@@ -42,13 +44,14 @@ public class ConvolutionLayerTest2 {
 				.addFullyConnectedLayer(w.getSizeY())
 				.addSigmoidLayer()
 				//.addConstScaleAndBiasLayer(0.01, 0)
-				.addConstScaleAndBiasLayer(1, -0.1)
-				.addLayer(new BinaryOutputLayer())
+				//.addConstScaleAndBiasLayer(1, -0.1)
+				//.addLayer(new BinaryOutputLayer())
 				.build();
 		FullyConnectedLayer l2 = (FullyConnectedLayer) net.get(0);
 //		w.copyTo(l2.weight);
 //		l2.weight.rMul(2.1);
-		l2.weight.makeR(1);
+//		l2.weight.makeR(1);
+		Utils.randomMatrix(l2.weight);
 		com.slavi.ann.test.Utils.randomMatrix(l2.weight);
 		new Trainer() {
 			public void epochComplete() {
