@@ -45,10 +45,11 @@
 	<logger level="all" name="LOG" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+	<logger level="none" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="trace" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="none" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="error" name="ch.qos.logback.classic.LoggerContext" />
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />
@@ -61,7 +62,7 @@
 	<logger level="error" name="Derby" />
 	<logger level="error" name="hsqldb.db" />
 
-	<root level="info">
+	<root level="error">
 		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>
