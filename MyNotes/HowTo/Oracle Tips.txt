@@ -318,9 +318,17 @@ order by table_name, constraint_name, orderby
 end;
 
 =========================== Make a comma separated list ===========================
+more examples: 
+	https://oracle-base.com/articles/misc/string-aggregation-techniques
+	https://oracle-base.com/articles/12c/listagg-function-enhancements-12cr2#default-listagg-functionality
+
 select rtrim(xmlagg(XMLELEMENT(E,a.lvl,',').extract('//text()') order by a.lvl).getclobval(), ',') csv
 from
-	(select level lvl from dual connect by level < 10) a; 
+	(select level lvl from dual connect by level < 10) a;
+
+select listagg(a.lvl,',' on overflow truncate without count) within group (order by a.lvl) csv
+from
+	(select level lvl from dual connect by level < 10) a;
 
 =========================== Split a column by comma ===========================
 https://lalitkumarb.wordpress.com/2015/03/04/split-comma-delimited-strings-in-a-table-in-oracle/
