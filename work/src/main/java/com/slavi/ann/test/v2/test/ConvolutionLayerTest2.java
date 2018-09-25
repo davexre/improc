@@ -17,31 +17,37 @@ import com.slavi.math.matrix.Matrix;
 
 public class ConvolutionLayerTest2 {
 	void doIt2() throws Exception {
+		int inputSizeX = 3;
+		int inputSizeY = 3;
+		int outputSize = 3;
 		//List<ConvolutionTestDataPoint> trainset = ConvolutionTestData.readDataSet(getClass().getResourceAsStream("ConvolutionLayerTest2.txt"));
 		Matrix w = Matrix.fromOneLineString("0.1 0.3 0.35; 1 0.7 1; 0.5 1 0.7");
 		FullyConnectedLayer.normalizeWeights(w);
-		FullyConnectedLayer l = new FullyConnectedLayer(w.getSizeX(), w.getSizeY(), 1);
-		w.copyTo(l.weight);
+		FullyConnectedLayer l = new FullyConnectedLayer(inputSizeX * inputSizeY, outputSize, 1);
+//		w.copyTo(l.weight);
 //		w.makeE();
-		w.makeR(0.5);
-//		Utils.randomMatrix(w);
-		NetworkBuilder nb = new NetworkBuilder(w.getSizeX(), 1)
+//		w.makeR(0.5);
+		Utils.randomMatrix(l.weight);
+		NetworkBuilder nb = new NetworkBuilder(inputSizeX, inputSizeY)
 				.addLayer(l)
+				.addConstScaleAndBiasLayer(5, -10)
 				.addSigmoidLayer()
-				//.addConstScaleAndBiasLayer(4, -2)
 				//.addReLULayer()
 				//.addConstScaleAndBiasLayer(1, -0.1)
 				//.addLayer(new BinaryOutputLayer())
 				;
-		List<MatrixDataPointPair> trainset = MatrixTestData.generateDataSet(nb.build(), w.getSizeX(), 1, 20);
+		List<MatrixDataPointPair> trainset = MatrixTestData.generateDataSet(nb.build(), inputSizeX, inputSizeY, 500);
 		MatrixTestData.checkDataSet(trainset);
 
+//		if (true)
+//			return;
 		MatrixDataPointPair p0 = trainset.get(0);
 		Matrix m = new Matrix();
 		p0.toInputMatrix(m);
 
-		Network net = new NetworkBuilder(w.getSizeX(), 1) //m.getSizeY())
-				.addFullyConnectedLayer(w.getSizeY())
+		Network net = new NetworkBuilder(inputSizeX, inputSizeY)
+				.addFullyConnectedLayer(outputSize)
+				.addConstScaleAndBiasLayer(5, -10)
 				.addSigmoidLayer()
 				//.addConstScaleAndBiasLayer(0.01, 0)
 				//.addConstScaleAndBiasLayer(1, -0.1)
@@ -58,7 +64,7 @@ public class ConvolutionLayerTest2 {
 				System.out.println(w.toMatlabString("W1"));
 				System.out.println(l2.weight.toMatlabString("W2"));
 			}
-		}.train(net, trainset, 5);
+		}.train(net, trainset, 15);
 	}
 
 	void doIt() throws Exception {
@@ -95,7 +101,7 @@ public class ConvolutionLayerTest2 {
 //			l.kernel.makeR(1);
 //			Utils.randomMatrix(l.kernel);
 			System.out.println(nb2.describe());
-			new Trainer().train(net, trainset, 5);
+			new Trainer().train(net, trainset, 10);
 			System.out.println(kernel.toMatlabString("K1"));
 			System.out.println(l.kernel.toMatlabString("K2"));
 		}

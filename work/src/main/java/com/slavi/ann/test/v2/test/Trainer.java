@@ -84,6 +84,7 @@ public class Trainer {
 		ArrayList<LayerWorkspace> wslist = new ArrayList<>();
 		wslist.add(ws);
 		double lastAvgError = 0;
+		double lastSumError = 0;
 
 		int numAdjustableParams = l.getNumAdjustableParams();
 		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
@@ -151,6 +152,7 @@ public class Trainer {
 			double avgError = avg.avg(); // avg.sumAll(); // / avg.getVectorSize();
 			double learnProgress = lastAvgError - avgError;
 			double maxErr = stAbsError.getAbsMaxX().max();
+			double sumError = error.sumAbs();
 
 			double maxStdInputErr = stInputError.getStdDeviation().max();
 			double patternsLearendPercent = (double) patternsLearend / index;
@@ -162,9 +164,11 @@ public class Trainer {
 			System.out.println("avg Avg Error**:  " + MathUtil.d4(avgError));
 			System.out.println("avg Max Error:    " + MathUtil.d4(avg.max()));
 			System.out.println("std Max Error:    " + MathUtil.d4(stAbsError.getStdDeviation().max()));
+			System.out.println("sum Error:        " + MathUtil.d4(sumError));
 			if (epoch > 0) {
 				System.out.println("LearnProgress**:  " + MathUtil.d4(learnProgress * 100));
 				System.out.println("lastAvgAvgError:  " + MathUtil.d4(lastAvgError));
+				System.out.println("lastSumError:     " + MathUtil.d4(lastSumError));
 			}
 			System.out.println("patternsLearend%: " + MathUtil.d4(patternsLearendPercent * 100));
 			System.out.println("patternsLearend:  " + patternsLearend + " / " + index);
@@ -181,6 +185,7 @@ public class Trainer {
 			System.out.println(x.transpose(null).toMatlabString("dX"));
 			System.out.println("dX.max.abs:       " + MathUtil.d4(x.maxAbs()));
 			lastAvgError = avgError;
+			lastSumError = sumError;
 
 //			if (maxStdInputErr < 0.0001) {
 //				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
