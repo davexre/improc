@@ -21,7 +21,7 @@
 		</encoder>
 	</appender>
 
-	<logger name="uk.org.lidalia.sysoutslf4j.context" level="none" additivity="false" />
+	<logger name="uk.org.lidalia.sysoutslf4j.context" level="off" additivity="false" />
 
 	<logger name="com.slavi.example.logging.Log4J" level="info" />
  -->

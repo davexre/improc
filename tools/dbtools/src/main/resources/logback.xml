@@ -6,7 +6,7 @@
 	</appender>
 
 	<logger level="error" name="com.slavi" />
-	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" />
+	<logger level="off"   name="uk.org.lidalia.sysoutslf4j.context" />
 
 	<root level="error">
 		<appender-ref ref="STDOUT" />

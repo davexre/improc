@@ -36,7 +36,7 @@
 		</encoder>
 	</appender>
 
-	<logger level="none"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
+	<logger level="off"  name="uk.org.lidalia.sysoutslf4j.context" additivity="false" />
 
 <!-- 	<logger name="my.logger.file" level="all" additivity="false">
 		<appender-ref ref="my.appender.file" />
@@ -45,10 +45,10 @@
 	<logger level="all" name="LOG" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="none" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="none" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust" />
 	<logger level="error" name="ch.qos.logback.classic.LoggerContext" />
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
