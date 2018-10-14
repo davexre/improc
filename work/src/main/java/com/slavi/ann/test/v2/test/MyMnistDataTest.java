@@ -69,7 +69,9 @@ public class MyMnistDataTest {
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				.addDebugLayer("last", DebugLayer.off)*/
 				// Iris data
-				.addFullyConnectedLayer(3).addSigmoidLayer()
+				.addFullyConnectedLayer(3)
+				.addBiasLayer()
+				.addSigmoidLayer()
 				.addConstScaleAndBiasLayer(10, -5)
 /*				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()*/

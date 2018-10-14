@@ -7,6 +7,7 @@ import com.slavi.ann.test.v2.activation.ConstScaleAndBiasLayer;
 import com.slavi.ann.test.v2.activation.DebugLayer;
 import com.slavi.ann.test.v2.activation.ReLULayer;
 import com.slavi.ann.test.v2.activation.SigmoidLayer;
+import com.slavi.ann.test.v2.connection.BiasLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionSameSizeLayer;
 import com.slavi.ann.test.v2.connection.ConvolutionWithStrideLayer;
@@ -80,6 +81,10 @@ public class NetworkBuilder {
 
 	public NetworkBuilder addFullyConnectedLayer(int outputSize) {
 		return addLayer(new FullyConnectedLayer(lastSize[0] * lastSize[1], outputSize, 1));
+	}
+
+	public NetworkBuilder addBiasLayer() {
+		return addLayer(new BiasLayer(lastSize[0], lastSize[1], 1));
 	}
 
 	public NetworkBuilder addConstScaleAndBiasLayer() {

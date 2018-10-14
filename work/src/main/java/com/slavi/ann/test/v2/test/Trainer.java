@@ -87,7 +87,7 @@ public class Trainer {
 		double lastSumError = 0;
 
 		int numAdjustableParams = l.getNumAdjustableParams();
-		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
+		LeastSquaresAdjust lsa = new LeastSquaresSVD(numAdjustableParams);
 		Matrix coefs = new Matrix(numAdjustableParams, 1);
 		Matrix params = new Matrix(numAdjustableParams, 1);
 		l.extractParams(params, 0);
@@ -184,17 +184,29 @@ public class Trainer {
 
 			System.out.println(x.transpose(null).toMatlabString("dX"));
 			System.out.println("dX.max.abs:       " + MathUtil.d4(x.maxAbs()));
-			lastAvgError = avgError;
-			lastSumError = sumError;
 
-//			if (maxStdInputErr < 0.0001) {
-//				System.out.println("Threashold 'Input error std dev' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
-//				break;
-//			}
-			if (patternsLearendPercent > 0.8 && maxErr < 0.3) {
-				System.out.println("Threshold 'patternsLearendPercent' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
-				break;
+			String threshold = null;
+			if (epoch > 0) {
+				double tmp = lastSumError > 0 ? Math.abs((lastSumError - sumError) / lastSumError) : 0;
+				System.out.println("TMP " + tmp);
+				if (tmp < 0.0001)
+					threshold = "Sum of squares does not decrease";
+				tmp = 0;
+				for (int i = numAdjustableParams - 1; i >= 0; i--) {
+					double p = params.getItem(i, 0);
+					if (p > 0) {
+						p = Math.abs(x.getItem(0, i) / p);
+						if (p > tmp)
+							tmp = p;
+					}
+				}
+				if (tmp < 0.001)
+					threshold = "Parameters do not change more than 0.1%";
 			}
+//			if (maxStdInputErr < 0.0001)
+//				threshold = "Input error std dev";
+			if (patternsLearendPercent > 0.8 && maxErr < 0.3)
+				threshold = "patternsLearendPercent";
 			if (maxErr < 0.2) { // || (dE > 0 && dE < 0.001)) {
 				System.out.println("Threshold 'maxE' reached at epoch " + epoch + " maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
 				break;
@@ -202,6 +214,14 @@ public class Trainer {
 			if (epoch > 0 && learnProgress < 0) {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
+			if (threshold != null) {
+				System.out.println("Threshold '" + threshold + "' reached at epoch " + epoch + 
+						" maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
+				break;
+			}
+			lastAvgError = avgError;
+			lastSumError = sumError;
+
 			//l.applyWorkspaces(wslist);
 /*			int tmpInputSize[] = new int[] { input.getSizeX(), input.getSizeY() };
 			BufferedImage bi = Utils.draw(ws, tmpInputSize);

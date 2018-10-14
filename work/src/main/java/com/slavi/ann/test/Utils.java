@@ -51,6 +51,10 @@ public class Utils {
 				) +
 			"\nOutput:\n" + stOut.toString(Statistics.CStatAvg | Statistics.CStatStdDev //| Statistics.CStatMinMax
 				));
+		
+		Matrix stddev = stOut.getStdDeviation();
+		if (stddev.min() < 0.1)
+			throw new Error("Insufficient diversity in output data");
 	}
 
 	public static double assertValidValue(double d) {
