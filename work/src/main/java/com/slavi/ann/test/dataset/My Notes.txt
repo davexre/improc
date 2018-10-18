@@ -1,0 +1,11 @@
+
+Pre trained networks
+====================
+https://www.analyticsvidhya.com/blog/2018/07/top-10-pretrained-models-get-started-deep-learning-part-1-computer-vision/
+	https://github.com/fyrestorm-sdb/tomatoes
+	https://github.com/matterport/Mask_RCNN
+
+A giant set of train/test images
+================================
+http://cocodataset.org/#download
+http://image-net.org/download-images
