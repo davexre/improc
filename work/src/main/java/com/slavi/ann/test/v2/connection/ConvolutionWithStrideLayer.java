@@ -9,6 +9,8 @@ public class ConvolutionWithStrideLayer extends Layer {
 	public int strideX;
 	public int strideY;
 
+	protected ConvolutionWithStrideLayer() {}
+
 	public ConvolutionWithStrideLayer(int kernelSizeX, int kernelSizeY, int strideX, int strideY, double learningRate) {
 		this.learningRate = learningRate;
 		this.strideX = strideX;

@@ -8,6 +8,8 @@ public class BiasLayer extends Layer {
 	public Matrix bias;
 	public double learningRate;
 
+	protected BiasLayer() {}
+
 	public BiasLayer(int sizeInputX, int sizeInputY, double learningRate) {
 		this.learningRate = learningRate;
 		bias = new Matrix(sizeInputX, sizeInputY);

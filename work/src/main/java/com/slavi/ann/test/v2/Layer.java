@@ -2,10 +2,19 @@ package com.slavi.ann.test.v2;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.slavi.ann.test.BellCurveDistribution;
 import com.slavi.improc.parallel.PGaussianFilter;
 import com.slavi.math.matrix.Matrix;
 
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.NAME,
+		include = JsonTypeInfo.As.PROPERTY,
+		property = "type")
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class Layer {
 
 	public abstract int[] getOutputSize(int inputSize[]);

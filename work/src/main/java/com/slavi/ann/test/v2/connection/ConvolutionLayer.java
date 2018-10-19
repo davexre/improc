@@ -9,6 +9,8 @@ public class ConvolutionLayer extends Layer {
 	public Matrix kernel;
 	public double learningRate;
 
+	protected ConvolutionLayer() {}
+
 	public ConvolutionLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);

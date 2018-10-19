@@ -39,6 +39,8 @@ public class DebugLayer extends Layer {
 		return false;
 	}
 
+	protected DebugLayer() {}
+
 	public DebugLayer(String name) {
 		this(name, defaultStyle);
 	}

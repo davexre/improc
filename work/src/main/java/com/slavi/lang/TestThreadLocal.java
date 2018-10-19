@@ -20,6 +20,8 @@ public class TestThreadLocal {
 		System.out.println(exec.submit(() -> {
 			return tl.get();
 		}).get());
+
+		exec.shutdown();
 	}
 
 	public static void main(String[] args) throws Exception {

@@ -8,6 +8,8 @@ public class ScaleAndBiasLayer extends Layer {
 	Matrix scale;
 	Matrix bias;
 
+	protected ScaleAndBiasLayer() {}
+
 	public ScaleAndBiasLayer(Matrix scale, Matrix bias) {
 		this.scale = scale;
 		this.bias = bias;

@@ -8,6 +8,8 @@ public class ConvolutionSameSizeLayer extends Layer {
 	public Matrix kernel;
 	public double learningRate;
 
+	protected ConvolutionSameSizeLayer() {}
+
 	public ConvolutionSameSizeLayer(int kernelSizeX, int kernelSizeY, double learningRate) {
 		this.learningRate = learningRate;
 		kernel = new Matrix(kernelSizeX, kernelSizeY);

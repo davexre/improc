@@ -8,6 +8,8 @@ public class SubsamplingMaxLayer extends Layer {
 	public int sizeX;
 	public int sizeY;
 
+	protected SubsamplingMaxLayer() {}
+
 	public SubsamplingMaxLayer(int sizeX, int sizeY) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;

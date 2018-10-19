@@ -23,17 +23,18 @@ for layer_name in layer_names:
     for weight_name in weight_names:
         lweights.append(weight_name[:-4])
 
-        #weights = np.asarray(g[weight_name]).tolist()
-        #fou_name = outdir + weight_name[:-4] + '.json'
-        #print(fou_name)
-        #fou = open(fou_name,"w+")
+        weights = np.asarray(g[weight_name]).tolist()
+        fou_name = outdir + weight_name[:-4] + '.json'
+        print(fou_name)
+        fou = open(fou_name,"w+")
         #obj = {}
         #obj[weight_name] = weights
-        #fou.writelines(json.dumps(obj))
-        #fou.close()
+        fou.writelines(json.dumps(weights))
+        fou.close()
 
     lnames.append([layer_name, lweights])
-fou = open(outdir + 'alllayers.json',"w+")
+
+fou = open(outdir + 'all_layers.json',"w+")
 fou.writelines(json.dumps(lnames, indent=4))
 fou.close()
 

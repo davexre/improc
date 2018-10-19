@@ -10,6 +10,8 @@ public class FullyConnectedLayer extends Layer {
 	public Matrix weight;
 	public double learningRate;
 
+	protected FullyConnectedLayer() {}
+
 	public FullyConnectedLayer(int sizeInput, int sizeOutput, double learningRate) {
 		this.learningRate = learningRate;
 		weight = new Matrix(sizeInput, sizeOutput);

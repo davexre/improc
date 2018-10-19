@@ -12,6 +12,8 @@ public class Network extends Layer implements Iterable<Layer>{
 
 	protected List<Layer> layers;
 
+	protected Network() {}
+
 	public Network(List<Layer> layers) {
 		this.layers = Collections.unmodifiableList(layers);
 	}

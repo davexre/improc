@@ -8,6 +8,8 @@ public class SubsamplingAvgLayer extends Layer {
 	public int sizeX;
 	public int sizeY;
 
+	protected SubsamplingAvgLayer() {}
+
 	public SubsamplingAvgLayer(int sizeX, int sizeY) {
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;

@@ -8,6 +8,8 @@ public class ConstScaleAndBiasLayer extends Layer {
 	double scale;
 	double bias;
 
+	protected ConstScaleAndBiasLayer() {}
+
 	public ConstScaleAndBiasLayer(double scale, double bias) {
 		this.scale = scale;
 		this.bias = bias;

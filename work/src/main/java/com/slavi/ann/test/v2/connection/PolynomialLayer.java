@@ -22,6 +22,8 @@ public class PolynomialLayer extends Layer {
 	int sizeInput;
 	int sizeOutput;
 
+	protected PolynomialLayer() {}
+
 	public PolynomialLayer(int sizeInput, int sizeOutput) {
 		this.sizeInput = sizeInput;
 		this.sizeOutput = sizeOutput;
