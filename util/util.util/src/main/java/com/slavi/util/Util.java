@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.slavi.util.jackson.MatrixJsonModule;
 
 /**
  * This class contains utility static methods for general purpose.
@@ -522,11 +523,13 @@ public class Util {
 		AnnotationIntrospector secondary = new JaxbAnnotationIntrospector();
 		AnnotationIntrospector pair = new AnnotationIntrospectorPair(primary, secondary);
 
-		m.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-		//m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"));
+		//m.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+		//m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
 		m.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		m.setAnnotationIntrospector(pair);
 		m.enable(SerializationFeature.INDENT_OUTPUT);
+
+		m.registerModule(new MatrixJsonModule());
 	}
 
 	public static ObjectMapper xmlMapper() {

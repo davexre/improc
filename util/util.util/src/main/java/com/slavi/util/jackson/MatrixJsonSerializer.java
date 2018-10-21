@@ -1,7 +1,8 @@
-package com.slavi.util;
+package com.slavi.util.jackson;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
@@ -13,7 +14,7 @@ public class MatrixJsonSerializer extends StdSerializer<Matrix> {
 	}
 
 	@Override
-	public void serialize(Matrix value, com.fasterxml.jackson.core.JsonGenerator g, SerializerProvider provider)
+	public void serialize(Matrix value, JsonGenerator g, SerializerProvider provider)
 			throws IOException {
 		if (g instanceof ToXmlGenerator) {
 			g.writeStartObject();

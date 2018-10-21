@@ -2,23 +2,23 @@ package com.slavi.ann.test;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.util.Util;
 
 public class Utils {
 	public static final double valueLow = 0.05;
@@ -51,7 +51,7 @@ public class Utils {
 				) +
 			"\nOutput:\n" + stOut.toString(Statistics.CStatAvg | Statistics.CStatStdDev //| Statistics.CStatMinMax
 				));
-		
+
 		Matrix stddev = stOut.getStdDeviation();
 		if (stddev.min() < 0.1)
 			throw new Error("Insufficient diversity in output data");
@@ -76,27 +76,27 @@ public class Utils {
 			dest.setVectorItem(i, random.nextDouble());
 	}
 
-	public static void configureMapper(ObjectMapper m) {
-		AnnotationIntrospector primary = new JacksonAnnotationIntrospector();
-		AnnotationIntrospector secondary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector pair = new AnnotationIntrospectorPair(primary, secondary);
-
-		m.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-		//m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX"));
-		m.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		m.setAnnotationIntrospector(pair);
-		m.enable(SerializationFeature.INDENT_OUTPUT);
+	public static void registerLayerSubTypes(ObjectMapper m) {
+		Reflections reflections = new Reflections(Layer.class.getPackage().getName());
+		Map<String, NamedType> map = new HashMap<>();
+		for (Class<? extends Layer> i : reflections.getSubTypesOf(Layer.class)) {
+			String name = i.getSimpleName();
+			if (name.endsWith("Layer"))
+				name = name.substring(0, name.length() - "Layer".length());
+			map.put(name, new NamedType(i, name));
+		}
+		m.getDeserializationConfig().getSubtypeResolver().registerSubtypes(map.values().toArray(new NamedType[map.size()]));
 	}
 
 	public static ObjectMapper xmlMapper() {
-		ObjectMapper m = new XmlMapper();
-		configureMapper(m);
+		ObjectMapper m = Util.xmlMapper();
+		registerLayerSubTypes(m);
 		return m;
 	}
 
 	public static ObjectMapper jsonMapper() {
-		ObjectMapper m = new ObjectMapper();
-		configureMapper(m);
+		ObjectMapper m = Util.jsonMapper();
+		registerLayerSubTypes(m);
 		return m;
 	}
 

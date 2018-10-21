@@ -1,31 +1,20 @@
 package com.slavi.jackson;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.StringInputStream;
-import org.reflections.Reflections;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.slavi.ann.test.Utils;
-import com.slavi.ann.test.v2.Layer;
 import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.NetworkBuilder;
-import com.slavi.ann.test.v2.connection.ConvolutionLayer;
-import com.slavi.math.matrix.Matrix;
-import com.slavi.util.MatrixJsonModule;
 
 public class TestCustomSerializerInJackson {
 
@@ -151,19 +140,9 @@ public class TestCustomSerializerInJackson {
 			.addSigmoidLayer()
 			.build();
 
-		ObjectMapper om = Utils.xmlMapper();
-		om.registerModule(new MatrixJsonModule());
+		ObjectMapper om = Utils.jsonMapper();
 		om.registerModule(new MyJacksonModule());
-		Reflections reflections = new Reflections(Layer.class.getPackage().getName());
-		Map<String, NamedType> map = new HashMap<>();
-		for (Class<? extends Layer> i : reflections.getSubTypesOf(Layer.class)) {
-			String name = i.getSimpleName();
-			if (name.endsWith("Layer"))
-				name = name.substring(0, name.length() - "Layer".length());
-			map.put(name, new NamedType(i, name));
-		}
 
-		om.getDeserializationConfig().getSubtypeResolver().registerSubtypes(map.values().toArray(new NamedType[map.size()]));
 		String value = om.writeValueAsString(o1);
 		System.out.println(value);
 		Network o2 = om.readValue(new StringInputStream(value), Network.class);

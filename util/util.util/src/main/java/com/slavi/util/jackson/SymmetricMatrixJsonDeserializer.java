@@ -1,4 +1,4 @@
-package com.slavi.util;
+package com.slavi.util.jackson;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,15 +10,15 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.SymmetricMatrix;
 
-public class MatrixJsonDeserializer extends StdDeserializer<Matrix> {
-	public MatrixJsonDeserializer() {
-		super(Matrix.class);
+public class SymmetricMatrixJsonDeserializer extends StdDeserializer<SymmetricMatrix> {
+	public SymmetricMatrixJsonDeserializer() {
+		super(SymmetricMatrix.class);
 	}
 
 	@Override
-	public Matrix deserialize(JsonParser p, DeserializationContext ctxt)
+	public SymmetricMatrix deserialize(JsonParser p, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
 		ArrayList<ArrayList<Double>> rows = new ArrayList<>();
 		int maxCols = 0;
@@ -77,10 +77,10 @@ public class MatrixJsonDeserializer extends StdDeserializer<Matrix> {
 			throw new JsonParseException(p, "Unexpected token");
 		}
 
-		Matrix m = new Matrix(maxCols, rows.size());
+		SymmetricMatrix m = new SymmetricMatrix(rows.size());
 		for (int j = 0; j < rows.size(); j++) {
 			ArrayList<Double> row = rows.get(j);
-			for (int i = 0; i < row.size(); i++) {
+			for (int i = 0, maxIndex = Math.min(row.size() - 1, j); i <= maxIndex; i++) {
 				m.setItem(i, j, row.get(i));
 			}
 		}
