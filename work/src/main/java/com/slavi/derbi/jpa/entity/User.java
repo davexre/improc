@@ -1,19 +1,31 @@
 package com.slavi.derbi.jpa.entity;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="users")
+@Table(name="USERS")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "UTYPE")
 public class User {
 	@Id
+	@Column(name = "un")
 	String username;
 
 	String name;
@@ -33,8 +45,23 @@ public class User {
 	@ManyToOne
 	User manager;
 
+	@ManyToMany
+	@JoinTable(
+		name = "UserEntities",
+		joinColumns = {
+			@JoinColumn(name = "un_fk")
+		},
+		inverseJoinColumns = {
+			@JoinColumn(name = "ent_fk")
+		}
+	)
+	@OrderColumn(name = "sys_key")
+	List<MyEntity> entities;
+
 	@OneToMany(mappedBy="manager")
 	Set<User> subordinate;
+
+	public User() {}
 
 	public User(String username, Department department) {
 		this.username = this.name = username;

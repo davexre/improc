@@ -2,7 +2,7 @@
 
 # Create allPictures.txt file
 # find /home/slavian/Pictures -type f -printf '%s\t%p\n' > allPictures.txt
-#cat allPictures.txt | grep -Evi "(jpg|gif|png|db|zip|xcf|info|kdenlive|odp|txt|7z|tif|odt|3gp|orf|mp4|avi|mov|mpg|wav|thm|wmv)$" | less
+#cat allPictures.txt | grep -Evi "(jpg|gif|png|zip|xcf|info|kdenlive|odp|txt|7z|tif|odt|3gp|orf|mp4|avi|mov|mpg|wav|thm|wmv)$" | less
 #source ~/bin/my_utils.sh
 
 # Tools: mediainfo, ffprobe, identify, mencoder, ffmpeg
@@ -97,7 +97,8 @@ function imageCompress() {
 	echo "Compress $i"
 #	https://www.imagemagick.org/script/escape.php
 #	%b -> size in bytes; %w,%h -> width,height of immage, %m,%C -> compression method, %x,%y -> x,y resolution/density; %Q -> compression quality
-#	identify -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\n' src.jpg
+#	%d -> directory; %f -> filename with extension; -precision 16 - force file size in bytes
+#	identify -precision 16 -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\t%d/%f\n' src.jpg
 	convert "$i" -compress JPEG -quality 70 "$fou"
 #	identify -verbose a6.jpg | grep -E "(  Compression:)|(  Quality:)
 #	compare $i $fou compare.jpg

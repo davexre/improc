@@ -16,6 +16,8 @@ public class Department {
 
 	DepartmentType type;
 
+	public Department() {}
+
 	public Department(String name, DepartmentType type) {
 		this.name = name;
 		this.type = type;

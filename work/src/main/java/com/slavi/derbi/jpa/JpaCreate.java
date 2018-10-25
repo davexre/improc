@@ -26,6 +26,9 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
+import org.apache.log4j.LogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,6 +38,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slavi.derbi.jpa.entity.AdvancedUser;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.Department;
 import com.slavi.derbi.jpa.entity.DepartmentType;
@@ -94,6 +98,9 @@ public class JpaCreate {
 		User manager = null;
 		for (int i = 0; i < 20; i++) {
 			User user = new User("User " + i, deparments.get(i % deparments.size()));
+			//User user = new AdvancedUser();
+			//user.setUsername("User " + i);
+			//user.setDepartment(deparments.get(i % deparments.size()));
 			if (i % 5 == 0) {
 				user.setRole(Role.MANAGER);
 			} else
@@ -159,10 +166,10 @@ public class JpaCreate {
 			System.out.println(u);
 
 		//EntityType<User> etype = em.getMetamodel().entity(User.class);
-		IdentifiableType itype = etype.getSupertype();
+/*		IdentifiableType itype = etype.getSupertype();
 		for (Object a : itype.getAttributes())
 			System.out.println(a);
-		
+	*/
 		if (true)
 			return;
 
@@ -208,7 +215,7 @@ public class JpaCreate {
 		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext(JpaCreate.class);
 		JpaCreate bean = appContext.getBean(JpaCreate.class);
 		bean.initialize();
-		bean.createORMs();
+//		bean.createORMs();
 		bean.dbToXml();
 		appContext.close();
 		System.out.println("Done.");
