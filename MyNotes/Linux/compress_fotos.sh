@@ -109,6 +109,34 @@ function imageGetInfo() {
 	stat -c $'%s\t%n' "$i"
 }
 
+function imageGetInfoAll() {
+	cat allPictures.txt | grep -Ei "(jpg)$" | cut -f 2 | \
+	xargs -L 1 -d '\n' -I '{}' identify -precision 16 -format $'%b\t%w\t%h\t%m\t%x\t%y\t%Q\t%d/%f\n' "{}" > img_jpg_info.csv 
+}
+
+function imageGetInfoMakeDb() {
+	rm -f "${outDir}/img_jpeg_info.sqlite"
+	sqlite3 "${outDir}/img_jpeg_info.sqlite" <<- EOF
+		.bail on
+		
+		create table img (
+			fsize varchar,
+			width integer,
+			height integer,
+			format varchar,
+			resx integer,
+			resy integer,
+			quality integer,
+			fname varchar
+		);
+		
+		.separator "\t"
+		
+		.import "${outDir}/img_jpg_info.csv" img
+	EOF
+}
+
+
 p1="$1"
 
 #set -e
