@@ -14,9 +14,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.IdentifiableType;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbutils.DbUtils;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flickr4java.flickr.machinetags.Predicate;
 import com.slavi.derbi.jpa.entity.AdvancedUser;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.Department;
@@ -201,6 +204,15 @@ public class JpaCreate {
 		}
 		Query q = em.createQuery("select e from MyEntityPartial e where e.id = 1", MyEntityPartial.class);
 		//em.getCriteriaBuilder().
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery qry = builder.createQuery(User.class);
+		Root<User> ru = qry.from(User.class);
+		qry.where(
+				builder.equal(ru.get("manager"), new User()),
+				builder.equal(ru.get("role"), Role.ADMIN)
+		);
+		em.createQuery(qry).getResultList();
 
 		List<MyEntityPartial> r = q.getResultList();
 		for (MyEntityPartial i : r) {
