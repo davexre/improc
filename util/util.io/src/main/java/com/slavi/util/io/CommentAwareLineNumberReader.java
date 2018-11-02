@@ -5,7 +5,7 @@ import java.io.Reader;
 
 /**
  * Reader counting lines that skips lines beginning with any of the chars in commentChars list.
- * Line with comments are still counted.
+ * Lines with comments are still counted.
  */
 public class CommentAwareLineNumberReader extends Reader implements LineReader {
 	String commentChars = "#";

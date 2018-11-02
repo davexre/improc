@@ -14,10 +14,32 @@ import com.slavi.util.file.FileUtil;
 
 public class ColorNamesTest {
 	public static double colorDist(ColorNameData i, double tmp[]) {
-		return
-				MathUtil.fixAnglePI(i.h - tmp[0]) / 2 +
+		int mode = 3;
+
+		double a = MathUtil.fixAnglePI(i.h - tmp[0]);
+		switch (mode) {
+		case 0:
+			return
+				Math.pow(i.s - Math.cos(a) * tmp[1], 2) +
+				Math.pow(Math.sin(a) * tmp[1], 2) +
+				Math.pow(i.l - tmp[2], 2);
+		default:
+		case 1:
+			return
+				Math.pow(a / Math.PI, 2.0) +
+				Math.pow(Math.abs(i.s - tmp[1]), 2.0) +
+				Math.pow(Math.abs(i.l - tmp[2]), 2.0);
+		case 2:
+			return
+				Math.pow((i.s + tmp[1]) * a * 0.5, 2) +
+				Math.pow(i.s - tmp[1], 2) +
+				Math.pow(i.l - tmp[2], 2);
+		case 3:
+			return
+				a / Math.PI +
 				Math.abs(i.s - tmp[1]) +
 				Math.abs(i.l - tmp[2]);
+		}
 	}
 
 	static int numColors = 20;
@@ -39,7 +61,7 @@ public class ColorNamesTest {
 		ColorConversion.HSL.toDRGB(tmp, tmp2);
 		int color = ColorConversion.RGB.toRGB(tmp2);
 */
-		int color = 0xFFEBCD;
+		int color = 0xFBECD;
 		double tmp[] = new double[3];
 		ColorConversion.RGB.fromRGB(color, tmp);
 		ColorConversion.HSL.instance.fromDRGB(tmp, tmp);
@@ -51,9 +73,9 @@ public class ColorNamesTest {
 					colorDist(b, tmp));
 		});
 
-		System.out.println(String.format("\t(0x%2$06X) h:%3$.2f s:%4$.2f, l:%5$.2f, %1$s", "test", color, tmp[0], tmp[1], tmp[2]));
+		System.out.println(String.format("          \t(0x%2$06X) h:%3$.2f s:%4$.2f l:%5$.2f %1$s", "test", color, tmp[0], tmp[1], tmp[2]));
 		for (int i = 0; i < numColors; i++) {
-			System.out.println(String.format("%.2f\t%s", 100000* colorDist(bak.get(i), tmp),bak.get(i)));
+			System.out.println(String.format("%10.6f\t%s", colorDist(bak.get(i), tmp),bak.get(i)));
 		}
 
 		BufferedImage bi = new BufferedImage(200,  numColors * colHeight, BufferedImage.TYPE_INT_RGB);

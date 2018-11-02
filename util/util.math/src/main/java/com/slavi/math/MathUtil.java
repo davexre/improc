@@ -145,29 +145,21 @@ public class MathUtil {
 	public static double fixAngle2PI(double angle) {
 		angle %= MathUtil.C2PI;
 		return (angle < 0) ? MathUtil.C2PI + angle : angle;
-//		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI);
 	}
 
 	/**
-	 * Returns the specified angle in the range (-pi..pi]
+	 * Returns the specified angle in the range [-pi..pi)
 	 */
 	public static double fixAngleMPI_PI(double angle) {
-		angle += Math.PI;
-		angle %= MathUtil.C2PI;
-		return ((angle < 0) ? MathUtil.C2PI + angle : angle) - Math.PI;
-//		angle += Math.PI;
-//		return Math.abs(angle - Math.floor(angle / C2PI) * C2PI) - Math.PI;
+		return fixAngle2PI(angle + Math.PI) - Math.PI;
 	}
 
 	/**
-	 * Returns the specified angle in the range [0..pi)
+	 * Returns the specified angle in the range [0..pi), ex. the angle between two lines
 	 */
 	public static double fixAnglePI(double angle) {
 		angle  = MathUtil.fixAngle2PI(angle);
 		return (angle > Math.PI) ? MathUtil.C2PI - angle : angle;
-/*		angle %= Math.PI;
-		return (angle < 0) ? Math.PI + angle : angle;*/
-//		return Math.abs(angle - Math.floor(angle / Math.PI) * Math.PI);
 	}
 
 	/**

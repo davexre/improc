@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -10,7 +12,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 @Embeddable
 @Access(AccessType.FIELD)
-public class MyNestedData {
+public class MyNestedData implements Serializable {
 
 	@Column
 	String data1;

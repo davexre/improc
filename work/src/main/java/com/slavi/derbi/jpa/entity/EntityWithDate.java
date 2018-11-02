@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,12 +18,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 //@SecondaryTable(name="DateStyle", pkJoinColumns=@PrimaryKeyJoinColumn(name="dateId"))
-public class EntityWithDate {
+public class EntityWithDate implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int entityWithDateId;
-	
+
 	@Column
 	String data;
 
@@ -33,14 +35,14 @@ public class EntityWithDate {
 //	@JsonIgnore
 	int dateIdRef;
 
-	/*	
+	/*
 	@OneToOne(targetEntity=DateStyle.class)
 	@JoinColumn(name="dateIdRef", updatable=false, insertable=false)
 	@AttributeOverride(name="dateFormat", column=@Column(name="format"))
 	//@AssociationOverride(name="format", joinColumns=@JoinColumn(name="dateIdRef"))
 	//@Column(table="DateStyle", name="format", updatable=false)
 	String dateFormat;
-	
+
 	public String getDateFormat() {
 		return dateFormat;
 	}

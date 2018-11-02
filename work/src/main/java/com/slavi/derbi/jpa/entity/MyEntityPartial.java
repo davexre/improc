@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -16,7 +18,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @Entity
 @Table(name = "my_entity")
 @Access(AccessType.FIELD)
-public class MyEntityPartial {
+public class MyEntityPartial implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;

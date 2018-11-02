@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -8,12 +10,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @XmlRootElement
-public class DateStyle {
+public class DateStyle implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int dateId;
-	
+
 	String format;
 
 	public int getDateId() {

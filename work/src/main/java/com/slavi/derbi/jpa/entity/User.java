@@ -1,12 +1,16 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Converter;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -15,18 +19,23 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 @Table(name="USERS")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "UTYPE")
-public class User {
+public class User implements Serializable {
 	@Id
 	@Column(name = "un")
 	String username;
+
+	@JoinColumn(name = "ent")
+	@ManyToOne(fetch = FetchType.LAZY)
+	MyEntity ent;
 
 	String name;
 
@@ -36,6 +45,11 @@ public class User {
 
 	Boolean enabled;
 
+	@Convert(converter = DateConverter.class)
+	@Column(name = "created_long")
+	Date created2;
+
+	@Temporal(TemporalType.DATE)
 	Date created;
 
 	@ManyToOne
@@ -45,7 +59,7 @@ public class User {
 	@ManyToOne
 	User manager;
 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(
 		name = "UserEntities",
 		joinColumns = {

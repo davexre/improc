@@ -84,9 +84,9 @@ dB/dX(ox, top) = -1
 					int left = ox == 0 ? 0 : ox - 1;
 					double A = input.getItem(right, oy) - input.getItem(left, oy);
 					double B = input.getItem(ox, bottom) - input.getItem(ox, top);
-					double dfdT = error.getItem(ox, oy) * output.getItem(ox, oy);
-					double dfdA = dfdT * 2.0 * A;
-					double dfdB = dfdT * 2.0 * B;
+					double dfdT_2 = error.getItem(ox, oy) * output.getItem(ox, oy);
+					double dfdA = dfdT_2 * A;
+					double dfdB = dfdT_2 * B;
 					inputError.itemAdd(right, oy, dfdA);
 					inputError.itemAdd(left, oy, -dfdA);
 					inputError.itemAdd(ox, bottom, dfdB);

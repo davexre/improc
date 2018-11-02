@@ -51,6 +51,7 @@ Setting-up a workspace
 	* ?? JSON Editor
 	Other plugins
 	* from a pom.xml file install "Sonatype m2e connector"
+	* Download & copy to eclipse plugins folder: https://sourceforge.net/projects/practicalmacro/files/
 	Settings
 	* Import Preferences file (for Quick Bookmarks Plugin)
 * MySQL

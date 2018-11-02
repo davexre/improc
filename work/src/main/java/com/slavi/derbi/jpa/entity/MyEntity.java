@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -12,11 +14,12 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "my_entity")
 @Access(AccessType.FIELD)
-public class MyEntity {
+public class MyEntity implements Serializable {
 	@Id
+	@Column(name = "sys_oid")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;
-	
+
 	@Column
 	String data;
 
@@ -27,12 +30,12 @@ public class MyEntity {
 	String data2;
 
 	public MyEntity() {}
-	
+
 	public MyEntity(int id, String data1) {
 		this.id = id;
 		this.data1 = data1;
 	}
-	
+
 	public int getId() {
 		return id;
 	}

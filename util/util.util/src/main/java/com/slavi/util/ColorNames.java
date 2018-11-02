@@ -71,6 +71,13 @@ public class ColorNames {
 		return cd == null ? "" : cd.name;
 	}
 
+	public static double getColorDistance(double[] hsl1, double[] hsl2) {
+		return
+			Math.pow(MathUtil.fixAnglePI(hsl1[0] - hsl2[0]) / Math.PI, 2.0) +
+			Math.pow(Math.abs(hsl1[1] - hsl1[1]), 2.0) +
+			Math.pow(Math.abs(hsl2[2] - hsl2[2]), 2.0);
+	}
+
 	public ColorNameData findClosestColor(int color) {
 		if (colors.size() == 0)
 			return null;
@@ -82,9 +89,9 @@ public class ColorNames {
 		double dist = Double.MAX_VALUE;
 		for (ColorNameData i : colors) {
 			double d =
-					MathUtil.fixAnglePI(i.h - tmp[0]) / 2 +
-					Math.abs(i.s - tmp[1]) +
-					Math.abs(i.l - tmp[2]);
+					Math.pow(MathUtil.fixAnglePI(i.h - tmp[0]) / Math.PI, 2.0) +
+					Math.pow(Math.abs(i.s - tmp[1]), 2.0) +
+					Math.pow(Math.abs(i.l - tmp[2]), 2.0);
 			if (d < dist) {
 				dist = d;
 				r = i;

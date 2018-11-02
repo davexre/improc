@@ -7,7 +7,9 @@ import java.util.Arrays;
 import javax.imageio.ImageIO;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.adjust.Statistics;
 import com.slavi.util.ColorConversion;
+import com.slavi.util.ColorNames;
 
 public class CompareImages {
 
@@ -21,7 +23,7 @@ public class CompareImages {
 			err(msg);
 	}
 
-	double unmatchedPrercent = 10;
+	double unmatchedPrercent = 0.10;
 	public void doIt(String[] args) throws Exception {
 		String f1 = args[0];
 		String f2 = args[1];
@@ -41,6 +43,8 @@ public class CompareImages {
 		double maxLAB[] = new double[3];
 		double d;
 		double maxLabDist = 0;
+		double maxColorDist = 0;
+		Statistics colorDist = new Statistics();
 		double sumD = 0;
 		int unmatchedPixels = 0;
 		for (int ix = 0; ix < i1.getWidth(); ix++) {
@@ -50,11 +54,11 @@ public class CompareImages {
 				int c2 = i2.getRGB(ix, iy);
 				ColorConversion.RGB.fromRGB(c1, rgb1);
 				ColorConversion.RGB.fromRGB(c2, rgb2);
-/*
+
 				double dist = 0;
 				for (int k = 0; k < 3; k++) {
 					d = Math.abs(rgb1[k] - rgb2[k]);
-					if (d > unmatchedPrercent/255.0) isSame = false;
+					if (d > unmatchedPrercent * 255.0) isSame = false;
 					dist += d * d;
 					if (maxRGB[k] < d)
 						maxRGB[k] = d;
@@ -63,22 +67,29 @@ public class CompareImages {
 				if (maxRgbDist < dist)
 					maxRgbDist = dist;
 
-				ColorConversion.HSL.fromDRGB(rgb1, tmp1);
-				ColorConversion.HSL.fromDRGB(rgb2, tmp2);
+				ColorConversion.HSL.instance.fromDRGB(rgb1, tmp1);
+				ColorConversion.HSL.instance.fromDRGB(rgb2, tmp2);
+
+				dist = ColorNames.getColorDistance(tmp1, tmp2);
+				if (maxColorDist < dist)
+					maxColorDist = dist;
+				if (dist > 1.0)
+					colorDist.addValue(dist);
+/*
 				d = MathUtil.fixAnglePI(tmp1[0] - tmp2[0]);
-				if (d > unmatchedPrercent/MathUtil.C2PI) isSame = false;
+				if (d > unmatchedPrercent * MathUtil.C2PI) isSame = false;
 				if (maxHSL[0] < d) {
-					maxHSL[0] = d;
 					System.out.println("  " + MathUtil.d4(tmp1[0]) + " " + MathUtil.d4(tmp2[0]) + " d:" + MathUtil.d4(d) +
-						" " + ColorConversion.RGB.toString(rgb1) +
-						" -> " + ColorConversion.RGB.toString(rgb2));
+						" " + ColorConversion.RGB.instance.toString(rgb1) +
+						" -> " + ColorConversion.RGB.instance.toString(rgb2));
 				}
-				for (int k = 1; k < 3; k++) {
+*/
+				for (int k = 0; k < 3; k++) {
 					d = Math.abs(tmp1[k] - tmp2[k]);
-					if (d > unmatchedPrercent/100.0) isSame = false;
+					//if (d > unmatchedPrercent) isSame = false;
 					if (maxHSL[k] < d)
 						maxHSL[k] = d;
-				}*/
+				}
 
 				ColorConversion.LAB.instance.fromDRGB(rgb1, tmp1);
 				ColorConversion.LAB.instance.fromDRGB(rgb2, tmp2);
@@ -101,6 +112,7 @@ public class CompareImages {
 			}
 		}
 
+		System.out.println("Max Color dist:  " + MathUtil.d2(maxColorDist));
 		System.out.println("Max RGB dist:    " + MathUtil.d2(maxRgbDist));
 		System.out.println("Max R dist:      " + MathUtil.d2(maxRGB[0]));
 		System.out.println("Max G dist:      " + MathUtil.d2(maxRGB[1]));
@@ -115,15 +127,16 @@ public class CompareImages {
 		int allPixels = i1.getWidth() * i1.getHeight();
 		System.out.println("Unmatched pixels:" + unmatchedPixels + "/" + allPixels);
 		System.out.println("Unmatched %:     " + MathUtil.d2(100.0 * unmatchedPixels / allPixels));
+		System.out.println("Statistics:\n" + colorDist.toString());
 	}
 
 	public static void main(String[] args) throws Exception {
 		if (true)
 			args = new String[] {
-					"/home/spetrov/temp/tp/IMG_20180120_105202.jpg",
-					"/home/spetrov/temp/tp/b6.jpg",
-				"/home/spetrov/temp/tp/DSC_3808.JPG",
-				"/home/spetrov/temp/tp/a6.jpg",
+					"/home/spetrov/temp/tp/a.jpg",
+					"/home/spetrov/temp/tp/b.png",
+//				"/home/spetrov/temp/tp/DSC_3808.JPG",
+//				"/home/spetrov/temp/tp/a6.jpg",
 			};
 		else
 			args = new String[] {

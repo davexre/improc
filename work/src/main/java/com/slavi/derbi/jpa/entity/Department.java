@@ -1,11 +1,13 @@
 package com.slavi.derbi.jpa.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-public class Department {
+public class Department implements Serializable {
 
 	@Id @GeneratedValue
 	Integer id;
