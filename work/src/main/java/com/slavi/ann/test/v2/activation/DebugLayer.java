@@ -1,6 +1,9 @@
 package com.slavi.ann.test.v2.activation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.slavi.ann.test.v2.Layer;
+import com.slavi.jackson.StatisticsFormatJsonConverter;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -11,7 +14,13 @@ public class DebugLayer extends Layer {
 	public static int off = 0;
 
 	String name;
+
+	@JsonSerialize(converter = StatisticsFormatJsonConverter.Serialize.class)
+	@JsonDeserialize(converter = StatisticsFormatJsonConverter.Deserialize.class)
 	int inputStyle;
+
+	@JsonSerialize(converter = StatisticsFormatJsonConverter.Serialize.class)
+	@JsonDeserialize(converter = StatisticsFormatJsonConverter.Deserialize.class)
 	int errorStyle;
 
 	public static String styleToString(int style) {

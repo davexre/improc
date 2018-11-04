@@ -23,8 +23,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import com.slavi.math.ColorSetPick;
-
 public class ZaSasho extends JApplet {
 
 	public static class MyPointWithWeight extends Point2D.Double implements DataWithWeight {

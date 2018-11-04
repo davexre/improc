@@ -1,6 +1,8 @@
-package com.slavi.math;
+package a.myDelaunay;
 
 import java.awt.Color;
+
+import com.slavi.math.MathUtil;
 
 public class ColorSetPick {
 	public static final int colors[] = {

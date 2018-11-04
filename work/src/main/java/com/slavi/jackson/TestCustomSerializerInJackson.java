@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.slavi.ann.test.Utils;
@@ -18,8 +20,27 @@ import com.slavi.ann.test.v2.NetworkBuilder;
 
 public class TestCustomSerializerInJackson {
 
+	public static class MyEnumJsonConverter {
+		final static String[] ITEMS = {"bit1", "bit2", "bit3"};
+
+		public static class Serialize extends BitJsonConverterBase.Serialize {
+			public Serialize() {
+				super(ITEMS, true);
+			}
+		}
+
+		public static class Deserialize extends BitJsonConverterBase.Deserialize {
+			public Deserialize() {
+				super(ITEMS, true, true);
+			}
+		}
+	}
+
 	public static class MyData {
+		@JsonSerialize(converter=MyEnumJsonConverter.Serialize.class)
+		@JsonDeserialize(converter=MyEnumJsonConverter.Deserialize.class)
 		int a;
+
 		String b;
 
 		public MyData() {
@@ -123,7 +144,7 @@ public class TestCustomSerializerInJackson {
 	public static class MyJacksonModule extends SimpleModule {
 		public MyJacksonModule() {
 			super(new Version(1, 0, 0, null, null, null));
-			addSerializer(MyData.class, MyDataSerializer.INSTANCE);
+//			addSerializer(MyData.class, MyDataSerializer.INSTANCE);
 		}
 	}
 
@@ -146,6 +167,7 @@ public class TestCustomSerializerInJackson {
 		String value = om.writeValueAsString(o1);
 		System.out.println(value);
 		Network o2 = om.readValue(new StringInputStream(value), Network.class);
+		//MyData o2 = om.readValue(new StringInputStream(value), MyData.class);
 		System.out.println(o2);
 		System.out.println();
 	}

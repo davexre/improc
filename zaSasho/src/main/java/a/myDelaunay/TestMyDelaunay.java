@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 
-import com.slavi.math.ColorSetPick;
 import com.slavi.util.Const;
 import com.slavi.util.xml.XMLHelper;
 

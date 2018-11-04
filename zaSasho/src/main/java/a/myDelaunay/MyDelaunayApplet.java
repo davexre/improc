@@ -16,8 +16,6 @@ import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import com.slavi.math.ColorSetPick;
-
 public class MyDelaunayApplet extends JApplet {
 
 	public static class MyDelaunayPanel extends BasePointsListPanel {

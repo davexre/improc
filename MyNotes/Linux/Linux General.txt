@@ -2,6 +2,11 @@ Enable Control-Alt-Backspace
 ============================
 sudo dpkg-reconfigure keyboard-configuration
 
+Using rsync
+===========
+* Synchronize folders, remove files from dest to match source
+rsync -havz --delete --progress -e "ssh -l slavian" ~/temp/b/ slavian@homepc:temp/b/
+
 HDD check upon boot
 ===================
 * check the current settings
