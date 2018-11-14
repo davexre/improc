@@ -14,6 +14,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "my_entity")
 @Access(AccessType.FIELD)
+@javax.persistence.DiscriminatorColumn(name = "SYS_TYPE")
 public class MyEntity implements Serializable {
 	@Id
 	@Column(name = "sys_oid")

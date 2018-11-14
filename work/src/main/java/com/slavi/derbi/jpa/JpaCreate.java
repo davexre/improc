@@ -28,20 +28,19 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
-import org.apache.log4j.LogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mapping.PersistentEntity;
+import org.springframework.data.mapping.PersistentProperty;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flickr4java.flickr.machinetags.Predicate;
-import com.slavi.derbi.jpa.entity.AdvancedUser;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.Department;
 import com.slavi.derbi.jpa.entity.DepartmentType;
@@ -50,18 +49,37 @@ import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.derbi.jpa.entity.MyEntityPartial;
 import com.slavi.derbi.jpa.entity.Role;
 import com.slavi.derbi.jpa.entity.User;
+import com.slavi.derbi.jpa.repository.UserRepository;
 import com.slavi.util.StringPrintStream;
 
 @Component
 @ComponentScan
 @EnableTransactionManagement
+@EnableJpaRepositories(namedQueriesLocation="classpath:/com/slavi/derbi/jpa/JpaCreate-jpa-named-queries.properties")
 @ImportResource("/com/slavi/derbi/jpa/JpaCreate-sping.xml")
 public class JpaCreate {
 
 	@Autowired
 	DataSource dataSource;
 
+	@Autowired
+	UserRepository userRepository;
+
 	public String dbToXml() throws SQLException, IOException {
+		System.out.println(userRepository.findAllOrdered().size());
+		System.out.println(em.createNamedQuery("User.listAllOrdered").getResultList().size());
+
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery qry = builder.createQuery(User.class);
+		Root<User> ru = qry.from(User.class);
+		qry.where(builder.and(
+				builder.equal(ru.get("manager"), new User()),
+				builder.equal(ru.get("role"), Role.ADMIN))
+		);
+
+		//qry.orderBy(builder.desc(ru.get("username")));
+		em.createQuery(qry).getResultList();
+
 		StringPrintStream out = new StringPrintStream();
 		dbToXml(out);
 		return out.toString();
@@ -92,7 +110,7 @@ public class JpaCreate {
 	@PersistenceContext
 	EntityManager em;
 
-	@Transactional(transactionManager="transactionManager")
+	@Transactional
 	public void initialize() throws Exception {
 		DepartmentType types[] = DepartmentType.values();
 		for (int i = 0; i < 5; i++)
@@ -115,7 +133,7 @@ public class JpaCreate {
 		}
 	}
 
-	@Transactional(transactionManager="transactionManager")
+	@Transactional
 	public void createORMs() throws Exception {
 		User manager = em.find(User.class, "User 0");
 		System.out.println(manager);
@@ -208,10 +226,12 @@ public class JpaCreate {
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery qry = builder.createQuery(User.class);
 		Root<User> ru = qry.from(User.class);
-		qry.where(
+		qry.where(builder.and(
 				builder.equal(ru.get("manager"), new User()),
-				builder.equal(ru.get("role"), Role.ADMIN)
+				builder.equal(ru.get("uuuasd"), Role.ADMIN))
 		);
+
+		qry.orderBy(builder.asc(ru.get("id")));
 		em.createQuery(qry).getResultList();
 
 		List<MyEntityPartial> r = q.getResultList();
@@ -225,6 +245,7 @@ public class JpaCreate {
 		System.setProperty("derby.stream.error.method", "com.slavi.dbutil.DerbyLogOverSlf4j.getLogger");
 		//ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", JpaCreate.class);
 		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext(JpaCreate.class);
+
 		JpaCreate bean = appContext.getBean(JpaCreate.class);
 		bean.initialize();
 //		bean.createORMs();

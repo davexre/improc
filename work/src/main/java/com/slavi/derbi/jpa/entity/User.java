@@ -2,15 +2,22 @@ package com.slavi.derbi.jpa.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.Converter;
 import javax.persistence.DiscriminatorColumn;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -18,6 +25,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
@@ -31,16 +39,31 @@ import javax.persistence.TemporalType;
 public class User implements Serializable {
 	@Id
 	@Column(name = "un")
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	String username;
-
-	@JoinColumn(name = "ent")
-	@ManyToOne(fetch = FetchType.LAZY)
+/*
+	@ElementCollection
+	@MapKeyColumn(name="sys_key")
+	@Column(name="sys_val")
+	@CollectionTable(name="UserParams", joinColumns=@JoinColumn(name="sys_oid"))
+	Map<String, String> params = new HashMap();
+*/
+	@JoinColumn(name = "ent_ref")
+//	@ManyToOne(fetch = FetchType.LAZY)
 	MyEntity ent;
 
 	String name;
 
+	@Enumerated(EnumType.STRING)
 	Role role;
-
+/*
+	@Enumerated(EnumType.STRING)
+	@ElementCollection(fetch = FetchType.LAZY)
+	@Column(name = "sys_val")
+	@OrderColumn(name = "sys_key")
+	@CollectionTable(name = "UserRoles_t", joinColumns=@JoinColumn(name = "sys_oid"))
+	List<Role> roles;
+*/
 	Integer someInt;
 
 	Boolean enabled;

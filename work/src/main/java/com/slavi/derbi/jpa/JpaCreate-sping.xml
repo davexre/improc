@@ -5,6 +5,7 @@
 	xmlns:c=		"http://www.springframework.org/schema/c"
 	xmlns:tx=		"http://www.springframework.org/schema/tx"
 	xmlns:jee=		"http://www.springframework.org/schema/jee"
+	xmlns:jpa=		"http://www.springframework.org/schema/data/jpa"
 	xmlns:oxm=		"http://www.springframework.org/schema/oxm"
 	xmlns:mvc=		"http://www.springframework.org/schema/mvc"
 	xmlns:context=	"http://www.springframework.org/schema/context" 
@@ -13,12 +14,13 @@
 	xmlns:xsi=		"http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="
 		http://www.springframework.org/schema/beans		http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/mvc		http://www.springframework.org/schema/mvc/spring-mvc.xsd
-		http://www.springframework.org/schema/aop		http://www.springframework.org/schema/aop/spring-aop.xsd
-		http://www.springframework.org/schema/context	http://www.springframework.org/schema/context/spring-context.xsd
 		http://www.springframework.org/schema/tx		http://www.springframework.org/schema/tx/spring-tx.xsd
-		http://www.springframework.org/schema/oxm		http://www.springframework.org/schema/oxm/spring-oxm.xsd
 		http://www.springframework.org/schema/jee		http://www.springframework.org/schema/jee/spring-jee.xsd
+		http://www.springframework.org/schema/data/jpa	http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+		http://www.springframework.org/schema/oxm		http://www.springframework.org/schema/oxm/spring-oxm.xsd
+		http://www.springframework.org/schema/mvc		http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/context	http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop		http://www.springframework.org/schema/aop/spring-aop.xsd
 		http://www.springframework.org/schema/util		http://www.springframework.org/schema/util/spring-util.xsd
 ">
 <!-- 	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -41,7 +43,30 @@
 		p:dataSource-ref="dataSource"
 		
 		p:packagesToScan="com.slavi.derbi.jpa.entity">
-	
+		
+<!--
+		<property name="jpaVendorAdapter">
+			<bean
+				class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+				p:showSql="true" />
+		</property>
+
+		<property name="jpaProperties">
+			<props>
+				<prop key="javax.persistence.schema-generation.database.action">drop-and-create</prop>
+				<prop key="javax.persistence.schema-generation.scripts.action">drop-and-create</prop>
+				<prop key="javax.persistence.schema-generation.scripts.create-target">logs/createDDL_ddlGeneration.sql</prop>
+				<prop key="javax.persistence.schema-generation.scripts.drop-target">logs/dropDDL_ddlGeneration.sql</prop>
+			</props>
+		</property>
+ -->
+		<property name="persistenceUnitPostProcessors">
+			<bean class="org.springframework.data.jpa.support.ClasspathScanningPersistenceUnitPostProcessor">
+				<constructor-arg value="com.slavi.derbi.jpa" />
+				<property name="mappingFileNamePattern" value="**/*orm.xml" />
+			</bean>
+		</property>
+
 		<property name="jpaVendorAdapter">
 			<bean
 				class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
@@ -58,13 +83,13 @@
 				<prop key="eclipselink.logging.level.sql">FINEST</prop>
 				<prop key="eclipselink.logging.parameters">true</prop>
 
-
-				<prop key="eclipselink.ddl-generation">drop-and-create-tables</prop>
+				<prop key="eclipselink.ddl-generation">create-tables</prop>
 				<prop key="eclipselink.create-ddl-jdbc-file-name">target/createDDL_ddlGeneration.sql</prop>
 				<prop key="eclipselink.drop-ddl-jdbc-file-name">target/dropDDL_ddlGeneration.sql</prop>
 				<prop key="eclipselink.ddl-generation.output-mode">both</prop> <!-- sql-script / database / both -->
 			</props>
 		</property>
+
 	</bean>
 	
 	<bean id="transactionManager" 

@@ -11,6 +11,7 @@
 	<properties>
 		<platform.dependencies>true</platform.dependencies>
 		<org.apache.poi.version>3.15</org.apache.poi.version>
+		<hibernate.version>5.1.16.Final</hibernate.version>
 	</properties>
 
 	<dependencies>
@@ -134,6 +135,13 @@
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>eclipselink</artifactId>
 		</dependency>
+<!-- 
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+ -->
 
 		<dependency>
 			<groupId>org.openimaj</groupId>

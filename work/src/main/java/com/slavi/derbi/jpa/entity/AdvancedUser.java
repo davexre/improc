@@ -12,5 +12,5 @@ import javax.persistence.Table;
 @Table(name="ADV_USR")
 @PrimaryKeyJoinColumn(name = "aid")
 public class AdvancedUser extends User {
-	String desc;
+	String descr;
 }
