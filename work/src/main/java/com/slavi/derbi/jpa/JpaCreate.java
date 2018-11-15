@@ -16,7 +16,9 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
@@ -49,6 +51,7 @@ import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.derbi.jpa.entity.MyEntityPartial;
 import com.slavi.derbi.jpa.entity.Role;
 import com.slavi.derbi.jpa.entity.User;
+import com.slavi.derbi.jpa.repository.MyRepo;
 import com.slavi.derbi.jpa.repository.UserRepository;
 import com.slavi.util.StringPrintStream;
 
@@ -63,12 +66,27 @@ public class JpaCreate {
 	DataSource dataSource;
 
 	@Autowired
-	UserRepository userRepository;
+	MyRepo userRepository;
 
 	public String dbToXml() throws SQLException, IOException {
-		System.out.println(userRepository.findAllOrdered().size());
-		System.out.println(em.createNamedQuery("User.listAllOrdered").getResultList().size());
+		Query q = em.createQuery("select u from User u where (select e from MyEntity e where e.data = 'asd') member of u.myEntities");
+		System.out.println(q.getResultList().size());
+/*
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+		Root<User> root = cq.from(User.class);
+//		Join j = root.join("subordinate");
+		cq.where(cb.equal(root.get("subordinate"), new User("asd", null)));
+		cq.select(cb.count(root));
+		System.out.println(em.createQuery(cq).getResultList().get(0));
+*/
 
+//		System.out.println(userRepository.findAllOrdered().size());
+//		System.out.println("------------- " + em.createNamedQuery("User.countAll").getResultList().size());
+//		System.out.println("------------- " + em.createNamedQuery("User.findAllOrdered").getResultList().size());
+		StringPrintStream out = new StringPrintStream();
+
+/*
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery qry = builder.createQuery(User.class);
 		Root<User> ru = qry.from(User.class);
@@ -80,8 +98,7 @@ public class JpaCreate {
 		//qry.orderBy(builder.desc(ru.get("username")));
 		em.createQuery(qry).getResultList();
 
-		StringPrintStream out = new StringPrintStream();
-		dbToXml(out);
+		dbToXml(out);*/
 		return out.toString();
 	}
 

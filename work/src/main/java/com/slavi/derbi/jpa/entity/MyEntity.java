@@ -19,29 +19,29 @@ public class MyEntity implements Serializable {
 	@Id
 	@Column(name = "sys_oid")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	int id;
+	String id;
 
 	@Column
-	String data;
+	public String data;
 
 	@Column
-	String data1;
+	public String data1;
 
 	@Column
 	String data2;
 
 	public MyEntity() {}
 
-	public MyEntity(int id, String data1) {
+	public MyEntity(String id, String data1) {
 		this.id = id;
 		this.data1 = data1;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 

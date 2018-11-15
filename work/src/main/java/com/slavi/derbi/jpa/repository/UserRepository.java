@@ -8,5 +8,5 @@ import com.slavi.derbi.jpa.entity.User;
 
 public interface UserRepository extends JpaRepository<User, String>{
 
-	List<User> findAllOrdered();
+//	List<User> findAllOrdered();
 }

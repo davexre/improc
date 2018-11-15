@@ -83,7 +83,7 @@
 				<prop key="eclipselink.logging.level.sql">FINEST</prop>
 				<prop key="eclipselink.logging.parameters">true</prop>
 
-				<prop key="eclipselink.ddl-generation">create-tables</prop>
+				<prop key="eclipselink.ddl-generation">drop-and-create-tables</prop>
 				<prop key="eclipselink.create-ddl-jdbc-file-name">target/createDDL_ddlGeneration.sql</prop>
 				<prop key="eclipselink.drop-ddl-jdbc-file-name">target/dropDDL_ddlGeneration.sql</prop>
 				<prop key="eclipselink.ddl-generation.output-mode">both</prop> <!-- sql-script / database / both -->

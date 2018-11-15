@@ -1,6 +1,7 @@
 package com.slavi.derbi.jpa.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,31 +40,39 @@ import javax.persistence.TemporalType;
 public class User implements Serializable {
 	@Id
 	@Column(name = "un")
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	String username;
-/*
+
 	@ElementCollection
 	@MapKeyColumn(name="sys_key")
 	@Column(name="sys_val")
 	@CollectionTable(name="UserParams", joinColumns=@JoinColumn(name="sys_oid"))
 	Map<String, String> params = new HashMap();
-*/
+
 	@JoinColumn(name = "ent_ref")
-//	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	MyEntity ent;
+
+	@ElementCollection(fetch = FetchType.LAZY)
+	@Column(name = "sys_val")
+	@OrderColumn(name = "sys_key")
+	@CollectionTable(name = "MyEntities_t", joinColumns=@JoinColumn(name = "sys_oid"))
+	public List<MyEntity> myEntities = new ArrayList<>();
 
 	String name;
 
+	Address address;
+
 	@Enumerated(EnumType.STRING)
 	Role role;
-/*
+
 	@Enumerated(EnumType.STRING)
 	@ElementCollection(fetch = FetchType.LAZY)
 	@Column(name = "sys_val")
 	@OrderColumn(name = "sys_key")
 	@CollectionTable(name = "UserRoles_t", joinColumns=@JoinColumn(name = "sys_oid"))
-	List<Role> roles;
-*/
+	public List<Role> roles = new ArrayList<>();
+
 	Integer someInt;
 
 	Boolean enabled;
