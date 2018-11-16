@@ -7,6 +7,8 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.io.IOUtils;
@@ -40,7 +43,6 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.derbi.jpa.entity.DateStyle;
@@ -68,18 +70,31 @@ public class JpaCreate {
 	@Autowired
 	MyRepo userRepository;
 
+	@Transactional
 	public String dbToXml() throws SQLException, IOException {
-		Query q = em.createQuery("select u from User u where (select e from MyEntity e where e.data = 'asd') member of u.myEntities");
-		System.out.println(q.getResultList().size());
-/*
+//		String jpql = "select u from AdvancedUser u where u.someInt = 12";
+//		String jpql = "select distinct u from User u join u.subordinate s where s.name = 'aaa'";
+///		String jpql = "select u from MyEntity u where u.data like 'Data %'";
+//		TypedQuery<User> q = em.createQuery(jpql, User.class);
+//		System.out.println(q.getResultList().size());
+
 		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<User> cq = cb.createQuery(User.class);
+		Root<User> root = cq.from(User.class);
+		cq.where(cb.or(cb.equal(root.get("someInt"), 1)));
+		System.out.println(em.createQuery(cq).getResultList().size());
+
+/*
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		Root<User> root = cq.from(User.class);
-//		Join j = root.join("subordinate");
-		cq.where(cb.equal(root.get("subordinate"), new User("asd", null)));
+		Join j = root.join("subordinate");
+		cq.where(
+				cb.equal(j.get("name"), "asd")
+//				cb.equal(root.get("subordinate"), new User("asd", null))
+				);
 		cq.select(cb.count(root));
-		System.out.println(em.createQuery(cq).getResultList().get(0));
-*/
+		System.out.println(em.createQuery(cq).getResultList().get(0));	*/
+
 
 //		System.out.println(userRepository.findAllOrdered().size());
 //		System.out.println("------------- " + em.createNamedQuery("User.countAll").getResultList().size());
@@ -147,6 +162,9 @@ public class JpaCreate {
 			if (i % 5 == 0) {
 				manager = em.find(User.class, user.getUsername());
 			}
+
+			MyEntity e = new MyEntity(Integer.toString(i), "Data " + i);
+			em.persist(e);
 		}
 	}
 

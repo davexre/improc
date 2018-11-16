@@ -40,7 +40,7 @@ import javax.persistence.TemporalType;
 public class User implements Serializable {
 	@Id
 	@Column(name = "un")
-	@GeneratedValue(strategy=GenerationType.AUTO)
+//	@GeneratedValue(strategy=GenerationType.AUTO)
 	String username;
 
 	@ElementCollection
@@ -53,11 +53,23 @@ public class User implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	MyEntity ent;
 
+	@OrderColumn(name = "sys_key")
+	@JoinTable(name = "MyEntities_t", joinColumns=@JoinColumn(name = "sys_oid"), inverseJoinColumns = @JoinColumn(name = "sys_val"))
+	@ManyToMany(fetch = FetchType.LAZY)
+	public List<MyEntity> myEntities = new ArrayList<>();
+
+/*
+	// This is not working well in Eclipselink - fails to make a join to this field.
+	@OrderColumn(name = "sys_key")
 	@ElementCollection(fetch = FetchType.LAZY)
 	@Column(name = "sys_val")
+	@CollectionTable(name = "subordinates_t", joinColumns=@JoinColumn(name = "sys_oid"))
+*/
 	@OrderColumn(name = "sys_key")
-	@CollectionTable(name = "MyEntities_t", joinColumns=@JoinColumn(name = "sys_oid"))
-	public List<MyEntity> myEntities = new ArrayList<>();
+	@JoinTable(name = "subordinates_t", joinColumns = @JoinColumn(name = "sys_oid"), inverseJoinColumns = @JoinColumn(name = "sys_val"))
+	@ManyToMany(fetch = FetchType.LAZY)
+/*	@OneToMany(mappedBy="manager")	*/
+	public List<User> subordinate;
 
 	String name;
 
@@ -103,9 +115,6 @@ public class User implements Serializable {
 	)
 	@OrderColumn(name = "sys_key")
 	List<MyEntity> entities;
-
-	@OneToMany(mappedBy="manager")
-	Set<User> subordinate;
 
 	public User() {}
 
@@ -180,13 +189,5 @@ public class User implements Serializable {
 
 	public void setManager(User manager) {
 		this.manager = manager;
-	}
-
-	public Set<User> getSubordinate() {
-		return subordinate;
-	}
-
-	public void setSubordinate(Set<User> subordinate) {
-		this.subordinate = subordinate;
 	}
 }
