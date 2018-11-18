@@ -101,6 +101,7 @@ lynx                        \
 mc                          \
 meld                        \
 melt                        \
+mercurial                   \
 mplayer2                    \
 ncdu                        \
 nemo                        \

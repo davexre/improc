@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -555,6 +556,9 @@ public class Matrix {
 	}
 
 	/**
+	 * 1-norm, the largest column sum of the absolute values of A.
+	 * https://octave.sourceforge.io/octave/function/norm.html
+	 *
 	 * Return the matrix one norm value that is equal to the maximum of the
 	 * column sums of the absolute values of the array elements.
 	 * <p>
@@ -579,6 +583,9 @@ public class Matrix {
 	}
 
 	/**
+	 * Infinity norm, the largest row sum of the absolute values of A.
+	 * https://octave.sourceforge.io/octave/function/norm.html
+	 *
 	 * Return the infinity norm of the matrix that is equal to the
 	 * maximum of the row sums of the absolute values of the array elements.
 	 * <p>
@@ -603,6 +610,9 @@ public class Matrix {
 	}
 
 	/**
+	 * Frobenius norm of A, sqrt (sum (diag (A' * A))).
+	 * https://octave.sourceforge.io/octave/function/norm.html
+	 *
 	 * Return the Frobenius norm of the matrix.
 	 * <p>
 	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
@@ -967,22 +977,25 @@ public class Matrix {
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 
 		for (int i = 0; i < sizeX; i++) {
-			double A = getItem(i, i);
-			if (A == 0) {
-				int indexI = 0;
-				for (int j = i + 1; j < sizeX; j++)
-					if (getItem(i, j) != 0) {
-						indexI = j;
-						exchangeX(i, j);
-						xchg.add(new XchgRec(i, j));
-						break;
-					}
-				if (indexI == 0) {
-					make0();
-					return false;
+			double A = Math.abs(getItem(i, i));
+			int pivotIndex = i;
+			for (int j = i + 1; j < sizeX; j++) {
+				double tmp = Math.abs(getItem(i, j));
+				if (tmp > A) {
+					A = tmp;
+					pivotIndex = j;
 				}
-				A = getItem(i, i);
 			}
+
+			if (A == 0) {
+				make0();
+				return false;
+			}
+			if (pivotIndex != i) {
+				exchangeX(i, pivotIndex);
+				xchg.add(new XchgRec(i, pivotIndex));
+			}
+			A = getItem(i, i);
 
 			A = 1.0 / A;
 			for (int j = 0; j < sizeX; j++)
@@ -1062,6 +1075,59 @@ public class Matrix {
 				}
 		}
 		return result;
+	}
+
+	/**
+	 * Row Reduced Echalon Form. Translated from Octave rref.m
+	 * The return value contains the list of "bound variables",
+	 * which are those columns on which elimination has been performed.
+	 */
+	public List<Integer> rref() {
+		double tol = MathUtil.eps * Math.max(getSizeX(), getSizeY()) * getNormInfinity();
+		int r = 0;
+		ArrayList<Integer> k = new ArrayList();
+		for (int c = 0; c < getSizeX(); c++) {
+			// Find the pivot row
+			int pivot = getSizeY() - 1;
+			double m = 0;
+			double v = 0;
+			for (int j = pivot; j >= r; j--) {
+				double v1 = getItem(c, j);
+				double m1 = Math.abs(v1);
+				if (m1 > m) {
+					v = v1;
+					m = m1;
+					pivot = j;
+				}
+			}
+
+			if (m < tol) {
+				// Skip column c, making sure the approximately zero terms are actually zero.
+				for (int j = getSizeY() - 1; j >= r; j--)
+					setItem(c, j, 0);
+			} else {
+				// keep track of bound variables
+				k.add(c);
+
+				// Swap current row and pivot row
+				exchangeY(pivot, r);
+				// Normalize pivot row
+				for (int i = getSizeX() - 1; i >= c; i--)
+					itemMul(i, r, 1.0 / v);
+				// Eliminate the current column
+				for (int j = getSizeY() - 1; j >= 0; j--) {
+					if (j == r)
+						continue;
+					double t = -getItem(c, j);
+					for (int i = getSizeX() - 1; i >= c; i--)
+						itemAdd(i, j, t * getItem(i, r));
+				}
+				// Check if done
+				if (++r >= getSizeY())
+					break;
+			}
+		}
+		return k;
 	}
 
 	/**

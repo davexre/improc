@@ -206,30 +206,25 @@ public class MathUtil {
 
 	/**
 	 * Calculates the machine precision.
+	 * https://en.wikipedia.org/wiki/Machine_epsilon
 	 * @returns The maximum eps such that 1.0 == 1.0 + eps
 	 */
 	public static double calcDoubleEps() {
-		double one = 1.0;
-		double eps = 1.0;
-		while(true) {
-			double onePlusEps = one + eps;
-			if (one == onePlusEps) {
-				return eps;
-			}
-			eps /= 2.0;
-		}
+		double eps = 1.0d;
+		while (1.0d + 0.5d * eps != 1.0d)
+			eps *= 0.5d;
+		return eps;
 	}
 
+	/**
+	 * https://en.wikipedia.org/wiki/Machine_epsilon
+	 * @return
+	 */
 	public static float calcFloatEps() {
-		float one = 1.0f;
 		float eps = 1.0f;
-		while(true) {
-			float onePlusEps = one + eps;
-			if (one == onePlusEps) {
-				return eps;
-			}
-			eps /= 2.0f;
-		}
+		while (1.0f + 0.5f * eps != 1.0f)
+			eps *= 0.5f;
+		return eps;
 	}
 
 	/**
