@@ -3,26 +3,26 @@ package com.slavi.math;
 import com.slavi.math.matrix.Matrix;
 
 /**
- * These methods perform rotation operations using Euler angles as 
- * composition of intrinsic rotations acting on frames.  
+ * These methods perform rotation operations using Euler angles as
+ * composition of intrinsic rotations acting on frames.
  *
  * A right-handed coordinate system is assumed.
  * Angle rotation is positive if counter-clockwise.
  * Points are column vectors.
- * 
+ *
  * P'=R*P
  * R=RZ2*RX*RZ1
- * 
- * http://en.wikipedia.org/wiki/Euler_angles 
- * 
- * <li>
- * <ol>Rotate the xyz-system about the z-axis by α. The x-axis now 
- * 		lies on the line of nodes.</ol>
- * <ol>Rotate the xyz-system again about the now rotated x-axis by β. 
- * 		The z-axis is now in its final orientation, and the x-axis 
- * 		remains on the line of nodes.</ol>
- * <ol>Rotate the xyz-system a third time about the new z-axis by γ.</ol>
- * </li>
+ *
+ * http://en.wikipedia.org/wiki/Euler_angles
+ *
+ * <ol>
+ * <li>Rotate the xyz-system about the z-axis by α. The x-axis now
+ * 		lies on the line of nodes.</li>
+ * <li>Rotate the xyz-system again about the now rotated x-axis by β.
+ * 		The z-axis is now in its final orientation, and the x-axis
+ * 		remains on the line of nodes.</li>
+ * <li>Rotate the xyz-system a third time about the new z-axis by γ.</li>
+ * </ol>
  */
 public class RotationZXZ implements Rotation3D {
 	public static final RotationZXZ instance = new RotationZXZ();
@@ -31,7 +31,7 @@ public class RotationZXZ implements Rotation3D {
 
 	/**
 	 * Return a rotation matrix R=RZ2*RX*RZ1
-	 * 
+	 *
 	 * r1 = rz1
 	 * r2 = rx
 	 * r3 = rz2
@@ -39,7 +39,7 @@ public class RotationZXZ implements Rotation3D {
 	public Matrix makeAngles(double r1, double r2, double r3) {
 		double s1 = Math.sin(r1);
 		double c1 = Math.cos(r1);
-		
+
 		double s2 = Math.sin(r2);
 		double c2 = Math.cos(r2);
 
@@ -56,11 +56,11 @@ public class RotationZXZ implements Rotation3D {
 		r.setItem(0, 0, c1*c3-s1*c2*s3);
 		r.setItem(1, 0, s1*c3+c1*c2*s3);
 		r.setItem(2, 0, s2*s3);
-		
+
 		r.setItem(0, 1, -c1*s3-s1*c2*c3);
 		r.setItem(1, 1, -s1*s3+c1*c2*c3);
 		r.setItem(2, 1, s2*c3);
-		
+
 		r.setItem(0, 2, s1*s2);
 		r.setItem(1, 2, -c1*s2);
 		r.setItem(2, 2, c2);
@@ -70,7 +70,7 @@ public class RotationZXZ implements Rotation3D {
 	public Matrix makeAngles(double angles[]) {
 		return makeAngles(angles[0], angles[1], angles[2]);
 	}
-	
+
 	/**
 	 * Transforms coordinates in source coordinate system into target coord system.
 	 * To obtain a rotation matrix use {@link #makeAngles(double, double, double)}.
@@ -86,11 +86,11 @@ public class RotationZXZ implements Rotation3D {
 		dest[1] = x * rot.getItem(0, 1) + y * rot.getItem(1, 1) + z * rot.getItem(2, 1);
 		dest[2] = x * rot.getItem(0, 2) + y * rot.getItem(1, 2) + z * rot.getItem(2, 2);
 	}
-	
+
 	public void transformForward(Matrix rot, double src[], double dest[]) {
 		transformForward(rot, src[0], src[1], src[2], dest);
 	}
-	
+
 	/**
 	 * Transforms coordinates in target coordinate system into source coord system.
 	 * To obtain a rotation matrix use {@link #makeAngles(double, double, double)}.
@@ -108,25 +108,25 @@ public class RotationZXZ implements Rotation3D {
 		dest[1] = x * rot.getItem(1, 0) + y * rot.getItem(1, 1) + z * rot.getItem(1, 2);
 		dest[2] = x * rot.getItem(2, 0) + y * rot.getItem(2, 1) + z * rot.getItem(2, 2);
 	}
-	
+
 	public void transformBackward(Matrix rot, double src[], double dest[]) {
 		transformBackward(rot, src[0], src[1], src[2], dest);
 	}
-	
+
 	/**
 	 * Extracts the rotation angles that constructed the rotation matrix M.
-	 * The angles are returned in the angles array as 
+	 * The angles are returned in the angles array as
 	 * angles[0] = rz1,
 	 * angles[1] = rx,
 	 * angles[2] = rz2
-	 * 
+	 *
 	 * Ideas borrowed from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/
 	 */
 	public void getRotationAngles(Matrix m, double[] angles) {
-		if (m.getItem(2, 2) >= threshold) { 
+		if (m.getItem(2, 2) >= threshold) {
 			/*
 			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
-			 * assume angles[2]=0; c3=1; s3=0 
+			 * assume angles[2]=0; c3=1; s3=0
 			 * R3*R2*R1
 			 * c1	s1	0
 			 * -s1	c1	0
@@ -158,20 +158,20 @@ public class RotationZXZ implements Rotation3D {
 			angles[1] = Math.acos(m.getItem(2, 2));
 			angles[2] = Math.atan2(m.getItem(2, 0), m.getItem(2, 1));
 		}
-	}	
-	
+	}
+
 	/**
 	 * Extracts the rotation angles that constructed the REVERSE rotation matrix M.
-	 * The angles are returned in the angles array as 
+	 * The angles are returned in the angles array as
 	 * angles[0] = rz1,
 	 * angles[1] = rx,
 	 * angles[2] = rz2
 	 */
 	public void getRotationAnglesBackword(Matrix m, double[] angles) {
-		if (m.getItem(2, 2) >= threshold) { 
+		if (m.getItem(2, 2) >= threshold) {
 			/*
 			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
-			 * assume angles[2]=0; c3=1; s3=0 
+			 * assume angles[2]=0; c3=1; s3=0
 			 * R3*R2*R1
 			 * c1	s1	0
 			 * -s1	c1	0
@@ -183,7 +183,7 @@ public class RotationZXZ implements Rotation3D {
 		} else if (m.getItem(2, 2) <= -threshold) {
 			/*
 			 * singularity at south pole, i.e. angles[1]=Math.PI; c2=-1; s2=0
-			 * assume angles[2]=0; c3=1; s3=0 
+			 * assume angles[2]=0; c3=1; s3=0
 			 * R3*R2*R1
 			 * c1	s1	0
 			 * s1	-c1	0
@@ -197,19 +197,19 @@ public class RotationZXZ implements Rotation3D {
 			 * M_foreward = R3*R2*R1
 			 * c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
 			 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
-			 * s1*s2			-c1*s2			c2 
-			 * 
+			 * s1*s2			-c1*s2			c2
+			 *
 			 * M_backword = Transpose(M_foreward)
 			 */
 			angles[0] = Math.atan2(m.getItem(2, 0), -m.getItem(2, 1));
 			angles[1] = Math.acos(m.getItem(2, 2));
 			angles[2] = Math.atan2(m.getItem(0, 2), m.getItem(1, 2));
 		}
-	}	
-	
+	}
+
 	/**
 	 * Computes the REVERSE rotation angles that constructed the REVERSE rotation matrix M.
-	 * The angles are returned in the angles array as 
+	 * The angles are returned in the angles array as
 	 * angles[0] = rz1,
 	 * angles[1] = rx,
 	 * angles[2] = rz2
@@ -217,7 +217,7 @@ public class RotationZXZ implements Rotation3D {
 	public void getRotationAnglesBackword(double rz1, double ry, double rz2, double[] angles) {
 		double s1 = Math.sin(rz1);
 		double c1 = Math.cos(rz1);
-		
+
 		double s2 = Math.sin(ry);
 		double c2 = Math.cos(ry);
 
@@ -227,7 +227,7 @@ public class RotationZXZ implements Rotation3D {
 		if (c2 >= threshold) {
 			/*
 			 * singularity at north pole, i.e. angles[1]=0; c2=1; s2=0
-			 * assume angles[2]=0; c3=1; s3=0 
+			 * assume angles[2]=0; c3=1; s3=0
 			 * R3*R2*R1
 			 * c1	s1	0
 			 * -s1	c1	0
@@ -239,7 +239,7 @@ public class RotationZXZ implements Rotation3D {
 		} else if (c2 <= -threshold) {
 			/*
 			 * singularity at south pole, i.e. angles[1]=Math.PI; c2=-1; s2=0
-			 * assume angles[2]=0; c3=1; s3=0 
+			 * assume angles[2]=0; c3=1; s3=0
 			 * R3*R2*R1
 			 * c1	s1	0
 			 * -s1	c1	0
@@ -253,15 +253,15 @@ public class RotationZXZ implements Rotation3D {
 			 * M_foreward = R3*R2*R1
 			 * c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
 			 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
-			 * s1*s2			-c1*s2			c2 
-			 * 
+			 * s1*s2			-c1*s2			c2
+			 *
 			 * M_backword = Transpose(M_foreward)
 			 */
 			angles[0] = Math.atan2(s2*s3, -s2*c3);
 			angles[1] = Math.acos(c2);
 			angles[2] = Math.atan2(s1*s2, -c1*s2);
 		}
-	}	
+	}
 
 	/*
 	 * (sinX)' = cosX
@@ -271,7 +271,7 @@ public class RotationZXZ implements Rotation3D {
 	public Matrix make_dF_dR3(double r1, double r2, double r3) {
 		double s1 = Math.sin(r1);
 		double c1 = Math.cos(r1);
-		
+
 		double s2 = Math.sin(r2);
 		double c2 = Math.cos(r2);
 
@@ -283,11 +283,11 @@ public class RotationZXZ implements Rotation3D {
 		 * c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
 		 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
 		 * s1*s2			-c1*s2			c2
-		 * 
+		 *
 		 * dF/d(r3)
 		 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
 		 * -c1*c3+s1*c2*s3	-s1*c3-c1*c2*s3	-s2*s3
-		 * 0				0				0	
+		 * 0				0				0
 		 */
 		Matrix r = new Matrix(3, 3);
 		r.setItem(0, 0, -c1*s3-s1*c2*c3);
@@ -301,11 +301,11 @@ public class RotationZXZ implements Rotation3D {
 		r.setItem(2, 2, 0);
 		return r;
 	}
-	
+
 	public Matrix make_dF_dR2(double r1, double r2, double r3) {
 		double s1 = Math.sin(r1);
 		double c1 = Math.cos(r1);
-		
+
 		double s2 = Math.sin(r2);
 		double c2 = Math.cos(r2);
 
@@ -317,7 +317,7 @@ public class RotationZXZ implements Rotation3D {
 		 * c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
 		 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
 		 * s1*s2			-c1*s2			c2
-		 * 
+		 *
 		 * dF/d(r2)
 		 * s1*s2*s3			-c1*s2*s3		c2*s3
 		 * s1*s2*c3			-c1*s2*c3		c2*c3
@@ -335,11 +335,11 @@ public class RotationZXZ implements Rotation3D {
 		r.setItem(2, 2, -s2);
 		return r;
 	}
-	
+
 	public Matrix make_dF_dR1(double r1, double r2, double r3) {
 		double s1 = Math.sin(r1);
 		double c1 = Math.cos(r1);
-		
+
 		double s2 = Math.sin(r2);
 		double c2 = Math.cos(r2);
 
@@ -351,7 +351,7 @@ public class RotationZXZ implements Rotation3D {
 		 * c1*c3-s1*c2*s3	s1*c3+c1*c2*s3	s2*s3
 		 * -c1*s3-s1*c2*c3	-s1*s3+c1*c2*c3	s2*c3
 		 * s1*s2			-c1*s2			c2
-		 * 
+		 *
 		 * dF/d(r1)
 		 * -s1*c3-c1*c2*s3	c1*c3-s1*c2*s3	0
 		 * s1*s3-c1*c2*c3	-c1*s3-s1*c2*c3	0

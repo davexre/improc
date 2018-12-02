@@ -37,7 +37,7 @@ public class SymmetricMatrix {
 
 	/**
 	 * Compares two matrices element by element.
-	 * 
+	 *
 	 * @return Returns true if all the ements of the matrices are equal.
 	 */
 	public boolean equals(Object obj) {
@@ -184,7 +184,7 @@ public class SymmetricMatrix {
 
 	/**
 	 * Returns the size of the SymmetricMatrix as a vector
-	 * 
+	 *
 	 * @see SymmetricMatrix#getVectorItem(int)
 	 */
 	public int getVectorSize() {
@@ -201,18 +201,18 @@ public class SymmetricMatrix {
 	 *        b c e h<br>
 	 *        d e f i<br>
 	 *        g h i j<br>
-	 *       or with internal (in-memory) representation<br> 
+	 *       or with internal (in-memory) representation<br>
 	 *        a      <br>
 	 *        b c    <br>
 	 *        d e f  <br>
 	 *        g h i j<br>
-	 *       <br> 
+	 *       <br>
 	 *       The same matrix as vector [10] (size+1)*size/2 = (4+1)*4/2=10<br>
 	 *        a b c d e f j h i j<br>
 	 * </tt>
-	 * 
+	 *
 	 * @param aIndex
-	 * 
+	 *
 	 * @return The value
 	 */
 	public double getVectorItem(int aIndex) {
@@ -490,7 +490,7 @@ public class SymmetricMatrix {
 		double maxVal = m[0];
 		double minVal = maxVal;
 		for (int i = m.length - 1; i >= 0; i--) {
-			double value = m[i]; 
+			double value = m[i];
 			if (maxVal < value)
 				maxVal = value;
 			if (minVal > value)
@@ -507,7 +507,7 @@ public class SymmetricMatrix {
 
 	/**
 	 * Returns a new symetrical matrix of class Matrix (not SymmetricMatrix).
-	 * 
+	 *
 	 * @return Returns the new Matrix matrix.
 	 */
 	public Matrix makeSquareMatrix() {
@@ -529,7 +529,7 @@ public class SymmetricMatrix {
 
 	/**
 	 * Makes a copy of the matrix.
-	 * 
+	 *
 	 * @return Returns the new matrix.
 	 */
 	public SymmetricMatrix makeCopy() {
@@ -590,7 +590,7 @@ public class SymmetricMatrix {
 			}
 		return result;
 	}
-	
+
 	/**
 	 * Returns true if this matrix is the identity matrix
 	 */
@@ -598,15 +598,15 @@ public class SymmetricMatrix {
 		tolerance = Math.abs(tolerance);
 		for (int i = sizeM - 1; i >= 0; i--)
 			for (int j = i; j >= 0; j--) {
-				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j); 
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
 				if (Math.abs(d) > tolerance)
 					return false;
 			}
 		return true;
 	}
-	
+
 	/**
-	 * Returns true if all elements are 0. 
+	 * Returns true if all elements are 0.
 	 */
 	public boolean is0(double tolerance) {
 		tolerance = Math.abs(tolerance);
@@ -669,27 +669,26 @@ public class SymmetricMatrix {
 		}
 	}
 
+	public double debugMinAbsDiag = 0;
 	/**
 	 * Calculates the inverse matrix of this matrix. The algorithm calculates
 	 * the inverse matrix "in place" and does NOT create any intermediate
 	 * matrices.
-	 * 
+	 *
 	 * @return Returns true if the inverse matrix is computable. If the inverse
 	 *         matrix can not be computed this.make0 is called and the returned
 	 *         value is false.
 	 */
-	public double debugMinAbsDiag = 0; 
-	
 	public boolean inverse() {
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 		debugMinAbsDiag = Double.MAX_VALUE;
-		
+
 		for (int i = 0; i < sizeM; i++) {
 			double A = getItem(i, i);
 			double abs = Math.abs(A);
 			if (abs != 0.0) {
 				debugMinAbsDiag = Math.min(debugMinAbsDiag, abs);
-			}			
+			}
 			if (A == 0) {
 				int indexI = 0;
 				for (int j = i + 1; j < sizeM; j++) {

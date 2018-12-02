@@ -37,10 +37,10 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 	}
 
 	/**
-	 * Fills the array d with parameters for use with java.awt.geom.AffineTransform.<br/>
-	 * <big><b>This method can be used ONLY if the number of coordinates is 2!</b></big><br/>
-	 * Usage:<br/>
-	 * <tt>
+	 * Fills the array d with parameters for use with java.awt.geom.AffineTransform.
+	 * <p><big><b>This method can be used ONLY if the number of coordinates is 2!</b></big>
+	 * <p>Usage:
+	 * <p><tt>
 	 * AffineTransformer atr = new AffineTransformer(2); // 2D affine transofrm!!!
 	 * ...
 	 * double[] d = new double[6];
@@ -65,10 +65,10 @@ public abstract class AffineTransformer<InputType, OutputType> extends BaseTrans
 	}
 
 	/**
-	 * Sets this transformer to the parameters returned by java.awt.geom.AffineTransform.<br/>
-	 * <big><b>This method can be used ONLY if the number of coordinates is 2!</b></big><br/>
-	 * Usage:<br/>
-	 * <tt>
+	 * Sets this transformer to the parameters returned by java.awt.geom.AffineTransform.
+	 * <p><big><b>This method can be used ONLY if the number of coordinates is 2!</b></big>
+	 * <p>Usage:
+	 * <p><tt>
 	 * AffineTransformer atr = new AffineTransformer(2); // 2D affine transofrm!!!
 	 * java.awt.geom.AffineTransform at;
 	 * ...

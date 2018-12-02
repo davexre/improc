@@ -28,7 +28,7 @@ public class JLapack {
 	 * If the elements of x are all zero, then tau = 0 and H is taken to be
 	 * the unit matrix.
 	 * <p>
-	 * DLARFG -> INCX=1
+	 * DLARFG - INCX=1
 	 */
 	public void DLARFG_X(Matrix Src, int atX, int atY, int width, double alpha) {
 		double xnorm = 0.0;
@@ -57,7 +57,7 @@ public class JLapack {
 
 	/**
 	 * @see #DLARFG_X(Matrix, int, int, int, double)
-	 * DLARFG -> INCX=Src.GetSizeY()
+	 * DLARFG - INCX=Src.GetSizeY()
 	 */
 	public void DLARFG_Y(Matrix Src, int atX, int atY, int height, double alpha) {
 		double xnorm = 0.0;
@@ -96,7 +96,7 @@ public class JLapack {
 	 * <p>
 	 * If tau = 0, then H is taken to be the unit matrix.
 	 * <p>
-	 * DLARF -> SIDE="Left"
+	 * DLARF - SIDE="Left"
 	 */
 	public static void DLARF_X(Matrix Src, int atX, double tau) {
 		for (int i = Src.getSizeX() - 1; i > atX; i--) {
@@ -110,7 +110,7 @@ public class JLapack {
 
 	/**
 	 * @see #DLARF_X(Matrix, int, double)
-	 * DLARF -> SIDE="Right"
+	 * DLARF - SIDE="Right"
 	 */
 	public static void DLARF_Y(Matrix Src, int atY, double tau) {
 		for (int j = Src.getSizeY() - 1; j > atY; j--) {
@@ -131,7 +131,7 @@ public class JLapack {
 	 * <p>
 	 * A - On exit, the elements on and above the diagonal of the array
 	 * 		contain the min(M,N)-by-N upper trapezoidal matrix R (R is
-	 * 		upper triangular if m >= n); the elements below the diagonal,
+	 * 		upper triangular if m &gt;= n); the elements below the diagonal,
 	 * 		with the array TAU, represent the orthogonal matrix Q as a
 	 * 		product of min(m,n) elementary reflectors.
 	 * <p>
@@ -177,7 +177,7 @@ public class JLapack {
 	 * form: A = Q * B * P**T.  Q and P**T are defined as products of
 	 * elementary reflectors H(i) or G(i) respectively.
 	 * <p>
-	 * DORGBR -> VECT="P"
+	 * DORGBR - VECT="P"
 	 */
 	public static void qrDecomositionGetR(Matrix Src, Matrix r) {
 		r.resize(Src.getSizeX(), Src.getSizeY());
@@ -189,7 +189,7 @@ public class JLapack {
 	/**
 	 * @see #qrDecomositionGetR(Matrix, Matrix)
 	 * <p>
-	 * DORGBR -> VECT="Q"
+	 * DORGBR - VECT="Q"
 	 */
 	public static void qrDecomositionGetQ(Matrix Src, Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < Src.getSizeX()) || (tau.getSizeY() < 1))
@@ -257,7 +257,7 @@ public class JLapack {
 	 * <p>
 	 * @see #qrDecomositionGetR(Matrix, Matrix)
 	 * <p>
-	 * DORGBR -> VECT="P"
+	 * DORGBR - VECT="P"
 	 */
 	public static void lqDecomositionGetL(Matrix Src, Matrix l) {
 		l.resize(Src.getSizeX(), Src.getSizeY());
@@ -269,7 +269,7 @@ public class JLapack {
 	/**
 	 * @see #lqDecomositionGetL(Matrix, Matrix)
 	 * <p>
-	 * DORGBR -> VECT="Q"
+	 * DORGBR - VECT="Q"
 	 */
 	public static void lqDecomositionGetQ(Matrix Src, Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < Src.getSizeY()) || (tau.getSizeY() != 1))
@@ -301,11 +301,11 @@ public class JLapack {
 	 * DGEBRD reduces a general real M-by-N matrix A to upper or lower
 	 * bidiagonal form B by an orthogonal transformation: Q**T * A * P = B.
 	 * <p>
-	 * If m >= n, B is upper bidiagonal; if m < n, B is lower bidiagonal.
+	 * If m &gt;= n, B is upper bidiagonal; if m &lt; n, B is lower bidiagonal.
 	 * <p>
 	 * The matrices Q and P are represented as products of elementary reflectors:
 	 * <p>
-	 * If m >= n,
+	 * If m &gt;= n,
 	 * <p>
 	 * Q = H(1) H(2) . . . H(n)  and  P = G(1) G(2) . . . G(n-1)
 	 * <p>
@@ -318,7 +318,7 @@ public class JLapack {
 	 * u(1:i) = 0, u(i+1) = 1, and u(i+2:n) is stored on exit in A(i,i+2:n);
 	 * tauq is stored in TAUQ(i) and taup in TAUP(i).
 	 * <p>
-	 * If m < n,
+	 * If m &lt; n,
 	 * <p>
 	 * Q = H(1) H(2) . . . H(m-1)  and  P = G(1) G(2) . . . G(m)
 	 * <p>
@@ -333,7 +333,7 @@ public class JLapack {
 	 * <p>
 	 * The contents of A on exit are illustrated by the following examples:
 	 * <blockquote><pre>
-	 * m = 6 and n = 5 (m > n):          m = 5 and n = 6 (m < n):
+	 * m = 6 and n = 5 (m &gt; n):          m = 5 and n = 6 (m &lt; n):
 	 *
 	 *   (  d   e   u1  u1  u1 )           (  d   u1  u1  u1  u1  u1 )
 	 *   (  v1  d   e   u2  u2 )           (  e   d   u2  u2  u2  u2 )
@@ -1215,7 +1215,7 @@ public class JLapack {
 	 * where either
 	 * <ol>
 	 * <li>CC = 0 so that AA and DD are real eigenvalues of the matrix, or</li>
-	 * <li>AA = DD and BB*CC < 0, so that AA + or - sqrt(BB*CC) are complex
+	 * <li>AA = DD and BB*CC &lt; 0, so that AA + or - sqrt(BB*CC) are complex
 	 * conjugate eigenvalues.</li>
 	 * </ol>
 	 */
@@ -1585,10 +1585,10 @@ public class JLapack {
 	 * The computed eigenvectors are normalized to have Euclidean norm
 	 * equal to 1 and largest component real.
 	 * <p>
-	 * JOBVL = "N" -> left eigenvectors of A are not computed
-	 * JOBVR = "N" -> right eigenvectors of A are not computed
+	 * JOBVL = "N" - left eigenvectors of A are not computed
+	 * JOBVR = "N" - right eigenvectors of A are not computed
 	 *
-	 * @param WRI - The eigenvalues WRI.getItem(?, 0) -> real part, WRI.getItem(?, 1) -> imaginary part
+	 * @param WRI - The eigenvalues WRI.getItem(?, 0) - real part, WRI.getItem(?, 1) - imaginary part
 	 */
 	public void DGEEV(Matrix A, Matrix WRI) {
 		if (A.getSizeX() != A.getSizeY())
@@ -1731,8 +1731,8 @@ public class JLapack {
 	 * magnitude has magnitude 1; here the magnitude of a complex number
 	 * (x,y) is taken to be |x| + |y|.
 	 * <p>
-	 * SIDE = "B" -> compute both right and left eigenvectors.
-	 * HOWMNY = "B" -> compute all right and/or left eigenvectors,
+	 * SIDE = "B" - compute both right and left eigenvectors.
+	 * HOWMNY = "B" - compute all right and/or left eigenvectors,
 	 *     and backtransform them using the input matrices supplied in VR and/or VL;
 	 * SELECT = [empty]
 	 */
@@ -1799,9 +1799,9 @@ public class JLapack {
 	 * which has been reduced to the Hessenberg form H by the orthogonal
 	 * matrix Q:  A = Q*H*Q**T = (QZ)*T*(QZ)**T.
 	 * <p>
-	 * JOB = "S" -> compute eigenvalues and the Schur form T.
+	 * JOB = "S" - compute eigenvalues and the Schur form T.
 	 * <p>
-	 * COMPZ = "V" -> Z must contain an orthogonal matrix Q on entry, and the product Q*Z is returned.
+	 * COMPZ = "V" - Z must contain an orthogonal matrix Q on entry, and the product Q*Z is returned.
 	 */
 	public void DHSEQR(int ILO, int IHI, Matrix A, Matrix WRI, Matrix ZZZ) {
 //		if (ZZZ != null)

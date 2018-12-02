@@ -45,8 +45,8 @@ public class LeastSquaresAdjust {
 	/**
 	 * "Смисълът" на параметрите numCoefsPerCoordinate и numCoordinates е "намаляване" на
 	 * размера на нормалната матрица при повтарящи се коефициенти например: Ако
-	 * матрицата на уравненията на поправките е:<br>
-	 * <tt><table border=1>
+	 * матрицата на уравненията на поправките е:
+	 * <table border=1>
 	 * <tr><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td><td> 0</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td> 0</td><td>a1</td><td> 0</td><td> 0</td><td>a2</td><td> 0</td><td> 0</td><td>a3</td><td> 0</td><td> 0</td><td>a4</td></tr>
@@ -57,17 +57,16 @@ public class LeastSquaresAdjust {
 	 * <tr><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td><td> 0</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td><td> 0</td></tr>
 	 * <tr><td> 0</td><td> 0</td><td>k1</td><td> 0</td><td> 0</td><td>k2</td><td> 0</td><td> 0</td><td>k3</td><td> 0</td><td> 0</td><td>k4</td></tr>
-	 * </table></tt><br>
-	 * то тя се "редуцира" до матрица от вида:<br>
-	 * <tt><table border=1>
+	 * </table>
+	 * <p>то тя се "редуцира" до матрица от вида:
+	 * <table border=1>
 	 * <tr><td>a1</td><td>a2</td><td>a3</td><td>a4</td></tr>
 	 * <tr><td>b1</td><td>b2</td><td>b3</td><td>b4</td></tr>
 	 * <tr><td colspan=4><center>... ... ...</center></td></tr>
 	 * <tr><td>k1</td><td>k2</td><td>k3</td><td>k4</td></tr>
-	 * </table></tt><br>
-	 * което е доста по-икономично ;)<br>
-	 * <br>
-	 * В този случай numCoefsPerCoordinate=4, numCoordinates=3
+	 * </table>
+	 * <p>което е доста по-икономично ;)
+	 * <p>В този случай numCoefsPerCoordinate=4, numCoordinates=3
 	 */
 	public LeastSquaresAdjust(int numCoefsPerCoordinate, int numCoordinates) {
 		this.numCoefsPerCoordinate = numCoefsPerCoordinate;

@@ -104,14 +104,14 @@ public class MathUtil {
 	}
 
 	/**
-	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 * Returns the value if min &lt;= value &lt;= max else returns min or max respecively.
 	 */
 	public static double clipValue(double value, double min, double max) {
 		return Math.min(max, Math.max(min, value));
 	}
 
 	/**
-	 * Returns the value if min <= value <= max else returns min or max respecively.
+	 * Returns the value if min &lt;= value &lt;= max else returns min or max respecively.
 	 */
 	public static int clipValue(int value, int min, int max) {
 		return Math.min(max, Math.max(min, value));
@@ -230,9 +230,8 @@ public class MathUtil {
 	/**
 	 * GCD - Greatest Common Divisor
 	 *
-	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
-	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
-	 *
+	 * <p><a href="http://en.wikipedia.org/wiki/Greatest_common_divisor">http://en.wikipedia.org/wiki/Greatest_common_divisor</a>
+	 * <p><a href="http://en.wikipedia.org/wiki/Euclidean_algorithm">http://en.wikipedia.org/wiki/Euclidean_algorithm</a>
 	 */
 	public static int gcd(int a, int b) {
 		while (b != 0) {
@@ -246,9 +245,8 @@ public class MathUtil {
 	/**
 	 * GCD - Greatest Common Divisor
 	 *
-	 * @see http://en.wikipedia.org/wiki/Greatest_common_divisor
-	 * @see http://en.wikipedia.org/wiki/Euclidean_algorithm
-	 *
+	 * <p><a href="http://en.wikipedia.org/wiki/Greatest_common_divisor">http://en.wikipedia.org/wiki/Greatest_common_divisor</a>
+	 * <p><a href="http://en.wikipedia.org/wiki/Euclidean_algorithm">http://en.wikipedia.org/wiki/Euclidean_algorithm</a>
 	 */
 	public static long gcd(long a, long b) {
 		while (b != 0) {
@@ -279,5 +277,4 @@ public class MathUtil {
 		}
 		return data.size() > 0 ? data.iterator().next() : 0;
 	}
-
 }
