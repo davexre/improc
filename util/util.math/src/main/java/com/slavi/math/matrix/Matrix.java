@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -949,7 +950,7 @@ public class Matrix {
 	/**
 	 * Private class used by Matrix.inverse()
 	 */
-	private static class XchgRec {
+	public static class XchgRec {
 
 		public int a;
 
@@ -970,24 +971,25 @@ public class Matrix {
 	 *         matrix can not be computed this.make0 is called and the returned
 	 *         value is false.
 	 */
-	public boolean inverse() {
+	public boolean inverse_OLD() {
 		if (sizeX != sizeY) {
 			throw new Error("Invalid argument");
 		}
+		double tol = calcEpsTolerance();
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
 
 		for (int i = 0; i < sizeX; i++) {
 			double A = Math.abs(getItem(i, i));
 			int pivotIndex = i;
 			for (int j = i + 1; j < sizeX; j++) {
-				double tmp = Math.abs(getItem(i, j));
+				double tmp = Math.abs(getItem(j, i));
 				if (tmp > A) {
 					A = tmp;
 					pivotIndex = j;
 				}
 			}
 
-			if (A == 0) {
+			if (A < tol) {
 				make0();
 				return false;
 			}
@@ -1026,6 +1028,80 @@ public class Matrix {
 		for (int i = xchg.size() - 1; i >= 0; i--) {
 			XchgRec x = xchg.get(i);
 			exchangeY(x.a, x.b);
+		}
+		return true;
+	}
+
+	/**
+	 * Calculates the inverse matrix of this matrix. The algorithm calculates
+	 * the inverse matrix "in place" and does NOT create any intermediate
+	 * matrices.
+	 * <p>Algorythm is described <a href="https://file.scirp.org/pdf/AM_2013100413422038.pdf">here</a>.
+	 * <p>A copy also available: <a href="doc-files/Matrix-In-place-inverse.pdf">Matrix In-place inverse.pdf</a>
+	 *
+	 * @return Returns true if the inverse matrix is computable. If the inverse
+	 *         matrix can not be computed this.make0 is called and the returned
+	 *         value is false.
+	 */
+	public boolean inverse() {
+		if (getSizeX() != getSizeY()) {
+			throw new Error("Invalid argument");
+		}
+		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
+		BitSet bs = new BitSet(getSizeY());
+		double tol = calcEpsTolerance();
+
+		for (int row = 0; row < getSizeY(); row++) {
+			// Find pivot row
+			int prow = 0;
+			int pcol = 0;
+			double tmp = 0;
+			for (int j = 0; j < getSizeY(); j++) {
+				if (bs.get(j))
+					continue;
+				for (int i = 0; i < getSizeX(); i++) {
+					if (bs.get(i))
+						continue;
+					double t = Math.abs(getItem(i, j));
+					if (tmp < t) {
+						tmp = t;
+						prow = j;
+						pcol = i;
+					}
+				}
+			}
+
+			if (tmp < tol) {
+				make0();
+				return false;
+			}
+			if (pcol != prow) {
+				exchangeY(prow, pcol);
+				xchg.add(new XchgRec(prow, pcol));
+				prow = pcol;
+			}
+
+			bs.set(prow);
+			tmp = 1.0 / getItem(prow, prow);
+			setItem(prow, prow, 1.0);
+			for (int j = 0; j < getSizeX(); j++)
+				itemMul(j, prow, tmp);
+
+			for (int i = 0; i < getSizeY(); i++) {
+				if (i == prow)
+					continue;
+				tmp = -getItem(prow, i);
+				for (int j = 0; j < getSizeX(); j++)
+					if (j != prow)
+						itemAdd(j, i, tmp * getItem(j, prow));
+					else
+						setItem(j, i, tmp * getItem(j, prow));
+			}
+		}
+
+		for (int i = xchg.size() - 1; i >= 0; i--) {
+			XchgRec x = xchg.get(i);
+			exchangeX(x.a, x.b);
 		}
 		return true;
 	}
@@ -1077,13 +1153,17 @@ public class Matrix {
 		return result;
 	}
 
+	public double calcEpsTolerance() {
+		return MathUtil.eps * Math.max(getSizeX(), getSizeY()) * getNormInfinity();
+	}
+
 	/**
 	 * Row Reduced Echalon Form. Translated from Octave rref.m
 	 * The return value contains the list of "bound variables",
 	 * which are those columns on which elimination has been performed.
 	 */
 	public List<Integer> rref() {
-		double tol = MathUtil.eps * Math.max(getSizeX(), getSizeY()) * getNormInfinity();
+		double tol = calcEpsTolerance();
 		int r = 0;
 		ArrayList<Integer> k = new ArrayList();
 		for (int c = 0; c < getSizeX(); c++) {
