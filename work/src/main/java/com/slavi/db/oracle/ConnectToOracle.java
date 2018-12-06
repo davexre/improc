@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -27,6 +28,7 @@ import oracle.sql.ArrayDescriptor;
 
 public class ConnectToOracle {
 
+	public final static String propertiesSuffix = ".3";
 	public Properties prop;
 	public String connectStr;
 	public String username;
@@ -36,9 +38,9 @@ public class ConnectToOracle {
 		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 		prop = new Properties();
 		prop.load(new InputStreamReader(getClass().getResourceAsStream(getClass().getSimpleName() + ".properties")));
-		connectStr = prop.getProperty("connectStr");
-		username = prop.getProperty("username");
-		password = prop.getProperty("password");
+		connectStr = prop.getProperty("connectStr" + propertiesSuffix);
+		username = prop.getProperty("username" + propertiesSuffix);
+		password = prop.getProperty("password" + propertiesSuffix);
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -53,11 +55,16 @@ public class ConnectToOracle {
 			lst.add("VARCHAR2");
 
 			// select * from ALL_COLL_TYPES where owner = 'SYS' order by coll_type, type_name;
-			//ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.ODCIVARCHAR2LIST", conn);
-			ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.DBMS_DEBUG_VC2COLL", conn);
+			ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.ODCIVARCHAR2LIST", conn);
+			//ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.DBMS_DEBUG_VC2COLL", conn);
 			ARRAY ar = new ARRAY(ard, conn, lst.toArray());
 			String sql = "select count(*) from user_tab_columns where data_type not in (select * from table(?))";
-			Object val = qr.query(conn, sql, new ScalarHandler(), ar);
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setObject(1, ar);
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			Object val = rs.getObject(1);
+//			Object val = qr.query(conn, sql, new ScalarHandler(), ar);
 			System.out.println(val);
 		};
 	}
@@ -146,7 +153,7 @@ public class ConnectToOracle {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new ConnectToOracle().doIt4(args);
+		new ConnectToOracle().exampleUsingOracleArrays(args);
 		System.out.println("Done.");
 	}
 }
