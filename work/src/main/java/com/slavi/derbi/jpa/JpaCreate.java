@@ -19,6 +19,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
@@ -43,6 +44,7 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Propagation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slavi.derbi.jpa.entity.DateStyle;
@@ -72,16 +74,52 @@ public class JpaCreate {
 
 	@Transactional
 	public String dbToXml() throws SQLException, IOException {
+		{
+			User manager = em.find(User.class, "User 0");
+			System.out.println(manager.params2.entrySet().iterator().next().getValue());
+/*
+			String jpql = "select u from User u join u.params2 p where key(p) = :s";
+			TypedQuery<User> q = em.createQuery(jpql, User.class);
+			User s = new User("s", null);
+			q.setParameter("s", s);
+			System.out.println(q.getResultList().size());
+
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			CriteriaQuery<User> cq = cb.createQuery(User.class);
+			Root<User> root = cq.from(User.class);
+			MapJoin j = root.joinMap("params2");
+			cq.where(cb.equal(j.key(), s));
+			q = em.createQuery(cq);
+			System.out.println(q.getResultList().size());*/
+		}
+		if (true)
+			return "";
+
 //		String jpql = "select u from AdvancedUser u where u.someInt = 12";
 //		String jpql = "select distinct u from User u join u.subordinate s where s.name = 'aaa'";
-///		String jpql = "select u from MyEntity u where u.data like 'Data %'";
-//		TypedQuery<User> q = em.createQuery(jpql, User.class);
-//		System.out.println(q.getResultList().size());
+//		String jpql = "select u from MyEntity u where u.data like 'Data %'";
+		String jpql = "select u from User u where :s member of u.subordinate";
+		TypedQuery<User> q = em.createQuery(jpql, User.class);
+		User s = new User("s", null);
+		q.setParameter("s", s);
+		System.out.println(q.getResultList().size());
+/*
+		jpql = "select u from User u left join u.subordinate s where s.name is null";
+		q = em.createQuery(jpql, User.class);
+		//q.setParameter("s", s);
+		System.out.println(q.getResultList().size());*/
+
 
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<User> cq = cb.createQuery(User.class);
 		Root<User> root = cq.from(User.class);
-		cq.where(cb.or(cb.equal(root.get("someInt"), 1)));
+		cq.where(cb.isNotEmpty(root.get("subordinate")));
+/*		Join sub = root.join("subordinate");
+//		cq.where(cb.equal(sub, s));
+		ArrayList lst = new ArrayList<>();
+		lst.add(s);
+		cq.where(sub.in(lst));
+		cq.select(cb.count(root));*/
 		System.out.println(em.createQuery(cq).getResultList().size());
 
 /*
@@ -142,7 +180,8 @@ public class JpaCreate {
 	@PersistenceContext
 	EntityManager em;
 
-	@Transactional
+	//@Transactional
+	@org.springframework.transaction.annotation.Transactional(propagation=Propagation.REQUIRES_NEW)
 	public void initialize() throws Exception {
 		DepartmentType types[] = DepartmentType.values();
 		for (int i = 0; i < 5; i++)
@@ -156,13 +195,18 @@ public class JpaCreate {
 			//user.setDepartment(deparments.get(i % deparments.size()));
 			if (i % 5 == 0) {
 				user.setRole(Role.MANAGER);
-			} else
+				manager = user;
+			} else {
 				user.setManager(manager);
+				manager.getSubordinate().add(user);
+			}
+			user.params2.put("user", null);
+
 			em.persist(user);
-			if (i % 5 == 0) {
+/*			if (i % 5 == 0) {
 				manager = em.find(User.class, user.getUsername());
 			}
-
+*/
 			MyEntity e = new MyEntity(Integer.toString(i), "Data " + i);
 			em.persist(e);
 		}
@@ -218,8 +262,9 @@ public class JpaCreate {
 		System.out.println("\n\n--------------------");
 		System.out.println(queryStr);
 		List<User> users = query.getResultList();
-		for (User u : users)
+		for (User u : users) {
 			System.out.println(u);
+		}
 
 		//EntityType<User> etype = em.getMetamodel().entity(User.class);
 /*		IdentifiableType itype = etype.getSupertype();
