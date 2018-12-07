@@ -5,20 +5,21 @@ public abstract class AbstractConvexHullArea {
 
 	/**
 	 * Moves the iterator onto the next point (first if after reset).
-	 * Returns false if no more points are available.  
+	 * @returns false if no more points are available.
 	 */
 	public abstract boolean nextPoint();
-	
+
 	public abstract double getX();
 	public abstract double getY();
-	
+
 	/**
 	 * Ideas borrowed from
-	 * http://www.dr-mikes-maths.com/DotPlacer.html 
+	 * http://www.dr-mikes-maths.com/DotPlacer.html
+	 * @return The area of the convex hull or 0 if the hull is selfintersecting
 	 */
 	public double getConvexHullArea() {
 		double result = 0.0;
-		
+
 		// Find the left-most point, i.e. min X
 		double startPointX = Double.MAX_VALUE;
 		double startPointY = Double.MAX_VALUE;

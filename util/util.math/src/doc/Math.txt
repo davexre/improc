@@ -67,4 +67,7 @@ Y - Y axis
 
 Y = e^( ((X-M)^2) / (2* S^2) ) / (S*sqrt(2*pi))
 
+Matrix In-place inverse
+=======================
+https://file.scirp.org/pdf/AM_2013100413422038.pdf
 

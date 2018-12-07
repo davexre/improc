@@ -10,23 +10,23 @@ import java.util.List;
  * http://en.wikipedia.org/wiki/B%C3%A9zier_curve
  */
 public class BezierQuadraticCurve {
-	
+
 	public Point2D.Double p0;
 	public Point2D.Double p1;
 	public Point2D.Double p2;
-	
+
 	public BezierQuadraticCurve() {
 		p0 = new Point2D.Double();
 		p1 = new Point2D.Double();
 		p2 = new Point2D.Double();
 	}
-	
+
 	public BezierQuadraticCurve(Point2D.Double p0, Point2D.Double p1, Point2D.Double p2) {
 		this.p0 = p0;
 		this.p1 = p1;
 		this.p2 = p2;
 	}
-/*	
+/*
 	public double breadth(double minLineLength) {
 		if (minLineLength <= 0)
 			minLineLength = 0.01;
@@ -50,7 +50,7 @@ public class BezierQuadraticCurve {
 	public BezierQuadraticCurve split(double t) {
 		Point2D.Double q0 = GeometryUtil.splitPoint(p0, p1, t);
 		Point2D.Double q1 = GeometryUtil.splitPoint(p1, p2, t);
-		
+
 		Point2D.Double b = GeometryUtil.splitPoint(q0, q1, t);
 
 		BezierQuadraticCurve r = new BezierQuadraticCurve(b, q1, p2);
@@ -58,7 +58,7 @@ public class BezierQuadraticCurve {
 		p2 = b;
 		return r;
 	}
-	
+
 	public static Point2D.Double midPoint(Point2D.Double a, Point2D.Double b) {
 		return new Point2D.Double(
 				0.5 * (a.x + b.x),
@@ -68,7 +68,7 @@ public class BezierQuadraticCurve {
 	public BezierQuadraticCurve bisect() {
 		Point2D.Double q0 = GeometryUtil.midPoint(p0, p1);
 		Point2D.Double q1 = GeometryUtil.midPoint(p1, p2);
-		
+
 		Point2D.Double b = GeometryUtil.midPoint(q0, q1);
 
 		BezierQuadraticCurve r = new BezierQuadraticCurve(b, q1, p2);
@@ -76,7 +76,7 @@ public class BezierQuadraticCurve {
 		p2 = b;
 		return r;
 	}
-	
+
 	public void appendToPath(Path2D.Double path) {
 		path.moveTo(p0.x, p0.y);
 		path.quadTo(p1.x, p1.y, p2.x, p2.y);
@@ -101,29 +101,30 @@ public class BezierQuadraticCurve {
 			}
 		}
 	}
-	
+
 	/**
-	 * 0 <= t <= 1
-	 * 
+	 * <pre>
+	 * 0 &lt;= t &lt;= 1
+	 *
 	 * B(n,m) = mth coefficient of nth degree Bernstein polynomial
 	 * B(n,m) = C(n,m) * t^(m) * (1 - t)^(n-m)
-	 * 
+	 *
 	 * C(n,m) = Combinations of n things, taken m at a time
 	 * C(n,m) = n! / (m! * (n-m)!)
-	 * 
+	 *
 	 * C(2,0) = 2! / (0! * 2!) = 1
 	 * C(2,1) = 2! / (1! * 1!) = 2
 	 * C(2,2) = 2! / (2! * 0!) = 1
-	 * 
+	 *
 	 * C(3,0) = 3! / (0! * 3!) = 1
 	 * C(3,1) = 3! / (1! * 2!) = 3
 	 * C(3,2) = 3! / (2! * 1!) = 3
 	 * C(3,3) = 3! / (3! * 0!) = 1
-	 * 
+	 *
 	 * B(2,0) = (1-t)^2
 	 * B(2,1) = 2 * t * (1-t)
 	 * B(2,2) = t^2
-	 * 
+	 *
 	 * B(3,0) = (1-t)^3
 	 * B(3,1) = 3 * t * (1-t)^2
 	 * B(3,2) = 3 * t^2 * (1-t)
@@ -132,7 +133,7 @@ public class BezierQuadraticCurve {
 	 * SEG_QUADTO
 	 * P(t) = B(2,0)*CP + B(2,1)*P1 + B(2,2)*P2
 	 * P(t) = CP*(1-t)^2 + P1*2*t*(1-t) + P2*t^2
-	 * 
+	 * </pre>
 	 */
 	public Point2D.Double getPointAt(double t) {
 		if ((t < 0.0) || (t > 1.0))
