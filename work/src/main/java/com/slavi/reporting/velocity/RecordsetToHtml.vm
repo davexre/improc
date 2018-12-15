@@ -1,0 +1,33 @@
+#parse( "com/slavi/reporting/velocity/lib.Table.vm" )
+##<!doctype html> ## Not supported by flying sauser (html-to-pdf)
+<html>
+<head>
+<style>
+#include($cssFile)
+#include("com/slavi/reporting/velocity/html2pdf.css")
+</style>
+</head>
+<body>
+	<div class="pageheader">
+		<table class="table table-borderless"><tr>
+			<td class="text-center">--- $utl.esc($title) ---</td>
+		</tr></table>
+	</div>
+	<div class="pagefooter">
+		<table class="table table-borderless"><tr>
+			<td class="text-left">$utl.esc($date)</td>
+			<td class="text-right">Page <span class="pagenumber" /> of <span class="pagecount" /></td>
+		</tr></table>
+	</div>
+
+	<div class="content container-fluid">
+	#renderTable($utl.sqlAsList("select * from countries"))
+	<hr/>
+	#renderTable($utl.sqlAsList("select * from countries"))
+	<hr/>
+	#renderTable($utl.sqlAsList("select * from countries"))
+	<hr/>
+	#renderTable($utl.sqlAsList("select * from countries"))
+	</div>
+</body>
+</html>
