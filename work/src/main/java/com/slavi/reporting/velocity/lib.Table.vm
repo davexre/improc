@@ -1,0 +1,33 @@
+#macro( renderTableHead $rows )
+	<tr>
+	#foreach($c in $rows.getColumnNames())
+		<th>$utl.esc($c)</th>
+	#end
+	</tr>
+#end
+##
+##
+##
+#macro( renderTableBody $rows )
+<tbody>
+	#foreach($row in $rows)
+	<tr>
+		#foreach($d in $row)
+		<td>$utl.esc($d)</td>
+		#end
+	</tr>
+	#end
+</tbody>
+#end
+##
+##
+##
+#macro( renderTable $rows )
+<table class="table table-sm">
+<thead>
+	#renderTableHead( $rows )
+</thead>
+	#renderTableBody( $rows )
+	#renderTableHead( $rows )
+</table>
+#end

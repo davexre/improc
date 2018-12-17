@@ -57,6 +57,8 @@ Setting-up a workspace
 * MySQL
 * SQuireL http://squirrel-sql.sourceforge.net/
 * Apache Tomcat
+* Lombok
+	java -jar ~/.m2/repository/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar
 
 Disable DALI/JPT
 ================

@@ -11,6 +11,8 @@
 	<properties>
 		<com.slavi.version>1.0.0-SNAPSHOT</com.slavi.version>
 
+		<javafx.version>11</javafx.version>
+		<jaxb-api.version>2.3.1</jaxb-api.version>
 		<log4j2.version>2.11.1</log4j2.version>
 		<slf4j.version>1.7.21</slf4j.version>
 		<sysout-over-slf4j.version>1.0.2</sysout-over-slf4j.version>
@@ -50,6 +52,7 @@
 		<sqlite-jdbc.version>3.25.2</sqlite-jdbc.version>
 		<hsqldb.version>2.4.1</hsqldb.version>
 		<h2database.version>1.4.197</h2database.version>
+		<commons-dbcp.version>1.4</commons-dbcp.version>
 		<commons-dbutils.version>1.7</commons-dbutils.version>
 		<apache.ddlutils.version>1.0</apache.ddlutils.version>
 		<oracle.version>12.2.0.1</oracle.version>
@@ -76,7 +79,7 @@
 		annotated with @RequestBody
 		-->
 		<com.fasterxml.jackson.version>2.9.7</com.fasterxml.jackson.version>
-		<lombok.version>1.18.2</lombok.version>
+		<lombok.version>1.18.4</lombok.version>
 	</properties>
 
 	<dependencyManagement>
@@ -540,6 +543,11 @@
 				<version>${h2database.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>commons-dbcp</groupId>
+				<artifactId>commons-dbcp</artifactId>
+				<version>${commons-dbcp.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>commons-dbutils</groupId>
 				<artifactId>commons-dbutils</artifactId>
 				<version>${commons-dbutils.version}</version>
@@ -727,6 +735,54 @@
 				<groupId>org.codehaus.woodstox</groupId>
 				<artifactId>woodstox-core-asl</artifactId>
 				<version>${woodstox-core-asl.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb-api.version}</version>
+			</dependency>
+
+			<!-- OpenJFX/Java FX -->
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-base</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-controls</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-fxml</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-graphics</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-media</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-swing</artifactId>
+				<version>${javafx.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjfx</groupId>
+				<artifactId>javafx-web</artifactId>
+				<version>${javafx.version}</version>
 			</dependency>
 
 			<!-- Miscelaneous -->

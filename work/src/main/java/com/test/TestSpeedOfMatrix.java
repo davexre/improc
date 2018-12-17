@@ -48,30 +48,39 @@ public class TestSpeedOfMatrix {
 	}
 	
 	void doIt() throws Exception {
-		// 19.158 seconds -> separate get/set
-		// 18.734 seconds -> itemAdd
-		// 17.192 seconds -> itemAdd without range check
-		Matrix m = new Matrix(10, 10);
-		Marker.mark("matrix");
-		for (int i = 0; i < 200_000_000; i++)
+		Marker.mark("dummy");
+		Marker.release();
+		{
+			// 19.158 seconds -> separate get/set
+			// 18.734 seconds -> itemAdd
+			// 17.192 seconds -> itemAdd without range check
+			Matrix m = new Matrix(10, 10);
+			doSomethingToMatrix(m, 0.001);
+			Marker.mark("matrix");
+			for (int i = 0; i < 200_000_000; i++)
 				doSomethingToMatrix(m, 0.001);
-		Marker.release();
+			Marker.release();
+		}
 
-		
-/*		// 10.675 seconds
-		double a[][] = new double[10][10];
-		Marker.mark("array");
-		for (int i = 0; i < 200_000_000; i++)
+		{
+			// 10.675 seconds
+			double a[][] = new double[10][10];
+			doSomethingToArray(a, 0.001);
+			Marker.mark("array");
+			for (int i = 0; i < 200_000_000; i++)
 				doSomethingToArray(a, 0.001);
-		Marker.release();
-*/
-/*		// 23.427 seconds
-		double a[][] = new double[10][10];
-		Marker.mark("array");
-		for (int i = 0; i < 200_000_000; i++)
+			Marker.release();
+		}
+
+		{
+			// 23.427 seconds
+			double a[][] = new double[10][10];
+			doSomethingToArray2(a, 0.001);
+			Marker.mark("array");
+			for (int i = 0; i < 200_000_000; i++)
 				doSomethingToArray2(a, 0.001);
-		Marker.release();
-*/
+			Marker.release();
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

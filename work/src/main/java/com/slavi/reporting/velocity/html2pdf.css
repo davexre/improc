@@ -1,0 +1,33 @@
+.pagenumber::after {
+	content: counter(page)
+}
+
+.pagecount::after {
+	content: counter(pages)
+}
+
+div.content {
+//	page-break-after: always;
+}
+
+.pageheader {
+	display: block; 
+	text-align: center; 
+	position: running(pageheader);
+}
+
+.pagefooter {
+	display: block; 
+	text-align: center; 
+	position: running(pagefooter);
+}
+
+@page { 
+	margin: 2cm 2cm 2cm 2cm;
+	@top-center { 
+		content: element(pageheader)
+	}
+	@bottom-center { 
+		content: element(pagefooter)
+	}
+}
