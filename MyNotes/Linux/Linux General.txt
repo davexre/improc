@@ -98,3 +98,7 @@ find . -type f | sed -nE 's/.*\.(\w+)$/\1/p' | sort | uniq -c | sort -nr | less
 
 * Show disk usage by subfolders
 du -bd 1|sort -n
+
+Remove Carrige Return (CR or \r) character from a text file
+===========================================================
+sed -i 's/\r//g' /path/to/file/to/edit.txt

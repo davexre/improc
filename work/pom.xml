@@ -469,6 +469,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm</artifactId>
+			<version>7.0</version>
+		</dependency>
+
+		<dependency>
 			<!-- requires org.apache.xmlgraphics:batik-i18n and org.apache.xmlgraphics:batik-constants -->
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>
