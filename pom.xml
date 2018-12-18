@@ -40,7 +40,7 @@
 		<maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
 		<maven-extra-enforcer-rules.version>1.0-beta-6</maven-extra-enforcer-rules.version>
 		<git-commit-id-plugin.version>2.2.4</git-commit-id-plugin.version>
-		<ph-javacc-maven-plugin.version>4.0.3</ph-javacc-maven-plugin.version>
+		<ph-javacc-maven-plugin.version>4.1.1</ph-javacc-maven-plugin.version>
 		<build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
 	</properties>
 

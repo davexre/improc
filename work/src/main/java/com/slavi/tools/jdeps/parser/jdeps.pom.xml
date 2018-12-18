@@ -1,0 +1,71 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.slavi</groupId>
+	<artifactId>example.javacc.jdeps</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<builddir>${project.basedir}/target/</builddir>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>example.javacc</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<directory>${builddir}</directory>
+		<plugins>
+<!-- 
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jdeps-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<dotOutput>${builddir}/jdeps/dot</dotOutput>
+					<include>${builddir}/jdeps/dependancy</include>
+					<recursive>true</recursive>
+				</configuration>
+			</plugin>
+-->
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-dependencies</id>
+						<goals><goal>unpack-dependencies</goal></goals>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${builddir}/jdeps/dependancy</outputDirectory>
+					<markersDirectory>${builddir}/jdeps/dependancy-markers</markersDirectory>
+					<includes>**/*</includes>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<configuration>
+					<classpath/>
+					<executable>echo</executable>
+					<arguments>
+						<argument>-dotoutput ${builddir}/jdeps/dot</argument>
+						<argument>-R</argument>
+						<argument>${builddir}/jdeps/dependancy</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

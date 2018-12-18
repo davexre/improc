@@ -1,0 +1,68 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(JDepsDotParser)
+
+package com.slavi.tools.jdeps.parser;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+
+public class JDepsDotParser {
+	public Map<String, Map<String, Set<String>>> modules = new HashMap();
+	String moduleName, packageName, dependsOn;
+}
+PARSER_END(JDepsDotParser)
+
+SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n" |
+	<"//"(~["\r","\n"])*>
+}
+
+TOKEN: {
+	<DIGRAPH: "digraph"> |
+	<POINTER: "->"> |
+	<END_OF_LINE: ";"> |
+	<CURLY_BRACKET_OPEN: "{"> | 
+	<CURLY_BRACKET_CLOSE: "}"> |
+
+	<QUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\""> |
+	<NON_QUOTED_TOKEN: (~["\n","\r","\""," ","\t"])*>
+}
+
+void parse(): {}
+{
+	(
+		<DIGRAPH>
+		(<QUOTED_TOKEN> | <NON_QUOTED_TOKEN>)	{ moduleName = token.image; }
+		<CURLY_BRACKET_OPEN>
+		(
+			(<QUOTED_TOKEN> | <NON_QUOTED_TOKEN>)	{ packageName = token.image; }
+			<POINTER>
+			(<QUOTED_TOKEN> | <NON_QUOTED_TOKEN>)	{ dependsOn = token.image; }
+			<END_OF_LINE> {
+				Map<String, Set<String>> m = modules.get(moduleName);
+				if (m == null) {
+					m = new HashMap();
+					modules.put(moduleName, m);
+				}
+				Set<String> p = m.get(packageName);
+				if (p == null) {
+					p = new HashSet();
+					m.put(packageName, p);
+				}
+				p.add(dependsOn);
+			}
+		)*
+		<CURLY_BRACKET_CLOSE>
+	)*
+	<EOF>
+}
