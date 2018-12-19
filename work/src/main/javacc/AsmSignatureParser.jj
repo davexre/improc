@@ -14,51 +14,46 @@ import java.util.Set;
 
 
 public class AsmSignatureParser {
-	public Map<String, Map<String, Set<String>>> modules = new HashMap();
-	String moduleName, packageName, dependsOn;
+	public Set<String> classes = new HashSet();
 }
 PARSER_END(AsmSignatureParser)
 
 TOKEN: {
-	<SIMPLE_TYPE: ["Z", "C", "B", "S", "I", "F", "J", "D"] > |
-	<ARRAY: "[" > |
+	<OBJECT: "L" > : ID |
 	<TYPE_VAR: "T" > |
-	<TTTYPE_VAR: "TT" > |
-	<OBJECT: "L" > |
-	<SEMICOLUMN: ";"> |
-	<SLASH: "/"> |
-	<ANGLEBR_OPEN: "<"> |
-	<ANGLEBR_CLOSE: ">"> |
-	<STAR: "*"> |
-	<PLUS: "+"> |
-	<MINUS: "-"> |
-	<DOT: "."> |
-	<JAVA_IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_"])+ >
+	<SLASH: "/"> : ID |
+	<DOT: "."> : ID
+}
+
+<ID> TOKEN: {
+	<JAVA_IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_"])* > : DEFAULT
 }
 
 void typeArgs(): {}
 {
+	"<"
 	(
-		<ANGLEBR_OPEN>
+		"*" |
 		(
-			<STAR> |
-			(
-				(<PLUS> | <MINUS>)?
-				fieldTypeSignature()
-			)
-		)
-		<ANGLEBR_CLOSE>
+			("+" | "-")?
+			fieldTypeSignature()
+		)+
 	)
+	">"
 }
 
-void fieldTypeSignature(): {}
+void fieldTypeSignature():						{ String cl = ""; 			}
 {
 	(
 		// ClassType signature
 		<OBJECT>
 		(
-			<JAVA_IDENTIFIER>
-			(<SLASH> <JAVA_IDENTIFIER>)*
+			(
+				<JAVA_IDENTIFIER>				{ cl = token.image; 		}
+				(
+					<SLASH> <JAVA_IDENTIFIER>	{ cl += "/" + token.image;	}
+				)*
+			)									{ classes.add(cl); 			}
 			( typeArgs() )?
 			(
 				<DOT>
@@ -66,31 +61,43 @@ void fieldTypeSignature(): {}
 				( typeArgs() )?
 			)*
 		)
-		<SEMICOLUMN>
+		";"
 	) | 
-	(<ARRAY> typeSignature()
-	) |
+	("[" typeSignature() ) |
 	(
-		<TYPE_VAR>
+		<TYPE_VAR> : ID
 		<JAVA_IDENTIFIER>
-		<SEMICOLUMN>
+		";"
 	)
 }
 
 void typeSignature(): {}
 {
-	<SIMPLE_TYPE> |
+	"Z" | "C" | "B" | "S" | "I" | "F" | "J" | "D" |
 	fieldTypeSignature()
 }
-	
-void parse(): {}
+
+//void methodTypeSignature(): {}
+//{
+//	("<"  ">"
+//	)?
+//}
+//
+//
+//void typeParam(): {}
+//{
+//	<JAVA_IDENTIFIER> ":" ( fieldTypeSignature() )?
+//	(":" fieldTypeSignature())*
+//}
+//
+//void parseMethod(): {}
+//{
+//	methodTypeSignature()
+//	<EOF>
+//}
+
+void parseType(): {}
 {
-//	LOOKAHEAD(2)
-	// typeSignature()
-	(
-	<TYPE_VAR>			{ System.out.println("Single T"); }
-//	|<TTTYPE_VAR>		{ System.out.println("Dual T"); }
-	)
-	<JAVA_IDENTIFIER>	{ System.out.println(token.image); }
+	typeSignature()
 	<EOF>
 }

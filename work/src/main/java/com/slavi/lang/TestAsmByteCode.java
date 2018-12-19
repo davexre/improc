@@ -117,12 +117,34 @@ public class TestAsmByteCode {
 		}
 	}
 
+	String[] typeTests = {
+		"Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;",
+		"Ljava/util/List<TE;>;",
+		"Ljava/util/List<*>;",
+		"Ljava/util/List<+Ljava/lang/Number;>;",
+		"Ljava/util/List<-Ljava/lang/Integer;>;",
+		"Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;",
+		"Ljava/util/HashMap<TK;TV;>.HashIterator<TK;>;",
+	};
+
+	String[] methodTests = {
+		"T:Ljava/lang/Object;",
+	};
 
 	void doIt() throws Exception {
-		//StringReader r = new StringReader("Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;");
-		StringReader r = new StringReader("Tasd");
-		AsmSignatureParser p = new AsmSignatureParser(r);
-		p.parse();
+		for (String t: typeTests) {
+			StringReader r = new StringReader(t);
+			AsmSignatureParser p = new AsmSignatureParser(r);
+			p.parseType();
+			System.out.println(p.classes);
+		}
+
+//		for (String t: methodTests) {
+//			StringReader r = new StringReader(t);
+//			AsmSignatureParser p = new AsmSignatureParser(r);
+//			p.parseMethod();
+//			System.out.println(p.classes);
+//		}
 	}
 
 	public static void main(String[] args) throws Exception {
