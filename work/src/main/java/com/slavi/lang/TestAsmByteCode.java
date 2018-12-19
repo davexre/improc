@@ -2,6 +2,7 @@ package com.slavi.lang;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.StringReader;
 import java.util.List;
 
 import org.objectweb.asm.AnnotationVisitor;
@@ -106,15 +107,22 @@ public class TestAsmByteCode {
 
 	List<String> myDummy() { return null; }
 
-	File dir = new File("target/classes/");
-	void doIt() throws Exception {
-
+	void doIt2() throws Exception {
+		File dir = new File("target/classes/");
 		ClassPrinter cp = new ClassPrinter();
 		File f = new File(dir, "com/slavi/lang/TestAsmByteCode.class");
 		try (FileInputStream is = new FileInputStream(f)) {
 			ClassReader cr = new ClassReader(is);
 			cr.accept(cp, 0);
 		}
+	}
+
+
+	void doIt() throws Exception {
+		//StringReader r = new StringReader("Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;");
+		StringReader r = new StringReader("Tasd");
+		AsmSignatureParser p = new AsmSignatureParser(r);
+		p.parse();
 	}
 
 	public static void main(String[] args) throws Exception {

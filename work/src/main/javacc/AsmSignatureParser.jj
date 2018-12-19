@@ -1,0 +1,96 @@
+options{
+	STATIC=false;
+	IGNORE_CASE=false;
+}
+
+PARSER_BEGIN(AsmSignatureParser)
+
+package com.slavi.lang;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+
+public class AsmSignatureParser {
+	public Map<String, Map<String, Set<String>>> modules = new HashMap();
+	String moduleName, packageName, dependsOn;
+}
+PARSER_END(AsmSignatureParser)
+
+TOKEN: {
+	<SIMPLE_TYPE: ["Z", "C", "B", "S", "I", "F", "J", "D"] > |
+	<ARRAY: "[" > |
+	<TYPE_VAR: "T" > |
+	<TTTYPE_VAR: "TT" > |
+	<OBJECT: "L" > |
+	<SEMICOLUMN: ";"> |
+	<SLASH: "/"> |
+	<ANGLEBR_OPEN: "<"> |
+	<ANGLEBR_CLOSE: ">"> |
+	<STAR: "*"> |
+	<PLUS: "+"> |
+	<MINUS: "-"> |
+	<DOT: "."> |
+	<JAVA_IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_"])+ >
+}
+
+void typeArgs(): {}
+{
+	(
+		<ANGLEBR_OPEN>
+		(
+			<STAR> |
+			(
+				(<PLUS> | <MINUS>)?
+				fieldTypeSignature()
+			)
+		)
+		<ANGLEBR_CLOSE>
+	)
+}
+
+void fieldTypeSignature(): {}
+{
+	(
+		// ClassType signature
+		<OBJECT>
+		(
+			<JAVA_IDENTIFIER>
+			(<SLASH> <JAVA_IDENTIFIER>)*
+			( typeArgs() )?
+			(
+				<DOT>
+				<JAVA_IDENTIFIER>
+				( typeArgs() )?
+			)*
+		)
+		<SEMICOLUMN>
+	) | 
+	(<ARRAY> typeSignature()
+	) |
+	(
+		<TYPE_VAR>
+		<JAVA_IDENTIFIER>
+		<SEMICOLUMN>
+	)
+}
+
+void typeSignature(): {}
+{
+	<SIMPLE_TYPE> |
+	fieldTypeSignature()
+}
+	
+void parse(): {}
+{
+//	LOOKAHEAD(2)
+	// typeSignature()
+	(
+	<TYPE_VAR>			{ System.out.println("Single T"); }
+//	|<TTTYPE_VAR>		{ System.out.println("Dual T"); }
+	)
+	<JAVA_IDENTIFIER>	{ System.out.println(token.image); }
+	<EOF>
+}

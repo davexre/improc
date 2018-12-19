@@ -35,7 +35,7 @@ TOKEN: {
 	<CURLY_BRACKET_CLOSE: "}"> |
 
 	<QUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\""> |
-	<NON_QUOTED_TOKEN: (~["\n","\r","\""," ","\t"])*>
+	<NON_QUOTED_TOKEN: (~["\n","\r","\""," ","\t"])+>
 }
 
 void parse(): {}
