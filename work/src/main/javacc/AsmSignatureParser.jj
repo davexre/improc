@@ -1,32 +1,25 @@
 options{
-	STATIC=false;
+//	STATIC=false;
 	IGNORE_CASE=false;
 }
 
 PARSER_BEGIN(AsmSignatureParser)
 
-package com.slavi.lang;
+package com.slavi.lang.asmParser;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 
-public class AsmSignatureParser {
-	public Set<String> classes = new HashSet();
+public abstract class AsmSignatureParser {
+	StringBuilder cl = new StringBuilder();
+	
+	public abstract void addClass(String className);
 }
 PARSER_END(AsmSignatureParser)
 
-TOKEN: {
-	<OBJECT: "L" > : ID |
-	<TYPE_VAR: "T" > |
-	<SLASH: "/"> : ID |
-	<DOT: "."> : ID
-}
-
-<ID> TOKEN: {
-	<JAVA_IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_"])* > : DEFAULT
+<IDENTIFIER> TOKEN: {
+	<JAVA_IDENTIFIER: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_","$"])* > : DEFAULT
 }
 
 void typeArgs(): {}
@@ -42,33 +35,34 @@ void typeArgs(): {}
 	">"
 }
 
-void fieldTypeSignature():						{ String cl = ""; 			}
+void classTypeSignature(): {}
 {
+	"L"
 	(
-		// ClassType signature
-		<OBJECT>
+		javaIdentifier()				{ cl.setLength(0); cl.append(token.image); }
 		(
-			(
-				<JAVA_IDENTIFIER>				{ cl = token.image; 		}
-				(
-					<SLASH> <JAVA_IDENTIFIER>	{ cl += "/" + token.image;	}
-				)*
-			)									{ classes.add(cl); 			}
-			( typeArgs() )?
-			(
-				<DOT>
-				<JAVA_IDENTIFIER>
-				( typeArgs() )?
-			)*
-		)
-		";"
-	) | 
-	("[" typeSignature() ) |
+			"/" javaIdentifier()		{ cl.append("/").append(token.image); }
+		)*
+	)									{ addClass(cl.toString()); cl.setLength(0); }
+	( typeArgs() )?
 	(
-		<TYPE_VAR> : ID
-		<JAVA_IDENTIFIER>
-		";"
-	)
+		"."
+		javaIdentifier()
+		( typeArgs() )?
+	)*
+	";"
+}
+
+void typeVar(): {}
+{
+	"T" javaIdentifier() ";"
+}
+
+void fieldTypeSignature(): {}
+{
+	( classTypeSignature() ) | 
+	("[" typeSignature() ) |
+	( typeVar() )
 }
 
 void typeSignature(): {}
@@ -77,26 +71,47 @@ void typeSignature(): {}
 	fieldTypeSignature()
 }
 
-//void methodTypeSignature(): {}
-//{
-//	("<"  ">"
-//	)?
-//}
-//
-//
-//void typeParam(): {}
-//{
-//	<JAVA_IDENTIFIER> ":" ( fieldTypeSignature() )?
-//	(":" fieldTypeSignature())*
-//}
-//
-//void parseMethod(): {}
-//{
-//	methodTypeSignature()
-//	<EOF>
-//}
+void methodTypeSignature(): {}
+{
+	( typeParams() )?
+	"("
+		( typeSignature() )*
+	")"
+	( typeSignature() | "V" ) 
+	( classTypeSignature() | typeVar() )*
+}
 
-void parseType(): {}
+void typeParams(): {}
+{
+	"<" 
+	( typeParam() )+
+	">"
+}
+
+void javaIdentifier():	{ token_source.SwitchTo(IDENTIFIER); }
+{
+	<JAVA_IDENTIFIER>	{ token_source.SwitchTo(DEFAULT); }
+}
+
+void typeParam(): {}
+{
+	javaIdentifier() ":" fieldTypeSignature()
+}
+
+void parseClassSignature(): {}
+{
+	( typeParams() )?
+	( classTypeSignature() )+
+	<EOF>
+}
+
+void parseMethodSignature(): {}
+{
+	methodTypeSignature()
+	<EOF>
+}
+
+void parseTypeSignature(): {}
 {
 	typeSignature()
 	<EOF>
