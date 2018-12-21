@@ -1,29 +1,11 @@
-package com.slavi.lang;
+package com.slavi.lang.asm;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.FieldVisitor;
@@ -35,17 +17,18 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 
-import com.slavi.lang.asmParser.AsmSignatureParser;
+import com.slavi.lang.asm.parser.AsmParser;
 
-public class TestAsmByteCode {
-
+public class AsmClass {
 	static final int ASM = Opcodes.ASM7;
 
-	public HashSet<String> classes = new HashSet();
+	public ClassLocation location;
+	public String className;
+	public HashSet<String> usedClasses = new HashSet();
 
 	public void addClassName(String className) {
 		if (StringUtils.isEmpty(className)) return;
-		classes.add(className);
+		usedClasses.add(className);
 	}
 
 	public void addType(String desc) {
@@ -77,16 +60,27 @@ public class TestAsmByteCode {
 
 	public void addObject(Object i) {
 		if (i instanceof Type) {
-			addType(((Type) i).getDescriptor());
+			Type t = (Type) i;
+			switch (t.getSort()) {
+			case Type.METHOD:
+				addMethod(t.getDescriptor());
+				break;
+			case Type.OBJECT:
+				addClass(t.getDescriptor());
+				break;
+			default:
+				addType(t.getDescriptor());
+				break;
+			}
 		} else if (i instanceof Handle) {
-			addType(((Handle) i).getDesc());
+			addMethod(((Handle) i).getDesc());
 		} else if (i instanceof ConstantDynamic) {
 			addType(((ConstantDynamic) i).getDescriptor());
 		// } else if (i instanceof ) { // More MethodVisitor.visitLdcInsn
 		}
 	}
 
-	class AsmSignatureParserImpl extends AsmSignatureParser {
+	class AsmSignatureParserImpl extends AsmParser {
 
 		public AsmSignatureParserImpl(String str) {
 			super(new StringReader(str));
@@ -224,8 +218,8 @@ public class TestAsmByteCode {
 
 		public void visitInvokeDynamicInsn(final String name, final String descriptor,
 				final Handle bootstrapMethodHandle, final Object... bootstrapMethodArguments) {
-			addType(descriptor);
-			addType(bootstrapMethodHandle.getDesc());
+			addMethod(descriptor);
+			addMethod(bootstrapMethodHandle.getDesc());
 			if (bootstrapMethodArguments != null)
 				for (Object i : bootstrapMethodArguments) {
 					addObject(i);
@@ -318,6 +312,7 @@ public class TestAsmByteCode {
 		}
 
 		public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+			className = name;
 			addClassName(name);
 			addClassName(superName);
 			addClass(signature);
@@ -338,7 +333,7 @@ public class TestAsmByteCode {
 
 		public void visitOuterClass(String owner, String name, String desc) {
 			addClassName(owner);
-			addClass(desc);
+			addMethod(desc);
 		}
 
 		public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
@@ -381,102 +376,5 @@ public class TestAsmByteCode {
 
 		public void visitEnd() {
 		}
-	}
-
-	List<String> myDummy() { return null; }
-
-	void doIt2() throws Exception {
-		File dir = new File("target/classes/");
-		ClassPrinter cp = new ClassPrinter();
-		File f = new File(dir, "com/slavi/lang/TestAsmByteCode.class");
-		try (FileInputStream is = new FileInputStream(f)) {
-			ClassReader cr = new ClassReader(is);
-			cr.accept(cp, 0);
-		}
-
-		System.out.println("--------- Referenced classes ----------");
-		ArrayList<String> classes = new ArrayList(this.classes);
-		Collections.sort(classes);
-		for (String t : classes) {
-			System.out.println(t);
-		}
-	}
-
-	String[] typeTests = {
-		"Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;",
-		"Ljava/util/List<TE;>;",
-		"Ljava/util/List<*>;",
-		"Ljava/util/List<+Ljava/lang/Number;>;",
-		"Ljava/util/List<-Ljava/lang/Integer;>;",
-		"Ljava/util/List<[Ljava/util/List<Ljava/lang/String;>;>;",
-		"Ljava/util/HashMap<TK;TV;>.HashIterator<TK;>;",
-	};
-
-	String[] methodTests = {
-		"<T:Ljava/lang/Object;>(I)Ljava/lang/Class<+TT;>;",
-		"()V",
-	};
-
-	String[] classTests = {
-		"<E:Ljava/lang/Object;T:Ljava/lang/Object;>Ljava/util/List;",
-		"<E:Ljava/lang/Object;>Ljava/util/List<TE;>;",
-		"<InputType:Ljava/lang/Object;OutputType:Ljava/lang/Object;>Lcom/slavi/math/transform/BaseTransformer<TInputType;TOutputType;>;"
-	};
-
-	void doIt() throws Exception {
-/*		for (String t: typeTests) {
-			AsmSignatureParserImpl p = new AsmSignatureParserImpl(t);
-			p.parseTypeSignature();
-			System.out.println(classes);
-			classes.clear();
-		}
-
-		for (String t: methodTests) {
-			AsmSignatureParserImpl p = new AsmSignatureParserImpl(t);
-			p.parseMethodSignature();
-			System.out.println(classes);
-			classes.clear();
-		}
-*/
-		for (String t: classTests) {
-			System.out.println(">>> " + t);
-			AsmSignatureParserImpl p = new AsmSignatureParserImpl(t);
-			p.parseClassSignature();
-			System.out.println(classes);
-			classes.clear();
-		}
-	}
-
-	void doIt3() throws Exception {
-		Path f;
-		if (true) {
-			String dn = "jar:file:/home/spetrov/.m2/repository/com/slavi/util.math/1.0.0-SNAPSHOT/util.math-1.0.0-SNAPSHOT.jar";
-			URI uri = URI.create(dn);
-			FileSystem fs = FileSystems.newFileSystem(uri, Collections.EMPTY_MAP);
-			f = fs.getPath("/");
-		} else {
-			String dn = "/home/spetrov/.S/git/improc/work/target/classes";
-			f = Paths.get(dn);
-		}
-
-		PathMatcher matcher = f.getFileSystem().getPathMatcher("glob:**.class");
-		Files.walkFileTree(f, new SimpleFileVisitor<Path>() {
-			@Override
-			public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
-				if (matcher.matches(file)) {
-//					System.out.println(file);
-					try (InputStream is = Files.newInputStream(file)) {
-						ClassReader cr = new ClassReader(is);
-						cr.accept(new ClassPrinter(), 0);
-					}
-				}
-				return FileVisitResult.CONTINUE;
-			}
-		});
-	}
-
-	public static void main(String[] args) throws Exception {
-		new TestAsmByteCode().doIt();
-		System.out.println("Done.");
 	}
 }

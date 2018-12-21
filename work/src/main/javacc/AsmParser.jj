@@ -1,0 +1,97 @@
+options{
+//	STATIC=false;
+	IGNORE_CASE=false;
+}
+
+PARSER_BEGIN(AsmParser)
+
+package com.slavi.lang.asm.parser;
+
+public abstract class AsmParser {
+	public abstract void addClass(String className);
+}
+PARSER_END(AsmParser)
+
+TOKEN: {
+	<CLASS_TYPE_IDENTIFIER: "L" ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_","$","/"])* > |
+	<TYPE_VAR: "T" ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_","$"])* ";" > |
+	<INNER_CLASS_TYPE_IDENTIFIER: "." ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_","$","/"])* > |
+	<TYPE_PARAM: ["a"-"z","A"-"Z"] (["a"-"z","A"-"Z","0"-"9","_","$"])* ":" >
+}
+
+void typeArgs(): {}
+{
+	"<"
+	(
+		"*" |
+		(
+			("+" | "-")?
+			fieldTypeSignature()
+		)
+	)+
+	">"
+}
+
+void classTypeSignature(): {}
+{
+	<CLASS_TYPE_IDENTIFIER>			{ addClass(token.image.substring(1)); }
+	( typeArgs() )?
+	(
+		<INNER_CLASS_TYPE_IDENTIFIER>
+		( typeArgs() )?
+	)*
+	";"
+}
+
+void fieldTypeSignature(): {}
+{
+	( classTypeSignature() ) | 
+	("[" typeSignature() ) |
+	<TYPE_VAR>
+}
+
+void typeSignature(): {}
+{
+	"Z" | "C" | "B" | "S" | "I" | "F" | "J" | "D" |
+	fieldTypeSignature()
+}
+
+void methodTypeSignature(): {}
+{
+	( typeParams() )?
+	"("
+		( typeSignature() )*
+	")"
+	( typeSignature() | "V" ) 
+	( classTypeSignature() | <TYPE_VAR> )*
+}
+
+void typeParams(): {}
+{
+	"<"
+	(
+		<TYPE_PARAM>
+		( fieldTypeSignature() )?
+		( ":" fieldTypeSignature() )*
+	)+
+	">"
+}
+
+void parseClassSignature(): {}
+{
+	( typeParams() )?
+	( classTypeSignature() )+
+	<EOF>
+}
+
+void parseMethodSignature(): {}
+{
+	methodTypeSignature()
+	<EOF>
+}
+
+void parseTypeSignature(): {}
+{
+	typeSignature()
+	<EOF>
+}
