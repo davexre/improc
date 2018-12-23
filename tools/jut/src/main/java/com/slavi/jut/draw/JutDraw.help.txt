@@ -1,0 +1,23 @@
+Usage: draw <options>
+    Makes a class/package dependancy diagram.
+
+ -h,--help   Display this help
+ -m <mode>   Mode for class extraction:
+    class    (default) Use classes to make the dependancy graph.
+    package  Use packages instead.
+ -l <class files location>
+             Classes location. May specify more than one. Location
+             could be a folder or a jar/zip file and optional source folder.
+ -r <regex>  Regex to filter the classes/packages to start with in the graph.
+             May specify more than one. If none specified then all 
+             classes/packages are matched.
+
+Error levels:
+  0          Ok
+  254        Invalid command line parameters. Help is displayed.
+  255        An error has occurred. See stderr for details.
+
+Examples:
+  draw -m class -l projA/classes -r 'com/projA/start/WithMe' -r 'com/projA/useMeAsWell/.*' > somefile.dot
+
+  dot -Tpng somefile.dot > somefile.png

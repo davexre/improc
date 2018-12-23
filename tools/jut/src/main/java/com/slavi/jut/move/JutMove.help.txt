@@ -1,0 +1,10 @@
+Usage: draw <options>
+
+ -h,--help   Display this help
+
+Error levels:
+  0          Ok
+  254        Invalid command line parameters. Help is displayed.
+  255        An error has occurred. See stderr for details.
+
+Examples:

@@ -1,42 +1,7 @@
-Usage: jut <options>
+Usage: 
+  jut <command> [<options>]
+  jut <command> -h
 
- -h,--help   Display this help
- -cfg <cfg file>
-             Read/write settings from a configuration file. Default "jut-cfg.json"
- -m <mode>   Mode for class extraction:
-    split    (default) Split/Extract classes to an independent project, i.e. move to
-             target project:
-             * matching classes
-             * classes they reffer to (recursive)
-             * classes that use the classes being moved (recursive).
-    common   Extract a project with an intermediate common project, i.e.
-             move to target project:
-             * matching classes
-             * classes they reffer to (recursive)
-             after that move to common project classes that are used by the 
-             remaining classes.
- -l <class files location[=<source files loation>]>
-             Classes (sources) location. May specify more than one. Location
-             could be a folder or a jar/zip file and optional source folder.
- -t <target files location>=<regex pattern 1>
-             Target project source files folder and extract regex patterns.
- -c <target files location>
-             Source files folder for Common classes. Applicable only for mode "common".
-
-Error levels:
-  0                          Ok, metadata is created or comparison found no mismatch.
-  254                        Invalid command line parameters. Help is displayed.
-  255                        An error has occurred. See stderr for details.
-
-Examples:
-  jut -l projA/classes -t 'extractProj=com/projA/extractme/SingleClass' -t 'extractProj=com/projA/extractme2/ToExtract.*'
-
-  jut -l projA/classes=projA/src -t 'extractProj/src=com/myproj/extractme/.*' -t extractProj/src=com/myproj/extractme2/ToExtract.*'
-
-  jut -cfg my-jut-cfg.json \
-      -m common \
-      -l projA/classes=projA/src \
-      -l projB/classes=projB/src \
-      -t 'extractProj/src=com/myproj/extractme/.*' \
-      -t 'extractProj/src=com/myproj/extractme2/ToExtract.*' \
-      -c 'commonProj/src'
+Commands:
+  move        Extract java classes (move sources) into independent projects.
+  draw        Make a class-dependency diagram.

@@ -1,11 +1,14 @@
 package com.slavi.jut.asm;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ConstantDynamic;
 import org.objectweb.asm.FieldVisitor;
@@ -377,5 +380,12 @@ public class AsmClass {
 
 		public void visitEnd() {
 		}
+	}
+
+	public static AsmClass loadOneClass(InputStream classBytes) throws IOException {
+		AsmClass r = new AsmClass();
+		ClassReader cr = new ClassReader(classBytes);
+		cr.accept(r.new ClassPrinter(), 0);
+		return r;
 	}
 }

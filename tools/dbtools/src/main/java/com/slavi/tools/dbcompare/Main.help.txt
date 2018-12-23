@@ -1,4 +1,5 @@
 Usage: dbcompare <command> <options>
+    Extract database metadata to file and compare databases using these files.
 
 Commands:
   get                        Get metadata for a database and store it in a file

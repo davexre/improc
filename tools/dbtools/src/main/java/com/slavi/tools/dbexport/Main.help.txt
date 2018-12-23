@@ -1,4 +1,5 @@
 Usage: dbexport <options>
+    Export a sql(s) or table(s) to CSV or SQL format.
 
 Options:
   -h,--help                      Display this help.
