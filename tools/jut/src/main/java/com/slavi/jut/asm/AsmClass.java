@@ -1,4 +1,4 @@
-package com.slavi.lang.asm;
+package com.slavi.jut.asm;
 
 import java.io.StringReader;
 import java.util.HashSet;
@@ -17,12 +17,13 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.TypePath;
 
-import com.slavi.lang.asm.parser.AsmParser;
+import com.slavi.jut.asm.parser.AsmParser;
+import com.slavi.jut.cfg.Location;
 
 public class AsmClass {
 	static final int ASM = Opcodes.ASM7;
 
-	public ClassLocation location;
+	public Location location;
 	public String className;
 	public HashSet<String> usedClasses = new HashSet();
 
@@ -80,7 +81,7 @@ public class AsmClass {
 		}
 	}
 
-	class AsmSignatureParserImpl extends AsmParser {
+	protected class AsmSignatureParserImpl extends AsmParser {
 
 		public AsmSignatureParserImpl(String str) {
 			super(new StringReader(str));
@@ -92,7 +93,7 @@ public class AsmClass {
 		}
 	}
 
-	public class ModulePrinter extends ModuleVisitor {
+	class ModulePrinter extends ModuleVisitor {
 		public ModulePrinter(int api) {
 			super(ASM);
 		}
@@ -123,7 +124,7 @@ public class AsmClass {
 		}
 	}
 
-	public class AnnotationPrinter extends AnnotationVisitor {
+	class AnnotationPrinter extends AnnotationVisitor {
 		public AnnotationPrinter() {
 			super(ASM);
 		}
@@ -148,7 +149,7 @@ public class AsmClass {
 		}
 	}
 
-	public class MethodPrinter extends MethodVisitor {
+	class MethodPrinter extends MethodVisitor {
 		public MethodPrinter() {
 			super(ASM);
 		}
@@ -286,7 +287,7 @@ public class AsmClass {
 		}
 	}
 
-	public class FieldPrinter extends FieldVisitor {
+	class FieldPrinter extends FieldVisitor {
 		public FieldPrinter() {
 			super(ASM);
 		}

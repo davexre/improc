@@ -13,5 +13,6 @@
 	
 	<modules>
 		<module>dbtools</module>
+		<module>jut</module>
 	</modules>
 </project>

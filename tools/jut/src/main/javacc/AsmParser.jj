@@ -5,7 +5,7 @@ options{
 
 PARSER_BEGIN(AsmParser)
 
-package com.slavi.lang.asm.parser;
+package com.slavi.jut.asm.parser;
 
 public abstract class AsmParser {
 	public abstract void addClass(String className);

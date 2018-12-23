@@ -1,6 +1,6 @@
 package com.slavi.dbtools;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -9,10 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Main {
 	public static void main(String[] args) {
 		try {
-			List<String> argsList = new ArrayList<>();
-			if (args != null)
-				for (String arg : args)
-					argsList.add(arg);
+			List<String> argsList = Arrays.asList(args);
 			String cmd = argsList.size() == 0 ? "" : StringUtils.trimToEmpty(argsList.remove(0));
 			args = argsList.toArray(new String[argsList.size()]);
 

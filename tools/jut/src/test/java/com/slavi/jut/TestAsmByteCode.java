@@ -1,4 +1,4 @@
-package com.slavi.lang.asm;
+package com.slavi.jut;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.objectweb.asm.ClassReader;
+
+import com.slavi.jut.asm.AsmClass;
 
 public class TestAsmByteCode extends AsmClass {
 
