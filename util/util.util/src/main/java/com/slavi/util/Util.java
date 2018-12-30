@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.slavi.util.jackson.MatrixJsonModule;
+import com.slavi.util.jackson.MatrixXmlModule;
 
 /**
  * This class contains utility static methods for general purpose.
@@ -528,19 +529,19 @@ public class Util {
 		m.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		m.setAnnotationIntrospector(pair);
 		m.enable(SerializationFeature.INDENT_OUTPUT);
-
-		m.registerModule(new MatrixJsonModule());
 	}
 
 	public static ObjectMapper xmlMapper() {
 		ObjectMapper m = new XmlMapper();
 		configureMapper(m);
+		m.registerModule(new MatrixXmlModule());
 		return m;
 	}
 
 	public static ObjectMapper jsonMapper() {
 		ObjectMapper m = new ObjectMapper();
 		configureMapper(m);
+		m.registerModule(new MatrixJsonModule());
 		return m;
 	}
 }

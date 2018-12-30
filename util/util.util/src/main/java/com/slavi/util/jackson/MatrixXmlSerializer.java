@@ -7,21 +7,23 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.slavi.math.matrix.Matrix;
 
-public class MatrixJsonSerializer extends StdSerializer<Matrix> {
-	public MatrixJsonSerializer() {
+public class MatrixXmlSerializer extends StdSerializer<Matrix> {
+	public MatrixXmlSerializer() {
 		super(Matrix.class);
 	}
 
 	@Override
 	public void serialize(Matrix value, JsonGenerator g, SerializerProvider provider)
 			throws IOException {
-		g.writeStartArray();
-		double r[] = new double[value.getSizeX()];
+		g.writeStartObject();
 		for (int j = 0; j < value.getSizeY(); j++) {
-			for (int i = 0; i < value.getSizeX(); i++)
-				r[i] = value.getItem(i, j);
-			g.writeArray(r, 0, r.length);
+			g.writeFieldName("r");
+			g.writeStartObject();
+			for (int i = 0; i < value.getSizeX(); i++) {
+				g.writeNumberField("c", value.getItem(i, j));
+			}
+			g.writeEndObject();
 		}
-		g.writeEndArray();
+		g.writeEndObject();
 	}
 }

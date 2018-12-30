@@ -13,20 +13,20 @@ import com.slavi.math.matrix.Vector;
  * com.fasterxml.jackson.databind.ObjectMapper om;
  * om.registerModule(new MatrixJsonModule);
  */
-public class MatrixJsonModule extends SimpleModule {
-	public MatrixJsonModule() {
+public class MatrixXmlModule extends SimpleModule {
+	public MatrixXmlModule() {
 		super(new Version(1, 0, 0, null, null, null));
 
-		addSerializer(Matrix.class, new MatrixJsonSerializer());
+		addSerializer(Matrix.class, new MatrixXmlSerializer());
 		addDeserializer(Matrix.class, new MatrixDeserializer());
 
-		addSerializer(SymmetricMatrix.class, new SymmetricMatrixJsonSerializer());
+		addSerializer(SymmetricMatrix.class, new SymmetricMatrixXmlSerializer());
 		addDeserializer(SymmetricMatrix.class, new SymmetricMatrixDeserializer());
 
 		addSerializer(DiagonalMatrix.class, new DiagonalMatrixSerializer());
 		addDeserializer(DiagonalMatrix.class, new DiagonalMatrixDeserializer());
 
-		addSerializer(TriangularMatrix.class, new TriangularMatrixJsonSerializer());
+		addSerializer(TriangularMatrix.class, new TriangularMatrixXmlSerializer());
 		addDeserializer(TriangularMatrix.class, new TriangularMatrixDeserializer());
 
 		addSerializer(Vector.class, new VectorSerializer());

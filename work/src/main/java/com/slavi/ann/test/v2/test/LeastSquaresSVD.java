@@ -56,7 +56,7 @@ public class LeastSquaresSVD extends LeastSquaresAdjust {
 		Matrix u = new Matrix();
 		Matrix vt = new Matrix();
 		Matrix s = new Matrix();
-		Matrix A = nm.makeSquareMatrix();
+		Matrix A = nm.toMatrix();
 //		new JLapack().mysvd(A, u, vt, s);
 
 		BlockRealMatrix aa = MatrixUtil.toApacheMatrix(A);

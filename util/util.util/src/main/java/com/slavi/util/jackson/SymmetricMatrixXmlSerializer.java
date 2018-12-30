@@ -7,21 +7,23 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.slavi.math.matrix.SymmetricMatrix;
 
-public class SymmetricMatrixJsonSerializer extends StdSerializer<SymmetricMatrix> {
-	public SymmetricMatrixJsonSerializer() {
+public class SymmetricMatrixXmlSerializer extends StdSerializer<SymmetricMatrix> {
+	public SymmetricMatrixXmlSerializer() {
 		super(SymmetricMatrix.class);
 	}
 
 	@Override
 	public void serialize(SymmetricMatrix value, JsonGenerator g, SerializerProvider provider)
 			throws IOException {
-		g.writeStartArray();
-		double r[] = new double[value.getSizeY()];
+		g.writeStartObject();
 		for (int j = 0; j < value.getSizeY(); j++) {
-			for (int i = 0; i <= j; i++)
-				r[i] = value.getItem(i, j);
-			g.writeArray(r, 0, j + 1);
+			g.writeFieldName("r");
+			g.writeStartObject();
+			for (int i = 0; i <= j; i++) {
+				g.writeNumberField("c", value.getItem(i, j));
+			}
+			g.writeEndObject();
 		}
-		g.writeEndArray();
+		g.writeEndObject();
 	}
 }

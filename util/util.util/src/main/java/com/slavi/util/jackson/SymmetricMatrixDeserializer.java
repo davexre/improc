@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.slavi.math.matrix.SymmetricMatrix;
 
-public class SymmetricMatrixJsonDeserializer extends StdDeserializer<SymmetricMatrix> {
-	public SymmetricMatrixJsonDeserializer() {
+public class SymmetricMatrixDeserializer extends StdDeserializer<SymmetricMatrix> {
+	public SymmetricMatrixDeserializer() {
 		super(SymmetricMatrix.class);
 	}
 

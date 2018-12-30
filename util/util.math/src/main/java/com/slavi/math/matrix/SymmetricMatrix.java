@@ -7,13 +7,35 @@ import java.io.StreamTokenizer;
 import java.util.ArrayList;
 
 import com.slavi.math.MathUtil;
+import com.slavi.math.matrix.Matrix.XchgRec;
 
-public class SymmetricMatrix {
-
-	/**
-	 * The elements of the matrix.
-	 */
-	private double m[];
+/**
+ * Symmetric matrix.
+ *
+ * The matrix can be interpreted as a "vector" where the elements are
+ * aligned by rows, i.e.<br>
+ * <br>
+ * <tt>
+ *       SymmetricMatrix [4]<br>
+ *        a b d g<br>
+ *        b c e h<br>
+ *        d e f i<br>
+ *        g h i j<br>
+ *       or with internal (in-memory) representation<br>
+ *        a      <br>
+ *        b c    <br>
+ *        d e f  <br>
+ *        g h i j<br>
+ *       <br>
+ *       The same matrix as vector [10] (size+1)*size/2 = (4+1)*4/2=10<br>
+ *        a b c d e f j h i j<br>
+ * </tt>
+ *
+ * @param aIndex
+ *
+ * @return The value
+ */
+public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> implements IMatrix<T> {
 
 	/**
 	 * Size of the matrix
@@ -40,6 +62,7 @@ public class SymmetricMatrix {
 	 *
 	 * @return Returns true if all the ements of the matrices are equal.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof SymmetricMatrix))
 			return false;
@@ -61,6 +84,7 @@ public class SymmetricMatrix {
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
+	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		for (int j = 0; j < sizeM; j++) {
@@ -96,16 +120,6 @@ public class SymmetricMatrix {
 		fou.print(this.toString());
 	}
 
-	public double[][] toArray() {
-		double [][] r = new double[getSizeM()][getSizeM()];
-		for (int i = getSizeM() - 1; i >= 0; i--) {
-			for (int j = getSizeM() - 1; j >= 0; j--) {
-				r[i][j] = getItem(i, j);
-			}
-		}
-		return r;
-	}
-
 	/**
 	 * Resizes the matrix if the new size differs from the current matrix size.
 	 */
@@ -121,10 +135,11 @@ public class SymmetricMatrix {
 		m = new double[newSize];
 	}
 
-	/**
-	 * Returns the size of the matrix.
-	 */
-	public int getSizeM() {
+	public int getSizeX() {
+		return sizeM;
+	}
+
+	public int getSizeY() {
 		return sizeM;
 	}
 
@@ -133,6 +148,7 @@ public class SymmetricMatrix {
 	 * element is atX=0, atY=0. Also have in mind that this.get(i,j) is
 	 * ABSOLUTELY the same as this.get(j,i), i.e. it is the same object.
 	 */
+	@Override
 	public double getItem(int atX, int atY) {
 		if (atX < atY) {
 			int tmp = atX;
@@ -160,6 +176,7 @@ public class SymmetricMatrix {
 		m[((atX * (atX + 1)) >> 1) + atY] = aValue;
 	}
 
+	@Override
 	public double itemAdd(int atX, int atY, double aValue) {
 		if (atX < atY) {
 			int tmp = atX;
@@ -171,6 +188,7 @@ public class SymmetricMatrix {
 		return m[((atX * (atX + 1)) >> 1) + atY] += aValue;
 	}
 
+	@Override
 	public double itemMul(int atX, int atY, double aValue) {
 		if (atX < atY) {
 			int tmp = atX;
@@ -180,60 +198,6 @@ public class SymmetricMatrix {
 		if (atY < 0 || atY >= sizeM)
 			throw new IndexOutOfBoundsException();
 		return m[((atX * (atX + 1)) >> 1) + atY] *= aValue;
-	}
-
-	/**
-	 * Returns the size of the SymmetricMatrix as a vector
-	 *
-	 * @see SymmetricMatrix#getVectorItem(int)
-	 */
-	public int getVectorSize() {
-		return m == null ? 0 : m.length; // ((sizeM + 1) * sizeM) >> 1;
-	}
-
-	/**
-	 * The matrix can be interpreted as a "vector" where the elements are
-	 * aligned by rows, i.e.<br>
-	 * <br>
-	 * <tt>
-	 *       SymmetricMatrix [4]<br>
-	 *        a b d g<br>
-	 *        b c e h<br>
-	 *        d e f i<br>
-	 *        g h i j<br>
-	 *       or with internal (in-memory) representation<br>
-	 *        a      <br>
-	 *        b c    <br>
-	 *        d e f  <br>
-	 *        g h i j<br>
-	 *       <br>
-	 *       The same matrix as vector [10] (size+1)*size/2 = (4+1)*4/2=10<br>
-	 *        a b c d e f j h i j<br>
-	 * </tt>
-	 *
-	 * @param aIndex
-	 *
-	 * @return The value
-	 */
-	public double getVectorItem(int aIndex) {
-		if (aIndex < 0 || aIndex >= m.length)
-			throw new IndexOutOfBoundsException();
-		return m[aIndex];
-	}
-
-	/**
-	 * @see SymmetricMatrix#getVectorItem(int)
-	 */
-	public void setVectorItem(int aIndex, double aValue) {
-		m[aIndex] = aValue;
-	}
-
-	public double vectorItemAdd(int aIndex, double aValue) {
-		return m[aIndex] += aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
-	}
-
-	public double vectorItemMul(int aIndex, double aValue) {
-		return m[aIndex] *= aValue; // setItem(aIndex % sizeX, aIndex / sizeX, aValue);
 	}
 
 	/**
@@ -380,51 +344,32 @@ public class SymmetricMatrix {
 	}
 
 	/**
-	 * Multiplies all elements of the matrix with aValue. The formula is:<br>
-	 * <tt>dest[i][j] = aValue * this[i][j]<br>
-	 * </tt>
-	 */
-	public void rMul(double aValue) {
-		for (int i = m.length - 1; i >= 0; i--)
-			m[i] *= aValue;
-	}
-
-	/**
 	 * Returns the sum of all elements in the matrix <b>AS IF the matrix is
 	 * <i>Matrix</i> not <i>SymmetricMatrix</i></b>
 	 */
+	@Override
 	public double sumAll() {
-		double D = 0;
+		double d = 0;
 		for (int i = sizeM - 1; i >= 0; i--)
 			for (int j = sizeM - 1; j >= 0; j--)
-				D += getItem(i, j);
-		return D;
+				d += getItem(i, j);
+		return d;
 	}
 
 	/**
 	 * Retuns the maximum value of all elements of the matrix.
 	 */
+	@Override
 	public double max() {
-		if (sizeM == 0)
-			return 0;
-		double D = m[0];
-		for (int i = m.length - 1; i >= 0; i--)
-			if (D < m[i])
-				D = m[i];
-		return D;
+		return Math.max(0, super.max());
 	}
 
 	/**
 	 * Retuns the minimum value of all elements of the matrix.
 	 */
+	@Override
 	public double min() {
-		if (sizeM == 0)
-			return 0;
-		double D = m[0];
-		for (int i = m.length - 1; i >= 0; i--)
-			if (D > m[i])
-				D = m[i];
-		return D;
+		return Math.min(0, super.min());
 	}
 
 	/**
@@ -468,12 +413,12 @@ public class SymmetricMatrix {
 	 * </tt>
 	 */
 	public boolean normalize() {
-		double D = sumAll();
-		if (D == 0) {
+		double d = sumAll();
+		if (d == 0) {
 			make0();
 			return false;
 		}
-		rMul(1 / D);
+		rMul(1 / d);
 		return true;
 	}
 
@@ -503,28 +448,6 @@ public class SymmetricMatrix {
 			for (int i = m.length - 1; i >= 0; i--)
 				m[i] = (m[i] - minVal) / delta;
 		}
-	}
-
-	/**
-	 * Returns a new symetrical matrix of class Matrix (not SymmetricMatrix).
-	 *
-	 * @return Returns the new Matrix matrix.
-	 */
-	public Matrix makeSquareMatrix() {
-		Matrix result = new Matrix(sizeM, sizeM);
-		copyToSquareMatrix(result);
-		return result;
-	}
-
-	/**
-	 * Copies this SymmetricMatrix to the dest Matrix. The dest becomes a symetrical matrix.
-	 * If the dest matrix is of incorrect size it will be resized.
-	 */
-	public void copyToSquareMatrix(Matrix dest) {
-		dest.resize(sizeM, sizeM);
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--)
-				dest.setItem(i, j, getItem(i, j));
 	}
 
 	/**
@@ -563,22 +486,6 @@ public class SymmetricMatrix {
 	}
 
 	/**
-	 * Makes a zero matrix. All elements are set to 0.
-	 */
-	public void make0() {
-		for (int i = m.length - 1; i >= 0; i--)
-			m[i] = 0;
-	}
-
-	/**
-	 * Sets all elements of this matrix to aValue.
-	 */
-	public void makeR(double aValue) {
-		for (int i = m.length - 1; i >= 0; i--)
-			m[i] = aValue;
-	}
-
-	/**
 	 * Returns true if this matrix is the identity matrix
 	 */
 	public double getSquaredDeviationFromE() {
@@ -586,6 +493,16 @@ public class SymmetricMatrix {
 		for (int i = sizeM - 1; i >= 0; i--)
 			for (int j = sizeM - 1; j >= 0; j--) {
 				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
+				result += d*d;
+			}
+		return result;
+	}
+
+	public double getSquaredDeviationFrom0() {
+		double result = 0.0;
+		for (int i = sizeM - 1; i >= 0; i--)
+			for (int j = sizeM - 1; j >= 0; j--) {
+				double d = getItem(i, j);
 				result += d*d;
 			}
 		return result;
@@ -602,17 +519,6 @@ public class SymmetricMatrix {
 				if (Math.abs(d) > tolerance)
 					return false;
 			}
-		return true;
-	}
-
-	/**
-	 * Returns true if all elements are 0.
-	 */
-	public boolean is0(double tolerance) {
-		tolerance = Math.abs(tolerance);
-		for (int i = m.length - 1; i >= 0; i--)
-			if (Math.abs(m[i]) > tolerance)
-				return false;
 		return true;
 	}
 
@@ -652,21 +558,6 @@ public class SymmetricMatrix {
 					j++;
 				setItem(atX2, i, tmpA[0][j++]);
 			}
-	}
-
-	/**
-	 * Private class used by Matrix.inverse()
-	 */
-	private static class XchgRec {
-
-		public int a;
-
-		public int b;
-
-		public XchgRec(int A, int B) {
-			a = A;
-			b = B;
-		}
 	}
 
 	public double debugMinAbsDiag = 0;
@@ -736,43 +627,8 @@ public class SymmetricMatrix {
 		return true;
 	}
 
-	/**
-	 * Compares this matrix to the second and returns the correlation between
-	 * them.
-	 */
-	public MatrixCompareResult compareTo(SymmetricMatrix second) {
-		if (sizeM != second.sizeM) {
-			throw new IllegalArgumentException("Comparing matrices of different size");
-		}
-		MatrixCompareResult res = new MatrixCompareResult();
-		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
-
-		// Средно аритметично.
-		double S = 2.0 / (sizeM * (sizeM + 1));
-		res.AvgA = 0;
-		res.AvgB = 0;
-		for (int i = m.length - 1; i >= 0; i--) {
-			res.AvgA += m[i];
-			res.AvgB += second.m[i];
-		}
-		res.AvgA /= S;
-		res.AvgB /= S;
-		res.SAA = 0;
-		res.SAB = 0;
-		res.SBB = 0;
-		// Коефициенти на корелация.
-		double dA, dB;
-		for (int i = m.length - 1; i >= 0; i--) {
-			dA = m[i] - res.AvgA;
-			dB = second.m[i] - res.AvgB;
-			res.SAA += dA * dA;
-			res.SBB += dB * dB;
-			res.SAB += dA * dB;
-		}
-
-		// Коефициент на корелация на Pearson
-		res.PearsonR = res.SAB / Math.sqrt(res.SAA * res.SBB);
-
-		return res;
+	@Override
+	public T transpose() {
+		return (T) this;
 	}
 }

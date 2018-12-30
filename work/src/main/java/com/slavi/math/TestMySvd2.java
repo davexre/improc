@@ -5,18 +5,22 @@ import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.ejml.data.DMatrixRBlock;
 import org.ejml.simple.SimpleSVD;
 
+import com.slavi.math.matrix.DiagonalMatrix;
 import com.slavi.math.matrix.JLapack;
 import com.slavi.math.matrix.Matrix;
+import com.slavi.math.matrix.MatrixFactorization;
+import com.slavi.math.matrix.SVD_Obsolete;
 import com.slavi.util.MatrixUtil;
 import com.test.math.SVD_Working;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.NotConvergedException;
-import no.uib.cipr.matrix.SVD;
 
 public class TestMySvd2 {
 
-	public static Matrix pseudoInverseS(Matrix s, Matrix dest) {
+	static final double eps = 1e-10;
+
+	public static Matrix inverseDiagonalMatrix(Matrix s, Matrix dest) {
 		if (dest == null)
 			dest = new Matrix(s.getSizeY(), s.getSizeX());
 		else
@@ -26,7 +30,7 @@ public class TestMySvd2 {
 				double v = 0;
 				if (i == j) {
 					v = s.getItem(i, j);
-					if (Math.abs(v) > JLapack.EPS)
+					if (Math.abs(v) > eps)
 						v = 1.0 / v;
 					else
 						v = 0;
@@ -42,37 +46,66 @@ public class TestMySvd2 {
 		Matrix tmp3 = new Matrix();
 
 		vt.transpose(tmp1);
-		pseudoInverseS(s, tmp2);
+		inverseDiagonalMatrix(s, tmp2);
 		tmp1.mMul(tmp2, tmp3);
 		u.transpose(tmp1);
 		tmp3.mMul(tmp1, tmp2);
 		return tmp2;
 	}
 
-	public static Matrix pinv(Matrix a) {
-		JLapack jl = new JLapack();
-		Matrix u = new Matrix();
-		Matrix vt = new Matrix();
-		Matrix s = new Matrix();
-		jl.mysvd(a, u, vt, s);
-		return pinvOld(u, s, vt);
-	}
-
 	public static Matrix pinv(Matrix u, Matrix s, Matrix vt) {
-		Matrix pinv = new Matrix(u.getSizeY(), vt.getSizeX());
-		int minXY = Math.min(pinv.getSizeX(), pinv.getSizeY());
-		for (int j = pinv.getSizeY() - 1; j >= 0; j--)
-			for (int i = minXY - 1; i >= 0; i--) {
-				double d = s.getItem(i, i);
-				if (Math.abs(d) < JLapack.EPS)
-					continue;
-				d = vt.getItem(j, i) / d;
+		int minXY = Math.min(u.getSizeX(), vt.getSizeX());
+		DiagonalMatrix ss = new DiagonalMatrix(vt.getSizeX(), u.getSizeX());
+		for (int i = 0; i < minXY; i++)
+			ss.setItem(i, i, s.getItem(i, i));
+		vt.transpose();
+		return MatrixFactorization.pinv(u, ss, vt, null);
 
+/*
+		int min = Math.min(u.getSizeX(), vt.getSizeX());
+		vt.transpose();
+		Matrix pinv = new Matrix(u.getSizeX(), vt.getSizeX());
+		pinv.make0();
+
+		for (int i = min - 1; i >= 0; i--) {
+			double d = s.getItem(i, i);
+			if (Math.abs(d) < eps)
+				continue;
+			for (int j = pinv.getSizeY() - 1; j >= 0; j--) {
+				double scale = vt.getItem(i, j) / d;
 				for (int k = pinv.getSizeX() - 1; k >= 0; k--) {
-					pinv.itemAdd(k, j, d * u.getItem(i, k));
+					pinv.itemAdd(k, j, scale * u.getItem(i, k));
 				}
 			}
-		return pinv;
+		}
+		return pinv;*/
+	}
+
+	public static Matrix pinvLEFT(Matrix u, Matrix s, Matrix vt) {
+		int minXY = Math.min(u.getSizeX(), vt.getSizeX());
+		DiagonalMatrix ss = new DiagonalMatrix(vt.getSizeX(), u.getSizeX());
+		for (int i = 0; i < minXY; i++)
+			ss.setItem(i, 0, s.getItem(i, i));
+		vt.transpose();
+		return MatrixFactorization.pinv(vt, ss, u, null);
+/*
+		vt.transpose();
+		int min = Math.min(u.getSizeX(), vt.getSizeX());
+		Matrix pinv = new Matrix(vt.getSizeX(), u.getSizeX());
+		pinv.make0();
+
+		for (int i = min - 1; i >= 0; i--) {
+			double d = s.getItem(i, i);
+			if (Math.abs(d) < eps)
+				continue;
+			for (int j = pinv.getSizeY() - 1; j >= 0; j--) {
+				double scale = vt.getItem(i, j) / d;
+				for (int k = pinv.getSizeX() - 1; k >= 0; k--) {
+					pinv.itemAdd(k, j, scale * u.getItem(i, k));
+				}
+			}
+		}
+		return pinv;*/
 	}
 
 	public static void printSVD(Matrix a, Matrix u, Matrix s, Matrix vt) {
@@ -83,13 +116,59 @@ public class TestMySvd2 {
 	}
 
 	public static void checkSVD(Matrix a, Matrix u, Matrix s, Matrix vt) {
+		double e;
 		Matrix tmp1 = new Matrix();
 		Matrix tmp2 = new Matrix();
+
+		u.transpose(tmp1);
+		u.mMul(tmp1, tmp2);
+		e = tmp2.getSquaredDeviationFromE();
+		if (e > eps)
+			throw new Error("U * UT != I => " + e);
+
+		u.transpose(tmp1);
+		tmp1.mMul(u, tmp2);
+		e = tmp2.getSquaredDeviationFromE();
+		if (e > eps)
+			throw new Error("UT * U != I => " + e);
+
+		vt.transpose(tmp1);
+		vt.mMul(tmp1, tmp2);
+		e = tmp2.getSquaredDeviationFromE();
+		if (e > eps)
+			throw new Error("VT * V != I => " + e);
+
+		vt.transpose(tmp1);
+		tmp1.mMul(vt, tmp2);
+		e = tmp2.getSquaredDeviationFromE();
+		if (e > eps)
+			throw new Error("V * VT != I => " + e);
+
 		u.mMul(s, tmp1);
 		tmp1.mMul(vt, tmp2);
-		System.out.println(tmp2.toMatlabString("U * S * V'"));
+		tmp2.printM("T2");
 		tmp2.mSub(a, tmp2);
-		System.out.println(tmp2.is0(1E-5));
+		e = tmp2.getSquaredDeviationFrom0();
+		if (e > eps)
+			throw new Error("A - U*S*VT != 0 => " + e);
+
+		Matrix pinv = pinv(u,s,vt);
+		pinv.printM("P+");
+		a.mMul(pinv, tmp1);
+		tmp1.mMul(a, tmp2);
+		tmp2.mSub(a, tmp2);
+		e = tmp2.getSquaredDeviationFrom0();
+		if (e > eps)
+			throw new Error("A * P+ * A - A != 0 => " + e);
+/*
+		pinv = pinvLEFT(u,s,vt);
+		pinv.printM("LEFT P+");
+		pinv.mMul(a, tmp1);
+		tmp1.mMul(pinv, tmp2);
+		tmp2.mSub(a, tmp2);
+		e = tmp2.getSquaredDeviationFrom0();
+		if (e > eps)
+			throw new Error("P+ * A * P+ - A != 0 => " + e);*/
 	}
 
 	public static void checkPInv(Matrix a, Matrix pinv) {
@@ -107,6 +186,30 @@ public class TestMySvd2 {
 		new JLapack().mysvd(a, u, vt, s);
 	}
 
+	public void svdGolubReinsch() {
+		Matrix v = new Matrix();
+		DiagonalMatrix q = new DiagonalMatrix();
+		com.slavi.math.matrix.MatrixFactorization.svd(a, u, q, v, true);
+
+		v.transpose(vt);
+		q.toMatrix(s);
+	}
+
+	public void svdObsolete1() {
+		SVD_Obsolete svd = new SVD_Obsolete(a.getSizeX(), a.getSizeY());
+		a.copyTo(svd);
+		Matrix w = new Matrix();
+		svd.svd(w, u);
+		u.transpose();
+		svd.copyTo(vt);
+		s.resize(vt.getSizeY(), u.getSizeX());
+		s.make0();
+		for (int i = 0; i < w.getSizeX(); i++) {
+			double d = w.getItem(i, 0);
+			s.setItem(i, i, d);
+		}
+	}
+
 	public void svdApache() {
 		BlockRealMatrix aa = MatrixUtil.toApacheMatrix(a);
 		SingularValueDecomposition svd = new SingularValueDecomposition(aa);
@@ -122,32 +225,39 @@ public class TestMySvd2 {
 		double av[][] = new double[a.getSizeX()][a.getSizeX()];
 		SVD_Working.svd(au, aw, av);
 
-		for (int i = a.getSizeY() - 1; i >= 0; i--)
-			s.setItem(i, i, aw[i]);
 		for (int j = u.getSizeY() - 1; j >= 0; j--)
 			for (int i = u.getSizeX() - 1; i >= 0; i--)
-				u.setItem(i, j, au[i][j]);
+				u.setItem(i, j, av[j][i]);
+
 		for (int j = vt.getSizeY() - 1; j >= 0; j--)
 			for (int i = vt.getSizeX() - 1; i >= 0; i--)
-				vt.setItem(i, j, av[i][j]);
+				vt.setItem(i, j, au[i][j]);
+
+		for (int i = a.getSizeY() - 1; i >= 0; i--)
+			s.setItem(i, i, aw[i]);
 	}
 
 	// MTJ - ok
 	public void svdMTJ() throws NotConvergedException {
 		DenseMatrix aa = new DenseMatrix(a.toArray());
-		SVD svd = new SVD(a.getSizeX(), a.getSizeY());
+		no.uib.cipr.matrix.SVD svd = new no.uib.cipr.matrix.SVD(a.getSizeX(), a.getSizeY());
 		svd.factor(aa);
 
-		double SS[] = svd.getS();
-		for (int i = SS.length - 1; i >= 0; i--)
-			s.setItem(i, i, svd.getS()[i]);
+		u.resize(svd.getVt().numColumns(), svd.getVt().numRows());
 		for (int j = u.getSizeY() - 1; j >= 0; j--)
 			for (int i = u.getSizeX() - 1; i >= 0; i--)
 				u.setItem(i, j, svd.getVt().get(i, j));
-		Matrix vt = new Matrix(a.getSizeX(), a.getSizeX());
+
+		vt.resize(svd.getU().numColumns(), svd.getU().numRows());
 		for (int j = vt.getSizeY() - 1; j >= 0; j--)
 			for (int i = vt.getSizeX() - 1; i >= 0; i--)
 				vt.setItem(i, j, svd.getU().get(i, j));
+
+		double SS[] = svd.getS();
+		s.resize(vt.getSizeY(), u.getSizeX());
+		s.make0();
+		for (int i = SS.length - 1; i >= 0; i--)
+			s.setItem(i, i, SS[i]);
 	}
 
 	// Jama - NO
@@ -155,9 +265,14 @@ public class TestMySvd2 {
 		Jama.Matrix aa = new Jama.Matrix(a.toArray());
 		Jama.SingularValueDecomposition svd = new Jama.SingularValueDecomposition(aa);
 
-		s = Matrix.fromArray(svd.getS().getArray());
 		u = Matrix.fromArray(svd.getV().transpose().getArray());
-		vt = Matrix.fromArray(svd.getU().transpose().getArray());
+		vt = Matrix.fromArray(svd.getU().getArray());
+		s.resize(vt.getSizeY(), u.getSizeX());
+		s.make0();
+		Matrix SS = Matrix.fromArray(svd.getS().getArray());
+		for (int i = s.getSizeX() - 1; i >= 0; i--)
+			for (int j = s.getSizeY() - 1; j >= 0; j--)
+				s.setItem(i, j, SS.getItem(i, j));
 	}
 
 	// EJML
@@ -175,34 +290,46 @@ public class TestMySvd2 {
 		*/
 	}
 
-	Matrix a =
-//			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 8 1");
-//			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 9 1");
-//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8; 1 2 3");
-//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
-//			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9; 9 2 3");
-			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9");
-	Matrix copyA = a.makeCopy();
+	Matrix a = new Matrix();
+	Matrix copyA = new Matrix();
 
-	Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
-	Matrix u = new Matrix(a.getSizeY(), a.getSizeY());
-	Matrix vt = new Matrix(a.getSizeX(), a.getSizeX());
+	Matrix s = new Matrix();
+	Matrix u = new Matrix();
+	Matrix vt = new Matrix();
+
+	Matrix testMatrices[] = new Matrix[] {
+			Matrix.fromOneLineString("1 2 3; 1 2 3; 1 2 7; 1 2 8"),
+			Matrix.fromOneLineString("1 0 0; 0 1 1"),
+			Matrix.fromOneLineString("1 0; 0 1; 0 1"),
+			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8"),
+			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9"),
+			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8; 1 2 3"),
+			Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 9; 9 2 3"),
+			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 8 1"),
+			Matrix.fromOneLineString("1 2 3 1; 4 5 6 1; 7 8 9 1"),
+		};
 
 	public void doIt(String[] args) throws Exception {
-		System.out.println(a.toMatlabString("A"));
-
-//		svdMy();
-//		svdMy2();
-		svdApache();
-//		svdJama();
-//		svdMTJ();
-//		svdEJML_NONO();
-
-		Matrix pinv = pinvOld(u,s,vt);
-		printSVD(copyA, u, s, vt);
-		System.out.println();
-		checkPInv(copyA, pinv);
-		checkSVD(copyA, u, s, vt);
+		try {
+			for (Matrix i : testMatrices) {
+				i.copyTo(a);
+				i.copyTo(copyA);
+				svdGolubReinsch();
+//				svdObsolete1();
+//				svdMy();
+//				svdMy2();	// Fails
+//				svdApache();
+//				svdMTJ();
+//				svdJama();
+//				svdEJML_NONO();
+				checkSVD(copyA, u, s, vt);
+				printSVD(copyA, u, s, vt);
+			}
+			System.out.println("All ok.");
+		} catch (Throwable t) {
+			t.printStackTrace();
+			printSVD(copyA, u, s, vt);
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

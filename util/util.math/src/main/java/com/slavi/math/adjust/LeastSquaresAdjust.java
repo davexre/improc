@@ -128,7 +128,7 @@ public class LeastSquaresAdjust {
 			}
 			return false;
 		}
-		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeM());
+		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeY());
 		nmCopy.mMul(nm, tmp);
 		double deviation = tmp.getSquaredDeviationFromE();
 		log.info("Inverse of normal matrix precision (squared deviation from E) is: " + MathUtil.d4(deviation));
@@ -136,7 +136,7 @@ public class LeastSquaresAdjust {
 			log.error("Inverse of normal matrix non-reliable.");
 		}
 		if (log.isTraceEnabled() || (deviation > precision)) {
-			log.trace("Normal matrix\n" + nmCopy.makeSquareMatrix().toMatlabString("NM"));
+			log.trace("Normal matrix\n" + nmCopy.toMatrix().toMatlabString("NM"));
 //			log.trace("Inverted Normal Matrix\n" + nm.toString());
 //			log.trace("NM * (NM')\n" + tmp.toString());
 //			log.trace("APL\n" + apl.toString());

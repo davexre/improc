@@ -10,14 +10,27 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
-import com.slavi.math.adjust.Statistics;
 
-public class Matrix {
-
-	/**
-	 * The elements of the matrix.
-	 */
-	private double m[];
+/**
+ * Rectangular matrix.
+ *
+ * The matrix can be interpreted as a "vector" where the elements are
+ * aligned by rows, i.e.<br>
+ * <br>
+ * <tt>
+ *       Matrix [4, 3]<br>
+ *        a b c d<br>
+ *        e f j h<br>
+ *        i j k l<br>
+ *       <br>
+ *       The same matrix as vector [12] sizeX*sizeY = 4*3 = 12<br>
+ *  &nbsp;a b c d e f j h i j k l     <br>
+ *       | Y = 1 | Y = 2 | Y = 3 |    <br>
+ * </tt>
+ *
+ * @return The value at the specified position.
+ */
+public class Matrix <T extends Matrix<T>> extends Vector<T> implements IMatrix<T> {
 
 	/**
 	 * Number of columns
@@ -51,6 +64,7 @@ public class Matrix {
 	 *
 	 * @return Returns true if all the elements of the matrices are equal.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)
 			return true;
@@ -137,6 +151,7 @@ public class Matrix {
 	/**
 	 * Returns a multiline string containing all elements of the matrix.
 	 */
+	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		for (int j = 0; j < getSizeY(); j++) {
@@ -151,20 +166,23 @@ public class Matrix {
 	}
 
 	/**
-	 * Loads the matrix from a text stream
+	 * Loads the matrix from a text stream.
+	 * @return this
 	 */
-	public void load(BufferedReader fin) throws IOException {
+	public Matrix load(BufferedReader fin) throws IOException {
 		for (int j = 0; j < getSizeY(); j++) {
 			StringTokenizer st = new StringTokenizer(fin.readLine());
 			for (int i = 0; i < getSizeX(); i++)
 				setItem(i, j, st.hasMoreTokens() ? Double.parseDouble(st.nextToken()) : 0.0);
 		}
+		return this;
 	}
 
 	/**
-	 * Saves the matrix to a text stream
+	 * Saves the matrix to a text stream.
+	 * @return this
 	 */
-	public void save(PrintStream fou) {
+	public Matrix save(PrintStream fou) {
 		for (int j = 0; j < getSizeY(); j++) {
 			for (int i = 0; i < getSizeX(); i++) {
 				if (i != 0)
@@ -173,16 +191,7 @@ public class Matrix {
 			}
 			fou.print("\n");
 		}
-	}
-
-	public double[][] toArray() {
-		double [][] r = new double[getSizeX()][getSizeY()];
-		for (int i = getSizeX() - 1; i >= 0; i--) {
-			for (int j = getSizeY() - 1; j >= 0; j--) {
-				r[i][j] = getItem(i, j);
-			}
-		}
-		return r;
+		return this;
 	}
 
 	public static Matrix fromArray(double d[][]) {
@@ -199,24 +208,29 @@ public class Matrix {
 
 	/**
 	 * Resizes the matrix if the new size differs from the current matrix size.
+	 * @return this
 	 */
-	public void resize(int newSizeX, int newSizeY) {
+	public Matrix resize(int newSizeX, int newSizeY) {
 		if ((newSizeX < 0) || (newSizeY < 0)) {
 			throw new Error("Invalid matrix size");
 		}
-		if (sizeX != newSizeX && sizeY != newSizeY) {
+		int newSize = newSizeX * newSizeY;
+		if (m == null || m.length != newSize)
+			m = newSize == 0 ? null : new double[newSize];
+		if (transposed) {
+			sizeY = newSizeX;
+			sizeX = newSizeY;
+		} else {
 			sizeX = newSizeX;
 			sizeY = newSizeY;
-			transposed = false;
-			int newSize = newSizeX * newSizeY;
-			if (m == null || m.length != newSize)
-				m = new double[newSize];
 		}
+		return this;
 	}
 
 	/**
 	 * Returns the number of columns in the matrix.
 	 */
+	@Override
 	public int getSizeX() {
 		return transposed ? sizeY : sizeX;
 	}
@@ -224,6 +238,7 @@ public class Matrix {
 	/**
 	 * Returns the number of rows in the matrix.
 	 */
+	@Override
 	public int getSizeY() {
 		return transposed ? sizeX : sizeY;
 	}
@@ -232,18 +247,14 @@ public class Matrix {
 		if (atX < 0 || atX >= getSizeX() ||
 			atY < 0 || atY >= getSizeY())
 			throw new IndexOutOfBoundsException("Indexes (" + atX + "," + atY + ") not in range (" + getSizeX() + "," + getSizeY() + ")");
-		return transposed ? atY + atX * sizeY : atX + atY * sizeX;
-	}
-
-	private void assertSameSize(Matrix second) {
-		if ((getSizeX() != second.getSizeX()) || (getSizeY() != second.getSizeY()))
-			throw new Error("Invalid argument. Sizes of this(" + getSizeX() + "," + getSizeY() + ") do not match second(" + second.getSizeX() + "," + second.getSizeY() + ")");
+		return transposed ? atY + atX * sizeX : atX + atY * sizeX;
 	}
 
 	/**
 	 * Returns the value of the matrix atX column and atY row. The top-left
 	 * element is atX=0, atY=0.
 	 */
+	@Override
 	public double getItem(int atX, int atY) {
 		return m[getItemIndex(atX, atY)];
 	}
@@ -252,87 +263,25 @@ public class Matrix {
 	 * Sets the value of the matrix atX column and atY row. The top-left element
 	 * is atX=0, atY=0.
 	 */
+	@Override
 	public void setItem(int atX, int atY, double aValue) {
 		m[getItemIndex(atX, atY)] = aValue;
 	}
 
+	/**
+	 * Returns the new value.
+	 */
+	@Override
 	public double itemAdd(int atX, int atY, double aValue) {
 		return m[getItemIndex(atX, atY)] += aValue;
 	}
 
+	/**
+	 * Returns the new value.
+	 */
+	@Override
 	public double itemMul(int atX, int atY, double aValue) {
 		return m[getItemIndex(atX, atY)] *= aValue;
-	}
-
-	/**
-	 * Returns the size of the matrix as a vector.
-	 * @see Matrix#getVectorItem(int)
-	 */
-	public int getVectorSize() {
-		return m == null ? 0 : m.length; // getSizeX() * getSizeY();
-	}
-
-	/**
-	 * The matrix can be interpreted as a "vector" where the elements are
-	 * aligned by rows, i.e.<br>
-	 * <br>
-	 * <tt>
-	 *       Matrix [4, 3]<br>
-	 *        a b c d<br>
-	 *        e f j h<br>
-	 *        i j k l<br>
-	 *       <br>
-	 *       The same matrix as vector [12] sizeX*sizeY = 4*3 = 12<br>
-	 *  &nbsp;a b c d e f j h i j k l     <br>
-	 *       | Y = 1 | Y = 2 | Y = 3 |    <br>
-	 * </tt>
-	 *
-	 * @return The value at the specified position.
-	 */
-	public double getVectorItem(int aIndex) {
-		return m[aIndex]; // getItem(aIndex % getSizeX(), aIndex / getSizeX());
-	}
-
-	/**
-	 * @see Matrix#getVectorItem(int)
-	 */
-	public void setVectorItem(int aIndex, double aValue) {
-		m[aIndex] = aValue; // setItem(aIndex % getSizeX(), aIndex / getSizeX();
-	}
-
-	public double vectorItemAdd(int aIndex, double aValue) {
-		return m[aIndex] += aValue; // setItem(aIndex % getSizeX(), aIndex / getSizeX());
-	}
-
-	public double vectorItemMul(int aIndex, double aValue) {
-		return m[aIndex] *= aValue; // setItem(aIndex % getSizeX(), aIndex / getSizeX());
-	}
-
-	/**
-	 * @see Matrix#getVectorItem(int)
-	 */
-	public void loadFromVector(double vector[]) {
-		if (vector.length != getVectorSize())
-			throw new Error("Invalid argument. VectorSize of this(" + getVectorSize() + ") do not match array size (" + vector.length + ")");
-		System.arraycopy(vector, 0, m, 0, vector.length);	// TODO: Is this how it should be?
-	}
-
-	/**
-	 * @see Matrix#getVectorItem(int)
-	 */
-	public void loadFromVector(int vector[]) {
-		if (vector.length != getVectorSize())
-			throw new Error("Invalid argument. VectorSize of this(" + getVectorSize() + ") do not match array size (" + vector.length + ")");
-		System.arraycopy(vector, 0, m, 0, vector.length);	// TODO: Is this how it should be?
-	}
-
-	/**
-	 * @see Matrix#getVectorItem(int)
-	 */
-	public double[] getVector() {
-		double vector[] = new double[getVectorSize()];
-		System.arraycopy(m, 0, vector, 0, vector.length);
-		return vector;
 	}
 
 	/**
@@ -341,21 +290,32 @@ public class Matrix {
 	 * <tt>dest = this * second<br>
 	 * </tt>
 	 * Requires: this != second != dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mMul(Matrix second, Matrix dest) {
-		if (getSizeX() != second.getSizeY() || this == second || this == dest || second == dest) {
+	public Matrix mMul(Matrix second, Matrix dest) {
+		if (this == dest || second == dest) {
 			throw new Error("Invalid argument");
 		}
-		dest.resize(second.getSizeX(), getSizeY());
+		if (getSizeX() != second.getSizeY()) {
+			throw new Error("Invalid argument this(" +
+						getSizeX() + "," + getSizeY() + ") * second(" +
+						second.getSizeX() + "," + second.getSizeY() + ")");
+		}
+		if (dest == null)
+			dest = new Matrix(second.getSizeX(), getSizeY());
+		else
+			dest.resize(second.getSizeX(), getSizeY());
 		double D;
-		for (int i = getSizeY() - 1; i >= 0; i--) {
-			for (int j = second.getSizeX() - 1; j >= 0; j--) {
+		for (int i = second.getSizeX() - 1; i >= 0; i--) {
+			for (int j = getSizeY() - 1; j >= 0; j--) {
 				D = 0;
 				for (int k = getSizeX() - 1; k >= 0; k--)
-					D += getItem(k, i) * second.getItem(j, k);
-				dest.setItem(j, i, D);
+					D += getItem(k, j) * second.getItem(i, k);
+				dest.setItem(i, j, D);
 			}
 		}
+		return dest;
 	}
 
 	/**
@@ -365,12 +325,19 @@ public class Matrix {
 	 * <tt>dest[i, j] = this[i, j] + second[i, j]<br>
 	 * </tt>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mSum(Matrix second, Matrix dest) {
+	public Matrix mSum(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			dest.setVectorItem(i, getVectorItem(i) + second.getVectorItem(i));
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) + second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -381,12 +348,19 @@ public class Matrix {
 	 * <tt>dest[i, j] = this[i, j] - second[i, j]<br>
 	 * </tt>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mSub(Matrix second, Matrix dest) {
+	public Matrix mSub(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			dest.setVectorItem(i, getVectorItem(i) - second.getVectorItem(i));
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) - second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -397,8 +371,9 @@ public class Matrix {
 	public double dotProduct(Matrix second) {
 		assertSameSize(second);
 		double sum = 0;
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			sum += getVectorItem(i) * second.getVectorItem(i);
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				sum += getItem(i, j) * second.getItem(i, j);
 		return sum;
 	}
 
@@ -409,11 +384,18 @@ public class Matrix {
 	 * <tt>dest[i, j] = abs(this[i, j])<br>
 	 * </tt>
 	 * Allows: this == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void termAbs(Matrix dest) {
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			dest.setVectorItem(i, Math.abs(getVectorItem(i)));
+	public Matrix termAbs(Matrix dest) {
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, Math.abs(getItem(i, j)));
+		return dest;
 	}
 
 	/**
@@ -424,12 +406,19 @@ public class Matrix {
 	 * <tt>dest[i, j] = this[i, j] * second[i, j]<br>
 	 * </tt>
 	 * Allows: this == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void termMul(Matrix second, Matrix dest) {
+	public Matrix termMul(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			vectorItemMul(i, second.getVectorItem(i));
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) * second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -440,209 +429,19 @@ public class Matrix {
 	 * </tt> <b>Warning:</b><i>If there is an element that is zero, an
 	 * exception will rise <code>java.lang.ArithmeticException</code>.</i>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void termDiv(Matrix second, Matrix dest) {
+	public Matrix termDiv(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			setVectorItem(i, getVectorItem(i) / second.getVectorItem(i));
-	}
-
-	/**
-	 * Multiplies all elements of the matrix with aValue. The formula is:<br>
-	 * <tt>this[i, j] = aValue * this[i, j]<br>
-	 * </tt>
-	 */
-	public void rMul(double aValue) {
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			vectorItemMul(i, aValue);
-	}
-
-	/**
-	 * Returns sum the of all elements of the matrix.
-	 */
-	public double sumAll() {
-		double D = 0;
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			D += getVectorItem(i);
-		return D;
-	}
-
-	/**
-	 * Returns the sum the of the absolute values of the matrix.
-	 */
-	public double sumAbs() {
-		double D = 0;
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			D += Math.abs(getVectorItem(i));
-		return D;
-	}
-
-	/**
-	 * Returns the maximum value of all elements of the matrix.
-	 */
-	public double max() {
-		int size = getVectorSize();
-		if (size == 0)
-			return 0;
-		double D = getVectorItem(0);
-		for (int i = size - 1; i > 0; i--)
-			if (D < getVectorItem(i))
-				D = getVectorItem(i);
-		return D;
-	}
-
-	/**
-	 * Returns the average value of all elements of the matrix.
-	 */
-	public double avg() {
-		int size = getVectorSize();
-		if (size == 0)
-			return 0;
-		double D = 0.0;
-		for (int i = size - 1; i >= 0; i--)
-			D += getVectorItem(i);
-		return D / size;
-	}
-
-	/**
-	 * Returns the max(abs()) of all elements of the matrix.
-	 * <p>
-	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
-	 * <p>
-	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
-	 * the infinity norm, or the element of largest absolute value of a
-	 * real matrix A.
-	 * <p>
-	 * NORM = 'M' or 'm'
-	 */
-	public double maxAbs() {
-		double D = 0;
-		for (int i = getVectorSize() - 1; i >= 0; i--) {
-			double tmp = Math.abs(getVectorItem(i));
-			if (D < tmp)
-				D = tmp;
-
-		}
-		return D;
-	}
-
-	/**
-	 * Returns the min(abs()) of all elements of the matrix.
-	 */
-	public double minAbs() {
-		int size = getVectorSize();
-		if (size == 0)
-			return 0;
-		double D = getVectorItem(0);
-		for (int i = size - 1; i > 0; i--) {
-			double tmp = Math.abs(getVectorItem(i));
-			if (D < tmp)
-				D = tmp;
-		}
-		return D;
-	}
-
-	/**
-	 * Returns the minimum value of all elements of the matrix.
-	 */
-	public double min() {
-		int size = getVectorSize();
-		if (size == 0)
-			return 0;
-		double D = getVectorItem(0);
-		for (int i = size - 1; i > 0; i--)
-			if (D > getVectorItem(i))
-				D = getVectorItem(i);
-		return D;
-	}
-
-	/**
-	 * 1-norm, the largest column sum of the absolute values of A.
-	 * https://octave.sourceforge.io/octave/function/norm.html
-	 *
-	 * Return the matrix one norm value that is equal to the maximum of the
-	 * column sums of the absolute values of the array elements.
-	 * <p>
-	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
-	 * <p>
-	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
-	 * the infinity norm, or the element of largest absolute value of a
-	 * real matrix A.
-	 * <p>
-	 * NORM = '1', 'O' or 'o'
-	 */
-	public double getOneNorm() {
-		double result = 0.0;
-		for (int i = getSizeX() - 1; i >= 0; i--) {
-			double d = 0.0;
-			for (int j = getSizeY() - 1; j >= 0; j--)
-				d += Math.abs(getItem(i, j));
-			if (d > result)
-				result = d;
-		}
-		return result;
-	}
-
-	/**
-	 * Infinity norm, the largest row sum of the absolute values of A.
-	 * https://octave.sourceforge.io/octave/function/norm.html
-	 *
-	 * Return the infinity norm of the matrix that is equal to the
-	 * maximum of the row sums of the absolute values of the array elements.
-	 * <p>
-	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
-	 * <p>
-	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
-	 * the infinity norm, or the element of largest absolute value of a
-	 * real matrix A.
-	 * <p>
-	 * NORM = 'I' or 'i'
-	 */
-	public double getNormInfinity() {
-		double result = 0.0;
-		for (int j = getSizeY() - 1; j >= 0; j--) {
-			double d = 0.0;
-			for (int i = getSizeX() - 1; i >= 0; i--)
-				d += Math.abs(getItem(i, j));
-			if (d > result)
-				result = d;
-		}
-		return result;
-	}
-
-	/**
-	 * Frobenius norm of A, sqrt (sum (diag (A' * A))).
-	 * https://octave.sourceforge.io/octave/function/norm.html
-	 *
-	 * Return the Frobenius norm of the matrix.
-	 * <p>
-	 * <b>LAPACK:</b> DOUBLE PRECISION FUNCTION DLANGE( NORM, M, N, A, LDA, WORK )
-	 * <p>
-	 * DLANGE returns the value of the one norm, or the Frobenius norm, or
-	 * the infinity norm, or the element of largest absolute value of a
-	 * real matrix A.
-	 * <p>
-	 * NORM = 'F', 'f', 'E' or 'e'
-	 */
-	public double getForbeniusNorm() {
-		double scale = 0.0;
-		double sum = 1.0;
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
 		for (int i = getSizeX() - 1; i >= 0; i--)
-			for (int j = getSizeY() - 1; j >= 0; j--) {
-				double d = Math.abs(getItem(i, j));
-				if (d != 0.0) {
-					if (scale < d) {
-						double d1 = scale / d;
-						sum = 1.0 + sum * d1 * d1;
-						scale = d;
-					} else {
-						double d1 = d / scale;
-						sum += d1 * d1;
-					}
-				}
-			}
-		return scale * Math.sqrt(sum);
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) / second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -652,15 +451,22 @@ public class Matrix {
 	 * <tt>dest[i, j] = max(abs(this[i, j]), abs(second[i, j]))<br>
 	 * </tt>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mMaxAbs(Matrix second, Matrix dest) {
+	public Matrix mMaxAbs(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--) {
-			double a = Math.abs(getVectorItem(i));
-			double b = Math.abs(second.getVectorItem(i));
-			dest.setVectorItem(i, a > b ? a : b);
-		}
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				double a = Math.abs(getItem(i, j));
+				double b = Math.abs(second.getItem(i, j));
+				dest.setItem(i, j, a > b ? a : b);
+			}
+		return dest;
 	}
 
 	/**
@@ -670,15 +476,22 @@ public class Matrix {
 	 * <tt>dest[i, j] = max( this[i, j] , second[i, j] )<br>
 	 * </tt>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mMax(Matrix second, Matrix dest) {
+	public Matrix mMax(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--) {
-			double a = getVectorItem(i);
-			double b = second.getVectorItem(i);
-			dest.setVectorItem(i, a > b ? a : b);
-		}
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a > b ? a : b);
+			}
+		return dest;
 	}
 
 	/**
@@ -688,21 +501,30 @@ public class Matrix {
 	 * <tt>dest[i, j] = min( this[i, j] , second[i, j] )<br>
 	 * </tt>
 	 * Allows: this == second == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void mMin(Matrix second, Matrix dest) {
+	public Matrix mMin(Matrix second, Matrix dest) {
 		assertSameSize(second);
-		dest.resize(getSizeX(), getSizeY());
-		for (int i = getVectorSize() - 1; i >= 0; i--) {
-			double a = getVectorItem(i);
-			double b = second.getVectorItem(i);
-			dest.setVectorItem(i, a < b ? a : b);
-		}
+		if (dest == null)
+			dest = new Matrix(getSizeX(), getSizeY());
+		else
+			dest.resize(getSizeX(), getSizeY());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a < b ? a : b);
+			}
+		return dest;
 	}
 
 	/**
 	 * Makes a transposed matirx of this matrix. If the dest matrix is of
 	 * incorrect size it will be resized.
 	 * Requires: this != dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
 	public Matrix transpose(Matrix dest) {
 		if (this == dest) {
@@ -722,9 +544,12 @@ public class Matrix {
 	 * Care should be taken when reading/writing from/to json/xml files a transposed matrix.
 	 * If a matrix A is transposed  and save to json and read back to a matrix B then the
 	 * A.getItem(i,j) = B.getItem(i,j) and A.getVectorItem(i) != B.getVectorItem(i).
+	 * @return this
 	 */
-	public void transpose() {
+	@Override
+	public T transpose() {
 		transposed = !transposed;
+		return (T) this;
 	}
 
 	public boolean isTransposed() {
@@ -756,10 +581,11 @@ public class Matrix {
 	 * called. The formula is:<br>
 	 * <tt>this[i, j] = (this[i, j] - min()) / (max() - min())<br>
 	 * </tt>
+	 * @return this
 	 */
-	public void normalize2() {
+	public Matrix normalize2() {
 		if ((getSizeX() == 0) || (getSizeY() == 0))
-			return;
+			return this;
 		double maxVal = getItem(0, 0);
 		double minVal = maxVal;
 		for (int i = getSizeX() - 1; i >= 0; i--)
@@ -778,6 +604,7 @@ public class Matrix {
 				for (int j = getSizeY() - 1; j >= 0; j--)
 					setItem(i, j, (getItem(i, j) - minVal) / delta);
 		}
+		return this;
 	}
 
 	/**
@@ -821,25 +648,30 @@ public class Matrix {
 	 * Copies this matrix to a destination. The destination is resized if
 	 * necessary.
 	 * Allows: this == dest
+	 * @param dest	If null a new Matrix will be created to store the result
+	 * @return dest
 	 */
-	public void copyTo(Matrix dest) {
-		dest.resize(getSizeX(), getSizeY());
+	public Matrix copyTo(Matrix dest) {
+		if (dest == null) {
+			dest = new Matrix(getSizeX(), getSizeY());
+		}
 		dest.transposed = transposed;
+		dest.resize(getSizeX(), getSizeY());
 		System.arraycopy(this.m, 0, dest.m, 0, this.m.length);
-/*		for (int i = sizeX - 1; i >= 0; i--)
-			for (int j = sizeY - 1; j >= 0; j--)
-				dest.setItem(i, j, getItem(i, j));*/
+		return dest;
 	}
 
 	/**
 	 * Makes the identity matrix. The formula is:<br>
 	 * <tt>Result[i, j] = (i == j) ? 1 : 0<br>
 	 * </tt>
+	 * @return this
 	 */
-	public void makeE() {
+	public Matrix makeE() {
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				setItem(i, j, (i == j) ? 1.0 : 0.0);
+		return this;
 	}
 
 	public double getSquaredDeviationFromE() {
@@ -866,56 +698,24 @@ public class Matrix {
 		return true;
 	}
 
-	public double getSquaredDeviationFrom0() {
-		double result = 0.0;
-		for (int i = getVectorSize() - 1; i >= 0; i--) {
-			double d = getVectorItem(i);
-			result += d*d;
-		}
-		return result;
-	}
-
-	/**
-	 * Makes a zero matrix. All elements are set to 0.
-	 */
-	public void make0() {
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			setVectorItem(i, 0.0);
-	}
-
-	/**
-	 * Returns true if all elements are 0.
-	 */
-	public boolean is0(double tolerance) {
-		tolerance = Math.abs(tolerance);
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			if (Math.abs(getVectorItem(i)) > tolerance)
-				return false;
-		return true;
-	}
-
-	/**
-	 * Sets all elements of this matrix to aValue.
-	 */
-	public void makeR(double aValue) {
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			setVectorItem(i, aValue);
-	}
-
 	/**
 	 * Multiplies all elements at column atX with D.
+	 * @return this
 	 */
-	public void mulX(int atX, double D) {
+	public Matrix mulX(int atX, double D) {
 		for (int j = getSizeY() - 1; j >= 0; j--)
 			itemMul(atX, j, D);
+		return this;
 	}
 
 	/**
 	 * Multiplies all elements at row atY with D.
+	 * @return this
 	 */
-	public void mulY(int atY, double D) {
+	public Matrix mulY(int atY, double D) {
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			itemMul(i, atY, D);
+		return this;
 	}
 
 	/**
@@ -923,10 +723,12 @@ public class Matrix {
 	 * stores the result in column atX1. The formula is:<br>
 	 * <tt>this[atX1, j] = this[atX1, j] + this[atX2, j]<br>
 	 * </tt>
+	 * @return this
 	 */
-	public void sumX(int atX1, int atX2) {
+	public Matrix sumX(int atX1, int atX2) {
 		for (int j = getSizeY() - 1; j >= 0; j--)
 			itemAdd(atX1, j, getItem(atX2, j));
+		return this;
 	}
 
 	/**
@@ -934,32 +736,38 @@ public class Matrix {
 	 * the result in row atY1. The formula is:<br>
 	 * <tt>this[i, atX1] = this[i, atX1] + this[i, atX2]<br>
 	 * </tt>
+	 * @return this
 	 */
-	public void sumY(int atY1, int atY2) {
+	public Matrix sumY(int atY1, int atY2) {
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			itemAdd(i, atY1, getItem(i, atY2));
+		return this;
 	}
 
 	/**
 	 * Exchanges the column atX1 with column atX2.
+	 * @return this
 	 */
-	public void exchangeX(int atX1, int atX2) {
+	public Matrix exchangeX(int atX1, int atX2) {
 		for (int j = getSizeY() - 1; j >= 0; j--) {
 			double D = getItem(atX1, j);
 			setItem(atX1, j, getItem(atX2, j));
 			setItem(atX2, j, D);
 		}
+		return this;
 	}
 
 	/**
 	 * Exchanges the row atY1 with row atY2.
+	 * @return this
 	 */
-	public void exchangeY(int atY1, int atY2) {
+	public Matrix exchangeY(int atY1, int atY2) {
 		for (int i = getSizeX() - 1; i >= 0; i--) {
 			double D = getItem(i, atY1);
 			setItem(i, atY1, getItem(i, atY2));
 			setItem(i, atY2, D);
 		}
+		return this;
 	}
 
 	/**
@@ -1226,54 +1034,9 @@ public class Matrix {
 	}
 
 	/**
-	 * Compares this matrix to the second and returns the correlation between
-	 * them.
+	 * @return this
 	 */
-	public MatrixCompareResult compareTo(Matrix second) {
-		if ((getSizeX() != second.getSizeX()) || (getSizeY() != second.getSizeY())) {
-			throw new IllegalArgumentException("Comparing matrices of different size");
-		}
-		MatrixCompareResult res = new MatrixCompareResult();
-		// *** Изчисляване на корелацията (Pearson's r) между данните. ***
-
-		// Средно аритметично.
-		double S = getSizeX() * getSizeY();
-		res.AvgA = sumAll() / S;
-		res.AvgB = second.sumAll() / S;
-		res.SAA = 0;
-		res.SAB = 0;
-		res.SBB = 0;
-		// Коефициенти на корелация.
-		double dA, dB;
-		for (int i = getSizeX() - 1; i >= 0; i--)
-			for (int j = getSizeY() - 1; j >= 0; j--) {
-				dA = getItem(i, j) - res.AvgA;
-				dB = second.getItem(i, j) - res.AvgB;
-				res.SAA += dA * dA;
-				res.SBB += dB * dB;
-				res.SAB += dA * dB;
-			}
-
-		// Коефициент на корелация на Pearson
-		res.PearsonR = res.SAB / Math.sqrt(res.SAA * res.SBB);
-		return res;
-	}
-
-	public Statistics calcStatistics() {
-		return calcStatistics(null);
-	}
-
-	public Statistics calcStatistics(Statistics dest) {
-		if (dest == null)
-			dest = new Statistics();
-		dest.start();
-		for (int i = getVectorSize() - 1; i >= 0; i--)
-			dest.addValue(getVectorItem(i), 1.0);
-		dest.stop();
-		return dest;
-	}
-
-	public void printM(String title) {
+	public Matrix printM(String title) {
 		System.out.println(title);
 //		System.out.print(toString());
 		for (int j = 0; j < getSizeY(); j++) {
@@ -1285,6 +1048,7 @@ public class Matrix {
 			}
 			System.out.println();
 		}
+		return this;
 	}
 
 	public void lq(Matrix q, Matrix tau) {

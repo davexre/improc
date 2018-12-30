@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.slavi.math.matrix.Matrix;
 
-public class MatrixJsonDeserializer extends StdDeserializer<Matrix> {
-	public MatrixJsonDeserializer() {
+public class MatrixDeserializer extends StdDeserializer<Matrix> {
+	public MatrixDeserializer() {
 		super(Matrix.class);
 	}
 
