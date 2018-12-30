@@ -406,7 +406,6 @@ public class MatrixFactorization {
 			}
 			if (s < MathUtil.eps) {
 				// TODO: May be this const shuld be different
-				System.out.println("Null vector in column " + i);
 				nullColumns.add(i);
 				continue;
 			}
@@ -433,10 +432,6 @@ public class MatrixFactorization {
 	 * Calculates QR of A.
 	 */
 	public static void qr(Matrix A, Matrix Q, Matrix R) {
-/*		A.copyTo(R);
-		List<Integer> nullspace = makeOrthoNormal(R);
-		Q.resize(newSizeX, newSizeY)
-*/
 		A.copyTo(Q);
 		makeOrthoNormal(Q);
 		Q.transpose();
@@ -447,8 +442,8 @@ public class MatrixFactorization {
 	public static void lq(Matrix A, Matrix Q, Matrix L) {
 		A.copyTo(Q);
 		makeOrthoNormal(Q);
-		A.transpose();
+		Q.transpose();
 		A.mMul(Q, L);
-		A.transpose();
+		Q.transpose();
 	}
 }

@@ -1,5 +1,7 @@
 package com.slavi.math.matrix;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,63 +61,25 @@ public class MatrixFactorizationTest {
 			throw new Error("A * P+ * A - A != 0 => " + e);
 	}
 
-	void runQrTest(Matrix A) {
-		//A.transpose();
-		Matrix Q = new Matrix();
-		Matrix R = new Matrix();
-		MatrixFactorization.qr(A, Q, R);
-		A.printM("A");
-		Q.printM("Q");
-		R.printM("R");
-
-		Matrix t1 = new Matrix();
-		Matrix t2 = new Matrix();
-
-		double e;
-		Q.copyTo(t1);
-		t1.printM("T1");
-		e = t1.transpose().mMul(Q, t2).getSquaredDeviationFromE();
-		Assert.assertTrue(e < MathUtil.eps);
-
-		e = Q.mMul(R, t1).mSub(A, t2).getSquaredDeviationFrom0();
-		Assert.assertTrue(e < MathUtil.eps);
-	}
-
-	void runLqTest(Matrix A) {
-		Matrix Q = new Matrix();
-		Matrix L = new Matrix();
-		MatrixFactorization.lq(A, Q, L);
-
-		Matrix t1 = new Matrix();
-		Matrix t2 = new Matrix();
-
-		System.out.println(A.toMatlabString("A"));
-		System.out.println(L.toMatlabString("L"));
-
-
-		double e;
-		Q.copyTo(t1);
-		e = t1.transpose().mMul(Q, t2).getSquaredDeviationFromE();
-		Assert.assertTrue(e < MathUtil.eps);
-
-		Q.transpose();
-		e = L.mMul(Q, t1).mSub(A, t2).getSquaredDeviationFrom0();
-		Q.transpose();
-		Assert.assertTrue(e < MathUtil.eps);
-	}
-
 	void runOrthoNormalTest(Matrix A) {
 		Matrix m = A.makeCopy();
-		MatrixFactorization.makeOrthoNormal(m);
+		List<Integer> nullspace = MatrixFactorization.makeOrthoNormal(m);
 
 		Matrix mt = m.makeCopy();
 		mt.transpose();
 		Matrix e = m.makeCopy();
-		if (m.getSizeX() < m.getSizeY())
-			mt.mMul(m, e);
-		else
-			m.mMul(mt, e);
-		Assert.assertTrue("Q' * Q = I", e.getSquaredDeviationFromE() < MathUtil.eps);
+		mt.mMul(m, e);
+
+		double err = 0;
+		for (int i = e.getSizeX() - 1; i >= 0; i--)
+			for (int j = e.getSizeY() - 1; j >= 0; j--) {
+				double d = e.getItem(i, j);
+				if (i == j && nullspace.indexOf(i) < 0) {
+					d -= 1;
+				}
+				err += d*d;
+			}
+		Assert.assertTrue("Q' * Q = I", err < MathUtil.eps);
 
 		Matrix r = new Matrix();
 		mt.mMul(A, r);
@@ -124,7 +88,42 @@ public class MatrixFactorizationTest {
 		Assert.assertTrue("Q'*A=R, Q*R=A", e.getSquaredDeviationFrom0() < MathUtil.eps);
 	}
 
+	void runQrTest(Matrix A) {
+		Matrix Q = new Matrix();
+		Matrix R = new Matrix();
+		MatrixFactorization.qr(A, Q, R);
+
+//		System.out.println(A.toMatlabString("A"));
+//		System.out.println(Q.toMatlabString("Q"));
+//		System.out.println(R.toMatlabString("R"));
+//		System.out.println();
+
+		Matrix t1 = new Matrix();
+		double e = Q.mMul(R, t1).getSquaredDifference(A);
+		Assert.assertEquals(0, e, MathUtil.eps);
+	}
+
+	void runLqTest(Matrix A) {
+		Matrix Q = new Matrix();
+		Matrix L = new Matrix();
+		MatrixFactorization.lq(A, Q, L);
+
+		System.out.println(A.toMatlabString("A"));
+		System.out.println(L.toMatlabString("L"));
+		System.out.println(Q.toMatlabString("Q"));
+		System.out.println();
+
+		Matrix t1 = new Matrix();
+		double e = L.mMul(Q, t1).getSquaredDifference(A);
+		Assert.assertEquals(0, e, MathUtil.eps);
+	}
+
 	Matrix testMatrices[] = new Matrix[] {
+			Matrix.fromOneLineString("0"),
+			Matrix.fromOneLineString("1"),
+			Matrix.fromOneLineString("0 0 0"),
+			Matrix.fromOneLineString("1 1 1"),
+
 			Matrix.fromOneLineString("0 1; 0 0"),
 			Matrix.fromOneLineString("0 0; 0 0"),
 			Matrix.fromOneLineString("1 0; 0 1"),
@@ -146,18 +145,47 @@ public class MatrixFactorizationTest {
 
 	@Test
 	public void testSvd() {
-		for (Matrix i : testMatrices)
+		for (Matrix i : testMatrices) {
 			runSvdTest(i.makeCopy());
+			runSvdTest(i.makeCopy().transpose());
+		}
+	}
+
+	@Test
+	public void testOrthoNormal() {
+		for (Matrix i : testMatrices) {
+			runOrthoNormalTest(i.makeCopy());
+			runOrthoNormalTest(i.makeCopy().transpose());
+		}
+	}
+
+	@Test
+	public void testQR() {
+		for (Matrix i : testMatrices) {
+			runQrTest(i.makeCopy());
+			runQrTest(i.makeCopy().transpose());
+		}
+	}
+
+	@Test
+	public void testLQ() {
+		for (Matrix i : testMatrices) {
+			runLqTest(i.makeCopy());
+			runLqTest(i.makeCopy().transpose());
+		}
 	}
 
 	public void doIt() throws Exception {
 //		Matrix A = Matrix.fromOneLineString("1 2 3; 1 2 3; 4 5 6; 7 8 8");
 //		Matrix A = Matrix.fromOneLineString("1 2 3; 1 2 3; 1 2 7; 1 2 8");
-		Matrix A = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
+//		Matrix A = Matrix.fromOneLineString("1 2 3; 4 5 6; 7 8 8");
+//		Matrix A = Matrix.fromOneLineString("0 1; 0 0");
+		Matrix A = Matrix.fromOneLineString("1 2 3; 1 2 3; 1 2 7; 1 2 8; 1 2 3; 1 2 3; 1 2 7; 1 2 8");
+//		Matrix A = Matrix.fromOneLineString("1 1 1");
 //		A.transpose();
 		A.printM("A");
-		runSvdTest(A);
-		//runOrthoNormalTest(A);
+		runLqTest(A);
+//		runQrTest(A);
 	}
 
 	public static void main(String[] args) throws Exception {

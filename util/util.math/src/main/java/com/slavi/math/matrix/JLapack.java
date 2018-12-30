@@ -259,7 +259,7 @@ public class JLapack {
 	 * <p>
 	 * DORGBR - VECT="P"
 	 */
-	public static void lqDecomositionGetL(Matrix Src, Matrix l) {
+	public static void lqDecompositionGetL(Matrix Src, Matrix l) {
 		l.resize(Src.getSizeX(), Src.getSizeY());
 		for (int i = Src.getSizeX() - 1; i >= 0; i--)
 			for (int j = Src.getSizeY() - 1; j >= 0; j--)
@@ -271,7 +271,7 @@ public class JLapack {
 	 * <p>
 	 * DORGBR - VECT="Q"
 	 */
-	public static void lqDecomositionGetQ(Matrix Src, Matrix tau, Matrix q) {
+	public static void lqDecompositionGetQ(Matrix Src, Matrix tau, Matrix q) {
 		if ((tau.getSizeX() < Src.getSizeY()) || (tau.getSizeY() != 1))
 			throw new IllegalArgumentException("Invalid parameter");
 
@@ -1106,16 +1106,16 @@ public class JLapack {
 		boolean upper = Src.getSizeX() <= Src.getSizeY();
 
 		if (upper) {
-			Src.qrDecomposition(tauP);
-			Src.qrDecomositionGetQ(tauP, U);
-			Src.qrDecomositionGetR(RL);
+			qrDecomposition(Src, tauP);
+			qrDecomositionGetQ(Src, tauP, U);
+			qrDecomositionGetR(Src, RL);
 			tmpU = U;
 			tmpV = V;
 			tmpQ = Q;
 		} else {
-			Src.lqDecomposition(tauP);
-			Src.lqDecompositionGetQ(tauP, V);
-			Src.lqDecompositionGetL(RL);
+			lqDecomposition(Src, tauP);
+			lqDecompositionGetQ(Src, tauP, V);
+			lqDecompositionGetL(Src, RL);
 			tmpU = V;
 			tmpV = Q;
 			tmpQ = U;
@@ -1134,7 +1134,7 @@ public class JLapack {
 				tmpV.setItem(i, j, RL.getItem(i, j));
 
 		// DGESVD:1817 Generate left bidiagonalizing vectors in WORK(IU)
-		RL.qrDecomositionGetQ(tauQ, tmpQ);
+		qrDecomositionGetQ(RL, tauQ, tmpQ);
 
 		// DORGBR:217 Shift the vectors which define the elementary reflectors one
 		// row downward, and set the first row and column of P' to those of the unit matrix
@@ -2168,5 +2168,22 @@ public class JLapack {
 		}
 		A.printM("companion matrix A:");
 		DGEEV(A, result);
+	}
+
+	public static void lq(Matrix Src, Matrix q, Matrix tau) {
+		q.resize(Src.getSizeY(), Src.getSizeY());
+		JLapack jl = new JLapack();
+		jl.lqDecomposition(Src, tau);
+		JLapack.lqDecompositionGetQ(Src, tau, q);
+		JLapack.lqDecompositionGetL(Src, Src);
+	}
+
+	public static void qr(Matrix Src, Matrix q, Matrix tau) {
+		q.resize(Src.getSizeX(), Src.getSizeX());
+		tau.resize(Src.getSizeX(), 1);
+		JLapack jl = new JLapack();
+		jl.qrDecomposition(Src, tau);
+		JLapack.qrDecomositionGetQ(Src, tau, q);
+		JLapack.qrDecomositionGetR(Src, Src);
 	}
 }

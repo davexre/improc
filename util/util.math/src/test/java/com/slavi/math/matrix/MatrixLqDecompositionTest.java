@@ -17,7 +17,7 @@ public class MatrixLqDecompositionTest {
 		Matrix a = new Matrix(Integer.parseInt(stt.nextToken()), Integer.parseInt(stt.nextToken()));
 		a.load(fin);
 		fin.close();
-		
+
 		Matrix b = a.makeCopy();
 		Matrix tmp = new Matrix();
 
@@ -25,9 +25,10 @@ public class MatrixLqDecompositionTest {
 		Matrix v = new Matrix(a.getSizeX(), a.getSizeX());
 		Matrix s = new Matrix(a.getSizeX(), a.getSizeY());
 
-		a.lqDecomposition(tmp);
-		a.lqDecompositionGetQ(tmp, u);
-		a.lqDecompositionGetL(v);
+		JLapack jl = new JLapack();
+		jl.lqDecomposition(a, tmp);
+		JLapack.lqDecompositionGetQ(a, tmp, u);
+		JLapack.lqDecompositionGetL(a, v);
 
 //		u.printM("U2");
 //		v.printM("V2");
