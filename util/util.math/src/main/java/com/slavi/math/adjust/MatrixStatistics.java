@@ -259,6 +259,10 @@ public class MatrixStatistics {
 		return stdDev;
 	}
 
+	public Matrix getSumSquares() {
+		return sumValues2;
+	}
+
 	public boolean hasBadValues() {
 		for (int i = sumValues1.getVectorSize() - 1; i >= 0; i--) {
 			if (!(

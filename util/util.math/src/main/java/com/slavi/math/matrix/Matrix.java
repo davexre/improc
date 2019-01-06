@@ -364,20 +364,6 @@ public class Matrix <T extends Matrix<T>> extends Vector<T> implements IMatrix<T
 	}
 
 	/**
-	 * Returns the dot product of the matrix. The formula is:<br>
-	 * <tt>Result = Sum( this[i, j] * second[i, j] )<br>
-	 * </tt>
-	 */
-	public double dotProduct(Matrix second) {
-		assertSameSize(second);
-		double sum = 0;
-		for (int i = getSizeX() - 1; i >= 0; i--)
-			for (int j = getSizeY() - 1; j >= 0; j--)
-				sum += getItem(i, j) * second.getItem(i, j);
-		return sum;
-	}
-
-	/**
 	 * Performs an element by element abs and
 	 * stores the result in dest matrix. If the dest matrix is of incorrect size
 	 * it will be resized to the same size as the source matrix. The formula is:<br>
@@ -639,9 +625,7 @@ public class Matrix <T extends Matrix<T>> extends Vector<T> implements IMatrix<T
 	 * @return Returns the new matrix.
 	 */
 	public Matrix makeCopy() {
-		Matrix result = new Matrix(getSizeX(), getSizeY());
-		copyTo(result);
-		return result;
+		return copyTo(null);
 	}
 
 	/**
@@ -672,16 +656,6 @@ public class Matrix <T extends Matrix<T>> extends Vector<T> implements IMatrix<T
 			for (int j = getSizeY() - 1; j >= 0; j--)
 				setItem(i, j, (i == j) ? 1.0 : 0.0);
 		return this;
-	}
-
-	public double getSquaredDeviationFromE() {
-		double result = 0.0;
-		for (int i = getSizeX() - 1; i >= 0; i--)
-			for (int j = getSizeY() - 1; j >= 0; j--) {
-				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
-				result += d*d;
-			}
-		return result;
 	}
 
 	/**

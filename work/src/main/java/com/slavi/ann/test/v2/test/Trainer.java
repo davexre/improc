@@ -88,6 +88,7 @@ public class Trainer {
 
 		int numAdjustableParams = l.getNumAdjustableParams();
 		LeastSquaresAdjust lsa = new LeastSquaresSVD(numAdjustableParams);
+//		LeastSquaresAdjust lsa = new LeastSquaresAdjust(numAdjustableParams);
 		Matrix coefs = new Matrix(numAdjustableParams, 1);
 		Matrix params = new Matrix(numAdjustableParams, 1);
 		l.extractParams(params, 0);
@@ -215,7 +216,7 @@ public class Trainer {
 				System.out.println("AVERAGE ERROR HAS INCREASED.");
 			}
 			if (threshold != null) {
-				System.out.println("Threshold '" + threshold + "' reached at epoch " + epoch + 
+				System.out.println("Threshold '" + threshold + "' reached at epoch " + epoch +
 						" maxErr=" + MathUtil.d4(maxErr) + " learnProgress=" + MathUtil.d4(learnProgress));
 				break;
 			}

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StreamTokenizer;
 import java.util.ArrayList;
+import java.util.Locale;
+import java.util.StringTokenizer;
 
 import com.slavi.math.MathUtil;
 import com.slavi.math.matrix.Matrix.XchgRec;
@@ -69,16 +71,46 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 		if (obj == this)
 			return true;
 		SymmetricMatrix a = (SymmetricMatrix) obj;
-		if (a.sizeM != sizeM)
+		if (a.getSizeX() != getSizeX())
 			return false;
-		for (int i = m.length - 1; i >= 0; i--)
-			if (m[i] != a.m[i])
-				return false;
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				if (getItem(i, j) != a.getItem(i, j))
+					return false;
 		return true;
 	}
 
 	public void printM(String title) {
 		System.out.print(title + "\n" + toString());
+	}
+
+	public String toOneLineString() {
+		StringBuilder result = new StringBuilder();
+		for (int j = 0; j < getSizeY(); j++) {
+			if (j != 0)
+				result.append(";");
+			for (int i = 0; i <= j; i++) {
+				if (i != 0)
+					result.append(" ");
+				result.append(String.format(Locale.US, "%1$10.4f",
+						new Object[] { new Double(getItem(i, j)) } ));
+			}
+		}
+		return result.toString();
+	}
+
+	public static SymmetricMatrix fromOneLineString(String str) {
+		StringTokenizer st = new StringTokenizer(str, ";");
+		int size = st.countTokens();
+		SymmetricMatrix result = new SymmetricMatrix(size);
+		for (int j = 0; j < size; j++) {
+			StringTokenizer st2 = new StringTokenizer(st.nextToken());
+			int i = 0;
+			while (st2.hasMoreTokens()) {
+				result.setItem(i++, j, Double.parseDouble(st2.nextToken()));
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -101,7 +133,7 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	/**
 	 * Loads the matrix from a text stream
 	 */
-	public void load(BufferedReader fin) throws IOException {
+	public SymmetricMatrix load(BufferedReader fin) throws IOException {
 		StreamTokenizer t = new StreamTokenizer(fin);
 		for (int j = 0; j < sizeM; j++)
 			for (int i = 0; i <= j; i++) {
@@ -111,28 +143,31 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 			}
 		// Scip the EOL that remains AFTER the last token is read
 		fin.readLine();
+		return this;
 	}
 
 	/**
 	 * Saves the matrix to a text stream
 	 */
-	public void save(PrintStream fou) {
+	public SymmetricMatrix save(PrintStream fou) {
 		fou.print(this.toString());
+		return this;
 	}
 
 	/**
 	 * Resizes the matrix if the new size differs from the current matrix size.
 	 */
-	public void resize(int aSizeM) {
+	public SymmetricMatrix resize(int aSizeM) {
 		if (aSizeM < 0) {
 			throw new IllegalArgumentException("Invalid matrix size");
 		}
 		if ((aSizeM == sizeM) && (m != null)) {
-			return;
+			return this;
 		}
 		sizeM = aSizeM;
 		int newSize = ((sizeM + 1) * sizeM) >> 1;
 		m = new double[newSize];
+		return this;
 	}
 
 	public int getSizeX() {
@@ -206,20 +241,24 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>Result = dest = this * second<br>
 	 * </tt>
 	 */
-	public void mMul(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix mMul(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
 		double D;
-		for (int i = sizeM - 1; i >= 0; i--) {
-			for (int j = sizeM - 1; j >= i; j--) {
+		for (int i = getSizeX() - 1; i >= 0; i--) {
+			for (int j = getSizeX() - 1; j >= i; j--) {
 				D = 0;
-				for (int k = sizeM - 1; k >= 0; k--)
+				for (int k = getSizeX() - 1; k >= 0; k--)
 					D += getItem(k, i) * second.getItem(j, k);
 				dest.setItem(j, i, D);
 			}
 		}
+		return dest;
 	}
 
 	/**
@@ -228,20 +267,24 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest = this * second<br>
 	 * </tt>
 	 */
-	public void mMul(Matrix second, Matrix dest) {
-		if (sizeM != second.getSizeY()) {
+	public Matrix mMul(Matrix second, Matrix dest) {
+		if (getSizeX() != second.getSizeY()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(second.getSizeX(), sizeM);
+		if (dest == null)
+			dest = new Matrix(second.getSizeX(), getSizeX());
+		else
+			dest.resize(second.getSizeX(), getSizeX());
 		double D;
-		for (int i = sizeM - 1; i >= 0; i--) {
+		for (int i = getSizeX() - 1; i >= 0; i--) {
 			for (int j = second.getSizeX() - 1; j >= 0; j--) {
 				D = 0;
-				for (int k = sizeM - 1; k >= 0; k--)
+				for (int k = getSizeX() - 1; k >= 0; k--)
 					D += getItem(k, i) * second.getItem(j, k);
 				dest.setItem(j, i, D);
 			}
 		}
+		return dest;
 	}
 
 	/**
@@ -251,13 +294,18 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest[i][j] = this[i][j] + second[i][j]<br>
 	 * </tt>
 	 */
-	public void mSum(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix mSum(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = m[i] + second.m[i];
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) + second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -268,45 +316,18 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest[i][j] = this[i][j] - second[i][j]<br>
 	 * </tt>
 	 */
-	public void mSub(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix mSub(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = m[i] - second.m[i];
-	}
-
-	/**
-	 * Returns the dot product of the matrix. The formula is:<br>
-	 * <tt>Result = Sum( m[i][j] )<br>
-	 * </tt>
-	 */
-	public double dotProduct(SymmetricMatrix second) {
-		if (sizeM != second.sizeM) {
-			throw new IllegalArgumentException("Invalid argument");
-		}
-		double sum = 0;
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--)
-				sum += getItem(i, j) * second.getItem(i, j);
-		return sum;
-	}
-
-	/**
-	 * Returns the dot product of the matrix. The formula is:<br>
-	 * <tt>Result = Sum( m[i][j] )<br>
-	 * </tt>
-	 */
-	public double dotProduct(Matrix second) {
-		if ((sizeM != second.getSizeX()) || (sizeM != second.getSizeY())) {
-			throw new IllegalArgumentException("Invalid argument");
-		}
-		double sum = 0;
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--)
-				sum += getItem(i, j) * second.getItem(i, j);
-		return sum;
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) - second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -317,13 +338,18 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest[i][j] = this[i][j] * second[i][j]<br>
 	 * </tt>
 	 */
-	public void termMul(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix termMul(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = m[i] * second.m[i];
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) * second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -334,13 +360,18 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * </tt> <b>Warning:</b><i>If there is an element that is zero, an
 	 * exception will rise <code>java.lang.ArithmeticException</code>.</i>
 	 */
-	public void termDiv(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix termDiv(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = m[i] / second.m[i];
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--)
+				dest.setItem(i, j, getItem(i, j) / second.getItem(i, j));
+		return dest;
 	}
 
 	/**
@@ -350,8 +381,8 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	@Override
 	public double sumAll() {
 		double d = 0;
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--)
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeX() - 1; j >= 0; j--)
 				d += getItem(i, j);
 		return d;
 	}
@@ -379,13 +410,21 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest[i][j] = max( this[i][j] , second[i][j] )<br>
 	 * </tt>
 	 */
-	public void mMax(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix mMax(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = (m[i] > second.m[i] ? m[i] : second.m[i]);
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a > b ? a : b);
+			}
+		return dest;
 	}
 
 	/**
@@ -395,13 +434,21 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>dest[i][j] = min( this[i][j] , second[i][j] )<br>
 	 * </tt>
 	 */
-	public void mMin(SymmetricMatrix second, SymmetricMatrix dest) {
-		if (sizeM != second.sizeM) {
+	public SymmetricMatrix mMin(SymmetricMatrix second, SymmetricMatrix dest) {
+		if (getSizeX() != second.getSizeX()) {
 			throw new IllegalArgumentException("Invalid argument");
 		}
-		dest.resize(sizeM);
-		for (int i = m.length - 1; i >= 0; i--)
-			dest.m[i] = (m[i] < second.m[i] ? m[i] : second.m[i]);
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = i; j >= 0; j--) {
+				double a = getItem(i, j);
+				double b = second.getItem(i, j);
+				dest.setItem(i, j, a < b ? a : b);
+			}
+		return dest;
 	}
 
 	/**
@@ -430,7 +477,7 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * </tt>
 	 */
 	public void normalize2() {
-		if (sizeM == 0)
+		if (getSizeX() == 0)
 			return;
 		double maxVal = m[0];
 		double minVal = maxVal;
@@ -456,19 +503,21 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * @return Returns the new matrix.
 	 */
 	public SymmetricMatrix makeCopy() {
-		SymmetricMatrix result = new SymmetricMatrix(sizeM);
-		copyTo(result);
-		return result;
+		return copyTo(null);
 	}
 
 	/**
 	 * Copies this matrix to a destination. The destination is resized if
 	 * necessary.
 	 */
-	public void copyTo(SymmetricMatrix dest) {
-		dest.resize(sizeM);
+	public SymmetricMatrix copyTo(SymmetricMatrix dest) {
+		if (dest == null)
+			dest = new SymmetricMatrix(getSizeX());
+		else
+			dest.resize(getSizeX());
 		for (int i = m.length - 1; i >= 0; i--)
 			dest.m[i] = m[i];
+		return dest;
 	}
 
 	/**
@@ -476,32 +525,20 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * <tt>Result[i][j] = (i == j) ? 1 : 0<br>
 	 * </tt>
 	 */
-	public void makeE() {
-		for (int i = sizeM - 1; i >= 0; i--)
+	public SymmetricMatrix makeE() {
+		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = i; j >= 0; j--)
 				if (i == j)
 					setItem(i, j, 1);
 				else
 					setItem(i, j, 0);
-	}
-
-	/**
-	 * Returns true if this matrix is the identity matrix
-	 */
-	public double getSquaredDeviationFromE() {
-		double result = 0.0;
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--) {
-				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
-				result += d*d;
-			}
-		return result;
+		return this;
 	}
 
 	public double getSquaredDeviationFrom0() {
 		double result = 0.0;
-		for (int i = sizeM - 1; i >= 0; i--)
-			for (int j = sizeM - 1; j >= 0; j--) {
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeX() - 1; j >= 0; j--) {
 				double d = getItem(i, j);
 				result += d*d;
 			}
@@ -513,7 +550,7 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 */
 	public boolean isE(double tolerance) {
 		tolerance = Math.abs(tolerance);
-		for (int i = sizeM - 1; i >= 0; i--)
+		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = i; j >= 0; j--) {
 				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
 				if (Math.abs(d) > tolerance)
@@ -528,39 +565,25 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 * this.get(i,j) returns the <i>SAME OBJECT</i> as this.get(j,i), i.e.
 	 * exchanging two columns also exchanges the corresponding rows.
 	 */
-	public void exchangeX(int atX1, int atX2) {
+	public SymmetricMatrix exchangeX(int atX1, int atX2) {
 		if (atX1 == atX2)
-			return;
+			return this;
 
-		int j;
-		double tmpA[][] = new double[2][sizeM];
-		for (int i = sizeM - 1; i >= 0; i--) {
-			tmpA[0][i] = getItem(atX1, i);
-			tmpA[1][i] = getItem(atX2, i);
+		double a1 = getItem(atX1, atX1);
+		double a2 = getItem(atX2, atX2);
+		double a12 = getItem(atX1, atX2);
+		double tmp;
+		for (int i = getSizeX() - 1; i >= 0; i--) {
+			tmp = getItem(i, atX1);
+			setItem(i, atX1, getItem(i, atX2));
+			setItem(i, atX2, tmp);
 		}
-
-		j = 0;
-		for (int i = 0; i < sizeM; i++)
-			if (i == atX1) {
-				setItem(atX1, i, tmpA[1][atX2]);
-			} else {
-				if (j == atX2)
-					j++;
-				setItem(atX1, i, tmpA[1][j++]);
-			}
-
-		j = 0;
-		for (int i = 0; i < sizeM; i++)
-			if (i == atX2) {
-				setItem(atX2, i, tmpA[0][atX1]);
-			} else {
-				if (j == atX1)
-					j++;
-				setItem(atX2, i, tmpA[0][j++]);
-			}
+		setItem(atX1, atX1, a2);
+		setItem(atX2, atX2, a1);
+		setItem(atX1, atX2, a12);
+		return this;
 	}
 
-	public double debugMinAbsDiag = 0;
 	/**
 	 * Calculates the inverse matrix of this matrix. The algorithm calculates
 	 * the inverse matrix "in place" and does NOT create any intermediate
@@ -572,52 +595,50 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 	 */
 	public boolean inverse() {
 		ArrayList<XchgRec> xchg = new ArrayList<XchgRec>();
-		debugMinAbsDiag = Double.MAX_VALUE;
+		double tol = calcEpsTolerance();
 
-		for (int i = 0; i < sizeM; i++) {
-			double A = getItem(i, i);
-			double abs = Math.abs(A);
-			if (abs != 0.0) {
-				debugMinAbsDiag = Math.min(debugMinAbsDiag, abs);
-			}
-			if (A == 0) {
-				int indexI = 0;
-				for (int j = i + 1; j < sizeM; j++) {
-					if (getItem(i, j) != 0) {
-						indexI = j;
-						exchangeX(i, j);
-						xchg.add(new XchgRec(i, j));
-						break;
-					}
+		for (int pivot = 0; pivot < getSizeY(); pivot++) {
+			// Choose pivot with max absolute value
+			int bestPivot = 0;
+			double A = 0;
+			for (int j = pivot; j < getSizeY(); j++) {
+				double t = Math.abs(getItem(j, j));
+				if (A < t) {
+					A = t;
+					bestPivot = j;
 				}
-				if (indexI == 0) {
-					make0();
-					return false;
-				}
-				A = getItem(i, i);
 			}
 
-			A = 1.0 / A;
-			for (int j = 0; j < sizeM; j++)
-				if (i != j) {
-					double B = getItem(j, i) * A;
-					for (int k = j; k < sizeM; k++)
-						if (k != i) {
-							if (k < i)
-								itemAdd(j, k,  B * getItem(i, k));
+			if (A < tol) {
+				make0();
+				return false;
+			}
+			if (pivot != bestPivot) {
+				exchangeX(pivot, bestPivot);
+				xchg.add(new XchgRec(pivot, bestPivot));
+			}
+
+			A = 1.0 / getItem(pivot, pivot);
+			for (int i = 0; i < getSizeY(); i++)
+				if (pivot != i) {
+					double B = getItem(i, pivot) * A;
+					for (int j = i; j < getSizeY(); j++)
+						if (j != pivot) {
+							if (j < pivot)
+								itemAdd(i, j,  B * getItem(pivot, j));
 							else
-								itemAdd(j, k, -B * getItem(i, k));
+								itemAdd(i, j, -B * getItem(pivot, j));
 						}
 				}
 
-			for (int j = 0; j < sizeM; j++)
-				if (i != j) {
-					if (i > j)
-						itemMul(i, j, -A);
+			for (int j = 0; j < getSizeY(); j++)
+				if (pivot != j) {
+					if (pivot > j)
+						itemMul(pivot, j, -A);
 					else
-						itemMul(i, j,  A);
+						itemMul(pivot, j,  A);
 				}
-			setItem(i, i, A);
+			setItem(pivot, pivot, A);
 		}
 
 		for (int i = xchg.size() - 1; i >= 0; i--) {
@@ -625,6 +646,10 @@ public class SymmetricMatrix <T extends SymmetricMatrix<T>> extends Vector<T> im
 			exchangeX(x.a, x.b);
 		}
 		return true;
+	}
+
+	public double calcEpsTolerance() {
+		return MathUtil.eps * getSizeX() * getNormInfinity();
 	}
 
 	@Override

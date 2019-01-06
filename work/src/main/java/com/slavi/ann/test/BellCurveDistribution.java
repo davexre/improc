@@ -68,12 +68,15 @@ public class BellCurveDistribution {
 		for (int i = 0; i < w.length; i++)
 			System.out.println(w[i]);
 */
-		Matrix w = new Matrix(800, 1);
+		Matrix w = new Matrix(4, 3);
+		fillWeight(w, 0.3);
+		System.out.println(w.toMatlabString("W"));
+
 		fillWeight_MY(w, stdDev);
 //		w.rMul(15/4.0);
 		for (int i = 0; i < w.getSizeX(); i++)
 			System.out.println(MathUtil.d20(w.getItem(i, 0)));
-		
+
 		System.out.println(w.sumAll());
 	}
 }

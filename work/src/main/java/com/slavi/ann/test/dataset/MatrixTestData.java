@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,8 @@ import com.slavi.ann.test.v2.Network;
 import com.slavi.ann.test.v2.activation.SigmoidLayer;
 import com.slavi.ann.test.v2.connection.FullyConnectedLayer;
 import com.slavi.math.MathUtil;
+import com.slavi.math.Rotation3D;
+import com.slavi.math.RotationXYZ;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
@@ -138,5 +141,36 @@ public class MatrixTestData {
 		weight.copyTo(l.weight);
 		Network net = new Network(l, new SigmoidLayer());
 		return generateDataSet(net, weight.getSizeX(), 1, numberOfDatapoints);
+	}
+
+	public static Matrix toMatrix(double[] v) {
+		Matrix m = new Matrix(3, 1);
+		m.loadFromVector(v);
+		return m;
+	}
+
+	public static List<MatrixDataPointPair> generatePoints(boolean addRandomness) {
+		ArrayList<MatrixDataPointPair> points = new ArrayList<>();
+		Rotation3D r = RotationXYZ.instance;
+		Random rnd = new Random();
+		Matrix initial = RotationXYZ.instance.makeAngles(10 * MathUtil.deg2rad, 20 * MathUtil.deg2rad, 30 * MathUtil.deg2rad);
+		for (int ix = 1; ix < 4; ix++) {
+			for (int iy = 0; iy < 4; iy++) {
+				for (int iz = 0; iz < 4; iz++) {
+					double src[] = new double[] { ix, iy, iz };
+					double dest[] = new double[3];
+					r.transformForward(initial, src, dest);
+					if (addRandomness)
+						for (int k = 0; k < dest.length; k++) {
+							dest[k] += (rnd.nextDouble() - 0.5) / 100.0;
+						}
+					MatrixDataPointPair pair = new MatrixDataPointPair();
+					pair.input = toMatrix(src);
+					pair.output = toMatrix(dest);
+					points.add(pair);
+				}
+			}
+		}
+		return points;
 	}
 }

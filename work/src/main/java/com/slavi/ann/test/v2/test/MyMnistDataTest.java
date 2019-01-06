@@ -38,10 +38,10 @@ public class MyMnistDataTest {
 		pair0.toInputMatrix(input0);
 		pair0.toOutputMatrix(output0);
 		NetworkBuilder nb = new NetworkBuilder(input0.getSizeX(), input0.getSizeY())
-				// MNIST data
+/*				// MNIST data
 				//.addConstScaleAndBiasLayer(2, -1)
-//				.addConvolutionLayer(7).addSigmoidLayer()
-//				.addConvolutionLayer(3).addSigmoidLayer()
+				.addConvolutionLayer(7).addSigmoidLayer()
+				.addConvolutionLayer(3).addSigmoidLayer()
 				//.addDebugLayer("A1", Statistics.CStatMinMax, Statistics.CStatMinMax)
 				//.addConstScaleAndBiasLayer(10.0 / 25, -5)
 				//.addDebugLayer("A2", Statistics.CStatDetail, Statistics.CStatDetail)
@@ -51,7 +51,7 @@ public class MyMnistDataTest {
 				//.addSigmoidLayer()
 //				.addLayer(new BinaryOutputLayer())
 				//.addDebugLayer("last", DebugLayer.off)
-
+*/
 /*
 //				.addConstScaleAndBiasLayer(2, -1)
 				.addConvolutionLayer(5)
@@ -69,10 +69,10 @@ public class MyMnistDataTest {
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				.addDebugLayer("last", DebugLayer.off)*/
 				// Iris data
-				.addFullyConnectedLayer(3)
-				.addBiasLayer()
-				.addSigmoidLayer()
-				.addConstScaleAndBiasLayer(10, -5)
+//				.addFullyConnectedLayer(3)
+//				.addBiasLayer()
+//				.addSigmoidLayer()
+//				.addConstScaleAndBiasLayer(10, -5)
 /*				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()*/
 				.addFullyConnectedLayer(output0.getVectorSize()).addSigmoidLayer()

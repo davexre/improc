@@ -32,6 +32,20 @@ public interface IMatrix <T extends IMatrix<T>> {
 	}
 
 	/**
+	 * Returns the dot product of the matrix. The formula is:<br>
+	 * <tt>Result = Sum( this[i, j] * second[i, j] )<br>
+	 * </tt>
+	 */
+	default double dotProduct(IMatrix second) {
+		assertSameSize(second);
+		double sum = 0;
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--)
+				sum += getItem(i, j) * second.getItem(i, j);
+		return sum;
+	}
+
+	/**
 	 * Calculates sum( (this(i,j) - second(i,j)) ^ 2 )
 	 */
 	default double getSquaredDifference(IMatrix second) {
@@ -40,6 +54,19 @@ public interface IMatrix <T extends IMatrix<T>> {
 		for (int i = getSizeX() - 1; i >= 0; i--)
 			for (int j = getSizeY() - 1; j >= 0; j--) {
 				double d = getItem(i, j) - second.getItem(i, j);
+				result += d*d;
+			}
+		return result;
+	}
+
+	/**
+	 * Calculates sum( (this(i,j) - EYE(i,j)) ^ 2 )
+	 */
+	default double getSquaredDeviationFromE() {
+		double result = 0.0;
+		for (int i = getSizeX() - 1; i >= 0; i--)
+			for (int j = getSizeY() - 1; j >= 0; j--) {
+				double d = i == j ? getItem(i, j) - 1.0 : getItem(i, j);
 				result += d*d;
 			}
 		return result;

@@ -108,6 +108,7 @@ public class LeastSquaresAdjust {
 	public boolean calculate() {
 		if (!canCalculate()) {
 			log.error("Can not calculate. Not enough data. Minimum " + getRequiredMeasurements() + " measurements required.");
+			unknown.make0();
 			return false;
 		}
 		if (log.isInfoEnabled()) {
@@ -126,6 +127,7 @@ public class LeastSquaresAdjust {
 				log.debug("Normal matrix\n" + nmCopy.toString());
 				log.debug("APL\n" + apl.toString());
 			}
+			unknown.make0();
 			return false;
 		}
 		SymmetricMatrix tmp = new SymmetricMatrix(nm.getSizeY());
@@ -137,11 +139,12 @@ public class LeastSquaresAdjust {
 		}
 		if (log.isTraceEnabled() || (deviation > precision)) {
 			log.trace("Normal matrix\n" + nmCopy.toMatrix().toMatlabString("NM"));
-//			log.trace("Inverted Normal Matrix\n" + nm.toString());
-//			log.trace("NM * (NM')\n" + tmp.toString());
-//			log.trace("APL\n" + apl.toString());
+			log.trace("Inverted Normal Matrix\n" + nm.toString());
+			log.trace("NM * (NM')\n" + tmp.toString());
+			log.trace("APL\n" + apl.toString());
 		}
 		if (deviation > precision) {
+			unknown.make0();
 			return false;
 		}
 		calculateUnknowns();

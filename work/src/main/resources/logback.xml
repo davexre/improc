@@ -45,10 +45,13 @@
 	<logger level="all" name="LOG" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
+	<logger level="all" name="com.slavi.math.adjust.LeastSquaresAdjust.measurements" additivity="false">
 		<appender-ref ref="my.appender.log" />
 	</logger>
-	<logger level="off" name="com.slavi.math.adjust.LeastSquaresAdjust" />
+	<logger level="all" name="com.slavi.math.adjust.LeastSquaresAdjust" additivity="false">
+		<appender-ref ref="my.appender.log" />
+	</logger>
+	
 	<logger level="error" name="ch.qos.logback.classic.LoggerContext" />
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />

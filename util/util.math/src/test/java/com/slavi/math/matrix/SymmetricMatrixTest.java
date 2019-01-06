@@ -7,6 +7,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.slavi.math.MathUtil;
+
 public class SymmetricMatrixTest {
 
 	public static double precision = 1.0 / 10000.0;
@@ -33,6 +35,30 @@ public class SymmetricMatrixTest {
 		Assert.assertTrue("Failed to inverse the matrix", a.inverse());
 		a.mMul(m, b);
 		Assert.assertTrue("Inverse matrix incorrect", b.isE(precision));
+	}
+
+	@Test
+	public void testExchangeX() {
+		SymmetricMatrix SA = new SymmetricMatrix(5);
+		double d[] = SA.getVector();
+		for (int i = 0; i < d.length; i++)
+			d[i] = i;
+		SA.loadFromVector(d);
+		Matrix A = SA.toMatrix();
+
+		SymmetricMatrix sa = new SymmetricMatrix();
+		Matrix a = new Matrix();
+		for (int i = 0; i < SA.getSizeX(); i++)
+			for (int j = 0; j < SA.getSizeX(); j++) {
+				SA.copyTo(sa);
+				A.copyTo(a);
+
+				sa.exchangeX(i, j);
+				a.exchangeX(i, j);
+				a.exchangeY(i, j);
+				double e = sa.getSquaredDifference(a);
+				Assert.assertEquals(0, e, MathUtil.eps);
+			}
 	}
 
 	@Test
