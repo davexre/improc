@@ -1,0 +1,102 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(TestParser)
+
+package com.slavi.tools.test.parser;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import com.slavi.lang.TestParserMain.Element;
+import com.slavi.lang.TestParserMain.ChildElement;
+import com.slavi.lang.TestParserMain.Content;
+
+public class TestParser {
+	public ArrayList<Element> elements = new ArrayList();
+	String moduleName, packageName, dependsOn;
+}
+PARSER_END(TestParser)
+
+SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n" |
+	<"//"(~["\r","\n"])*>
+}
+
+TOKEN: {
+	<XML_DEF: "<?xml" (~[">"])* ">">
+|	<LETTER: ["A"-"Z","a"-"z","_"]>
+|	<NAME: ("#" | <LETTER>) (<LETTER> | ["0"-"9"])* >
+// |	<QUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\"">
+}
+
+
+void element(): 			{ Element e = new Element(); }
+{
+	"<!ELEMENT"
+	<NAME>					{ e.name = token.image; }
+	(
+		<NAME>				{
+								switch (token.image) {
+								case "EMPTY":
+								case "ANY":
+									break;
+								default:
+									throw new Error("");
+								}
+							}
+|		content(e)
+	)
+	["*"]
+	">"						{ elements.add(e); }
+}
+
+void content(Content p):	{ Content tmp; }
+{
+	"("
+	nameWithModifier(p)
+	(
+		("," | "|")			{ 
+								if ("".equals(p.operation))
+									p.operation = token.image;
+								else if (!token.image.equals(p.operation))
+									throw new Error("Merging operations , and | not allowed");
+							}
+		(
+			nameWithModifier(p) 
+|			content(tmp = new Content())	{ p.content.add(tmp); }
+		)
+	)*
+	")"
+}
+
+void nameWithModifier(Content p): { ChildElement e = new ChildElement(); }
+{
+	<NAME>					{ e.name = token.image; }
+	[
+		("?" | "+" | "*")	{ e.modifier = token.image; }
+	]
+							{ p.content.add(e); }
+}
+
+void attList(): {}
+{
+	"<!ATTLIST"
+	<NAME>					{ e.name = token.image; }
+	
+}
+
+void parse(): {}
+{
+	[<XML_DEF>]
+	(
+		element()
+	)*
+	<EOF>
+}

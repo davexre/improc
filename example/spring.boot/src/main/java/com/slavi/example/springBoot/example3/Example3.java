@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
@@ -24,6 +26,7 @@ import com.slavi.example.springBoot.example3.component.Dao;
 @ComponentScan
 @EnableTransactionManagement
 @EnableJpaRepositories
+@EnableAutoConfiguration
 @ImportAutoConfiguration
 @Import({ DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class })
 public class Example3 {
@@ -75,7 +78,7 @@ public class Example3 {
 
 	void doIt() throws Exception {
 		SpringApplication app = new SpringApplication(getClass());
-		app.setWebEnvironment(false);
+		app.setWebApplicationType(WebApplicationType.NONE);
 		app.setDefaultProperties(appProperties);
 		ConfigurableApplicationContext ctx = app.run();
 		ctx.getBean(getClass()).springMain();

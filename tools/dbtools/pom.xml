@@ -62,7 +62,50 @@ In order to include all jdbcs in the target jar use:
 	</dependencies>
 	
 	<build>
+		<finalName>dbtools</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.1.1.RELEASE</version>
+				<executions>
+					<execution>
+						<id>repackage</id>
+						<phase>package</phase>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<embeddedLaunchScript>src/main/script/embeddedLaunchScript.sh</embeddedLaunchScript>
+							<executable>true</executable>
+							<classifier>exec</classifier>
+							<mainClass>com.slavi.dbtools.Main</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>rename</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<move file="${project.build.directory}/${project.build.finalName}-exec.jar" tofile="${project.build.directory}/dbtools" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -83,6 +126,7 @@ In order to include all jdbcs in the target jar use:
 					</execution>
 				</executions>
 			</plugin>
+ -->
 		</plugins>
 	</build>
 	

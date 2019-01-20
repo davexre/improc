@@ -41,6 +41,7 @@ public class Dao {
 		}
 	}
 
+	@javax.transaction.Transactional
 	public void dummy() {
 		User u = em.find(User.class, "User 1");
 		em.detach(u);

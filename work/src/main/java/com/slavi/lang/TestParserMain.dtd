@@ -1,0 +1,17 @@
+<?xml version="1">
+
+
+<!ELEMENT to (#PCDATA)>
+<!ELEMENT from (#PCDATA)>
+<!ELEMENT heading (#PCDATA)>
+<!ELEMENT body (#PCDATA)>
+
+<!ELEMENT note3 (message+)>
+<!ELEMENT note4 (message*)>
+<!ELEMENT note5 (message?)>
+<!ELEMENT note2 (to,from,heading,body)>
+<!ELEMENT note6 (to,from,header,(message|body))>
+<!ELEMENT note7 (#PCDATA|to|from|header|message)*>
+
+<!ELEMENT br EMPTY>
+<!ELEMENT note1 ANY>
