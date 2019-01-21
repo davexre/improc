@@ -1,5 +1,14 @@
 <?xml version="1">
 
+<!ENTITY % dtypes-mod SYSTEM 'dtypes.mod' >
+%dtypes-mod;
+<!ENTITY % nmspace-mod SYSTEM "nmspace.mod">
+%nmspace-mod;
+<!ENTITY % defs-mod SYSTEM "defs.mod">
+%defs-mod;
+
+<!-- comment -->
+<!ENTITY % SOME a"b'c"d'e"f'g "qq">
 
 <!ELEMENT to (#PCDATA)>
 <!ELEMENT from (#PCDATA)>

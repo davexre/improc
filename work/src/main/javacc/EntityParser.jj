@@ -1,0 +1,80 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(EntityParser)
+
+package com.slavi.dtd.entity.parser;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import com.slavi.lang.TestParserMain.Element;
+import com.slavi.lang.TestParserMain.ChildElement;
+import com.slavi.lang.TestParserMain.Content;
+
+public class EntityParser {
+    public HashMap<String, String> entities = new HashMap();
+}
+PARSER_END(EntityParser)
+
+SKIP: {
+    " "
+|   "\t"
+|   "\r"
+|   "\n"
+|   <"<!--" ( (~["-"]) | ( "-" (~["-"]) ))* "-->">
+|   <"//"(~["\r","\n"])*>
+}
+
+TOKEN: {
+    <XML_DEF: "<?xml" (~[">"])* ">">
+|   <START: "<!">
+|   <STOP: ">">
+|   <SUBST: "%" (~[";", " ", "\t", "\n", "\r"])+ ";">
+|   <WORD: ( 
+//        (~[">"])+
+        (~["<", ">", " ", "\t", "\n", "\r", "\"", "'"])
+//        ["A"-"Z","a"-"z","0"-"9","-","_","%","#","(",")"]
+    |   ("'"  (~["'"])*  "'")
+    |   ("\"" (~["\""])* "\"")
+    )+>
+}
+
+void parse(): {}
+{
+    [<XML_DEF>]
+    (
+        <SUBST> |
+        (
+            <START>			{ int count = 0; boolean ok = true; String name = ""; String val = "";}
+            (
+                (<SUBST> |
+                <WORD>)		{
+                				String s = token.image;
+                				count++;
+                				switch(count) {
+                				case 1: ok &= "ENTITY".equalsIgnoreCase(s); break;
+                				case 2: ok &= "%".equalsIgnoreCase(s); break;
+                				case 3: name = s; break;
+                				case 4: break;
+                				case 5: val = s; break;
+                				}
+                				// System.out.println(count + " " + s); 
+                			}
+            )+
+            <STOP>			{ 
+            					// System.out.println(ok + ": " + count + ": " + name + " -> " + val); 
+            					if (ok && 
+            						count == 5 &&
+            						!"".equals(name) && 
+            						!"".equals(val)
+            						) 
+            						entities.put(name, val); 
+            				}
+       )
+    )*
+    <EOF>
+}
