@@ -1,0 +1,69 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(TestParser2)
+
+package com.slavi.tools.test.parser;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import com.slavi.lang.TestParserMain.Element;
+import com.slavi.lang.TestParserMain.ChildElement;
+import com.slavi.lang.TestParserMain.Content;
+
+public class TestParser2 {
+	public ArrayList<Element> elements = new ArrayList();
+	String moduleName, packageName, dependsOn;
+	
+	public void setTabSize(int w) {
+		jj_input_stream.setTabSize(w);
+	}
+}
+PARSER_END(TestParser2)
+
+SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n" |
+	<"//"(~["\r","\n"])*>
+}
+
+TOKEN: {
+	<#LETTER: ["A"-"C","a"-"c","_"]>
+|	<WORD: (<LETTER>)+>
+//|	<DQUOTED_TOKEN: "\"">: DQUOTE
+//|	<QUOTED_TOKEN: "\'">: QUOTE
+//|	<DQUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\"">
+//|	<QUOTED_TOKEN: "\'" (~["\n","\r","\'"])* "\'">
+
+|	<#DQUOTED_TEXT: (~["\n","\r","\""])*>	
+|	<#QUOTED_TEXT:  (~["\n","\r","\'"])*>	
+|	<DQUOTED_TOKEN: "\"" <DQUOTED_TEXT> "\"">	{ System.out.println("#DQ " + matchedToken.image); }
+|	<QUOTED_TOKEN: "\'" <QUOTED_TEXT> "\'">		{ System.out.println("#SQ " + matchedToken.image); }
+}
+
+<DQUOTE> SKIP: {
+	< "\"" >: DEFAULT
+}
+
+<DQUOTE> MORE: {
+	< ~[] >
+}
+
+<QUOTE> MORE: {
+	< "'" >: DEFAULT
+|	< ~["\n","\r","\'"] >
+}
+
+void parse(): {}
+{
+	(
+		(<WORD> | <QUOTED_TOKEN> | <DQUOTED_TOKEN>)	{ System.out.println(token.image); }
+	)*
+	<EOF>
+}

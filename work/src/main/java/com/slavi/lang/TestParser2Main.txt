@@ -1,0 +1,2 @@
+aaa " qqq ' zzz " bbb ' qqq " zzz ' ccc
+//a a	za"qqq'zzz"bbb'qqq"zzz'ccc
