@@ -1,0 +1,64 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(DTDEntityParser)
+
+package com.slavi.tools.test.parser;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import com.slavi.lang.TestParserMain.Element;
+import com.slavi.lang.TestParserMain.ChildElement;
+import com.slavi.lang.TestParserMain.Content;
+
+public class DTDEntityParser {
+	public HashMap<String, String> entities = new HashMap();
+	String moduleName, packageName, dependsOn;
+}
+PARSER_END(DTDEntityParser)
+
+<*> SKIP: {
+	" " |
+	"\t" |
+	"\r" |
+	"\n" |
+	<"<!--" ( ~["-"] | ( "-" ~["-"] ) )* "-->">
+}
+
+TOKEN: {
+	<XML_DEF: "<?xml" (~[">"])* ">">
+|	<BEGIN: "<!">
+}
+
+TOKEN: {
+	<ENTITY: "ENTITY">
+|	<PERCENT: "%">
+|	<NAME: (["A"-"Z","a"-"z","0"-"9","_"])+ >
+|	<QUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\"">
+|	<SINGLE_QUOTED_TOKEN: "'" (~["\n","\r","'"])* "'">
+|	<NON_CLOSING: (~[">"])>
+|	<CLOSING: ">">
+}
+
+void parse(): {}
+{
+	[<XML_DEF>]
+	(
+		<BEGIN>
+		(
+			<ENTITY> <PERCENT>
+			<NAME>					{ String name = token.image; }
+			(
+				<QUOTED_TOKEN> | <SINGLE_QUOTED_TOKEN> | <NAME>
+			)					{ entities.put(name, token.image); }
+		) | ((
+			<NAME> | <PERCENT> | <QUOTED_TOKEN> | <SINGLE_QUOTED_TOKEN> | <NON_CLOSING>
+		)+)
+		<CLOSING>
+	)*
+	<EOF>
+}

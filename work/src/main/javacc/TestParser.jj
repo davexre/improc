@@ -36,7 +36,6 @@ TOKEN: {
 // |	<QUOTED_TOKEN: "\"" (~["\n","\r","\""])* "\"">
 }
 
-
 void element(): 			{ Element e = new Element(); }
 {
 	"<!ELEMENT"
@@ -88,7 +87,7 @@ void nameWithModifier(Content p): { ChildElement e = new ChildElement(); }
 void attList(): {}
 {
 	"<!ATTLIST"
-	<NAME>					{ e.name = token.image; }
+	<NAME>				//	{ e.name = token.image; }
 	
 }
 

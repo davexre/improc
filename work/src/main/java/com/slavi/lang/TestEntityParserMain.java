@@ -13,8 +13,9 @@ import com.slavi.util.io.LineReader;
 
 public class TestEntityParserMain {
 
-	void doIt1() throws Exception {
-		try (Reader is = new InputStreamReader(getClass().getResourceAsStream("TestParserMain.dtd"))) {
+	void doIt() throws Exception {
+		try (Reader is = new FileReader("/home/spetrov/git/ibetms/bin/docs/misc/RemoteControlResponse.dtd")) {
+//		try (Reader is = new InputStreamReader(getClass().getResourceAsStream("TestParserMain.dtd"))) {
 			EntityParser p = new EntityParser(is);
 			p.parse();
 			ObjectMapper m = Util.jsonMapper();
@@ -22,10 +23,10 @@ public class TestEntityParserMain {
 		}
 	}
 
-	void doIt() throws Exception {
+	void doIt1() throws Exception {
 		ArrayList<String> err = new ArrayList();
 		try (LineReader lr = new CommentAwareLineNumberReader(new InputStreamReader(getClass().getResourceAsStream("TestParserMain files list.txt")))) {
-			String l = "/usr/lib/libreoffice/share/dtd/officedocument/1_0/office.dtd";
+			String l;
 			while ((l = lr.readLine()) != null) {
 				System.out.println("\n---------- " + l);
 				try (Reader is = new FileReader(l)) {

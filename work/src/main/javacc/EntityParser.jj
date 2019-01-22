@@ -59,20 +59,28 @@ void parse(): {}
                 				case 1: ok &= "ENTITY".equalsIgnoreCase(s); break;
                 				case 2: ok &= "%".equalsIgnoreCase(s); break;
                 				case 3: name = s; break;
-                				case 4: break;
-                				case 5: val = s; break;
+                				case 4: val = s; break;
+                				case 5: 
+                					if ("SYSTEM".equals(val)) 
+                						val = s; 
+                					else 
+                						ok = false; 
+                					break;
+                				default: ok = false; break;
                 				}
-                				// System.out.println(count + " " + s); 
+                				//System.out.println(count + " " + s); 
                 			}
             )+
-            <STOP>			{ 
-            					// System.out.println(ok + ": " + count + ": " + name + " -> " + val); 
+            <STOP>			{
+            					//System.out.println(ok + ": " + count + ": " + name + " -> " + val); 
             					if (ok && 
-            						count == 5 &&
             						!"".equals(name) && 
             						!"".equals(val)
-            						) 
-            						entities.put(name, val); 
+            						)
+            						if (count == 4) 
+            							entities.put(name, val);
+            						else 
+            							entities.put(name, val);	// URL
             				}
        )
     )*
