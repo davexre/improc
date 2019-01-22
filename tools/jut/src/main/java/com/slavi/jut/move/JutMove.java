@@ -90,7 +90,7 @@ public class JutMove {
 			if (ci > 0)
 				c = c.substring(0, ci);
 			String fromDir = FilenameUtils.concat(i.location.sourcesPath, c);
-			String toDir = FilenameUtils.concat(d.sourcesPath, c);
+			String toDir = FilenameUtils.getPath(FilenameUtils.concat(d.sourcesPath, c));
 			lines.add("mv '" + fromDir + ".java' '" + toDir + "'");
 		}
 		sortAndPrintCollection(lines, "Move classes for " + title);

@@ -63,7 +63,10 @@ void methodTypeSignature(): {}
 		( typeSignature() )*
 	")"
 	( typeSignature() | "V" ) 
-	( classTypeSignature() | <TYPE_VAR> )*
+	(
+		"^"
+		(classTypeSignature() | <TYPE_VAR>)
+	)*
 }
 
 void typeParams(): {}

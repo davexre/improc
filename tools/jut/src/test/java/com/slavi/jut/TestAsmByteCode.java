@@ -42,6 +42,7 @@ public class TestAsmByteCode extends AsmClass {
 		"<T:Ljava/lang/Object;>(I)Ljava/lang/Class<+TT;>;",
 		"()V",
 		"<SerializableObject::Ljava/io/Serializable;>(TSerializableObject;)TSerializableObject;",
+		"<E:Ljava/lang/Throwable;>(TE;)V^TE;",
 	};
 
 	String[] classTests = {

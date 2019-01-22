@@ -1,10 +1,18 @@
-Usage: draw <options>
+Usage: move <options>
 
- -h,--help   Display this help
+ -h,--help       Display this help
+ -cfg            Configuration file
+ -l <classes>    Classes location. May specify more than one.
+ -t <target>     Target project location
+ -m <mode>       Mode: split, common
+ 
+ Mode = common
+ -c <location>   Location from Common classes
 
 Error levels:
-  0          Ok
-  254        Invalid command line parameters. Help is displayed.
-  255        An error has occurred. See stderr for details.
+  0              Ok
+  254            Invalid command line parameters. Help is displayed.
+  255            An error has occurred. See stderr for details.
 
 Examples:
+move -m common -l ./classes/ -c ./common -t ./extract=com.example.ExtractThisClass
