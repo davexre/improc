@@ -190,7 +190,7 @@ public class JutDraw {
 		if (showHelp) {
 			//HelpFormatter formatter = new HelpFormatter();
 			//formatter.printHelp("tools", "", options, "");
-			System.out.println(IOUtils.toString(JutMove.class.getResourceAsStream("JutMove.help.txt"), "UTF8"));
+			System.out.println(IOUtils.toString(JutDraw.class.getResourceAsStream("JutDraw.help.txt"), "UTF8"));
 			return 254;
 		}
 		return 0;

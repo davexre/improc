@@ -48,6 +48,7 @@ In order to include all jdbcs in the target jar use:
 	</dependencies>
 	
 	<build>
+		<finalName>jut</finalName>
 		<plugins>
 			<plugin>
 				<groupId>com.helger.maven</groupId>
@@ -63,6 +64,46 @@ In order to include all jdbcs in the target jar use:
 				</executions>
 			</plugin>
 
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.1.1.RELEASE</version>
+				<executions>
+					<execution>
+						<id>repackage</id>
+						<phase>package</phase>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						<configuration>
+							<embeddedLaunchScript>src/main/script/embeddedLaunchScript.sh</embeddedLaunchScript>
+							<executable>true</executable>
+							<classifier>exec</classifier>
+							<mainClass>com.slavi.jut.Main</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>rename</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<move file="${project.build.directory}/${project.build.finalName}-exec.jar" tofile="${project.build.directory}/jut" />
+							</target>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+<!-- 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -83,63 +124,7 @@ In order to include all jdbcs in the target jar use:
 					</execution>
 				</executions>
 			</plugin>
+ -->
 		</plugins>
 	</build>
-	
-	<profiles>
-		<profile>
-			<id>mysql</id>
-			<activation><property><name>alljdbc</name></property></activation>
-			<dependencies>
-				<dependency>
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-		
-		<profile>
-			<id>derby</id>
-			<activation><property><name>alljdbc</name></property></activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.apache.derby</groupId>
-					<artifactId>derby</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>hsqldb</id>
-			<activation><property><name>alljdbc</name></property></activation>
-			<dependencies>
-				<dependency>
-					<groupId>org.hsqldb</groupId>
-					<artifactId>hsqldb</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>h2</id>
-			<activation><property><name>alljdbc</name></property></activation>
-			<dependencies>
-				<dependency>
-					<groupId>com.h2database</groupId>
-					<artifactId>h2</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-
-		<profile>
-			<id>mssql</id>
-			<activation><property><name>alljdbc</name></property></activation>
-			<dependencies>
-				<dependency>
-					<groupId>com.microsoft.sqlserver</groupId>
-					<artifactId>mssql-jdbc</artifactId>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
 </project>

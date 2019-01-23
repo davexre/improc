@@ -62,6 +62,7 @@ In order to include all jdbcs in the target jar use:
 	</dependencies>
 	
 	<build>
+
 		<finalName>dbtools</finalName>
 		<plugins>
 			<plugin>
@@ -103,7 +104,6 @@ In order to include all jdbcs in the target jar use:
 					</execution>
 				</executions>
 			</plugin>
-
 
 <!-- 
 			<plugin>
