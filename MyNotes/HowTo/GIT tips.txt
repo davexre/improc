@@ -80,3 +80,10 @@ git reset --soft HEAD~2
 Clean the git working folder
 ============================
 git clean -fdx
+
+List files in stash or commit
+=============================
+* Note: the following command DOES NOT list stashed files that are not tracked.
+git stash show stash@{0}
+
+git diff --name-only HEAD~10 HEAD~5

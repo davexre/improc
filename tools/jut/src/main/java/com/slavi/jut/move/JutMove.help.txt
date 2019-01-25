@@ -3,11 +3,14 @@ Usage: move <options>
  -h,--help       Display this help
  -cfg            Configuration file
  -l <classes>    Classes location. May specify more than one.
- -t <target>     Target project location
+                 -l <class_file_folder>[=<sources folder>]
+ -t <target>     Target project location and regular expression.
+                 -t <target_folder>=<regex to match classes>
  -m <mode>       Mode: split, common
  
  Mode = common
  -c <location>   Location from Common classes
+                 -c <destinaction_folder>
 
 Error levels:
   0              Ok
@@ -16,3 +19,4 @@ Error levels:
 
 Examples:
 move -m common -l ./classes/ -c ./common -t ./extract=com.example.ExtractThisClass
+move -m common -l ./classes=./src/main/java -c ./common -t './extract=com\.example\.Extr.*'
