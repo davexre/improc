@@ -74,6 +74,7 @@
 		<org.reflections.version>0.9.11</org.reflections.version>
 		<javax.mail.version>1.6.2</javax.mail.version>
 		<apache.velocity.version>2.0</apache.velocity.version>
+		<apache.freemarker.version>2.3.28</apache.freemarker.version>
 		
 		<!--
 		The version of the jackson library can not be in the range [2.7.0-2.7.4] (all versions tested) because
@@ -846,6 +847,11 @@
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
 				<version>${apache.velocity.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>${apache.freemarker.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>

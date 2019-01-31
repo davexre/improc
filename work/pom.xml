@@ -478,6 +478,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+		</dependency>
+
+		<dependency>
 			<!-- requires org.apache.xmlgraphics:batik-i18n and org.apache.xmlgraphics:batik-constants -->
 			<groupId>org.apache.xmlgraphics</groupId>
 			<artifactId>fop</artifactId>

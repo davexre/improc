@@ -23,6 +23,7 @@
 ##
 ##
 #macro( renderTable $rows )
+#if($rows.hasNext())
 <table class="table table-sm">
 <thead>
 	#renderTableHead( $rows )
@@ -30,4 +31,5 @@
 	#renderTableBody( $rows )
 	#renderTableHead( $rows )
 </table>
+#end
 #end

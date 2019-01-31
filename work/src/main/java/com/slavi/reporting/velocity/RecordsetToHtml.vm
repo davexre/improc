@@ -21,7 +21,8 @@
 	</div>
 
 	<div class="content container-fluid">
-	#renderTable($utl.sqlAsList("select * from countries"))
+	<p>No data in the first table</p>
+	#renderTable($utl.sqlAsList("select * from countries where REGION_ID = 123"))
 	<hr/>
 	#renderTable($utl.sqlAsList("select * from countries"))
 	<hr/>
