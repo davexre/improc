@@ -156,6 +156,7 @@ wammu                       \
 whois                       \
 xbacklight                  \
 xpdf                        \
+xsltproc                    \
 zenity                      \
 zip
 
