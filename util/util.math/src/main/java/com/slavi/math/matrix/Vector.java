@@ -1,5 +1,7 @@
 package com.slavi.math.matrix;
 
+import java.util.Random;
+
 import com.slavi.math.adjust.Statistics;
 
 public class Vector <T extends Vector<T>> {
@@ -221,6 +223,13 @@ public class Vector <T extends Vector<T>> {
 	public T rMul(double aValue) {
 		for (int i = getVectorSize() - 1; i >= 0; i--)
 			vectorItemMul(i, aValue);
+		return (T) this;
+	}
+
+	public T random() {
+		Random r = new Random();
+		for (int i = getVectorSize() - 1; i >= 0; i--)
+			setVectorItem(i, r.nextDouble());
 		return (T) this;
 	}
 }

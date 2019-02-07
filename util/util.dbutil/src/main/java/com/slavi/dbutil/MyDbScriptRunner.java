@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 public class MyDbScriptRunner extends MyScriptParser {
 	Logger log = LoggerFactory.getLogger(getClass());
-	
+
 	Connection conn;
 	int numberOfStatementsInBatch = 20;
-	
+
 	public MyDbScriptRunner(Connection conn) {
 		this.conn = conn;
 	}
@@ -21,17 +21,17 @@ public class MyDbScriptRunner extends MyScriptParser {
 	}
 
 	/**
-	 * Sets the number of SQL statements that are executed 
+	 * Sets the number of SQL statements that are executed
 	 * between two explicit conn.commit(). If negative then batch commit is disabled.
 	 * It will have no effect if the conn.getAutoCommit() is true.
 	 */
 	public void setNumberOfStatementsInBatch(int numberOfStatementsInBatch) {
 		this.numberOfStatementsInBatch = numberOfStatementsInBatch;
 	}
-	
+
 	Statement statement;
 	int cmdCount;
-	
+
 	public void onPrepare() throws Exception {
 		statement = conn.createStatement();
 		cmdCount = 0;
@@ -41,7 +41,7 @@ public class MyDbScriptRunner extends MyScriptParser {
 		cmdCount++;
 		log.debug("Running SQL command line: {}, {}", cmdLineNumber, command);
 		statement.execute(command);
-		if (numberOfStatementsInBatch >= 0 && cmdCount >= numberOfStatementsInBatch) {
+		if (numberOfStatementsInBatch > 0 && cmdCount >= numberOfStatementsInBatch) {
 			cmdCount = 0;
 			conn.commit();
 		}
