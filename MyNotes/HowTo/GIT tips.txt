@@ -87,3 +87,12 @@ List files in stash or commit
 git stash show stash@{0}
 
 git diff --name-only HEAD~10 HEAD~5
+
+Find the commit that deleted file a file
+========================================
+https://stackoverflow.com/questions/6839398/find-when-a-file-was-deleted-in-git/34755406#34755406
+git log --full-history -- path/to/the/file
+
+Also usefull to check the merge changelists:
+git log --merges
+

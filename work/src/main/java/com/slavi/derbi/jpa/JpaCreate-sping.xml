@@ -44,7 +44,13 @@
 		
 		p:packagesToScan="com.slavi.derbi.jpa.entity">
 		
-<!--
+		<property name="persistenceUnitPostProcessors">
+			<bean class="org.springframework.data.jpa.support.ClasspathScanningPersistenceUnitPostProcessor">
+				<constructor-arg value="com.slavi.derbi.jpa" />
+				<property name="mappingFileNamePattern" value="**/*orm.xml" />
+			</bean>
+		</property>
+
 		<property name="jpaVendorAdapter">
 			<bean
 				class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
@@ -55,18 +61,11 @@
 			<props>
 				<prop key="javax.persistence.schema-generation.database.action">drop-and-create</prop>
 				<prop key="javax.persistence.schema-generation.scripts.action">drop-and-create</prop>
-				<prop key="javax.persistence.schema-generation.scripts.create-target">logs/createDDL_ddlGeneration.sql</prop>
-				<prop key="javax.persistence.schema-generation.scripts.drop-target">logs/dropDDL_ddlGeneration.sql</prop>
+				<prop key="javax.persistence.schema-generation.scripts.create-target">target/createDDL_ddlGeneration.sql</prop>
+				<prop key="javax.persistence.schema-generation.scripts.drop-target">target/dropDDL_ddlGeneration.sql</prop>
 			</props>
 		</property>
- -->
-		<property name="persistenceUnitPostProcessors">
-			<bean class="org.springframework.data.jpa.support.ClasspathScanningPersistenceUnitPostProcessor">
-				<constructor-arg value="com.slavi.derbi.jpa" />
-				<property name="mappingFileNamePattern" value="**/*orm.xml" />
-			</bean>
-		</property>
-
+<!--
 		<property name="jpaVendorAdapter">
 			<bean
 				class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"
@@ -86,9 +85,10 @@
 				<prop key="eclipselink.ddl-generation">drop-and-create-tables</prop>
 				<prop key="eclipselink.create-ddl-jdbc-file-name">target/createDDL_ddlGeneration.sql</prop>
 				<prop key="eclipselink.drop-ddl-jdbc-file-name">target/dropDDL_ddlGeneration.sql</prop>
-				<prop key="eclipselink.ddl-generation.output-mode">both</prop> <!-- sql-script / database / both -->
+				<prop key="eclipselink.ddl-generation.output-mode">both</prop> <!- - sql-script / database / both - ->
 			</props>
 		</property>
+ -->
 
 	</bean>
 	

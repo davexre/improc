@@ -1,5 +1,7 @@
 package com.slavi.derbi.jpa;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -28,6 +30,7 @@ import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
 import org.apache.commons.dbutils.DbUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.ddlutils.Platform;
@@ -76,7 +79,7 @@ public class JpaCreate {
 	public String dbToXml() throws SQLException, IOException {
 		{
 			User manager = em.find(User.class, "User 0");
-			System.out.println(manager.params2.entrySet().iterator().next().getValue());
+			//System.out.println(manager.params2.entrySet().iterator().next().getValue());
 /*
 			String jpql = "select u from User u join u.params2 p where key(p) = :s";
 			TypedQuery<User> q = em.createQuery(jpql, User.class);
@@ -208,6 +211,7 @@ public class JpaCreate {
 			}
 */
 			MyEntity e = new MyEntity(Integer.toString(i), "Data " + i);
+			System.out.println(e);
 			em.persist(e);
 		}
 	}
@@ -294,8 +298,7 @@ public class JpaCreate {
 
 		System.out.println("---------------------");
 		for (int i = 0; i < 10; i++) {
-			MyEntity ent = new MyEntity();
-			ent.setData ("Data  for entity No " + i);
+			MyEntity ent = new MyEntity(Integer.toString(i), "Data  for entity No " + i);
 			ent.setData1("Data1 for entity No " + i);
 			ent.setData2("Data2 for entity No " + i);
 			em.merge(ent);
@@ -322,6 +325,9 @@ public class JpaCreate {
 	}
 
 	public static void main(String[] args) throws Exception {
+		new FileOutputStream("target/createDDL_ddlGeneration.sql").close();;
+		new FileOutputStream("target/dropDDL_ddlGeneration.sql").close();;
+
 		System.setProperty("derby.stream.error.method", "com.slavi.dbutil.DerbyLogOverSlf4j.getLogger");
 		//ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", JpaCreate.class);
 		AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext(JpaCreate.class);

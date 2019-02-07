@@ -30,7 +30,7 @@ public class MyEntity implements Serializable {
 	@Column
 	String data2;
 
-	public MyEntity() {}
+	//public MyEntity() {}
 
 	public MyEntity(String id, String data1) {
 		this.id = id;

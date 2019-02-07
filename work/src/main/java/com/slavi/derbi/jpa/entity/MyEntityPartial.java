@@ -20,6 +20,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 @Access(AccessType.FIELD)
 public class MyEntityPartial implements Serializable {
 	@Id
+	@Column(name = "sys_oid")
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;
 

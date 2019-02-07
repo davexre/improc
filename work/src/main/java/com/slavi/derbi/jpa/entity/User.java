@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Cacheable;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -19,8 +18,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -28,7 +25,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKey;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.OneToMany;
@@ -46,7 +42,7 @@ import org.eclipse.persistence.annotations.Noncacheable;
 @DiscriminatorColumn(name = "UTYPE")
 public class User implements Serializable {
 	@Id
-	@Column(name = "un")
+	@Column(name = "un", length=123)
 //	@GeneratedValue(strategy=GenerationType.AUTO)
 	String username;
 /*
@@ -55,30 +51,48 @@ public class User implements Serializable {
 	@ManyToMany(fetch = FetchType.LAZY)
 	Map<String, MyEntity> params = new HashMap();
 	*/
+/*
+	@ElementCollection(fetch = FetchType.LAZY)
+	@MapKeyJoinColumn(name="map_sys_key")
+	@Column(name="sys_val")
+	@CollectionTable(name="UserParams", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))*/
+
+	@ManyToMany(fetch=FetchType.LAZY)
+	@JoinTable(name = "UserParams", joinColumns = @JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
+	@MapKeyJoinColumn(name = "map_sys_key")
+	Set<User> params = new HashSet<>();
 
 	@ElementCollection(fetch = FetchType.LAZY)
+	@OrderColumn(name="sys_key")
 	@MapKeyColumn(name="map_sys_key")
 	@Column(name="sys_val")
-	@CollectionTable(name="UserParams", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
-	Set<User> params = new HashSet<>();
+	@CollectionTable(name="UserParams1", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
+	Set<String> paramsSet = new HashSet<>();
 
 	@ElementCollection(fetch = FetchType.LAZY)
 	@OrderColumn(name="sys_key")
 	@Column(name="sys_val")
 	@CollectionTable(name="UserParamsStr", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
 	List<String> paramsStr = new ArrayList<>();
-/*
-	@ElementCollection(fetch = FetchType.LAZY)
-	@MapKeyJoinColumn(name="map_sys_key")
+
+	@ElementCollection(fetch = javax.persistence.FetchType.LAZY)
+	@MapKeyJoinColumn(name="sys_key")
 	@Column(name="sys_val")
-	@CollectionTable(name="UserParams2", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
-*/
+	@CollectionTable(name="UserParams4", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
+	private Map<Department, String> params4 = new HashMap();
+
+	@ManyToMany(fetch=FetchType.LAZY)
+	@JoinTable(name = "UserParams3", joinColumns = @JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
+	@MapKeyJoinColumn(name = "map_sys_key")
+	public Map<MyEntity, Department> params3 = new HashMap();
+
 //	@MapKeyJoinColumn(name="map_sys_key")
 /*	@JoinColumn(name="map_sys_val")
 	@JoinTable(name = "UserParams2", joinColumns=@JoinColumn(name = "map_sys_oid"))
  */
 	@Noncacheable
-	@Convert(converter = NullStringConverter.class)
+	@Convert(converter = NullStringConverter.class, attributeName="key")
+	@Convert(converter = NullStringConverter.class, attributeName="value")
 	@ElementCollection(fetch = FetchType.LAZY)
 	@CollectionTable(name="UserParams2", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
 	@MapKeyColumn(name="sys_key")
@@ -104,12 +118,14 @@ public class User implements Serializable {
 	@OrderColumn(name = "sys_key")
 	@JoinTable(name = "subordinates_t", joinColumns = @JoinColumn(name = "sys_oid"), inverseJoinColumns = @JoinColumn(name = "sys_val"))
 	@ManyToMany(fetch = FetchType.LAZY)
-	@OneToMany(mappedBy="manager")
+//	@OneToMany(mappedBy="manager")
 	private List<User> subordinate = new ArrayList<>();
 
 	String name;
 
-	Address address;
+	// TODO: I want this to be just Address - test inheritance
+	//@JoinColumn(name="addr", referencedColumnName="id")
+//	ComplexAddress address;
 
 	@Enumerated(EnumType.STRING)
 	Role role;
