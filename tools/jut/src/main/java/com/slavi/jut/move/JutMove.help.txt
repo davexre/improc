@@ -18,5 +18,5 @@ Error levels:
   255            An error has occurred. See stderr for details.
 
 Examples:
-move -m common -l ./classes/ -c ./common -t ./extract=com.example.ExtractThisClass
-move -m common -l ./classes=./src/main/java -c ./common -t './extract=com\.example\.Extr.*'
+move -m common -l ./classes/ -c ./common -t ./extract=com/example/ExtractThisClass
+move -m common -l ./classes=./src/main/java -c ./common -t './extract=com/example/Extr.*'
