@@ -534,19 +534,19 @@ cols as (
 	group by index_name
 ),
 dup as (
-	select i1.index_name name1, i2.index_name name2, count(*) cnt
+	select i1.index_name index_name1, i2.index_name index_name2, count(*) common_columns
 	from user_ind_columns i1
 	join user_ind_columns i2 on i1.table_name = i2.table_name and i1.column_name = i2.column_name and i1.index_name != i2.index_name
 	group by i1.index_name, i2.index_name
 )
-select dup.*, c1.cols cols1, c2.cols cols2
+select dup.index_name1, dup.index_name2, dup.common_columns, c1.cols cols_in_index1, c2.cols cols_in_index2
 from dup
-join cols c1 on dup.name1 = c1.index_name
-join cols c2 on dup.name2 = c2.index_name
+join cols c1 on dup.index_name1 = c1.index_name
+join cols c2 on dup.index_name2 = c2.index_name
 where
 	(c1.cols < c2.cols or (c1.cols = c2.cols and c1.index_name < c2.index_name))
-	and dup.cnt = c1.cols	-- comment this line to return possible duplication, uncomment to get a list of "full match"
-order by cnt desc, dup.name1, dup.name2;
+	and dup.common_columns = c1.cols	-- comment this line to return possible duplication, uncomment to get a list of "full match"
+order by dup.common_columns desc, dup.index_name1, dup.index_name2;
 
 =========================== Find SQL statements using literals ===========================
 Article URL: https://connormcdonald.wordpress.com/2016/05/30/sql-statements-using-literals/

@@ -14,11 +14,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.adjust.MatrixStatistics;
 import com.slavi.math.adjust.Statistics;
 import com.slavi.math.matrix.Matrix;
 import com.slavi.util.Util;
+import com.slavi.util.jackson.MatrixJsonModule;
+import com.slavi.util.jackson.MatrixXmlModule;
 
 public class Utils {
 	public static final double valueLow = 0.05;
@@ -96,6 +100,14 @@ public class Utils {
 
 	public static ObjectMapper jsonMapper() {
 		ObjectMapper m = Util.jsonMapper();
+		registerLayerSubTypes(m);
+		return m;
+	}
+
+	public static ObjectMapper yamlMapper() {
+		ObjectMapper m = new YAMLMapper();
+		Util.configureMapper(m);
+		m.registerModule(new MatrixJsonModule());
 		registerLayerSubTypes(m);
 		return m;
 	}

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -76,7 +77,22 @@ public class JpaCreate {
 	MyRepo userRepository;
 
 	@Transactional
-	public String dbToXml() throws SQLException, IOException {
+	public String dbSomething2() throws SQLException, IOException {
+		EntityGraph graph = this.em.getEntityGraph("manager.subordinate");
+		System.out.println("-------------");
+//		TypedQuery<User> q = this.em.createQuery("select distinct u from User u where u.username = :un", User.class).setParameter("un", "User 0");
+		TypedQuery<User> q = this.em.createQuery("select u from User u join fetch u.subordinate s where u.username = :un", User.class).setParameter("un", "User 0");
+//		q.setHint("javax.persistence.loadgraph", graph);
+//		q.setHint("javax.persistence.fetchgraph", graph);
+		List<User> users = q.getResultList();
+		System.out.println("-------------");
+		for (User u : users)
+			System.out.println(u.getUsername() + " " + u.getSubordinate().size());
+		return "";
+	}
+
+	@Transactional
+	public String dbSomething() throws SQLException, IOException {
 		{
 			User manager = em.find(User.class, "User 0");
 			//System.out.println(manager.params2.entrySet().iterator().next().getValue());
@@ -335,7 +351,7 @@ public class JpaCreate {
 		JpaCreate bean = appContext.getBean(JpaCreate.class);
 		bean.initialize();
 //		bean.createORMs();
-		bean.dbToXml();
+		bean.dbSomething2();
 		appContext.close();
 		System.out.println("Done.");
 	}

@@ -1,6 +1,8 @@
 package com.slavi.jackson;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.plexus.util.StringInputStream;
 
@@ -161,7 +163,7 @@ public class TestCustomSerializerInJackson {
 			.addSigmoidLayer()
 			.build();
 
-		ObjectMapper om = Utils.jsonMapper();
+		ObjectMapper om = Utils.yamlMapper();
 		om.registerModule(new MyJacksonModule());
 
 		String value = om.writeValueAsString(o1);
@@ -170,6 +172,15 @@ public class TestCustomSerializerInJackson {
 		//MyData o2 = om.readValue(new StringInputStream(value), MyData.class);
 		System.out.println(o2);
 		System.out.println();
+
+		Map map = new HashMap();
+		map.put("a", "A");
+		Map b = new HashMap();
+		b.put("b", "B");
+		map.put("mapB", b);
+		map.put(b, "mapBB");
+		System.out.println(om.writeValueAsString(map));
+
 	}
 
 	public static void main(String[] args) throws Exception {

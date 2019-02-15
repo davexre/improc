@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -27,6 +28,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyJoinColumn;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
@@ -40,6 +43,7 @@ import org.eclipse.persistence.annotations.Noncacheable;
 @Table(name="USERS")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "UTYPE")
+@NamedEntityGraph(name = "manager.subordinate", attributeNodes = @NamedAttributeNode("subordinate"))
 public class User implements Serializable {
 	@Id
 	@Column(name = "un", length=123)
@@ -57,7 +61,7 @@ public class User implements Serializable {
 	@Column(name="sys_val")
 	@CollectionTable(name="UserParams", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))*/
 
-	@ManyToMany(fetch=FetchType.LAZY)
+	@ManyToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "UserParams", joinColumns = @JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
 	@MapKeyJoinColumn(name = "map_sys_key")
 	Set<User> params = new HashSet<>();
@@ -117,15 +121,16 @@ public class User implements Serializable {
 */
 	@OrderColumn(name = "sys_key")
 	@JoinTable(name = "subordinates_t", joinColumns = @JoinColumn(name = "sys_oid"), inverseJoinColumns = @JoinColumn(name = "sys_val"))
-	@ManyToMany(fetch = FetchType.LAZY)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //	@OneToMany(mappedBy="manager")
 	private List<User> subordinate = new ArrayList<>();
 
 	String name;
 
 	// TODO: I want this to be just Address - test inheritance
-	//@JoinColumn(name="addr", referencedColumnName="id")
-//	ComplexAddress address;
+    @javax.persistence.JoinColumn(name = "addr_c")
+    @javax.persistence.ManyToOne(fetch = javax.persistence.FetchType.LAZY, cascade = javax.persistence.CascadeType.ALL)
+	ComplexAddress address;
 
 	@Enumerated(EnumType.STRING)
 	Role role;
@@ -148,7 +153,7 @@ public class User implements Serializable {
 	@Temporal(TemporalType.DATE)
 	Date created;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	Department department;
 
 	@JoinColumn(name="manager")
