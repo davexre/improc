@@ -1,9 +1,7 @@
 package com.slavi.util.concurrent;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -11,7 +9,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 /**
- * Executes a set of tasks. If one task fails, i.e. throws an Exception then 
+ * Executes a set of tasks. If one task fails, i.e. throws an Exception then
  * all tasks are considered failed and their execution will be aborted via
  * Future.cancel(true) which effectively invokes Thread.interrupt().</br>
  * If a task fails it can safely wrap any exceptions in CompletionException.
@@ -31,8 +29,11 @@ public class TaskSet {
 	public TaskSet(ExecutorService exec) {
 		this.exec = exec;
 		result.handle((r, throwable) -> {
-			for (Future f : tasks) {
-				f.cancel(true);
+			synchronized (tasks) {
+				addingFinished = true;
+				for (Future f : tasks) {
+					f.cancel(true);
+				}
 			}
 			return null;
 		});
@@ -90,7 +91,7 @@ public class TaskSet {
 			return tasks.size();
 		}
 	}
-	
+
 	public int getFinishedTasksCount() {
 		synchronized (tasks) {
 			return tasks.size() - remaining;
@@ -102,17 +103,17 @@ public class TaskSet {
 			return remaining;
 		}
 	}
-	
+
 	/**
 	 * Invoked upon an exception in some of the sub-tasks. The method MUST BE
-	 * thread safe, i.e. may be invoked multiple time from different threads. 
+	 * thread safe, i.e. may be invoked multiple time from different threads.
 	 */
 	public void onError(Object task, Throwable e) throws Exception {
 	}
 
 	/**
 	 * Invoked upon an successful execution of a task. The method MUST BE
-	 * thread safe, i.e. may be invoked multiple time from different threads. 
+	 * thread safe, i.e. may be invoked multiple time from different threads.
 	 */
 	public void onTaskFinished(Object task) throws Exception {
 	}
@@ -123,7 +124,7 @@ public class TaskSet {
 		return this;
 	}
 
-	public TaskSet addAll(Collection<Runnable> tasks) {
+	public TaskSet addAll(Iterable<Runnable> tasks) {
 		for (Runnable t : tasks)
 			add(t);
 		return this;
@@ -133,16 +134,15 @@ public class TaskSet {
 		if (numberOfThreads <= 0)
 			numberOfThreads = Runtime.getRuntime().availableProcessors();
 		TaskSet taskSet = new TaskSet(exec);
+		final Object sync = new Object();
 		for (int i = 0; i < numberOfThreads; i++) {
 			taskSet.add(() -> {
 				while (true) {
 					if (Thread.interrupted())
 						Thread.currentThread().interrupt();
 					T item;
-					try {
-						item = iterator.next();
-					} catch (NoSuchElementException e) {
-						break;
+					synchronized (sync) {
+						item = iterator.hasNext() ? iterator.next() : null;
 					}
 					task.accept(item);
 				}
