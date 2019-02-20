@@ -19,7 +19,6 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 
 import sun.reflect.ReflectionFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.slavi.util.io.ObjectToPropertiesOutputStream.State;
 
@@ -28,7 +27,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 //implements ObjectInput {
 
 	Properties properties;
-	
+
 	Stack<State> stack = new Stack<State>();
 
 	boolean setToNullMissingProperties;
@@ -36,7 +35,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 	public ObjectToPropertiesInputStream(Properties properties, String prefix) throws IOException {
 		this(properties, prefix, true);
 	}
-	
+
 	public ObjectToPropertiesInputStream(Properties properties, String prefix, boolean setToNullMissingProperties) throws IOException {
 		this.properties = properties;
 		this.setToNullMissingProperties = setToNullMissingProperties;
@@ -53,22 +52,22 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			throw new IOException("Missing non null value");
 		return v;
 	}
-	
+
 	private void pushPrefix(String prefix) {
 		stack.push(new State(prefix));
 	}
-	
+
 	private void popPrefix() {
 		if (stack.size() <= 1)
 			return;
 		stack.pop();
 	}
-	
+
 	private String getPropertyKey() {
 		State state = stack.peek();
 		return Utils.getChildPrefix(state.prefix, "_$" + Integer.toString(++state.fieldCounter));
 	}
-	
+
 	public int read() throws IOException {
 		return Integer.parseInt(getNonNullProperty());
 	}
@@ -102,57 +101,57 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		}
 		return len;
 	}
-	
+
 	public int available() throws IOException {
 		return 1;
 	}
-	
+
 	public void close() throws IOException {
 	}
 
 	public boolean readBoolean() throws IOException {
 		return Boolean.parseBoolean(getNonNullProperty());
 	}
-	
+
 	public byte readByte() throws IOException  {
 		return Byte.parseByte(getNonNullProperty());
 	}
-	
+
 	public int readUnsignedByte() throws IOException {
 		return Byte.parseByte(getNonNullProperty());
 	}
-	
+
 	public char readChar() throws IOException {
 		String v = getNonNullProperty();
 		if ("".equals(v))
 			throw new IOException("Missing non null value");
 		return v.charAt(0);
 	}
-	
+
 	public short readShort() throws IOException {
 		return Short.parseShort(getNonNullProperty());
 	}
-	
+
 	public int readUnsignedShort() throws IOException {
 		return Short.parseShort(getNonNullProperty());
 	}
-	
+
 	public int readInt() throws IOException {
 		return Integer.parseInt(getNonNullProperty());
 	}
-	
+
 	public long readLong() throws IOException {
 		return Long.parseLong(getNonNullProperty());
 	}
-	
+
 	public float readFloat() throws IOException {
 		return Float.parseFloat(getNonNullProperty());
 	}
-	
+
 	public double readDouble() throws IOException {
 		return Double.parseDouble(getNonNullProperty());
 	}
-	
+
 	public void readFully(byte[] buf) throws IOException {
 		if (buf == null) {
 			throw new NullPointerException();
@@ -166,7 +165,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		for (int i = max; i < buf.length; i++)
 			buf[i] = 0;
 	}
-	
+
 	public void readFully(byte[] buf, int off, int len) throws IOException {
 		if (buf == null) {
 			throw new NullPointerException();
@@ -184,22 +183,22 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		for (int i = max; i < len; i++)
 			buf[i] = 0;
 	}
-	
+
 	public long skip(long n) throws IOException {
 		return 0;
 	}
 	public int skipBytes(int len) throws IOException {
 		return 0;
 	}
-	
+
 	public String readLine() throws IOException {
 		return getNonNullProperty();
 	}
-	
+
 	public String readUTF() throws IOException {
 		return getNonNullProperty();
 	}
-	
+
 	public void defaultReadObject() throws IOException, ClassNotFoundException {
 		if (stack.peek().curObject == null) {
 			throw new NotActiveException("not in call to readObject");
@@ -219,7 +218,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			throw new IOException(e);
 		}
 	}
-	
+
 	protected Object readObjectOverride() throws IOException, ClassNotFoundException {
 		State state = stack.peek();
 		String newPrefix = Utils.getChildPrefix(state.prefix, "$object$" + Integer.toString(++state.objectCounter));
@@ -237,7 +236,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			popPrefix();
 		}
 	}
-	
+
 	public ArrayList handle = new ArrayList();
 
 	protected Object readObjectOverride0(String objectClassName) throws Exception {
@@ -250,7 +249,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		}
 		// TC_CLASSDESC:
 		// TC_PROXYCLASSDESC:
-		
+
 		Class objectClass = Utils.getClassFromClassTag(objectClassName);
 		if (objectClass.getComponentType() != null) {
 			// array
@@ -283,7 +282,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			}
 			return array;
 		}
-		
+
 		String sval = getProperty(stack.peek().prefix);
 		if ((objectClass == boolean.class) ||
 			(objectClass == Boolean.class)) {
@@ -330,7 +329,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 
 		return readOrdinaryObject(objectClass);
 	}
-	
+
 	protected Object readOrdinaryObject(Class objectClass) throws Exception {
 		if (!Utils.hasPropertiesStartingWith(properties, stack.peek().prefix) && setToNullMissingProperties) {
 			return null;
@@ -355,7 +354,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		}
 		Object object = intConstr.newInstance();
 		handle.add(object);
-		
+
 		State state = stack.peek();
 		if (Externalizable.class.isAssignableFrom(objectClass)) {
 			state.curClass = objectClass;
@@ -365,7 +364,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			state.curObject = null;
 			return object;
 		}
-		
+
 		Class curClass = objectClass;
 		while (curClass != null) {
 			Method readObjectMethod;
@@ -389,7 +388,7 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 		}
 		return object;
 	}
-	
+
 	protected void defaultReadFields(Object object, Class objectClass) throws Exception {
 		ObjectStreamField[] fields = ObjectToPropertiesOutputStream.getSerialFields(objectClass);
 		Arrays.sort(fields);
@@ -419,18 +418,18 @@ public class ObjectToPropertiesInputStream extends ObjectInputStream {
 			}
 		}
 	}
-	
+
 	public Object readUnshared() throws IOException, ClassNotFoundException {
 		return readObjectOverride();
 	}
-	
+
 	public ObjectInputStream.GetField readFields()
 			throws IOException, ClassNotFoundException {
-		throw new NotImplementedException();
+		throw new InvalidObjectException("Not implemented");
 	}
 
 	public void registerValidation(ObjectInputValidation obj, int prio)
 			throws NotActiveException, InvalidObjectException {
-		throw new NotImplementedException();
+		throw new InvalidObjectException("Not implemented");
 	}
 }

@@ -1,12 +1,14 @@
 package manualTest;
 
+import javax.swing.UIManager;
+
 import com.slavi.util.swing.SwingUtil;
 
 public class TestTaskProgress {
 
 	public void doIt(String[] args) throws Exception {
 		SwingUtil.swingInit();
-		
+
 		final int maxIter = 10;
 		Runnable task = new Runnable() {
 			public void run() {
@@ -26,6 +28,8 @@ public class TestTaskProgress {
 
 	public static void main(String[] args) throws Exception {
 		new TestTaskProgress().doIt(args);
+//		for (var i : UIManager.getInstalledLookAndFeels())
+//			System.out.println(i);
 		System.out.println("Done.");
 	}
 }

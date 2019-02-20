@@ -68,7 +68,6 @@ In order to include all jdbcs in the target jar use:
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.1.1.RELEASE</version>
 				<executions>
 					<execution>
 						<id>repackage</id>
@@ -79,7 +78,6 @@ In order to include all jdbcs in the target jar use:
 						<configuration>
 							<embeddedLaunchScript>src/main/script/embeddedLaunchScript.sh</embeddedLaunchScript>
 							<executable>true</executable>
-							<classifier>exec</classifier>
 							<mainClass>com.slavi.dbtools.Main</mainClass>
 						</configuration>
 					</execution>
@@ -88,7 +86,6 @@ In order to include all jdbcs in the target jar use:
 
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.7</version>
 				<executions>
 					<execution>
 						<id>rename</id>

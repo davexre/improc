@@ -62,7 +62,7 @@ import javafx.scene.web.WebHistory.Entry;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import netscape.javascript.JSObject;
+//import netscape.javascript.JSObject;
 
 // https://docs.oracle.com/javafx/2/webview/jfxpub-webview.htm
 @SuppressWarnings("restriction")
@@ -211,19 +211,18 @@ class Browser extends Region {
         webEngine.getLoadWorker().stateProperty().addListener(
             new ChangeListener<State>() {
                 @Override
-                public void changed(ObservableValue<? extends State> ov,
-                    State oldState, State newState) {
+                public void changed(ObservableValue<? extends State> ov, State oldState, State newState) {
                     toolBar.getChildren().remove(showPrevDoc);
                     if (newState == State.SUCCEEDED) {
-                            JSObject win =
-                                (JSObject) webEngine.executeScript("window");
-                            win.setMember("app", new JavaApp());
-                            if (needDocumentationButton) {
-                                toolBar.getChildren().add(showPrevDoc);
-                            }
-                        }
+/*                        JSObject win =
+                            (JSObject) webEngine.executeScript("window");
+                        win.setMember("app", new JavaApp());
+                        if (needDocumentationButton) {
+                            toolBar.getChildren().add(showPrevDoc);
+                        } */
                     }
                 }
+            }
         );
 
         // load the home page

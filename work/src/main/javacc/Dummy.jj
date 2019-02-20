@@ -1,0 +1,50 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(DummyParser)
+
+package com.slavi.tools.test.parser;
+
+public class DummyParser {
+
+}
+
+PARSER_END(DummyParser)
+
+<IDENT, DEFAULT> SKIP: {
+	" "
+|	"\t"
+|	"\r"
+|	"\n"
+|	<"--"(~["\r","\n"])*>
+|	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+//|	<"/*" ((?!"*/").)* "*/">
+}
+
+TOKEN: {
+	<NUMBER: (<DIGIT>)+>
+|	<#QUOTED_TEXT:  (~["\r","\n","\'"])*>
+|	<#DQUOTED_TEXT: (~["\n","\r","\""])*>	
+|	<QUOTED_TOKEN: "\'" <QUOTED_TEXT> "\'">
+|	<DQUOTED_TOKEN: "\"" <DQUOTED_TEXT> "\"">
+|	<CHARACTERSET: "CHARACTERSET" <IDENTIFIER>>
+|	<EQ: "=">: IDENT
+//|	<COMMA: ",">: IDENT
+|	<COLUMN: ":">: IDENT
+}
+
+void parse(): {}
+{
+	("ASD" <EQ> <IDENTIFIER>) |
+//	("QWE" <EQ> <IDENTIFIER> <COMMA>  <IDENTIFIER>) |
+	("QWE" <EQ> <IDENTIFIER> "," { token_source.SwitchTo(IDENT); } <IDENTIFIER>) |
+	("ZXC" <EQ> <IDENTIFIER> <COLUMN> <IDENTIFIER>)
+	<EOF>
+}
+
+<IDENT, DEFAULT> TOKEN : {
+ <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>: DEFAULT
+|  <#LETTER: ["$","A"-"Z","_","a"-"z"]>
+|  <#DIGIT: ["0"-"9"]>
+}

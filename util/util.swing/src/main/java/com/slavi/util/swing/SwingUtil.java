@@ -543,11 +543,10 @@ public class SwingUtil {
 		return r == TaskState.FINISHED;
 	}
 
-	@SuppressWarnings("restriction")
 	public static void swingInit() {
 		try {
-			UIManager.setLookAndFeel(new com.sun.java.swing.plaf.gtk.GTKLookAndFeel());
-		} catch (UnsupportedLookAndFeelException e) {
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel"); // com.sun.java.swing.plaf.gtk.GTKLookAndFeel()
+		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	}

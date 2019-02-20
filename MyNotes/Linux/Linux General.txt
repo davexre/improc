@@ -33,6 +33,9 @@ sudo mount -a
 sudo apt-get install sshfs
 sshfs username@server:/foldername/ /local_mount_point
 
+* WiFi settings/passwords
+/etc/NetworkManager/system-connections/<WiFi name>
+
 Change laptop screen backlight
 ==============================
 sudo apt-get install xbacklight

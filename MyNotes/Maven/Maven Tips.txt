@@ -1,3 +1,11 @@
+========= Use maven to build module-info =========
+mvn clean
+mvn package
+mvn dependency:copy-dependencies
+#mvn dependency:build-classpath
+jdeps --module-path target/dependency/ --generate-module-info target --multi-release 11 target/<artifact.jar>
+cp -t src/main/java target/<the output of jdeps>
+
 ========= Maven Configuration =========
 * Maven Central mirrors
 http://repo.maven.apache.org/maven2/.meta/repository-metadata.xml
@@ -34,10 +42,12 @@ mvn versions:display-plugin-updates
 mvn exec:java -Dexec.mainClass=.... -Dexec.args="arg1 arg2 arg3"
 
 ========= Remove the project dependencies from the local repository, and optionally re-resolve them =========
-mvn org.apache.maven.plugins:maven-dependency-plugin:2.10:purge-local-repository
+mvn dependency:purge-local-repository
 
 ========= Download dependencies, source & doc =========
 mvn dependency:resolve dependency:sources
+mvn dependency:copy-dependencies
+mvn dependency:build-classpath
 
 ========= Identify unused dependencies =========
 mvn dependency:analyze

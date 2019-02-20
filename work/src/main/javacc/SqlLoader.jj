@@ -1,0 +1,453 @@
+options{
+	IGNORE_CASE=true;
+}
+
+PARSER_BEGIN(SqlLoaderParser)
+
+package com.slavi.tools.test.parser;
+
+public class SqlLoaderParser {
+
+}
+
+PARSER_END(SqlLoaderParser)
+
+SKIP: {
+	" "
+|	"\t"
+|	"\r"
+|	"\n"
+|	<"--"(~["\r","\n"])*>
+|	<"/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+//|	<"/*" ((?!"*/").)* "*/">
+}
+
+void option_silent(): {}
+{
+	"HEADERS" | "FEEDBACK" | "ERRORS" | "DISCARDS" | "PARTITIONS" | "ALL"
+}
+
+void option_single(): {}
+{
+		("BINDSIZE" "=" <NUMBER>)
+|		("COLUMNARRAYROWS" "=" <NUMBER>)
+|		("DIRECT" "=" ("TRUE" | "FALSE"))
+|		("ERRORS" "=" <NUMBER>)
+|		("LOAD" "=" <NUMBER>)
+|		("MULTITHREADING" "=" ("TRUE" | "FALSE"))
+|		("PARALLEL" "=" ("TRUE" | "FALSE"))
+|		("READSIZE" "=" <NUMBER>)
+|		("RESUMABLE" "=" ("TRUE" | "FALSE"))
+|		("RESUMABLE_NAME" "=" <QUOTED_TOKEN>)
+|		("RESUMABLE_TIMEOUT" "=" <NUMBER>)
+|		("ROWS" "=" <NUMBER>)
+|		("SILENT" "=" (
+			option_silent()
+|			(
+				"("
+					option_silent()
+					("," option_silent())*
+				")"
+			)
+		))
+|		("SKIP" "=" <NUMBER>)
+|		("SKIP_INDEX_MAINTENANCE" "=" ("TRUE" | "FALSE"))
+|		("SKIP_UNUSABLE_INDEXES" "=" ("TRUE" | "FALSE"))
+|		("STREAMSIZE" "=" <NUMBER>)
+}
+
+void options(): {}
+{
+	"OPTIONS" "("
+	(
+		option_single()
+		("," option_single())*
+	)
+	")"
+}
+
+void loadStatement(): {}
+{
+	("UNRECOVERABLE" | "RECOVERABLE")?
+	("LOAD" | "CONTINUE_LOAD")
+	("DATA")?
+	("CHARACTERSET")?
+	("LENGTH" ("SEMANTICS")?
+		("BYTE" | "CHAR" | "CHARACTER")
+	)?
+	("BYTEORDER" ("BIG" | "LITTLE") ("ENDIAN")?)?
+	("BYTEORDERMARK" ("CHECK" | "NOCHECK"))?
+	(infileClause())*
+	("READSIZE" <NUMBER>)?
+	("READBUFFERS" <NUMBER>)?
+	("INSERT" | "APPEND" | "REPLACE" | "TRUNCATE")?
+	(concatenateClause())?
+	("PRESERVE" "BLANKS")?
+	(intoTableClause())+
+	("BEGINDATA")?
+}
+
+void infileClause(): {}
+{
+	("INFILE" | "INCON")
+	<QUOTED_TOKEN>
+	("," <QUOTED_TOKEN>)?
+	(osFileProcClause())?
+	( ("BADFILE" <QUOTED_TOKEN>) | "BADON")?
+	("DISCARDFILE" | "DISCARDON" <QUOTED_TOKEN>)?
+	("DISCARS" | "DISCARDMAX" <NUMBER>)?
+}
+
+void osFileProcClause(): {}
+{
+	<DQUOTED_TOKEN>
+}
+
+void concatenateClause(): {}
+{
+	("CONCATENATE"
+		<NUMBER> | ("(" <NUMBER> ")")
+	)
+|	("CONTINUEIF"
+		(
+			("THIS" | "NEXT")?
+			("PRESERVE")?
+			(
+				"("
+				posSpec()
+				operator()
+				("X")? <QUOTED_TOKEN>
+				")"
+			) | (
+				posSpec()
+				operator()
+				("X")? <QUOTED_TOKEN>
+			)
+		)
+|		(
+			"LAST"
+			("PRESERVE")?
+			(
+				"("
+				operator()
+				("X")? <QUOTED_TOKEN>
+				")"
+			) | (
+				operator()
+				("X")? <QUOTED_TOKEN>
+			)
+		)
+	)
+}
+
+void intoTableClause(): {}
+{
+	"INTO" "TABLE" <NAME>
+	(
+		"("
+		("PARTITION" <NAME>) |
+		("SUBPARTITION" <NAME>)
+		")"
+	)?
+	("INSERT" | "APPEND" | "REPLACE" | "TRUNCATE")
+	(
+		"SORTED"
+		("INDEXES")?
+		"("
+		<NAME>
+		")"
+	)?
+	("SINGLEROW")?
+	("INSERT" | "APPEND" | "REPLACE" | "TRUNCATE")?
+	(
+		"OPTIONS" "(" "FILE" "=" <QUOTED_TOKEN> ")"
+	)?
+	("EVALUATE_CHECK_CONSTRAINTS")?
+	("REENABLE")?
+	("DISCARD_CONSTRAINTS")?
+	("EXCAPTIONS" <NAME>)?
+	("WHEN" fieldCondition())?
+	(oidSpec() | sidSpec())?
+	("FIELDS" (delimSpec())?)?
+	("TRAILING" ("NULLCOLS")?)?
+	("TREAT" "AS" <NAME>)?
+	("SKIP" <NUMBER>)?
+	fieldList()
+}
+
+void fieldCondition_single(): {}
+{
+	(<NAME> | posSpec())
+	operator()
+	(
+		("X")? <QUOTED_TOKEN>
+	) | "BLANKS"
+}
+
+void fieldCondition(): {}
+{
+	LOOKAHEAD(2)
+		(
+			"(" 
+			fieldCondition_single() 
+			")"
+		) | fieldCondition_single()
+	( "AND"
+		(
+			"(" 
+			fieldCondition_single() 
+			")"
+		) | fieldCondition_single()
+	)*
+}
+
+void delimSpec(): {}
+{
+	enclosureSpec()
+|	(
+		terminationSpec()
+		(
+			("OPTIONALLY")?
+			enclosureSpec()
+		)?
+	)
+}
+
+void terminationSpec(): {}
+{
+	"TERMINATED"
+	("BY")?
+	"WHITESPACE"
+|	"EOF"
+|	(("X")? <QUOTED_TOKEN>)
+}
+
+void enclosureSpec(): {}
+{
+	"ENCLOSED"
+	("BY")?
+	(("X")? <QUOTED_TOKEN>)?
+	("AND" ("X")? <QUOTED_TOKEN>)?
+}
+
+void oidSpec(): {}
+{
+	"OID" "(" <NAME> ")"
+}
+
+void sidSpec(): {}
+{
+	"SID" "("
+	<NAME> | ("CONSTANT" <NAME>)
+	")"
+}
+
+void fieldList_single(): {}
+{
+	<NAME>
+	dGenFldSpec()
+|	scalarFldSpec()
+|	colObjFldSpec()
+|	collectionFldSpec()
+|	fillerFldSpec()
+}
+
+void fieldList(): {}
+{
+	"("
+	fieldList_single()
+	("," fieldList_single())*
+	")"
+}
+
+void dGenFldSpec(): {}
+{
+	"RECNUM"
+|	"SYSDATE"
+|	("CONSTANT" <QUOTED_TOKEN>)
+|	("SEQUENCE" "(" ("COUNT" | "MAX" | <NUMBER>) ("," <NUMBER>)? ")")
+|	(refSpec() | sidSpec() | bfileSpec() initSpec())
+|	("EXPRESSION" <DQUOTED_TOKEN>)
+}
+
+void refSpec_single(): {}
+{
+	<NAME>
+|	("CONSTANT" <QUOTED_TOKEN>)
+}
+
+void refSpec(): {}
+{
+	"REF" "("
+	refSpec_single()
+	("," refSpec_single())*
+	")"
+}
+
+void initSpec(): {}
+{
+	("NULLIF" | "DEFAULTIF")
+	fieldCondition()
+	("AND" fieldCondition())*
+}
+
+void bfileSpec(): {}
+{
+	"BFILE" "("
+	refSpec_single()
+	","
+	refSpec_single()
+	")"
+}
+
+void fillerFldSpec(): {}
+{
+	("FILLER" | "BOUNDFILLER")
+	(posSpec())?
+	(datatypeSpec())?
+	("PIECED")?
+}
+
+void scalarFldSpec(): {}
+{
+	(
+		lobFileSpec()
+|		("POSITION" posSpec())
+	)?
+	(datatypeSpec())?
+	("PIECED")?
+	(initSpec())?
+	(<DQUOTED_TOKEN>)?
+}
+
+void lobFileSpec(): {}
+{
+	"LOBFILE" "("
+	refSpec_single()
+	(<CHARACTERSET>)?
+	(
+		"LENGTH"
+		("SEMANTICS")?
+		("BYTE" | "CHAR" | "CHARACTER")
+	)?
+	(
+		"BYTEORDER"
+		("BIG" | "LITTLE")
+		("ENDIAN")?
+	)?
+	(
+		"BYTEORDERMARK"
+		("CHECK" | "NOCHECK")
+	)?
+}
+
+void posSpec(): {}
+{
+	"("
+	<NUMBER>
+|	("," (<NUMBER>)?)
+	(":" | "-" <NUMBER>)?
+	")"
+}
+
+void externalSpec(): {}
+{
+	"EXTERNAL"
+	("(" <NUMBER> ")")?
+	(delimSpec())?
+}
+
+void datatypeSpec(): {}
+{
+	(delimSpec())
+|	("INTEGER" (
+			"SIGNED"
+		|	"UNSIGNED"
+		|	("(" <NUMBER> ")" ("SIGNED" | "UNSIGNED")?) 
+		|	externalSpec()
+		)?
+	)
+|	("FLOAT" (externalSpec())?)
+|	("DECIMAL" | "ZONED" (
+			externalSpec() | 
+			("(" <NUMBER> ("," <NUMBER>)? ")")
+		)?
+	)
+|	"DOUBLE"
+|	"BYTEINT"
+|	("SMALLINT" ("SIGNED" | "UNSIGNED")?)
+|	("RAW" ("(" <NUMBER> ")")?)
+|	("GRAPHIC" ("EXTERNAL")? ("(" <NUMBER> ")")?)
+|	("VARGRAPHIC" | "VARCHAR" | (("LONG")? "VARRAW") ("(" <NUMBER> ")")?)
+|	("CHAR" ("(" <NUMBER> ")")? (delimSpec())?)
+|	("VARCHARC" | "VARRAWC" "(" <NUMBER> ("," <NUMBER>)? ")")
+
+|	("DATE" (externalSpec())? (<DQUOTED_TOKEN>)? (delimSpec())?)
+|	(
+		"TIME" | "TIMESTAMP"
+		("WHEN" ("LOCAL")? "TIME" "ZONE")?
+		(<DQUOTED_TOKEN>)?
+	)
+|	("INTERVAL"
+		("YEAR" "TO" "MONTH") |
+		("DAY" "TO" "SECOND")
+	)
+}
+
+void colObjFldSpec(): {}
+{
+	"COLUMN" "OBJECT"
+	("TREAT" "AS" <NAME>)?
+	(initSpec())?
+	fieldList()
+	(<DQUOTED_TOKEN>)?
+}
+
+void collectionFldSpec(): {}
+{
+	("NESTED" "TABLE") | "VARARRAY"
+	(sdfSpec())?
+	countSpec() | delimSpec()
+	(initSpec())?
+	fieldList()
+}
+
+void sdfSpec(): {}
+{
+	"SDF" "("
+	(refSpec_single())?
+	(osFileProcClause())?
+	("READSIZE" <NUMBER>)?
+	(<CHARACTERSET>)?
+	("LENGTH" ("SEMANTICS")? ("BYTE" | "CHAR" | "CHARACTER"))?
+	("BYTEORDER" ("BIG" | "LITTLE") ("ENDIAN")?)?
+	("BYTEORDERMARK" ("CHECK" | "NOCHECK"))?
+	")"
+}
+
+void countSpec(): {}
+{
+	"COUNT" "(" refSpec_single() ")"
+}
+
+void operator(): {}
+{
+	"=" | "<" | ">"		// TODO: Check this
+}
+
+void parse(): {}
+{
+	(options())?
+	<EOF>
+}
+
+TOKEN: {
+	<NUMBER: (["0"-"9"])+>
+|	<#QUOTED_TEXT:  (~["\r","\n","\'"])*>
+|	<#DQUOTED_TEXT: (~["\n","\r","\""])*>	
+|	<QUOTED_TOKEN: "\'" <QUOTED_TEXT> "\'">
+|	<DQUOTED_TOKEN: "\"" <DQUOTED_TEXT> "\"">
+|	<CHARACTERSET: "CHARACTERSET" <NAME>>
+|	<NAME: (~[" ","\t","\r","\n",",",":"])+>
+}
+
