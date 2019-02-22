@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,37 +15,58 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
+import javax.management.Attribute;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanException;
+import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import com.slavi.dbutil.ResultSetToStringHandler;
 import com.slavi.dbutil.StringRowProcessor;
 
 import oracle.jdbc.pool.OracleDataSource;
-import oracle.sql.ARRAY;
-import oracle.sql.ArrayDescriptor;
+import oracle.ucp.jdbc.PoolDataSource;
+import oracle.ucp.jdbc.PoolDataSourceFactory;
 
 public class ConnectToOracle {
 
-	public final static String propertiesSuffix = ".3";
+	public final static String propertiesSuffix = ".5";
 	public Properties prop;
 	public String connectStr;
 	public String username;
 	public String password;
+	PoolDataSource pds;
 
 	public ConnectToOracle() throws IOException, SQLException {
-		DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
+		//DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 		prop = new Properties();
 		prop.load(new InputStreamReader(getClass().getResourceAsStream(getClass().getSimpleName() + ".properties")));
 		connectStr = prop.getProperty("connectStr" + propertiesSuffix);
 		username = prop.getProperty("username" + propertiesSuffix);
 		password = prop.getProperty("password" + propertiesSuffix);
+
+		pds = PoolDataSourceFactory.getPoolDataSource();
+		//pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
+		System.out.println(connectStr);
+		pds.setURL(connectStr);
+		pds.setUser(username);
+		pds.setPassword(password);
+
 	}
 
 	public Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(connectStr, username, password);
+		//return DriverManager.getConnection(connectStr, username, password);
+		return pds.getConnection();
 	}
 
 	public void exampleUsingOracleArrays(String[] args) throws Exception {
@@ -54,6 +76,15 @@ public class ConnectToOracle {
 			lst.add("NUMBER");
 			lst.add("VARCHAR2");
 
+			String sql = "select ? asd, count(*) from user_tab_columns";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, 123);
+			ResultSet rs = ps.executeQuery();
+			rs.next();
+			Object val = rs.getObject(1);
+			System.out.println(val);
+
+/*
 			// select * from ALL_COLL_TYPES where owner = 'SYS' order by coll_type, type_name;
 			ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.ODCIVARCHAR2LIST", conn);
 			//ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.DBMS_DEBUG_VC2COLL", conn);
@@ -65,7 +96,7 @@ public class ConnectToOracle {
 			rs.next();
 			Object val = rs.getObject(1);
 //			Object val = qr.query(conn, sql, new ScalarHandler(), ar);
-			System.out.println(val);
+			System.out.println(val);*/
 		};
 	}
 
@@ -152,7 +183,37 @@ public class ConnectToOracle {
 		}
 	}
 
+	public static boolean isOjdbcLoggingEnabled() throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName pattern  = new ObjectName("com.oracle.jdbc:type=diagnosability,*");
+		ObjectName diag = ((ObjectName[]) (mbs.queryNames(pattern, null).toArray(new ObjectName[0])))[0];
+		return (boolean) mbs.getAttribute(diag, "LoggingEnabled");
+	}
+
+	public static void setOjdbcLoggingEnabled(boolean enabled) throws MalformedObjectNameException, InstanceNotFoundException, AttributeNotFoundException, ReflectionException, MBeanException, InvalidAttributeValueException {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName pattern  = new ObjectName("com.oracle.jdbc:type=diagnosability,*");
+		ObjectName diag = ((ObjectName[]) (mbs.queryNames(pattern, null).toArray(new ObjectName[0])))[0];
+		mbs.setAttribute(diag, new Attribute("LoggingEnabled", enabled));
+	}
+
+	// -Doracle.jdbc.Trace=true
 	public static void main(String[] args) throws Exception {
+		SLF4JBridgeHandler.install();
+/*		System.setProperty("oracle.jdbc.Trace", "true");
+		System.setProperty("java.util.logging.config.file", "/OracleLog.properties");
+		OracleDriver.registerMBeans();
+		oracle.jdbc.driver.OracleLog.setTrace(true);
+		//System.out.println(oracle.jdbc.driver.OracleLog.isEnabled());
+		//System.out.println(isOjdbcLoggingEnabled());
+		OracleDriver od = new oracle.jdbc.OracleDriver();
+		Logger pl = od.getParentLogger();
+		pl.setLevel(Level.FINEST);
+		pl.getLogger("sql").setLevel(Level.FINE);
+		pl.getLogger("oracle.sql").setLevel(Level.FINE);
+		pl.getParent().setLevel(Level.FINE);
+		pl.getParent().getLogger("sql").setLevel(Level.FINE);
+		DriverManager.registerDriver (od);*/
 		new ConnectToOracle().exampleUsingOracleArrays(args);
 		System.out.println("Done.");
 	}

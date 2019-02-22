@@ -1,7 +1,18 @@
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 =========================== TITLE ===========================
-=========================== TITLE ===========================
+
+=========================== Oracle JDBC ===========================
+* Logging of Oracle JDBC		https://www.oracle.com/technetwork/topics/11-2.pdf
+** Use debug jar, i.e. the ones having _g in the name. Ex. ojdbc8_g.jar instead of ojdbc8.jar
+** Enable logging:
+*** java -Doracle.jdbc.Trace=true
+*** oracle.jdbc.driver.OracleLog.setTrace(true);	// Oracle 10g
+*** 	MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName pattern  = new ObjectName("com.oracle.jdbc:type=diagnosability,*");
+		ObjectName diag = ((ObjectName[]) (mbs.queryNames(pattern, null).toArray(new ObjectName[0])))[0];
+		mbs.setAttribute(diag, new Attribute("LoggingEnabled", enabled));
+
 
 =========================== Oracle 12C in Docker ===========================
 https://hub.docker.com/r/sath89/oracle-12c/

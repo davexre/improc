@@ -425,6 +425,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>p6spy</groupId>
+			<artifactId>p6spy</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.slavi</groupId>
 			<artifactId>util.log</artifactId>
 		</dependency>
@@ -528,7 +534,13 @@
 
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
-			<artifactId>ojdbc8</artifactId>
+			<artifactId>ojdbc8_g</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>com.oracle.jdbc</groupId>
+					<artifactId>ojdbc8</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<!-- Needed to work with XML columns -->

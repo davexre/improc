@@ -57,7 +57,7 @@
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />
 
-	<logger level="trace"  name="org.eclipse.persistence.logging.sql" />
+	<logger level="trace" name="org.eclipse.persistence.logging.sql" />
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />
 	<logger level="error" name="org.apache.commons.digester" />
 	<logger level="error" name="org.apache.commons.beanutils" />
@@ -65,6 +65,9 @@
 	<logger level="info"  name="org.springframework" />
 	<logger level="error" name="Derby" />
 	<logger level="error" name="hsqldb.db" />
+	<logger level="trace" name="oracle" />
+	<logger level="trace" name="p6spy" />
+	<logger level="trace" name="jdbc.spy.sql" />
 
 	<root level="error">
 		<appender-ref ref="STDOUT" />
