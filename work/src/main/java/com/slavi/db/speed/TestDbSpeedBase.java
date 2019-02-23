@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 
 import com.slavi.math.MathUtil;
 import com.slavi.util.Marker;
-import com.slavi.util.Marker.State;
 import com.xuggle.ferry.AtomicInteger;
 
 public abstract class TestDbSpeedBase {
@@ -24,17 +23,17 @@ public abstract class TestDbSpeedBase {
 	abstract Connection getConn() throws SQLException;
 
 	abstract void createTables(Connection conn) throws SQLException;
-	
+
 	abstract void doTest() throws Exception;
 
 	String getSqlForCreateDataRows() {
 		return "insert into t(data) values(?)";
 	}
-	
+
 	String getSqlForMinMaxId() {
 		return "select min(id), max(id) from t";
 	}
-	
+
 	String makeRandomAsciiString(int numberOfChars) {
 		StringBuilder sb = new StringBuilder(numberOfChars);
 		Random r = new Random(); // Tried using SecureRandom as Sonar suggests, but it is way too slow.
@@ -43,7 +42,7 @@ public abstract class TestDbSpeedBase {
 		}
 		return sb.toString();
 	}
-	
+
 	void createDataRows(Connection conn, AtomicInteger countDown, boolean useAutoCommit) throws SQLException {
 		conn.setAutoCommit(useAutoCommit);
 		PreparedStatement ps = conn.prepareStatement(getSqlForCreateDataRows());
@@ -64,13 +63,13 @@ public abstract class TestDbSpeedBase {
 		if (!useAutoCommit)
 			conn.commit();
 	}
-	
+
 	void createDataRowsTask(AtomicInteger countDown) throws SQLException {
 		try (Connection conn = getConn()) {
 			createDataRows(conn, countDown, false);
 		}
 	}
-	
+
 	void createData(int maxMessages) throws Exception {
 		try (Connection conn = getConn()) {
 			createTables(conn);
@@ -91,8 +90,8 @@ public abstract class TestDbSpeedBase {
 			}, exec));
 		}
 		CompletableFuture.allOf(tasks.toArray(new CompletableFuture[tasks.size()])).get();
-		
-		State state = Marker.release();
+
+		Marker state = Marker.release();
 		double tps = 1000.0 * maxMessages / (state.end - state.start);
 		System.out.println("TPS is " + MathUtil.d2(tps));
 	}
@@ -121,7 +120,7 @@ public abstract class TestDbSpeedBase {
 
 	void readAllData(int numberOfParallelTasks) throws Exception {
 		int min, max;
-		
+
 		try (Connection conn = getConn()) {
 			Marker.mark("scan min/max data");
 			PreparedStatement ps = conn.prepareStatement(getSqlForMinMaxId());
@@ -131,16 +130,16 @@ public abstract class TestDbSpeedBase {
 			max = (int) rs.getLong(2);
 			rs.close();
 			ps.close();
-			
+
 			System.out.println(min);
 			System.out.println(max);
 			Marker.releaseAndMark("random read");
 		}
-			
+
 		List<CompletableFuture> tasks = new ArrayList<>();
 		AtomicInteger countDown = new AtomicInteger(max - min);
 		final int span = (max - min) / numberOfParallelTasks ;
-		
+
 		for (int i = 0; i < numberOfParallelTasks; i++) {
 			final int ii = i;
 			tasks.add(CompletableFuture.runAsync(new Runnable() {
@@ -157,11 +156,11 @@ public abstract class TestDbSpeedBase {
 		}
 		CompletableFuture.allOf(tasks.toArray(new CompletableFuture[tasks.size()])).get();
 
-		State state = Marker.release();
+		Marker state = Marker.release();
 		double tps = 1000.0 * (max - min) / (state.end - state.start);
 		System.out.println("TPS is " + MathUtil.d2(tps));
 	}
-	
+
 	void doIt() throws Exception {
 		exec = Executors.newCachedThreadPool();
 		try {

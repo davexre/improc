@@ -20,6 +20,10 @@
 			<groupId>com.slavi</groupId>
 			<artifactId>util.math</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.slavi</groupId>
+			<artifactId>util.log</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
