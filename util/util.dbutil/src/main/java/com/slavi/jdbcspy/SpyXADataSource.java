@@ -1,4 +1,4 @@
-package com.slavi.db.spy;
+package com.slavi.jdbcspy;
 
 import java.sql.SQLException;
 

@@ -1,4 +1,4 @@
-package com.slavi.db.spy;
+package com.slavi.jdbcspy;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -42,7 +42,7 @@ public class SpyConnection<TT extends Connection> extends SpyWrapper<TT> impleme
 
 	@Override
 	public String nativeSQL(String sql) throws SQLException {
-		try (SpyTimer tt = new SpyTimer(logSql, sql)) {
+		try (SpyTimer tt = new SpyTimer(log, sql)) {
 			return t.nativeSQL(sql);
 		}
 	}
@@ -59,12 +59,16 @@ public class SpyConnection<TT extends Connection> extends SpyWrapper<TT> impleme
 
 	@Override
 	public void commit() throws SQLException {
-		t.commit();
+		try (SpyTimer tt = new SpyTimer(log, "commit")) {
+			t.commit();
+		}
 	}
 
 	@Override
 	public void rollback() throws SQLException {
-		t.rollback();
+		try (SpyTimer tt = new SpyTimer(log, "rollback")) {
+			t.rollback();
+		}
 	}
 
 	@Override
@@ -158,24 +162,41 @@ public class SpyConnection<TT extends Connection> extends SpyWrapper<TT> impleme
 		return t.getHoldability();
 	}
 
+	static String getSavepointName(Savepoint savepoint) throws SQLException {
+		return
+				savepoint == null ? null :
+				savepoint.getSavepointName() != null ? savepoint.getSavepointName() :
+				Integer.toString(savepoint.getSavepointId());
+	}
+
 	@Override
 	public Savepoint setSavepoint() throws SQLException {
-		return t.setSavepoint();
+		try (SpyTimer tt = new SpyTimer(log, "savepoint")) {
+			Savepoint savepoint = t.setSavepoint();
+			tt.msg = "savepoint " + getSavepointName(savepoint);
+			return savepoint;
+		}
 	}
 
 	@Override
 	public Savepoint setSavepoint(String name) throws SQLException {
-		return t.setSavepoint(name);
+		try (SpyTimer tt = new SpyTimer(log, "savepoint " + name)) {
+			return t.setSavepoint(name);
+		}
 	}
 
 	@Override
 	public void rollback(Savepoint savepoint) throws SQLException {
-		t.rollback(savepoint);
+		try (SpyTimer tt = new SpyTimer(log, "rollback to " + getSavepointName(savepoint))) {
+			t.rollback(savepoint);
+		}
 	}
 
 	@Override
 	public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-		t.releaseSavepoint(savepoint);
+		try (SpyTimer tt = new SpyTimer(log, "release savepoint " + getSavepointName(savepoint))) {
+			t.releaseSavepoint(savepoint);
+		}
 	}
 
 	@Override

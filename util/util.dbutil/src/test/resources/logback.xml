@@ -1,0 +1,13 @@
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%-5level %-40.-40logger| %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger level="debug" name="jdbc.spy" />
+
+	<root level="error">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>

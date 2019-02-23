@@ -1,4 +1,4 @@
-package com.slavi.db.spy;
+package com.slavi.jdbcspy;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -10,6 +10,9 @@ import java.util.Properties;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
+/**
+ * @see com.slavi.jdbcspy
+ */
 public class SpyDriver implements Driver {
 	static Logger log = Logger.getLogger("com.slavi.db.spy");
 

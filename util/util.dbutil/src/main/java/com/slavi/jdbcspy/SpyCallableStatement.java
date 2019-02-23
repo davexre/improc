@@ -1,4 +1,4 @@
-package com.slavi.db.spy;
+package com.slavi.jdbcspy;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -168,11 +168,13 @@ public class SpyCallableStatement<TT extends CallableStatement> extends SpyPrepa
 	@Override
 	public void registerOutParameter(String parameterName, int sqlType, int scale) throws SQLException {
 		t.registerOutParameter(parameterName, sqlType, scale);
+		params.put(parameterName, "(out:" + sqlTypes.get(sqlType) + ")");
 	}
 
 	@Override
 	public void registerOutParameter(String parameterName, int sqlType, String typeName) throws SQLException {
 		t.registerOutParameter(parameterName, sqlType);
+		params.put(parameterName, "(out:" + sqlTypes.get(sqlType) + ")");
 	}
 
 	@Override
@@ -183,126 +185,151 @@ public class SpyCallableStatement<TT extends CallableStatement> extends SpyPrepa
 	@Override
 	public void setURL(String parameterName, URL val) throws SQLException {
 		t.setURL(parameterName, val);
+		params.put(parameterName, val);
 	}
 
 	@Override
 	public void setNull(String parameterName, int sqlType) throws SQLException {
 		t.setNull(parameterName, sqlType);
+		params.put(parameterName, null);
 	}
 
 	@Override
 	public void setBoolean(String parameterName, boolean x) throws SQLException {
 		t.setBoolean(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setByte(String parameterName, byte x) throws SQLException {
 		t.setByte(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setShort(String parameterName, short x) throws SQLException {
 		t.setShort(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setInt(String parameterName, int x) throws SQLException {
 		t.setInt(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setLong(String parameterName, long x) throws SQLException {
 		t.setLong(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setFloat(String parameterName, float x) throws SQLException {
 		t.setFloat(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setDouble(String parameterName, double x) throws SQLException {
 		t.setDouble(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setBigDecimal(String parameterName, BigDecimal x) throws SQLException {
 		t.setBigDecimal(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setString(String parameterName, String x) throws SQLException {
 		t.setString(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setBytes(String parameterName, byte[] x) throws SQLException {
 		t.setBytes(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setDate(String parameterName, Date x) throws SQLException {
 		t.setDate(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setTime(String parameterName, Time x) throws SQLException {
 		t.setTime(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setTimestamp(String parameterName, Timestamp x) throws SQLException {
 		t.setTimestamp(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setAsciiStream(String parameterName, InputStream x, int length) throws SQLException {
 		t.setAsciiStream(parameterName, x, length);
+		params.put(parameterName, "AsciiStream:" + length);
 	}
 
 	@Override
 	public void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
 		t.setBinaryStream(parameterName, x, length);
+		params.put(parameterName, "BinaryStream:" + length);
 	}
 
 	@Override
 	public void setObject(String parameterName, Object x, int targetSqlType, int scale) throws SQLException {
 		t.setObject(parameterName, x, targetSqlType, scale);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setObject(String parameterName, Object x, int targetSqlType) throws SQLException {
 		t.setObject(parameterName, x, targetSqlType);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setObject(String parameterName, Object x) throws SQLException {
 		t.setObject(parameterName, x);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setCharacterStream(String parameterName, Reader reader, int length) throws SQLException {
 		t.setCharacterStream(parameterName, reader, length);
+		params.put(parameterName, "CharacterStream:" + length);
 	}
 
 	@Override
 	public void setDate(String parameterName, Date x, Calendar cal) throws SQLException {
 		t.setDate(parameterName, x, cal);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setTime(String parameterName, Time x, Calendar cal) throws SQLException {
 		t.setTime(parameterName, x, cal);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setTimestamp(String parameterName, Timestamp x, Calendar cal) throws SQLException {
 		t.setTimestamp(parameterName, x, cal);
+		params.put(parameterName, x);
 	}
 
 	@Override
 	public void setNull(String parameterName, int sqlType, String typeName) throws SQLException {
 		t.setNull(parameterName, sqlType, typeName);
+		params.put(parameterName, null);
 	}
 
 	@Override
@@ -433,36 +460,43 @@ public class SpyCallableStatement<TT extends CallableStatement> extends SpyPrepa
 	@Override
 	public void setRowId(String parameterName, RowId x) throws SQLException {
 		t.setRowId(parameterName, x);
+		params.put(parameterName, "RowId");
 	}
 
 	@Override
 	public void setNString(String parameterName, String value) throws SQLException {
 		t.setNString(parameterName, value);
+		params.put(parameterName, value);
 	}
 
 	@Override
 	public void setNCharacterStream(String parameterName, Reader value, long length) throws SQLException {
 		t.setNCharacterStream(parameterName, value, length);
+		params.put(parameterName, "NCharacterStream:" + length);
 	}
 
 	@Override
 	public void setNClob(String parameterName, NClob value) throws SQLException {
 		t.setNClob(parameterName, value);
+		params.put(parameterName, "NClob");
 	}
 
 	@Override
 	public void setClob(String parameterName, Reader reader, long length) throws SQLException {
 		t.setClob(parameterName, reader, length);
+		params.put(parameterName, "Clob");
 	}
 
 	@Override
 	public void setBlob(String parameterName, InputStream inputStream, long length) throws SQLException {
 		t.setBlob(parameterName, inputStream, length);
+		params.put(parameterName, "Blob");
 	}
 
 	@Override
 	public void setNClob(String parameterName, Reader reader, long length) throws SQLException {
 		t.setNClob(parameterName, reader, length);
+		params.put(parameterName, "NClob");
 	}
 
 	@Override
@@ -478,6 +512,7 @@ public class SpyCallableStatement<TT extends CallableStatement> extends SpyPrepa
 	@Override
 	public void setSQLXML(String parameterName, SQLXML xmlObject) throws SQLException {
 		t.setSQLXML(parameterName, xmlObject);
+		params.put(parameterName, "XML");
 	}
 
 	@Override
@@ -523,61 +558,73 @@ public class SpyCallableStatement<TT extends CallableStatement> extends SpyPrepa
 	@Override
 	public void setBlob(String parameterName, Blob x) throws SQLException {
 		t.setBlob(parameterName, x);
+		params.put(parameterName, "Blob");
 	}
 
 	@Override
 	public void setClob(String parameterName, Clob x) throws SQLException {
 		t.setClob(parameterName, x);
+		params.put(parameterName, "Clob");
 	}
 
 	@Override
 	public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
 		t.setAsciiStream(parameterName, x, length);
+		params.put(parameterName, "AsciiStream:" + length);
 	}
 
 	@Override
 	public void setBinaryStream(String parameterName, InputStream x, long length) throws SQLException {
 		t.setBinaryStream(parameterName, x, length);
+		params.put(parameterName, "BinaryStream:" + length);
 	}
 
 	@Override
 	public void setCharacterStream(String parameterName, Reader reader, long length) throws SQLException {
 		t.setCharacterStream(parameterName, reader, length);
+		params.put(parameterName, "CharacterStream:" + length);
 	}
 
 	@Override
 	public void setAsciiStream(String parameterName, InputStream x) throws SQLException {
 		t.setAsciiStream(parameterName, x);
+		params.put(parameterName, "AsciiStream");
 	}
 
 	@Override
 	public void setBinaryStream(String parameterName, InputStream x) throws SQLException {
 		t.setBinaryStream(parameterName, x);
+		params.put(parameterName, "BinaryStream");
 	}
 
 	@Override
 	public void setCharacterStream(String parameterName, Reader reader) throws SQLException {
 		t.setCharacterStream(parameterName, reader);
+		params.put(parameterName, "CharacterStream");
 	}
 
 	@Override
 	public void setNCharacterStream(String parameterName, Reader value) throws SQLException {
 		t.setNCharacterStream(parameterName, value);
+		params.put(parameterName, "NCharacterStream");
 	}
 
 	@Override
 	public void setClob(String parameterName, Reader reader) throws SQLException {
 		t.setClob(parameterName, reader);
+		params.put(parameterName, "Clob");
 	}
 
 	@Override
 	public void setBlob(String parameterName, InputStream inputStream) throws SQLException {
 		t.setBlob(parameterName, inputStream);
+		params.put(parameterName, "Blob");
 	}
 
 	@Override
 	public void setNClob(String parameterName, Reader reader) throws SQLException {
 		t.setNClob(parameterName, reader);
+		params.put(parameterName, "NClob");
 	}
 
 	@Override

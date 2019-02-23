@@ -5,5 +5,10 @@ module util.dbutil {
 	requires transitive commons.dbutils;
 	requires transitive java.sql;
 
+	uses java.sql.Driver;
+
 	exports com.slavi.dbutil;
+	exports com.slavi.jdbcspy;
+
+	provides java.sql.Driver with com.slavi.jdbcspy.SpyDriver;
 }
