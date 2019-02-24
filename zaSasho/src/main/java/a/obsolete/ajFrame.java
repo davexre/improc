@@ -2,7 +2,7 @@ package a.obsolete;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   ajFrame.java
 
 import java.awt.CheckboxMenuItem;
@@ -134,7 +134,7 @@ public class ajFrame extends Frame {
 				return true;
 			}
 			if (event.target == manual) {
-				URL url;
+				/*URL url;
 				try {
 					url = new URL(va.getCodeBase(), va.getHelpURL());
 				} catch (MalformedURLException _ex) {
@@ -142,7 +142,7 @@ public class ajFrame extends Frame {
 				}
 				if (url != null)
 					va.getAppletContext().showDocument(url, "VoroGlide User Manual");
-				return true;
+				return true;*/
 			}
 		}
 		return va.action(event, obj);

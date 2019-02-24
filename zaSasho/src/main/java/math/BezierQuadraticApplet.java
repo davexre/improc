@@ -8,25 +8,27 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import a.myDelaunay.BasePointsListApplet;
+import javax.swing.JFrame;
 
 import com.slavi.math.BezierQuadraticCurve;
+
+import a.myDelaunay.BasePointsListApplet;
 
 public class BezierQuadraticApplet extends BasePointsListApplet {
 
 	BezierQuadraticCurve spline = new BezierQuadraticCurve(
-		new Point2D.Double(25, 25),
+		new Point2D.Double(75, 75),
 		new Point2D.Double(125, 125),
 		new Point2D.Double(225, 125));
 
-	public void init() {
+	public BezierQuadraticApplet() {
+		super();
 		fixedNumberOfPoints = true;
 		points.add(spline.p0);
 		points.add(spline.p1);
 		points.add(spline.p2);
-		super.init();
 	}
-	
+
 	static Path2D.Double toPath(List<? extends Point2D> points) {
 		Path2D.Double path = new Path2D.Double();
 		if (points == null || points.size() == 0)
@@ -56,26 +58,35 @@ public class BezierQuadraticApplet extends BasePointsListApplet {
 		g2.draw(path);
 
 		double minLineLength = 100;
-		double maxBreadth = 0.1; 
+		double maxBreadth = 0.1;
 
 		ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
 		spline.appendToPointsList(points, maxBreadth, minLineLength);
 		path = toPath(points);
 		g2.setColor(Color.green);
 		g2.draw(path);
-		
+
 //		g2.setColor(Color.cyan);
-//		g2.drawLine(0, 10, (int) minLineLength, 10); 
-		
+//		g2.drawLine(0, 10, (int) minLineLength, 10);
+
 		g2.setColor(Color.black);
 		System.out.println();
 		System.out.println(spline.p0);
-		
+
 		for (int i = 1; i < 10; i++) {
 			Point2D.Double p = spline.getPointAt(i / 10.0);
 			System.out.println(p);
 			g2.fillOval((int) p.x - 5, (int) p.y - 5, 10, 10);
 		}
 		super.paint(g);
+	}
+
+	public static void main(String[] args) {
+		JFrame f = new JFrame();
+		f.add(new BezierQuadraticApplet());
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setSize(400, 400);
+		f.setVisible(true);
+		System.out.println("Done.");
 	}
 }

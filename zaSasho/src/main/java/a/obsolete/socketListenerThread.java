@@ -2,7 +2,7 @@ package a.obsolete;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   socketListenerThread.java
 
 import java.awt.Event;
@@ -21,7 +21,7 @@ public class socketListenerThread extends Thread {
 		vapp = voronoiapplet;
 		buffer = new byte[1024];
 		try {
-			dsock = new Socket(vapp.getCodeBase().getHost(), rcvPort);
+			//dsock = new Socket(vapp.getCodeBase().getHost(), rcvPort);
 			inStream = new DataInputStream(dsock.getInputStream());
 			outStream = new DataOutputStream(dsock.getOutputStream());
 			return;
@@ -64,7 +64,7 @@ public class socketListenerThread extends Thread {
 						if (vapp.recPanel.load.isEnabled()) {
 							vapp.evRec.save_op = false;
 							vapp.evRec.selected.setLength(0);
-							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
+							//vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
 							vapp.evRec.selected.append(File.separator);
 							vapp.evRec.selected.append(s3);
 							vapp.evRec.load_save();
@@ -78,7 +78,7 @@ public class socketListenerThread extends Thread {
 						if (vapp.recPanel.load.isEnabled()) {
 							vapp.evRec.save_op = false;
 							vapp.evRec.selected.setLength(0);
-							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
+//							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
 							vapp.evRec.selected.append(File.separator);
 							vapp.evRec.selected.append(s4);
 							vapp.evRec.load_save();
@@ -97,7 +97,7 @@ public class socketListenerThread extends Thread {
 						if (vapp.recPanel.load.isEnabled()) {
 							vapp.evRec.save_op = false;
 							vapp.evRec.selected.setLength(0);
-							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
+//							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
 							vapp.evRec.selected.append(File.separator);
 							vapp.evRec.selected.append(s5);
 							vapp.evRec.load_save();
@@ -110,7 +110,7 @@ public class socketListenerThread extends Thread {
 						if (vapp.recPanel.load.isEnabled()) {
 							vapp.evRec.save_op = true;
 							vapp.evRec.selected.setLength(0);
-							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
+//							vapp.evRec.selected.append((new File(vapp.getCodeBase().getFile())).getParent());
 							vapp.evRec.selected.append(File.separator);
 							vapp.evRec.selected.append(s6);
 							vapp.evRec.load_save();

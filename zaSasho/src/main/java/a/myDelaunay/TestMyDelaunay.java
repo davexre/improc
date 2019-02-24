@@ -26,7 +26,7 @@ public class TestMyDelaunay {
 		public ArrayList<Point2D> points = new ArrayList<Point2D>();
 		public Rectangle2D extent = new Rectangle2D.Double();
 	}
-	
+
 	public static ArrayList<TestData> readTests() throws JDOMException, IOException {
 		InputStream fin = TestMyDelaunay.class.getResourceAsStream("testData.xml");
 		ArrayList<TestData> r = new ArrayList<TestData>();
@@ -59,19 +59,19 @@ public class TestMyDelaunay {
 		int border = 120;
 		ColorSetPick colorPick = new ColorSetPick();
 		Rectangle2D extent = new Rectangle2D.Double(
-				test.extent.getX() - border, 
-				test.extent.getY() - border, 
-				test.extent.getWidth() + border + border, 
+				test.extent.getX() - border,
+				test.extent.getY() - border,
+				test.extent.getWidth() + border + border,
 				test.extent.getHeight() + border + border);
 		BufferedImage bo = new BufferedImage(
-				(int) extent.getWidth(), 
-				(int) extent.getHeight(), 
+				(int) extent.getWidth(),
+				(int) extent.getHeight(),
 				BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = (Graphics2D) bo.getGraphics();
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, bo.getWidth(), bo.getHeight());
 		g.translate(
-				(int) (border - test.extent.getX()), 
+				(int) (border - test.extent.getX()),
 				(int) (border - test.extent.getY()));
 
 		// draw
@@ -87,7 +87,7 @@ public class TestMyDelaunay {
 			Point2D p = test.points.get(i);
 			Utils.drawPoint(g, (int) p.getX(), (int) p.getY(), Color.black, Integer.toString(i));
 		}
-		
+
 		ArrayList<Path2D> voronoi = MyVoronoi.computeVoroni(d, extent);
 		for (Path2D path : voronoi) {
 			g.setColor(colorPick.getNextColor(80));
@@ -95,19 +95,18 @@ public class TestMyDelaunay {
 			g.setColor(Color.blue);
 			g.draw(path);
 		}
-		
 		File fou = new File(Const.workDir, "test " + test.name + " " + fouPart + ".png");
 		ImageIO.write(bo, "png", fou);
 		return fou;
 	}
-	
+
 	public static void dumpPoints(TestData test) {
 		for (int i = 0; i < test.points.size(); i++) {
 			Point2D p = test.points.get(i);
 			System.out.println("points.add(new Point2D.Double(" + p.getX() + ", " + p.getY() + "));");
 		}
 	}
-	
+
 	static void testAndMakeImageOnError(TestData test, boolean makeImageForEachAddedPoint) throws Exception {
 		MyDelaunay d = new MyDelaunay() {
 			public int getPointId(Point2D p) {
@@ -134,7 +133,7 @@ public class TestMyDelaunay {
 		}
 		d.dumpStatistics();
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		ArrayList<TestData> tests = readTests();
 		for (TestData test : tests) {

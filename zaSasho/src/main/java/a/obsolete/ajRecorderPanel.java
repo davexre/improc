@@ -2,7 +2,7 @@ package a.obsolete;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   ajRecorderPanel.java
 
 import java.awt.Button;
@@ -56,7 +56,7 @@ public class ajRecorderPanel extends Panel {
 		panel.add(slot3);
 		panel.add(slot4);
 		panel.add(slot5);
-		String s = va.getParameter("AOFRecord");
+		String s = null; //va.getParameter("AOFRecord");
 		if (s != null && s.compareTo("true") == 0) {
 			LayoutTools.gridBagConstrain(this, firstrec, 0, 1, 1, 1, 0, 10, 0.0D, 0.0D, 15, 15, 5, 5);
 			LayoutTools.gridBagConstrain(this, nextrec, 1, 1, 1, 1, 0, 10, 0.0D, 0.0D, 15, 15, 5, 5);

@@ -2,7 +2,7 @@ package a.obsolete;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   ajRecorder.java
 
 import java.awt.Event;
@@ -41,7 +41,7 @@ public class ajRecorder extends ajAnimator {
 		zero_t = 0L;
 		session_stamp = 0L;
 		selected_record = 0;
-		URL url = va.getCodeBase();
+		/*URL url = va.getCodeBase();
 		String s = url.getProtocol();
 		if (s.compareTo("http") == 0 || s.compareTo("HTTP") == 0) {
 			System.out.println("Netbased applet. File storage disabled.");
@@ -62,7 +62,7 @@ public class ajRecorder extends ajAnimator {
 			return;
 		} catch (NullPointerException _ex) {
 			return;
-		}
+		}*/
 	}
 
 	public boolean hasRecord() {
@@ -83,7 +83,7 @@ public class ajRecorder extends ajAnimator {
 				.concat(String.valueOf(start_time[selected_record])).concat(".ani");
 		save_op = true;
 		selected.setLength(0);
-		selected.append((new File(va.getCodeBase().getFile())).getParent());
+		//selected.append((new File(va.getCodeBase().getFile())).getParent());
 		selected.append(File.separator);
 		selected.append(s1);
 		load_save();
@@ -306,7 +306,7 @@ public class ajRecorder extends ajAnimator {
 			return;
 		} else {
 			selected.setLength(0);
-			selected.append((new File(va.getCodeBase().getFile())).getParent());
+			//selected.append((new File(va.getCodeBase().getFile())).getParent());
 			selected.append(File.separator);
 			selected.append(recfilename);
 			load_save();
@@ -330,7 +330,7 @@ public class ajRecorder extends ajAnimator {
 			return;
 		} else {
 			selected.setLength(0);
-			selected.append((new File(va.getCodeBase().getFile())).getParent());
+			//selected.append((new File(va.getCodeBase().getFile())).getParent());
 			selected.append(File.separator);
 			selected.append(recfilename);
 			load_save();
@@ -346,7 +346,7 @@ public class ajRecorder extends ajAnimator {
 		if (save_op) {
 			save(selected.toString());
 		} else {
-			URL url = va.getCodeBase();
+			/*URL url = va.getCodeBase();
 			URL url1 = null;
 			try {
 				url1 = new URL(url, selected.toString());
@@ -366,7 +366,7 @@ public class ajRecorder extends ajAnimator {
 			if (hasRecord())
 				va.recPanel.rec_loaded();
 			else
-				va.recPanel.no_rec_loaded();
+				va.recPanel.no_rec_loaded();*/
 		}
 		selected.setLength(0);
 	}

@@ -1,4 +1,4 @@
-module util.dbutil {
+module com.slavi.util.dbutil {
 	requires org.apache.commons.lang3;
 	requires slf4j.api;
 

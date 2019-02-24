@@ -2,13 +2,14 @@ package a;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   VoronoiApplet.java
 
 import java.applet.Applet;
 import java.applet.AudioClip;
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Event;
@@ -16,8 +17,12 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import a.obsolete.ajButtonImages;
 import a.obsolete.ajElement;
@@ -31,24 +36,29 @@ import a.obsolete.ajStep;
 import a.obsolete.ajUpdateable;
 import a.obsolete.socketListenerThread;
 
-public class VoronoiApplet extends Applet implements ajUpdateable {
+public class VoronoiApplet extends JPanel implements ajUpdateable {
 
 	void addPoint(int x, int y) {
 		ajPoint p = new ajPoint(x, y);
 		delau.insertPoint(p);
 		canvas.add(p);
 	}
-	
-	public void init() {
-		String s = getParameter("FrameWidth");
-		String s1 = getParameter("FrameHeight");
-		String s2 = getParameter("Panels");
-		String s3 = getParameter("RemoteControl");
-		String s4 = getParameter("FrameShow");
-		String s5 = getParameter("Color");
-		getParameter("unBuf");
-		String s6 = getParameter("Info");
-		helpURL = getParameter("HelpURL");
+
+	public VoronoiApplet() throws IOException {
+		hasPrint = false;
+		stepMode = false;
+		stepping = false;
+		stopped = false;
+
+		String s = null;		//getParameter("FrameWidth");
+		String s1 = null;		//getParameter("FrameHeight");
+		String s2 = null;		//getParameter("Panels");
+		String s3 = null;		//getParameter("RemoteControl");
+		String s4 = null;		//getParameter("FrameShow");
+		String s5 = null;		//getParameter("Color");
+								//getParameter("unBuf");
+		String s6 = null;		//getParameter("Info");
+		helpURL = null;			//getParameter("HelpURL");
 		if (helpURL == null)
 			helpURL = "VA_UserManual.html";
 		String s7 = System.getProperty("java.version");
@@ -95,7 +105,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		frame.add("Center", canvas);
 		canvas.unsetOffscreen();
 		delau = new ajExtendDelaunay(canvas);
-/*		
+/*
 		addPoint(100, 100);
 		addPoint(200, 200);
 		addPoint(200, 100);
@@ -105,7 +115,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		*/
 		recFrame = new Frame("Recorder");
 		stepFrame = new Frame("Step Mode");
-		ajButtonImages ajbuttonimages = new ajButtonImages(this);
+		ajButtonImages ajbuttonimages = new ajButtonImages();
 		stepPanel = new ajSingleStepPanel(this, ajbuttonimages);
 		recPanel = new ajRecorderPanel(this, ajbuttonimages);
 		stepFrame.add("Center", stepPanel);
@@ -142,7 +152,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 				setBackground(color);
 		}
 		setLayout(new BorderLayout(5, 5));
-		String s11 = getParameter("ButtonText");
+		String s11 = null;		//getParameter("ButtonText");
 		if (s11 != null)
 			sf = new Button(s11);
 		else
@@ -378,7 +388,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 				return true;
 
 			case 8: // '\b'
-				showStatus("Replay finished.");
+				//showStatus("Replay finished.");
 				recPanel.stop_rec();
 				return true;
 
@@ -390,7 +400,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 			end_stepping(event.target == stepPanel.ez_ende, event.target == stepPanel.ez_ende);
 			return true;
 		}
-		String s = getParameter("Panels");
+		String s = null;		//getParameter("Panels");
 		if (event.target == sf) {
 			frame.show();
 			if (s != null && s.compareTo("all") == 0) {
@@ -418,7 +428,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		}
 		evRec.recordEvent(8);
 		evRec.stop_recording();
-		showStatus("Stopped.");
+		//showStatus("Stopped.");
 		end_stepping(false, true);
 		if (pick != null) {
 			canvas.cleanTempLayers();
@@ -444,7 +454,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		evRec.stop_replay();
 		if (evRec.hasRecord()) {
 			clear_canvas();
-			showStatus("Replay");
+			//showStatus("Replay");
 			recPanel.do_replay();
 			evRec.start_replay();
 		}
@@ -468,14 +478,14 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 			evRec.start();
 		}
 		evRec.stop_replay();
-		showStatus("Recording...");
-		String s = getParameter("AudioClip");
+		//showStatus("Recording...");
+		String s = null;		//getParameter("AudioClip");
 		if (s != null)
 			try {
 				URL url = new URL(s);
 				if (url != null) {
-					clip = getAudioClip(url);
-					clip.play();
+					//clip = getAudioClip(url);
+					//clip.play();
 				}
 			} catch (MalformedURLException _ex) {
 			} catch (NullPointerException _ex) {
@@ -530,7 +540,7 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		if (flag) {
 			canvas.unsetOffscreen();
 		} else {
-			String s = getParameter("unBuf");
+			String s = null;		//getParameter("unBuf");
 			if (s != null && s.compareTo("true") == 0) {
 				System.err.println("Buffered Display not possible");
 				canvas.unsetOffscreen();
@@ -585,13 +595,6 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 		}
 	}
 
-	public VoronoiApplet() {
-		hasPrint = false;
-		stepMode = false;
-		stepping = false;
-		stopped = false;
-	}
-
 	static final int SHOW_VORO = 1;
 	static final int SHOW_DEL = 2;
 	static final int SHOW_CONV = 4;
@@ -617,4 +620,11 @@ public class VoronoiApplet extends Applet implements ajUpdateable {
 	ajPoint step_point;
 	boolean stopped;
 	String helpURL;
+
+	public static void main(String[] args) throws IOException {
+		JFrame f = new JFrame();
+		f.add(new VoronoiApplet());
+		f.setSize(400, 400);
+		f.setVisible(true);
+	}
 }

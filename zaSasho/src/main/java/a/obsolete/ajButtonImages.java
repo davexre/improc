@@ -2,36 +2,37 @@ package a.obsolete;
 
 // Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
 // Jad home page: http://www.geocities.com/kpdus/jad.html
-// Decompiler options: packimports(3) 
+// Decompiler options: packimports(3)
 // Source File Name:   ajButtonImages.java
 
-import java.applet.Applet;
 import java.awt.Image;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 public class ajButtonImages {
 
-	public ajButtonImages(Applet applet) {
-		java.net.URL url = applet.getCodeBase();
-		stopOffImg = applet.getImage(url, "Stop_Off.gif");
-		stopOnImg = applet.getImage(url, "Stop_On.gif");
-		pauseOffImg = applet.getImage(url, "Pause_Off.gif");
-		pauseOnImg = applet.getImage(url, "Pause_On.gif");
-		anfangOffImg = applet.getImage(url, "Anfang_Off.gif");
-		anfangOnImg = applet.getImage(url, "Anfang_On.gif");
-		stepBackOffImg = applet.getImage(url, "StepBack_Off.gif");
-		stepBackOnImg = applet.getImage(url, "StepBack_On.gif");
-		playOffImg = applet.getImage(url, "Play_Off.gif");
-		playOnImg = applet.getImage(url, "Play_On.gif");
-		recordOffImg = applet.getImage(url, "Record_Off.gif");
-		recordOnImg = applet.getImage(url, "Record_On.gif");
-		stepOffImg = applet.getImage(url, "Step_Off.gif");
-		stepOnImg = applet.getImage(url, "Step_On.gif");
-		endeOffImg = applet.getImage(url, "Ende_Off.gif");
-		endeOnImg = applet.getImage(url, "Ende_On.gif");
-		loadOffImg = applet.getImage(url, "Load_Off.gif");
-		loadOnImg = applet.getImage(url, "Load_On.gif");
-		saveOffImg = applet.getImage(url, "Save_Off.gif");
-		saveOnImg = applet.getImage(url, "Save_On.gif");
+	public ajButtonImages() throws IOException {
+		stopOffImg = ImageIO.read(getClass().getResourceAsStream("Stop_Off.gif"));
+		stopOnImg = ImageIO.read(getClass().getResourceAsStream("Stop_On.gif"));
+		pauseOffImg = ImageIO.read(getClass().getResourceAsStream("Pause_Off.gif"));
+		pauseOnImg =  ImageIO.read(getClass().getResourceAsStream("Pause_On.gif"));
+		anfangOffImg = ImageIO.read(getClass().getResourceAsStream("Anfang_Off.gif"));
+		anfangOnImg = ImageIO.read(getClass().getResourceAsStream("Anfang_On.gif"));
+		stepBackOffImg = ImageIO.read(getClass().getResourceAsStream("StepBack_Off.gif"));
+		stepBackOnImg = ImageIO.read(getClass().getResourceAsStream("StepBack_On.gif"));
+		playOffImg = ImageIO.read(getClass().getResourceAsStream("Play_Off.gif"));
+		playOnImg = ImageIO.read(getClass().getResourceAsStream("Play_On.gif"));
+		recordOffImg = ImageIO.read(getClass().getResourceAsStream("Record_Off.gif"));
+		recordOnImg = ImageIO.read(getClass().getResourceAsStream("Record_On.gif"));
+		stepOffImg = ImageIO.read(getClass().getResourceAsStream("Step_Off.gif"));
+		stepOnImg = ImageIO.read(getClass().getResourceAsStream("Step_On.gif"));
+		endeOffImg = ImageIO.read(getClass().getResourceAsStream("Ende_Off.gif"));
+		endeOnImg = ImageIO.read(getClass().getResourceAsStream("Ende_On.gif"));
+		loadOffImg = ImageIO.read(getClass().getResourceAsStream("Load_Off.gif"));
+		loadOnImg = ImageIO.read(getClass().getResourceAsStream("Load_On.gif"));
+		saveOffImg = ImageIO.read(getClass().getResourceAsStream("Save_Off.gif"));
+		saveOnImg = ImageIO.read(getClass().getResourceAsStream("Save_On.gif"));
 	}
 
 	public Image stopOffImg;

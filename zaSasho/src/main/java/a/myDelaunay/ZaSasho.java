@@ -20,52 +20,54 @@ import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-public class ZaSasho extends JApplet {
+public class ZaSasho extends JFrame {
 
 	public static class MyPointWithWeight extends Point2D.Double implements DataWithWeight {
 		double weight = 1.0;
-		
+
 		public MyPointWithWeight() {
 		}
-		
+
 		public MyPointWithWeight(double x, double y) {
 			super(x, y);
 		}
-		
+
 		public MyPointWithWeight(double x, double y, double weight) {
 			super(x, y);
 			this.weight = weight;
 		}
-		
+
 		public double getWeight() {
 			return weight;
 		}
-		
+
 		public void setWeight(double weight) {
 			this.weight = weight;
 		}
 	}
-	
+
 	MyDelaunayPanel delaunayPanel;
 	JCheckBox cbTriangles;
 	JCheckBox cbPolygons;
-	
+
 	class MyDelaunayPanel extends JComponent {
 		protected boolean drawPointIndex = false;
-		
+
 		protected ArrayList<MyPointWithWeight> points = new ArrayList<MyPointWithWeight>();
-		
+
 		protected int selectedIndex = -1;
-		
+
 		private boolean mouseButton1Down = false;
 
 		void fixPoint(Point2D p) {
 			double x = p.getX();
 			double y = p.getY();
-			if (x < 0) 
+			if (x < 0)
 				x = 0;
 			if (y < 0)
 				y = 0;
@@ -75,7 +77,7 @@ public class ZaSasho extends JApplet {
 				y = getHeight();
 			p.setLocation(x, y);
 		}
-		
+
 		public MyDelaunayPanel() {
 			MouseAdapter listener = new MouseAdapter() {
 				public void mouseDragged(MouseEvent e) {
@@ -95,7 +97,7 @@ public class ZaSasho extends JApplet {
 					}
 					repaint();
 				}
-				
+
 				public void mousePressed(MouseEvent e) {
 					int x = e.getX();
 					int y = e.getY();
@@ -103,9 +105,9 @@ public class ZaSasho extends JApplet {
 					selectedIndex = -1;
 					for (int i = 0; i < points.size(); i++) {
 						Point2D p = points.get(i);
-						if ((p.getX() - Utils.controlNodeWidth <= x) && 
-							(x <= p.getX() + Utils.controlNodeWidth) && 
-							(p.getY() - Utils.controlNodeHeight <= y) && 
+						if ((p.getX() - Utils.controlNodeWidth <= x) &&
+							(x <= p.getX() + Utils.controlNodeWidth) &&
+							(p.getY() - Utils.controlNodeHeight <= y) &&
 							(y <= p.getY() + Utils.controlNodeHeight)) {
 							selectedIndex = i;
 							break;
@@ -114,7 +116,7 @@ public class ZaSasho extends JApplet {
 
 					if (e.getButton() == MouseEvent.BUTTON1) {
 						mouseButton1Down = true;
-						
+
 						if (selectedIndex >= 0) {
 							if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0) {
 								// delete point
@@ -137,7 +139,7 @@ public class ZaSasho extends JApplet {
 			};
 
 			setRequestFocusEnabled(true);
-			
+
 			addMouseListener(listener);
 			addMouseMotionListener(listener);
 			AbstractAction keyListener = new AbstractAction() {
@@ -152,19 +154,19 @@ public class ZaSasho extends JApplet {
 					}
 				}
 			};
-			
+
 			for (Character c = '1'; c <= '9'; c++) {
 				getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(c), c);
 				getActionMap().put(c, keyListener);
 			}
 			drawPointIndex = true;
-			
+
 			points.add(new MyPointWithWeight(40.0, 80.0));
 			points.add(new MyPointWithWeight(40.0, 160.0));
 			points.add(new MyPointWithWeight(120.0, 80.0));
 			points.add(new MyPointWithWeight(120.0, 160.0));
 		}
-	
+
 		public void dumpPoints() {
 			System.out.println("=== Dump points ===");
 			for (MyPointWithWeight p : points) {
@@ -172,7 +174,7 @@ public class ZaSasho extends JApplet {
 			}
 			System.out.println("======");
 		}
-		
+
 		public void paint(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setColor(Color.lightGray);
@@ -219,14 +221,14 @@ public class ZaSasho extends JApplet {
 			}
 			for (int i = 0; i < points.size(); i++) {
 				MyPointWithWeight p = (MyPointWithWeight) points.get(i);
-				Utils.drawPoint(g, (int) p.getX(), (int) p.getY(), 
-					i == selectedIndex ? Color.yellow : Color.black, 
+				Utils.drawPoint(g, (int) p.getX(), (int) p.getY(),
+					i == selectedIndex ? Color.yellow : Color.black,
 					drawPointIndex ? Integer.toString(i) + "(" + Integer.toString((int) p.getWeight()) + ")" : null);
 			}
 		}
 	}
-	
-	public void init() {
+
+	public ZaSasho() {
 		GridBagConstraints c = new GridBagConstraints();
 		JPanel rootPanel = new JPanel();
 		rootPanel.setDoubleBuffered(true);
@@ -240,7 +242,7 @@ public class ZaSasho extends JApplet {
 		c.fill = GridBagConstraints.BOTH;
 		c.gridy = 1;
 		rootPanel.add(delaunayPanel, c);
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 		c.fill = GridBagConstraints.NONE;
@@ -254,7 +256,7 @@ public class ZaSasho extends JApplet {
 				repaint();
 			}
 		});
-		
+
 		ActionListener repaintListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				repaint();
@@ -267,7 +269,7 @@ public class ZaSasho extends JApplet {
 		c.gridx++;
 		panel.add(cbTriangles, c);
 		rootPanel.add(panel);
-		
+
 		cbPolygons = new JCheckBox("polygons");
 		cbPolygons.addActionListener(repaintListener);
 		cbPolygons.setSelected(true);
@@ -277,5 +279,12 @@ public class ZaSasho extends JApplet {
 		rootPanel.add(panel);
 
 		setSize(400, 400);
+	}
+
+	public static void main(String[] args) {
+		ZaSasho app = new ZaSasho();
+		app.setDefaultCloseOperation(EXIT_ON_CLOSE);
+		app.setVisible(true);
+		System.out.println("Done.");
 	}
 }

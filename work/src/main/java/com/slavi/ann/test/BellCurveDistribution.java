@@ -60,7 +60,7 @@ public class BellCurveDistribution {
 	}
 
 	public static void main(String[] args) {
-		double stdDev = 0.3;
+		double stdDev = 0.9;
 /*
 		double w[] = new double[33];
 		int meanAtIndex = 60;
@@ -68,15 +68,19 @@ public class BellCurveDistribution {
 		for (int i = 0; i < w.length; i++)
 			System.out.println(w[i]);
 */
-		Matrix w = new Matrix(4, 3);
-		fillWeight(w, 0.3);
-		System.out.println(w.toMatlabString("W"));
+		Matrix w = new Matrix(5, 1);
+		fillWeight(w, 0.5);
+		System.out.println(w.toMatlabString("W1"));
+		System.out.println(w.sumAll());
+		System.out.println(w.max());
 
 		fillWeight_MY(w, stdDev);
+		System.out.println(w.toMatlabString("W2"));
 //		w.rMul(15/4.0);
-		for (int i = 0; i < w.getSizeX(); i++)
-			System.out.println(MathUtil.d20(w.getItem(i, 0)));
+//		for (int i = 0; i < w.getSizeX(); i++)
+//			System.out.println(MathUtil.d20(w.getItem(i, 0)));
 
 		System.out.println(w.sumAll());
+		System.out.println(w.max());
 	}
 }

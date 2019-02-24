@@ -1,6 +1,6 @@
 package a.myDelaunay;
 
-import java.applet.Applet;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.InputEvent;
@@ -9,18 +9,20 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class BasePointsListApplet extends Applet {
+import javax.swing.JFrame;
+
+public class BasePointsListApplet extends Canvas {
 
 	protected boolean fixedNumberOfPoints = false;
-	
+
 	protected boolean drawPointIndex = false;
-	
+
 	protected ArrayList<Point2D.Double> points = new ArrayList<Point2D.Double>();
-	
+
 	protected int selectedIndex = -1;
 
 	void fixPoint(Point2D.Double p) {
-		if (p.x < 0) 
+		if (p.x < 0)
 			p.x = 0;
 		if (p.y < 0)
 			p.y = 0;
@@ -29,8 +31,8 @@ public class BasePointsListApplet extends Applet {
 		if (p.y >= getHeight())
 			p.y = getHeight();
 	}
-	
-	public void init() {
+
+	public BasePointsListApplet() {
 		setName(getClass().getName());
 		MouseAdapter listener = new MouseAdapter() {
 			public void mouseDragged(MouseEvent e) {
@@ -49,18 +51,18 @@ public class BasePointsListApplet extends Applet {
 				selectedIndex = -1;
 				repaint();
 			}
-			
+
 			public void mousePressed(MouseEvent e) {
 				int x = e.getX();
 				int y = e.getY();
-				
+
 				int oldSelectedIndex = selectedIndex;
 				selectedIndex = -1;
 				for (int i = 0; i < points.size(); i++) {
 					Point2D.Double p = points.get(i);
-					if ((p.x - Utils.controlNodeWidth <= x) && 
-						(x <= p.x + Utils.controlNodeWidth) && 
-						(p.y - Utils.controlNodeHeight <= y) && 
+					if ((p.x - Utils.controlNodeWidth <= x) &&
+						(x <= p.x + Utils.controlNodeWidth) &&
+						(p.y - Utils.controlNodeHeight <= y) &&
 						(y <= p.y + Utils.controlNodeHeight)) {
 						selectedIndex = i;
 						break;
@@ -68,7 +70,7 @@ public class BasePointsListApplet extends Applet {
 				}
 
 				if (selectedIndex >= 0) {
-					if ((!fixedNumberOfPoints) && 
+					if ((!fixedNumberOfPoints) &&
 						((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0)) {
 						// delete point
 						points.remove(selectedIndex);
@@ -94,12 +96,12 @@ public class BasePointsListApplet extends Applet {
 		addMouseListener(listener);
 		addMouseMotionListener(listener);
 	}
-	
+
 	public void paint(Graphics g) {
 		for (int i = 0; i < points.size(); i++) {
 			Point2D.Double p = points.get(i);
-			Utils.drawPoint(g, (int) p.x, (int) p.y, 
-				i == selectedIndex ? Color.yellow : Color.black, 
+			Utils.drawPoint(g, (int) p.x, (int) p.y,
+				i == selectedIndex ? Color.yellow : Color.black,
 				drawPointIndex ? Integer.toString(i) : null);
 		}
 	}
