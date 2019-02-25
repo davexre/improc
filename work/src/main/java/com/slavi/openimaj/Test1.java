@@ -2,7 +2,6 @@ package com.slavi.openimaj;
 
 import org.openimaj.image.FImage;
 import org.openimaj.image.MBFImage;
-import org.openimaj.image.analysis.algorithm.EuclideanDistanceTransform;
 import org.openimaj.video.VideoDisplay;
 import org.openimaj.video.VideoDisplay.Mode;
 import org.openimaj.video.VideoDisplayListener;
@@ -18,13 +17,13 @@ public class Test1 {
 			public void videoStopped(VideoDisplay<?> arg0) {
 				video.close();
 			}
-			
+
 			public void videoStateChanged(Mode arg0, VideoDisplay<?> arg1) {
 			}
-			
+
 			public void videoPlaying(VideoDisplay<?> arg0) {
 			}
-			
+
 			public void videoPaused(VideoDisplay<?> arg0) {
 			}
 		});
@@ -39,21 +38,21 @@ public class Test1 {
 				    	}*/
 				    	//ImageProcessor ip = new DifferenceOfGaussian();
 				    	//ImageProcessor ip = new CannyEdgeDetector();
-				    	EuclideanDistanceTransform ip = new EuclideanDistanceTransform();
+				    	//EuclideanDistanceTransform ip = new EuclideanDistanceTransform();
 				        //frame.processInplace(new CannyEdgeDetector());
 				    	FImage img = frame.flatten();
 
-				    	ip.analyseImage(img);
-				    	img = ip.getDistances();
+				    	//ip.analyseImage(img);
+				    	//img = ip.getDistances();
 				    	//img.normalise();
-				    	
+
 				        frame.drawImage(img.toRGB(), 0, 0);
 				    }
 
 				    public void afterUpdate(VideoDisplay<MBFImage> display) {
 				    }
-				  });		
-		
+				  });
+
 //		MBFImage image = ImageUtilities.readMBF(new File(Const.sourceImage));
 //		System.out.println(image.colourSpace);
 /*		MBFImage clone = image.clone();
@@ -63,14 +62,14 @@ public class Test1 {
 		        clone.getBand(2).pixels[y][x] = 0;
 		    }
 		}*/
-/*		DoGSIFTEngine engine = new DoGSIFTEngine();	
+/*		DoGSIFTEngine engine = new DoGSIFTEngine();
 		LocalFeatureList<Keypoint> queryKeypoints = engine.findFeatures(image.flatten());
-		
-		
+
+
 		System.out.println(queryKeypoints);
-		
+
 		//LocalFeatureList<Keypoint> targetKeypoints = engine.findFeatures(target.flatten());
-		
+
 		//image.processInplace(new CannyEdgeDetector());
 		DisplayUtilities.display(image.flatten());*/
 	}
