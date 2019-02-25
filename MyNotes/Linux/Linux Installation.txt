@@ -71,8 +71,6 @@ gedit-plugins               \
 ghex                        \
 gimp                        \
 git                         \
-gksu                        \
-gmobilemedia                \
 gnome-color-chooser         \
 gnome-search-tool           \
 gnupg-agent                 \
@@ -93,7 +91,6 @@ kate                        \
 kde-baseapps-bin            \
 kdenlive                    \
 lame                        \
-libav-tools                 \
 librecad                    \
 libreoffice                 \
 links                       \
@@ -102,7 +99,6 @@ mc                          \
 meld                        \
 melt                        \
 mercurial                   \
-mplayer2                    \
 ncdu                        \
 nemo                        \
 nemo-fileroller             \
@@ -116,7 +112,6 @@ p7zip                       \
 pavucontrol                 \
 perl-doc                    \
 pinentry-curses             \
-pdfshufler                  \
 ppa-purge                   \
 python-pip                  \
 python-qgis                 \
@@ -136,7 +131,6 @@ subversion                  \
 synaptic                    \
 synfigstudio                \
 sysstat                     \
-sysv-rc-conf                \
 sqlite3                     \
 tesseract-ocr               \
 tesseract-ocr-bul           \
