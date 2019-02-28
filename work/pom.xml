@@ -159,6 +159,11 @@
 		</dependency>
 
 
+<!-- 
+		<dependency>
+			<groupId>org.openimaj</groupId>
+			<artifactId>camera-calibration</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>image-local-features</artifactId>
@@ -199,12 +204,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.openimaj</groupId>
-			<artifactId>camera-calibration</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.openimaj</groupId>
 			<artifactId>faces</artifactId>
 		</dependency>
+ -->
 		<dependency>
 			<groupId>org.openimaj</groupId>
 			<artifactId>core-video-capture</artifactId>
@@ -271,11 +273,13 @@
 			<artifactId>gsl</artifactId>
 			<version>1.16-1.1</version>
 		</dependency>
+<!-- 
 		<dependency>
 			<groupId>org.bytedeco.javacpp-presets</groupId>
 			<artifactId>llvm</artifactId>
 			<version>3.7.0-1.1</version>
 		</dependency>
+ -->
 		<dependency>
 			<groupId>org.bytedeco.javacpp-presets</groupId>
 			<artifactId>leptonica</artifactId>
