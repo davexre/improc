@@ -20,7 +20,7 @@ public class HyperThreadingExample {
 		System.out.println("Waiting for tasks to finish");
 		ts.run().get();
 		System.out.println("Parallel job finished");
-		Marker.State stamp = Marker.release();
+		Marker stamp = Marker.release();
 		
 		exec.shutdown();
 		return (stamp.end - stamp.start) / numThreads;

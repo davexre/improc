@@ -1,4 +1,4 @@
-package com.slavi.reporting.velocity;
+package com.slavi.dbutil;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

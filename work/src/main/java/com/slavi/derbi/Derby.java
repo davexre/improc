@@ -129,9 +129,4 @@ public class Derby {
 		// DriverManager.getConnection("jdbc:derby:;shutdown=true");
 		System.out.println("Done.");
 	}
-
-	public static void main2(String[] args) throws Exception {
-		Connection conn = DriverManager.getConnection("jdbc:derby:memory:MyDbTest;create=true");
-		System.out.println(conn.getClass());
-	}
 }

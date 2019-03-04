@@ -29,7 +29,7 @@ public class SpyTimer implements AutoCloseable {
 		long end = System.currentTimeMillis();
 		if (log.isInfoEnabled())
 			log.info("Spent {} ms on: {}", (end - start), msg);
-		if (log.isDebugEnabled() && !params.isEmpty()) {
+		if (log.isDebugEnabled() && params != null && !params.isEmpty()) {
 			ArrayList<Map.Entry> items = new ArrayList(params.entrySet());
 			Collections.sort(items, (a, b) -> {
 				Object keyA = a.getKey();
@@ -62,6 +62,7 @@ public class SpyTimer implements AutoCloseable {
 			sb.append(']');
 			log.debug(sb.toString());
 		}
-		params.clear();
+		if (params != null)
+			params.clear();
 	}
 }

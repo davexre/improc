@@ -341,8 +341,8 @@ public class JpaCreate {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new FileOutputStream("target/createDDL_ddlGeneration.sql").close();;
-		new FileOutputStream("target/dropDDL_ddlGeneration.sql").close();;
+		new FileOutputStream("target/createDDL_ddlGeneration.sql").close();
+		new FileOutputStream("target/dropDDL_ddlGeneration.sql").close();
 
 		System.setProperty("derby.stream.error.method", "com.slavi.dbutil.DerbyLogOverSlf4j.getLogger");
 		//ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("JpaCreate-sping.xml", JpaCreate.class);

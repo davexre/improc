@@ -20,12 +20,10 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import com.slavi.dbutil.MyDbScriptRunner;
-import com.slavi.derbi.Derby;
-import com.slavi.reporting.velocity.ResultSetToIteratorList;
+import com.slavi.dbutil.ResultSetToIteratorList;
+import com.slavi.derbi.hr.Derby;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -74,22 +72,11 @@ public class HtmlReportTest {
 		}*/
 	}
 
-	public static DataSource generateHrDb() throws Exception {
-		EmbeddedDataSource ds = new EmbeddedDataSource();
-		ds.setDatabaseName("memory:hr");
-		ds.setCreateDatabase("create");
-		try (Connection conn = ds.getConnection()) {
-			MyDbScriptRunner sr = new MyDbScriptRunner(conn);
-			sr.process(Derby.class.getResourceAsStream("Derby_HR_schema.sql.txt"));
-		}
-		return ds;
-	}
-
 	DataSource ds;
 
 	void doIt() throws Exception {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		ds = generateHrDb();
+		ds = Derby.generateDb();
 
 		Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
 		//cfg.setClassForTemplateLoading(getClass(), "");

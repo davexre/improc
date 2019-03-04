@@ -7,13 +7,13 @@ import com.slavi.util.Util;
 
 public class TestRegExp {
 
-	static void dumpMatcher(Matcher m) {
+	public static void dumpMatcher(Matcher m) {
 		int count = m.groupCount();
 		for (int i = 0; i <= count; i++) {
 			System.out.println(" grp[" + i + "]=" + m.group(i));
 		}
 	}
-	
+
 	public static void main(String[] args) {
 //		String regexp = "a+([DFG]|(QW))+z+";
 //		String regexp = "\\b\\w+(?<!s)\\b";
@@ -27,13 +27,13 @@ public class TestRegExp {
 //				{ "sssaaaQWzzzsss", "aaaQWzzz" },
 //				{ "sssaaaQDWzzzsss", "" },
 		};
-		
+
 		System.out.println("Pattern is: " + regexp);
 		Pattern pattern = Pattern.compile(regexp);
 		for (String pair[] : vals) {
 			String val = pair[0];
 			String expected = pair[1];
-			
+
 			String grp = "";
 			Matcher m = pattern.matcher(val);
 			if (m.find()) {
@@ -48,7 +48,7 @@ public class TestRegExp {
 			}
 		}
 	}
-	
+
 	public static void main2(String[] args) {
 		String regexp = "\\$\\{(([^}](?!\\$\\{))+)\\}";
 //		String regexp = "\\$\\{([\\$[^(\\$\\{)(\\})]]+)\\}";
@@ -60,13 +60,13 @@ public class TestRegExp {
 				{ "aaa${qwe${z{xc}}zzz", "z{xc" },
 				{ "aaa${qwe}${zxc}zzz", "qwe" },
 		};
-		
+
 		System.out.println("Pattern is: " + regexp);
 		Pattern pattern = Pattern.compile(regexp);
 		for (String pair[] : vals) {
 			String val = pair[0];
 			String expected = pair[1];
-			
+
 			String grp = "";
 			Matcher m = pattern.matcher(val);
 			if (m.find()) {
