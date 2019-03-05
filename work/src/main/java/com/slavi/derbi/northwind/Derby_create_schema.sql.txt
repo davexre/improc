@@ -1,0 +1,29 @@
+/*
+	Assembled from:
+		https://raw.githubusercontent.com/Microsoft/sql-server-samples/master/samples/databases/northwind-pubs/instnwnd.sql
+		https://raw.githubusercontent.com/Microsoft/sql-server-samples/master/samples/databases/northwind-pubs/instpubs.sql
+*/
+
+CREATE TABLE "Employees" (
+	"EmployeeID" int NOT NULL,
+	"LastName" varchar(20) NOT NULL,
+	"FirstName" varchar(10) NOT NULL,
+	"Title" varchar(30),
+	"TitleOfCourtesy" varchar(25),
+	"BirthDate" date,
+	"HireDate" date,
+	"Address" varchar(60),
+	"City" varchar(15),
+	"Region" varchar(15),
+	"PostalCode" varchar(10),
+	"Country" varchar(15),
+	"HomePhone" varchar(24),
+	"Extension" varchar(4),
+	"Photo" blob,
+	"Notes" clob,
+	"ReportsTo" int,
+	"PhotoPath" varchar(255),
+	CONSTRAINT "PK_Employees" PRIMARY KEY ("EmployeeID")
+--	CONSTRAINT "FK_Employees_Employees" FOREIGN KEY ("ReportsTo") REFERENCES "Employees" ("EmployeeID")
+--	CONSTRAINT "CK_Birthdate" CHECK (BirthDate < getdate())
+);

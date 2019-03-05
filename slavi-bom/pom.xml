@@ -530,6 +530,11 @@
 				<version>${apache.derby.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbyclient</artifactId>
+				<version>${apache.derby.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<version>${mssql-jdbc.version}</version>

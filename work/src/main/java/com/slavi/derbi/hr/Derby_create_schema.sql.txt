@@ -28,6 +28,8 @@ create table countries(
 	constraint country_c_id_pk primary key(country_id)
 );
 
+alter table countries add constraint countr_reg_fk foreign key (region_id) references regions(region_id);
+
 create table locations(
 	location_id		int constraint loc_id_nn not null,
 	street_address	varchar(40),
@@ -41,8 +43,6 @@ create unique index loc_id_pk on locations(location_id);
 
 alter table locations add constraint loc_id_pk primary key(location_id);
 alter table locations add constraint loc_c_id_fk foreign key (country_id) references countries(country_id);
-
-alter table countries add constraint countr_reg_fk foreign key (region_id) references regions(region_id);
 
 create table departments(
 	department_id		int constraint dept_id_nn not null,

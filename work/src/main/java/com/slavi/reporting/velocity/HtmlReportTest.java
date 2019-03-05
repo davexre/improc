@@ -16,7 +16,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -24,8 +23,8 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import com.slavi.dbutil.MyDbScriptRunner;
-import com.slavi.derbi.Derby;
+import com.slavi.dbutil.ResultSetToIteratorList;
+import com.slavi.derbi.hr.Derby;
 
 public class HtmlReportTest {
 
@@ -45,17 +44,6 @@ public class HtmlReportTest {
 		}
 	}
 
-	public static DataSource generateHrDb() throws Exception {
-		EmbeddedDataSource ds = new EmbeddedDataSource();
-		ds.setDatabaseName("memory:hr");
-		ds.setCreateDatabase("create");
-		try (Connection conn = ds.getConnection()) {
-			MyDbScriptRunner sr = new MyDbScriptRunner(conn);
-			sr.process(Derby.class.getResourceAsStream("Derby_HR_schema.sql.txt"));
-		}
-		return ds;
-	}
-
 	DataSource ds;
 
 	void doIt() throws Exception {
@@ -68,7 +56,7 @@ public class HtmlReportTest {
 		VelocityEngine ve = new VelocityEngine(p);
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		ds = generateHrDb();
+		ds = Derby.generateDb();
 		String fou = "target/report";
 		try (
 			Connection conn = ds.getConnection();

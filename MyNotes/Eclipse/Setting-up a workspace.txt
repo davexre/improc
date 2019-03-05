@@ -56,6 +56,10 @@ Setting-up a workspace
 	* Import Preferences file (for Quick Bookmarks Plugin)
 * MySQL
 * SQuireL http://squirrel-sql.sourceforge.net/
+	* Install DB drivers:
+		* cd <improc_home>/tools/squirrel_drivers
+		* mvn clean generate-resources
+		* cp target/dependencies <squirrel_home>/lib
 * Apache Tomcat
 * Lombok
 	java -jar ~/.m2/repository/org/projectlombok/lombok/1.18.4/lombok-1.18.4.jar

@@ -67,7 +67,10 @@
 	<logger level="error" name="hsqldb.db" />
 	<logger level="trace" name="oracle" />
 	<logger level="trace" name="p6spy" />
-	<logger level="trace" name="jdbc.spy.sql" />
+	<logger level="debug" name="org.hibernate.SQL" />
+	<logger level="off"   name="org.hibernate.type" />
+	<logger level="off"   name="org.hibernate.type.descriptor.sql" />
+	<logger level="trace" name="jdbc.spy" />
 
 	<root level="error">
 		<appender-ref ref="STDOUT" />
