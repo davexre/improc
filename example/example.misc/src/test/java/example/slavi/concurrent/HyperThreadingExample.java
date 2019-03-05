@@ -20,12 +20,12 @@ public class HyperThreadingExample {
 		System.out.println("Waiting for tasks to finish");
 		ts.run().get();
 		System.out.println("Parallel job finished");
-		Marker.State stamp = Marker.release();
-		
+		Marker stamp = Marker.release();
+
 		exec.shutdown();
 		return (stamp.end - stamp.start) / numThreads;
-	}	
-	
+	}
+
 	public static void main(String[] args) throws Exception {
 		int maxTasks = 10;
 		long results[] = new long[maxTasks];
@@ -40,5 +40,5 @@ public class HyperThreadingExample {
 			System.out.println((i+1) + "\t" + Util.getFormatedMilliseconds(results[i]));
 		}
 		System.out.println("Done.");
-	}	
+	}
 }

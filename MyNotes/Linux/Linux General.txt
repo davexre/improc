@@ -105,3 +105,41 @@ du -bd 1|sort -n
 Remove Carrige Return (CR or \r) character from a text file
 ===========================================================
 sed -i 's/\r//g' /path/to/file/to/edit.txt
+
+Setting kate as default text editor
+===================================
+mkdir -p ~/.local/share/applications
+cd ~/.local/share/applications
+
+# create kate.desktop
+kate kate.desktop
+--------
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Icon=/usr/share/icons/hicolor/48x48/apps/kate.png
+Exec=/usr/bin/kate
+Name=Kate
+Comment=Kate
+--------
+
+cp /usr/share/applications/defaults.list mimeapps.list
+# set kate.desctop for
+application/x-perl=gedit.desktop
+text/csv=kate.desktop
+text/plain=kate.desktop
+text/tab-separated-values=kate.desktop
+text/x-comma-separated-values=kate.desktop
+text/x-c++hdr=kate.desktop
+text/x-c++src=kate.desktop
+text/x-xsrc=kate.desktop
+text/x-chdr=kate.desktop
+text/x-csrc=kate.desktop
+text/x-dtd=kate.desktop
+text/x-java=kate.desktop
+text/mathml=kate.desktop
+text/x-python=kate.desktop
+text/x-sql=kate.desktop
+text/xml=kate.desktop
+
+
