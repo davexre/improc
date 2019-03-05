@@ -2,6 +2,12 @@
 =========================== TITLE ===========================
 =========================== TITLE ===========================
 
+=========================== SQL Developer ===========================
+* Install PLSQL Unwrapper plugin:
+	Help/Check for Updates/Install From Local File(s) -> Unwrapper_for_SQLDev_1.0.0.zip
+* Load user shortcuts:
+	Tools/Preferences/Shortcut Keys/Import Shortcuts -> "SQL Developer shortcuts.xml"
+
 =========================== Oracle JDBC ===========================
 * Logging of Oracle JDBC		https://www.oracle.com/technetwork/topics/11-2.pdf
 ** Use debug jar, i.e. the ones having _g in the name. Ex. ojdbc8_g.jar instead of ojdbc8.jar

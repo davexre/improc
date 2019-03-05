@@ -1,22 +1,22 @@
-Enable Control-Alt-Backspace
-============================
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+
+=========================== Enable Control-Alt-Backspace ===========================
 sudo dpkg-reconfigure keyboard-configuration
 
-Using rsync
-===========
+=========================== Using rsync ===========================
 * Synchronize folders, remove files from dest to match source
 rsync -havz --delete --progress -e "ssh -l slavian" ~/temp/b/ slavian@homepc:temp/b/
 
-HDD check upon boot
-===================
+=========================== HDD check upon boot ===========================
 * check the current settings
 tune2fs -l /dev/sda1
 
 * check ONLY once a month
 tune2fs -i 1m -c 0 /dev/sda1
 
-Mount Network Volumes
-=====================
+=========================== Mount Network Volumes ===========================
 * Windows
 https://wiki.ubuntu.com/MountWindowsSharesPermanently
 sudo apt-get install cifs-utils
@@ -36,16 +36,14 @@ sshfs username@server:/foldername/ /local_mount_point
 * WiFi settings/passwords
 /etc/NetworkManager/system-connections/<WiFi name>
 
-Change laptop screen backlight
-==============================
+=========================== Change laptop screen backlight ===========================
 sudo apt-get install xbacklight
 * increase 10%
 xbacklight -inc 10
 * decrease 10%
 xbacklight -dec 10
 
-Ubuntu startup scripts & locations
-==================================
+=========================== Ubuntu startup scripts & locations ===========================
 # Grub config
 sudoedit /etc/default/grub
 sudo update-grub2
@@ -66,48 +64,40 @@ init			# Change runlevel
 # X-server startup scripts
 /etc/xdg/autostart/*.desktop
 
-Determine the NetBIOS/Windows name of a machine by IP
-=====================================================
+=========================== Determine the NetBIOS/Windows name of a machine by IP ===========================
 http://stackoverflow.com/a/37115634/2243209
 nmblookup -A <ip>
 
 sudo apt-get install nbtscan
 nbtscan <ip>
 
-Ubuntu & multiple displays
-==========================
+=========================== Ubuntu & multiple displays ===========================
 Use xrandr to turn off and then on a VGA/DP monitor if it does not automatically start.
 
-List sub-folders and their sizes
-================================
+=========================== List sub-folders and their sizes ===========================
 du -chd1
 
-OCR a PDF
-=========
+=========================== OCR a PDF ===========================
 cd into an empty folder
 rm a-*.jpg
 convert -density 300 <input file>.pdf -depth 8 a-%d.jpg
 (find . -name "a-*.jpg"|sort -n -k 2 -t -|xargs -I{} tesseract {} stdout -l bul) > output.txt
 
-Some interesting tools
-======================
+=========================== Some interesting tools ===========================
 biosdecode			read info from BIOS
 dmidecode			read info from BIOS
 
-Usefull command chains
-======================
+=========================== Usefull command chains ===========================
 * List all file extensions in subfolders and count number of files
 find . -type f | sed -nE 's/.*\.(\w+)$/\1/p' | sort | uniq -c | sort -nr | less
 
 * Show disk usage by subfolders
 du -bd 1|sort -n
 
-Remove Carrige Return (CR or \r) character from a text file
-===========================================================
+=========================== Remove Carrige Return (CR or \r) character from a text file ===========================
 sed -i 's/\r//g' /path/to/file/to/edit.txt
 
-Setting kate as default text editor
-===================================
+=========================== Setting kate as default text editor ===========================
 mkdir -p ~/.local/share/applications
 cd ~/.local/share/applications
 
@@ -141,5 +131,3 @@ text/mathml=kate.desktop
 text/x-python=kate.desktop
 text/x-sql=kate.desktop
 text/xml=kate.desktop
-
-

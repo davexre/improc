@@ -1,15 +1,29 @@
-Simple ssh
-==========
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+=========================== TITLE ===========================
+
+=========================== Simple ssh ===========================
 ssh -p 443 slavian@slavi.no-ip.org
 
-Simple scp
-==========
+=========================== Simple scp ===========================
 scp -r -P 443 slavian@slavi.no-ip.org:/home/slavian/some_file_or_dir .
 
-Connect to home
-===============
+=========================== Connect to home ===========================
 ssh -p 443 slavian@slavi.no-ip.org -L 1234:localhost:5900
 vino-preferences
 /usr/lib/vino/vino-server
 remmina
 	localhost:1234
+
+=========================== Setup SOCKS4 and SOCKS5 proxy over ssh ===========================
+* Make the connection
+	ssh -p 443 slavian@slavi.no-ip.org -D 12345
+* Setup proxy in Firefox
+	* Install plugin "FoxyProxy"
+		Proxy type: SOCKS5
+		IP address, DNS name, server name: localhost
+		Port: 12345
+* Linux shell
+	export http_proxy="socks5://localhost:12345"
+	export https_proxy=$http_proxy
+* True http(s) proxy - https://tinyproxy.github.io/
