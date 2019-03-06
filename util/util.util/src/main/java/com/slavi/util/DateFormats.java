@@ -32,10 +32,16 @@ public class DateFormats extends DateFormat {
 
 	@Override
 	public Date parse(String source, ParsePosition pos) {
+		if (source == null || "".equals(source))
+			return null;
 		for (DateFormat df : dateFormats) {
-			Date r = df.parse(source, pos);
-			if (r != null)
-				return r;
+			try {
+				Date r = df.parse(source, pos);
+				if (r != null)
+					return r;
+			} catch (Throwable t) {
+				// Ignore the error, try next format.
+			}
 		}
 		return null;
 	}
