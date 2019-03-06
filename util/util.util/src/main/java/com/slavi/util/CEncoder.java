@@ -3,7 +3,7 @@ package com.slavi.util;
 import java.util.Formatter;
 
 /**
- * @deprecated Use org.apache.commons:commons-lang3:org.apache.commons.lang3.StringEscapeUtils
+ * @deprecated Use org.apache.commons:commons-text:org.apache.commons.text.StringEscapeUtils
  */
 public class CEncoder {
 	private static final String specialSymbolsShort = " !#$%&,/:;@^|";

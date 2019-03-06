@@ -7,6 +7,11 @@
 	Help/Check for Updates/Install From Local File(s) -> Unwrapper_for_SQLDev_1.0.0.zip
 * Load user shortcuts:
 	Tools/Preferences/Shortcut Keys/Import Shortcuts -> "SQL Developer shortcuts.xml"
+* Setup max memory used by SQL Developer:
+	* Open <SQLDevHome>/ide/bin/launcher.sh
+	* Search for "@@ADDVMOPTION_MAXIMUM_JAVA_MEMORY@@"
+	* Change the line to:
+		@@ADDVMOPTION_MAXIMUM_JAVA_MEMORY@@ -Xmx1g
 
 =========================== Oracle JDBC ===========================
 * Logging of Oracle JDBC		https://www.oracle.com/technetwork/topics/11-2.pdf

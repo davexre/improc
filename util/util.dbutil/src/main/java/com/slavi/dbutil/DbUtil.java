@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class DbUtil {
 	static final int MIN_NUMERIC_PRECISION = 6;
 
-	abstract static class DBFieldFormat {
+	public abstract static class DBFieldFormat {
 		public int typeCode;
 		public String typeName;
 

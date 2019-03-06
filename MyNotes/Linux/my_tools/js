@@ -3,5 +3,5 @@
 find . -type f -regextype egrep -iregex '.*\.(jar|zip)$' | 
 while read i ; do
 	echo ">>> $i"
-	unzip -Z1 "$i"
+	unzip -Z1 "$i"|sort
 done
