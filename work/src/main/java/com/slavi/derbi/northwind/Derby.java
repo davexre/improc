@@ -5,12 +5,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -49,6 +48,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.slavi.dbutil.MyDbScriptRunner;
 import com.slavi.dbutil.ResultSetToString;
+import com.slavi.derbi.dbload.DbDataParser;
+import com.slavi.derbi.dbload.DbDataParserTemplate;
+import com.slavi.derbi.dbload.ValueParser;
 import com.slavi.jdbcspy.SpyDataSource;
 
 @Component
@@ -59,97 +61,50 @@ public class Derby {
 
 	public final static Charset utf8 = Charset.forName("UTF8");
 
-	private final static String hexChars = "0123456789ABCDEF";
+	public static ByteArrayInputStream parseCrappyBmpImage(String str) throws ParseException {
+		byte[] r = DbDataParserTemplate.hexToBytes(str);
+		if (r == null || r.length <= 78)
+			return null;
+		return new ByteArrayInputStream(r, 78, r.length - 78);
+	}
 
-	public static byte[] hexToBytes(String hex) {
-		if (hex.length() % 2 != 0)
-			throw new NumberFormatException("Number of chars in hex string must be multiple of 2 but was " + hex.length());
-		byte[] r = new byte[hex.length() / 2];
-		for (int i = 0, ii = 0; i < r.length; i++) {
-			int a1 = hexChars.indexOf(hex.charAt(ii));
-			if (a1 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
-			int a2 = hexChars.indexOf(hex.charAt(++ii));
-			if (a2 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
-			r[i] = (byte) (((a1 << 4) + a2) & 0xff);
+	static void processCSV(DbDataParser dp, String fin) throws Exception {
+		CSVParser p = CSVParser.parse(Derby.class.getResourceAsStream("data/Employees.csv"), utf8, CSVFormat.EXCEL.withQuote('\''));
+		p.iterator().next();
+		while (p.iterator().hasNext()) {
+			CSVRecord r = p.iterator().next();
+			dp.reset();
+			for (int i = 0; i < dp.size(); i++) {
+				String v = i < r.size() ? r.get(i) : null;
+				dp.set(v);
+			}
+			dp.ps.executeUpdate();
 		}
-		return r;
-	}
-
-	public static ByteArrayInputStream parseHex(String str) throws ParseException {
-		if (str == null || "".equals(str) || "NULL".equalsIgnoreCase(str))
-			return null;
-		return new ByteArrayInputStream(hexToBytes(str));
-	}
-
-	public static Date parseDate(String str, SimpleDateFormat df) throws ParseException {
-		if (str == null || "".equals(str) || "NULL".equalsIgnoreCase(str))
-			return null;
-		return new Date(df.parse(str).getTime());
-	}
-
-	public static Integer parseInt(String str) {
-		if (str == null || "".equals(str) || "NULL".equalsIgnoreCase(str))
-			return null;
-		return Integer.parseInt(str);
+		p.close();
+		dp.ps.close();
 	}
 
 	public static DataSource generateDb() throws Exception {
-		SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 		EmbeddedDataSource ds = new EmbeddedDataSource();
 		ds.setDatabaseName("memory:northwind;create=true");
+
+		ValueParser crappyImageParser = (v) -> parseCrappyBmpImage(v);
+		Properties sql = new Properties();
+		sql.load(Derby.class.getResourceAsStream("data/sql.properties"));
 		try (Connection conn = ds.getConnection()) {
+			DbDataParserTemplate dbDataParserTemplate = new DbDataParserTemplate("MM/dd/yyyy");
 			MyDbScriptRunner sr = new MyDbScriptRunner(conn);
 			sr.process(Derby.class.getResourceAsStream("Derby_create_schema.sql.txt"));
 
-			PreparedStatement ps = conn.prepareStatement(IOUtils.toString(Derby.class.getResourceAsStream("data/Employees.sql"), utf8));
+			PreparedStatement ps = conn.prepareStatement(sql.getProperty("employees.sql"));
+			DbDataParser dp = new DbDataParser(ps, dbDataParserTemplate);
+			dp.parsers.set(14, crappyImageParser);
+			processCSV(dp, "data/Employees.csv");
 
-			/*
-			CsvTokenizer t = new CsvTokenizer(",", "'");
-			LineNumberReader r = new LineNumberReader(new InputStreamReader(Derby.class.getResourceAsStream("data/Employees.csv")));
-			String line = r.readLine();
-			t.setLine(line);
-			while ((line = r.readLine()) != null) {
-				t.setLine(line);
-			*/
-
-			CSVParser p = CSVParser.parse(Derby.class.getResourceAsStream("data/Employees.csv"), utf8, CSVFormat.EXCEL.withQuote('\''));
-			p.iterator().next();
-			while (p.iterator().hasNext()) {
-				CSVRecord r = p.iterator().next();
-				int col = 0;
-
-				// "EmployeeID","LastName","FirstName"
-				ps.setObject(1, parseInt(r.get(col++)));
-				ps.setString(2, r.get(col++));
-				ps.setString(3, r.get(col++));
-
-				// "Title","TitleOfCourtesy","BirthDate",
-				ps.setString(4, r.get(col++));
-				ps.setString(5, r.get(col++));
-				ps.setDate(6, parseDate(r.get(col++), df));
-
-				// "HireDate","Address","City",
-				ps.setDate(7, parseDate(r.get(col++), df));
-				ps.setString(8, r.get(col++));
-				ps.setString(9, r.get(col++));
-
-				// "Region","PostalCode","Country",
-				ps.setString(10, r.get(col++));
-				ps.setString(11, r.get(col++));
-				ps.setString(12, r.get(col++));
-
-				// "HomePhone","Extension","Photo",
-				ps.setString(13, r.get(col++));
-				ps.setString(14, r.get(col++));
-				ps.setBlob(15, parseHex(r.get(col++)));
-
-				// "Notes","ReportsTo","PhotoPath"
-				ps.setString(16, r.get(col++));
-				ps.setObject(17, parseInt(r.get(col++)));
-				ps.setString(18, r.get(col++));
-
-				ps.executeUpdate();
-			}
+			ps = conn.prepareStatement(sql.getProperty("categories.sql"));
+			dp = new DbDataParser(ps, dbDataParserTemplate);
+			dp.parsers.set(3, crappyImageParser);
+			processCSV(dp, "data/Categories.csv");
 		}
 		return ds;
 	}
@@ -218,8 +173,13 @@ public class Derby {
 	public void doIt() throws Exception {
 		SharedSessionContractImplementor session = em.unwrap(SharedSessionContractImplementor.class);
 		Connection conn = session.connection();
-		try (PreparedStatement st = conn.prepareStatement("select * from \"Employees\" fetch first 3 rows only")) {
+		try (PreparedStatement st = conn.prepareStatement("select * from \"Employees\" order by \"EmployeeID\" fetch first 3 rows only")) {
 			System.out.println(ResultSetToString.resultSetToString(st.executeQuery()));
+		}
+		try (PreparedStatement st = conn.prepareStatement("select * from \"Employees\" order by \"EmployeeID\" fetch first 3 rows only")) {
+			ResultSet rs = st.executeQuery();
+			rs.next();
+			IOUtils.copy(rs.getBlob("Photo").getBinaryStream(), new FileOutputStream("target/aa.bmp"));
 		}
 /*
 		TypedQuery<OrderDetail> tq = em.createQuery("select e from \"Employees\" e", OrderDetail.class);
@@ -236,7 +196,7 @@ public class Derby {
 		new FileOutputStream("target/createDDL_ddlGeneration.sql").close();
 		new FileOutputStream("target/dropDDL_ddlGeneration.sql").close();
 		try (AnnotationConfigApplicationContext ctx =  new AnnotationConfigApplicationContext(Derby.class)) {
-			ctx.getBean(Derby.class).loadAllEntities();
+			ctx.getBean(Derby.class).doIt();
 		};
 		System.out.println("Done.");
 	}

@@ -19,6 +19,16 @@ $DISPLAY
 $LINES				-> Number of lines in current terminal
 $EUID				-> Effective user id. If running as root EUID is 0. Same as $(id -u)
 
+Converting binary to/from hex string
+====================================
+https://stackoverflow.com/a/51314853/2243209
+* hex -> bin
+	$ printf 5a5a5a5a | perl -lne 'print pack "H*", $_'
+	ZZZZ
+* bin -> hex
+	$ printf ZZZZ | perl -lne 'print unpack "H*", $_'
+	5a5a5a5a
+
 Saving/restoring bash flags
 ===========================
 * Save/restore all flags
