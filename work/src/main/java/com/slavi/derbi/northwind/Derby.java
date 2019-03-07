@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -18,6 +19,7 @@ import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
@@ -84,8 +86,32 @@ public class Derby {
 
 	@Transactional
 	public void loadAllEntities() throws Exception {
+		Set<EntityType<?>> entities = em.getMetamodel().getEntities();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
+		BeanUtilsBean2 bu = new BeanUtilsBean2();
+		for (EntityType e : entities) {
+			Class clazz = e.getJavaType();
+			System.out.println("Loading entity from class: " + clazz.getCanonicalName());
+			CriteriaQuery cq = cb.createQuery();
+			Root root = cq.from(clazz);
+			cq.select(root);
+			Query q = em.createQuery(cq);
+			q.setMaxResults(3);
+			List res = q.getResultList();
+			if (res.size() > 0) {
+				BeanInfo bi = Introspector.getBeanInfo(clazz);
+				Object o = res.get(0);
+				for (PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+					bu.getProperty(o, pd.getName());
+				}
+			}
+		}
+	}
+
+	@Transactional
+	public void loadAllEntitiesReflection() throws Exception {
 		Reflections rr = new Reflections(getClass().getPackageName());
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 		BeanUtilsBean2 bu = new BeanUtilsBean2();
 		for (Class clazz : rr.getTypesAnnotatedWith(Entity.class)) {
 			System.out.println("Loading entity from class: " + clazz.getCanonicalName());
