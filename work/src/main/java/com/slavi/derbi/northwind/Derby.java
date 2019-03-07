@@ -3,15 +3,10 @@ package com.slavi.derbi.northwind;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
-import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,11 +22,7 @@ import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
 import org.apache.commons.beanutils.BeanUtilsBean2;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.reflections.Reflections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +37,7 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.slavi.dbutil.MyDbScriptRunner;
 import com.slavi.dbutil.ResultSetToString;
-import com.slavi.derbi.dbload.DbDataParser;
-import com.slavi.derbi.dbload.DbDataParserTemplate;
-import com.slavi.derbi.dbload.ValueParser;
 import com.slavi.jdbcspy.SpyDataSource;
 
 @Component
@@ -59,60 +46,10 @@ import com.slavi.jdbcspy.SpyDataSource;
 @Configuration
 public class Derby {
 
-	public final static Charset utf8 = Charset.forName("UTF8");
-
-	public static ByteArrayInputStream parseCrappyBmpImage(String str) throws ParseException {
-		byte[] r = DbDataParserTemplate.hexToBytes(str);
-		if (r == null || r.length <= 78)
-			return null;
-		return new ByteArrayInputStream(r, 78, r.length - 78);
-	}
-
-	static void processCSV(DbDataParser dp, String fin) throws Exception {
-		CSVParser p = CSVParser.parse(Derby.class.getResourceAsStream("data/Employees.csv"), utf8, CSVFormat.EXCEL.withQuote('\''));
-		p.iterator().next();
-		while (p.iterator().hasNext()) {
-			CSVRecord r = p.iterator().next();
-			dp.reset();
-			for (int i = 0; i < dp.size(); i++) {
-				String v = i < r.size() ? r.get(i) : null;
-				dp.set(v);
-			}
-			dp.ps.executeUpdate();
-		}
-		p.close();
-		dp.ps.close();
-	}
-
-	public static DataSource generateDb() throws Exception {
-		EmbeddedDataSource ds = new EmbeddedDataSource();
-		ds.setDatabaseName("memory:northwind;create=true");
-
-		ValueParser crappyImageParser = (v) -> parseCrappyBmpImage(v);
-		Properties sql = new Properties();
-		sql.load(Derby.class.getResourceAsStream("data/sql.properties"));
-		try (Connection conn = ds.getConnection()) {
-			DbDataParserTemplate dbDataParserTemplate = new DbDataParserTemplate("MM/dd/yyyy");
-			MyDbScriptRunner sr = new MyDbScriptRunner(conn);
-			sr.process(Derby.class.getResourceAsStream("Derby_create_schema.sql.txt"));
-
-			PreparedStatement ps = conn.prepareStatement(sql.getProperty("employees.sql"));
-			DbDataParser dp = new DbDataParser(ps, dbDataParserTemplate);
-			dp.parsers.set(14, crappyImageParser);
-			processCSV(dp, "data/Employees.csv");
-
-			ps = conn.prepareStatement(sql.getProperty("categories.sql"));
-			dp = new DbDataParser(ps, dbDataParserTemplate);
-			dp.parsers.set(3, crappyImageParser);
-			processCSV(dp, "data/Categories.csv");
-		}
-		return ds;
-	}
-
 	@Bean
 	public static DataSource dataSource() throws Exception {
 //		return generateDb();
-		return new SpyDataSource(generateDb());
+		return new SpyDataSource(CreateDb.generateDb());
 	}
 	@Bean(name = "entityManagerFactory")
 	public static LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {

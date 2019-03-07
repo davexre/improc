@@ -100,8 +100,8 @@ public class DbDataParserTemplate {
 		if (hex.length() % 2 != 0)
 			throw new NumberFormatException("Number of chars in hex string must be multiple of 2 but was " + hex.length());
 		byte[] r = new byte[hex.length() / 2];
-		for (int i = 0, ii = 0; i < r.length; i++) {
-			int a1 = hexChars.indexOf(hex.charAt(ii));
+		for (int i = 0, ii = -1; i < r.length; i++) {
+			int a1 = hexChars.indexOf(hex.charAt(++ii));
 			if (a1 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
 			int a2 = hexChars.indexOf(hex.charAt(++ii));
 			if (a2 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
