@@ -49,9 +49,9 @@ public class ScriptRunner2 {
 			}
 		} catch (SQLException e) {
 			if (stopOnError) {
-				throw new ScriptError("Error running sql command on line " + line, e);
+				throw new ScriptError("Error running sql command starting on line " + line, e);
 			} else {
-				System.err.println("Error running sql command on line " + line);
+				System.err.println("Error running sql command starting on line " + line);
 				e.printStackTrace();
 			}
 		}

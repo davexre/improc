@@ -15,14 +15,14 @@ public class MyScriptParser {
 
 	public void onFinally() throws Exception {
 	}
-	
+
 	public void execSqlCommand(int cmdLineNumber, String command) throws Exception {
 	}
 
 	int cmdLineNumber = 1;
 	LineNumberReader r;
 	StringBuilder cmd;
-	
+
 	void process() throws Exception {
 		String c = cmd.toString().trim();
 		try {
@@ -39,7 +39,7 @@ public class MyScriptParser {
 	public void process(InputStream is) throws Exception {
 		process(new InputStreamReader(is));
 	}
-	
+
 	public void process(Reader fin) throws Exception {
 		r = new LineNumberReader(fin);
 		cmdLineNumber = 1;
@@ -49,6 +49,8 @@ public class MyScriptParser {
 			onPrepare();
 			while (r.ready()) {
 				String line = r.readLine();
+				if (cmd.toString().trim().length() == 0)
+					cmdLineNumber = r.getLineNumber();
 				String tline = line.trim();
 				if (tline.startsWith("/*")) {
 					blockComment = true;

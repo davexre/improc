@@ -15,7 +15,7 @@ public class MySqlParser {
 	public boolean removeComments = false;
 
 	void add() {
-		if (cmd.length() == 0)
+		if (cmd.toString().trim().length() == 0)
 			line = token.beginLine;
 		cmd.append(token.image);
 	}
