@@ -22,6 +22,26 @@ import com.slavi.ann.test.v2.NetworkBuilder;
 
 public class TestCustomSerializerInJackson {
 
+	static Map<Integer, String> code2String = new HashMap<>();
+
+	static {
+		code2String.put(JsonTokenId.ID_EMBEDDED_OBJECT, "ID_EMBEDDED_OBJECT");
+		code2String.put(JsonTokenId.ID_START_OBJECT   , "ID_START_OBJECT");
+		code2String.put(JsonTokenId.ID_END_OBJECT     , "ID_END_OBJECT");
+		code2String.put(JsonTokenId.ID_START_ARRAY    , "ID_START_ARRAY");
+		code2String.put(JsonTokenId.ID_END_ARRAY      , "ID_END_ARRAY");
+		code2String.put(JsonTokenId.ID_STRING         , "ID_STRING");
+		code2String.put(JsonTokenId.ID_NUMBER_INT     , "ID_NUMBER_INT");
+		code2String.put(JsonTokenId.ID_NUMBER_FLOAT   , "ID_NUMBER_FLOAT");
+		code2String.put(JsonTokenId.ID_TRUE           , "ID_TRUE");
+		code2String.put(JsonTokenId.ID_FALSE          , "ID_FALSE");
+		code2String.put(JsonTokenId.ID_NULL           , "ID_NULL");
+		code2String.put(JsonTokenId.ID_NOT_AVAILABLE  , "ID_NOT_AVAILABLE");
+		code2String.put(JsonTokenId.ID_NO_TOKEN       , "ID_NO_TOKEN");
+		code2String.put(JsonTokenId.ID_FIELD_NAME     , "ID_FIELD_NAME");
+	}
+
+
 	public static class MyEnumJsonConverter {
 		final static String[] ITEMS = {"bit1", "bit2", "bit3"};
 

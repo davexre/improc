@@ -1,0 +1,18 @@
+# Comment
+defs:
+    -   # Comment
+        name: Location      # Comment
+        path: /locations    # Comment
+        before:             # Velocity macto
+            truncate table testdata
+        sql: |              # Velocity macto
+            insert into testdata
+                (data1, data2, data3)
+            values
+                (?,?,?)
+        params:
+        - |                 # Velocity macto
+            A value $rec._LINE
+    -   # Comment
+        name: Patterns
+        path: /destinations/[^/]*/patterns

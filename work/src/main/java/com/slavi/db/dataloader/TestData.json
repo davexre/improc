@@ -1,0 +1,18 @@
+{
+  "mode" : "split",
+  "locations" : [ {
+    "classes" : "target/classes",
+    "sources" : "target/classes"
+  } ],
+  "destinations" : [ {
+    "sources" : "target/extract/dest1",
+    "patterns" : [ "com/slavi/ann/test/v2/Utils.*",  "com/slavi/ann/test/v2/Utils.*" ]
+  }, {
+    "sources" : "target/extract/dest2",
+    "patterns" : [ "com/slavi/ann/test/v2/Utils.*",  "com/slavi/ann/test/v2/Utils.*" ]
+  } ],
+  "common" : {
+    "sources" : "target/common",
+    "patterns" : [ ]
+  }
+}

@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -26,15 +27,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.databind.util.Converter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import com.slavi.util.jackson.MatrixJsonModule;
 import com.slavi.util.jackson.MatrixXmlModule;
+import com.slavi.util.jackson.PostLoad;
 
 /**
  * This class contains utility static methods for general purpose.
@@ -519,10 +526,69 @@ public class Util {
 		return value == null ? valueIfNull : valueIfNotNull;
 	}
 
+	static Method findPostLoad(Class clazz) {
+		while (clazz != null) {
+			for (Method m : clazz.getDeclaredMethods()) {
+				if (m.getParameterCount() == 0 && m.getAnnotation(PostLoad.class) != null) {
+					return m;
+				}
+			}
+			clazz = clazz.getSuperclass();
+		}
+		return null;
+	}
+
+	static class MyConverter implements Converter {
+		JavaType type;
+		public MyConverter(JavaType type) {
+			this.type = type;
+		}
+
+		@Override
+		public Object convert(Object value) {
+			if (value != null) {
+				Method m = findPostLoad(value.getClass());
+				try {
+					m.invoke(value);
+				} catch (Exception e) {
+					throw new Error(e);
+				}
+			}
+			return value;
+		}
+
+		@Override
+		public JavaType getInputType(TypeFactory typeFactory) {
+			return type;
+		}
+
+		@Override
+		public JavaType getOutputType(TypeFactory typeFactory) {
+			return type;
+		}
+	}
+
+	static class MyAnnotationIntrospector extends AnnotationIntrospector {
+		@Override
+		public Version version() {
+			return com.fasterxml.jackson.databind.cfg.PackageVersion.VERSION;
+		}
+
+		public Object findDeserializationConverter(Annotated a) {
+			return findPostLoad(a.getRawType()) == null ? null : new MyConverter(a.getType());
+		}
+	}
+
+	/**
+	 * Idea borrowed from https://github.com/FasterXML/jackson-databind/issues/279
+	 * Makes use of com.slavi.util.jackson.PostLoad annotation on void no-arg method.
+	 * @see com.slavi.util.jackson.PostLoad
+	 */
 	public static void configureMapper(ObjectMapper m) {
 		AnnotationIntrospector primary = new JacksonAnnotationIntrospector();
 		AnnotationIntrospector secondary = new JaxbAnnotationIntrospector();
-		AnnotationIntrospector pair = new AnnotationIntrospectorPair(primary, secondary);
+		AnnotationIntrospector tertiary = new MyAnnotationIntrospector();
+		AnnotationIntrospector pair = new AnnotationIntrospectorPair(new AnnotationIntrospectorPair(primary, secondary), tertiary);
 
 		//m.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
 		//m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));

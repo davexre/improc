@@ -29,6 +29,7 @@
 		<jstl.version>1.2</jstl.version>
 		<javax.servlet-api.version>4.0.1</javax.servlet-api.version>
 		<javax.servlet.jsp-api.version>2.3.3</javax.servlet.jsp-api.version>
+		<javax.persistence-api.version>2.2</javax.persistence-api.version>
 		<javax.persistence.version>2.2.1</javax.persistence.version>
 		<eclipselink.version>2.7.3</eclipselink.version>
 		<eclipse.persistence.commonj.sdo.version>2.1.1</eclipse.persistence.commonj.sdo.version>
@@ -323,6 +324,11 @@
 			</dependency>
 
 			<!-- JPA -->
+			<dependency>
+				<groupId>javax.persistence</groupId>
+				<artifactId>javax.persistence-api</artifactId>
+				<version>${javax.persistence-api.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>javax.persistence</artifactId>
