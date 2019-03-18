@@ -3,6 +3,7 @@ package com.slavi.db.dataloader;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,9 +47,21 @@ public class DataLoader {
 					cur.get(tagId), cur.get(tagLine), cur.get(tagCol), cur.get(tagIndex), cur.get(tagName), cur.get(tagPath), cur.get(tagValue));
 		}
 		String path = (String) cur.get(tagPath);
+		ctx.put("rec", cur);
+		ctx.put("root", root);
 		for (var def : cfg.defs) {
 			if (def.getPathPattern().matcher(path).matches()) {
+				ArrayList<String> params = new ArrayList<>();
+				if (def.getParamTemplates() != null) {
+					for (var t : def.getParamTemplates()) {
+						Writer out = new StringWriter();
+						t.merge(ctx, out);
+						params.add(out.toString());
+					}
+				}
 				System.out.println(def.getName() + " " + path);
+				for (var i : params)
+					System.out.println(i);
 			}
 		}
 	}
@@ -157,15 +170,21 @@ public class DataLoader {
 
 	//ArrayList<EntityDef> defs = new ArrayList<>();
 	Config cfg;
+	VelocityEngine ve;
+	VelocityContext ctx;
 
 	public void doIt() throws Exception {
-		VelocityEngine ve = Config.velocity.get();
+		ve = Config.velocity.get();
+		Map map = new HashMap();
+		map.put("asd", "qwe");
+		ctx = new VelocityContext(map);
+
 		ObjectMapper m = new YAMLMapper();
 		Util.configureMapper(m);
 		cfg = m.readValue(getClass().getResourceAsStream("config.yml"), Config.class);
 
-//		String fname = "StAX_testData.xml";
-		String fname = "StAX_testData.json";
+//		String fname = "TestData.xml";
+		String fname = "TestData.json";
 		InputStream is = getClass().getResourceAsStream(fname);
 		//p = new XmlFactory().createParser(is);
 		p = new JsonFactory().createParser(is);
@@ -187,13 +206,13 @@ public class DataLoader {
 		map.put("asd", "qwe");
 		VelocityContext ctx = new VelocityContext(map);
 		Writer out = new StringWriter();
-		Template t = cfg.defs.get(0).getSqlTemplate();
+		Template t = cfg.defs.get(0).getParamTemplates().get(0);
 		t.merge(ctx, out);
-		System.out.println(cfg.defs.get(0).getSql());
+		System.out.println(out.toString());
 	}
 
 	public static void main(String[] args) throws Exception {
-		new DataLoader().doIt2();
+		new DataLoader().doIt();
 		System.out.println("Done.");
 	}
 }

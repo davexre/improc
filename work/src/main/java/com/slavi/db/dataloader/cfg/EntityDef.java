@@ -2,11 +2,13 @@ package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.velocity.Template;
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
@@ -17,14 +19,14 @@ public class EntityDef implements Serializable {
 	String path;
 	String before;
 	String sql;
-	ArrayList<String> params;
+	List<String> params;
 
 	@XmlTransient
 	Pattern pathPattern;
 
 	@XmlTransient
-	ArrayList<Template> paramTemplates;
-	
+	List<Template> paramTemplates = new ArrayList<>();
+
 	@XmlTransient
 	Template beforeTemplate;
 
@@ -79,12 +81,18 @@ public class EntityDef implements Serializable {
 		sqlTemplate = Config.velocity.get().getTemplate(template);
 	}
 
-	public ArrayList<String> getParams() {
+	public List<String> getParams() {
 		return params;
 	}
 
-	public void setParams(ArrayList<String> params) {
+	public void setParams(List<String> params) throws Exception {
 		this.params = params;
+		paramTemplates.clear();
+		if (params != null) {
+			VelocityEngine ve = Config.velocity.get();
+			for (String i : params)
+				paramTemplates.add(ve.getTemplate(i));
+		}
 	}
 
 	public Pattern getPathPattern() {
@@ -97,5 +105,9 @@ public class EntityDef implements Serializable {
 
 	public Template getSqlTemplate() {
 		return sqlTemplate;
+	}
+
+	public List<Template> getParamTemplates() {
+		return paramTemplates;
 	}
 }
