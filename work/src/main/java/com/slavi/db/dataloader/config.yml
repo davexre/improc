@@ -1,18 +1,34 @@
 # Comment
+before: |                   # Velocity macto
+    truncate table testdata1;
+    truncate table testdata1;
+
+after: |                   # Velocity macto
+    begin
+        exec_stored_procedure;
+    end
+
 defs:
     -   # Comment
-        name: Location      # Comment
-        path: /locations    # Comment
-        before:             # Velocity macto
+        name: Location          # Just a name
+        path: /locations/\d+    # RegRex to math against record path
+        before:                 # Velocity macto
             truncate table testdata
-        sql: |              # Velocity macto
+        after:                  # Velocity macto
+            begin
+                exec_stored_procedure;
+            end
+        sql: |                  # Velocity macto
             insert into testdata
                 (data1, data2, data3)
             values
                 (?,?,?)
-        params:
-        - |                 # Velocity macto
+        params:                 # SQL parameters formatting
+        - |                     # Velocity macto
             A value $rec._LINE
+        - $rec._PARENT._PARENT._ID
+        - $su.abbreviate($rec.classes, 10)
+
     -   # Comment
         name: Patterns
         path: /destinations/[^/]*/patterns

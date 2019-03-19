@@ -18,6 +18,7 @@ public class EntityDef implements Serializable {
 	String name;
 	String path;
 	String before;
+	String after;
 	String sql;
 	List<String> params;
 
@@ -29,6 +30,9 @@ public class EntityDef implements Serializable {
 
 	@XmlTransient
 	Template beforeTemplate;
+
+	@XmlTransient
+	Template afterTemplate;
 
 	@XmlTransient
 	Template sqlTemplate;
@@ -72,6 +76,15 @@ public class EntityDef implements Serializable {
 		beforeTemplate = Config.velocity.get().getTemplate(template);
 	}
 
+	public String getAfter() {
+		return after;
+	}
+
+	public void setAfter(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
+		after = template;
+		afterTemplate = Config.velocity.get().getTemplate(template);
+	}
+
 	public String getSql() {
 		return sql;
 	}
@@ -101,6 +114,10 @@ public class EntityDef implements Serializable {
 
 	public Template getBeforeTemplate() {
 		return beforeTemplate;
+	}
+
+	public Template getAfterTemplate() {
+		return afterTemplate;
 	}
 
 	public Template getSqlTemplate() {

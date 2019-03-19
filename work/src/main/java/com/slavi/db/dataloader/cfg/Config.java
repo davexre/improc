@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ParseErrorException;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
@@ -30,4 +35,39 @@ public class Config implements Serializable {
 	};
 
 	public ArrayList<EntityDef> defs;
+
+	String before;
+	String after;
+
+	@XmlTransient
+	Template beforeTemplate;
+
+	@XmlTransient
+	Template afterTemplate;
+
+	public String getBefore() {
+		return before;
+	}
+
+	public void setBefore(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
+		this.before = template;
+		beforeTemplate = velocity.get().getTemplate(template);
+	}
+
+	public String getAfter() {
+		return after;
+	}
+
+	public void setAfter(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
+		this.after = template;
+		afterTemplate = velocity.get().getTemplate(template);
+	}
+
+	public Template getBeforeTemplate() {
+		return beforeTemplate;
+	}
+
+	public Template getAfterTemplate() {
+		return afterTemplate;
+	}
 }

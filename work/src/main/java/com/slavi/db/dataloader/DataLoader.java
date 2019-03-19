@@ -4,9 +4,17 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -16,11 +24,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.slavi.db.dataloader.cfg.Config;
+import com.slavi.util.CEncoder;
 import com.slavi.util.Util;
 
 public class DataLoader {
@@ -39,29 +49,73 @@ public class DataLoader {
 	JsonParser p;
 	int id = 1;
 
-	Logger log = LoggerFactory.getLogger("com.slavi.xml");
+	Logger log = LoggerFactory.getLogger(getClass());
 
-	void processLeaf() {
-		if (log.isDebugEnabled()) {
+	void debugPrint() {
+		if (!log.isTraceEnabled())
+			return;
+		StringBuilder r = new StringBuilder("Parser leaf");
+		var l = new ArrayList<String>();
+		var loop = root;
+		while (loop != null) {
+			var ll = loop;
+			loop = null;
+			l.clear();
+			for (var i : ll.entrySet()) {
+				if (tagParent.equals(i.getKey()) ||
+					tagPath.equals(i.getKey()))
+					continue;
+				if (i.getValue() instanceof Map) {
+					loop = (Map<String, Object>) i.getValue();
+//					l.add(CEncoder.encode(i.getKey() + "= <map>"));
+					continue;
+				}
+				l.add(CEncoder.encode(i.getKey() + "=" + StringUtils.abbreviate(i.getValue().toString(), 20)));
+			}
+			Collections.sort(l);
+			r.append("\n").append("  Path").append("=").append(ll.get(tagPath));
+			for (var i : l)
+				r.append("; ").append(i);
+		}
+		log.trace(r.toString());
+	}
+
+	String applyTemplate(Template t) {
+		if (t == null)
+			return null;
+		Writer out = new StringWriter();
+		t.merge(ctx, out);
+		return out.toString();
+	}
+
+	void processLeaf() throws JsonProcessingException {
+		if (log.isTraceEnabled()) {
+			debugPrint();
+		} else if (log.isDebugEnabled()) {
 			log.debug("Parser leaf: _ID:{} _LINE:{} _COL:{} _INDEX:{} _NAME:{} _PATH:{} _VALUE:{} ",
 					cur.get(tagId), cur.get(tagLine), cur.get(tagCol), cur.get(tagIndex), cur.get(tagName), cur.get(tagPath), cur.get(tagValue));
 		}
 		String path = (String) cur.get(tagPath);
 		ctx.put("rec", cur);
 		ctx.put("root", root);
+
 		for (var def : cfg.defs) {
 			if (def.getPathPattern().matcher(path).matches()) {
 				ArrayList<String> params = new ArrayList<>();
 				if (def.getParamTemplates() != null) {
 					for (var t : def.getParamTemplates()) {
-						Writer out = new StringWriter();
-						t.merge(ctx, out);
-						params.add(out.toString());
+						params.add(applyTemplate(t));
 					}
 				}
-				System.out.println(def.getName() + " " + path);
-				for (var i : params)
-					System.out.println(i);
+				if (log.isInfoEnabled()) {
+					StringBuilder sb = new StringBuilder();
+					sb.append("Matched def ").append(def.getName())
+						.append("\n  SQL: ").append(applyTemplate(def.getSqlTemplate()));
+					for (var i : params)
+						sb.append("\n  Param: ").append(CEncoder.encode(StringUtils.abbreviate(i, 40)));
+					log.info(sb.toString());
+				}
+				// TODO:
 			}
 		}
 	}
@@ -95,7 +149,10 @@ public class DataLoader {
 	}
 
 	void pop() {
+		var old = (String) cur.get(tagName);
 		cur = (Map) cur.get(tagParent);
+		if (cur != null)
+			cur.remove(old);
 	}
 
 	void process() throws Exception {
@@ -175,9 +232,17 @@ public class DataLoader {
 
 	public void doIt() throws Exception {
 		ve = Config.velocity.get();
-		Map map = new HashMap();
-		map.put("asd", "qwe");
-		ctx = new VelocityContext(map);
+		ctx = new VelocityContext();
+		Map env = new HashMap(System.getenv());
+		env.putAll(System.getProperties());
+		ctx.put("env", env);
+		ctx.put("bu", BooleanUtils.class);
+		ctx.put("lu", LocaleUtils.class);
+		ctx.put("du", DateUtils.class);
+		ctx.put("nu", NumberUtils.class);
+		ctx.put("su", StringUtils.class);
+		ctx.put("seu", StringEscapeUtils.class);
+		ctx.put("re", RegExUtils.class);
 
 		ObjectMapper m = new YAMLMapper();
 		Util.configureMapper(m);

@@ -2,10 +2,17 @@ package com.slavi.jackson;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.SerializeExceptFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -25,9 +32,32 @@ public class TestJackson {
 		}
 	}
 
-
+	@JsonFilter("empFilter")
+	public static class Dummy implements Serializable {
+		public Map map;
+	}
 
 	public static void main(String[] args) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		Map map = new HashMap();
+		Map map2 = new HashMap();
+		map.put("a", "A");
+		map.put("c", map2);
+		map2.put("b", "B");
+//		map2.put("p", map);
+		Dummy d = new Dummy();
+		d.map = map;
+
+		SimpleFilterProvider filterProvider = new SimpleFilterProvider();
+		filterProvider.addFilter("empFilter", SimpleBeanPropertyFilter.serializeAllExcept("p", "c"));
+		mapper.setFilterProvider(filterProvider);
+		System.out.println(mapper.writeValueAsString(d));
+//		System.out.println(map);
+//		System.out.println(ReflectionToStringBuilder.toString(map));
+//		DumpUtil.showObject(map);
+	}
+
+	public static void main2(String[] args) throws IOException {
 		ObjectMapper mapper;
 		int type = 2;
 		switch (type) {
