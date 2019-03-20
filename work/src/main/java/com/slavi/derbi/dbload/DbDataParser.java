@@ -22,7 +22,7 @@ public class DbDataParser {
 			int mode = md.getParameterMode(i);
 			ValueParser p = null;
 			if (mode == ParameterMetaData.parameterModeIn ||
-				mode == ParameterMetaData.parameterModeIn) {
+				mode == ParameterMetaData.parameterModeInOut) {
 				p = defaults.formatter.get(md.getParameterType(i));
 			}
 			parsers.add(p);

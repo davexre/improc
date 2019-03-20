@@ -1,8 +1,10 @@
 package com.slavi.db.dataloader;
 
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,8 +30,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.slavi.db.dataloader.cfg.Config;
+import com.slavi.dbutil.ScriptRunner2;
 import com.slavi.util.CEncoder;
 import com.slavi.util.Util;
 
@@ -67,7 +72,6 @@ public class DataLoader {
 					continue;
 				if (i.getValue() instanceof Map) {
 					loop = (Map<String, Object>) i.getValue();
-//					l.add(CEncoder.encode(i.getKey() + "= <map>"));
 					continue;
 				}
 				l.add(CEncoder.encode(i.getKey() + "=" + StringUtils.abbreviate(i.getValue().toString(), 20)));
@@ -118,6 +122,9 @@ public class DataLoader {
 				// TODO:
 			}
 		}
+
+		ctx.remove("rec");
+		ctx.remove("root");
 	}
 
 	void push() throws Exception {
@@ -225,10 +232,11 @@ public class DataLoader {
 		}
 	}
 
-	//ArrayList<EntityDef> defs = new ArrayList<>();
 	Config cfg;
 	VelocityEngine ve;
 	VelocityContext ctx;
+	Connection conn = null;
+	ScriptRunner2 scriptRunner;
 
 	public void doIt() throws Exception {
 		ve = Config.velocity.get();
@@ -248,13 +256,57 @@ public class DataLoader {
 		Util.configureMapper(m);
 		cfg = m.readValue(getClass().getResourceAsStream("config.yml"), Config.class);
 
+		scriptRunner = new ScriptRunner2(conn);
+		// Execute befre scripts
+		String script = applyTemplate(cfg.getBeforeTemplate());
+		if (script != null) {
+			log.debug("Running script config.before");
+			log.trace("Expanded script is\n{}", script);
+			scriptRunner.runScript(new StringReader(script));
+		}
+		for (var def : cfg.defs) {
+			script = applyTemplate(def.getBeforeTemplate());
+			if (script != null) {
+				log.debug("Running script {} before", def.getName());
+				log.trace("Expanded script is\n{}", script);
+				scriptRunner.runScript(new StringReader(script));
+			}
+		}
+
 //		String fname = "TestData.xml";
 		String fname = "TestData.json";
 		InputStream is = getClass().getResourceAsStream(fname);
-		//p = new XmlFactory().createParser(is);
-		p = new JsonFactory().createParser(is);
+
+		switch (cfg.getFormat()) {
+		case "json":
+			p = new JsonFactory().createParser(is);
+			break;
+		case "yml":
+			p = new YAMLFactory().createParser(is);
+			break;
+		case "xml":
+		default:
+			p = new XmlFactory().createParser(is);
+			break;
+		}
 
 		process();
+
+		// Execute after scripts
+		for (var def : cfg.defs) {
+			script = applyTemplate(def.getAfterTemplate());
+			if (script != null) {
+				log.debug("Running script {} after", def.getName());
+				log.trace("Expanded script is\n{}", script);
+				scriptRunner.runScript(new StringReader(script));
+			}
+		}
+		script = applyTemplate(cfg.getAfterTemplate());
+		if (script != null) {
+			log.debug("Running script config.after");
+			log.trace("Expanded script is\n{}", script);
+			scriptRunner.runScript(new StringReader(script));
+		}
 	}
 
 	public void doIt2() throws Exception {

@@ -36,6 +36,7 @@ public class Config implements Serializable {
 
 	public ArrayList<EntityDef> defs;
 
+	String format;
 	String before;
 	String after;
 
@@ -69,5 +70,13 @@ public class Config implements Serializable {
 
 	public Template getAfterTemplate() {
 		return afterTemplate;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
 	}
 }

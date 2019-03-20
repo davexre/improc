@@ -1,4 +1,6 @@
-# Comment
+# Format: xml, json, yml
+format: json
+
 before: |                   # Velocity macto
     truncate table testdata1;
     truncate table testdata1;
