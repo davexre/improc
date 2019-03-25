@@ -56,7 +56,7 @@ public class ConnectToOracle {
 		password = prop.getProperty("password" + propertiesSuffix);
 
 		pds = PoolDataSourceFactory.getPoolDataSource();
-		//pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
+		pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
 		System.out.println(connectStr);
 		pds.setURL(connectStr);
 		pds.setUser(username);

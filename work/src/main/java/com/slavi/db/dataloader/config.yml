@@ -1,36 +1,79 @@
 # Format: xml, json, yml
 format: json
 
+url: jdbc:derby:memory:MyDbTest;create=true
+
+username: anonymous
+password: anonymous@anonymous.com
+
 before: |                   # Velocity macto
-    truncate table testdata1;
-    truncate table testdata1;
+    create table location (
+        id int,
+        line int,
+        seq int,
+        classes varchar(50),
+        sources varchar(50)
+    );
 
 after: |                   # Velocity macto
-    begin
-        exec_stored_procedure;
-    end
+    --begin
+    --    exec_stored_procedure;
+    --end
 
 defs:
     -   # Comment
         name: Location          # Just a name
         path: /locations/\d+    # RegRex to math against record path
         before:                 # Velocity macto
-            truncate table testdata
+            truncate table location
         after:                  # Velocity macto
-            begin
-                exec_stored_procedure;
-            end
+            --begin
+            --    exec_stored_procedure;
+            --end
         sql: |                  # Velocity macto
-            insert into testdata
-                (data1, data2, data3)
+            insert into location
+                (id, line, seq, classes, sources)
             values
-                (?,?,?)
-        params:                 # SQL parameters formatting
-        - |                     # Velocity macto
-            A value $rec._LINE
-        - $rec._PARENT._PARENT._ID
+                (?,?,?,?,?)
+        params:                 # SQL parameters formatting, Velocity macto
+        - $rec._PARENT._ID
+        - $rec._LINE
+        - $rec._NAME
         - $su.abbreviate($rec.classes, 10)
+        - $rec._PATH
 
     -   # Comment
         name: Patterns
         path: /destinations/[^/]*/patterns
+        before: |
+            create table dest_pattern (
+                dest_id int,
+                line int,
+                seq int,
+                pattern varchar(50)
+            );
+        sql: |
+            insert into dest_pattern(dest_id, line, seq, pattern)
+            values(?,?,?,?)
+        params:
+        - $rec._PARENT._ID
+        - $rec._LINE
+        - $rec._INDEX
+        - $rec._VALUE
+
+    -
+        name: Patterns
+        path: /destinations/[^/]*
+        before: |
+            create table destination (
+                id int,
+                line int,
+                seq int,
+                sources varchar(50)
+            );
+        sql: insert into destination (id, line, seq, sources) values(?,?,?,?)
+        params:
+        - $rec._ID
+        - $rec._LINE
+        - $rec._NAME
+        - $rec.sources
