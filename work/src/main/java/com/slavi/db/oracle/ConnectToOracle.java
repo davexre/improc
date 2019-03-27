@@ -57,6 +57,7 @@ public class ConnectToOracle {
 
 		PoolDataSource ds = PoolDataSourceFactory.getPoolDataSource();
 		ds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
+
 		ds.setURL(connectStr);
 		ds.setUser(username);
 		ds.setPassword(password);

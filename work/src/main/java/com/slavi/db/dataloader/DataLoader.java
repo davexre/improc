@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -239,6 +240,10 @@ public class DataLoader {
 	ScriptRunner2 scriptRunner;
 
 	public void doIt() throws Exception {
+		ObjectMapper m = new YAMLMapper();
+		Util.configureMapper(m);
+		cfg = m.readValue(getClass().getResourceAsStream("config.yml"), Config.class);
+
 		ve = Config.velocity.get();
 		ctx = new VelocityContext();
 		Map env = new HashMap(System.getenv());
@@ -252,10 +257,7 @@ public class DataLoader {
 		ctx.put("seu", StringEscapeUtils.class);
 		ctx.put("re", RegExUtils.class);
 
-		ObjectMapper m = new YAMLMapper();
-		Util.configureMapper(m);
-		cfg = m.readValue(getClass().getResourceAsStream("config.yml"), Config.class);
-
+		conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword());
 		scriptRunner = new ScriptRunner2(conn);
 		// Execute befre scripts
 		String script = applyTemplate(cfg.getBeforeTemplate());
