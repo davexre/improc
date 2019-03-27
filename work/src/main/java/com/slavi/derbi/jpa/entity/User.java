@@ -1,6 +1,5 @@
 package com.slavi.derbi.jpa.entity;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -30,7 +28,6 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.MapKeyJoinColumn;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToMany;
 import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -44,23 +41,19 @@ import org.eclipse.persistence.annotations.Noncacheable;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "UTYPE")
 @NamedEntityGraph(name = "manager.subordinate", attributeNodes = @NamedAttributeNode("subordinate"))
-public class User implements Serializable {
-	@Id
-	@Column(name = "un", length=123)
-//	@GeneratedValue(strategy=GenerationType.AUTO)
-	String username;
-/*
+public class User extends Person {
 	@MapKeyColumn(name="map_sys_key")
-	@JoinTable(name = "UserParams", joinColumns=@JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
+	@JoinTable(name = "UserParams0", joinColumns=@JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
 	@ManyToMany(fetch = FetchType.LAZY)
-	Map<String, MyEntity> params = new HashMap();
-	*/
+	Map<String, MyEntity> params0 = new HashMap();
+
 /*
 	@ElementCollection(fetch = FetchType.LAZY)
 	@MapKeyJoinColumn(name="map_sys_key")
 	@Column(name="sys_val")
-	@CollectionTable(name="UserParams", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))*/
-
+	@CollectionTable(name="UserParamsNO", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
+	Map<String, MyEntity> paramsNO = new HashMap();
+*/
 	@ManyToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "UserParams", joinColumns = @JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
 	@MapKeyJoinColumn(name = "map_sys_key")
@@ -83,7 +76,7 @@ public class User implements Serializable {
 	@MapKeyJoinColumn(name="sys_key")
 	@Column(name="sys_val")
 	@CollectionTable(name="UserParams4", joinColumns=@javax.persistence.JoinColumn(name="sys_oid"))
-	private Map<Department, String> params4 = new HashMap();
+	private Map<User, String> params4 = new HashMap();
 
 	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name = "UserParams3", joinColumns = @JoinColumn(name = "map_sys_oid"), inverseJoinColumns = @JoinColumn(name = "map_sys_val"))
@@ -157,7 +150,7 @@ public class User implements Serializable {
 	Department department;
 
 	@JoinColumn(name="manager")
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	User manager;
 
 	@ManyToMany(fetch = FetchType.LAZY)
@@ -182,14 +175,6 @@ public class User implements Serializable {
 		someInt = 12;
 		created = new Date();
 		this.department = department;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
 	public String getName() {

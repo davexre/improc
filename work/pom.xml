@@ -543,13 +543,7 @@
 
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
-			<artifactId>ojdbc8_g</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>com.oracle.jdbc</groupId>
-					<artifactId>ojdbc8</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>ojdbc8</artifactId>
 		</dependency>
 		<dependency>
 			<!-- Needed to work with XML columns -->

@@ -1,6 +1,5 @@
 package com.slavi.derbi.jpa;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -9,8 +8,6 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -24,14 +21,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Selection;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
 
 import org.apache.commons.dbutils.DbUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.ddlutils.Platform;
@@ -43,24 +38,22 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.data.mapping.PersistentEntity;
-import org.springframework.data.mapping.PersistentProperty;
-import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Propagation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slavi.derbi.jpa.entity.AdvancedUser;
 import com.slavi.derbi.jpa.entity.DateStyle;
 import com.slavi.derbi.jpa.entity.Department;
 import com.slavi.derbi.jpa.entity.DepartmentType;
 import com.slavi.derbi.jpa.entity.EntityWithDate;
 import com.slavi.derbi.jpa.entity.MyEntity;
 import com.slavi.derbi.jpa.entity.MyEntityPartial;
+import com.slavi.derbi.jpa.entity.Person;
 import com.slavi.derbi.jpa.entity.Role;
 import com.slavi.derbi.jpa.entity.User;
 import com.slavi.derbi.jpa.repository.MyRepo;
-import com.slavi.derbi.jpa.repository.UserRepository;
 import com.slavi.util.StringPrintStream;
 
 @Component
@@ -94,22 +87,68 @@ public class JpaCreate {
 	@Transactional
 	public String dbSomething() throws SQLException, IOException {
 		{
-			User manager = em.find(User.class, "User 0");
-			//System.out.println(manager.params2.entrySet().iterator().next().getValue());
-/*
-			String jpql = "select u from User u join u.params2 p where key(p) = :s";
-			TypedQuery<User> q = em.createQuery(jpql, User.class);
-			User s = new User("s", null);
-			q.setParameter("s", s);
-			System.out.println(q.getResultList().size());
-
+/*			User manager = em.find(User.class, "User 1");
+			em.detach(manager);
+			manager.setName("qweqwe");
 			CriteriaBuilder cb = em.getCriteriaBuilder();
 			CriteriaQuery<User> cq = cb.createQuery(User.class);
 			Root<User> root = cq.from(User.class);
-			MapJoin j = root.joinMap("params2");
-			cq.where(cb.equal(j.key(), s));
+			ArrayList<Predicate> where = new ArrayList<>();
+			where.add(cb.equal(root.join("params"), manager));
+			cq.where(where.toArray(new Predicate[where.size()]));
+
+			TypedQuery<User> q = em.createQuery(cq);
+			System.out.println(q.getResultList().size());
+
+			where.add(root.get("username").isNotNull());
+			cq.where(where.toArray(new Predicate[where.size()]));
 			q = em.createQuery(cq);
-			System.out.println(q.getResultList().size());*/
+			System.out.println(q.getResultList().size());
+*/
+
+
+			//System.out.println(manager.params2.entrySet().iterator().next().getValue());
+/*
+			Query nq = em.createNativeQuery("select * from users where un='User 1'");
+			System.out.println(nq.getSingleResult().getClass());
+*/
+
+			{
+				String jpql = "select u from User u join u.params4 p where key(p) = :s";
+				TypedQuery<User> q = em.createQuery(jpql, User.class);
+				User s = new User("s", null);
+				q.setParameter("s", s);
+				System.out.println(q.getResultList().size());
+			}
+
+			CriteriaBuilder cb = em.getCriteriaBuilder();
+			{
+				CriteriaQuery<User> cq = cb.createQuery(User.class);
+				Root<User> root = cq.from(User.class);
+				MapJoin j = root.joinMap("params4");
+				//cq.where(cb.equal(j.key(), s));
+				cq.where(cb.equal(root.type(), AdvancedUser.class));
+				TypedQuery<User> q = em.createQuery(cq);
+				System.out.println(q.getResultList().size());
+			}
+			{
+				CriteriaQuery<Person> cq = cb.createQuery(Person.class);
+				Root<Person> root = cq.from(Person.class);
+				TypedQuery<Person> q = em.createQuery(cq);
+				System.out.println("---> " + q.getResultList().size());
+			}
+			{
+				CriteriaQuery<User> cq = cb.createQuery(User.class);
+				Root<User> root = cq.from(User.class);
+				Join j = root.join("subordinate");
+				cq.select(root);
+				cq.distinct(true);
+				cq.where(cb.equal(cb.treat(j, AdvancedUser.class).get("descr"), "asd"));
+				TypedQuery<User> q = em.createQuery(cq);
+				System.out.println("---> " + q.getResultList().size());
+			}
+
+
 		}
 		if (true)
 			return "";
@@ -351,7 +390,7 @@ public class JpaCreate {
 		JpaCreate bean = appContext.getBean(JpaCreate.class);
 		bean.initialize();
 //		bean.createORMs();
-		bean.dbSomething2();
+		bean.dbSomething();
 		appContext.close();
 		System.out.println("Done.");
 	}

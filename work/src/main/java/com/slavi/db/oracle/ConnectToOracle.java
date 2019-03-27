@@ -7,11 +7,9 @@ import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -24,6 +22,7 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+import javax.sql.DataSource;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.dbutils.QueryRunner;
@@ -31,6 +30,7 @@ import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import com.itextpdf.text.log.SysoCounter;
 import com.slavi.dbutil.ResultSetToStringHandler;
 import com.slavi.dbutil.StringRowProcessor;
 
@@ -45,7 +45,7 @@ public class ConnectToOracle {
 	public String connectStr;
 	public String username;
 	public String password;
-	PoolDataSource pds;
+	DataSource ds;
 
 	public ConnectToOracle() throws IOException, SQLException {
 		//DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
@@ -55,23 +55,34 @@ public class ConnectToOracle {
 		username = prop.getProperty("username" + propertiesSuffix);
 		password = prop.getProperty("password" + propertiesSuffix);
 
-		pds = PoolDataSourceFactory.getPoolDataSource();
-		//pds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
-		System.out.println(connectStr);
-		pds.setURL(connectStr);
-		pds.setUser(username);
-		pds.setPassword(password);
-
+		PoolDataSource ds = PoolDataSourceFactory.getPoolDataSource();
+		ds.setConnectionFactoryClassName("oracle.jdbc.pool.OracleDataSource");
+		ds.setURL(connectStr);
+		ds.setUser(username);
+		ds.setPassword(password);
+		this.ds = ds;
 	}
 
 	public Connection getConnection() throws SQLException {
-		//return DriverManager.getConnection(connectStr, username, password);
-		return pds.getConnection();
+		return DriverManager.getConnection(connectStr, username, password);
+		//return ds.getConnection();
 	}
 
 	public void exampleUsingOracleArrays(String[] args) throws Exception {
+		QueryRunner qr = new QueryRunner();
 		try (Connection conn = getConnection()) {
-			QueryRunner qr = new QueryRunner();
+			System.out.println(qr.query(conn, "select name_c from tlabel_t where sys_oid = 158951792", new ScalarHandler()));
+		}
+		try (Connection conn = getConnection()) {
+			conn.setAutoCommit(false);
+			System.out.println(qr.update(conn, "update tlabel_t set name_c = 'qqq' where sys_oid = 158951792"));
+		}
+		try (Connection conn = getConnection()) {
+			System.out.println(qr.query(conn, "select name_c from tlabel_t where sys_oid = 158951792", new ScalarHandler()));
+		}
+		try (Connection conn = getConnection()) {
+
+/*			QueryRunner qr = new QueryRunner();
 			ArrayList<String> lst = new ArrayList<>();
 			lst.add("NUMBER");
 			lst.add("VARCHAR2");
@@ -83,7 +94,7 @@ public class ConnectToOracle {
 			rs.next();
 			Object val = rs.getObject(1);
 			System.out.println(val);
-
+*/
 /*
 			// select * from ALL_COLL_TYPES where owner = 'SYS' order by coll_type, type_name;
 			ArrayDescriptor ard = ArrayDescriptor.createDescriptor("SYS.ODCIVARCHAR2LIST", conn);
