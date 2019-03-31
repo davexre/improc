@@ -107,6 +107,7 @@ nemo-fileroller             \
 nethogs                     \
 nmon                        \
 npm                         \
+ntp                         \
 ocrmypdf                    \
 octave                      \
 openssh-server              \

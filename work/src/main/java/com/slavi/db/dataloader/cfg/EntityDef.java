@@ -1,6 +1,7 @@
 package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -12,6 +13,9 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
+import com.slavi.derbi.dbload.DbDataParser;
+import com.slavi.derbi.dbload.DbDataParserTemplate;
+import com.slavi.util.DateFormats;
 import com.slavi.util.jackson.PostLoad;
 
 public class EntityDef implements Serializable {
@@ -21,6 +25,7 @@ public class EntityDef implements Serializable {
 	String after;
 	String sql;
 	List<String> params;
+	List<String> dateFormats;
 
 	@XmlTransient
 	Pattern pathPattern;
@@ -126,5 +131,15 @@ public class EntityDef implements Serializable {
 
 	public List<Template> getParamTemplates() {
 		return paramTemplates;
+	}
+
+	public List<String> getDateFormats() {
+		return dateFormats;
+	}
+
+	public void setDateFormats(List<String> dateFormats) {
+		this.dateFormats = dateFormats;
+		if (dateFormats != null)
+			new DateFormats(dateFormats);
 	}
 }

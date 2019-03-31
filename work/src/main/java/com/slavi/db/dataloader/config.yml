@@ -2,9 +2,9 @@
 format: json
 
 url: jdbc:derby:memory:MyDbTest;create=true
-
 username: anonymous
 password: anonymous@anonymous.com
+dateFormats: ["YYYY-MM-DD", "DD/MM/YYYY"]
 
 before: |                   # Velocity macto
     create table location (
@@ -24,6 +24,7 @@ defs:
     -   # Comment
         name: Location          # Just a name
         path: /locations/\d+    # RegRex to math against record path
+        dateFormats: ["YYYY-MM-DD", "YYYYMMDD", "DD/MM/YYYY"]
         before:                 # Velocity macto
             truncate table location
         after:                  # Velocity macto

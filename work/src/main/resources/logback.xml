@@ -56,7 +56,7 @@
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />
-	<logger level="trace" name="com.slavi.db.dataloader" />
+	<logger level="debug" name="com.slavi.db.dataloader" />
 
 	<logger level="trace" name="org.eclipse.persistence.logging.sql" />
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />

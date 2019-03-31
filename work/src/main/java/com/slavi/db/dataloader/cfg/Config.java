@@ -16,6 +16,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import com.slavi.db.dataloader.VelocityStringResourceLoader;
 import com.slavi.util.ComputableSoftReference;
+import com.slavi.util.DateFormats;
 
 public class Config implements Serializable {
 
@@ -34,16 +35,18 @@ public class Config implements Serializable {
 		}
 	};
 
-	public ArrayList<EntityDef> defs;
+	public List<EntityDef> defs;
 
 	String format;
 
 	String url;
 	String username;
 	String password;
+	int commitEveryNumSqls = 1;
 
 	String before;
 	String after;
+	List<String> dateFormats;
 
 	@XmlTransient
 	Template beforeTemplate;
@@ -107,5 +110,25 @@ public class Config implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public List<String> getDateFormats() {
+		return dateFormats;
+	}
+
+	public void setDateFormats(List<String> dateFormats) {
+		this.dateFormats = dateFormats;
+		if (dateFormats != null)
+			new DateFormats(dateFormats);
+	}
+
+	public int getCommitEveryNumSqls() {
+		return commitEveryNumSqls;
+	}
+
+	public void setCommitEveryNumSqls(int commitEveryNumSqls) {
+		if (commitEveryNumSqls < 1)
+			throw new IllegalArgumentException();
+		this.commitEveryNumSqls = commitEveryNumSqls;
 	}
 }
