@@ -16,6 +16,17 @@ tune2fs -l /dev/sda1
 * check ONLY once a month
 tune2fs -i 1m -c 0 /dev/sda1
 
+=========================== Netowk settings ===========================
+Set linux host and domain names
+* network-admin
+* bash
+	vi /etc/hostname	-> set host name
+	vi /etc/hosts
+		127.0.0.1 localhost
+		127.0.0.1 linuxbox.my.domain.name
+* When running VirtualBox force DNS resolution using host's settings:
+	VBoxManage modifyvm "<vbox-machine-name>" --natdnshostresolver1 on
+
 =========================== Mount Network Volumes ===========================
 * Windows
 https://wiki.ubuntu.com/MountWindowsSharesPermanently

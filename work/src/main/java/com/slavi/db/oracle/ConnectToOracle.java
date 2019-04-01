@@ -30,7 +30,6 @@ import org.apache.commons.dbutils.handlers.ArrayHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import com.itextpdf.text.log.SysoCounter;
 import com.slavi.dbutil.ResultSetToStringHandler;
 import com.slavi.dbutil.StringRowProcessor;
 
