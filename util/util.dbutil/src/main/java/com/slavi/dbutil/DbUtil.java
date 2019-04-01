@@ -68,7 +68,6 @@ public class DbUtil {
 		}
 
 		public String getFieldTypeString(ResultSetMetaData md, int column) throws SQLException {
-
 			return typeName +
 				(md.getPrecision(column) < 1 ? "" : (
 					"(" + md.getPrecision(column) +
@@ -92,7 +91,7 @@ public class DbUtil {
 		}
 	}
 
-	static class DBFieldDouble extends DBFieldFormat {
+	static class DBFieldDouble extends DBFieldNumeric {
 		public String valueToString(ResultSet rs, ResultSetMetaData md, int column, int maxStringLength) throws SQLException {
 			return Double.toString(rs.getDouble(column));
 		}
@@ -301,7 +300,7 @@ Types.TIMESTAMP_WITH_TIMEZONE
 		addType(Types.TIMESTAMP, "TIMESTAMP", new DBFieldTimestamp());
 		addType(Types.TIMESTAMP_WITH_TIMEZONE, "TIMESTAMP_WITH_TIMEZONE", new DBFieldTimestamp());
 
-		addType(Types.DECIMAL, "DECIMAL", new DBFieldInt());
+		addType(Types.DECIMAL, "DECIMAL", new DBFieldDouble());
 		addType(Types.DOUBLE, "DOUBLE", new DBFieldDouble());
 		addType(Types.NUMERIC, "NUMERIC", new DBFieldNumeric());
 		addType(Types.REAL, "REAL", new DBFieldDouble());

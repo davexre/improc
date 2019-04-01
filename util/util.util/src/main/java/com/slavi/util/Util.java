@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.JavaType;
@@ -589,12 +590,20 @@ public class Util {
 		AnnotationIntrospector secondary = new JaxbAnnotationIntrospector();
 		AnnotationIntrospector tertiary = new MyAnnotationIntrospector();
 		AnnotationIntrospector pair = new AnnotationIntrospectorPair(new AnnotationIntrospectorPair(primary, secondary), tertiary);
+		m.setAnnotationIntrospector(pair);
 
 		//m.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
 		//m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
 		m.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		m.setAnnotationIntrospector(pair);
 		m.enable(SerializationFeature.INDENT_OUTPUT);
+		m.enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS);
+		m.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
+		m.enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+		m.enable(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER);
+		m.enable(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS);
+		m.enable(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS);
+		m.enable(JsonParser.Feature.ALLOW_MISSING_VALUES);
+		m.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
 	}
 
 	public static ObjectMapper xmlMapper() {

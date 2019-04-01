@@ -13,6 +13,10 @@
   } ],
   "common" : {
     "sources" : "target/common",
-    "patterns" : [ ]
+    "patterns" : [
+    ["asd1", "qwe1"],
+    ["asd2", "qwe2"],
+    [["asd3", { "qqq": "qwe3", "bbb": "zxc3" }, "zzz"]]
+    ]
   }
 }

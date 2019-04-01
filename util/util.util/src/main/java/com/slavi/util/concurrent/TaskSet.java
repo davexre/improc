@@ -2,6 +2,7 @@ package com.slavi.util.concurrent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -51,6 +52,14 @@ public class TaskSet {
 	}
 
 	public TaskSet add(Runnable task) {
+		return addInternal(task);
+	}
+
+	public TaskSet add(Callable task) {
+		return addInternal(task);
+	}
+
+	private TaskSet addInternal(Object task) {
 		synchronized (tasks) {
 			if (result.isDone() || addingFinished) {
 				throw new RejectedExecutionException();
@@ -60,7 +69,10 @@ public class TaskSet {
 		Future f = exec.submit(() -> {
 			try {
 				if (!result.isDone()) {
-					task.run();
+					if (task instanceof Runnable)
+						((Runnable) task).run();
+					else if (task instanceof Callable)
+						((Callable) task).call();
 					boolean lastOne;
 					synchronized (tasks) {
 						lastOne = (0 == --remaining) && addingFinished;
