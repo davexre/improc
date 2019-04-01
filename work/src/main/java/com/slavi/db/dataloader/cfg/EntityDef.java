@@ -1,7 +1,6 @@
 package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -13,12 +12,12 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
-import com.slavi.derbi.dbload.DbDataParser;
-import com.slavi.derbi.dbload.DbDataParserTemplate;
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.slavi.util.DateFormats;
-import com.slavi.util.jackson.PostLoad;
 
 public class EntityDef implements Serializable {
+	public final VelocityEngine velocity;
+
 	String name;
 	String path;
 	String before;
@@ -42,17 +41,8 @@ public class EntityDef implements Serializable {
 	@XmlTransient
 	Template sqlTemplate;
 
-	public EntityDef() {
-	}
-
-	public EntityDef(String name, String path) {
-		this.name = name;
-		this.path = path;
-		postLoad();
-	}
-
-	@PostLoad
-	public void postLoad() {
+	public EntityDef(@JacksonInject(value=Config.JacksonInjectTag) VelocityEngine velocity) {
+		this.velocity = velocity;
 	}
 
 	public String getName() {
@@ -78,7 +68,7 @@ public class EntityDef implements Serializable {
 
 	public void setBefore(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
 		before = template;
-		beforeTemplate = Config.velocity.get().getTemplate(template);
+		beforeTemplate = velocity.getTemplate(template);
 	}
 
 	public String getAfter() {
@@ -87,7 +77,7 @@ public class EntityDef implements Serializable {
 
 	public void setAfter(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
 		after = template;
-		afterTemplate = Config.velocity.get().getTemplate(template);
+		afterTemplate = velocity.getTemplate(template);
 	}
 
 	public String getSql() {
@@ -96,7 +86,7 @@ public class EntityDef implements Serializable {
 
 	public void setSql(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
 		sql = template;
-		sqlTemplate = Config.velocity.get().getTemplate(template);
+		sqlTemplate = velocity.getTemplate(template);
 	}
 
 	public List<String> getParams() {
@@ -107,9 +97,8 @@ public class EntityDef implements Serializable {
 		this.params = params;
 		paramTemplates.clear();
 		if (params != null) {
-			VelocityEngine ve = Config.velocity.get();
 			for (String i : params)
-				paramTemplates.add(ve.getTemplate(i));
+				paramTemplates.add(velocity.getTemplate(i));
 		}
 	}
 

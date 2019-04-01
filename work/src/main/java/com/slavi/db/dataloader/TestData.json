@@ -6,10 +6,10 @@
   } ],
   "destinations" : [ {
     "sources" : "target/extract/dest1",
-    "patterns" : [ "com/slavi/ann/test/v2/Utils.*",  "com/slavi/ann/test/v2/Utils.*" ]
+    "patterns" : [ "com/slavi/ann/test/v1/Utils.*",  "com/slavi/ann/test/v2/Utils.*" ]
   }, {
     "sources" : "target/extract/dest2",
-    "patterns" : [ "com/slavi/ann/test/v2/Utils.*",  "com/slavi/ann/test/v2/Utils.*" ]
+    "patterns" : [ "com/slavi/ann/test/v3/Utils.*",  "com/slavi/ann/test/v4/Utils.*" ]
   } ],
   "common" : {
     "sources" : "target/common",

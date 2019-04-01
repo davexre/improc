@@ -1,9 +1,7 @@
 package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -11,29 +9,19 @@ import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
-import com.slavi.db.dataloader.VelocityStringResourceLoader;
-import com.slavi.util.ComputableSoftReference;
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.slavi.util.DateFormats;
 
 public class Config implements Serializable {
 
-	public static final ComputableSoftReference<VelocityEngine> velocity = new ComputableSoftReference<>() {
-		@Override
-		protected VelocityEngine compute() throws Exception {
-			Properties p = new Properties();
-			p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-			p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
-			p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-			p.put("output.encoding", "UTF-8");
-			p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
-			p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
-			VelocityEngine ve = new VelocityEngine(p);
-			return ve;
-		}
-	};
+	public static final String JacksonInjectTag = "Velocity";
+
+	public final VelocityEngine velocity;
+
+	public Config(@JacksonInject(value=JacksonInjectTag) VelocityEngine velocity) {
+		this.velocity = velocity;
+	}
 
 	public List<EntityDef> defs;
 
@@ -60,7 +48,7 @@ public class Config implements Serializable {
 
 	public void setBefore(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
 		this.before = template;
-		beforeTemplate = velocity.get().getTemplate(template);
+		beforeTemplate = velocity.getTemplate(template);
 	}
 
 	public String getAfter() {
@@ -69,7 +57,7 @@ public class Config implements Serializable {
 
 	public void setAfter(String template) throws ResourceNotFoundException, ParseErrorException, Exception {
 		this.after = template;
-		afterTemplate = velocity.get().getTemplate(template);
+		afterTemplate = velocity.getTemplate(template);
 	}
 
 	public Template getBeforeTemplate() {

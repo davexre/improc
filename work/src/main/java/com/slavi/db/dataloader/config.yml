@@ -44,8 +44,8 @@ defs:
         - $rec._PATH
 
     -   # Comment
-        name: Patterns
-        path: /destinations/[^/]*/patterns
+        name: dest_patterns
+        path: /destinations/[^/]*/patterns/[\d]+
         before: |
             create table dest_pattern (
                 dest_id int,
@@ -57,13 +57,13 @@ defs:
             insert into dest_pattern(dest_id, line, seq, pattern)
             values(?,?,?,?)
         params:
-        - $rec._PARENT._ID
+        - $rec._PARENT._PARENT._ID
         - $rec._LINE
-        - $rec._INDEX
+        - $rec._NAME
         - $rec._VALUE
 
     -
-        name: Patterns
+        name: Destination patterns
         path: /destinations/[^/]*
         before: |
             create table destination (

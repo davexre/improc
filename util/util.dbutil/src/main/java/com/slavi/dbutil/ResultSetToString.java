@@ -26,13 +26,10 @@ public class ResultSetToString {
 			String columnFormats[] = new String[columns];
 			StringBuilder delim = new StringBuilder();
 			for (int c = 0; c < columns; c++) {
-				int preferedWidth = DbUtil.getPreferedColumnWidth(md, c + 1);
 				String columnName = md.getColumnName(c + 1);
 				String columnType = DbUtil.getFieldTypeString(md, c + 1);
 				int columnWidth = Math.max(columnName.length(), columnType.length());
-				if (preferedWidth < maxColumnWidth) {
-					columnWidth = Math.max(columnWidth, preferedWidth);
-				}
+				columnWidth = Math.max(columnWidth, DbUtil.getPreferedColumnWidth(md, c + 1));
 				columnWidth = Math.min(columnWidth, maxColumnWidth);
 
 				columnWidths[c] = columnWidth;

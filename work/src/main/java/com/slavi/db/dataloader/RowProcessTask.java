@@ -12,13 +12,11 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.slavi.db.dataloader.cfg.Config;
 import com.slavi.db.dataloader.cfg.EntityDef;
-import com.slavi.dbutil.ScriptRunner2;
 import com.slavi.derbi.dbload.DbDataParser;
 import com.slavi.derbi.dbload.DbDataParserTemplate;
 import com.slavi.util.CEncoder;
@@ -62,10 +60,9 @@ public class RowProcessTask implements Callable {
 		this.rows = rows;
 	}
 
-	VelocityEngine ve;
 	VelocityContext ctx;
 	Connection conn;
-	ScriptRunner2 scriptRunner;
+	int sqlCount;
 
 	void debugPrint(Map<String, Object> row) {
 		if (!log.isTraceEnabled())
@@ -92,12 +89,12 @@ public class RowProcessTask implements Callable {
 
 	@Override
 	public Void call() throws Exception {
-		ve = Config.velocity.get();
 		ctx = DataLoader.makeContext();
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
 			this.conn = conn;
-			scriptRunner = new ScriptRunner2(conn);
-			scriptRunner.setCommitEveryNumSqls(cfg.getCommitEveryNumSqls());
+			sqlCount = 0;
+			if (cfg.getCommitEveryNumSqls() > 1)
+				conn.setAutoCommit(false);
 
 			Map rec;
 			while ((rec = rows.take()) != null) {
@@ -122,6 +119,7 @@ public class RowProcessTask implements Callable {
 					}
 				}
 			}
+			conn.commit();
 		}
 		return null;
 	}
@@ -179,6 +177,11 @@ public class RowProcessTask implements Callable {
 				ws.dp.set(val);
 			}
 			ws.ps.executeUpdate();
+			sqlCount++;
+			if (cfg.getCommitEveryNumSqls() > 1 && sqlCount >= cfg.getCommitEveryNumSqls()) {
+				sqlCount = 0;
+				conn.commit();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO:

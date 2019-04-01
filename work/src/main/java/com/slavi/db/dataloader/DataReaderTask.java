@@ -125,14 +125,11 @@ public class DataReaderTask implements Callable<Void> {
 						cur = new HashMap(cur);
 						cur.put(name, p.getText());
 					} else {
-						JsonLocation loc = p.getTokenLocation();
-						var cur_bak = cur;
-						cur = new HashMap(cur);
-						cur.put(DataLoader.tagCol, loc.getColumnNr());
-						cur.put(DataLoader.tagLine, loc.getLineNr());
+						push();
 						cur.put(DataLoader.tagValue, p.getText());
 						rows.put(cur);
-						cur = new HashMap(cur_bak);
+						pop();
+						cur = new HashMap(cur);
 						cur.put(DataLoader.tagIndex, index + 1);
 					}
 					break;
