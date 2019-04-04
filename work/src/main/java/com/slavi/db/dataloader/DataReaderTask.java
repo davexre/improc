@@ -24,12 +24,12 @@ public class DataReaderTask implements Callable<Void> {
 	static Logger log = LoggerFactory.getLogger(DataLoader.class);
 
 	Config cfg;
-	CloseableBlockingQueue<Map<String, Object>> rows;
+	CloseableBlockingQueue<Map> rows;
 	JsonParser p;
 	int id = 1;
-	Map<String, Object> cur = null;
+	Map cur = null;
 
-	public DataReaderTask(Config cfg, CloseableBlockingQueue<Map<String, Object>> rows, InputStream is) throws JsonParseException, IOException {
+	public DataReaderTask(Config cfg, CloseableBlockingQueue<Map> rows, InputStream is) throws JsonParseException, IOException {
 		this.cfg = cfg;
 		this.rows = rows;
 		switch (cfg.getFormat()) {
@@ -58,7 +58,7 @@ public class DataReaderTask implements Callable<Void> {
 		if (name.startsWith("_"))
 			name = "_" + name;
 
-		Map<String, Object> parent = cur;
+		Map parent = cur;
 		cur = new HashMap<>();
 		cur.put(DataLoader.tagName, name);
 		cur.put(DataLoader.tagId, id++);

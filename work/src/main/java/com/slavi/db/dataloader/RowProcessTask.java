@@ -34,7 +34,7 @@ public class RowProcessTask implements Callable {
 	}
 
 	Config cfg;
-	CloseableBlockingQueue<Map<String, Object>> rows;
+	CloseableBlockingQueue<Map> rows;
 
 	static String defaultDateFormats[] = {
 			"EEE MMM dd HH:mm:ss zzz yyyy",
@@ -55,7 +55,7 @@ public class RowProcessTask implements Callable {
 			"dd/MM/yyyy"
 		};
 
-	public RowProcessTask(Config cfg, CloseableBlockingQueue<Map<String, Object>> rows) {
+	public RowProcessTask(Config cfg, CloseableBlockingQueue<Map> rows) {
 		this.cfg = cfg;
 		this.rows = rows;
 	}
@@ -64,7 +64,7 @@ public class RowProcessTask implements Callable {
 	Connection conn;
 	int sqlCount;
 
-	void debugPrint(Map<String, Object> row) {
+	void debugPrint(Map<?,?> row) {
 		if (!log.isTraceEnabled())
 			return;
 		StringBuilder r = new StringBuilder("Parser leaf");

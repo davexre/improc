@@ -1,5 +1,6 @@
 package com.slavi.db.dataloader;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -29,7 +30,9 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.InjectableValues;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.slavi.db.dataloader.cfg.Config;
@@ -76,7 +79,7 @@ public class DataLoader {
 	}
 
 	Config cfg;
-	CloseableBlockingQueue<Map<String, Object>> rows;
+	CloseableBlockingQueue<Map> rows;
 
 	void runBeforeScripts() throws Exception {
 		VelocityContext ctx = makeContext();
@@ -173,8 +176,34 @@ public class DataLoader {
 		}
 	}
 
+	public static class Data {
+		public String asd;
+		public Map options;
+	}
+
+	public void doIt2() throws Exception {
+		Properties p = new Properties();
+		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
+		p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
+		p.put("output.encoding", "UTF-8");
+		p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
+		p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
+		VelocityEngine ve = new VelocityEngine(p);
+
+		ObjectMapper m = new YAMLMapper();
+		Util.configureMapper(m);
+		Map<String, Object> jsonInject = new HashMap<>();
+		jsonInject.put(Config.JacksonInjectTag, ve);
+		m.setInjectableValues(new InjectableValues.Std(jsonInject));
+
+		Data d = m.readValue(getClass().getResourceAsStream("dummy.yml"), Data.class);
+		System.out.println(d.asd);
+		System.out.println(d.options);
+	}
+
 	public static void main(String[] args) throws Exception {
-		new DataLoader().doIt();
+		new DataLoader().doIt2();
 		System.out.println("Done.");
 	}
 }
