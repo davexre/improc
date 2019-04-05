@@ -1,0 +1,46 @@
+# Format: xml, json, yml
+format: xml
+
+url: jdbc:derby:memory:MyDbTest;create=true
+username:
+password:
+dateFormats: ["YYYY-MM-DD", "DD/MM/YYYY"]
+
+before: |                   # Velocity macto
+    create table city (
+        id int,
+        line int,
+        country varchar(50),
+        name varchar(50),
+        pop_count int,
+        pop_age decimal(4,1),
+        pop_income decimal(10,2)
+    );
+
+after: |                   # Velocity macto
+    --begin
+    --    exec_stored_procedure;
+    --end
+
+#defs:
+#    -   # Comment
+#        name: Location          # Just a name
+#        path: /locations/\d+    # RegRex to math against record path
+#        dateFormats: ["YYYY-MM-DD", "YYYYMMDD", "DD/MM/YYYY"]
+#        before:                 # Velocity macto
+#            truncate table location
+#        after:                  # Velocity macto
+#            --begin
+#            --    exec_stored_procedure;
+#            --end
+#        sql: |                  # Velocity macto
+#            insert into location
+#                (id, line, seq, classes, sources)
+#            values
+#                (?,?,?,?,?)
+#        params:                 # SQL parameters formatting, Velocity macto
+#        - $rec._PARENT._ID
+#        - $rec._LINE
+#        - $rec._NAME
+#        - $su.abbreviate($rec.classes, 10)
+#        - $rec._PATH

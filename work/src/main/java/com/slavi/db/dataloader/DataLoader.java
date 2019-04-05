@@ -126,7 +126,7 @@ public class DataLoader {
 	}
 
 
-	public void doIt() throws Exception {
+	public void doIt(String config, String dataFile) throws Exception {
 		Properties p = new Properties();
 		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
@@ -142,7 +142,7 @@ public class DataLoader {
 		jsonInject.put(Config.JacksonInjectTag, ve);
 		m.setInjectableValues(new InjectableValues.Std(jsonInject));
 
-		cfg = m.readValue(getClass().getResourceAsStream("config.yml"), Config.class);
+		cfg = m.readValue(getClass().getResourceAsStream(config), Config.class);
 		if (cfg.defs == null)
 			cfg.defs = Collections.EMPTY_LIST;
 		for (var i : cfg.defs)
@@ -151,9 +151,7 @@ public class DataLoader {
 
 		rows = new CloseableBlockingQueue<>(10);
 
-//		String fname = "TestData.xml";
-		String fname = "TestData.json";
-		InputStream is = getClass().getResourceAsStream(fname);
+		InputStream is = getClass().getResourceAsStream(dataFile);
 
 		runBeforeScripts();
 		Runtime runtime = Runtime.getRuntime();
@@ -168,12 +166,12 @@ public class DataLoader {
 		task.run().get();
 		exec.shutdownNow();
 		runAfterScripts();
-
+/*
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
 			PreparedStatement ps = conn.prepareStatement("select * from dest_pattern");
 			ps.execute();
 			System.out.println(ResultSetToString.resultSetToString(ps.getResultSet()));
-		}
+		}*/
 	}
 
 	public static class Data {
@@ -203,7 +201,8 @@ public class DataLoader {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new DataLoader().doIt2();
+//		new DataLoader().doIt("TestData-jut-config.yml", "TestData-jut.json");
+		new DataLoader().doIt("TestData-City-config.yml", "TestData-City.xml");
 		System.out.println("Done.");
 	}
 }

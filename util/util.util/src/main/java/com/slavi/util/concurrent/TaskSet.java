@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
@@ -62,6 +63,16 @@ public class TaskSet {
 	private TaskSet addInternal(Object task) {
 		synchronized (tasks) {
 			if (result.isDone() || addingFinished) {
+				if (result.isCompletedExceptionally()) {
+					try {
+						throw new RejectedExecutionException((Throwable)
+								(result.handle((r, throwable) -> { return throwable; }).get()));
+					} catch (InterruptedException e) {
+						throw new RejectedExecutionException(e);
+					} catch (ExecutionException e) {
+						throw new RejectedExecutionException(e);
+					}
+				}
 				throw new RejectedExecutionException();
 			}
 			remaining++;

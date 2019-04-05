@@ -1,0 +1,18 @@
+<data>
+	<city country="BG">
+		<name>City1</name>
+		<population>
+			<count>1000</count>
+			<age>45</age>
+			<income>310</income>
+		</population>
+	</city>
+	<city country="RO">
+		<name>City2</name>
+		<population>
+			<count>1200</count>
+			<age>41</age>
+			<income>350</income>
+		</population>
+	</city>
+</data>

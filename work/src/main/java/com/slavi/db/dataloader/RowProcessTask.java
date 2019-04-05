@@ -76,7 +76,13 @@ public class RowProcessTask implements Callable {
 				if (DataLoader.tagParent.equals(i.getKey()) ||
 					DataLoader.tagPath.equals(i.getKey()))
 					continue;
-				l.add(CEncoder.encode(i.getKey() + "=" + StringUtils.abbreviate(i.getValue().toString(), 20)));
+				Object v = i.getValue();
+				if (v instanceof Map) {
+					v = i.getValue().toString();
+				} else {
+					v = StringUtils.abbreviate(v.toString(), 20);
+				}
+				l.add(CEncoder.encode(i.getKey() + "=" + v));
 			}
 			Collections.sort(l);
 			r.append("\n").append("  Path").append("=").append(loop.get(DataLoader.tagPath));

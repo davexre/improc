@@ -72,6 +72,7 @@
 	<logger level="off"   name="org.hibernate.type" />
 	<logger level="off"   name="org.hibernate.type.descriptor.sql" />
 	<logger level="trace" name="jdbc.spy" />
+	<logger level="trace" name="net.ttddyy" />
 
 	<root level="error">
 		<appender-ref ref="STDOUT" />

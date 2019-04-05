@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
@@ -40,7 +41,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.slavi.dbutil.MyDbScriptRunner;
 import com.slavi.dbutil.ResultSetToString;
 import com.slavi.derbi.hr.model.EmployeeDetails;
-import com.slavi.jdbcspy.SpyDataSource;
+
+import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 
 @Component
 @ComponentScan
@@ -61,7 +64,15 @@ public class Derby {
 	@Bean
 	public static DataSource dataSource() throws Exception {
 //		return generateDb();
-		return new SpyDataSource(generateDb());
+//		return new SpyDataSource(generateDb());
+		SLF4JQueryLoggingListener listener = new SLF4JQueryLoggingListener();
+		return ProxyDataSourceBuilder.create(generateDb())
+//				.name("ProxyDataSource")
+				.countQuery()
+				.multiline()
+				.listener(listener)
+				.logSlowQueryToSysOut(1, TimeUnit.MINUTES)
+				.build();
 	}
 	@Bean(name = "entityManagerFactory")
 	public static LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {

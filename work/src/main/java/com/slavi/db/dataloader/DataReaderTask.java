@@ -48,10 +48,13 @@ public class DataReaderTask implements Callable<Void> {
 	}
 
 	void push() throws Exception {
-		String name = p.getCurrentName();
-		if (name == null && cur != null) {
-			Integer index = (Integer) cur.get(DataLoader.tagIndex);
-			name = index == null ? null : index.toString();
+		String name = null;
+		if (cur != null) {
+			name = p.getCurrentName();
+			if (name == null) {
+				Integer index = (Integer) cur.get(DataLoader.tagIndex);
+				name = index == null ? null : index.toString();
+			}
 		}
 		if (name == null)
 			name = "/";
@@ -75,7 +78,13 @@ public class DataReaderTask implements Callable<Void> {
 	}
 
 	void pop() {
+		Map tmp = new HashMap(cur);
 		cur = (Map) cur.get(DataLoader.tagParent);
+		if (cur != null) {
+			cur = new HashMap(cur);
+			tmp.remove(DataLoader.tagParent);
+			cur.put(tmp.get(DataLoader.tagName), tmp);
+		}
 	}
 
 	public Void call() throws Exception {
