@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -21,8 +18,6 @@ import com.slavi.db.dataloader.cfg.Config;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 
 public class DataReaderTask implements Callable<Void> {
-	static Logger log = LoggerFactory.getLogger(DataLoader.class);
-
 	Config cfg;
 	CloseableBlockingQueue<Map> rows;
 	JsonParser p;

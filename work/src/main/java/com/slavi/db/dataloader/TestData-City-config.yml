@@ -6,7 +6,7 @@ username:
 password:
 dateFormats: ["YYYY-MM-DD", "DD/MM/YYYY"]
 
-before: |                   # Velocity macto
+before: |                   # Velocity macro
     create table city (
         id int,
         line int,
@@ -17,7 +17,7 @@ before: |                   # Velocity macto
         pop_income decimal(10,2)
     );
 
-after: |                   # Velocity macto
+after: |                   # Velocity macro
     --begin
     --    exec_stored_procedure;
     --end
@@ -27,18 +27,18 @@ after: |                   # Velocity macto
 #        name: Location          # Just a name
 #        path: /locations/\d+    # RegRex to math against record path
 #        dateFormats: ["YYYY-MM-DD", "YYYYMMDD", "DD/MM/YYYY"]
-#        before:                 # Velocity macto
+#        before:                 # Velocity macro
 #            truncate table location
-#        after:                  # Velocity macto
+#        after:                  # Velocity macro
 #            --begin
 #            --    exec_stored_procedure;
 #            --end
-#        sql: |                  # Velocity macto
+#        sql: |                  # Velocity macro
 #            insert into location
 #                (id, line, seq, classes, sources)
 #            values
 #                (?,?,?,?,?)
-#        params:                 # SQL parameters formatting, Velocity macto
+#        params:                 # SQL parameters formatting, Velocity macro
 #        - $rec._PARENT._ID
 #        - $rec._LINE
 #        - $rec._NAME

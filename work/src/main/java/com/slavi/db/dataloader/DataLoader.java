@@ -1,14 +1,13 @@
 package com.slavi.db.dataloader;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +29,12 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.InjectableValues;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.slavi.db.dataloader.cfg.Config;
-import com.slavi.dbutil.ResultSetToString;
 import com.slavi.dbutil.ScriptRunner2;
+import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 import com.slavi.util.concurrent.TaskSet;
@@ -53,7 +50,7 @@ public class DataLoader {
 	public static final String tagId = "_ID";
 	public static final String tagPath = "_PATH";
 
-	static Logger log = LoggerFactory.getLogger(DataLoader.class);
+	static Logger log = LoggerFactory.getLogger("DataLoader");
 
 	static String applyTemplate(VelocityContext ctx, Template t) {
 		if (t == null)
@@ -100,6 +97,30 @@ public class DataLoader {
 					scriptRunner.runScript(new StringReader(script));
 				}
 			}
+/*
+			var meta = conn.getMetaData();
+			// Check the definitions
+			for (var def : cfg.defs) {
+				if (def.getSql() == null) {
+					def.setSql(def.getName());
+				}
+				String sql;
+				try {
+					sql = applyTemplate(ctx, def.getSqlTemplate());
+				} catch (Throwable t) {
+					log.trace("Error applying sql template for definition {}", def.getName(), t);
+					sql = null;
+				}
+				if (sql != null) {
+					try (ResultSet rs = meta.getColumns(null, null, sql, null)) {
+						if (rs.next()) {
+							String tableName = rs.getString(3);
+							def.setSql("insert into \"" + tableName + "\" ");
+						}
+					}
+				}
+			}
+			*/
 		}
 	}
 
@@ -125,16 +146,16 @@ public class DataLoader {
 		}
 	}
 
-
 	public void doIt(String config, String dataFile) throws Exception {
-		Properties p = new Properties();
-		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
-		p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-		p.put("output.encoding", "UTF-8");
-		p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
-		p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
-		VelocityEngine ve = new VelocityEngine(p);
+		Properties velocityParams = new Properties();
+		velocityParams.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+		velocityParams.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
+		velocityParams.put("output.encoding", "UTF-8");
+		velocityParams.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
+		velocityParams.put(RuntimeConstants.RUNTIME_REFERENCES_STRICT, "true");
+		velocityParams.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
+		velocityParams.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
+		VelocityEngine ve = new VelocityEngine(velocityParams);
 
 		ObjectMapper m = new YAMLMapper();
 		Util.configureMapper(m);
@@ -144,10 +165,10 @@ public class DataLoader {
 
 		cfg = m.readValue(getClass().getResourceAsStream(config), Config.class);
 		if (cfg.defs == null)
-			cfg.defs = Collections.EMPTY_LIST;
+			cfg.defs = new ArrayList();
 		for (var i : cfg.defs)
 			if (i.getParams() == null)
-				i.setParams(Collections.EMPTY_LIST);
+				i.setParams(new ArrayList());
 
 		rows = new CloseableBlockingQueue<>(10);
 
@@ -160,7 +181,27 @@ public class DataLoader {
 			nThreads = 4;
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor(nThreads);
 		TaskSet task = new TaskSet(exec);
-		task.add(new DataReaderTask(cfg, rows, is));
+		switch (cfg.getFormat()) {
+		case "json":
+		case "yml":
+		case "xml":
+			task.add(new DataReaderTask(cfg, rows, is));
+			break;
+		case "csv":
+		case "csv-excel":
+		case "csv-informix-unload":
+		case "csv-informix-unload-csv":
+		case "csv-mysql":
+		case "csv-oracle":
+		case "csv-postgresql-csv":
+		case "csv-postgresql-text":
+		case "csv-rfc4180":
+		case "csv-tdf":
+			task.add(new CsvDataReaderTask(cfg, rows, is, dataFile));
+			break;
+		default:
+			throw new InvalidParameterException("Invalid file format " + cfg.getFormat());
+		}
 		for (int i = 1; i < nThreads; i++)
 			task.add(new RowProcessTask(cfg, rows));
 		task.run().get();
@@ -201,8 +242,11 @@ public class DataLoader {
 	}
 
 	public static void main(String[] args) throws Exception {
+		Marker.mark();
 //		new DataLoader().doIt("TestData-jut-config.yml", "TestData-jut.json");
-		new DataLoader().doIt("TestData-City-config.yml", "TestData-City.xml");
+//		new DataLoader().doIt("TestData-City-config.yml", "TestData-City.xml");
+		new DataLoader().doIt("TestData-CSV-config.yml", "/bg/elections/pv/data/2013/pe2013_pe_candidates.txt");
+		Marker.release();
 		System.out.println("Done.");
 	}
 }

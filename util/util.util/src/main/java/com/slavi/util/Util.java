@@ -604,6 +604,8 @@ public class Util {
 		m.enable(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS);
 		m.enable(JsonParser.Feature.ALLOW_MISSING_VALUES);
 		m.enable(JsonParser.Feature.ALLOW_TRAILING_COMMA);
+
+		m.findAndRegisterModules();
 	}
 
 	public static ObjectMapper xmlMapper() {

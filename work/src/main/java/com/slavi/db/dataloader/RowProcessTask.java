@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,11 @@ import com.slavi.db.dataloader.cfg.Config;
 import com.slavi.db.dataloader.cfg.EntityDef;
 import com.slavi.derbi.dbload.DbDataParser;
 import com.slavi.derbi.dbload.DbDataParserTemplate;
-import com.slavi.util.CEncoder;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 
 public class RowProcessTask implements Callable {
-	static Logger log = LoggerFactory.getLogger(DataLoader.class);
+	static Logger logParser = LoggerFactory.getLogger(DataLoader.log.getName() + ".parser");
+	static Logger logSql = LoggerFactory.getLogger(DataLoader.log.getName() + ".sql");
 
 	static class EntityDefWorkspace {
 		EntityDef def;
@@ -36,7 +37,7 @@ public class RowProcessTask implements Callable {
 	Config cfg;
 	CloseableBlockingQueue<Map> rows;
 
-	static String defaultDateFormats[] = {
+	public static String defaultDateFormats[] = {
 			"EEE MMM dd HH:mm:ss zzz yyyy",
 			"yyyy-MM-dd'T'HH:mm:ss.SSS",
 			"yyyy-MM-dd'T'HH:mm:ss",
@@ -65,7 +66,7 @@ public class RowProcessTask implements Callable {
 	int sqlCount;
 
 	void debugPrint(Map<?,?> row) {
-		if (!log.isTraceEnabled())
+		if (!logParser.isTraceEnabled())
 			return;
 		StringBuilder r = new StringBuilder("Parser leaf");
 		var l = new ArrayList<String>();
@@ -82,7 +83,7 @@ public class RowProcessTask implements Callable {
 				} else {
 					v = StringUtils.abbreviate(v.toString(), 20);
 				}
-				l.add(CEncoder.encode(i.getKey() + "=" + v));
+				l.add(StringEscapeUtils.escapeCsv(i.getKey() + "=" + v));
 			}
 			Collections.sort(l);
 			r.append("\n").append("  Path").append("=").append(loop.get(DataLoader.tagPath));
@@ -90,13 +91,16 @@ public class RowProcessTask implements Callable {
 				r.append("; ").append(i);
 			loop = (Map) loop.get(DataLoader.tagParent);
 		}
-		log.trace(r.toString());
+		logParser.trace(r.toString());
 	}
 
 	@Override
 	public Void call() throws Exception {
 		ctx = DataLoader.makeContext();
-		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
+		try (Connection conn = DriverManager.getConnection(
+				DataLoader.applyTemplate(ctx, cfg.getUrlTemplate()),
+				DataLoader.applyTemplate(ctx, cfg.getUsernameTemplate()),
+				DataLoader.applyTemplate(ctx, cfg.getPasswordTemplate()))) {
 			this.conn = conn;
 			sqlCount = 0;
 			if (cfg.getCommitEveryNumSqls() > 1)
@@ -104,10 +108,10 @@ public class RowProcessTask implements Callable {
 
 			Map rec;
 			while ((rec = rows.take()) != null) {
-				if (log.isTraceEnabled()) {
+				if (logParser.isTraceEnabled()) {
 					debugPrint(rec);
-				} else if (log.isDebugEnabled()) {
-					log.debug("Parser leaf: _ID:{} _LINE:{} _COL:{} _INDEX:{} _NAME:{} _PATH:{} _VALUE:{} ",
+				} else if (logParser.isDebugEnabled()) {
+					logParser.debug("Parser leaf: _ID:{} _LINE:{} _COL:{} _INDEX:{} _NAME:{} _PATH:{} _VALUE:{} ",
 							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagId)), 4),
 							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagLine)), 4),
 							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagCol)), 4),
@@ -135,16 +139,23 @@ public class RowProcessTask implements Callable {
 	void applyDef(EntityDef def) throws SQLException {
 		ArrayList<String> params = new ArrayList<>();
 		String sql = DataLoader.applyTemplate(ctx, def.getSqlTemplate());
-		if (log.isInfoEnabled()) {
+		if (logSql.isDebugEnabled()) {
 			for (var t : def.getParamTemplates()) {
-				params.add(DataLoader.applyTemplate(ctx, t));
+				String val;
+				try {
+					val = DataLoader.applyTemplate(ctx, t);
+				} catch (Throwable e) {
+					logSql.trace("Error processing value", e);
+					val = null;
+				}
+				params.add(val);
 			}
 			StringBuilder sb = new StringBuilder();
 			sb.append("Matched def ").append(def.getName())
 				.append("\n  SQL: ").append(sql);
 			for (var i : params)
-				sb.append("\n  Param: ").append(CEncoder.encode(StringUtils.abbreviate(i, 40)));
-			log.info(sb.toString());
+				sb.append("\n  Param: ").append(StringEscapeUtils.escapeCsv(StringUtils.abbreviate(i, 40)));
+			logSql.debug(sb.toString());
 		}
 
 		EntityDefWorkspace ws = workspaces.get(def);
@@ -189,7 +200,7 @@ public class RowProcessTask implements Callable {
 				conn.commit();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logSql.info("Error processing row", e);
 			// TODO:
 		}
 	}

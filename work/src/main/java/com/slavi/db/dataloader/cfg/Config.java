@@ -2,6 +2,7 @@ package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -26,6 +27,7 @@ public class Config implements Serializable {
 	public List<EntityDef> defs;
 
 	String format;
+	Map formatOptions;
 
 	String url;
 	String username;
@@ -41,6 +43,15 @@ public class Config implements Serializable {
 
 	@XmlTransient
 	Template afterTemplate;
+
+	@XmlTransient
+	Template urlTemplate;
+
+	@XmlTransient
+	Template usernameTemplate;
+
+	@XmlTransient
+	Template passwordTemplate;
 
 	public String getBefore() {
 		return before;
@@ -82,6 +93,7 @@ public class Config implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
+		urlTemplate = velocity.getTemplate(url);
 	}
 
 	public String getUsername() {
@@ -90,6 +102,7 @@ public class Config implements Serializable {
 
 	public void setUsername(String username) {
 		this.username = username;
+		usernameTemplate = velocity.getTemplate(username);
 	}
 
 	public String getPassword() {
@@ -98,6 +111,7 @@ public class Config implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+		passwordTemplate = velocity.getTemplate(password);
 	}
 
 	public List<String> getDateFormats() {
@@ -118,5 +132,25 @@ public class Config implements Serializable {
 		if (commitEveryNumSqls < 1)
 			throw new IllegalArgumentException();
 		this.commitEveryNumSqls = commitEveryNumSqls;
+	}
+
+	public Map<?,?> getFormatOptions() {
+		return formatOptions;
+	}
+
+	public void setFormatOptions(Map formatOptions) {
+		this.formatOptions = formatOptions;
+	}
+
+	public Template getUrlTemplate() {
+		return urlTemplate;
+	}
+
+	public Template getUsernameTemplate() {
+		return usernameTemplate;
+	}
+
+	public Template getPasswordTemplate() {
+		return passwordTemplate;
 	}
 }

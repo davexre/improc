@@ -113,7 +113,7 @@
 				<updatePolicy>never</updatePolicy>
 			</releases>
 		</repository>
-		
+
 		<repository>
 			<id>maven.oracle.com</id>
 			<name>Oracle Maven Reporistory</name>

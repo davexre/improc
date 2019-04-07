@@ -56,10 +56,13 @@
 
 	<logger level="trace" name="com.slavi.ann.test.dataset.MatrixTestData" />
 	<logger level="debug" name="com.slavi.ann.test" />
-	<logger level="trace" name="com.slavi.db.dataloader" />
+	<logger level="info"  name="DataLoader" />
+	<logger level="info"  name="DataLoader.sql" />
+	<logger level="off"   name="DataLoader.parser" />
 
 	<logger level="trace" name="org.eclipse.persistence.logging.sql" />
 	<logger level="info"  name="com.slavi.example.logging.Log4J" />
+	<logger level="info"  name="com.slavi.util.Marker" />
 	<logger level="error" name="org.apache.commons.digester" />
 	<logger level="error" name="org.apache.commons.beanutils" />
 	<logger level="debug" name="org.eclipse.persistence" />
