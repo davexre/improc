@@ -6,12 +6,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
@@ -33,6 +33,8 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.slavi.dbutil.ResultSetToStringHandler;
 import com.slavi.dbutil.StringRowProcessor;
 
+import net.ttddyy.dsproxy.listener.logging.SLF4JQueryLoggingListener;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import oracle.jdbc.pool.OracleDataSource;
 import oracle.ucp.jdbc.PoolDataSource;
 import oracle.ucp.jdbc.PoolDataSourceFactory;
@@ -60,23 +62,23 @@ public class ConnectToOracle {
 		ds.setURL(connectStr);
 		ds.setUser(username);
 		ds.setPassword(password);
-		this.ds = ds;
+//		this.ds = ds;
+		SLF4JQueryLoggingListener listener = new SLF4JQueryLoggingListener();
+		this.ds = ProxyDataSourceBuilder.create(ds)
+				.countQuery()
+				.multiline()
+				.listener(listener)
+				.logSlowQueryToSysOut(300, TimeUnit.MILLISECONDS)
+				.build();
 	}
 
 	public Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(connectStr, username, password);
-		//return ds.getConnection();
+		//return DriverManager.getConnection(connectStr, username, password);
+		return ds.getConnection();
 	}
 
 	public void exampleUsingOracleArrays(String[] args) throws Exception {
 		QueryRunner qr = new QueryRunner();
-		try (Connection conn = getConnection()) {
-			System.out.println(qr.query(conn, "select name_c from tlabel_t where sys_oid = 158951792", new ScalarHandler()));
-		}
-		try (Connection conn = getConnection()) {
-			conn.setAutoCommit(false);
-			System.out.println(qr.update(conn, "update tlabel_t set name_c = 'qqq' where sys_oid = 158951792"));
-		}
 		try (Connection conn = getConnection()) {
 			System.out.println(qr.query(conn, "select name_c from tlabel_t where sys_oid = 158951792", new ScalarHandler()));
 		}
