@@ -36,6 +36,8 @@ public class Config implements Serializable {
 
 	String before;
 	String after;
+	String connectionInitialize;
+	String connectionFinalize;
 	List<String> dateFormats;
 
 	@XmlTransient
@@ -43,6 +45,12 @@ public class Config implements Serializable {
 
 	@XmlTransient
 	Template afterTemplate;
+
+	@XmlTransient
+	Template connectionInitializeTemplate;
+
+	@XmlTransient
+	Template connectionFinalizeTemplate;
 
 	@XmlTransient
 	Template urlTemplate;
@@ -152,5 +160,31 @@ public class Config implements Serializable {
 
 	public Template getPasswordTemplate() {
 		return passwordTemplate;
+	}
+
+	public String getConnectionInitialize() {
+		return connectionInitialize;
+	}
+
+	public void setConnectionInitialize(String connectionInitialize) {
+		this.connectionInitialize = connectionInitialize;
+		connectionInitializeTemplate = velocity.getTemplate(connectionInitialize);
+	}
+
+	public String getConnectionFinalize() {
+		return connectionFinalize;
+	}
+
+	public void setConnectionFinalize(String connectionFinalize) {
+		this.connectionFinalize = connectionFinalize;
+		connectionFinalizeTemplate = velocity.getTemplate(connectionFinalize);
+	}
+
+	public Template getConnectionInitializeTemplate() {
+		return connectionInitializeTemplate;
+	}
+
+	public Template getConnectionFinalizeTemplate() {
+		return connectionFinalizeTemplate;
 	}
 }

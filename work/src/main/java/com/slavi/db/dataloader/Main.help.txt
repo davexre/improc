@@ -1,0 +1,56 @@
+Usage: dbload <options>
+    Imports data from input file or stdin into a db table.
+
+Options:
+  -h,--help                  Display this help.
+  -cfg                       Configuration file
+  -D <name>=<value>          Name=Value property that will be made available
+       to templates in the config file. Same as specifying the -D option of
+       the Java Virtual Machine. All OS environment variables are also
+       available in the template context for variable resolution.
+  -url <db connect url>      Connect string to database. Overrides config. See examples.
+  -p,--password <pass>       Password to connect to database. Overrides config.
+  -u,--user <username>       Username to connect to database. Overrides config.
+  -format <format>           Input file format. One of "csv-*" types.
+       Incompatible with -cfg option.
+  
+
+
+
+  -sql <select sql>              SQL to use export data.
+  -sf,--sqlFile <file>           Read sql commands from file.
+  -t,--tables <tables>           List of tables to export. Separator can be space, comma, semi column or column.
+
+  -c,--createScript              Generate a create table script.
+  -f,--file <file>               Pattern to use for output file names. Use %t (table name), %n (sql number), %d (date stamp).
+  -mode <mode>                   Output format mode. Default is excel.
+
+  -url <db connect url>          Connect string to database. See examples.
+  -p,--password <pass>           Password to connect to database.
+  -u,--user <username>           Username to connect to database.
+
+Available modes:
+  sql                            Generate insert statements.
+  mysql, unload, unload_csv, rfc4180, excel
+                                 Gererate CSV file. More info https://commons.apache.org/proper/commons-csv/archives/1.5/apidocs/org/apache/commons/csv/CSVFormat.html
+  targetDb                       Export data to a target database.
+
+Options available when using -mode targetDb:
+  -turl,--targetUrl <db connect url>
+                                 Connect string to target database. See option -url.
+  -tp,--targetPassword <pass>    Password to connect to target database.
+  -tu,--targetUser <username>    Username to connect to database.
+  -et,--existingTables <action>  Action to take on existing tables in target database. Valid actions are "drop" (Default), "truncate" and "append"
+
+
+Error levels:
+  0                              Ok, all data is exported.
+  254                            Invalid command line parameters. Help is displayed.
+  255                            An error has occurred. See stderr for details.
+
+Examples:
+  dbexport -mode sql -c -f './export/table %t.sql' -t 'departments, employees' -u 'scott' -p 'tiger' -url 'jdbc:oracle:thin:localhost:1521:XE'
+
+  dbexport -mode excel -sql 'select * from employees where department_id>4' -u 'scott' -p 'tiger' -url 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=XE)))'
+
+  dbexport -mode targetDb -t 'departments, employees' -u 'scott' -p 'tiger' -url 'jdbc:oracle:thin:localhost:1521:XE' -turl 'jdbc:sqlite:targetDb.sqlite' -et 'append'
