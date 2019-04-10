@@ -1,5 +1,7 @@
 package com.slavi.db.dataloader;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -13,7 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.RegExUtils;
@@ -38,6 +44,8 @@ import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 import com.slavi.util.concurrent.TaskSet;
+import com.slavi.util.file.FileUtil;
+import com.slavi.util.io.Utils;
 
 public class DataLoader {
 
@@ -221,16 +229,49 @@ public class DataLoader {
 	}
 
 	public void doIt2() throws Exception {
-		Properties p = new Properties();
+		var p = new Properties();
 		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
 		p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
 		p.put("output.encoding", "UTF-8");
 		p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
 		p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
-		VelocityEngine ve = new VelocityEngine(p);
+		var ve = new VelocityEngine(p);
 
-		ObjectMapper m = new YAMLMapper();
+		var file = IOUtils.toString(getClass().getResourceAsStream("/bg/elections/pv/data/2013/pe2013_pe_candidates.txt"));
+		var os = new ByteArrayOutputStream();
+		var zos = new ZipOutputStream(os);
+		var entry = new ZipEntry("data.txt");
+		zos.putNextEntry(entry);
+		IOUtils.copy(new StringReader(file), zos);
+		zos.closeEntry();
+		zos.close();
+
+		var ctx = makeContext();
+		var osBytes = new String(os.toByteArray());
+		ctx.put("rec", osBytes);
+		Template t = ve.getTemplate("${rec}");
+		String ttt = applyTemplate(ctx, t);
+
+		System.out.println(StringUtils.abbreviate(file, 50));
+		System.out.println(StringUtils.abbreviate(ttt, 50));
+		System.out.println(StringUtils.abbreviate(osBytes.toString(), 50));
+
+		var is = new ByteArrayInputStream(ttt.getBytes());
+		var zis = new ZipInputStream(is);
+		entry = zis.getNextEntry();
+		String file2 = IOUtils.toString(zis);
+		zis.closeEntry();
+		zis.close();
+
+		System.out.println(StringUtils.abbreviate(file2, 50));
+		System.out.println(file.equals(file2));
+
+
+
+
+
+/*		ObjectMapper m = new YAMLMapper();
 		Util.configureMapper(m);
 		Map<String, Object> jsonInject = new HashMap<>();
 		jsonInject.put(Config.JacksonInjectTag, ve);
@@ -238,14 +279,15 @@ public class DataLoader {
 
 		Data d = m.readValue(getClass().getResourceAsStream("dummy.yml"), Data.class);
 		System.out.println(d.asd);
-		System.out.println(d.options);
+		System.out.println(d.options);*/
 	}
 
 	public static void main(String[] args) throws Exception {
 		Marker.mark();
 //		new DataLoader().doIt("TestData-jut-config.yml", "TestData-jut.json");
 //		new DataLoader().doIt("TestData-City-config.yml", "TestData-City.xml");
-		new DataLoader().doIt("TestData-CSV-config.yml", "/bg/elections/pv/data/2013/pe2013_pe_candidates.txt");
+//		new DataLoader().doIt("TestData-CSV-config.yml", "/bg/elections/pv/data/2013/pe2013_pe_candidates.txt");
+		new DataLoader().doIt2();
 		Marker.release();
 		System.out.println("Done.");
 	}
