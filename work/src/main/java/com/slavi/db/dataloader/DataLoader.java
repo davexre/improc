@@ -188,32 +188,35 @@ public class DataLoader {
 		if (nThreads < 4)
 			nThreads = 4;
 		ExecutorService exec = Util.newBlockingThreadPoolExecutor(nThreads);
-		TaskSet task = new TaskSet(exec);
-		switch (cfg.getFormat()) {
-		case "json":
-		case "yml":
-		case "xml":
-			task.add(new DataReaderTask(cfg, rows, is));
-			break;
-		case "csv":
-		case "csv-excel":
-		case "csv-informix-unload":
-		case "csv-informix-unload-csv":
-		case "csv-mysql":
-		case "csv-oracle":
-		case "csv-postgresql-csv":
-		case "csv-postgresql-text":
-		case "csv-rfc4180":
-		case "csv-tdf":
-			task.add(new CsvDataReaderTask(cfg, rows, is, dataFile));
-			break;
-		default:
-			throw new InvalidParameterException("Invalid file format " + cfg.getFormat());
+		try {
+			TaskSet task = new TaskSet(exec);
+			switch (cfg.getFormat()) {
+			case "json":
+			case "yml":
+			case "xml":
+				task.add(new DataReaderTask(cfg, rows, is));
+				break;
+			case "csv":
+			case "csv-excel":
+			case "csv-informix-unload":
+			case "csv-informix-unload-csv":
+			case "csv-mysql":
+			case "csv-oracle":
+			case "csv-postgresql-csv":
+			case "csv-postgresql-text":
+			case "csv-rfc4180":
+			case "csv-tdf":
+				task.add(new CsvDataReaderTask(cfg, rows, is, dataFile));
+				break;
+			default:
+				throw new InvalidParameterException("Invalid file format " + cfg.getFormat());
+			}
+			for (int i = 1; i < nThreads; i++)
+				task.add(new RowProcessTask(cfg, rows));
+			task.run().get();
+		} finally {
+			exec.shutdownNow();
 		}
-		for (int i = 1; i < nThreads; i++)
-			task.add(new RowProcessTask(cfg, rows));
-		task.run().get();
-		exec.shutdownNow();
 		runAfterScripts();
 /*
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
