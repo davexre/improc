@@ -3,6 +3,7 @@ package com.slavi.db.dataloader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -10,6 +11,7 @@ import java.security.InvalidParameterException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -250,17 +252,31 @@ public class DataLoader {
 		zos.closeEntry();
 		zos.close();
 
-		var ctx = makeContext();
-		var osBytes = new String(os.toByteArray());
+		var ctx = new VelocityContext();
+		var osBytes = os.toByteArray();
 		ctx.put("rec", osBytes);
-		Template t = ve.getTemplate("${rec}");
-		String ttt = applyTemplate(ctx, t);
+		// Idea borrowed from: https://grokbase.com/t/velocity/user/05bw3e8akp/image-data-from-byte-array-merging#20051128jgcg6bpk5rvtbzmbgw66qc4pvm
+		Template t = ve.getTemplate("#set ($dummy = ${os.write(${rec})})\n\n\n");
+		var os2 = new ByteArrayOutputStream();
+		Writer out = new OutputStreamWriter(os2);
+		ctx.put("os", os2);
+		ctx.put("out", out);
+
+		t.merge(ctx, out);
+		out.flush();
+		var osBytes2 = os2.toByteArray();
+		//String ttt = applyTemplate(ctx, t);
 
 		System.out.println(StringUtils.abbreviate(file, 50));
-		System.out.println(StringUtils.abbreviate(ttt, 50));
-		System.out.println(StringUtils.abbreviate(osBytes.toString(), 50));
+//		System.out.println(StringUtils.abbreviate(ttt, 50));
+		System.out.println(StringUtils.abbreviate(new String(osBytes), 50));
+		System.out.println(StringUtils.abbreviate(new String(osBytes2), 50));
+		System.out.println(osBytes.length);
+		System.out.println(osBytes2.length);
+		System.out.println(Arrays.equals(osBytes, osBytes2));
 
-		var is = new ByteArrayInputStream(ttt.getBytes());
+
+		var is = new ByteArrayInputStream(os2.toByteArray());
 		var zis = new ZipInputStream(is);
 		entry = zis.getNextEntry();
 		String file2 = IOUtils.toString(zis);
