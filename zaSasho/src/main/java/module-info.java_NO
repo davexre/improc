@@ -1,0 +1,15 @@
+module com.slavi.zaSasho {
+	requires com.slavi.util.util;
+	requires com.slavi.util.io;
+	requires com.slavi.util.math;
+
+	requires transitive java.desktop;
+	requires transitive jdom;
+
+	exports a;
+	exports a.myDelaunay;
+	exports a.obsolete;
+	exports koleto;
+	exports math;
+	exports zaSasho;
+}

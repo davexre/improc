@@ -1,5 +1,6 @@
 package com.slavi.ann.test.v2.activation;
 
+import com.slavi.ann.test.Utils;
 import com.slavi.ann.test.v2.Layer;
 import com.slavi.math.matrix.Matrix;
 
@@ -32,7 +33,7 @@ public class MaxWinLayer extends Layer {
 			}
 			for (int i = input.getVectorSize() - 1; i >= 0; i--) {
 				double r = input.getVectorItem(i);
-				output.setVectorItem(i, maxVal >= r ? 1 : 0);
+				output.setVectorItem(i, maxVal > r ? Utils.valueLow : Utils.valueHigh);
 			}
 			return output;
 		}
@@ -46,7 +47,7 @@ public class MaxWinLayer extends Layer {
 			inputError.resize(input.getSizeX(), input.getSizeY());
 			for (int i = input.getVectorSize() - 1; i >= 0; i--) {
 				double r = input.getVectorItem(i);
-				inputError.setVectorItem(i, maxVal >= r ? error.getVectorItem(i) : 0);
+				inputError.setVectorItem(i, maxVal > r ? 0 : error.getVectorItem(i));
 			}
 			return inputError;
 		}
