@@ -17,8 +17,8 @@ public class Main {
 			args = argsList.toArray(new String[argsList.size()]);
 
 			switch (cmd) {
-				case "dbcompare": System.exit(com.slavi.tools.dbcompare.Main.main0(args));
-				case "dbexport": System.exit(com.slavi.tools.dbexport.Main.main0(args));
+				case "dbcompare": System.exit(com.slavi.dbtools.dbcompare.Main.main0(args));
+				case "dbexport": System.exit(com.slavi.dbtools.dbexport.Main.main0(args));
 			}
 			System.out.println(IOUtils.toString(Main.class.getResourceAsStream("Main.help.txt"), "UTF8"));
 			System.exit(254);

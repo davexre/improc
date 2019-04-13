@@ -1,6 +1,6 @@
-package com.slavi.tools.dbexport.test;
+package com.slavi.dbtools.dbexport.test;
 
-import com.slavi.tools.dbexport.Main;
+import com.slavi.dbtools.dbexport.Main;
 
 public class TestDbExport {
 	static String[] exportTables = new String[] {

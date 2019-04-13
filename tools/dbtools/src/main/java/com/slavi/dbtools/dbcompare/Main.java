@@ -1,4 +1,4 @@
-package com.slavi.tools.dbcompare;
+package com.slavi.dbtools.dbcompare;
 
 import java.io.File;
 import java.io.InputStreamReader;

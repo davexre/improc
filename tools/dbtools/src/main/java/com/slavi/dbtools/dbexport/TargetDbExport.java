@@ -1,4 +1,4 @@
-package com.slavi.tools.dbexport;
+package com.slavi.dbtools.dbexport;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

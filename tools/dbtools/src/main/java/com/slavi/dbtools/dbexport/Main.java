@@ -1,4 +1,4 @@
-package com.slavi.tools.dbexport;
+package com.slavi.dbtools.dbexport;
 
 import java.io.FileReader;
 import java.io.InputStreamReader;
@@ -17,7 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.slavi.tools.dbcompare.JdbcCompare;
+import com.slavi.dbtools.dbcompare.JdbcCompare;
 
 public class Main {
 	public static int main0(String[] args) throws Exception {

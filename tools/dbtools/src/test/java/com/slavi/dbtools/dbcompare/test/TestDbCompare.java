@@ -1,6 +1,6 @@
-package com.slavi.tools.dbcompare.test;
+package com.slavi.dbtools.dbcompare.test;
 
-import com.slavi.tools.dbcompare.Main;
+import com.slavi.dbtools.dbcompare.Main;
 
 public class TestDbCompare {
 	static String[] jdbcGetSource = new String[] {

@@ -1,4 +1,4 @@
-package com.slavi.tools.dbcompare;
+package com.slavi.dbtools.dbcompare;
 
 import java.sql.Connection;
 import java.sql.SQLException;
