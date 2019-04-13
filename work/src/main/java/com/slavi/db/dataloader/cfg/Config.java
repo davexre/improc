@@ -1,12 +1,21 @@
 package com.slavi.db.dataloader.cfg;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.RegExUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -25,6 +34,8 @@ public class Config implements Serializable {
 	}
 
 	public List<EntityDef> defs;
+
+	Map variables = new HashMap();
 
 	String format;
 	Map formatOptions;
@@ -60,6 +71,21 @@ public class Config implements Serializable {
 
 	@XmlTransient
 	Template passwordTemplate;
+
+	public VelocityContext makeContext() {
+		var ctx = new HashMap();
+		ctx.put("env", new HashMap(System.getenv()));
+		ctx.putAll(getVariables());
+		ctx.putAll(System.getProperties());
+		ctx.put("bu", BooleanUtils.class);
+		ctx.put("lu", LocaleUtils.class);
+		ctx.put("du", DateUtils.class);
+		ctx.put("nu", NumberUtils.class);
+		ctx.put("su", StringUtils.class);
+		ctx.put("seu", StringEscapeUtils.class);
+		ctx.put("re", RegExUtils.class);
+		return new VelocityContext(ctx);
+	}
 
 	public String getBefore() {
 		return before;
@@ -186,5 +212,13 @@ public class Config implements Serializable {
 
 	public Template getConnectionFinalizeTemplate() {
 		return connectionFinalizeTemplate;
+	}
+
+	public Map getVariables() {
+		return variables;
+	}
+
+	public void setVariables(Map variables) {
+		this.variables = variables;
 	}
 }

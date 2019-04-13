@@ -22,13 +22,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.LocaleUtils;
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -46,8 +40,6 @@ import com.slavi.util.Marker;
 import com.slavi.util.Util;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 import com.slavi.util.concurrent.TaskSet;
-import com.slavi.util.file.FileUtil;
-import com.slavi.util.io.Utils;
 
 public class DataLoader {
 
@@ -70,26 +62,11 @@ public class DataLoader {
 		return out.toString();
 	}
 
-	static VelocityContext makeContext() {
-		var ctx = new VelocityContext();
-		Map env = new HashMap(System.getenv());
-		env.putAll(System.getProperties());
-		ctx.put("env", env);
-		ctx.put("bu", BooleanUtils.class);
-		ctx.put("lu", LocaleUtils.class);
-		ctx.put("du", DateUtils.class);
-		ctx.put("nu", NumberUtils.class);
-		ctx.put("su", StringUtils.class);
-		ctx.put("seu", StringEscapeUtils.class);
-		ctx.put("re", RegExUtils.class);
-		return ctx;
-	}
-
 	Config cfg;
 	CloseableBlockingQueue<Map> rows;
 
 	void runBeforeScripts() throws Exception {
-		VelocityContext ctx = makeContext();
+		VelocityContext ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
 			ScriptRunner2 scriptRunner = new ScriptRunner2(conn);
 			// Execute befre scripts
@@ -107,35 +84,11 @@ public class DataLoader {
 					scriptRunner.runScript(new StringReader(script));
 				}
 			}
-/*
-			var meta = conn.getMetaData();
-			// Check the definitions
-			for (var def : cfg.defs) {
-				if (def.getSql() == null) {
-					def.setSql(def.getName());
-				}
-				String sql;
-				try {
-					sql = applyTemplate(ctx, def.getSqlTemplate());
-				} catch (Throwable t) {
-					log.trace("Error applying sql template for definition {}", def.getName(), t);
-					sql = null;
-				}
-				if (sql != null) {
-					try (ResultSet rs = meta.getColumns(null, null, sql, null)) {
-						if (rs.next()) {
-							String tableName = rs.getString(3);
-							def.setSql("insert into \"" + tableName + "\" ");
-						}
-					}
-				}
-			}
-			*/
 		}
 	}
 
 	void runAfterScripts() throws Exception {
-		VelocityContext ctx = makeContext();
+		VelocityContext ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
 			ScriptRunner2 scriptRunner = new ScriptRunner2(conn);
 			// Execute after scripts
@@ -156,7 +109,7 @@ public class DataLoader {
 		}
 	}
 
-	public void doIt(String config, String dataFile) throws Exception {
+	public static VelocityEngine makeVelocityEngine() {
 		Properties velocityParams = new Properties();
 		velocityParams.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		velocityParams.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
@@ -166,24 +119,27 @@ public class DataLoader {
 		velocityParams.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
 		velocityParams.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
 		VelocityEngine ve = new VelocityEngine(velocityParams);
+		return ve;
+	}
 
+	public static Config loadConfig(VelocityEngine ve, InputStream cfgInputStream) throws Exception {
 		ObjectMapper m = new YAMLMapper();
 		Util.configureMapper(m);
 		Map<String, Object> jsonInject = new HashMap<>();
 		jsonInject.put(Config.JacksonInjectTag, ve);
 		m.setInjectableValues(new InjectableValues.Std(jsonInject));
 
-		cfg = m.readValue(getClass().getResourceAsStream(config), Config.class);
+		Config cfg = m.readValue(cfgInputStream, Config.class);
 		if (cfg.defs == null)
 			cfg.defs = new ArrayList();
 		for (var i : cfg.defs)
 			if (i.getParams() == null)
 				i.setParams(new ArrayList());
+		return cfg;
+	}
 
+	public void loadData(Config cfg, InputStream is, String dataFile) throws Exception {
 		rows = new CloseableBlockingQueue<>(10);
-
-		InputStream is = getClass().getResourceAsStream(dataFile);
-
 		runBeforeScripts();
 		Runtime runtime = Runtime.getRuntime();
 		int nThreads = runtime.availableProcessors() * 2;
@@ -220,6 +176,15 @@ public class DataLoader {
 			exec.shutdownNow();
 		}
 		runAfterScripts();
+	}
+
+
+	public void doIt(String config, String dataFile) throws Exception {
+		VelocityEngine ve = makeVelocityEngine();
+		cfg = loadConfig(ve , getClass().getResourceAsStream(config));
+
+		InputStream is = getClass().getResourceAsStream(dataFile);
+		loadData(cfg, is, dataFile);
 /*
 		try (Connection conn = DriverManager.getConnection(cfg.getUrl(), cfg.getUsername(), cfg.getPassword())) {
 			PreparedStatement ps = conn.prepareStatement("select * from dest_pattern");
@@ -228,20 +193,8 @@ public class DataLoader {
 		}*/
 	}
 
-	public static class Data {
-		public String asd;
-		public Map options;
-	}
-
 	public void doIt2() throws Exception {
-		var p = new Properties();
-		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
-		p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-		p.put("output.encoding", "UTF-8");
-		p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
-		p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
-		var ve = new VelocityEngine(p);
+		var ve = makeVelocityEngine();
 
 		var file = IOUtils.toString(getClass().getResourceAsStream("/bg/elections/pv/data/2013/pe2013_pe_candidates.txt"));
 		var os = new ByteArrayOutputStream();
@@ -285,20 +238,6 @@ public class DataLoader {
 
 		System.out.println(StringUtils.abbreviate(file2, 50));
 		System.out.println(file.equals(file2));
-
-
-
-
-
-/*		ObjectMapper m = new YAMLMapper();
-		Util.configureMapper(m);
-		Map<String, Object> jsonInject = new HashMap<>();
-		jsonInject.put(Config.JacksonInjectTag, ve);
-		m.setInjectableValues(new InjectableValues.Std(jsonInject));
-
-		Data d = m.readValue(getClass().getResourceAsStream("dummy.yml"), Data.class);
-		System.out.println(d.asd);
-		System.out.println(d.options);*/
 	}
 
 	public static void main(String[] args) throws Exception {

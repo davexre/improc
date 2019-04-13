@@ -96,7 +96,7 @@ public class RowProcessTask implements Callable {
 
 	@Override
 	public Void call() throws Exception {
-		ctx = DataLoader.makeContext();
+		ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(
 				DataLoader.applyTemplate(ctx, cfg.getUrlTemplate()),
 				DataLoader.applyTemplate(ctx, cfg.getUsernameTemplate()),

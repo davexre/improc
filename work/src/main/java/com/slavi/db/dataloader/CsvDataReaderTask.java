@@ -145,7 +145,7 @@ public class CsvDataReaderTask implements Callable<Void> {
 		if ("".equals(tableName))
 			tableName = "CSV_IMPORT";
 
-		var ctx = DataLoader.makeContext();
+		var ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(
 				DataLoader.applyTemplate(ctx, cfg.getUrlTemplate()),
 				DataLoader.applyTemplate(ctx, cfg.getUsernameTemplate()),
