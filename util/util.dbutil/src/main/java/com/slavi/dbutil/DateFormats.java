@@ -1,4 +1,4 @@
-package com.slavi.util;
+package com.slavi.dbutil;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;

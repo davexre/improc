@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,13 +20,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import com.slavi.db.dataloader.cfg.Config;
-import com.slavi.db.dataloader.cfg.EntityDef;
-import com.slavi.util.DateFormats;
+import com.slavi.dbutil.DateFormats;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 
 public class CsvDataReaderTask implements Callable<Void> {
-	static Logger log = DataLoader.log;
+	static Logger log = DataLoad.log;
 
 	Config cfg;
 	CloseableBlockingQueue<Map> rows;
@@ -101,23 +99,23 @@ public class CsvDataReaderTask implements Callable<Void> {
 
 		if (cfg.getFormatOptions() != null)
 			for (Map.Entry i : cfg.getFormatOptions().entrySet()) {
-				String k = StringUtils.lowerCase((String) i.getKey());
+				String k = StringUtils.trimToEmpty((String) i.getKey());
 				switch (k) {
-				case "allowmissingcolumnnames": f = f.withAllowMissingColumnNames(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
-				case "commentmarker": f = f.withCommentMarker((stringValueOf(i.getValue()) + "#").charAt(0)); break;
+				case "allowMissingColumnNames": f = f.withAllowMissingColumnNames(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
+				case "commentMarker": f = f.withCommentMarker((stringValueOf(i.getValue()) + "#").charAt(0)); break;
 				case "delimiter": f = f.withDelimiter((stringValueOf(i.getValue()) + ",").charAt(0)); break;
-				case "escapecharacter": f = f.withEscape((stringValueOf(i.getValue()) + "\\").charAt(0)); break;
-				case "ignoreemptylines": f = f.withIgnoreEmptyLines(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
-				case "ignoresurroundingspaces": f = f.withIgnoreSurroundingSpaces(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
-				case "nullstring": f = f.withNullString(stringValueOf(i.getValue())); break;
-				case "quotecharacter": f = f.withQuote((stringValueOf(i.getValue()) + "\"").charAt(0)); break;
-				case "recordseparator": f = f.withEscape((stringValueOf(i.getValue()) + "\n").charAt(0)); break;
-				case "skipheaderrecord": f = f.withSkipHeaderRecord(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
+				case "escapeCharacter": f = f.withEscape((stringValueOf(i.getValue()) + "\\").charAt(0)); break;
+				case "ignoreEmptyLines": f = f.withIgnoreEmptyLines(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
+				case "ignoreSurroundingSpaces": f = f.withIgnoreSurroundingSpaces(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
+				case "nullString": f = f.withNullString(stringValueOf(i.getValue())); break;
+				case "quoteCharacter": f = f.withQuote((stringValueOf(i.getValue()) + "\"").charAt(0)); break;
+				case "recordSeparator": f = f.withEscape((stringValueOf(i.getValue()) + "\n").charAt(0)); break;
+				case "skipHeaderRecord": f = f.withSkipHeaderRecord(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
 				case "header": f = f.withHeader(); break;
-				case "trailingdelimiter": f = f.withTrailingDelimiter(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
+				case "trailingDelimiter": f = f.withTrailingDelimiter(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
 				case "trim": f = f.withTrim(Boolean.parseBoolean(stringValueOf(i.getValue()))); break;
 
-				case "maxrecordstocheck": maxRecordsToCheck = Integer.parseInt(stringValueOf(i.getValue())); break;
+				case "maxRecordsToCheck": maxRecordsToCheck = Integer.parseInt(stringValueOf(i.getValue())); break;
 				case "table": tableName = stringValueOf(i.getValue()); break;
 				default: throw new Exception("Invalid format option " + i.getKey());
 				}
@@ -147,9 +145,9 @@ public class CsvDataReaderTask implements Callable<Void> {
 
 		var ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(
-				DataLoader.applyTemplate(ctx, cfg.getUrlTemplate()),
-				DataLoader.applyTemplate(ctx, cfg.getUsernameTemplate()),
-				DataLoader.applyTemplate(ctx, cfg.getPasswordTemplate()))) {
+				DataLoad.applyTemplate(ctx, cfg.getUrlTemplate()),
+				DataLoad.applyTemplate(ctx, cfg.getUsernameTemplate()),
+				DataLoad.applyTemplate(ctx, cfg.getPasswordTemplate()))) {
 			DatabaseMetaData meta = conn.getMetaData();
 			int autoName = 1;
 			String tmp = tableName;
@@ -255,10 +253,10 @@ public class CsvDataReaderTask implements Callable<Void> {
 				var rec = iter.next();
 				long recordNumber = parser.getRecordNumber();
 				Map cur = new HashMap<>();
-				cur.put(DataLoader.tagLine, parser.getCurrentLineNumber());
-				cur.put(DataLoader.tagId, recordNumber);
-				cur.put(DataLoader.tagPath, "/");
-				cur.put(DataLoader.tagCol, 1);
+				cur.put(DataLoad.tagLine, parser.getCurrentLineNumber());
+				cur.put(DataLoad.tagId, recordNumber);
+				cur.put(DataLoad.tagPath, "/");
+				cur.put(DataLoad.tagCol, 1);
 				for (int i = 0; i < rec.size(); i++) {
 					ColumnFormat cf;
 					if (i < columns.size()) {

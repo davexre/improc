@@ -1,5 +1,5 @@
 format: csv
 formatOptions:
-    Delimiter: ";"
-    MaxRecordsToCheck: 4000
+    delimiter: ";"
+    maxRecordsToCheck: 4000
 url: jdbc:derby:memory:MyDbTest;create=true

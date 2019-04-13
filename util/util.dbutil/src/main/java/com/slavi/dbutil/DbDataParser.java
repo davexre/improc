@@ -1,4 +1,4 @@
-package com.slavi.derbi.dbload;
+package com.slavi.dbutil;
 
 import java.io.InputStream;
 import java.sql.ParameterMetaData;
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbDataParser {
-	public List<ValueParser> parsers;
+	public List<DbDataValueParser> parsers;
 
 	public PreparedStatement ps;
 
@@ -20,7 +20,7 @@ public class DbDataParser {
 		ParameterMetaData md = ps.getParameterMetaData();
 		for (int i = 1; i <= md.getParameterCount(); i++) {
 			int mode = md.getParameterMode(i);
-			ValueParser p = null;
+			DbDataValueParser p = null;
 			if (mode == ParameterMetaData.parameterModeIn ||
 				mode == ParameterMetaData.parameterModeInOut) {
 				p = defaults.formatter.get(md.getParameterType(i));
@@ -32,7 +32,7 @@ public class DbDataParser {
 	public Object set(String value) throws Exception {
 		if (currentField >= parsers.size())
 			throw new Error("Field index out of range");
-		ValueParser p = parsers.get(currentField++);
+		DbDataValueParser p = parsers.get(currentField++);
 		if (p == null)
 			return null;
 		Object o = p.parse(value);

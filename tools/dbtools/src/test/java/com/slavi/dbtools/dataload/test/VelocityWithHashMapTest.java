@@ -1,19 +1,17 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload.test;
 
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
-public class VelocityWithHashMap {
+import com.slavi.dbtools.dataload.DataLoad;
+
+public class VelocityWithHashMapTest {
 
 	public static class MyTools {
 		public static String eval(String path) {
@@ -22,14 +20,7 @@ public class VelocityWithHashMap {
 	}
 
 	void doIt() throws Exception {
-		Properties p = new Properties();
-		p.put("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-		p.put("string.resource.loader.class", VelocityStringResourceLoader.class.getName());
-		p.put(RuntimeConstants.INPUT_ENCODING, "UTF-8");
-		p.put("output.encoding", "UTF-8");
-		p.put(RuntimeConstants.ENCODING_DEFAULT, "UTF-8");
-		p.put(RuntimeConstants.RESOURCE_LOADER, List.of("classpath", "string"));
-		VelocityEngine ve = new VelocityEngine(p);
+		VelocityEngine ve = DataLoad.makeVelocityEngine();
 
 		Map map = new HashMap();
 		map.put("asd", "qwe");
@@ -52,7 +43,7 @@ public class VelocityWithHashMap {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new VelocityWithHashMap().doIt();
+		new VelocityWithHashMapTest().doIt();
 		System.out.println("Done.");
 	}
 }

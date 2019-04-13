@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,15 +16,13 @@ import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.slavi.db.dataloader.cfg.Config;
-import com.slavi.db.dataloader.cfg.EntityDef;
-import com.slavi.derbi.dbload.DbDataParser;
-import com.slavi.derbi.dbload.DbDataParserTemplate;
+import com.slavi.dbutil.DbDataParser;
+import com.slavi.dbutil.DbDataParserTemplate;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 
 public class RowProcessTask implements Callable {
-	static Logger logParser = LoggerFactory.getLogger(DataLoader.log.getName() + ".parser");
-	static Logger logSql = LoggerFactory.getLogger(DataLoader.log.getName() + ".sql");
+	static Logger logParser = LoggerFactory.getLogger(DataLoad.log.getName() + ".parser");
+	static Logger logSql = LoggerFactory.getLogger(DataLoad.log.getName() + ".sql");
 
 	static class EntityDefWorkspace {
 		EntityDef def;
@@ -74,8 +72,8 @@ public class RowProcessTask implements Callable {
 		while (loop != null) {
 			l.clear();
 			for (var i : loop.entrySet()) {
-				if (DataLoader.tagParent.equals(i.getKey()) ||
-					DataLoader.tagPath.equals(i.getKey()))
+				if (DataLoad.tagParent.equals(i.getKey()) ||
+					DataLoad.tagPath.equals(i.getKey()))
 					continue;
 				Object v = i.getValue();
 				if (v instanceof Map) {
@@ -86,10 +84,10 @@ public class RowProcessTask implements Callable {
 				l.add(StringEscapeUtils.escapeCsv(i.getKey() + "=" + v));
 			}
 			Collections.sort(l);
-			r.append("\n").append("  Path").append("=").append(loop.get(DataLoader.tagPath));
+			r.append("\n").append("  Path").append("=").append(loop.get(DataLoad.tagPath));
 			for (var i : l)
 				r.append("; ").append(i);
-			loop = (Map) loop.get(DataLoader.tagParent);
+			loop = (Map) loop.get(DataLoad.tagParent);
 		}
 		logParser.trace(r.toString());
 	}
@@ -98,9 +96,9 @@ public class RowProcessTask implements Callable {
 	public Void call() throws Exception {
 		ctx = cfg.makeContext();
 		try (Connection conn = DriverManager.getConnection(
-				DataLoader.applyTemplate(ctx, cfg.getUrlTemplate()),
-				DataLoader.applyTemplate(ctx, cfg.getUsernameTemplate()),
-				DataLoader.applyTemplate(ctx, cfg.getPasswordTemplate()))) {
+				DataLoad.applyTemplate(ctx, cfg.getUrlTemplate()),
+				DataLoad.applyTemplate(ctx, cfg.getUsernameTemplate()),
+				DataLoad.applyTemplate(ctx, cfg.getPasswordTemplate()))) {
 			this.conn = conn;
 			sqlCount = 0;
 			if (cfg.getCommitEveryNumSqls() > 1)
@@ -112,17 +110,17 @@ public class RowProcessTask implements Callable {
 					debugPrint(rec);
 				} else if (logParser.isDebugEnabled()) {
 					logParser.debug("Parser leaf: _ID:{} _LINE:{} _COL:{} _INDEX:{} _NAME:{} _PATH:{} _VALUE:{} ",
-							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagId)), 4),
-							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagLine)), 4),
-							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagCol)), 4),
-							StringUtils.rightPad(String.valueOf(rec.get(DataLoader.tagIndex)), 4),
-							rec.get(DataLoader.tagName),
-							rec.get(DataLoader.tagPath),
-							rec.get(DataLoader.tagValue));
+							StringUtils.rightPad(String.valueOf(rec.get(DataLoad.tagId)), 4),
+							StringUtils.rightPad(String.valueOf(rec.get(DataLoad.tagLine)), 4),
+							StringUtils.rightPad(String.valueOf(rec.get(DataLoad.tagCol)), 4),
+							StringUtils.rightPad(String.valueOf(rec.get(DataLoad.tagIndex)), 4),
+							rec.get(DataLoad.tagName),
+							rec.get(DataLoad.tagPath),
+							rec.get(DataLoad.tagValue));
 				}
 
 				ctx.put("rec", rec);
-				String path = (String) rec.get(DataLoader.tagPath);
+				String path = (String) rec.get(DataLoad.tagPath);
 				for (var def : cfg.defs) {
 					if (def.getPathPattern().matcher(path).matches()) {
 						applyDef(def);
@@ -138,12 +136,12 @@ public class RowProcessTask implements Callable {
 
 	void applyDef(EntityDef def) throws SQLException {
 		ArrayList<String> params = new ArrayList<>();
-		String sql = DataLoader.applyTemplate(ctx, def.getSqlTemplate());
+		String sql = DataLoad.applyTemplate(ctx, def.getSqlTemplate());
 		if (logSql.isDebugEnabled()) {
 			for (var t : def.getParamTemplates()) {
 				String val;
 				try {
-					val = DataLoader.applyTemplate(ctx, t);
+					val = DataLoad.applyTemplate(ctx, t);
 				} catch (Throwable e) {
 					logSql.trace("Error processing value", e);
 					val = null;
@@ -189,7 +187,7 @@ public class RowProcessTask implements Callable {
 				if (i < params.size())
 					val = params.get(i);
 				if (val == null && i < def.getParamTemplates().size()) {
-					val = DataLoader.applyTemplate(ctx, def.getParamTemplates().get(i));
+					val = DataLoad.applyTemplate(ctx, def.getParamTemplates().get(i));
 				}
 				ws.dp.set(val);
 			}

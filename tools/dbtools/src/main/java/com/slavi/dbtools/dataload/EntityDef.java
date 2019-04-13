@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader.cfg;
+package com.slavi.dbtools.dataload;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
-import com.slavi.util.DateFormats;
+import com.slavi.dbutil.DateFormats;
 
 public class EntityDef implements Serializable {
 	public final VelocityEngine velocity;

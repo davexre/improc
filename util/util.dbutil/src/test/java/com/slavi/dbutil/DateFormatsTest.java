@@ -1,9 +1,11 @@
-package com.slavi.util;
+package com.slavi.dbutil;
 
 import java.text.ParseException;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.slavi.dbutil.DateFormats;
 
 public class DateFormatsTest {
 

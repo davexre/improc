@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -13,8 +13,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.app.VelocityEngine;
-
-import com.slavi.db.dataloader.cfg.Config;
 
 public class Main {
 	public static int main0(String[] args) throws Exception {
@@ -49,11 +47,11 @@ public class Main {
 		} else if (cl.hasOption("cfg") && cl.hasOption("format")) {
 			System.out.println("Invalid combination of options specified -cfg and -format");
 		} else {
-			VelocityEngine ve = DataLoader.makeVelocityEngine();
+			VelocityEngine ve = DataLoad.makeVelocityEngine();
 			Config cfg;
 			if (cl.hasOption("cfg")) {
 				try (var is = new FileInputStream(cl.getOptionValue("cfg"))) {
-					cfg = DataLoader.loadConfig(ve , is);
+					cfg = DataLoad.loadConfig(ve , is);
 				}
 			} else {
 				cfg = new Config(ve);
@@ -63,7 +61,7 @@ public class Main {
 				var map = new HashMap();
 				var vals = cl.getOptionValues("formatOptions");
 				int i = 0;
-				while (i < vals.length) {
+				while (vals != null && i < vals.length) {
 					map.put(vals[i++], vals[i++]);
 				}
 				cfg.setFormatOptions(map);
@@ -71,7 +69,7 @@ public class Main {
 
 			var vals = cl.getOptionValues('D');
 			int i = 0;
-			while (i < vals.length) {
+			while (vals != null && i < vals.length) {
 				cfg.getVariables().put(vals[i++], vals[i++]);
 			}
 
@@ -81,7 +79,7 @@ public class Main {
 			String dataFile = cl.getOptionValue("f");
 			InputStream fis = dataFile != null ? new FileInputStream(dataFile) : System.in;
 			try {
-				new DataLoader().loadData(cfg, fis, dataFile);
+				new DataLoad().loadData(cfg, fis, dataFile);
 			} finally {
 				if (dataFile != null)
 					IOUtils.closeQuietly(fis);
@@ -97,23 +95,12 @@ public class Main {
 		return 0;
 	}
 
-	public static void main1(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		try {
 			System.exit(main0(args));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(255);
 		}
-	}
-
-	public static void main(String[] args) throws Exception {
-		Main.main1(new String[] {
-			"-Dasd=qwe",
-			"-D", "asd1=qwe1",
-			"-D", "asd2", "=qwe2",
-			"-D", "asd3=", "qwe3",
-			"-D", "asd4", "qwe4",
-			"-D", "asd5=",
-		});
 	}
 }

@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -15,7 +15,7 @@ public class VelocityStringResourceLoader extends ResourceLoader {
 
 	@Override
 	public Reader getResourceReader(String source, String encoding) throws ResourceNotFoundException {
-		return new StringReader(source);
+		return new StringReader(source == null ? "" : source);
 	}
 
 	@Override

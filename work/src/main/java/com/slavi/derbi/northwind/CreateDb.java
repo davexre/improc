@@ -14,10 +14,10 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 
+import com.slavi.dbutil.DbDataParser;
+import com.slavi.dbutil.DbDataParserTemplate;
+import com.slavi.dbutil.DbDataValueParser;
 import com.slavi.dbutil.MyDbScriptRunner;
-import com.slavi.derbi.dbload.DbDataParser;
-import com.slavi.derbi.dbload.DbDataParserTemplate;
-import com.slavi.derbi.dbload.ValueParser;
 
 public class CreateDb {
 	public final static Charset utf8 = Charset.forName("UTF8");
@@ -44,7 +44,7 @@ public class CreateDb {
 			int i = 0;
 			while (i < dpParams.length) {
 				int index = (Integer) (dpParams[i++]);
-				ValueParser p = (ValueParser) (dpParams[i++]);
+				DbDataValueParser p = (DbDataValueParser) (dpParams[i++]);
 				dp.parsers.set(index, p);
 			}
 		}
@@ -73,7 +73,7 @@ public class CreateDb {
 		EmbeddedDataSource ds = new EmbeddedDataSource();
 		ds.setDatabaseName("memory:northwind;create=true");
 
-		ValueParser crappyImageParser = (v) -> parseCrappyBmpImage(v);
+		DbDataValueParser crappyImageParser = (v) -> parseCrappyBmpImage(v);
 		sql = new Properties();
 		sql.load(Derby.class.getResourceAsStream("data/sql.properties"));
 		conn = ds.getConnection();

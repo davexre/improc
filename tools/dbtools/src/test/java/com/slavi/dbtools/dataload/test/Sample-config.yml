@@ -6,21 +6,26 @@
 format: json
 
 # Format options for any of the csv-* formats
-#   AllowMissingColumnNames
-#   CommentMarker
-#   Delimiter
-#   EscapeCharacter
-#   IgnoreEmptyLines
-#   IgnoreSurroundingSpaces
-#   NullString
-#   QuoteCharacter
-#   SkipHeaderRecord
-#   TrailingDelimiter
-#   Trim
+#   allowMissingColumnNames
+#   commentMarker
+#   delimiter
+#   escapeCharacter
+#   ignoreEmptyLines
+#   ignoreSurroundingSpaces
+#   nullString
+#   quoteCharacter
+#   skipHeaderRecord
+#   trailingDelimiter
+#   trim
+#   maxRecordsToCheck: 100  # Records to read from a csv file in order to determine the type and number of columns. This data is used to create a db table.
+#   table: MyTable   # Available only in CSV format. Name of target db table. 
+#           If not specified file name will be used. 
+#           If stdin is used then the target db table name fill be generated as CSV_IMPORT_<number> where <number> is first available (non existing) table 
+#           Any of these rules are overriden if atleast one defs item is specified.
 #
 #format: csv-excel
 #formatOptions:
-#    Delimiter: "\t"
+#    delimiter: "\t"
 
 # Velocity macro
 url: jdbc:derby:memory:MyDbTest;create=true

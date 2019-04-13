@@ -5,3 +5,4 @@ Usage:
 Commands:
   dbcompare         Extract database metadata to file and compare databases using these files.
   dbexport          Export a sql(s) or table(s) to CSV or SQL format.
+  dataloader        Loads data from csv,json,xml or yml file to a db table.

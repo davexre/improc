@@ -1,4 +1,4 @@
-package com.slavi.derbi.dbload;
+package com.slavi.dbutil;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Date;
@@ -9,14 +9,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.HashMap;
 
-import com.slavi.util.DateFormats;
-
 public class DbDataParserTemplate {
 	public final static String hexChars = "0123456789ABCDEF";
 
 	public DateFormat dateFormat;
 
-	public HashMap<Integer, ValueParser> formatter = new HashMap();
+	public HashMap<Integer, DbDataValueParser> formatter = new HashMap();
 
 	public boolean interpretNullKeyword = true;
 
@@ -101,9 +99,9 @@ public class DbDataParserTemplate {
 			throw new NumberFormatException("Number of chars in hex string must be multiple of 2 but was " + hex.length());
 		byte[] r = new byte[hex.length() / 2];
 		for (int i = 0, ii = -1; i < r.length; i++) {
-			int a1 = hexChars.indexOf(hex.charAt(++ii));
+			int a1 = hexChars.indexOf(Character.toUpperCase(hex.charAt(++ii)));
 			if (a1 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
-			int a2 = hexChars.indexOf(hex.charAt(++ii));
+			int a2 = hexChars.indexOf(Character.toUpperCase(hex.charAt(++ii)));
 			if (a2 < 0) throw new NumberFormatException("Invalid char " + hex.charAt(ii) + " at position " + ii);
 			r[i] = (byte) (((a1 << 4) + a2) & 0xff);
 		}
@@ -122,7 +120,7 @@ public class DbDataParserTemplate {
 
 	public DbDataParserTemplate(String... dateFormats) {
 		dateFormat = new DateFormats(dateFormats);
-		ValueParser p;
+		DbDataValueParser p;
 
 		p = (v) -> parseBoolean(v);
 		formatter.put(Types.BIT, p);

@@ -14,9 +14,9 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 
+import com.slavi.dbutil.DbDataParser;
+import com.slavi.dbutil.DbDataParserTemplate;
 import com.slavi.dbutil.MyDbScriptRunner;
-import com.slavi.derbi.dbload.DbDataParserTemplate;
-import com.slavi.derbi.dbload.DbDataParser;
 import com.slavi.derbi.northwind.Derby;
 
 public class TestParameterMetaData {

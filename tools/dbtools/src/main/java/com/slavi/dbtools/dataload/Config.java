@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader.cfg;
+package com.slavi.dbtools.dataload;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
 import com.fasterxml.jackson.annotation.JacksonInject;
-import com.slavi.util.DateFormats;
+import com.slavi.dbutil.DateFormats;
 
 public class Config implements Serializable {
 
@@ -77,6 +77,7 @@ public class Config implements Serializable {
 		ctx.put("env", new HashMap(System.getenv()));
 		ctx.putAll(getVariables());
 		ctx.putAll(System.getProperties());
+		ctx.put("u", Utils.class);
 		ctx.put("bu", BooleanUtils.class);
 		ctx.put("lu", LocaleUtils.class);
 		ctx.put("du", DateUtils.class);

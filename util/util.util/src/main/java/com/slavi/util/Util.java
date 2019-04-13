@@ -48,6 +48,33 @@ import com.slavi.util.jackson.PostLoad;
  * This class contains utility static methods for general purpose.
  */
 public class Util {
+	public final static String hexChars = "0123456789ABCDEF";
+
+	// https://stackoverflow.com/a/9855338/2243209
+	public static String bytesToHex(byte[] bytes) {
+		char[] r = new char[bytes.length * 2];
+		for (int j = 0; j < bytes.length; j++) {
+			int v = bytes[j] & 0xFF;
+			r[j * 2] = hexChars.charAt(v >>> 4);
+			r[j * 2 + 1] = hexChars.charAt(v & 0x0F);
+		}
+		return new String(r);
+	}
+
+	public static byte[] hexToBytes(String hexStr) throws NumberFormatException {
+		if (hexStr.length() % 2 != 0)
+			throw new NumberFormatException("Number of chars in hex string must be multiple of 2 but was " + hexStr.length());
+		byte[] r = new byte[hexStr.length() / 2];
+		for (int i = 0, ii = -1; i < r.length; i++) {
+			int a1 = hexChars.indexOf(Character.toUpperCase(hexStr.charAt(++ii)));
+			if (a1 < 0) throw new NumberFormatException("Invalid char " + hexStr.charAt(ii) + " at position " + ii);
+			int a2 = hexChars.indexOf(Character.toUpperCase(hexStr.charAt(++ii)));
+			if (a2 < 0) throw new NumberFormatException("Invalid char " + hexStr.charAt(ii) + " at position " + ii);
+			r[i] = (byte) (((a1 << 4) + a2) & 0xff);
+		}
+		return r;
+	}
+
 	/**
 	 * Returns the "human" representation of a time delta specified in milliseconds
 	 * like "1 hour 23 minutes 45.6 seconds".

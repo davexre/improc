@@ -1,4 +1,4 @@
-package com.slavi.db.dataloader;
+package com.slavi.dbtools.dataload;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,6 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.JsonTokenId;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.slavi.db.dataloader.cfg.Config;
 import com.slavi.util.concurrent.CloseableBlockingQueue;
 
 public class DataReaderTask implements Callable<Void> {
@@ -47,7 +46,7 @@ public class DataReaderTask implements Callable<Void> {
 		if (cur != null) {
 			name = p.getCurrentName();
 			if (name == null) {
-				Integer index = (Integer) cur.get(DataLoader.tagIndex);
+				Integer index = (Integer) cur.get(DataLoad.tagIndex);
 				name = index == null ? null : index.toString();
 			}
 		}
@@ -58,27 +57,27 @@ public class DataReaderTask implements Callable<Void> {
 
 		Map parent = cur;
 		cur = new HashMap<>();
-		cur.put(DataLoader.tagName, name);
-		cur.put(DataLoader.tagId, id++);
+		cur.put(DataLoad.tagName, name);
+		cur.put(DataLoad.tagId, id++);
 		JsonLocation loc = p.getTokenLocation();
-		cur.put(DataLoader.tagCol, loc.getColumnNr());
-		cur.put(DataLoader.tagLine, loc.getLineNr());
+		cur.put(DataLoad.tagCol, loc.getColumnNr());
+		cur.put(DataLoad.tagLine, loc.getLineNr());
 		if (parent != null) {
-			cur.put(DataLoader.tagParent, parent);
-			String path = (String) parent.get(DataLoader.tagPath);
-			cur.put(DataLoader.tagPath, path + (path.endsWith("/") ? "" : "/") + name);
+			cur.put(DataLoad.tagParent, parent);
+			String path = (String) parent.get(DataLoad.tagPath);
+			cur.put(DataLoad.tagPath, path + (path.endsWith("/") ? "" : "/") + name);
 		} else {
-			cur.put(DataLoader.tagPath, name);
+			cur.put(DataLoad.tagPath, name);
 		}
 	}
 
 	void pop() {
 		Map tmp = new HashMap(cur);
-		cur = (Map) cur.get(DataLoader.tagParent);
+		cur = (Map) cur.get(DataLoad.tagParent);
 		if (cur != null) {
 			cur = new HashMap(cur);
-			tmp.remove(DataLoader.tagParent);
-			cur.put(tmp.get(DataLoader.tagName), tmp);
+			tmp.remove(DataLoad.tagParent);
+			cur.put(tmp.get(DataLoad.tagName), tmp);
 		}
 	}
 
@@ -90,7 +89,7 @@ public class DataReaderTask implements Callable<Void> {
 				switch (t.id()) {
 				case JsonTokenId.ID_START_ARRAY:
 					push();
-					cur.put(DataLoader.tagIndex, 0);
+					cur.put(DataLoad.tagIndex, 0);
 					break;
 
 				case JsonTokenId.ID_EMBEDDED_OBJECT:
@@ -101,9 +100,9 @@ public class DataReaderTask implements Callable<Void> {
 				case JsonTokenId.ID_END_ARRAY:
 				case JsonTokenId.ID_END_OBJECT:
 					cur = new HashMap(cur);
-					index = (Integer) cur.get(DataLoader.tagIndex);
+					index = (Integer) cur.get(DataLoad.tagIndex);
 					if (index != null) {
-						cur.put(DataLoader.tagIndex, index + 1);
+						cur.put(DataLoad.tagIndex, index + 1);
 					}
 					rows.put(cur);
 					pop();
@@ -115,10 +114,10 @@ public class DataReaderTask implements Callable<Void> {
 				case JsonTokenId.ID_TRUE:
 				case JsonTokenId.ID_FALSE:
 				case JsonTokenId.ID_NULL: {
-					index = (Integer) cur.get(DataLoader.tagIndex);
+					index = (Integer) cur.get(DataLoad.tagIndex);
 					if (index == null) {
 						push();
-						cur.put(DataLoader.tagValue, p.getText());
+						cur.put(DataLoad.tagValue, p.getText());
 						rows.put(cur);
 						pop();
 						String name = p.getCurrentName();
@@ -130,11 +129,11 @@ public class DataReaderTask implements Callable<Void> {
 						cur.put(name, p.getText());
 					} else {
 						push();
-						cur.put(DataLoader.tagValue, p.getText());
+						cur.put(DataLoad.tagValue, p.getText());
 						rows.put(cur);
 						pop();
 						cur = new HashMap(cur);
-						cur.put(DataLoader.tagIndex, index + 1);
+						cur.put(DataLoad.tagIndex, index + 1);
 					}
 					break;
 				}
